@@ -10,16 +10,16 @@ body:
   id: problems
   attributes:
     label: Problem(s) addressed
-    placeholder: Copied, pasted & formatted commands & output in console blocks (as instructed below); instructions;
-      screenshots
+    placeholder: Instead of screenshots, prefer copied, pasted & formatted commands & output in console blocks (as
+      instructed below)
   validations:
     required: true
 - type: textarea
   id: proposals
   attributes:
     label: Proposed solution(s)
-    placeholder: Copied, pasted & formatted commands & output in console blocks (as instructed below); instructions;
-      screenshots
+    placeholder: Instead of screenshots, prefer copied, pasted & formatted commands & output in console blocks (as
+      instructed below)
   validations:
     required: true
 - type: markdown

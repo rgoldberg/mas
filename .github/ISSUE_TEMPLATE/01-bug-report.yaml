@@ -27,16 +27,16 @@ body:
   attributes:
     label: Bug description
     description: Expected & actual output; other pertinent info
-    placeholder: Copied, pasted & formatted commands & output in console blocks (as instructed below); instructions;
-      screenshots
+    placeholder: Instead of screenshots, prefer copied, pasted & formatted commands & output in console blocks (as
+      instructed below)
   validations:
     required: true
 - type: textarea
   id: reproduction
   attributes:
     label: Steps to reproduce
-    placeholder: Copied, pasted & formatted commands & output in console blocks (as instructed below); instructions;
-      screenshots
+    placeholder: Instead of screenshots, prefer copied, pasted & formatted commands & output in console blocks (as
+      instructed below)
     value: |
       ```console
 
