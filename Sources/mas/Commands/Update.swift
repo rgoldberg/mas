@@ -6,6 +6,7 @@
 //
 
 internal import ArgumentParser
+private import Foundation
 private import StoreFoundation
 
 extension MAS {
@@ -21,20 +22,23 @@ extension MAS {
 
 		func run() async {
 			do {
-				await run(installedApps: try await nonTestFlightInstalledApps)
+				try await run(installedApps: try await nonTestFlightInstalledApps)
 			} catch {
 				printer.error(error: error)
 			}
 		}
 
-		func run(installedApps: [InstalledApp]) async {
-			for installedApp in installedApps.filter(by: optionalAppIDsOptionGroup) {
-				do {
-					try await downloadApp(withADAMID: installedApp.adamID) { download, _ in
-						installedApp.version == download.metadata?.bundleVersion
+		func run(installedApps: [InstalledApp]) async throws {
+			try requireRootUserAndWheelGroup(withErrorMessageSuffix: "to update apps")
+			try await ProcessInfo.processInfo.runAsSudoEffectiveUserAndSudoEffectiveGroup {
+				for installedApp in installedApps.filter(by: optionalAppIDsOptionGroup) {
+					do {
+						try await downloadApp(withADAMID: installedApp.adamID) { download, _ in
+							installedApp.version == download.metadata?.bundleVersion
+						}
+					} catch {
+						printer.error(error: error)
 					}
-				} catch {
-					printer.error(error: error)
 				}
 			}
 		}

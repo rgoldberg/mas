@@ -12,7 +12,9 @@ internal import Testing
 extension MASTests {
 	@Test(.disabled())
 	func findsNoUpdates() async {
-		let actual = await consequencesOf(await MAS.main(try MAS.Update.parse([])) { await $0.run(installedApps: []) })
+		let actual = await consequencesOf(
+			try await MAS.main(try MAS.Update.parse([])) { try await $0.run(installedApps: []) }
+		)
 		let expected = Consequences()
 		#expect(actual == expected)
 	}

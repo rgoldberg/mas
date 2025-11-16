@@ -33,10 +33,7 @@ extension MAS {
 		}
 
 		func run(installedApps: [InstalledApp]) throws {
-			guard NSUserName() == "root" else {
-				throw MASError.runtimeError("Apps installed from the Mac App Store require root permission to uninstall")
-			}
-
+			try requireRootUserAndWheelGroup(withErrorMessageSuffix: "to uninstall apps")
 			let uninstallingAppPaths = uninstallingAppPaths(from: installedApps)
 			guard !uninstallingAppPaths.isEmpty else {
 				return
