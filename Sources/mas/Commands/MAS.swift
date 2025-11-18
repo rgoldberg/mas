@@ -90,3 +90,5 @@ struct MAS: AsyncParsableCommand, Sendable {
 private func cast<T>(_ instance: Any, as _: T.Type) -> T? {
 	instance as? T
 }
+
+let requiresRootPrivilegesMessage = "Requires root privileges"
