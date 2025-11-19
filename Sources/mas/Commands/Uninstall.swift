@@ -35,19 +35,21 @@ extension MAS {
 
 		func run(installedApps: [InstalledApp]) throws {
 			try requireRootUserAndWheelGroup(withErrorMessageSuffix: "to uninstall apps")
-			let uninstallingAppPaths = uninstallingAppPaths(from: installedApps)
-			guard !uninstallingAppPaths.isEmpty else {
-				return
-			}
-			guard !dryRun else {
-				printer.notice("Dry run. A wet run would uninstall:\n")
-				for uninstallingAppPath in uninstallingAppPaths {
-					printer.info(uninstallingAppPath)
+			try ProcessInfo.processInfo.runAsSudoEffectiveUserAndSudoEffectiveGroup {
+				let uninstallingAppPaths = uninstallingAppPaths(from: installedApps)
+				guard !uninstallingAppPaths.isEmpty else {
+					return
 				}
-				return
-			}
+				guard !dryRun else {
+					printer.notice("Dry run. A wet run would uninstall:\n")
+					for uninstallingAppPath in uninstallingAppPaths {
+						printer.info(uninstallingAppPath)
+					}
+					return
+				}
 
-			try uninstallApps(atPaths: uninstallingAppPaths)
+				try uninstallApps(atPaths: uninstallingAppPaths)
+			}
 		}
 
 		private func uninstallingAppPaths(from installedApps: [InstalledApp]) -> [String] {
@@ -93,15 +95,37 @@ private func uninstallApps(atPaths appPaths: [String]) throws {
 			MAS.printer.error("Failed to get gid of", appPath)
 			continue
 		}
-		guard chown(appPath, uid, gid) == 0 else {
-			MAS.printer.error("Failed to change ownership of", appPath.quoted, "to uid", uid, "& gid", gid)
+		guard
+			try run(asEffectiveUID: 0, andEffectiveGID: 0, {
+				guard chown(appPath, uid, gid) == 0 else {
+					MAS.printer.error("Failed to change ownership of", appPath.quoted, "to uid", uid, "& gid", gid)
+					return false
+				}
+
+				return true
+			})
+		else {
 			continue
 		}
 
 		var chownPath = appPath
 		defer {
-			if chown(chownPath, appUID, appGID) != 0 {
-				MAS.printer.warning("Failed to revert ownership of", chownPath.quoted, "back to uid", appUID, "& gid", appGID)
+			do {
+				try run(asEffectiveUID: 0, andEffectiveGID: 0) {
+					if chown(chownPath, appUID, appGID) != 0 {
+						throw MASError.runtimeError("")
+					}
+				}
+			} catch {
+				MAS.printer.warning(
+					"Failed to revert ownership of",
+					chownPath.quoted,
+					"back to uid",
+					appUID,
+					"& gid",
+					appGID,
+					error: error
+				)
 			}
 		}
 

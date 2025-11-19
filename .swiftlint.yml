@@ -37,7 +37,7 @@ attributes:
   always_on_line_above: ['@MainActor', '@OptionGroup', '@objc']
 cyclomatic_complexity:
   ignores_case_statements: true
-  warning: 13
+  warning: 15
 deployment_target:
   macOS_deployment_target: 10.15
   macOSApplicationExtension_deployment_target: 10.15
