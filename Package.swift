@@ -20,7 +20,7 @@ _ = Package(
 	products: [.executable(name: "mas", targets: ["mas"])],
 	dependencies: [
 		.package(url: "https://github.com/KittyMac/Sextant", from: "0.4.41"),
-		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
+		.package(name: "ArgumentParser", path: "../swift-argument-parser"), // TODO: use released version
 		.package(url: "https://github.com/apple/swift-atomics", from: "1.3.1"),
 		.package(url: "https://github.com/apple/swift-collections", from: "1.6.0"),
 		.package(url: "https://github.com/attaswift/BigInt", from: "6.0.0"),
@@ -34,7 +34,7 @@ _ = Package(
 		.executableTarget(
 			name: "mas",
 			dependencies: [
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "ArgumentParser", package: "ArgumentParser"), // TODO: use released version
 				.product(name: "Atomics", package: "swift-atomics"),
 				.product(name: "JSON", package: "swift-json"),
 				.product(name: "OrderedCollections", package: "swift-collections"),
