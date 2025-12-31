@@ -16,6 +16,7 @@ extension String {
 		"'\(replacing("'", with: "\\'"))'"
 	}
 
+	/* // swiftformat:disable indent
 	/// Compares `self` insensitively to a given `String`.
 	///
 	/// - Parameter string: The `String` to which `self` is compared.
@@ -48,7 +49,9 @@ extension String {
 			possiblePrefix,
 			withCompareOptions: [.anchored, .caseInsensitive, .diacriticInsensitive, .numeric, .widthInsensitive],
 		)
-	} // swiftformat:enable indent
+	}
+	*/
+	// swiftformat:enable indent
 
 	func removingSuffix(_ suffix: Self) -> Self {
 		hasSuffix(suffix) ? .init(dropLast(suffix.count)) : self

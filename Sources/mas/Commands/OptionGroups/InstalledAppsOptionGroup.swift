@@ -30,9 +30,10 @@ var installedAppIDCompletionKind: CompletionKind {
 	.custom(installedAppIDCompletions)
 }
 
-private func installedAppIDCompletions(_: [String], _: Int, completionPrefix: String) async -> [String] {
+private func installedAppIDCompletions(_: [String], _: Int, _: String) -> [String] {
+	.init()
+	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
-	// swiftformat:disable indent
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
 	.sorted { $0.name.compareInsensitively(to: $1.name) == .orderedAscending }
 	.map { "\($0.adamID):\($0.name)" }
@@ -40,7 +41,6 @@ private func installedAppIDCompletions(_: [String], _: Int, completionPrefix: St
 	.sorted { $0.bundleID.compareInsensitively(to: $1.bundleID) == .orderedAscending }
 	.map { "\($0.adamID):\($0.bundleID)" }
 	+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
-	// swiftformat:enable indent
 	do {
 		try completions.joined(separator: "\n").write(
 			to: URL(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
@@ -51,6 +51,8 @@ private func installedAppIDCompletions(_: [String], _: Int, completionPrefix: St
 		// Do nothing
 	}
 	return completions
+	*/
+	// swiftformat:enable indent
 }
 
 /* // swiftformat:disable indent
