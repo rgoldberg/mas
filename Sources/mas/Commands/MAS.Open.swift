@@ -23,7 +23,7 @@ extension MAS {
 
 		@OptionGroup
 		private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
-		@Argument(help: .init("App ID", valueName: "app-id"))
+		@Argument(help: .init("App ID", valueName: "app-id"), completion: catalogAppIDCompletionKind)
 		private var appIDString: String?
 
 		func run() async throws {

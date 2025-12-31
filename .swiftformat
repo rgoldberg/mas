@@ -20,7 +20,7 @@
 # Enabled rules (disabled by default)
 --enable acronyms
 --enable blankLinesAfterGuardStatements
---enable blockComments
+# TODO: --enable blockComments
 --enable emptyExtensions
 --enable isEmpty
 --enable noExplicitOwnership

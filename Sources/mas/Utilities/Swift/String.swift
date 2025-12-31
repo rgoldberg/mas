@@ -5,7 +5,7 @@
 // Copyright © 2025 mas-cli. All rights reserved.
 //
 
-private import Foundation
+internal import Foundation
 
 extension String {
 	var uppercasingFirst: Self {
@@ -16,9 +16,39 @@ extension String {
 		"'\(replacing("'", with: "\\'"))'"
 	}
 
+	/// Compares `self` insensitively to a given `String`.
+	///
+	/// - Parameter string: The `String` to which `self` is compared.
+	/// - Returns: `ComparisonResult` from comparing `self` insensitively to `string`.
+	func compareInsensitively(to string: String) -> ComparisonResult {
+		compare(string, options: [.caseInsensitive, .diacriticInsensitive, .numeric, .widthInsensitive])
+	}
+
+	/// Checks if `self` contains a given `String` as indicated by the given `CompareOptions`.
+	///
+	/// - Parameters:
+	///   - string: The `String` for which `self` is being searched.
+	///   - options: The `ComparisonOptions`.
+	/// - Returns: `Bool` indicating if `self` contains `string` as indicated by `options`.
+	func contains(_ string: String, withCompareOptions options: CompareOptions = []) -> Bool {
+		range(of: string, options: options, range: startIndex..<endIndex, locale: .current) != nil
+	}
+
 	func ifNotEmptyPrepend(_ prefix: String) -> Self {
 		isEmpty ? self : prefix + self
 	}
+
+	/// Checks if `self` starts with a given prefix using insensitive comparison.
+	///
+	/// - Parameter prefix: The prefix being tested.
+	/// - Returns: `Bool` indicating if `self` starts with `prefix` using insensitive comparison.
+	func insensitivelyStarts(with possiblePrefix: String) -> Bool {
+		possiblePrefix.isEmpty
+		|| contains( // swiftformat:disable indent
+			possiblePrefix,
+			withCompareOptions: [.anchored, .caseInsensitive, .diacriticInsensitive, .numeric, .widthInsensitive],
+		)
+	} // swiftformat:enable indent
 
 	func removingSuffix(_ suffix: Self) -> Self {
 		hasSuffix(suffix) ? .init(dropLast(suffix.count)) : self
