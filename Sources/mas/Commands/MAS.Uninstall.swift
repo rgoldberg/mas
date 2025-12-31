@@ -23,6 +23,16 @@ extension MAS {
 		private var isPerformingDryRun = false
 		@Flag(name: .customLong("all"), help: "Uninstall all App Store apps")
 		private var isUninstallingAll = false
+
+		/* // swiftformat:disable indent
+		// TODO: Remove
+		@Argument(
+			help: .init("App ID", valueName: "app-id"),
+			completion: .file(extensions: [CompletionShell.requesting?.rawValue ?? ""])
+		)
+		*/
+		// swiftformat:enable indent
+
 		@OptionGroup
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 

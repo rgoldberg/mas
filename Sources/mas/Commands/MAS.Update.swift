@@ -16,6 +16,24 @@ extension MAS {
 			aliases: ["upgrade"],
 		)
 
+		// TODO: Begin remove
+		// swiftformat:disable unusedPrivateDeclarations
+		// swiftlint:disable unused_declaration
+		// @Argument(help: .init("Other", valueName: "other"), completion: .file())
+		// var others = [String]()
+		// @Argument(help: "Other", completion: .file())
+		// private var other = "" // periphery:ignore
+		@Option(help: .init("Test", valueName: "test"), completion: installedAppIDCompletionKind)
+		private var tests = [String]() // periphery:ignore
+		@Flag(name: .shortAndLong, help: "counter")
+		private var counter: Int // periphery:ignore
+		@Option(help: .init("Dir", valueName: "dir"), completion: .directory)
+		private var dir = "" // periphery:ignore
+
+		// swiftlint:enable unused_declaration
+		// swiftformat:enable unusedPrivateDeclarations
+		// TODO: End remove
+
 		@OptionGroup
 		private var forceOptionGroup: ForceOptionGroup
 		@OptionGroup

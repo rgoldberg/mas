@@ -19,6 +19,15 @@ extension MAS {
 			aliases: ["info"],
 		)
 
+		/* // swiftformat:disable indent
+		// TODO: Remove
+		@Argument(
+			help: .init("App ID", valueName: "app-id"),
+			completion: .shellCommand("echo \(CompletionShell.requesting?.rawValue ?? "")")
+		)
+		*/
+		// swiftformat:enable indent
+
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup

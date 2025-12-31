@@ -23,6 +23,8 @@ extension MAS {
 
 		@OptionGroup
 		private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
+		// TODO: Remove
+		// @Argument(help: "App ID", completion: .list([CompletionShell.requesting?.rawValue ?? ""]))
 		@Argument(help: .init("App ID", valueName: "app-id"), completion: catalogAppIDCompletionKind)
 		private var appIDString: String?
 

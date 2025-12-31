@@ -27,6 +27,7 @@ struct MAS: AsyncParsableCommand {
 			Search.self,
 			Seller.self,
 			SignOut.self,
+			Test.self, // TODO: Remove
 			Uninstall.self,
 			Update.self,
 			Version.self,
