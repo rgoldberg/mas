@@ -12,6 +12,8 @@
 // 	switch CompletionShell.requesting {
 // 	case .bash:
 // 		"""
+// 		printf $'\\n'
+// 		printf $'%s\\n' "${completions[@]}" >&2
 // 		__mas_add_completions -W "${completions[@]}"
 // 		__mas_add_completions -W 1234
 // 		"""
