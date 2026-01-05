@@ -22,22 +22,14 @@
 // 	case .zsh:
 // 		"""
 //
-// 		local search_term="${words[CURRENT]}"
-// 		if [[ ! "${search_term}" =~ ^[0-9]+$ && -n "${search_term}" ]]; then
+// 		if ((${#completions[@]})); then
 // 		    local -a ids descs
-// 		    local line id name
-// 		    while IFS= read -r line; do
-// 		        if [[ "${line}" =~ ^([0-9]+)[[:space:]]+(.+)$ ]]; then
-// 		            id="${match[1]}"
-// 		            name="${match[2]}"
-// 		            ids+=("${id}")
-// 		            descs+=("${id} -- ${name}")
-// 		        fi
-// 		    done < <("${command_name}" search "${search_term}" 2>/dev/null)
-// 		    if ((${#ids[@]} > 0)); then
-// 		        compadd -U -d descs -o nosort -l -- "${ids[@]}"
-// 		        ret=0
-// 		    fi
+// 		    local c
+// 		    for c in "${completions[@]}"; do
+// 		        ids+=("${c%%:*}")
+// 		        descs+=("${c%%:*} -- ${c#*:}")
+// 		    done
+// 		    compadd -U -d descs -a ids
 // 		fi
 // 		"""
 // 	default:
