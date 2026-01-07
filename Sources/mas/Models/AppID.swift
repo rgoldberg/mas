@@ -5,11 +5,18 @@
 // Copyright © 2024 mas-cli. All rights reserved.
 //
 
+internal import Foundation
+
 enum AppID {
 	case adamID(ADAMID)
 	case bundleID(String)
+	case path(URL)
 
-	init(from string: String, forceBundleID: Bool) {
+	init(from string: String, forceBundleID: Bool = false) {
+		guard !string.contains("/") else {
+			self = .path(URL(filePath: string, directoryHint: .isDirectory))
+			return
+		}
 		guard !forceBundleID, let adamID = ADAMID(string) else {
 			self = .bundleID(string)
 			return
@@ -26,6 +33,8 @@ extension AppID: CustomStringConvertible { // swiftlint:disable:this file_types_
 			"ADAM ID \(adamID)"
 		case let .bundleID(bundleID):
 			"bundle ID \(bundleID)"
+		case let .path(url):
+			"path \(url.filePath)"
 		}
 	}
 }

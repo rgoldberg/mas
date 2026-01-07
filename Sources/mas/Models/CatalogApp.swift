@@ -300,6 +300,8 @@ private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp 
 		URLQueryItem(name: "id", value: .init(adamID))
 	case let .bundleID(bundleID):
 		URLQueryItem(name: "bundleId", value: bundleID)
+	case let .path(path):
+		URLQueryItem(name: "id", value: .init(path.filePath))
 	}
 	let lookupURL = Environment.current.lookupURL.appending(queryItems: [queryItem])
 	return if // swiftformat:disable:this wrap wrapArguments

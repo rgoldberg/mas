@@ -58,6 +58,8 @@ struct InstalledApp {
 			self.adamID == adamID
 		case let .bundleID(bundleID):
 			self.bundleID == bundleID
+		case let .path(path):
+			self.path == path.filePath
 		}
 	}
 }
