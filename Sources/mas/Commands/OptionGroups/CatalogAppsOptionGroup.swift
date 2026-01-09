@@ -29,7 +29,7 @@ private func catalogAppIDCompletions(_: [String], _: Int, completingPrefix: Stri
 		let completions = try await search(for: completingPrefix) // swiftformat:disable:next indent
 		.map { "\($0.adamID)\(CompletionShell.requesting == .fish ? "\t" : ":")\($0.name)" }
 		try completions.joined(separator: "\n").write(
-			to: URL(filePath: "/Users/ross.goldberg/Downloads/completion-test.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/Users/ross.goldberg/Downloads/completion-test.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8,
 		)

@@ -179,7 +179,7 @@ private func test(args _: [String], completingArgumentIndex _: Int, completingAr
 		// let s = CompletionShell.requesting?.rawValue ?? "unknown"
 		// try s
 		.write(
-			to: URL(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8
 		)
@@ -187,7 +187,7 @@ private func test(args _: [String], completingArgumentIndex _: Int, completingAr
 		if args.isEmpty {
 			try "EMPTY_ARRAY\n"
 				.write(
-					to: URL(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
+					to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
 					atomically: true,
 					encoding: .utf8
 				)
@@ -259,7 +259,7 @@ private func test(_: [String]) -> [String] {
 		)
 		"""
 		.write(
-			to: URL(filePath: "/tmp/swift-custom-completion-args.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/tmp/swift-custom-completion-args.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8
 		)
@@ -292,7 +292,7 @@ private func installedAppIDs(_ args: [String]) -> [String] {
 		// let s = CompletionShell.requesting?.rawValue ?? "unknown"
 		// try s
 		.write(
-			to: URL(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8
 		)
@@ -300,7 +300,7 @@ private func installedAppIDs(_ args: [String]) -> [String] {
 		if args.isEmpty {
 			try "EMPTY_ARRAY\n"
 				.write(
-					to: URL(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
+					to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
 					atomically: true,
 					encoding: .utf8
 				)

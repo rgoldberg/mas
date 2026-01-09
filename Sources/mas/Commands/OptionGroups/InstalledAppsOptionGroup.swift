@@ -30,8 +30,23 @@ var installedAppIDCompletionKind: CompletionKind {
 	.custom(installedAppIDCompletions)
 }
 
-private func installedAppIDCompletions(_: [String], _: Int, _: String) -> [String] {
-	.init()
+private func installedAppIDCompletions(_: [String], _: Int, _: String) async -> [String] {
+	// TODO: filter using args
+	do {
+		// let separator = CompletionShell.requesting == .fish ? "\t" : ":"
+		let completions = await installedApps(matching: .init(), withFullJSON: false).map(\.adamID).map(String.init)
+		// let completions =
+		// 	await installedApps(matching: .init(), withFullJSON: false).map { "\($0.adamID)\(separator)\($0.name)" }
+		// let completions = ["1234\(separator)A", "5678\(separator)B"]
+		try completions.joined(separator: "\n").write(
+			to: .init(filePath: "/tmp/installedAppIDCompletions.txt", directoryHint: .notDirectory),
+			atomically: true,
+			encoding: .utf8,
+		)
+		return completions
+	} catch {
+		return .init()
+	}
 	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
@@ -43,7 +58,7 @@ private func installedAppIDCompletions(_: [String], _: Int, _: String) -> [Strin
 	+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
 	do {
 		try completions.joined(separator: "\n").write(
-			to: URL(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8,
 		)
@@ -107,7 +122,7 @@ private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix
 	do {
 		// try "\(installedApps.count) \(installedAppIDSet.count)\n\(installedAppIDSet)".write(
 		try completions.joined(separator: "\n").write(
-			to: URL(filePath: "/tmp/upgrade-completion-test.txt", directoryHint: .notDirectory),
+			to: .init(filePath: "/tmp/upgrade-completion-test.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8,
 		)
