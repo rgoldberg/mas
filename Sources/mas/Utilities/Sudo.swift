@@ -17,8 +17,8 @@ func sudo(_ executableName: String, args: some Sequence<String>) throws {
 	try sudo([executablePath] + args)
 }
 
-private func sudo(_ args: some Sequence<String>) throws {
-	let cArgs = unsafe (["sudo"] + args).map { unsafe strdup($0) } // swiftformat:disable:this spaceAroundParens
+private func sudo(_ args: some Sequence<String>) throws { // swiftformat:disable:next spaceAroundParens
+	let cArgs = unsafe (["sudo", "MAS_NO_AUTO_INDEX=1"] + args).map { unsafe strdup($0) }
 	defer {
 		for unsafe cArg in unsafe cArgs {
 			unsafe free(cArg)
