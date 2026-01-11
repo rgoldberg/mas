@@ -19,8 +19,8 @@ private extension MASTests {
 			"""
 			Warning: No installed apps found
 
-			If this is unexpected, any of the following command lines should fix things by reindexing apps in the Spotlight\
-			 MDS index (which might take some time):
+			If this is unexpected, any of the following command lines should fix things by reindexing apps in Spotlight\
+			 (which might take some time):
 
 			# Individual apps (if you know exactly what apps were incorrectly omitted):
 			mdimport /Applications/Example.app
