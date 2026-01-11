@@ -18,7 +18,7 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var accurateOptionGroup: AccurateOptionGroup
+		private var accuracyOptionGroup: AccuracyOptionGroup
 		@OptionGroup
 		private var forceOptionGroup: ForceOptionGroup
 		@OptionGroup
@@ -38,7 +38,7 @@ extension MAS {
 				: await outdatedApps(
 					installedApps: installedApps,
 					lookupAppFromAppID: lookupAppFromAppID,
-					accurateOptionGroup: accurateOptionGroup,
+					accuracyOptionGroup: accuracyOptionGroup,
 					verboseOptionGroup: verboseOptionGroup,
 					installedAppIDsOptionGroup: installedAppIDsOptionGroup,
 				),

@@ -1,5 +1,5 @@
 //
-// AccurateOptionGroup.swift
+// AccuracyOptionGroup.swift
 // mas
 //
 // Copyright © 2025 mas-cli. All rights reserved.
@@ -7,7 +7,7 @@
 
 private import ArgumentParser
 
-struct AccurateOptionGroup: ParsableArguments {
+struct AccuracyOptionGroup: ParsableArguments {
 	@Flag
 	private var accuracy = OutdatedAccuracy.inaccurate
 

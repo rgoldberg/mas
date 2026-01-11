@@ -105,11 +105,11 @@ private extension [InstalledApp] {
 func outdatedApps(
 	installedApps: [InstalledApp],
 	lookupAppFromAppID: (AppID) async throws -> CatalogApp,
-	accurateOptionGroup: AccurateOptionGroup,
+	accuracyOptionGroup: AccuracyOptionGroup,
 	verboseOptionGroup: VerboseOptionGroup,
 	installedAppIDsOptionGroup: InstalledAppIDsOptionGroup,
 ) async -> [OutdatedApp] {
-	await accurateOptionGroup.outdatedApps(
+	await accuracyOptionGroup.outdatedApps(
 		accurate: { shouldIgnoreUnknownApps in
 			await withTaskGroup { group in
 				let installedApps = await installedApps
