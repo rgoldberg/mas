@@ -125,7 +125,7 @@ struct Printer: Sendable {
 		terminator: String,
 		to fileHandle: FileHandle,
 	) {
-		let formattedPrefix = mas.format(prefix: prefix, format: format, for: fileHandle)
+		let formattedPrefix = prefix.formatted(with: format, for: fileHandle)
 		print(
 			items.first.map { ["\(formattedPrefix) \($0)"] + items.dropFirst().map(String.init(describing:)) }
 			?? [formattedPrefix], // swiftformat:disable:this indent
@@ -136,8 +136,10 @@ struct Printer: Sendable {
 	}
 }
 
-func format(prefix: String, format: String, for fileHandle: FileHandle) -> String {
-	fileHandle.isTerminal ? "\(csi)\(format)m\(prefix)\(csi)0m" : prefix
+extension String {
+	func formatted(with format: Self, for fileHandle: FileHandle) -> Self {
+		fileHandle.isTerminal ? "\(csi)\(format)m\(self)\(csi)0m" : self
+	}
 }
 
 let errorPrefix = "Error:"
