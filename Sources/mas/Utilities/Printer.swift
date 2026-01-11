@@ -124,12 +124,26 @@ struct Printer: Sendable {
 		separator: String,
 		terminator: String,
 		to fileHandle: FileHandle,
-	) {
-		let formattedPrefix = prefix.formatted(with: format, for: fileHandle)
+	) { // swiftformat:disable indent
+		let indent = """
+
+			\(
+				String( // swiftlint:disable:this indentation_width
+					repeating: " ",
+					count:
+						(prefix.range(of: "\n", options: .backwards).map { String(prefix[$0.upperBound...]) } ?? prefix).count + 1,
+				)
+			)
+			"""
+
+		let formattedPrefix = prefix.formatted(with: format, for: fileHandle) // swiftformat:enable indent
 		print(
-			items.first.map { ["\(formattedPrefix) \($0)"] + items.dropFirst().map(String.init(describing:)) }
+			items.first.map { item in
+				["\(formattedPrefix) \(mas.indent(item, with: indent))"]
+				+ items.dropFirst().map { mas.indent($0, with: indent) } // swiftformat:disable:this indent
+			}
 			?? [formattedPrefix], // swiftformat:disable:this indent
-			separator: separator,
+			separator: mas.indent(separator, with: indent),
 			terminator: terminator,
 			to: fileHandle,
 		)
@@ -142,8 +156,14 @@ extension String {
 	}
 }
 
+private func indent(_ item: Any, with indent: String) -> String {
+	.init(describing: item).replacing(unsafe nonEmptyLineStartRegex, with: indent)
+}
+
 let errorPrefix = "Error:"
 let errorFormat = "4;31"
 
 /// Terminal Control Sequence Indicator.
 private let csi = "\u{001B}["
+
+private nonisolated(unsafe) let nonEmptyLineStartRegex = /\n(?!\n)/
