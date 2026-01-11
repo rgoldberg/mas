@@ -51,15 +51,15 @@ protocol MajorMinorPatchInteger: MajorMinorPatch {
 
 extension MajorMinorPatchInteger {
 	var major: String {
-		"\(majorInteger)"
+		.init(majorInteger)
 	}
 
 	var minor: String {
-		"\(minorInteger)"
+		.init(minorInteger)
 	}
 
 	var patch: String {
-		"\(patchInteger)"
+		.init(patchInteger)
 	}
 }
 

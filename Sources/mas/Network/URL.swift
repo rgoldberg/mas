@@ -11,7 +11,7 @@ private import ObjectiveC
 
 extension URL {
 	var filePath: String {
-		String(path(percentEncoded: false).dropLast { $0 == "/" })
+		.init(path(percentEncoded: false).dropLast { $0 == "/" })
 	}
 
 	func open(configuration: NSWorkspace.OpenConfiguration = NSWorkspace.OpenConfiguration()) async throws {

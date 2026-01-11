@@ -24,7 +24,7 @@ final class Sample {
 	/// If the first letter of an acronym is uppercase, the entire thing should be
 	/// uppercase.
 	static func decode(from json: JSON) -> Self {
-		Self(json: json)
+		.init(json: json)
 	}
 }
 

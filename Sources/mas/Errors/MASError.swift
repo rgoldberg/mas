@@ -17,7 +17,7 @@ enum MASError: Error {
 		separator: String = ":\n",
 		separatorAndErrorReplacement: String = "",
 	) -> Self {
-		Self.error(
+		.error(
 			message,
 			error: error.map { Self.error($0) },
 			separator: separator,

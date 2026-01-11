@@ -44,8 +44,6 @@ deployment_target:
   tvOSApplicationExtension_deployment_target: 99
   watchOS_deployment_target: 99
   watchOSApplicationExtension_deployment_target: 99
-explicit_init:
-  include_bare_init: true
 file_length:
   ignore_comment_only_lines: true
   warning: 500
