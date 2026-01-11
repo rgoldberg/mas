@@ -32,21 +32,8 @@ var installedAppIDCompletionKind: CompletionKind {
 
 private func installedAppIDCompletions(_: [String], _: Int, _: String) async -> [String] {
 	// TODO: filter using args
-	do {
-		// let separator = CompletionShell.requesting == .fish ? "\t" : ":"
-		let completions = await installedApps(matching: .init(), withFullJSON: false).map(\.adamID).map(String.init)
-		// let completions =
-		// 	await installedApps(matching: .init(), withFullJSON: false).map { "\($0.adamID)\(separator)\($0.name)" }
-		// let completions = ["1234\(separator)A", "5678\(separator)B"]
-		try completions.joined(separator: "\n").write(
-			to: .init(filePath: "/tmp/installedAppIDCompletions.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8,
-		)
-		return completions
-	} catch {
-		return .init()
-	}
+	let separator = CompletionShell.requesting == .fish ? "\t" : ":"
+	return await installedApps(matching: .init(), withFullJSON: false).map { "\($0.adamID)\(separator)\($0.name)" }
 	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
