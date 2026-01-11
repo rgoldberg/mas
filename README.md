@@ -531,7 +531,7 @@ reattach-to-user-namespace mas install
 mas 2.0.0+ sources data for installed App Store apps from macOS's Spotlight
 Metadata Server (aka MDS).
 
-You can check if an App Store app is properly indexed in the MDS:
+You can check if an App Store app is properly indexed in Spotlight:
 
 ```console
 ## General format:
@@ -544,7 +544,7 @@ $ mdls -rn kMDItemAppStoreAdamID /Applications/WhatsApp.app
 310633997
 ```
 
-If an app has been indexed in the MDS, the path to the app can be found:
+If an app has been indexed in Spotlight, the path to the app can be found:
 
 ```shell
 mdfind 'kMDItemAppStoreAdamID = <adam-id>'

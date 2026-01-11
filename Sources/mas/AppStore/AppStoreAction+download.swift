@@ -279,7 +279,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 					try applicationsFolderURLs.contains(
 						where: { applicationsFolderURL in
 							var relationship = FileManager.URLRelationship.other
-							try fileManager.getRelationship(
+							try unsafe fileManager.getRelationship(
 								&relationship,
 								ofDirectoryAt: applicationsFolderURL,
 								toItemAt: appFolderURL,
