@@ -94,7 +94,7 @@ func outdatedApps(
 	.filter(for: appIDs)
 	.compactMap { installedApp in
 		do {
-			let catalogApp = try await lookupAppFromAppID(.adamID(installedApp.adamID))
+			let catalogApp = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
 			if installedApp.isOutdated(comparedTo: catalogApp) {
 				return OutdatedApp(installedApp, catalogApp.version)
 			}
@@ -109,7 +109,7 @@ func outdatedApps(
 			? installedApps // swiftformat:disable:this indent
 			: await installedApps.compactMap { installedApp in
 				do {
-					_ = try await lookupAppFromAppID(.adamID(installedApp.adamID))
+					_ = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
 					return installedApp
 				} catch {
 					error.print(forExpectedAppName: installedApp.name, shouldWarnIfUnknownApp: shouldWarnIfUnknownApp)
