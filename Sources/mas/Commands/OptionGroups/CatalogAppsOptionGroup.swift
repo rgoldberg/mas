@@ -11,7 +11,7 @@ private import Foundation // TODO: Remove import
 struct CatalogAppsOptionGroup: ParsableArguments {
 	@OptionGroup
 	private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
-	@Argument(help: .init("App ID", valueName: "app-id"), completion: catalogAppIDCompletionKind)
+	@Argument(help: .init("App ID", valueName: "app-id"), completion: .custom(catalogAppIDCompletions))
 	private var appIDStrings: [String]
 
 	var appIDs: [AppID] {
@@ -19,12 +19,7 @@ struct CatalogAppsOptionGroup: ParsableArguments {
 	}
 }
 
-var catalogAppIDCompletionKind: CompletionKind {
-	// TODO: .custom(shellScript: associatedValueInsertionShellScript, catalogAppIDCompletions)
-	.custom(catalogAppIDCompletions)
-}
-
-private func catalogAppIDCompletions(_: [String], _: Int, completingPrefix: String) async -> [String] {
+func catalogAppIDCompletions(_: [String], _: Int, completingPrefix: String) async -> [String] {
 	do {
 		let completions = try await search(for: completingPrefix) // swiftformat:disable:next indent
 		.map { "\($0.adamID)\(CompletionShell.requesting == .fish ? "\t" : ":")\($0.name)" }

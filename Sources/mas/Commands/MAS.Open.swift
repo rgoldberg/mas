@@ -25,7 +25,7 @@ extension MAS {
 		private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
 		// TODO: Remove
 		// @Argument(help: "App ID", completion: .list([CompletionShell.requesting?.rawValue ?? ""]))
-		@Argument(help: .init("App ID", valueName: "app-id"), completion: catalogAppIDCompletionKind)
+		@Argument(help: .init("App ID", valueName: "app-id"), completion: .custom(catalogAppIDCompletions))
 		private var appIDString: String?
 
 		func run() async throws {

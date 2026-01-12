@@ -23,8 +23,8 @@ extension MAS {
 		// var others = [String]()
 		// @Argument(help: "Other", completion: .file())
 		// private var other = "" // periphery:ignore
-		@Option(help: .init("Test", valueName: "test"), completion: installedAppIDCompletionKind)
-		private var tests = [String]() // periphery:ignore
+		// @Option(help: .init("Test", valueName: "test"), completion: .custom(installedAppIDCompletions))
+		// private var tests = [String]() // periphery:ignore
 		@Flag(name: .shortAndLong, help: "counter")
 		private var counter: Int // periphery:ignore
 		@Option(help: .init("Dir", valueName: "dir"), completion: .directory)
