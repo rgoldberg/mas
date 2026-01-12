@@ -34,11 +34,11 @@ private func installedAppIDCompletions(_: [String], _: Int, _: String) async -> 
 	// TODO: filter using args
 	let transform = switch CompletionShell.requesting {
 	case .fish:
-		{ (installedApp: InstalledApp) in "\(installedApp.adamID)\t\(installedApp.name)" }
+		{ (installedApp: InstalledApp) in "\(installedApp.bundleID)\t\(installedApp.name)" }
 	case .zsh:
-		{ (installedApp: InstalledApp) in "\(installedApp.adamID):\(installedApp.name)" }
+		{ (installedApp: InstalledApp) in "\(installedApp.bundleID):\(installedApp.name)" }
 	default:
-		{ (installedApp: InstalledApp) in String(installedApp.adamID) }
+		{ (installedApp: InstalledApp) in installedApp.bundleID }
 	}
 	return await installedApps(matching: .init(), withFullJSON: false).map(transform)
 	/* // swiftformat:disable indent
