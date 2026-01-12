@@ -34,7 +34,7 @@ extension MAS {
 		// swiftformat:enable indent
 
 		@OptionGroup
-		private var installedAppsOptionGroup: InstalledAppsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup<All>
 
 		func validate() throws(ValidationError) {
 			if isUninstallingAll != installedAppsOptionGroup.appIDStrings.isEmpty {

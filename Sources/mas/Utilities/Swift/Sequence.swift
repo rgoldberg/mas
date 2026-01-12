@@ -6,6 +6,14 @@
 //
 
 extension Sequence {
+	func filter(_ isIncluded: (Element) async throws -> Bool) async rethrows -> [Element] {
+		var filteredElements = [Element]()
+		for element in self where try await isIncluded(element) {
+			filteredElements.append(element)
+		}
+		return filteredElements
+	}
+
 	func forEach<E: Error>(attemptTo perform: String, _ body: (Element) async throws(E) -> Void) async {
 		await forEach(body) { MAS.printer.error($1 is MASError ? .init() : ["Failed to", perform, $0], error: $1) }
 	}

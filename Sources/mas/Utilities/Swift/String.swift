@@ -24,6 +24,8 @@ extension String {
 	func compareInsensitively(to string: String) -> ComparisonResult {
 		compare(string, options: [.caseInsensitive, .diacriticInsensitive, .numeric, .widthInsensitive])
 	}
+	*/
+	// swiftformat:enable indent
 
 	/// Checks if `self` contains a given `String` as indicated by the given `CompareOptions`.
 	///
@@ -49,9 +51,7 @@ extension String {
 			possiblePrefix,
 			withCompareOptions: [.anchored, .caseInsensitive, .diacriticInsensitive, .numeric, .widthInsensitive],
 		)
-	}
-	*/
-	// swiftformat:enable indent
+	} // swiftformat:enable indent
 
 	func removingSuffix(_ suffix: Self) -> Self {
 		hasSuffix(suffix) ? .init(dropLast(suffix.count)) : self

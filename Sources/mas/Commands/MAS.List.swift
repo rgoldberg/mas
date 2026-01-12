@@ -17,7 +17,7 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var installedAppsOptionGroup: InstalledAppsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup<All>
 
 		func run() async {
 			run(

@@ -21,7 +21,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 	@Flag(name: .customLong("verbose"), help: "Warn about app IDs unknown to the App Store")
 	private var shouldWarnIfUnknownApp = false
 	@OptionGroup
-	private var installedAppsOptionGroup: InstalledAppsOptionGroup
+	private var installedAppsOptionGroup: InstalledAppsOptionGroup<Outdated>
 
 	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool) async -> [OutdatedApp] {
 		considerAllOutdated
@@ -36,17 +36,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 		func installableCatalogApp(from installedApp: InstalledApp) async -> CatalogApp? {
 			do {
 				let catalogApp = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
-				return shouldCheckMinimumOSVersion
-					&& UniversalSemVerInt(rawValue: catalogApp.minimumOSVersion).map { minimumOSVersion in
-						ProcessInfo.processInfo.isOperatingSystemAtLeast(
-							.init(
-								majorVersion: minimumOSVersion.majorInteger,
-								minorVersion: minimumOSVersion.minorInteger,
-								patchVersion: minimumOSVersion.patchInteger,
-							),
-						)
-					}
-					== false ? nil : catalogApp
+				return shouldCheckMinimumOSVersion && catalogApp.isInstallable == false ? nil : catalogApp
 			} catch is CancellationError {
 				return nil
 			} catch {
@@ -85,11 +75,32 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 				}
 				: { @Sendable installedApp in
 					await installableCatalogApp(from: installedApp).flatMap { catalogApp in
-						UniversalSemVer(rawValue: installedApp.version)
-							.compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
-							== .orderedAscending ? .init(installedApp: installedApp, newVersion: catalogApp.version) : nil
+						installedApp.isOutdated(comparedTo: catalogApp)
+							? .init(installedApp: installedApp, newVersion: catalogApp.version)
+							: nil
 					}
 				},
 		)
+	}
+}
+
+extension CatalogApp {
+	var isInstallable: Bool? { // swiftlint:disable:this discouraged_optional_boolean
+		UniversalSemVerInt(rawValue: minimumOSVersion).map { minimumOSVersion in
+			ProcessInfo.processInfo.isOperatingSystemAtLeast(
+				.init(
+					majorVersion: minimumOSVersion.majorInteger,
+					minorVersion: minimumOSVersion.minorInteger,
+					patchVersion: minimumOSVersion.patchInteger,
+				),
+			)
+		}
+	}
+}
+
+extension InstalledApp {
+	func isOutdated(comparedTo catalogApp: CatalogApp) -> Bool {
+		UniversalSemVer(rawValue: version).compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
+			== .orderedAscending
 	}
 }

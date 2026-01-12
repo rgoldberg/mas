@@ -8,10 +8,10 @@
 internal import ArgumentParser
 private import Foundation // TODO: Remove import
 
-struct InstalledAppsOptionGroup: ParsableArguments {
+struct InstalledAppsOptionGroup<Completion: CompletionProvider>: ParsableArguments {
 	@OptionGroup
 	private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup // swiftformat:disable:this organizeDeclarations
-	@Argument(help: .init("App ID", valueName: "app-id"), completion: installedAppIDCompletionKind)
+	@Argument(help: .init("App ID", valueName: "app-id"), completion: Completion.kind)
 	private(set) var appIDStrings = [String]()
 
 	var appIDs: [AppID] {
@@ -25,22 +25,58 @@ struct InstalledAppsOptionGroup: ParsableArguments {
 	}
 }
 
+protocol CompletionProvider { // swiftlint:disable:this one_declaration_per_file
+	static var kind: CompletionKind { get }
+}
+
+enum All: CompletionProvider { // swiftlint:disable:this one_declaration_per_file
+	static let kind = installedAppIDCompletionKind
+}
+
+enum Outdated: CompletionProvider { // swiftlint:disable:this one_declaration_per_file
+	static let kind = outdatedAppIDCompletionKind
+}
+
 var installedAppIDCompletionKind: CompletionKind {
 	// TODO: .custom(shellScript: associatedValueInsertionShellScript, installedAppIDCompletions)
 	.custom(installedAppIDCompletions)
 }
 
-private func installedAppIDCompletions(_: [String], _: Int, _: String) async -> [String] {
-	// TODO: filter using args
-	let transform = switch CompletionShell.requesting {
-	case .fish:
-		{ (installedApp: InstalledApp) in "\(installedApp.bundleID)\t\(installedApp.name)" }
-	case .zsh:
-		{ (installedApp: InstalledApp) in "\(installedApp.bundleID):\(installedApp.name)" }
-	default:
-		{ (installedApp: InstalledApp) in installedApp.bundleID }
-	}
-	return await installedApps(matching: .init(), withFullJSON: false).map(transform)
+var outdatedAppIDCompletionKind: CompletionKind {
+	// TODO: .custom(shellScript: associatedValueInsertionShellScript, outdatedAppIDCompletions)
+	.custom(outdatedAppIDCompletions)
+}
+
+private func installedAppIDCompletions(arguments: [String], _: Int, completionPrefix: String) async -> [String] {
+	appIDCompletions(
+		installedApps: await installedApps(matching: .init(), withFullJSON: false),
+		arguments: arguments,
+		completionPrefix: completionPrefix,
+	)
+}
+
+private func outdatedAppIDCompletions(arguments: [String], _: Int, completionPrefix: String) async -> [String] {
+	let shouldOfferAllInstalledApps = arguments.contains { $0 == "--accurate" || $0 == "--force" }
+	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
+	return appIDCompletions(
+		installedApps: shouldOfferAllInstalledApps ? installedApps : await installedApps.filter { installedApp in
+			do {
+				let catalogApp = try await lookup(appID: .bundleID(installedApp.bundleID))
+				return catalogApp.isInstallable != false && installedApp.isOutdated(comparedTo: catalogApp)
+			} catch {
+				return true
+			}
+		},
+		arguments: arguments,
+		completionPrefix: completionPrefix,
+	)
+}
+
+private func appIDCompletions(installedApps: [InstalledApp], arguments: [String], completionPrefix: String)
+-> [String] { // swiftformat:disable:this indent
+	installedApps
+		.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
+		.map(completionFromInstalledApp(forceBundleID: arguments.contains("--bundle")))
 	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
@@ -127,3 +163,22 @@ private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix
 }
 */
 // swiftformat:enable indent
+
+private func completionFromInstalledApp(forceBundleID: Bool) -> (InstalledApp) -> String {
+	func completionValue(for installedApp: InstalledApp) -> String {
+		forceBundleID || ADAMID(installedApp.bundleID) == nil ? installedApp.bundleID : String(installedApp.adamID)
+	}
+
+	func completionDescription(for installedApp: InstalledApp) -> String {
+		"\(installedApp.name)\(ADAMID(installedApp.bundleID) == nil ? "" : (forceBundleID ? " (bundle ID)" : " (ADAM ID)"))"
+	}
+
+	return switch CompletionShell.requesting {
+	case .fish:
+		{ "\(completionValue(for: $0))\t\(completionDescription(for: $0))" }
+	case .zsh:
+		{ "\(completionValue(for: $0)):\(completionDescription(for: $0))" }
+	default:
+		{ completionValue(for: $0) }
+	}
+}
