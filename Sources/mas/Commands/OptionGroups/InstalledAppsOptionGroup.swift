@@ -32,8 +32,15 @@ var installedAppIDCompletionKind: CompletionKind {
 
 private func installedAppIDCompletions(_: [String], _: Int, _: String) async -> [String] {
 	// TODO: filter using args
-	let separator = CompletionShell.requesting == .fish ? "\t" : ":"
-	return await installedApps(matching: .init(), withFullJSON: false).map { "\($0.adamID)\(separator)\($0.name)" }
+	let transform = switch CompletionShell.requesting {
+	case .fish:
+		{ (installedApp: InstalledApp) in "\(installedApp.adamID)\t\(installedApp.name)" }
+	case .zsh:
+		{ (installedApp: InstalledApp) in "\(installedApp.adamID):\(installedApp.name)" }
+	default:
+		{ (installedApp: InstalledApp) in String(installedApp.adamID) }
+	}
+	return await installedApps(matching: .init(), withFullJSON: false).map(transform)
 	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
