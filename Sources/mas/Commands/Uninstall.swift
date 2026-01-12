@@ -40,32 +40,30 @@ extension MAS {
 		}
 
 		private func run(installedApps: [InstalledApp]) throws {
-			let uninstallingAppByPath = (
+			let uninstallingAppPathSet = (
 				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppIDsOptionGroup.appIDs,
 			)
-			.reduce(into: OrderedDictionary<String, InstalledApp>()) { uninstallingAppByPath, appID in
+			.reduce(into: OrderedSet<String>()) { uninstallingAppPathSet, appID in
 				let uninstallingApps = installedApps.filter { $0.matches(appID) }
 				guard !uninstallingApps.isEmpty else {
 					printer.error(appID.notInstalledMessage)
 					return
 				}
 
-				for uninstallingApp in uninstallingApps {
-					uninstallingAppByPath[uninstallingApp.path] = uninstallingApp
-				}
+				uninstallingAppPathSet.append(contentsOf: uninstallingApps.map(\.path))
 			}
-			guard !uninstallingAppByPath.isEmpty else {
+			guard !uninstallingAppPathSet.isEmpty else {
 				return
 			}
 			guard !isPerformingDryRun else {
 				printer.notice("Dry run. A wet run would uninstall:\n")
-				for appPath in uninstallingAppByPath.keys {
-					printer.info(appPath)
+				for uninstallingAppPath in uninstallingAppPathSet {
+					printer.info(uninstallingAppPath)
 				}
 				return
 			}
 			guard getuid() == 0 else {
-				try sudo(MAS._commandName, args: [Self._commandName] + uninstallingAppByPath.values.map { String($0.adamID) })
+				try sudo(MAS._commandName, args: CommandLine.arguments.dropFirst())
 				return
 			}
 
@@ -73,7 +71,7 @@ extension MAS {
 			let uid = try processInfo.sudoUID
 			let gid = try processInfo.sudoGID
 			let fileManager = FileManager.default
-			for appPath in uninstallingAppByPath.keys {
+			for appPath in uninstallingAppPathSet {
 				let attributes = try fileManager.attributesOfItem(atPath: appPath)
 				guard let appUID = attributes[.ownerAccountID] as? uid_t else {
 					printer.error("Failed to get uid of", appPath)
