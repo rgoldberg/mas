@@ -41,7 +41,7 @@ extension MAS {
 
 		private func run(installedApps: [InstalledApp]) throws {
 			let uninstallingAppByPath = (
-				isUninstallingAll ? installedApps.map { .adamID($0.adamID) } : installedAppIDsOptionGroup.appIDs,
+				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppIDsOptionGroup.appIDs,
 			)
 			.reduce(into: OrderedDictionary<String, InstalledApp>()) { uninstallingAppByPath, appID in
 				let uninstallingApps = installedApps.filter { $0.matches(appID) }
