@@ -2,7 +2,7 @@
 # .swiftlint.yml
 # mas
 #
-# SwiftLint 0.63.0
+# SwiftLint 0.63.2
 #
 ---
 excluded:

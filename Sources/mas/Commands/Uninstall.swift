@@ -42,7 +42,7 @@ extension MAS {
 		private func run(installedApps: [InstalledApp]) throws {
 			let uninstallingAppByPath = (
 				isUninstallingAll ? installedApps.map { AppID.adamID($0.adamID) } : installedAppIDsOptionGroup.appIDs,
-			) // swiftformat:disable indent
+			)
 			.reduce(into: OrderedDictionary<String, InstalledApp>()) { uninstallingAppByPath, appID in
 				let uninstallingApps = installedApps.filter { $0.matches(appID) }
 				guard !uninstallingApps.isEmpty else {
@@ -54,7 +54,7 @@ extension MAS {
 					uninstallingAppByPath[uninstallingApp.path] = uninstallingApp
 				}
 			}
-			guard !uninstallingAppByPath.isEmpty else { // swiftformat:enable indent
+			guard !uninstallingAppByPath.isEmpty else {
 				return
 			}
 			guard !isPerformingDryRun else {
