@@ -21,9 +21,7 @@ jobs:
         - runner: macos-14
           xcode: brew
         - runner: macos-15
-          xcode: 26.1.1
         - runner: macos-15-intel
-          xcode: 26.1.1
         - runner: macos-26
     runs-on: ${{matrix.runner}}
     defaults:
