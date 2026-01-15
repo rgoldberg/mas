@@ -74,9 +74,17 @@ private func outdatedAppIDCompletions(arguments: [String], _: Int, completionPre
 
 private func appIDCompletions(installedApps: [InstalledApp], arguments: [String], completionPrefix: String)
 -> [String] { // swiftformat:disable:this indent
-	installedApps
+	let completions = installedApps
 		.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
 		.map(completionFromInstalledApp(forceBundleID: arguments.contains("--bundle")))
+	// try? completions.joined(separator: "\n").write(
+	// try? installedApps.map(\.bundleID).joined(separator: "\n").write(
+	try? "(\(completionPrefix)) \(completionPrefix.count)\n\(completions.joined(separator: "\n"))".write(
+		to: URL(filePath: "/Users/ross.goldberg/Downloads/completions.log", directoryHint: .notDirectory),
+		atomically: true,
+		encoding: .utf8,
+	)
+	return completions
 	/* // swiftformat:disable indent
 	let installedApps = await installedApps(matching: .init(), withFullJSON: false)
 	let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
