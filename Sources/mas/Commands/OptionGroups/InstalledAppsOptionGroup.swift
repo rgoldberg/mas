@@ -95,11 +95,32 @@ private func appIDCompletions(installedApps: [InstalledApp], arguments: [String]
 	.map { "\($0.adamID):\($0.bundleID)" }
 	+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
 	do {
+<<<<<<< HEAD:Sources/mas/Commands/OptionGroups/InstalledAppsOptionGroup.swift
 		try completions.joined(separator: "\n").write(
 			to: .init(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
 			atomically: true,
 			encoding: .utf8,
 		)
+=======
+		let installedApps = try await installedApps()
+		let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
+		.sorted { $0.name.compareInsensitively(to: $1.name) == .orderedAscending }
+		.map { "\($0.adamID):\($0.name)" }
+		+ installedApps.filter { $0.bundleID.insensitivelyStarts(with: completionPrefix) }
+		.sorted { $0.bundleID.compareInsensitively(to: $1.bundleID) == .orderedAscending }
+		.map { "\($0.adamID):\($0.bundleID)" }
+		+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
+		do {
+			try completions.joined(separator: "\n").write(
+				to: URL(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
+				atomically: true,
+				encoding: .utf8,
+			)
+		} catch {
+			// Do nothing
+		}
+		return completions
+>>>>>>> 41721706f (Remove commented swiftformat directives.):Sources/mas/Commands/OptionGroups/InstalledAppIDsOptionGroup.swift
 	} catch {
 		// Do nothing
 	}
@@ -110,12 +131,10 @@ private func appIDCompletions(installedApps: [InstalledApp], arguments: [String]
 
 /* // swiftformat:disable indent
 // TODO: Remove
-// swiftformat:disable:next unusedPrivateDeclarations
 private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix: String) -> [String] {
 	/*
 	// TODO: reinstate
 	let installedApps = await installedApps()
-	// swiftformat:disable indent
 	let installedAppIDSet = installedApps.filter { installedApp in
 		installedApp.name.insensitivelyStarts(with: completionPrefix)
 		|| installedApp.bundleID.insensitivelyStarts(with: completionPrefix)
@@ -131,7 +150,6 @@ private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix
 	case 1:
 		[installedAppIDSet.first?.description ?? ""]
 	default:
-		// swiftformat:disable indent
 		installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
 		.sorted { $0.name.compareInsensitively(to: $1.name) == .orderedAscending }
 		.map { "\($0.adamID):\($0.name)" } // OR…
@@ -144,7 +162,7 @@ private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix
 		.sorted { $0.adamID < $1.adamID }
 		.map { "\($0.adamID):\($0.adamID)" } // OR…
 		.map { "\($0.adamID):\($0.name)" }
-	} // swiftformat:enable indent
+	}
 	*/
 	let completions =
 		switch completionPrefix {
