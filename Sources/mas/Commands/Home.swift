@@ -27,9 +27,7 @@ extension MAS {
 		}
 
 		private func run(lookupAppFromAppID: (AppID) async throws -> CatalogApp) async {
-			await run(
-				catalogApps: await catalogAppIDsOptionGroup.appIDs.lookupCatalogApps(lookupAppFromAppID: lookupAppFromAppID),
-			)
+			await run(catalogApps: await catalogAppIDsOptionGroup.appIDs.lookupCatalogApps(using: lookupAppFromAppID))
 		}
 
 		func run(catalogApps: [CatalogApp]) async { // swiftformat:disable:this organizeDeclarations
