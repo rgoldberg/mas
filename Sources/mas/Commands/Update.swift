@@ -18,7 +18,7 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var accurateOptionGroup: AccurateOptionGroup
+		private var accuracyOptionGroup: AccuracyOptionGroup
 		@OptionGroup
 		private var forceOptionGroup: ForceOptionGroup
 		@OptionGroup
@@ -30,17 +30,17 @@ extension MAS {
 			try await run(installedApps: try await installedApps.filter(!\.isTestFlight), lookupAppFromAppID: lookup(appID:))
 		}
 
-		private func run(installedApps: [InstalledApp], lookupAppFromAppID: (AppID) async throws -> CatalogApp)
+		private func run(installedApps: [InstalledApp], lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp)
 		async throws { // swiftformat:disable:this indent
 			try await run(
 				outdatedApps: forceOptionGroup.force // swiftformat:disable:next indent
 				? installedApps.filter(for: installedAppIDsOptionGroup.appIDs).map { ($0, "") }
 				: await outdatedApps(
-					installedApps: installedApps,
+					from: installedApps,
+					filterFor: installedAppIDsOptionGroup.appIDs,
 					lookupAppFromAppID: lookupAppFromAppID,
-					accurateOptionGroup: accurateOptionGroup,
-					verboseOptionGroup: verboseOptionGroup,
-					installedAppIDsOptionGroup: installedAppIDsOptionGroup,
+					accuracy: accuracyOptionGroup.accuracy,
+					shouldWarnIfUnknownApp: verboseOptionGroup.verbose,
 				),
 			)
 		}

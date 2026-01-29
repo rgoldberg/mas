@@ -29,12 +29,7 @@ extension MAS {
 				driver ▁ \(swiftDriverVersion)
 				store ▁▁ \(appStoreRegion)
 				region ▁ \(macRegion)
-				macos ▁▁ \(
-					ProcessInfo.processInfo
-					.operatingSystemVersionString // swiftformat:disable:this indent
-					.dropFirst(8) // swiftformat:disable:this indent
-					.replacing("Build ", with: "", maxReplacements: 1) // swiftformat:disable:this indent
-				)
+				macos ▁▁ \(macOSVersion)
 				mac ▁▁▁▁ \(configStringValue("hw.product"))
 				cpu ▁▁▁▁ \(configStringValue("machdep.cpu.brand_string"))
 				arch ▁▁▁ \(configStringValue("hw.machine"))
@@ -81,6 +76,10 @@ private var supportedSliceArchitectures: [String] {
 		}
 	}
 	?? [] // swiftformat:disable:this indent
+}
+
+private var macOSVersion: Substring {
+	ProcessInfo.processInfo.operatingSystemVersionString.dropFirst(8).replacing("Build ", with: "", maxReplacements: 1)
 }
 
 private func configStringValue(_ name: String) -> String {

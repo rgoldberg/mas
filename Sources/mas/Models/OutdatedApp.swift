@@ -82,83 +82,65 @@ private extension InstalledApp {
 	} // swiftformat:enable indent
 }
 
-private extension [InstalledApp] {
-	func filterOutApps(
-		unknownTo lookupAppFromAppID: (AppID) async throws -> CatalogApp,
-		if shouldFilter: Bool,
-		shouldWarnIfUnknownApp: Bool,
-	) async -> Self {
-		!shouldFilter
-		? self // swiftformat:disable:this indent
-		: await compactMap { installedApp in
-			do {
-				_ = try await lookupAppFromAppID(.adamID(installedApp.adamID))
-				return installedApp
-			} catch {
-				error.print(forExpectedAppName: installedApp.name, shouldWarnIfUnknownApp: shouldWarnIfUnknownApp)
-				return nil
+func outdatedApps(
+	from installedApps: [InstalledApp],
+	filterFor appIDs: [AppID],
+	lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp,
+	accuracy: OutdatedAccuracy,
+	shouldWarnIfUnknownApp: Bool,
+) async -> [OutdatedApp] {
+	accuracy == .inaccurate
+	? await installedApps // swiftformat:disable indent
+	.filter(for: appIDs)
+	.compactMap { installedApp in
+		do {
+			let catalogApp = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
+			if installedApp.isOutdated(comparedTo: catalogApp) {
+				return OutdatedApp(installedApp, catalogApp.version)
+			}
+		} catch {
+			error.print(forExpectedAppName: installedApp.name, shouldWarnIfUnknownApp: shouldWarnIfUnknownApp)
+		}
+		return nil
+	}
+	: await withTaskGroup { group in // swiftformat:enable indent
+		func filterOutUnknownApps(from installedApps: [InstalledApp]) async -> [InstalledApp] {
+			accuracy != .accurateIgnoreUnknownApps
+			? installedApps // swiftformat:disable:this indent
+			: await installedApps.compactMap { installedApp in
+				do {
+					_ = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
+					return installedApp
+				} catch {
+					error.print(forExpectedAppName: installedApp.name, shouldWarnIfUnknownApp: shouldWarnIfUnknownApp)
+					return nil
+				}
 			}
 		}
+		let installedApps = await filterOutUnknownApps(from: installedApps.filter(for: appIDs))
+		let maxConcurrentTaskCount = min(installedApps.count, 16)
+		var index = 0
+		while index < maxConcurrentTaskCount {
+			let installedApp = installedApps[index]
+			index += 1
+			group.addTask {
+				await installedApp.outdated
+			}
+		}
+
+		return await group.reduce(into: [OutdatedApp]()) { outdatedApps, outdatedApp in
+			if let outdatedApp {
+				outdatedApps.append(outdatedApp)
+			}
+
+			guard index < installedApps.count else {
+				return
+			}
+
+			let installedApp = installedApps[index]
+			index += 1
+			_ = group.addTaskUnlessCancelled { await installedApp.outdated }
+		}
 	}
-}
-
-func outdatedApps(
-	installedApps: [InstalledApp],
-	lookupAppFromAppID: (AppID) async throws -> CatalogApp,
-	accurateOptionGroup: AccurateOptionGroup,
-	verboseOptionGroup: VerboseOptionGroup,
-	installedAppIDsOptionGroup: InstalledAppIDsOptionGroup,
-) async -> [OutdatedApp] {
-	await accurateOptionGroup.outdatedApps(
-		accurate: { shouldIgnoreUnknownApps in
-			await withTaskGroup { group in
-				let installedApps = await installedApps
-				.filter(for: installedAppIDsOptionGroup.appIDs) // swiftformat:disable indent
-				.filterOutApps(
-					unknownTo: lookupAppFromAppID,
-					if: shouldIgnoreUnknownApps,
-					shouldWarnIfUnknownApp: verboseOptionGroup.verbose,
-				)
-				let maxConcurrentTaskCount = min(installedApps.count, 16) // swiftformat:enable indent
-				var index = 0
-				while index < maxConcurrentTaskCount {
-					let installedApp = installedApps[index]
-					index += 1
-					group.addTask {
-						await installedApp.outdated
-					}
-				}
-
-				return await group.reduce(into: [OutdatedApp]()) { outdatedApps, outdatedApp in
-					if let outdatedApp {
-						outdatedApps.append(outdatedApp)
-					}
-
-					guard index < installedApps.count else {
-						return
-					}
-
-					let installedApp = installedApps[index]
-					index += 1
-					_ = group.addTaskUnlessCancelled { await installedApp.outdated }
-				}
-			}
-			.sorted(using: KeyPathComparator(\.installedApp.name, comparator: .localizedStandard))
-		},
-		inaccurate: {
-			await installedApps
-			.filter(for: installedAppIDsOptionGroup.appIDs) // swiftformat:disable indent
-			.compactMap { installedApp in
-				do {
-					let catalogApp = try await lookupAppFromAppID(.adamID(installedApp.adamID))
-					if installedApp.isOutdated(comparedTo: catalogApp) {
-						return OutdatedApp(installedApp, catalogApp.version)
-					}
-				} catch {
-					error.print(forExpectedAppName: installedApp.name, shouldWarnIfUnknownApp: verboseOptionGroup.verbose)
-				}
-				return nil
-			}
-		}, // swiftformat:enable indent
-	)
+	.sorted(using: KeyPathComparator(\.installedApp.name, comparator: .localizedStandard))
 }

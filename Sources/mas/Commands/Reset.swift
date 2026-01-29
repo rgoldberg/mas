@@ -58,7 +58,6 @@ extension MAS {
 				return
 			}
 
-			// swiftformat:disable:next spaceAroundBrackets
 			var kinfoProcs = unsafe [kinfo_proc](repeating: kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
 			guard unsafe sysctl(&processListMIB, u_int(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list")
