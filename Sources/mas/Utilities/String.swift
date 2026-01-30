@@ -6,7 +6,7 @@
 //
 
 extension String {
-	var quoted: String {
+	var quoted: Self {
 		"'\(replacing("'", with: "\\'"))'"
 	}
 
