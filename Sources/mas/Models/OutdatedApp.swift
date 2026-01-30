@@ -85,7 +85,7 @@ private extension InstalledApp {
 func outdatedApps(
 	from installedApps: [InstalledApp],
 	filterFor appIDs: [AppID],
-	lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp,
+	lookupAppFromAppID: (AppID) async throws -> CatalogApp,
 	accuracy: OutdatedAccuracy,
 	shouldWarnIfUnknownApp: Bool,
 ) async -> [OutdatedApp] {
