@@ -13,7 +13,7 @@ private import StoreFoundation
 
 extension AppStoreAction { // swiftlint:disable:this file_types_order
 	@MainActor
-	func app(withADAMID adamID: ADAMID, shouldCancel: @Sendable @escaping (String?, Bool) -> Bool) async throws {
+	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) async throws {
 		let purchase = SSPurchase(
 			buyParameters: """
 				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
@@ -71,7 +71,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 	private var receiptHardLinkURL = URL?.none
 	private var alreadyResumed = false
 
-	init(for action: AppStoreAction, of adamID: ADAMID, shouldCancel: @Sendable @escaping (String?, Bool) -> Bool) {
+	init(for action: AppStoreAction, of adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) {
 		self.action = action
 		self.adamID = adamID
 		self.shouldCancel = shouldCancel
