@@ -9,6 +9,6 @@ internal import Foundation
 
 extension Pipe {
 	func readToEnd(encoding: String.Encoding = .utf8) throws -> String? {
-		try fileHandleForReading.readToEnd().flatMap { String(data: $0, encoding: encoding) }
+		try fileHandleForReading.readToEnd().flatMap { .init(data: $0, encoding: encoding) }
 	}
 }

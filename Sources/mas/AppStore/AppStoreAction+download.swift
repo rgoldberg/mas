@@ -265,7 +265,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 					throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
 				}
 
-				appFolderURL = snapshot.appFolderPath.map { URL(filePath: $0, directoryHint: .isDirectory) }
+				appFolderURL = snapshot.appFolderPath.map { .init(filePath: $0, directoryHint: .isDirectory) }
 			}
 
 			MAS.printer.notice(
