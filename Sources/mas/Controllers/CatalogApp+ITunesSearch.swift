@@ -6,6 +6,8 @@
 //
 
 internal import Foundation
+private import Sextant
+private import SwiftSoup
 
 func lookup(appID: AppID) async throws -> CatalogApp {
 	try await lookup(appID: appID, inRegion: appStoreRegion)
@@ -38,10 +40,44 @@ func lookup(
 		let catalogApp = // swiftformat:disable:next indent
 			try await getCatalogApps(from: try url("lookup", queryItem, inRegion: region), dataFrom: dataSource).first
 	else {
-		throw MASError.unknownAppID(appID)
+		guard
+			let catalogApp = try await getCatalogApps(
+				from: try url("lookup", queryItem, inRegion: region, additionalQueryItems: []),
+				dataFrom: dataSource,
+			)
+			.first,
+			catalogApp.supportedDevices?.contains("MacDesktop-MacDesktop") ?? false
+		else {
+			throw MASError.unknownAppID(appID)
+		}
+
+		return catalogApp.with(minimumOSVersion: await catalogApp.minimumOSVersion(dataFrom: dataSource))
 	}
 
 	return catalogApp
+}
+
+private extension CatalogApp {
+	func minimumOSVersion(dataFrom: (URL) async throws -> (Data, URLResponse) = urlSession.data(from:)) async -> String {
+		do {
+			return try await URL(string: appStorePageURLString)
+			.flatMap { url in // swiftformat:disable indent
+				try SwiftSoup.parse(try await dataFrom(url).0, appStorePageURLString)
+				.select("#serialized-server-data")
+				.first()?
+				.data()
+				.query(
+					string:
+						"$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')].items[?(@.heading == 'Mac')].text",
+				)?
+				.firstMatch(of: minimumOSVersionRegex)?
+				.version
+			}
+			.map(String.init(_:)) ?? minimumOSVersion // swiftformat:enable indent
+		} catch {
+			return minimumOSVersion
+		}
+	}
 }
 
 func search(for searchTerm: String) async throws -> [CatalogApp] {
@@ -63,26 +99,38 @@ func search(
 	inRegion region: Region = appStoreRegion,
 	dataFrom dataSource: (URL) async throws -> (Data, URLResponse) = urlSession.data(from:),
 ) async throws -> [CatalogApp] {
-	try await getCatalogApps(
-		from: try url("search", URLQueryItem(name: "term", value: searchTerm), inRegion: region),
-		dataFrom: dataSource,
-	)
+	let queryItem = URLQueryItem(name: "term", value: searchTerm)
+	let catalogApps = try await getCatalogApps(from: try url("search", queryItem, inRegion: region), dataFrom: dataSource)
+	let adamIDSet = Set(catalogApps.map(\.adamID))
+	return catalogApps.priorityMerge(
+		try await getCatalogApps(
+			from: try url("search", queryItem, inRegion: region, additionalQueryItems: []),
+			dataFrom: dataSource,
+		)
+		.filter { ($0.supportedDevices?.contains("MacDesktop-MacDesktop") ?? false) && !adamIDSet.contains($0.adamID) }
+		.map { $0.with(minimumOSVersion: "11.0") },
+	) { $0.name.similarity(to: searchTerm) }
 }
 
-private func url(_ action: String, _ queryItem: URLQueryItem, inRegion region: Region) throws -> URL {
+private func url(
+	_ action: String,
+	_ queryItem: URLQueryItem,
+	inRegion region: Region,
+	additionalQueryItems: [URLQueryItem] = [URLQueryItem(name: "entity", value: "desktopSoftware")],
+) throws -> URL {
 	let urlString = "https://itunes.apple.com/\(action)"
 	guard let url = URL(string: urlString) else {
 		throw MASError.unparsableURL(urlString)
 	}
 
 	return url.appending(
-		queryItems: [
-			URLQueryItem(name: "media", value: "software"),
-			URLQueryItem(name: "entity", value: "desktopSoftware"),
+		queryItems: [URLQueryItem(name: "media", value: "software")]
+		+ additionalQueryItems // swiftformat:disable indent
+		+ [
 			URLQueryItem(name: "country", value: region),
 			queryItem,
 		],
-	)
+	) // swiftformat:enable indent
 }
 
 private func getCatalogApps(from url: URL, dataFrom: (URL) async throws -> (Data, URLResponse))
@@ -96,3 +144,4 @@ async throws -> [CatalogApp] { // swiftformat:disable:this indent
 }
 
 private let urlSession = URLSession(configuration: .ephemeral)
+private nonisolated(unsafe) let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
