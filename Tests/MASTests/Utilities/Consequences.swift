@@ -70,12 +70,12 @@ private struct StandardStreamCapture { // swiftlint:disable:this one_declaration
 
 	func consequences(value _: Void, error: (any Error)? = nil) -> Consequences<NoValue> {
 		let (stdout, stderr) = finishAndRead(encoding: encoding)
-		return Consequences(nil as NoValue?, error, stdout, stderr)
+		return .init(nil as NoValue?, error, stdout, stderr)
 	}
 
 	func consequences<Value>(value: Value? = nil, error: (any Error)? = nil) -> Consequences<Value> {
 		let (stdout, stderr) = finishAndRead(encoding: encoding)
-		return Consequences(value, error, stdout, stderr)
+		return .init(value, error, stdout, stderr)
 	}
 
 	private func finishAndRead(encoding: String.Encoding) -> (stdout: String, stderr: String) {

@@ -13,7 +13,7 @@ private import StoreFoundation
 
 extension AppStoreAction { // swiftlint:disable:this file_types_order
 	@MainActor
-	func app(withADAMID adamID: ADAMID, shouldCancel: @Sendable @escaping (String?, Bool) -> Bool) async throws {
+	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) async throws {
 		let purchase = SSPurchase(
 			buyParameters: """
 				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
@@ -71,7 +71,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 	private var receiptHardLinkURL = URL?.none
 	private var alreadyResumed = false
 
-	init(for action: AppStoreAction, of adamID: ADAMID, shouldCancel: @Sendable @escaping (String?, Bool) -> Bool) {
+	init(for action: AppStoreAction, of adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) {
 		self.action = action
 		self.adamID = adamID
 		self.shouldCancel = shouldCancel
@@ -164,9 +164,9 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 			)
 			do {
 				pkgHardLinkURL = try hardLinkURL(
-					to: try downloadFolderChildURLs.compactMap { url -> (url: URL, date: Date)? in
+					to: try downloadFolderChildURLs.compactMap { url in
 						guard url.pathExtension == "pkg" else {
-							return nil
+							return nil as (url: URL, date: Date)?
 						}
 
 						let resourceValues = try url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey])
@@ -265,7 +265,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 					throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
 				}
 
-				appFolderURL = snapshot.appFolderPath.map { URL(filePath: $0, directoryHint: .isDirectory) }
+				appFolderURL = snapshot.appFolderPath.map { .init(filePath: $0, directoryHint: .isDirectory) }
 			}
 
 			MAS.printer.notice(

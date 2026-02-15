@@ -131,7 +131,7 @@ struct Printer: Sendable {
 				String( // swiftlint:disable:this indentation_width
 					repeating: " ",
 					count:
-						(prefix.range(of: "\n", options: .backwards).map { String(prefix[$0.upperBound...]) } ?? prefix).count + 1,
+						(prefix.range(of: "\n", options: .backwards).map { .init(prefix[$0.upperBound...]) } ?? prefix).count + 1,
 				)
 			)
 			"""

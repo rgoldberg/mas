@@ -8,7 +8,7 @@
 struct CatalogApp: Sendable {
 	let adamID: ADAMID
 	let appStorePageURLString: String
-	let bundleID: String // periphery:ignore
+	let bundleID: String
 	let fileSizeBytes: String
 	let formattedPrice: String?
 	let minimumOSVersion: String
@@ -16,6 +16,7 @@ struct CatalogApp: Sendable {
 	let releaseDate: String
 	let sellerName: String
 	let sellerURLString: String?
+	let supportedDevices: [String]? // swiftlint:disable:this discouraged_optional_collection
 	let version: String
 
 	var displayPrice: String {
@@ -33,8 +34,9 @@ struct CatalogApp: Sendable {
 		releaseDate: String = "",
 		sellerName: String = "",
 		sellerURLString: String? = nil,
+		supportedDevices: [String]? = nil, // swiftlint:disable:this discouraged_optional_collection
 		version: String = "",
-	) { // periphery:ignore
+	) {
 		self.adamID = adamID
 		self.appStorePageURLString = appStorePageURLString
 		self.bundleID = bundleID
@@ -45,7 +47,25 @@ struct CatalogApp: Sendable {
 		self.releaseDate = releaseDate
 		self.sellerName = sellerName
 		self.sellerURLString = sellerURLString
+		self.supportedDevices = supportedDevices
 		self.version = version
+	}
+
+	func with(minimumOSVersion: String) -> Self {
+		.init(
+			adamID: adamID,
+			appStorePageURLString: appStorePageURLString,
+			bundleID: bundleID,
+			fileSizeBytes: fileSizeBytes,
+			formattedPrice: formattedPrice,
+			minimumOSVersion: minimumOSVersion,
+			name: name,
+			releaseDate: releaseDate,
+			sellerName: sellerName,
+			sellerURLString: sellerURLString,
+			supportedDevices: supportedDevices,
+			version: version,
+		)
 	}
 }
 
@@ -61,6 +81,7 @@ extension CatalogApp: Decodable {
 		case releaseDate = "currentVersionReleaseDate"
 		case sellerName
 		case sellerURLString = "sellerUrl"
+		case supportedDevices
 		case version
 	}
 }

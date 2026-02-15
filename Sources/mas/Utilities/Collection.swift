@@ -48,7 +48,7 @@ extension Collection {
 		_ transform: (Element) async throws(E) -> T?,
 		handlingErrors errorHandler: (Element, E) async -> T?,
 	) async -> [T] {
-		await compactMap { (element: Element) async -> T? in
+		await compactMap { element in
 			do {
 				return try await transform(element)
 			} catch let error as E {

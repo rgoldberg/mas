@@ -47,13 +47,13 @@ fi
 
 if ((can_use_periphery)) && ! [[ -v 'received_flag[-P]' ]]; then
 	printf -- $'--> 🌀 Periphery\n'
-	script -q /dev/null periphery scan --exclude-tests |
-	 (grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r' || true)
+	periphery scan --exclude-tests |
+	 (grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r?' || true)
 	((exit_status |= ${?}))
 
 	printf -- $'--> 🌀 Periphery Tests\n'
-	script -q /dev/null periphery scan |
-	 (grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r' || true)
+	periphery scan |
+	 (grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r?' || true)
 	((exit_status |= ${?}))
 fi
 

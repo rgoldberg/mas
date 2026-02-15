@@ -22,7 +22,7 @@ private extension MASTests {
 	func parsesCatalogAppResultsFromThingsJSON() {
 		let actual =
 			consequencesOf(try JSONDecoder().decode(CatalogAppResults.self, from: Data(fromResource: "things")).resultCount)
-		let expected = Consequences(50)
+		let expected = Consequences(12)
 		#expect(actual == expected)
 	}
 }

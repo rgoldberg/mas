@@ -27,10 +27,7 @@ extension MAS {
 			await run(installedApps: try await installedApps.filter(!\.isTestFlight), lookupAppFromAppID: lookup(appID:))
 		}
 
-		private func run(
-			installedApps: [InstalledApp],
-			lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp,
-		) async {
+		private func run(installedApps: [InstalledApp], lookupAppFromAppID: (AppID) async throws -> CatalogApp) async {
 			run(
 				outdatedApps: await outdatedApps(
 					from: installedApps,

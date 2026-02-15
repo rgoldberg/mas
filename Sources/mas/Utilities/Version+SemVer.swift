@@ -31,7 +31,7 @@ protocol CoreIntegerVersion: Version {
 
 extension CoreIntegerVersion where Integer: FixedWidthInteger {
 	var coreElements: [String] {
-		coreIntegers.map { String($0) }
+		coreIntegers.map { .init($0) }
 	}
 }
 

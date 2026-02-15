@@ -14,6 +14,6 @@ struct InstalledAppIDsOptionGroup: ParsableArguments {
 	private var appIDStrings = [String]()
 
 	var appIDs: [AppID] {
-		appIDStrings.map { AppID(from: $0, forceBundleID: forceBundleIDOptionGroup.forceBundleID) }
+		appIDStrings.map { .init(from: $0, forceBundleID: forceBundleIDOptionGroup.forceBundleID) }
 	}
 }
