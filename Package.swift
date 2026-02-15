@@ -20,6 +20,7 @@ _ = Package(
 	dependencies: [
 		.package(url: "https://github.com/KittyMac/Sextant.git", from: "0.4.38"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.0"),
+		.package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.1.2"),
 		.package(url: "https://github.com/apple/swift-atomics.git", from: "1.3.0"),
 		.package(url: "https://github.com/apple/swift-collections.git", from: "1.3.0"),
 		.package(url: "https://github.com/attaswift/BigInt.git", from: "5.7.0"),
@@ -32,6 +33,7 @@ _ = Package(
 			name: "mas",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
 				.product(name: "Atomics", package: "swift-atomics"),
 				.product(name: "OrderedCollections", package: "swift-collections"),
 				"BigInt",
