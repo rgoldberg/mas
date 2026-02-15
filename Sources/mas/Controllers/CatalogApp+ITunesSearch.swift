@@ -5,6 +5,7 @@
 // Copyright © 2018 mas-cli. All rights reserved.
 //
 
+private import AsyncAlgorithms
 internal import Foundation
 private import Sextant
 private import SwiftSoup
@@ -97,7 +98,7 @@ func search(for searchTerm: String) async throws -> [CatalogApp] {
 func search(
 	for searchTerm: String,
 	inRegion region: Region = appStoreRegion,
-	dataFrom dataSource: (URL) async throws -> (Data, URLResponse) = urlSession.data(from:),
+	dataFrom dataSource: @escaping @Sendable (URL) async throws -> (Data, URLResponse) = urlSession.data(from:),
 ) async throws -> [CatalogApp] {
 	let queryItem = URLQueryItem(name: "term", value: searchTerm)
 	let catalogApps = try await getCatalogApps(from: try url("search", queryItem, inRegion: region), dataFrom: dataSource)
@@ -108,7 +109,9 @@ func search(
 			dataFrom: dataSource,
 		)
 		.filter { ($0.supportedDevices?.contains("MacDesktop-MacDesktop") ?? false) && !adamIDSet.contains($0.adamID) }
-		.map { $0.with(minimumOSVersion: "11.0") },
+		.async
+		.map { $0.with(minimumOSVersion: await $0.minimumOSVersion(dataFrom: dataSource)) }
+		.array,
 	) { $0.name.similarity(to: searchTerm) }
 }
 
