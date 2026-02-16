@@ -356,8 +356,8 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 
 		guard
 			let appFolderURLSubstring = standardErrorString
-			.matches(of: unsafe appFolderURLRegex) // swiftformat:disable:next preferKeyPath
-			.compactMap({ $0.1 }) // swiftlint:disable:this prefer_key_path
+			.matches(of: unsafe appFolderURLRegex)
+			.compactMap(\.1)
 			.min(by: { $0.count < $1.count })
 		else {
 			throw MASError.error(

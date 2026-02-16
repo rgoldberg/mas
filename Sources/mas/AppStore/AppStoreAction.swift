@@ -41,7 +41,7 @@ enum AppStoreAction: Sendable {
 		withAppIDs appIDs: [AppID],
 		force: Bool,
 		installedApps: [InstalledApp],
-		lookupAppFromAppID: (AppID) async throws -> CatalogApp,
+		lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp,
 	) async throws {
 		try await apps(
 			withADAMIDs: await appIDs.lookupCatalogApps(using: lookupAppFromAppID).map(\.adamID),

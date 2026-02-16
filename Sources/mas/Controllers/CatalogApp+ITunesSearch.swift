@@ -5,7 +5,6 @@
 // Copyright © 2018 mas-cli. All rights reserved.
 //
 
-private import AsyncAlgorithms
 internal import Foundation
 private import Sextant
 private import SwiftSoup
@@ -109,9 +108,7 @@ func search(
 			dataFrom: dataSource,
 		)
 		.filter { ($0.supportedDevices?.contains("MacDesktop-MacDesktop") ?? false) && !adamIDSet.contains($0.adamID) }
-		.async
-		.map { $0.with(minimumOSVersion: await $0.minimumOSVersion(dataFrom: dataSource)) }
-		.array,
+		.concurrentMap { $0.with(minimumOSVersion: await $0.minimumOSVersion(dataFrom: dataSource)) },
 	) { $0.name.similarity(to: searchTerm) }
 }
 

@@ -30,13 +30,14 @@ extension MAS {
 			try await run(installedApps: try await installedApps.filter(!\.isTestFlight), lookupAppFromAppID: lookup(appID:))
 		}
 
-		private func run(installedApps: [InstalledApp], lookupAppFromAppID: (AppID) async throws -> CatalogApp)
-		async throws { // swiftformat:disable:this indent
+		private func run(
+			installedApps: [InstalledApp],
+			lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp,
+		) async throws {
 			try await run(
 				outdatedApps: forceOptionGroup.force // swiftformat:disable:next indent
 				? installedApps.filter(for: installedAppIDsOptionGroup.appIDs).map { ($0, "") }
-				: await outdatedApps(
-					from: installedApps,
+				: await installedApps.outdatedApps(
 					filterFor: installedAppIDsOptionGroup.appIDs,
 					lookupAppFromAppID: lookupAppFromAppID,
 					accuracy: accuracyOptionGroup.accuracy,

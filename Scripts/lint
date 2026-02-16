@@ -10,6 +10,7 @@
 # Please keep in sync with Scripts/format.
 #
 
+# shellcheck disable=SC1036,SC1056,SC1072
 . "${0:A:h}/_setup_script"
 
 print_notice '🚨 Linting' "${@}"
@@ -17,11 +18,11 @@ print_notice '🚨 Linting' "${@}"
 ensure_command_available actionlint git markdownlint-cli2 shellcheck swiftformat swiftlint yamllint || exit
 [[ "$(/usr/bin/arch)" = arm64 && "${$(sw_vers -productVersion)%%.*}" -ge 15 ]]
 integer -r can_use_periphery="$((! ?))"
-# shellcheck disable=SC1083
+# shellcheck disable=SC1073,SC1083
 ((can_use_periphery)) && { ensure_command_available periphery || exit }
 
 zmodload zsh/zutil
-zparseopts -D -A received_flag A P
+zparseopts -D -A received_flag P
 
 export -r MAS_DISTRIBUTION=lint
 
@@ -35,15 +36,6 @@ script -q /dev/null swiftformat --lint --markdown-files format-strict . |
 printf -- $'--> 🦅 SwiftLint\n'
 swiftlint --strict --quiet --reporter relative-path
 ((exit_status |= ${?}))
-
-# shellcheck disable=SC1046,SC1047,SC1072,SC1073
-if ! [[ -v 'received_flag[-A]' ]]; then
-	printf -- $'--> 🔬 SwiftLint Analyze\n'
-	# shellcheck disable=SC1036
-	swiftlint analyze --strict --quiet --reporter relative-path --compiler-log-path\
-	 =(xcodebuild -scheme mas -destination "platform=macOS,arch=$(arch),variant=macos" 2>&1)
-	((exit_status |= ${?}))
-fi
 
 if ((can_use_periphery)) && ! [[ -v 'received_flag[-P]' ]]; then
 	printf -- $'--> 🌀 Periphery\n'
