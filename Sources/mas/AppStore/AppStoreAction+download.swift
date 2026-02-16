@@ -365,7 +365,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 				error: standardErrorString,
 			)
 		}
-		guard let appFolderURL = URL(string: String(appFolderURLSubstring)) else {
+		guard let appFolderURL = URL(string: .init(appFolderURLSubstring)) else {
 			throw MASError.error(
 				"Failed to parse app folder URL for \(appNameAndVersion) from \(appFolderURLSubstring)",
 				error: standardErrorString,

@@ -76,7 +76,7 @@ private extension InstalledApp {
 			: false
 		}
 		?? ( // swiftformat:disable indent
-			UniversalSemVer(from: version).compareSemVerAndBuild(to: UniversalSemVer(from: catalogApp.version))
+			UniversalSemVer(from: version).compareSemVerAndBuild(to: .init(from: catalogApp.version))
 			== .orderedAscending
 		)
 	} // swiftformat:enable indent

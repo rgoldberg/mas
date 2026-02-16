@@ -33,7 +33,7 @@ func lookup(
 	let queryItem =
 		switch appID {
 		case let .adamID(adamID):
-			URLQueryItem(name: "id", value: String(adamID))
+			URLQueryItem(name: "id", value: .init(adamID))
 		case let .bundleID(bundleID):
 			URLQueryItem(name: "bundleId", value: bundleID)
 		}
@@ -142,7 +142,7 @@ async throws -> [CatalogApp] { // swiftformat:disable:this indent
 	do {
 		return try JSONDecoder().decode(CatalogAppResults.self, from: data).results
 	} catch {
-		throw MASError.error("Failed to parse JSON from response \(url)", error: String(data: data, encoding: .utf8) ?? "")
+		throw MASError.error("Failed to parse JSON from response \(url)", error: .init(data: data, encoding: .utf8) ?? "")
 	}
 }
 

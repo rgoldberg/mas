@@ -23,7 +23,7 @@ extension MAS {
 
 		@OptionGroup
 		private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
-		@Argument(help: ArgumentHelp("App ID", valueName: "app-id"))
+		@Argument(help: .init("App ID", valueName: "app-id"))
 		private var appIDString: String?
 
 		func run() async throws {
@@ -67,7 +67,7 @@ private func openMacAppStore() async throws {
 		throw MASError.error("Failed to find app to open macappstore URLs")
 	}
 
-	try await workspace.openApplication(at: appURL, configuration: NSWorkspace.OpenConfiguration())
+	try await workspace.openApplication(at: appURL, configuration: .init())
 }
 
 private func openMacAppStorePage(forAppStorePageURLString appStorePageURLString: String) async throws {

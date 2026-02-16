@@ -115,7 +115,7 @@ extension MAS {
 
 				var uninstalledAppNSURL = NSURL?.none // swiftlint:disable:this legacy_objc_type
 				try unsafe fileManager.trashItem(
-					at: URL(filePath: appPath, directoryHint: .isDirectory),
+					at: .init(filePath: appPath, directoryHint: .isDirectory),
 					resultingItemURL: &uninstalledAppNSURL,
 				)
 				guard let uninstalledAppPath = uninstalledAppNSURL?.path else {
