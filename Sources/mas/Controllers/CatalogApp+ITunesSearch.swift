@@ -63,7 +63,7 @@ private extension CatalogApp {
 		do {
 			return try await URL(string: appStorePageURLString)
 			.flatMap { url in // swiftformat:disable indent
-				try SwiftSoup.parse(try await dataFrom(url).0, appStorePageURLString)
+				try unsafe SwiftSoup.parse(try await dataFrom(url).0, appStorePageURLString)
 				.select("#serialized-server-data")
 				.first()?
 				.data()
