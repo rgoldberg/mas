@@ -33,8 +33,9 @@ enum AppID: CustomStringConvertible, Sendable {
 }
 
 extension [AppID] { // swiftlint:disable:this file_types_order
-	func lookupCatalogApps(using lookupAppFromAppID: (AppID) async throws -> CatalogApp) async -> [CatalogApp] {
-		await compactMap(attemptingTo: "lookup app for", lookupAppFromAppID)
+	func lookupCatalogApps(using lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp)
+	async -> [CatalogApp] { // swiftformat:disable:this indent
+		await concurrentCompactMap(attemptingTo: "lookup app for", lookupAppFromAppID)
 	}
 }
 

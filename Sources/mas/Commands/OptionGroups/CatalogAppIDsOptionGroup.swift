@@ -10,7 +10,7 @@ internal import ArgumentParser
 struct CatalogAppIDsOptionGroup: ParsableArguments {
 	@OptionGroup
 	private var forceBundleIDOptionGroup: ForceBundleIDOptionGroup
-	@Argument(help: ArgumentHelp("App ID", valueName: "app-id"))
+	@Argument(help: .init("App ID", valueName: "app-id"))
 	private var appIDStrings: [String]
 
 	var appIDs: [AppID] {

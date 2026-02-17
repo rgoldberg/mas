@@ -356,8 +356,8 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 
 		guard
 			let appFolderURLSubstring = standardErrorString
-			.matches(of: unsafe appFolderURLRegex) // swiftformat:disable:next preferKeyPath
-			.compactMap({ $0.1 }) // swiftlint:disable:this prefer_key_path
+			.matches(of: unsafe appFolderURLRegex)
+			.compactMap(\.1)
 			.min(by: { $0.count < $1.count })
 		else {
 			throw MASError.error(
@@ -365,7 +365,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 				error: standardErrorString,
 			)
 		}
-		guard let appFolderURL = URL(string: String(appFolderURLSubstring)) else {
+		guard let appFolderURL = URL(string: .init(appFolderURLSubstring)) else {
 			throw MASError.error(
 				"Failed to parse app folder URL for \(appNameAndVersion) from \(appFolderURLSubstring)",
 				error: standardErrorString,

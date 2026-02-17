@@ -27,7 +27,7 @@ extension MAS {
 			await run(lookupAppFromAppID: lookup(appID:))
 		}
 
-		private func run(lookupAppFromAppID: (AppID) async throws -> CatalogApp) async {
+		private func run(lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp) async {
 			run(catalogApps: await catalogAppIDsOptionGroup.appIDs.lookupCatalogApps(using: lookupAppFromAppID))
 		}
 

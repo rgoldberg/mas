@@ -13,7 +13,7 @@ private extension MASTests {
 	@Test
 	func parsesCatalogAppResultsFromBBEditJSON() {
 		let actual =
-			consequencesOf(try JSONDecoder().decode(CatalogAppResults.self, from: Data(fromResource: "bbedit")).resultCount)
+			consequencesOf(try JSONDecoder().decode(CatalogAppResults.self, from: .init(fromResource: "bbedit")).resultCount)
 		let expected = Consequences(1)
 		#expect(actual == expected)
 	}
@@ -21,7 +21,7 @@ private extension MASTests {
 	@Test
 	func parsesCatalogAppResultsFromThingsJSON() {
 		let actual =
-			consequencesOf(try JSONDecoder().decode(CatalogAppResults.self, from: Data(fromResource: "things")).resultCount)
+			consequencesOf(try JSONDecoder().decode(CatalogAppResults.self, from: .init(fromResource: "things")).resultCount)
 		let expected = Consequences(12)
 		#expect(actual == expected)
 	}

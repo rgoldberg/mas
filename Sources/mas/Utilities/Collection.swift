@@ -11,60 +11,74 @@ extension Collection {
 	}
 }
 
-extension Collection {
-	func compactMap<T, E: Error>(_ transform: (Element) async throws(E) -> T?) async throws(E) -> [T] {
-		var transformedElements = [T]()
-		transformedElements.reserveCapacity(count)
-		return try await compactMap(into: &transformedElements, transform)
+extension Collection where Element: Sendable {
+	func concurrentMap<T: Sendable>(
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async -> T,
+	) async -> [T] { // swiftlint:disable:next force_unwrapping
+		await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).map { $0! }
 	}
 
-	private func compactMap<T, E: Error>(
-		into transformedElements: inout [T],
-		_ transform: (Element) async throws(E) -> T?,
-	) async throws(E) -> [T] {
-		for element in self {
-			try await transform(element).map { transformedElements.append($0) }
-		}
-		return transformedElements
-	}
-}
+	func concurrentMap<T: Sendable>(
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async throws -> T,
+	) async rethrows -> [T] { // periphery:ignore
+		try await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).map { $0! }
+	} // swiftlint:disable:previous force_unwrapping
 
-extension Collection {
-	func compactMap<T, E: Error>(attemptingTo effect: String, _ transform: (Element) async throws(E) -> T?) async -> [T] {
-		await compactMap(transform) { MAS.printer.error($1 is MASError ? [] : ["Failed to", effect, $0], error: $1) }
-	}
-
-	private func compactMap<T, E: Error>(
-		_ transform: (Element) async throws(E) -> T?,
-		handlingErrors errorHandler: (Element, E) async -> Void,
+	func concurrentCompactMap<T: Sendable>(
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async -> T?,
 	) async -> [T] {
-		await compactMap(transform) { element, error in
-			await errorHandler(element, error)
-			return nil
-		}
+		await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).compactMap(\.self)
 	}
 
-	private func compactMap<T, E: Error>(
-		_ transform: (Element) async throws(E) -> T?,
-		handlingErrors errorHandler: (Element, E) async -> T?,
+	func concurrentCompactMap<T: Sendable>(
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async throws -> T?,
+	) async rethrows -> [T] { // periphery:ignore
+		try await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).compactMap(\.self)
+	}
+
+	func concurrentCompactMap<T: Sendable, E: Error>(
+		attemptingTo perform: String,
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async throws(E) -> T?,
 	) async -> [T] {
-		await compactMap { element in
+		await concurrentCompactMap(maxConcurrentTaskCount: maxConcurrentTaskCount) { element in
 			do {
 				return try await transform(element)
-			} catch let error as E {
-				return await errorHandler(element, error)
 			} catch {
-				fatalError(
-					"""
-					Impossible error type \(type(of: error)) for element:
-					\(element)
+				MAS.printer.error(error is MASError ? [] : ["Failed to", perform, element], error: error)
+				return nil
+			}
+		}
+	}
 
-					Error:
-					\(error)
+	private func concurrentTransform<T: Sendable>(
+		maxConcurrentTaskCount: Int,
+		_ transform: @escaping @Sendable (Element) async throws -> T?,
+	) async rethrows -> [T?] {
+		try await withThrowingTaskGroup(of: (index: Int, result: T?).self) { group in
+			var iterator = enumerated().makeIterator()
+			func addNextTask() {
+				if let next = iterator.next() {
+					group.addTask {
+						(next.offset, try await transform(next.element))
+					}
+				}
+			}
 
-					""",
-				)
+			for _ in 0..<Swift.min(count, maxConcurrentTaskCount) {
+				addNextTask()
+			}
+
+			return try await group.reduce(into: [T?](repeating: nil, count: count)) { results, indexedResult in
+				results[indexedResult.index] = indexedResult.result
+				addNextTask()
 			}
 		}
 	}
 }
+
+private let defaultMaxConcurrentTaskCount = 16

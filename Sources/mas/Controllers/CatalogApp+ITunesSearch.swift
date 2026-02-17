@@ -5,7 +5,6 @@
 // Copyright © 2018 mas-cli. All rights reserved.
 //
 
-private import AsyncAlgorithms
 internal import Foundation
 private import Sextant
 private import SwiftSoup
@@ -33,7 +32,7 @@ func lookup(
 	let queryItem =
 		switch appID {
 		case let .adamID(adamID):
-			URLQueryItem(name: "id", value: String(adamID))
+			URLQueryItem(name: "id", value: .init(adamID))
 		case let .bundleID(bundleID):
 			URLQueryItem(name: "bundleId", value: bundleID)
 		}
@@ -63,7 +62,7 @@ private extension CatalogApp {
 		do {
 			return try await URL(string: appStorePageURLString)
 			.flatMap { url in // swiftformat:disable indent
-				try SwiftSoup.parse(try await dataFrom(url).0, appStorePageURLString)
+				try unsafe SwiftSoup.parse(try await dataFrom(url).0, appStorePageURLString)
 				.select("#serialized-server-data")
 				.first()?
 				.data()
@@ -109,9 +108,7 @@ func search(
 			dataFrom: dataSource,
 		)
 		.filter { ($0.supportedDevices?.contains("MacDesktop-MacDesktop") ?? false) && !adamIDSet.contains($0.adamID) }
-		.async
-		.map { $0.with(minimumOSVersion: await $0.minimumOSVersion(dataFrom: dataSource)) }
-		.array,
+		.concurrentMap { $0.with(minimumOSVersion: await $0.minimumOSVersion(dataFrom: dataSource)) },
 	) { $0.name.similarity(to: searchTerm) }
 }
 
@@ -142,7 +139,7 @@ async throws -> [CatalogApp] { // swiftformat:disable:this indent
 	do {
 		return try JSONDecoder().decode(CatalogAppResults.self, from: data).results
 	} catch {
-		throw MASError.error("Failed to parse JSON from response \(url)", error: String(data: data, encoding: .utf8) ?? "")
+		throw MASError.error("Failed to parse JSON from response \(url)", error: .init(data: data, encoding: .utf8) ?? "")
 	}
 }
 

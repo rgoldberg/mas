@@ -54,7 +54,7 @@ struct MAS: AsyncParsableCommand, Sendable {
 
 			let errorCount = printer.errorCount
 			if errorCount > 0 {
-				throw ExitCode(errorCount >= UInt64(Int32.max) ? Int32.max : Int32(errorCount))
+				throw ExitCode(errorCount >= UInt64(Int32.max) ? .max : .init(errorCount))
 			}
 		} catch {
 			exit(withError: error)
