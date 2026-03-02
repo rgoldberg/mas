@@ -65,7 +65,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		@Option(help: "custom", completion: .custom(test))
 		private var custom = "default"
 
-		@Option(help: "App ID", completion: .custom(test))
+		@Option(name: [.long, .customShort("p")], help: "App ID", completion: .custom(test))
 		private var appIDString = "0"
 
 		@Option(help: "dir", completion: .directory)
@@ -99,7 +99,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		*/
 		// swiftformat:enable indent
 
-		@Option(help: "adhoc")
+		@Option(name: .shortAndLong, help: "adhoc")
 		private var adhoc = ""
 		@Option(help: #"Escaped chars: '[]\."#)
 		private var qwerty = ""
