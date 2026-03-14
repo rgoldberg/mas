@@ -98,6 +98,8 @@ Detailed documentation is available via `man mas` & `mas --help`.
 | Action                                                                  | Command                      |
 |:------------------------------------------------------------------------|:-----------------------------|
 | Build                                                                   | `Scripts/build` or Xcode 26+ |
+| Set up zsh wrapper                                                      | `Scripts/setup_libexec`      |
+| Run zsh wrapper                                                         | `Scripts/mas`                |
 | Test ([Swift Testing](https://developer.apple.com/xcode/swift-testing)) | `Scripts/test`               |
 <!--editorconfig-checker-enable-->
 <!--markdownlint-enable line-length-->

@@ -1,5 +1,5 @@
 {
-	"originHash" : "1e59b315a1259424c1a6805e5b9e9164e4267377e7bf98e1bb3f1c5986eab67d",
+	"originHash" : "1e5aa0361cd7b68d6a92a242029fe4d44f182a65906e9db9393c43a54bb7e5e7",
 	"pins" : [
 		{
 			"identity" : "bigint",
@@ -17,6 +17,15 @@
 			"state" : {
 				"revision" : "99d4f4137837a28e1e294eb69ac66ad53c0934d3",
 				"version" : "0.1.14"
+			}
+		},
+		{
+			"identity" : "gram",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/rarestype/gram",
+			"state" : {
+				"revision" : "d9276e23523174cd04213e945f146dd9a553a571",
+				"version" : "2.0.0"
 			}
 		},
 		{
@@ -71,6 +80,15 @@
 			"state" : {
 				"revision" : "6675bc0ff86e61436e615df6fc5174e043e57924",
 				"version" : "1.4.1"
+			}
+		},
+		{
+			"identity" : "swift-json",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/mas-cli/swift-json.git",
+			"state" : {
+				"revision" : "3fe81bfbabc1580e381dcf0d87355f9db3864578",
+				"version" : "9.9.9"
 			}
 		},
 		{
