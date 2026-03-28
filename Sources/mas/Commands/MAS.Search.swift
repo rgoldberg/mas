@@ -31,7 +31,7 @@ extension MAS {
 			)
 		}
 
-		func run(catalogApps: [CatalogApp]) throws {
+		func run(catalogApps: [CatalogApp]) throws(MASError) {
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
