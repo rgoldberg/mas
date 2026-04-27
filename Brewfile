@@ -6,6 +6,6 @@ brew "ipsw"                 # 3.1.672
 brew "markdownlint-cli2"    # 0.22.1
 brew "periphery" if MacOS.version >= :sequoia && `/usr/bin/arch` == "arm64" # 3.7.4
 brew "shellcheck"           # 0.11.0
-brew "swiftformat"          # 0.61.0
+brew "swiftformat"          # 0.61.1
 brew "swiftlint"            # 0.63.2
 brew "yamllint"             # 1.38.0
