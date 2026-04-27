@@ -22,51 +22,6 @@ struct CatalogApp {
 
 	private let json: Lazy<String>
 
-	fileprivate init?(macDesktopAppObject object: JSON.Object) async throws {
-		guard try object["supportedDevices"]?.decode(to: [String]?.self)?.contains("MacDesktop-MacDesktop") == true else {
-			return nil
-		}
-
-		let appStorePageURLString: String = try object["trackViewUrl"]?.decode() ?? ""
-		guard
-			let minimumOSVersion = try? await URL(string: appStorePageURLString)
-				.flatMap({ url in
-					try SwiftSoup.parse(try await Dependencies.current.dataFrom(url).0, appStorePageURLString)
-						.getElementById("serialized-server-data")? // swiftformat:disable:this acronyms
-						.data()
-						.query(
-							string: """
-								$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')].items[?(@.heading == 'Mac')].text
-								""",
-						)?
-						.firstMatch(of: minimumOSVersionRegex)
-						.map { String($0.version) }
-				})
-		else {
-			return nil
-		}
-
-		var jsonObject = object
-		let jsonMinimumOSVersion = try jsonObject[minimumOSVersionKey]?.decode() ?? ""
-		if jsonMinimumOSVersion != minimumOSVersion {
-			if let index = jsonObject.fields.firstIndex(where: { $0.key == minimumOSVersionKey }) {
-				jsonObject.fields[index] = (minimumOSVersionKey, .string(minimumOSVersion))
-			} else {
-				jsonObject.fields.append((minimumOSVersionKey, .string(minimumOSVersion)))
-			}
-		}
-
-		self.init(
-			adamID: try jsonObject["trackId"]?.decode() ?? 0,
-			appStorePageURLString: appStorePageURLString,
-			minimumOSVersion: minimumOSVersion,
-			name: try jsonObject["trackName"]?.decode() ?? "",
-			sellerURLString: try jsonObject["sellerUrl"]?.decode(),
-			version: try jsonObject["version"]?.decode() ?? "",
-			jsonObject: jsonObject,
-		)
-	}
-
 	private init(
 		adamID: ADAMID,
 		appStorePageURLString: String,
@@ -106,6 +61,50 @@ extension CatalogApp: JSONDecodable {
 			adamID: try object["trackId"]?.decode() ?? 0,
 			appStorePageURLString: try object["trackViewUrl"]?.decode() ?? "",
 			minimumOSVersion: try object[minimumOSVersionKey]?.decode() ?? "",
+			name: try object["trackName"]?.decode() ?? "",
+			sellerURLString: try object["sellerUrl"]?.decode(),
+			version: try object["version"]?.decode() ?? "",
+			jsonObject: object,
+		)
+	}
+
+	fileprivate init?(macDesktopAppObject object: JSON.Object) async throws {
+		guard
+			try object["supportedDevices"]?.decode(to: [String]?.self)?.contains("MacDesktop-MacDesktop") == true,
+			let appStorePageURLString = try object["trackViewUrl"]?.decode(to: String?.self),
+			let minimumOSVersion = try? await URL(string: appStorePageURLString)
+				.flatMap(
+					{ url in
+						try SwiftSoup.parse(try await Dependencies.current.dataFrom(url).0, appStorePageURLString)
+							.getElementById("serialized-server-data")? // swiftformat:disable:this acronyms
+							.data()
+							.query(
+								string: """
+									$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')].items[?(@.heading == 'Mac')].text
+									""",
+							)?
+							.firstMatch(of: minimumOSVersionRegex)
+							.map { String($0.version) }
+					},
+				)
+		else {
+			return nil
+		}
+
+		var object = object
+		let jsonMinimumOSVersion = try object[minimumOSVersionKey]?.decode() ?? ""
+		if jsonMinimumOSVersion != minimumOSVersion {
+			if let index = object.fields.firstIndex(where: { $0.key == minimumOSVersionKey }) {
+				object.fields[index] = (minimumOSVersionKey, .string(minimumOSVersion))
+			} else {
+				object.fields.append((minimumOSVersionKey, .string(minimumOSVersion)))
+			}
+		}
+
+		self.init(
+			adamID: try object["trackId"]?.decode() ?? 0,
+			appStorePageURLString: appStorePageURLString,
+			minimumOSVersion: minimumOSVersion,
 			name: try object["trackName"]?.decode() ?? "",
 			sellerURLString: try object["sellerUrl"]?.decode(),
 			version: try object["version"]?.decode() ?? "",
@@ -297,10 +296,12 @@ private func lookup(appID: AppID, inRegion region: Region = appStoreRegion) asyn
 	case let .bundleID(bundleID):
 		URLQueryItem(name: "bundleId", value: bundleID)
 	}
-	return if let catalogAppJSONObject = try await catalogAppJSONObjects("lookup", queryItem, inRegion: region).first {
+	return if
+		let catalogAppJSONObject = try await catalogAppJSONObjects(from: lookupURL, queryItem, inRegion: region).first
+	{
 		try .init(object: catalogAppJSONObject)
 	} else {
-		try await catalogAppJSONObjects("lookup", queryItem, inRegion: region, additionalQueryItems: .init())
+		try await catalogAppJSONObjects(from: lookupURL, queryItem, inRegion: region, additionalQueryItems: .init())
 			.first
 			.flatMap { try await CatalogApp(macDesktopAppObject: $0) }
 			?? { throw MASError.unknownAppID(appID) }()
@@ -314,44 +315,36 @@ func search(for searchTerm: String) async throws -> [CatalogApp] {
 private func search(for searchTerm: String, inRegion region: Region = appStoreRegion) async throws -> [CatalogApp] {
 	let queryItem = URLQueryItem(name: "term", value: searchTerm)
 	let catalogApps =
-		try await catalogAppJSONObjects("search", queryItem, inRegion: region).map { try CatalogApp(object: $0) }
+		try await catalogAppJSONObjects(from: searchURL, queryItem, inRegion: region).map { try CatalogApp(object: $0) }
 	let adamIDSet = Set(catalogApps.map(\.adamID))
 	return catalogApps.priorityMerge(
-		try await catalogAppJSONObjects("search", queryItem, inRegion: region, additionalQueryItems: .init())
+		try await catalogAppJSONObjects(from: searchURL, queryItem, inRegion: region, additionalQueryItems: .init())
 			.concurrentCompactMap { catalogAppJSONObject in
-				guard
-					try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map({ adamIDSet.contains($0) }) == false
-				else {
-					return nil
-				}
-
-				return try await .init(macDesktopAppObject: catalogAppJSONObject)
+				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map { adamIDSet.contains($0) } == false
+				? try await .init(macDesktopAppObject: catalogAppJSONObject) // swiftformat:disable:this indent
+				: nil
 			},
 	) { $0.name.similarity(to: searchTerm) }
 }
 
 private func catalogAppJSONObjects(
-	_ action: String,
+	from url: URL,
 	_ queryItem: URLQueryItem,
 	inRegion region: Region,
 	additionalQueryItems: [URLQueryItem] = [.init(name: "entity", value: "desktopSoftware")],
 ) async throws -> [JSON.Object] {
-	let urlString = "https://itunes.apple.com/\(action)"
-	return try await URL(string: urlString).map { url in
-		try await unsafe Dependencies.current
-			.dataFrom(
-				url.appending(
-					queryItems: [.init(name: "media", value: "software")]
-						+ additionalQueryItems
-						+ [.init(name: "country", value: region), queryItem],
-				),
-			)
-			.0
-			.withUnsafeBytes { bufferPointer in
-				try CatalogAppResults(json: .init(parsing: unsafe RawSpan(_unsafeBytes: unsafe bufferPointer))).resultObjects
-			}
-	}
-	?? { throw MASError.invalidURL(urlString) }() // swiftformat:disable:this indent
+	try await unsafe Dependencies.current
+		.dataFrom(
+			url.appending(
+				queryItems: [.init(name: "media", value: "software")]
+					+ additionalQueryItems
+					+ [.init(name: "country", value: region), queryItem],
+			),
+		)
+		.0
+		.withUnsafeBytes { bufferPointer in
+			try CatalogAppResults(json: .init(parsing: unsafe RawSpan(_unsafeBytes: unsafe bufferPointer))).resultObjects
+		}
 }
 
 private let minimumOSVersionKey = JSON.Key("minimumOsVersion")
@@ -360,3 +353,5 @@ private let trackRegex = /((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/
 // editorconfig-checker-disable-next-line
 private let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
 private let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
+private let lookupURL = URL(string: "https://itunes.apple.com/lookup")! // swiftlint:disable:this force_unwrapping
+private let searchURL = URL(string: "https://itunes.apple.com/search")! // swiftlint:disable:this force_unwrapping
