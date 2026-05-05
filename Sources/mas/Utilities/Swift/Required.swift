@@ -9,8 +9,13 @@
 struct Required<Value> {
 	let wrappedValue: Value
 
-	init(_ value: @autoclosure () -> Value?, file: StaticString = #fileID, line: UInt = #line) {
-		wrappedValue = value() ?? { preconditionFailure("Required value was nil", file: file, line: line) }()
+	init(
+		_ value: @autoclosure () -> Value?,
+		message: String = "Required value cannot be nil",
+		file: StaticString = #fileID,
+		line: UInt = #line,
+	) {
+		wrappedValue = value() ?? { preconditionFailure(message, file: file, line: line) }()
 	}
 }
 
