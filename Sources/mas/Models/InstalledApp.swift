@@ -20,11 +20,11 @@ struct InstalledApp {
 	let version: String
 
 	private let jsonObjectRaw: JSON.Object
-	private let _jsonObject: Lazy<JSON.Object>
-	private let json: Lazy<String>
+	private let lazyJSONObject: Lazy<JSON.Object>
+	private let lazyJSON: Lazy<String>
 
 	var jsonObject: JSON.Object {
-		_jsonObject.value
+		lazyJSONObject.value
 	}
 
 	var isTestFlight: Bool {
@@ -57,14 +57,14 @@ struct InstalledApp {
 		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let jsonObjectRaw = jsonObjectRaw
 		let name = name
-		_jsonObject = .init(
+		lazyJSONObject = .init(
 			.init(
 				(jsonObjectRaw.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
 					.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
 			),
 		)
-		let jsonObject = _jsonObject
-		json = .init(.init(jsonObject.value))
+		let lazyJSONObject = lazyJSONObject
+		lazyJSON = .init(.init(lazyJSONObject.value))
 	}
 
 	func matches(_ appID: AppID) -> Bool {
@@ -79,7 +79,7 @@ struct InstalledApp {
 
 extension InstalledApp: CustomStringConvertible {
 	var description: String {
-		json.value
+		lazyJSON.value
 	}
 }
 

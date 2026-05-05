@@ -8,25 +8,32 @@
 private import os
 
 final class Lazy<Value: Sendable>: Sendable {
-	private let state: OSAllocatedUnfairLock<(value: Value?, initializer: (@Sendable () -> Value)?)>
+	private enum State {
+		case uninitialized(@Sendable () -> Value)
+		case initialized(Value)
+	}
+
+	private let stateGate: OSAllocatedUnfairLock<State>
 
 	var value: Value {
-		state.withLock { state in
-			state.value ?? {
-				let value = state.initializer!() // swiftlint:disable:this force_unwrapping
-				state.value = value
-				state.initializer = nil
+		stateGate.withLock { state in
+			switch state {
+			case let .uninitialized(initialize):
+				let value = initialize()
+				state = .initialized(value)
 				return value
-			}()
+			case let .initialized(value):
+				return value
+			}
 		}
 	}
 
-	init(_ initializer: @escaping @Sendable () -> Value) {
-		state = .init(initialState: (value: nil, initializer: initializer))
+	init(_ initialize: @escaping @Sendable () -> Value) {
+		stateGate = .init(initialState: .uninitialized(initialize))
 	}
 
-	convenience init(_ initializer: @autoclosure @escaping @Sendable () -> Value) {
-		self.init(initializer)
+	convenience init(_ initialize: @autoclosure @escaping @Sendable () -> Value) {
+		self.init(initialize)
 	}
 
 	deinit {

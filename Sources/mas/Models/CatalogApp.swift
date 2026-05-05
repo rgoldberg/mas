@@ -20,7 +20,7 @@ struct CatalogApp {
 	let sellerURLString: String?
 	let version: String
 
-	private let json: Lazy<String>
+	private let lazyJSON: Lazy<String>
 
 	private init(
 		adamID: ADAMID,
@@ -37,13 +37,13 @@ struct CatalogApp {
 		self.name = name
 		self.sellerURLString = sellerURLString
 		self.version = version
-		json = .init(.init(jsonObject.normalized))
+		lazyJSON = .init(.init(jsonObject.normalized))
 	}
 }
 
 extension CatalogApp: CustomStringConvertible {
 	var description: String {
-		json.value
+		lazyJSON.value
 	}
 }
 
