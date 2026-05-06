@@ -15,6 +15,7 @@
 #--enable preferExplicitFalse
 #--enable testSuiteAccessControl
 #--enable wrapMultilineConditionalAssignment
+#--enable wrapSwitchCases
 
 # Enabled rules (disabled by default)
 --enable acronyms
@@ -45,7 +46,6 @@
 --enable wrapEnumCases
 --enable wrapGuardStatementBodies
 --enable wrapMultilineFunctionChains
---enable wrapSwitchCases
 
 # Rule options
 --acronyms ADAM,ADI,AE,ANSI,API,CD,CEO,CF,CI,CK,CPU,DAV,DOS,DS,DSID,DVD,EOF,FAQ,FAT,FD,FTP,GB,GID,GUI,GUID,HTML,HTTP,HTTPS,ID,IFS,ISO,JSON,KB,MAS,MD,MDM,MDS,MIB,MIT,NS,OS,OSX,PDF,PR,QL,SB,SDK,SHA,SS,SSH,STDQ,STDRDL,UDF,UI,UID,URL,US,UTF,UUID,VPP,XML,XPC,YAML

@@ -221,11 +221,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 		switch snapshot.activePhaseType {
 		case prevPhaseType:
 			break
-		case
-			.downloading where prevPhaseType == .processing,
-			.downloaded where prevPhaseType == .downloading,
-			.performing
-		: // swiftformat:disable:this indent
+		case .downloading where prevPhaseType == .processing, .downloaded where prevPhaseType == .downloading, .performing:
 			MAS.printer.clearCurrentLine(of: .standardOutput)
 			MAS.printer.notice(snapshot.activePhaseType, snapshot.appNameAndVersion)
 		default:
@@ -480,9 +476,7 @@ private enum PhaseType: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .processing:
 			"processed"
-		case // swiftformat:disable:this sortSwitchCases
-			.downloading,
-			.downloaded:
+		case .downloading, .downloaded: // swiftformat:disable:this sortSwitchCases
 			"downloaded"
 		case let .performing(action):
 			action.performed
