@@ -7,6 +7,7 @@
 
 internal import Foundation
 @testable private import mas
+private import ObjectiveC
 
 struct Consequences<Value> {
 	let value: Value?

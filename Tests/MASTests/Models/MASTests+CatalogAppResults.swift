@@ -5,7 +5,6 @@
 // Copyright © 2025 mas-cli. All rights reserved.
 //
 
-private import Foundation
 @testable private import mas
 internal import Testing
 

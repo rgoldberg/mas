@@ -100,7 +100,7 @@ extension [InstalledApp] {
 private extension JSON.Node {
 	init(for value: Any?) {
 		self = switch value {
-		case let jsonNode as JSON.Node:
+		case let jsonNode as Self:
 			jsonNode
 		case let number as NSNumber: // swiftlint:disable:this legacy_objc_type
 			number === kCFBooleanTrue || number === kCFBooleanFalse
@@ -257,17 +257,17 @@ private extension JSON.Key {
 }
 
 private extension URL {
-	var installedAppURLs: [URL] {
+	var installedAppURLs: [Self] {
 		FileManager.default
 			.enumerator(at: self, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])
 			.map { enumerator in
 				enumerator.compactMap { item in
 					guard
-						let url = item as? URL,
+						let url = item as? Self,
 						(try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true,
 						url.pathExtension == "app"
 					else {
-						return URL?.none
+						return Self?.none
 					}
 
 					enumerator.skipDescendants()

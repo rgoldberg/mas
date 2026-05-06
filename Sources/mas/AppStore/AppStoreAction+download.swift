@@ -82,7 +82,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver {
 		downloadFolderURL = .init(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
 
 		let (eventStream, eventStreamContinuation) = AsyncStream.makeStream(of: Event.self)
-		self.eventStreamContinuation = eventStreamContinuation // swiftlint:disable:this redundant_self
+		self.eventStreamContinuation = eventStreamContinuation
 
 		unsafe task = Task { [weak self] in
 			for await event in eventStream {

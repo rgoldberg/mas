@@ -2,7 +2,7 @@
 # .swiftformat
 # mas
 #
-# SwiftFormat 0.61.1
+# SwiftFormat 0.62.1
 #
 
 # Disabled rules (enabled by default)
@@ -20,23 +20,30 @@
 --enable acronyms
 --enable blankLinesAfterGuardStatements
 --enable blockComments
+--enable emptyExtensions
 --enable isEmpty
 --enable noExplicitOwnership
 --enable noGuardInTests
 --enable organizeDeclarations
+--enable preferContains
+--enable preferCountWhere
 --enable preferFinalClasses
+--enable preferFirstWhere
+--enable preferFlatMap
+--enable preferMinOverSorted
 --enable preferSwiftStringAPI
 --enable preferSwiftTesting
 --enable privateStateVariables
 --enable propertyTypes
+--enable redundantSendable
 --enable singlePropertyPerLine
 --enable sortSwitchCases
 --enable unusedPrivateDeclarations
 --enable urlMacro
 --enable validateTestCases
 --enable wrapCaseBodies
---enable wrapConditionalBodies
 --enable wrapEnumCases
+--enable wrapGuardStatementBodies
 --enable wrapMultilineFunctionChains
 --enable wrapSwitchCases
 
@@ -46,6 +53,7 @@
 --complex-attributes prev-line
 --computed-var-attributes prev-line
 --conditional-assignment always
+--doc-comments before-non-local-declarations
 --exponent-grouping enabled
 --file-macro "#fileID"
 --fraction-grouping enabled
@@ -56,6 +64,7 @@
 --import-grouping alpha
 --indent tab
 --indent-strings true
+--language-mode 6
 --line-after-marks false
 --mark-categories false
 --max-width 120

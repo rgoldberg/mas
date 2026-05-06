@@ -6,7 +6,6 @@
 //
 
 internal import ArgumentParser
-private import Foundation
 
 extension MAS {
 	/// Searches for apps in the App Store.
@@ -21,9 +20,9 @@ extension MAS {
 
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
-		@Flag(help: "Output the price of each app") // swiftformat:disable:next unusedPrivateDeclarations
+		@Flag(help: "Output the price of each app") // swiftlint:disable:next unused_declaration
 		private var price = false // periphery:ignore
-		@OptionGroup // swiftlint:disable:previous unused_declaration
+		@OptionGroup // swiftformat:disable:previous unusedPrivateDeclarations
 		private var searchTermOptionGroup: SearchTermOptionGroup
 
 		func run() async throws {

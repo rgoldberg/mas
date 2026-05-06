@@ -23,7 +23,7 @@ final class ThrowingLazy<Value: Sendable>: Sendable {
 		}
 	}
 
-	init(_ initializer: @escaping @Sendable () throws -> Value) { // swiftlint:disable:this unneeded_escaping
+	init(_ initializer: @escaping @Sendable () throws -> Value) {
 		state = .init(initialState: (value: nil, initializer: initializer))
 	}
 

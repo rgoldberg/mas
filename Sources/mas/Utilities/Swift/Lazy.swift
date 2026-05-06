@@ -21,7 +21,7 @@ final class Lazy<Value: Sendable>: Sendable {
 		}
 	}
 
-	init(_ initializer: @escaping @Sendable () -> Value) { // swiftlint:disable:this unneeded_escaping
+	init(_ initializer: @escaping @Sendable () -> Value) {
 		state = .init(initialState: (value: nil, initializer: initializer))
 	}
 

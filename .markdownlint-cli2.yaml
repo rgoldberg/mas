@@ -6,7 +6,7 @@
 # .markdownlint-cli2.yaml
 # mas
 #
-# markdownlint-cli2 0.22.0 / markdownlint 0.40.0
+# markdownlint-cli2 0.23.1 / markdownlint 0.41.1
 #
 ---
 gitignore: true
@@ -37,7 +37,7 @@ config:
     code_blocks: false
     spaces_per_tab: 2
   no-inline-html:
-    allowed_elements: [a, details, h1, summary]
+    allowed_elements: [a, h1]
   no-trailing-spaces:
     code_blocks: true
     strict: true

@@ -8,7 +8,6 @@
 internal import AppKit
 private import Foundation
 private import ObjectiveC
-private import System
 
 extension URL {
 	var filePath: String {
@@ -16,11 +15,11 @@ extension URL {
 		?? .init(path(percentEncoded: false).dropLast { $0 == "/" }) // swiftformat:disable:this indent
 	}
 
-	init(folderPath path: String, relativeTo base: URL? = nil) {
+	init(folderPath path: String, relativeTo base: Self? = nil) {
 		self.init(filePath: path, directoryHint: .isDirectory, relativeTo: base)
 	}
 
-	init(nonFolderPath path: String, relativeTo base: URL? = nil) {
+	init(nonFolderPath path: String, relativeTo base: Self? = nil) {
 		self.init(filePath: path, directoryHint: .notDirectory, relativeTo: base)
 	}
 
