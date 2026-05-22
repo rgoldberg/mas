@@ -1,5 +1,5 @@
 //
-// Dependencies.swift
+// Environment.swift
 // mas
 //
 // Copyright © 2026 mas-cli. All rights reserved.
@@ -7,7 +7,7 @@
 
 internal import Foundation
 
-struct Dependencies {
+struct Environment {
 	@TaskLocal
 	static var current = Self()
 

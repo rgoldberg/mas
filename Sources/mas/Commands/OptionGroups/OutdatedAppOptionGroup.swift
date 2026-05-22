@@ -27,7 +27,7 @@ struct OutdatedAppOptionGroup: ParsableArguments {
 		@Sendable
 		func installableCatalogApp(from installedApp: InstalledApp) async -> CatalogApp? {
 			do {
-				let catalogApp = try await Dependencies.current.lookupAppFromAppID(.bundleID(installedApp.bundleID))
+				let catalogApp = try await Environment.current.lookupAppFromAppID(.bundleID(installedApp.bundleID))
 				return shouldCheckMinimumOSVersion // swiftformat:disable indent
 				&& UniversalSemVerInt(rawValue: catalogApp.minimumOSVersion).map { minimumOSVersion in
 					ProcessInfo.processInfo.isOperatingSystemAtLeast(

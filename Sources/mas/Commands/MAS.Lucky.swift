@@ -32,7 +32,7 @@ extension MAS {
 
 		private func run(installedApps: [InstalledApp]) async throws {
 			let searchTerm = searchTermOptionGroup.searchTerm
-			guard let adamID = try await Dependencies.current.searchForAppsMatchingSearchTerm(searchTerm).first?.adamID else {
+			guard let adamID = try await Environment.current.searchForAppsMatchingSearchTerm(searchTerm).first?.adamID else {
 				throw MASError.noCatalogAppsFound(for: searchTerm)
 			}
 

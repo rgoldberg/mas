@@ -27,7 +27,7 @@ extension MAS {
 
 		func run() async throws {
 			try run(
-				catalogApps: try await Dependencies.current.searchForAppsMatchingSearchTerm(searchTermOptionGroup.searchTerm),
+				catalogApps: try await Environment.current.searchForAppsMatchingSearchTerm(searchTermOptionGroup.searchTerm),
 			)
 		}
 

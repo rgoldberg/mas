@@ -35,7 +35,7 @@ enum AppID: CustomStringConvertible {
 extension [AppID] { // swiftlint:disable:this file_types_order
 	var catalogApps: [CatalogApp] {
 		get async {
-			await concurrentCompactMap(attemptingTo: "lookup app for", Dependencies.current.lookupAppFromAppID)
+			await concurrentCompactMap(attemptingTo: "lookup app for", Environment.current.lookupAppFromAppID)
 		}
 	}
 }

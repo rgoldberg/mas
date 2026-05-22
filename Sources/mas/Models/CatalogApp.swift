@@ -75,7 +75,7 @@ extension CatalogApp: JSONDecodable {
 			let minimumOSVersion = try? await URL(string: appStorePageURLString)
 				.flatMap(
 					{ url in
-						try SwiftSoup.parse(try await Dependencies.current.dataFrom(url).0, appStorePageURLString)
+						try SwiftSoup.parse(try await Environment.current.dataFrom(url).0, appStorePageURLString)
 							.getElementById("serialized-server-data")? // swiftformat:disable:this acronyms
 							.data()
 							.query(
@@ -298,7 +298,7 @@ private func lookup(appID: AppID, inRegion region: Region = appStoreRegion) asyn
 	}
 	return if // swiftformat:disable:this wrap wrapArguments
 		let catalogAppJSONObject = try await catalogAppJSONObjects(
-			from: Dependencies.current.lookupURL,
+			from: Environment.current.lookupURL,
 			queryItem,
 			inRegion: region,
 		)
@@ -307,7 +307,7 @@ private func lookup(appID: AppID, inRegion region: Region = appStoreRegion) asyn
 		try .init(object: catalogAppJSONObject)
 	} else {
 		try await catalogAppJSONObjects(
-			from: Dependencies.current.lookupURL,
+			from: Environment.current.lookupURL,
 			queryItem,
 			inRegion: region,
 			additionalQueryItems: .init(),
@@ -324,12 +324,12 @@ func search(for searchTerm: String) async throws -> [CatalogApp] {
 
 private func search(for searchTerm: String, inRegion region: Region = appStoreRegion) async throws -> [CatalogApp] {
 	let queryItem = URLQueryItem(name: "term", value: searchTerm)
-	let catalogApps = try await catalogAppJSONObjects(from: Dependencies.current.searchURL, queryItem, inRegion: region)
+	let catalogApps = try await catalogAppJSONObjects(from: Environment.current.searchURL, queryItem, inRegion: region)
 		.map { try CatalogApp(object: $0) }
 	let adamIDSet = Set(catalogApps.map(\.adamID))
 	return catalogApps.priorityMerge(
 		try await catalogAppJSONObjects(
-			from: Dependencies.current.searchURL,
+			from: Environment.current.searchURL,
 			queryItem,
 			inRegion: region,
 			additionalQueryItems: .init(),
@@ -348,7 +348,7 @@ private func catalogAppJSONObjects(
 	inRegion region: Region,
 	additionalQueryItems: [URLQueryItem] = [.init(name: "entity", value: "desktopSoftware")],
 ) async throws -> [JSON.Object] {
-	try await unsafe Dependencies.current
+	try await unsafe Environment.current
 		.dataFrom(
 			url.appending(
 				queryItems: [.init(name: "media", value: "software")]

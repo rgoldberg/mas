@@ -21,7 +21,7 @@ private extension MASTests {
 	@Test
 	func `iTunes searches for slack`() async {
 		let actual = await consequencesOf(
-			try await Dependencies.$current.withValue(.init { _ in (try .init(fromResource: "slack"), .init()) }) {
+			try await Environment.$current.withValue(.init { _ in (try .init(fromResource: "slack"), .init()) }) {
 				try await search(for: "slack").count
 			},
 		)
@@ -33,7 +33,7 @@ private extension MASTests {
 	func `looks up slack`() async throws {
 		let adamID = ADAMID(803_453_959)
 		let actual = await consequencesOf(
-			try await Dependencies.$current.withValue(.init { _ in (try .init(fromResource: "slack-lookup"), .init()) }) {
+			try await Environment.$current.withValue(.init { _ in (try .init(fromResource: "slack-lookup"), .init()) }) {
 				try await lookup(appID: .adamID(adamID))
 			},
 		)
