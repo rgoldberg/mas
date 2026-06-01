@@ -80,7 +80,7 @@ private func appIDCompletions(installedApps: [InstalledApp], arguments: [String]
 	// try? completions.joined(separator: "\n").write(
 	// try? installedApps.map(\.bundleID).joined(separator: "\n").write(
 	try? "(\(completionPrefix)) \(completionPrefix.count)\n\(completions.joined(separator: "\n"))".write(
-		to: URL(filePath: "/Users/ross.goldberg/Downloads/completions.log", directoryHint: .notDirectory),
+		to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/completions.log"),
 		atomically: true,
 		encoding: .utf8,
 	)
@@ -95,13 +95,6 @@ private func appIDCompletions(installedApps: [InstalledApp], arguments: [String]
 	.map { "\($0.adamID):\($0.bundleID)" }
 	+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
 	do {
-<<<<<<< HEAD:Sources/mas/Commands/OptionGroups/InstalledAppsOptionGroup.swift
-		try completions.joined(separator: "\n").write(
-			to: .init(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8,
-		)
-=======
 		let installedApps = try await installedApps()
 		let completions = installedApps.filter { $0.name.insensitivelyStarts(with: completionPrefix) }
 		.sorted { $0.name.compareInsensitively(to: $1.name) == .orderedAscending }
@@ -112,18 +105,13 @@ private func appIDCompletions(installedApps: [InstalledApp], arguments: [String]
 		+ installedApps.filter { String($0.adamID).hasPrefix(completionPrefix) }.map { "\($0.adamID):\($0.adamID)" }
 		do {
 			try completions.joined(separator: "\n").write(
-				to: URL(filePath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt", directoryHint: .notDirectory),
+				to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/upgrade-completion-test.txt"),
 				atomically: true,
 				encoding: .utf8,
 			)
-		} catch {
-			// Do nothing
-		}
+		} catch {}
 		return completions
->>>>>>> 41721706f (Remove commented swiftformat directives.):Sources/mas/Commands/OptionGroups/InstalledAppIDsOptionGroup.swift
-	} catch {
-		// Do nothing
-	}
+	} catch {}
 	return completions
 	*/
 	// swiftformat:enable indent
@@ -177,14 +165,11 @@ private func installedAppIDCompletionsTest(_: [String], _: Int, completionPrefix
 		}
 	do {
 		// try "\(installedApps.count) \(installedAppIDSet.count)\n\(installedAppIDSet)".write(
-		try completions.joined(separator: "\n").write(
-			to: .init(filePath: "/tmp/upgrade-completion-test.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8,
-		)
+		try completions.joined(separator: "\n")
+			.write(to: .init(nonFolderPath: "/tmp/upgrade-completion-test.txt"), atomically: true, encoding: .utf8)
 		return completions
 	} catch {
-		return []
+		return .init()
 	}
 }
 */

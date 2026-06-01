@@ -6,6 +6,7 @@
 //
 
 internal import ArgumentParser
+private import Foundation
 
 // swiftformat:disable unusedPrivateDeclarations
 // swiftlint:disable:next blanket_disable_command
@@ -106,8 +107,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 
 		func run() {
 			/* // swiftformat:disable indent
-			print("E \(yn is any ExpressibleByArgument)")
-			print("C \(yn is any CaseIterable)")
+			MAS.printer.info("E \(yn is any ExpressibleByArgument)")
+			MAS.printer.info("C \(yn is any CaseIterable)")
 			*/
 			// swiftformat:enable indent
 
@@ -116,7 +117,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 
 		private func run(lookupAppFromAppID _: (AppID) async throws -> CatalogApp) {
 			/* // swiftformat:disable indent
-			print(maybe)
+			MAS.printer.info(maybe)
 			let catalogApp = try await lookupAppFromAppID(appID: appID)
 
 			guard let urlString = catalogApp.sellerURL else {
@@ -164,45 +165,34 @@ extension Bool: @retroactive CaseIterable {
 }
 
 @Sendable
-private func test(args _: [String], completingArgumentIndex _: Int, completingArgument _: String) -> [String] {
-	/* // swiftformat:disable indent
-	print("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
+private func test(args: [String], completingArgumentIndex: Int, completingArgument: String) -> [String] {
+	// swiftformat:disable indent
+	// MAS.printer.info("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
 	do {
 		// CURRENT WORD: (\(args[completingArgumentIndex]))
 		try """
 		SHELL: \(CompletionShell.requesting?.rawValue ?? "unknown")
 		VERSION: \(CompletionShell.requestingVersion ?? "unknown")
 		WORD INDEX: \(completingArgumentIndex)
-		CURSOR INDEX: \(completingArgument)
+		COMPLETING ARGUMENT: (\(completingArgument))
 		\(args.map { "(\($0))\n" }.joined())
 		"""
-		// let s = CompletionShell.requesting?.rawValue ?? "unknown"
-		// try s
-		.write(
-			to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8
-		)
+			.write(to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/s.txt"), atomically: true, encoding: .utf8)
 
 		if args.isEmpty {
 			try "EMPTY_ARRAY\n"
-				.write(
-					to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
-					atomically: true,
-					encoding: .utf8
-				)
+				.write(to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/s.txt"), atomically: true, encoding: .utf8)
 		}
 	} catch {
-		printError(String(describing: error))
+		MAS.printer.error(error: error)
 	}
 
 	// return []
 
-	guard let countString = ProcessInfo.processInfo.environment["ROSS_COUNT"] else {
-		// printError("\n\nA\n\n")
-	*/
+	// guard let countString = ProcessInfo.processInfo.environment["ROSS_COUNT"] else {
+	// MAS.printer.error("\n\nA\n\n")
 	// swiftformat:enable indent
-	[
+	return [
 		"",
 		" ",
 		"q",
@@ -216,14 +206,14 @@ private func test(args _: [String], completingArgumentIndex _: Int, completingAr
 	/* // swiftformat:disable indent
 	}
 	guard let count = Int(countString) else {
-		// printError("\n\nB\n\n")
+		// MAS.printer.error("\n\nB\n\n")
 		return []
 	}
-	// printError("\n\nC \(count)\n\(Array(1...count).map { String($0) })\n\n")
+	// MAS.printer.error("\n\nC \(count)\n\(Array(1...count).map { String($0) })\n\n")
 	return count < 0 ? [String](repeating: "", count: -count) : count == 0 ? [] : Array(1...count).map { String($0) }
 	["a bc", "", "def", " ", "ghi"]
 	[CompletionShell.requesting?.rawValue ?? "unknown", CompletionShell.requestingVersion ?? "unknown"]
-	print("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
+	MAS.printer.info("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
 	let current = args[completingArgumentIndex]
 	return args.map { "\(current)-\(completingArgumentIndex)-\($0)" }
 	installedAppIDs(args, await installedApps)
@@ -243,7 +233,7 @@ private func test(args _: [String], completingArgumentIndex _: Int, completingAr
 
 /* // swiftformat:disable indent
 private func test(_: [String]) -> [String] {
-	// print("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
+	// MAS.printer.info("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
 	[]
 	["a bc", "", "def", " ", "ghi"]
 	[CompletionShell.requesting?.rawValue ?? "unknown", CompletionShell.requestingVersion ?? "unknown"]
@@ -258,13 +248,9 @@ private func test(_: [String]) -> [String] {
 			.joined()
 		)
 		"""
-		.write(
-			to: .init(filePath: "/tmp/swift-custom-completion-args.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8
-		)
+		.write(to: .init(nonFolderPath: "/tmp/swift-custom-completion-args.txt"), atomically: true, encoding: .utf8)
 	} catch {
-		print(String(describing: error))
+		MAS.printer.error(error: error)
 	}
 	return args
 }
@@ -289,30 +275,21 @@ private func installedAppIDs(_ args: [String]) -> [String] {
 			.joined()
 		)
 		"""
-		// let s = CompletionShell.requesting?.rawValue ?? "unknown"
-		// try s
-		.write(
-			to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
-			atomically: true,
-			encoding: .utf8
-		)
+		let s = CompletionShell.requesting?.rawValue ?? "unknown"
+		try s.write(to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/s.txt"), atomically: true, encoding: .utf8)
 
 		if args.isEmpty {
 			try "EMPTY_ARRAY\n"
-				.write(
-					to: .init(filePath: "/Users/ross.goldberg/mas-test/s.txt", directoryHint: .notDirectory),
-					atomically: true,
-					encoding: .utf8
-				)
+				.write(to: .init(nonFolderPath: "/Users/ross.goldberg/Downloads/s.txt"), atomically: true, encoding: .utf8)
 		}
 	} catch {
-		printError(String(describing: error))
+		MAS.printer.error(String(describing: error))
 	}
 
 	// return []
 
 	guard let countString = ProcessInfo.processInfo.environment["ROSS_COUNT"] else {
-		// printError("\n\nA\n\n")
+		// MAS.printer.error("\n\nA\n\n")
 		return [
 			"",
 			" ",
@@ -326,13 +303,13 @@ private func installedAppIDs(_ args: [String]) -> [String] {
 		]
 	}
 	guard let count = Int(countString) else {
-		// printError("\n\nB\n\n")
+		// MAS.printer.error("\n\nB\n\n")
 		return []
 	}
-	// printError("\n\nC \(count)\n\(Array(1...count).map { String($0) })\n\n")
+	// MAS.printer.error("\n\nC \(count)\n\(Array(1...count).map { String($0) })\n\n")
 	return count < 0 ? [String](repeating: "", count: -count) : count == 0 ? [] : Array(1...count).map { String($0) }
 	await installedApps.map { String($0.id) }
-	print("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
+	MAS.printer.info("ROSS\nROSS\nROSS \(args.joined(separator: " "))\nROSS\nROSS\nROSS\n")
 	args.map {
 		"XYZ-\($0.prefix(min(2, $0.count)))-OPTION-\($0[$0.index($0.startIndex, offsetBy: min(2, $0.count))...])-ABC"
 	}
