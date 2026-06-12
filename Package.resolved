@@ -1,5 +1,5 @@
 {
-	"originHash" : "8dd848ba2feaabb51e986c0c9671ada3eb512dd529be7cf494ab7f26546b6e30",
+	"originHash" : "0c0e32bbf89d9f1c8e9386c7b623d0cd0aacb079d21c202604b2e5a346b40d44",
 	"pins" : [
 		{
 			"identity" : "bigint",
@@ -56,15 +56,6 @@
 			}
 		},
 		{
-			"identity" : "swift-argument-parser",
-			"kind" : "remoteSourceControl",
-			"location" : "https://github.com/apple/swift-argument-parser",
-			"state" : {
-				"revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
-				"version" : "1.8.2"
-			}
-		},
-		{
 			"identity" : "swift-async-algorithms",
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/apple/swift-async-algorithms",
@@ -83,6 +74,15 @@
 			}
 		},
 		{
+			"identity" : "swift-configuration",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/apple/swift-configuration",
+			"state" : {
+				"revision" : "be76c4ad929eb6c4bcaf3351799f2adf9e6848a9",
+				"version" : "1.2.0"
+			}
+		},
+		{
 			"identity" : "swift-json",
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/rarestype/swift-json",
@@ -92,12 +92,39 @@
 			}
 		},
 		{
+			"identity" : "swift-log",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/apple/swift-log",
+			"state" : {
+				"revision" : "3ffafb9722d5d918c614feb496c8789a3b59d222",
+				"version" : "1.15.0"
+			}
+		},
+		{
+			"identity" : "swift-service-lifecycle",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/swift-server/swift-service-lifecycle",
+			"state" : {
+				"revision" : "9829955b385e5bb88128b73f1b8389e9b9c3191a",
+				"version" : "2.11.0"
+			}
+		},
+		{
 			"identity" : "swift-subprocess",
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/swiftlang/swift-subprocess",
 			"state" : {
 				"revision" : "b3937ab85dd32f6e9435914599c1519074769c1a",
 				"version" : "1.0.0"
+			}
+		},
+		{
+			"identity" : "swift-syntax",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/swiftlang/swift-syntax",
+			"state" : {
+				"revision" : "79e4b74a295b6eb74a8b585e3a39d29e70c1dbd1",
+				"version" : "603.0.2"
 			}
 		},
 		{
@@ -116,6 +143,15 @@
 			"state" : {
 				"revision" : "8d6ad267714cac3ae747cefdd21f7a6665006e1f",
 				"version" : "2.13.7"
+			}
+		},
+		{
+			"identity" : "yams",
+			"kind" : "remoteSourceControl",
+			"location" : "https://github.com/jpsim/Yams",
+			"state" : {
+				"revision" : "a27b21e0c81c5bf42049b897a62aaf387e80f279",
+				"version" : "6.2.2"
 			}
 		}
 	],

@@ -18,9 +18,9 @@ _ = Package(
 	name: "mas",
 	platforms: [.macOS(.v15)],
 	products: [.executable(name: "mas", targets: ["mas"])],
-	dependencies: [
+	dependencies: [ // TODO: use released version
+		.package(name: "ArgumentParserConfiguration", path: "../swift-argument-parser-configuration"),
 		.package(url: "https://github.com/KittyMac/Sextant", from: "0.4.41"),
-		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
 		.package(url: "https://github.com/apple/swift-async-algorithms", from: "1.1.5"),
 		.package(url: "https://github.com/apple/swift-collections", from: "1.6.0"),
 		.package(url: "https://github.com/attaswift/BigInt", from: "6.0.0"),
@@ -34,11 +34,11 @@ _ = Package(
 		.executableTarget(
 			name: "mas",
 			dependencies: [
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				.product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
 				.product(name: "JSON", package: "swift-json"),
 				.product(name: "OrderedCollections", package: "swift-collections"),
 				.product(name: "Subprocess", package: "swift-subprocess"),
+				"ArgumentParserConfiguration",
 				"BigInt",
 				"PrivateFrameworks",
 				"Sextant",

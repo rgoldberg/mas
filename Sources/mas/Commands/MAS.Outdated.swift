@@ -6,6 +6,7 @@
 //
 
 internal import ArgumentParser
+internal import ArgumentParserConfiguration
 
 extension MAS {
 	/// Outputs a list of installed apps which have updates available to be
@@ -15,6 +16,9 @@ extension MAS {
 			abstract: "List pending app updates from the App Store",
 		)
 
+		@ParentCommand // swiftlint:disable:next unused_declaration
+		private var parent: MAS // periphery:ignore
+		@ConfigDefault
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup

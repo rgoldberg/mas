@@ -7,6 +7,7 @@
 ---
 color: always
 disable_update_check: true
+index_exclude: [../swift-argument-parser/*, ../swift-argument-parser-configuration/*]
 quiet: true
 relative_results: true
 strict: true
