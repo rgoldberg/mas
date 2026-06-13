@@ -59,14 +59,15 @@ extension MAS {
 				return
 			}
 
-			var kinfoProcs = unsafe [kinfo_proc](repeating: kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
+			var kinfoProcs =
+				unsafe [kinfo_proc](repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
 			guard unsafe sysctl(&processListMIB, u_int(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list")
 				return
 			}
 
 			var executablePathBuffer = [CChar](repeating: 0, count: .init(PATH_MAX))
-			for pid in unsafe kinfoProcs.map(\.kp_proc.p_pid) {
+			for pid in unsafe kinfoProcs.map(unsafe \.kp_proc.p_pid) {
 				guard
 					unsafe proc_pidpath(pid, &executablePathBuffer, .init(executablePathBuffer.count)) > 0,
 					let executablePath = String(cString: executablePathBuffer, encoding: .utf8),

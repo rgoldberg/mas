@@ -21,16 +21,16 @@ private func sudo(_ args: some Sequence<String>) throws {
 	let cArgs = unsafe (["sudo", "MAS_NO_AUTO_INDEX=1"] + args).map { unsafe strdup($0) }
 	defer {
 		for unsafe cArg in unsafe cArgs {
-			unsafe free(cArg)
+			unsafe free(unsafe cArg)
 		}
 	}
 
 	var pid = pid_t(0)
-	let spawnStatus = unsafe posix_spawn(&pid, "/usr/bin/sudo", nil, nil, cArgs + [nil], environ)
+	let spawnStatus = unsafe posix_spawn(&pid, "/usr/bin/sudo", nil, nil, unsafe cArgs + [nil], unsafe environ)
 	guard spawnStatus == 0 else {
 		throw MASError.error(
 			"Failed to spawn installer process",
-			cause: unsafe .init(cString: strerror(spawnStatus)),
+			cause: unsafe .init(cString: unsafe strerror(spawnStatus)),
 			separatorWhenCause: ": ",
 		)
 	}

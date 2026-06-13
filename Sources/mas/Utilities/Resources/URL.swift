@@ -11,7 +11,7 @@ private import ObjectiveC
 
 extension URL {
 	var filePath: String {
-		unsafe withUnsafeFileSystemRepresentation { unsafe $0.map(String.init(cString:)) }
+		unsafe withUnsafeFileSystemRepresentation { unsafe $0.map(unsafe String.init(cString:)) }
 		?? .init(path(percentEncoded: false).dropLast { $0 == "/" }) // swiftformat:disable:this indent
 	}
 

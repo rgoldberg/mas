@@ -72,16 +72,14 @@ private struct StandardStreamCapture { // swiftlint:disable:this one_declaration
 	}
 
 	private func finishAndRead(encoding: String.Encoding) -> (stdout: String, stderr: String) {
-		unsafe fflush(stdout)
-		unsafe fflush(stderr)
+		unsafe fflush(unsafe stdout)
+		unsafe fflush(unsafe stderr)
 		dup2(outDuplicateFD, outOriginalFD)
 		dup2(errDuplicateFD, errOriginalFD)
 		try? outPipe.fileHandleForWriting.close()
 		try? errPipe.fileHandleForWriting.close()
-
 		close(outDuplicateFD)
 		close(errDuplicateFD)
-
 		return (try! outPipe.readToEnd(encoding: encoding) ?? "", try! errPipe.readToEnd(encoding: encoding) ?? "")
 	} // swiftlint:disable:previous force_try
 }
