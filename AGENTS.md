@@ -212,9 +212,8 @@ Apple-exclusive entitlements.
 
 Source is organized in folders by concern:
 
-- **AppStore:** App Store integration
 - **Commands:** CLI implementation
-- **Models:** Data types
+- **Models:** Data types & suppliers
 - **Utilities:** Utilities
 
 ### Style Essentials

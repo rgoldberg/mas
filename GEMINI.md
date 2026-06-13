@@ -80,7 +80,7 @@ Refer to [AGENTS.md](AGENTS.md) for comprehensive guidelines. Key highlights:
 
 ### Swift Development
 
-- **Structure:** Organized by `AppStore/`, `Commands/`, `Models/`, `Utilities/`.
+- **Structure:** Organized by `Commands/`, `Models/`, `Utilities/`.
 - **Force Unwrapping:** Avoid in `Sources/mas/`.
 - **Naming:** Capitalize acronyms consistently (e.g., `ADAM`, `API`, `JSON`).
 - **Organization:** Group computed properties below stored properties.
