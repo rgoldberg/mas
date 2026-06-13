@@ -14,7 +14,7 @@ struct Consequences<Value> {
 	let stdout: String
 	let stderr: String
 
-	init(_ error: (any Error)? = nil, _ stdout: String = "", _ stderr: String = "") where Value == NoValue {
+	init(_ error: (any Error)? = nil, _ stdout: String = "", _ stderr: String = "") where Value == Void {
 		self.init(nil, error, stdout, stderr)
 	}
 
@@ -35,79 +35,74 @@ extension Consequences: Equatable where Value: Equatable { // swiftlint:disable:
 	}
 }
 
+extension Consequences where Value == Void { // swiftlint:disable:this file_types_order
+	static func == (lhs: Self, rhs: Self) -> Bool {
+		(lhs.value != nil) == (rhs.value != nil)
+			&& lhs.stdout == rhs.stdout
+			&& lhs.stderr == rhs.stderr
+			&& lhs.error as NSError? == rhs.error as NSError?
+	}
+}
+
 private struct StandardStreamCapture { // swiftlint:disable:this one_declaration_per_file
-	private let encoding: String.Encoding
-	private let outOriginalFD: Int32
-	private let errOriginalFD: Int32
-	private let outDuplicateFD: Int32
-	private let errDuplicateFD: Int32
-	private let outPipe: Pipe
-	private let errPipe: Pipe
+	private let outRedirector: StreamRedirector
+	private let errRedirector: StreamRedirector
 
 	init(encoding: String.Encoding) {
-		self.encoding = encoding
-
-		outOriginalFD = FileHandle.standardOutput.fileDescriptor
-		errOriginalFD = FileHandle.standardError.fileDescriptor
-
-		outDuplicateFD = dup(outOriginalFD)
-		errDuplicateFD = dup(errOriginalFD)
-
-		outPipe = .init()
-		errPipe = .init()
-
-		dup2(outPipe.fileHandleForWriting.fileDescriptor, outOriginalFD)
-		dup2(errPipe.fileHandleForWriting.fileDescriptor, errOriginalFD)
-	}
-
-	func consequences(value _: Void, error: (any Error)? = nil) -> Consequences<NoValue> {
-		let (stdout, stderr) = finishAndRead(encoding: encoding)
-		return .init(NoValue?.none, error, stdout, stderr)
+		outRedirector = .init(from: FileHandle.standardOutput.fileDescriptor, encoding: encoding)
+		errRedirector = .init(from: FileHandle.standardError.fileDescriptor, encoding: encoding)
 	}
 
 	func consequences<Value>(value: Value? = nil, error: (any Error)? = nil) -> Consequences<Value> {
-		let (stdout, stderr) = finishAndRead(encoding: encoding)
-		return .init(value, error, stdout, stderr)
-	}
-
-	private func finishAndRead(encoding: String.Encoding) -> (stdout: String, stderr: String) {
-		unsafe fflush(unsafe stdout)
-		unsafe fflush(unsafe stderr)
-		dup2(outDuplicateFD, outOriginalFD)
-		dup2(errDuplicateFD, errOriginalFD)
-		try? outPipe.fileHandleForWriting.close()
-		try? errPipe.fileHandleForWriting.close()
-		close(outDuplicateFD)
-		close(errDuplicateFD)
-		return (try! outPipe.readToEnd(encoding: encoding) ?? "", try! errPipe.readToEnd(encoding: encoding) ?? "")
-	} // swiftlint:disable:previous force_try
-}
-
-enum NoValue: Equatable { // swiftlint:disable:this one_declaration_per_file
-	// Empty
-}
-
-private extension Pipe {
-	func readToEnd(encoding: String.Encoding) throws -> String? {
-		try fileHandleForReading.readToEnd().flatMap { .init(data: $0, encoding: encoding) }
+		.init(value, error, outRedirector.stop(), errRedirector.stop())
 	}
 }
 
-func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () throws -> Void)
--> Consequences<NoValue> { // swiftformat:disable:this indent
+private struct StreamRedirector { // swiftlint:disable:this one_declaration_per_file
+	private let originalFD: Int32
+	private let duplicateFD: Int32
+	private let encoding: String.Encoding
+	private let pipe = Pipe()
+
+	init(from fileDescriptor: Int32, encoding: String.Encoding) {
+		originalFD = fileDescriptor
+		duplicateFD = dup(originalFD)
+		dup2(pipe.fileHandleForWriting.fileDescriptor, originalFD)
+		self.encoding = encoding
+	}
+
+	func stop() -> String {
+		switch originalFD {
+		case FileHandle.standardOutput.fileDescriptor:
+			unsafe fflush(unsafe stdout)
+		case FileHandle.standardError.fileDescriptor:
+			unsafe fflush(unsafe stderr)
+		default:
+			fflush(nil)
+		}
+		dup2(duplicateFD, originalFD)
+		try? pipe.fileHandleForWriting.close()
+		close(duplicateFD) // swiftlint:disable:next force_try
+		return try! pipe.fileHandleForReading.readToEnd().flatMap { .init(data: $0, encoding: encoding) } ?? ""
+	}
+}
+
+func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () throws -> Void) -> Consequences<Void> {
 	let capture = StandardStreamCapture(encoding: encoding)
 	do {
-		return capture.consequences(value: try body())
+		try body()
+		return capture.consequences()
 	} catch {
 		return capture.consequences(error: error)
 	}
 }
 
 func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () async throws -> Void)
-async -> Consequences<NoValue> { // swiftformat:disable:this indent
+async -> Consequences<Void> { // swiftformat:disable:this indent
 	let capture = StandardStreamCapture(encoding: encoding)
 	do {
-		return capture.consequences(value: try await body())
+		try await body()
+		return capture.consequences()
 	} catch {
 		return capture.consequences(error: error)
 	}
