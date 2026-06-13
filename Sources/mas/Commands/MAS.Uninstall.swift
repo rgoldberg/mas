@@ -28,8 +28,8 @@ extension MAS {
 			if isUninstallingAll != installedAppsOptionGroup.appIDs.isEmpty {
 				throw .init(
 					isUninstallingAll
-					? "Cannot specify both --all & app IDs" // swiftformat:disable:this indent
-					: "Must specify either --all or at least one app ID",
+						? "Cannot specify both --all & app IDs"
+						: "Must specify either --all or at least one app ID",
 				)
 			}
 		}

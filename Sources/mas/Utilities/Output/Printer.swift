@@ -110,7 +110,7 @@ struct Printer {
 				let errorDescription = String(describing: error)
 				return "\(errorDescription.isEmpty ? "" : items.isEmpty ? " " : "\n")\(errorDescription)\(terminator)"
 			}
-			?? terminator, // swiftformat:disable:this indent
+				?? terminator,
 			to: .standardError,
 		)
 	}
@@ -144,9 +144,9 @@ struct Printer {
 		print(
 			items.first.map { item in
 				["\(formattedPrefix) \(mas.indent(item, with: indent))"]
-				+ items.dropFirst().map { mas.indent($0, with: indent) } // swiftformat:disable:this indent
+					+ items.dropFirst().map { mas.indent($0, with: indent) }
 			}
-			?? [formattedPrefix], // swiftformat:disable:this indent
+				?? [formattedPrefix],
 			separator: mas.indent(separator, with: indent),
 			terminator: terminator,
 			to: fileHandle,

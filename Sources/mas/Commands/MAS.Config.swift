@@ -72,7 +72,7 @@ private var supportedSliceArchitectures: [String] {
 			}
 		}
 	}
-	?? .init() // swiftformat:disable:this indent
+		?? .init()
 }
 
 private var macOSVersion: String {

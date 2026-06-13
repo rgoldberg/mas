@@ -18,7 +18,7 @@ struct MASBuildToolPlugin: BuildToolPlugin {
 				arguments: [
 					{ url in
 						unsafe url.withUnsafeFileSystemRepresentation { unsafe $0.flatMap(unsafe String.init(validatingCString:)) }
-						?? url.path(percentEncoded: false) // swiftformat:disable:this indent
+							?? url.path(percentEncoded: false)
 					}(context.pluginWorkDirectoryURL),
 				],
 				environment: ProcessInfo.processInfo.environment,

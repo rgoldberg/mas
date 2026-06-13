@@ -30,10 +30,10 @@ struct Consequences<Value> {
 extension Consequences: Equatable where Value: Equatable { // swiftlint:disable:this file_types_order
 	static func == (lhs: Self, rhs: Self) -> Bool {
 		lhs.value == rhs.value
-		&& lhs.stdout == rhs.stdout // swiftformat:disable indent
-		&& lhs.stderr == rhs.stderr
-		&& lhs.error as NSError? == rhs.error as NSError?
-	} // swiftformat:enable indent
+			&& lhs.stdout == rhs.stdout
+			&& lhs.stderr == rhs.stderr
+			&& lhs.error as NSError? == rhs.error as NSError?
+	}
 }
 
 private struct StandardStreamCapture { // swiftlint:disable:this one_declaration_per_file

@@ -27,10 +27,10 @@ extension MAS {
 
 		private func run(installedApps: [InstalledApp]) async throws {
 			try await run(
-				outdatedApps: forceOptionGroup.force // swiftformat:disable:next indent
-				? installedApps.filter(for: outdatedAppsOptionGroup.installedAppsOptionGroup.appIDs)
-					.map { OutdatedApp(installedApp: $0, newVersion: "") } // swiftformat:disable:this indent
-				: await outdatedAppsOptionGroup.outdatedApps(from: installedApps),
+				outdatedApps: forceOptionGroup.force
+					? installedApps.filter(for: outdatedAppsOptionGroup.installedAppsOptionGroup.appIDs)
+						.map { OutdatedApp(installedApp: $0, newVersion: "") }
+					: await outdatedAppsOptionGroup.outdatedApps(from: installedApps),
 			)
 		}
 

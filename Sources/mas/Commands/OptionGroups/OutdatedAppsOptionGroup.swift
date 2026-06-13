@@ -27,18 +27,18 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 		func installableCatalogApp(from installedApp: InstalledApp) async -> CatalogApp? {
 			do {
 				let catalogApp = try await Environment.current.lookupAppFromAppID(.bundleID(installedApp.bundleID))
-				return shouldCheckMinimumOSVersion // swiftformat:disable indent
-				&& UniversalSemVerInt(rawValue: catalogApp.minimumOSVersion).map { minimumOSVersion in
-					ProcessInfo.processInfo.isOperatingSystemAtLeast(
-						.init(
-							majorVersion: minimumOSVersion.majorInteger,
-							minorVersion: minimumOSVersion.minorInteger,
-							patchVersion: minimumOSVersion.patchInteger,
-						),
-					)
-				}
-				== false ? nil : catalogApp
-			} catch { // swiftformat:enable indent
+				return shouldCheckMinimumOSVersion
+					&& UniversalSemVerInt(rawValue: catalogApp.minimumOSVersion).map { minimumOSVersion in
+						ProcessInfo.processInfo.isOperatingSystemAtLeast(
+							.init(
+								majorVersion: minimumOSVersion.majorInteger,
+								minorVersion: minimumOSVersion.minorInteger,
+								patchVersion: minimumOSVersion.patchInteger,
+							),
+						)
+					}
+					== false ? nil : catalogApp
+			} catch {
 				if case MASError.unknownAppID = error {
 					if shouldWarnIfUnknownApp {
 						MAS.printer.warning(error, "; was expected to identify: ", installedApp.name, separator: "")
@@ -52,36 +52,37 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 
 		return await installedApps.filter(for: installedAppsOptionGroup.appIDs).concurrentCompactMap(
 			accuracy == .accurate
-			? { @Sendable installedApp in // swiftformat:disable indent
-				if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
-					nil
-				} else {
-					await AsyncStream { continuation in
-						let task = Task {
-							do {
-								try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
-									if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
-										continuation.yield(.init(installedApp: installedApp, newVersion: appStoreVersion))
-										continuation.finish()
+				? { @Sendable installedApp in
+					if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
+						nil
+					} else {
+						await AsyncStream { continuation in
+							let task = Task {
+								do {
+									try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
+										if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
+											continuation.yield(.init(installedApp: installedApp, newVersion: appStoreVersion))
+											continuation.finish()
+										}
+										return true
 									}
-									return true
+								} catch {
+									MAS.printer.error(error: error)
 								}
-							} catch {
-								MAS.printer.error(error: error)
+								continuation.finish()
 							}
-							continuation.finish()
+							continuation.onTermination = { _ in task.cancel() }
 						}
-						continuation.onTermination = { _ in task.cancel() }
+						.first { _ in true }
 					}
-					.first { _ in true }
 				}
-			}
-			: { @Sendable installedApp in
-				await installableCatalogApp(from: installedApp).flatMap { catalogApp in
-					UniversalSemVer(rawValue: installedApp.version).compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
-					== .orderedAscending ? .init(installedApp: installedApp, newVersion: catalogApp.version) : nil
-				}
-			},
-		) // swiftformat:enable indent
+				: { @Sendable installedApp in
+					await installableCatalogApp(from: installedApp).flatMap { catalogApp in
+						UniversalSemVer(rawValue: installedApp.version)
+							.compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
+							== .orderedAscending ? .init(installedApp: installedApp, newVersion: catalogApp.version) : nil
+					}
+				},
+		)
 	}
 }

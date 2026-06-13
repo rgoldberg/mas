@@ -58,8 +58,8 @@ extension String {
 					)
 
 					matrix[i][j] = i > 1 && j > 1 && this[i - 1] == that[j - 2] && this[i - 2] == that[j - 1] // Transposition
-					? Swift.min(cost, matrix[i - 2][j - 2] + 0.4) // swiftformat:disable:this indent
-					: cost
+						? Swift.min(cost, matrix[i - 2][j - 2] + 0.4)
+						: cost
 				}
 			}
 		}

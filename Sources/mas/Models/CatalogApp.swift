@@ -222,7 +222,7 @@ private extension JSON.Key {
 					.replacing(trackRegex) { match in // swiftformat:disable indent
 						func track(_ prefix: String) -> String {
 							output.3.first.map { $0.isUppercase ? $0.lowercased() : "\(prefix)\(output.2)\($0)" }
-							?? "\(prefix)\(output.2)"
+								?? "\(prefix)\(output.2)"
 						}
 
 						let output = match.output
@@ -336,8 +336,8 @@ private func search(for searchTerm: String, inRegion region: Region = appStoreRe
 		)
 			.concurrentCompactMap { catalogAppJSONObject in // swiftformat:disable indent
 				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
-				? try await .init(macDesktopAppObject: catalogAppJSONObject)
-				: nil
+					? try await .init(macDesktopAppObject: catalogAppJSONObject)
+					: nil
 			},
 	) { $0.name.similarity(to: searchTerm) } // swiftformat:enable indent
 }
@@ -352,8 +352,8 @@ private func catalogAppJSONObjects(
 		.dataFrom(
 			url.appending(
 				queryItems: [.init(name: "media", value: "software")]
-				+ additionalQueryItems // swiftformat:disable:this indent
-				+ [.init(name: "country", value: region), queryItem], // swiftformat:disable:this indent
+					+ additionalQueryItems
+					+ [.init(name: "country", value: region), queryItem],
 			),
 		)
 		.0

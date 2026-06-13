@@ -34,16 +34,16 @@ struct InstalledApp {
 	fileprivate init(for item: NSMetadataItem, withFullJSON: Bool) {
 		let valueByAttribute = item.values(
 			forAttributes: withFullJSON
-			? item.attributes + [NSMetadataItemPathKey] // swiftformat:disable:this indent
-			: [
-				"kMDItemAppStoreAdamID",
-				NSMetadataItemCFBundleIdentifierKey,
-				"_kMDItemDisplayNameWithExtensions",
-				NSMetadataItemPathKey,
-				NSMetadataItemVersionKey,
-			],
+				? item.attributes + [NSMetadataItemPathKey]
+				: [
+					"kMDItemAppStoreAdamID",
+					NSMetadataItemCFBundleIdentifierKey,
+					"_kMDItemDisplayNameWithExtensions",
+					NSMetadataItemPathKey,
+					NSMetadataItemVersionKey,
+				],
 		)
-		?? .init() // swiftformat:disable:this indent
+			?? .init()
 		adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID ?? 0
 		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
 		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
@@ -51,7 +51,7 @@ struct InstalledApp {
 			let path = String(describing: pathAny)
 			return (try? URL(folderPath: path).resourceValues(forKeys: [.canonicalPathKey]))?.canonicalPath ?? path
 		}
-		?? "" // swiftformat:disable:this indent
+			?? ""
 		version = .init(describing: valueByAttribute[NSMetadataItemVersionKey] ?? "")
 
 		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
@@ -86,14 +86,14 @@ extension InstalledApp: CustomStringConvertible {
 extension [InstalledApp] {
 	func filter(for appIDs: [AppID]) -> [Element] {
 		appIDs.isEmpty
-		? self // swiftformat:disable:this indent
-		: appIDs.flatMap { appID in
-			let installedApps = filter { $0.matches(appID) }
-			if installedApps.isEmpty {
-				MAS.printer.error(appID.notInstalledMessage)
+			? self
+			: appIDs.flatMap { appID in
+				let installedApps = filter { $0.matches(appID) }
+				if installedApps.isEmpty {
+					MAS.printer.error(appID.notInstalledMessage)
+				}
+				return installedApps
 			}
-			return installedApps
-		}
 	}
 }
 
@@ -104,26 +104,26 @@ private extension JSON.Node {
 			jsonNode
 		case let number as NSNumber: // swiftlint:disable:this legacy_objc_type
 			number === kCFBooleanTrue || number === kCFBooleanFalse
-			? .bool(number.boolValue) // swiftformat:disable:this indent
-			: .init(.init(describing: number)) ?? .null
+				? .bool(number.boolValue)
+				: .init(.init(describing: number)) ?? .null
 		case let date as Date:
 			.string(date.formatted(.iso8601))
 		case let data as Data:
 			data.isEmpty // swiftlint:disable:next void_function_in_ternary
-			? .string("") // swiftformat:disable:this indent
-			: {
-				var hex = "0x"
-				hex.reserveCapacity(2 + data.count * 2)
-				return .string(
-					data.reduce(into: hex) { hex, byte in
-						let byteHex = String(byte, radix: 16)
-						if byteHex.count < 2 {
-							hex += "0"
-						}
-						hex += byteHex
-					},
-				)
-			}()
+				? .string("")
+				: {
+					var hex = "0x"
+					hex.reserveCapacity(2 + data.count * 2)
+					return .string(
+						data.reduce(into: hex) { hex, byte in
+							let byteHex = String(byte, radix: 16)
+							if byteHex.count < 2 {
+								hex += "0"
+							}
+							hex += byteHex
+						},
+					)
+				}()
 		case let array as [Any?]:
 			.array(.init(array.map { .init(for: $0) }))
 		default:

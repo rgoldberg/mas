@@ -228,7 +228,7 @@ enum AppStoreAction: String {
 
 					MAS.printer.notice(
 						[performed.uppercasingFirst, snapshot.appNameAndVersion]
-						+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()), // swiftformat:disable:this indent
+							+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()),
 					)
 
 					if let appFolderURL {

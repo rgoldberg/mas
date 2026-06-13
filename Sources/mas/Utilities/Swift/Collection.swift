@@ -95,7 +95,7 @@ extension Collection where Element: Sendable {
 				results[indexedResult.index] = indexedResult.result
 				addNextTask()
 			}
-				.compactMap(\.self) // swiftformat:disable:this indent
+			.compactMap(\.self)
 		}
 	}
 }

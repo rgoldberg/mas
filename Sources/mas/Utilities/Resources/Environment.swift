@@ -21,7 +21,7 @@ struct Environment {
 
 	init(
 		dataFrom: @escaping @Sendable (URL) async throws -> (Data, URLResponse)
-		= URLSession(configuration: .ephemeral).data(from:), // swiftformat:disable:this indent
+			= URLSession(configuration: .ephemeral).data(from:),
 		lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp = lookup(appID:),
 		searchForAppsMatchingSearchTerm: @escaping @Sendable (String) async throws -> [CatalogApp] = search(for:),
 	) {
