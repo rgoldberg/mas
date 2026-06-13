@@ -5,7 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import os
+private import Synchronization
 
 final class AsyncLazy<Value: Sendable>: Sendable { // periphery:ignore
 	private enum State { // swiftlint:disable:previous unused_declaration
@@ -19,16 +19,16 @@ final class AsyncLazy<Value: Sendable>: Sendable { // periphery:ignore
 		case `return`(Value)
 	}
 
-	private let stateGate: OSAllocatedUnfairLock<State>
+	private let stateMutex: Mutex<State>
 
 	var value: Value { // swiftlint:disable:this unused_declaration
 		get async {
-			let action = stateGate.withLock { state in
+			let action = stateMutex.withLock { state in
 				switch state {
 				case let .uninitialized(initialize):
 					let task = Task { [weak self] in
 						let value = await initialize()
-						self?.stateGate.withLock { $0 = .initialized(value) }
+						self?.stateMutex.withLock { $0 = .initialized(value) }
 						return value
 					}
 					state = .initializing(task)
@@ -50,7 +50,7 @@ final class AsyncLazy<Value: Sendable>: Sendable { // periphery:ignore
 	}
 
 	init(_ initialize: @escaping @Sendable () async -> Value) {
-		stateGate = .init(initialState: .uninitialized(initialize))
+		stateMutex = .init(.uninitialized(initialize))
 	}
 
 	// swiftlint:disable:next async_without_await

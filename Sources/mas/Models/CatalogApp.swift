@@ -370,14 +370,17 @@ async throws -> [CatalogApp] { // swiftformat:disable:this indent
 }
 
 private func catalogAppJSONObjects(from url: URL, in region: Region) async throws -> [JSON.Object] {
-	try await unsafe Environment.current
-		.dataFrom(
-			url.appending(queryItems: [.init(name: "media", value: "software"), .init(name: "country", value: region)]),
-		)
-		.data
-		.withUnsafeBytes { bufferPointer in
-			try CatalogAppResults(json: try .init(parsing: unsafe RawSpan(_unsafeBytes: unsafe bufferPointer))).resultObjects
-		}
+	try CatalogAppResults(
+		json: try .init(
+			parsing: try await Environment.current
+				.dataFrom(
+					url.appending(queryItems: [.init(name: "media", value: "software"), .init(name: "country", value: region)]),
+				)
+				.data
+				.bytes,
+		),
+	)
+	.resultObjects
 }
 
 private let minimumOSVersionKey = JSON.Key("minimumOsVersion")

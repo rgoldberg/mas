@@ -7,16 +7,39 @@
 
 internal import AsyncAlgorithms
 private import Foundation
-private import os
+private import Synchronization
 
 /// A concurrent map sequence that preserves input order & respects downstream
 /// backpressure.
 struct OrderedConcurrentMapSequence<Base: Sequence & Sendable, Element: Sendable>: AsyncSequence
 where Base.Element: Sendable { // swiftformat:disable:this indent
+	private final class TaskManager: Sendable {
+		private let taskByIndexMutex = Mutex([Int: Task<Result<Element, any Error>, Never>]())
+
+		deinit {
+			// Empty
+		}
+
+		func insert(_ task: Task<Result<Element, any Error>, Never>, at index: Int) {
+			taskByIndexMutex.withLock { $0[index] = task }
+		}
+
+		func remove(at index: Int) {
+			taskByIndexMutex.withLock { _ = $0.removeValue(forKey: index) }
+		}
+
+		func cancelTasks(higherThan cancellationIndex: Int) {
+			taskByIndexMutex.withLock { taskByIndex in
+				for (index, task) in taskByIndex where index > cancellationIndex {
+					task.cancel()
+				}
+			}
+		}
+	}
+
 	private let base: Base
 	private let maxConcurrentTaskCount: Int
 	private let transform: @Sendable (Base.Element) async throws -> Element
-	private let taskByIndexGate = OSAllocatedUnfairLock(initialState: [Int: Task<Result<Element, any Error>, Never>]())
 
 	init(
 		base: Base,
@@ -31,6 +54,7 @@ where Base.Element: Sendable { // swiftformat:disable:this indent
 	func makeAsyncIterator() -> AsyncThrowingChannel<Element, any Error>.Iterator {
 		let channel = AsyncThrowingChannel<Element, any Error>()
 		Task {
+			let taskManager = TaskManager()
 			await withTaskGroup(of: (Int, Result<Element, any Error>).self) { taskGroup in
 				var iterator = base.makeIterator()
 				var inputIndex = 0
@@ -53,11 +77,11 @@ where Base.Element: Sendable { // swiftformat:disable:this indent
 								return .failure(error)
 							}
 						}
-						taskByIndexGate.withLock { [inputIndex] in $0[inputIndex] = task }
+						taskManager.insert(task, at: inputIndex)
 						taskGroup.addTask { [inputIndex] in
 							await withTaskCancellationHandler {
 								let result = await task.value
-								taskByIndexGate.withLock { _ = $0.removeValue(forKey: inputIndex) }
+								taskManager.remove(at: inputIndex)
 								return (inputIndex, result)
 							} onCancel: {
 								task.cancel()
@@ -76,11 +100,7 @@ where Base.Element: Sendable { // swiftformat:disable:this indent
 						activeTaskCount -= 1
 						if case .failure = result, earliestFailureIndex.map({ index < $0 }) != false {
 							earliestFailureIndex = index
-							taskByIndexGate.withLock { taskByIndex in
-								for (currentIndex, task) in taskByIndex where currentIndex > index {
-									task.cancel()
-								}
-							}
+							taskManager.cancelTasks(higherThan: index)
 						}
 						guard index == nextYieldIndex else {
 							resultByIndex[index] = result

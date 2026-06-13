@@ -5,15 +5,6 @@
 builtin unalias -as
 setopt pipefail
 
-jq() {
-	local p
-	for p in /usr/bin/jq ${commands[jq]:-} /usr/local/bin/jq /opt/homebrew/bin/jq; do
-		[[ -x "${p}" ]] && exec "${p}" "${@}"
-	done
-	printf $'%s jq command not found\n' "${error_prefix}" >&2
-	exit 1
-}
-
 readonly mas="${0:A:h}/../libexec/bin/mas"
 
 [[ -t 2 ]] && readonly error_prefix=$'\u001B[4;31mError:\u001B[0m' || readonly error_prefix=Error:
@@ -31,7 +22,7 @@ list|outdated)
 	# shellcheck disable=SC1056
 	{
 		# shellcheck disable=SC1083
-		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | jq -sr '
+		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | /usr/bin/jq -sr '
 def pad_spaces($count):
 	" " * ($count - (. | length))
 ;
@@ -52,7 +43,7 @@ try (
 	;;
 lookup|info)
 	{
-		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | jq -sr '
+		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | /usr/bin/jq -sr '
 def number_commas($n):
 	($n | abs | round | tostring) as $s |
 	if $n < 0 then "-" else "" end + ([$s | while(length > 0; .[:-3]) | .[-3:]] | reverse | join(","))
@@ -95,7 +86,7 @@ try (
 	;;
 config)
 	{
-		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | jq -r '
+		{ exec "${mas}" "${@}" 3>&1 1>&4 2>&5 } | /usr/bin/jq -r '
 try (
 	(keys_unsorted | map(length) | max) as $max_key_length |
 	to_entries[] |

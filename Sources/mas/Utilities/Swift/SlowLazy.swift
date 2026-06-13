@@ -6,7 +6,7 @@
 //
 
 private import Dispatch
-private import os
+private import Synchronization
 
 final class SlowLazy<Value: Sendable>: Sendable { // periphery:ignore
 	private enum State { // swiftlint:disable:previous unused_declaration
@@ -16,15 +16,15 @@ final class SlowLazy<Value: Sendable>: Sendable { // periphery:ignore
 	}
 
 	private enum Action {
-		case initialize(@Sendable () -> Value, DispatchGroup)
+		case initialize(() -> Value, DispatchGroup)
 		case `await`(DispatchGroup)
 		case `return`(Value)
 	}
 
-	private let stateGate: OSAllocatedUnfairLock<State>
+	private let stateMutex: Mutex<State>
 
 	var value: Value { // swiftlint:disable:this unused_declaration
-		let action = stateGate.withLock { state in
+		let action = stateMutex.withLock { state in
 			switch state {
 			case let .uninitialized(initialize):
 				let dispatchGroup = DispatchGroup()
@@ -41,12 +41,12 @@ final class SlowLazy<Value: Sendable>: Sendable { // periphery:ignore
 		switch action {
 		case let .initialize(initialize, dispatchGroup):
 			let value = initialize()
-			stateGate.withLock { $0 = .initialized(value) }
+			stateMutex.withLock { $0 = .initialized(value) }
 			dispatchGroup.leave()
 			return value
 		case let .await(dispatchGroup):
 			dispatchGroup.wait()
-			return stateGate.withLock { state in
+			return stateMutex.withLock { state in
 				guard case let .initialized(value) = state else {
 					fatalError("SlowLazy value missing")
 				}
@@ -59,7 +59,7 @@ final class SlowLazy<Value: Sendable>: Sendable { // periphery:ignore
 	}
 
 	init(_ initialize: @escaping @Sendable () -> Value) {
-		stateGate = .init(initialState: .uninitialized(initialize))
+		stateMutex = .init(.uninitialized(initialize))
 	}
 
 	convenience init(_ initialize: @autoclosure @escaping @Sendable () -> Value) {
