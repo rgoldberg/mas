@@ -76,7 +76,7 @@ enum AppStoreAction: String {
 	}
 
 	@MainActor
-	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) async throws {
+	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping (String?, Bool) -> Bool) async throws {
 		let purchase = SSPurchase(
 			buyParameters: """
 				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
@@ -94,328 +94,211 @@ enum AppStoreAction: String {
 		downloadMetadata.itemIdentifier = adamID
 		purchase.downloadMetadata = downloadMetadata
 
-		let queue = CKDownloadQueue.shared()
-		let observer = DownloadQueueObserver(for: self, of: adamID, shouldCancel: shouldCancel)
-		let observerUUID = queue.add(observer)
-		defer { queue.removeObserver(observerUUID) }
+		let (eventStream, eventContinuation) = AsyncStream.makeStream(of: QueueEvent.self)
+		let observer = DownloadQueueObserver(
+			action: self,
+			adamID: adamID,
+			shouldCancel: shouldCancel,
+			continuation: eventContinuation,
+		)
+		let observerUUID = CKDownloadQueue.shared().add(observer)
+		eventContinuation.onTermination = { _ in CKDownloadQueue.shared().removeObserver(observerUUID) }
+		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
+		var prevPhaseType = PhaseType.processing
+		var pkgHardLinkURL = URL?.none
+		var receiptHardLinkURL = URL?.none
 
-		try await withCheckedThrowingContinuation { continuation in
-			observer.set(continuation: continuation)
+		defer {
+			CKDownloadQueue.shared().removeObserver(observerUUID)
+			eventContinuation.finish()
+			deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg")
+			deleteTempFolder(containing: receiptHardLinkURL, fileType: "receipt")
+		}
 
+		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
 			CKPurchaseController.shared().perform(purchase, withOptions: 0) { _, _, error, response in
 				if let error {
-					Task { await observer.resumeOnce { $0.resume(throwing: error) } }
+					continuation.resume(throwing: error)
 				} else if response?.downloads?.isEmpty != false {
-					Task {
-						await observer.resumeOnce { continuation in
-							continuation.resume(throwing: MASError.error("No downloads initiated for ADAM ID \(adamID)"))
-						}
-					}
+					continuation.resume(throwing: MASError.error("No downloads initiated for ADAM ID \(adamID)"))
+				} else {
+					continuation.resume()
 				}
 			}
 		}
-	}
-}
 
-typealias AppStore = AppStoreAction
+		for await event in eventStream {
+			try Task.checkCancellation()
+			switch event {
+			case let .statusChanged(snapshot):
+				// Refresh hard links to latest artifacts in the download directory
+				do {
+					let downloadFolderChildURLs = try FileManager.default.contentsOfDirectory(
+						at: downloadFolderURL,
+						includingPropertiesForKeys: [.contentModificationDateKey, .isRegularFileKey],
+					)
+					do {
+						pkgHardLinkURL = try hardLinkURL(
+							to: try downloadFolderChildURLs.compactMap { url in
+								guard url.pathExtension == "pkg" else {
+									return (url: URL, date: Date)?.none
+								}
 
-private actor DownloadQueueObserver: CKDownloadQueueObserver { // swiftlint:disable:this one_declaration_per_file
-	private enum Event {
-		case statusChanged(DownloadSnapshot)
-		case removed(DownloadSnapshot)
-	}
+								let resourceValues = try url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey])
+								return
+									resourceValues.isRegularFile == true ? resourceValues.contentModificationDate.map { (url, $0) } : nil
+							}
+							.max { $0.date < $1.date }?
+							.url,
+							existing: pkgHardLinkURL,
+							adamID: adamID,
+						)
+					} catch {
+						MAS.printer.warning("Failed to link pkg for", snapshot.appNameAndVersion, error: error)
+					}
+					do {
+						receiptHardLinkURL = try hardLinkURL(
+							to: downloadFolderChildURLs.first { $0.lastPathComponent == "receipt" },
+							existing: receiptHardLinkURL,
+							adamID: adamID,
+						)
+					} catch {
+						MAS.printer.warning("Failed to link receipt for", snapshot.appNameAndVersion, error: error)
+					}
+				} catch {
+					MAS.printer.warning(
+						"Failed to read contents of download folder",
+						downloadFolderURL.filePath.quoted,
+						"for",
+						snapshot.appNameAndVersion,
+						error: error,
+					)
+				}
+				switch snapshot.activePhaseType {
+				case prevPhaseType:
+					break
+				case
+					.downloading where prevPhaseType == .processing,
+					.downloaded where prevPhaseType == .downloading,
+					.performing
+				: // swiftformat:disable:this indent
+					MAS.printer.clearCurrentLine(of: .standardOutput)
+					MAS.printer.notice(snapshot.activePhaseType, snapshot.appNameAndVersion)
+				default:
+					break
+				}
+				if
+					FileHandle.standardOutput.isTerminal,
+					snapshot.phasePercentComplete != 0 || snapshot.activePhaseType != .processing
+				{
+					// Output the progress bar iff connected to a terminal
+					let totalLength = 60
+					let completedLength = Int(snapshot.phasePercentComplete * .init(totalLength))
+					MAS.printer.clearCurrentLine(of: .standardOutput)
+					MAS.printer.info(
+						String(repeating: "#", count: completedLength),
+						String(repeating: "-", count: totalLength - completedLength),
+						" ",
+						UInt64((snapshot.phasePercentComplete * 100).rounded()),
+						"% ",
+						snapshot.activePhaseType.performed,
+						separator: "",
+						terminator: "",
+					)
+				}
+				prevPhaseType = snapshot.activePhaseType
+			case let .removed(snapshot):
+				MAS.printer.clearCurrentLine(of: .standardOutput)
+				do {
+					let appFolderURL: URL?
+					if let error = snapshot.error {
+						guard error is Ignorable else {
+							throw error
+						}
 
-	private let action: AppStoreAction
-	private let adamID: ADAMID
-	private let shouldCancel: @Sendable (String?, Bool) -> Bool
-	private let downloadFolderURL: URL
-	private let eventStreamContinuation: AsyncStream<Event>.Continuation
+						MAS.printer.notice(PhaseType.downloaded, snapshot.appNameAndVersion)
+						MAS.printer.notice(performing.uppercasingFirst, snapshot.appNameAndVersion)
+						MAS.printer.info(rawValue.uppercasingFirst, "progress cannot be displayed", terminator: "")
+						appFolderURL = try await install(
+							appNameAndVersion: snapshot.appNameAndVersion,
+							pkgHardLinkURL: pkgHardLinkURL,
+							receiptHardLinkURL: receiptHardLinkURL,
+						)
+						MAS.printer.clearCurrentLine(of: .standardOutput)
+					} else {
+						guard !snapshot.isFailed else {
+							throw MASError.error("Failed to download \(snapshot.appNameAndVersion)")
+						}
+						guard !shouldCancel(snapshot.version, false) else {
+							return
+						}
+						guard !snapshot.isCancelled else {
+							throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
+						}
 
-	private nonisolated(unsafe) var task = Task<Void, Never>?.none
-	private nonisolated(unsafe) var continuation = CheckedContinuation<Void, any Error>?.none
+						appFolderURL = snapshot.appFolderPath.map { .init(folderPath: $0) }
+					}
 
-	private var prevPhaseType = PhaseType.processing
-	private var pkgHardLinkURL = URL?.none
-	private var receiptHardLinkURL = URL?.none
-	private var alreadyResumed = false
+					MAS.printer.notice(
+						[performed.uppercasingFirst, snapshot.appNameAndVersion]
+						+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()), // swiftformat:disable:this indent
+					)
 
-	init(for action: AppStoreAction, of adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) {
-		self.action = action
-		self.adamID = adamID
-		self.shouldCancel = shouldCancel
-		downloadFolderURL = .init(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
-
-		let (eventStream, eventStreamContinuation) = AsyncStream.makeStream(of: Event.self)
-		self.eventStreamContinuation = eventStreamContinuation
-
-		unsafe task = Task { [weak self] in
-			for await event in eventStream {
-				guard let self else {
+					if let appFolderURL {
+						let fileManager = FileManager.default
+						if
+							try applicationsFolderURLs.contains(
+								where: { applicationsFolderURL in
+									var relationship = FileManager.URLRelationship.other
+									try unsafe fileManager.getRelationship(
+										&relationship,
+										ofDirectoryAt: applicationsFolderURL,
+										toItemAt: appFolderURL,
+									)
+									return relationship == .contains
+								},
+							)
+						{
+							let appFolderPath = appFolderURL.filePath
+							let installedApps =
+								try await installedApps(withADAMID: snapshot.adamID).filter { $0.path != appFolderPath }
+							if !installedApps.isEmpty {
+								MAS.printer.warning(
+									"Multiple installations of ",
+									snapshot.name ?? "unknown app",
+									" exist in the applications folders\n\n",
+									performed.uppercasingFirst,
+									":\n",
+									appFolderPath,
+									"\n\nOthers:\n",
+									installedApps.map(\.path).sorted(using: .localizedStandard).joined(separator: "\n"),
+									separator: "",
+								)
+							}
+						} else {
+							MAS.printer.warning(
+								performed.uppercasingFirst,
+								snapshot.appNameAndVersion,
+								"outside of the applications folders, in",
+								appFolderURL.filePath,
+							)
+						}
+					}
 					return
-				}
-
-				switch event {
-				case let .statusChanged(snapshot):
-					await statusChanged(for: snapshot)
-				case let .removed(snapshot):
-					await removed(snapshot)
-				}
-			}
-		}
-	}
-
-	deinit {
-		eventStreamContinuation.finish()
-		unsafe task?.cancel()
-		resumeOnce(
-			alreadyResumed: alreadyResumed,
-			pkgHardLinkURL: pkgHardLinkURL,
-			receiptHardLinkURL: receiptHardLinkURL,
-		) { continuation in
-			continuation
-				.resume(throwing: MASError.error("Observer deallocated before download completed for ADAM ID \(adamID)"))
-		}
-	}
-
-	nonisolated func set(continuation: CheckedContinuation<Void, any Error>) {
-		unsafe self.continuation = continuation
-	}
-
-	nonisolated func downloadQueue(_: CKDownloadQueue, changedWithAddition _: SSDownload) {
-		// Empty
-	}
-
-	nonisolated func downloadQueue(_ queue: CKDownloadQueue, statusChangedFor download: SSDownload) {
-		guard
-			let snapshot = DownloadSnapshot(to: action, download),
-			snapshot.adamID == adamID,
-			!snapshot.isCancelled,
-			!snapshot.isFailed
-		else {
-			return
-		}
-		guard !shouldCancel(snapshot.version, true) else {
-			queue.cancelDownload(download, promptToConfirm: false, askToDelete: false)
-			return
-		}
-
-		eventStreamContinuation.yield(.statusChanged(snapshot))
-	}
-
-	nonisolated func downloadQueue(_: CKDownloadQueue, changedWithRemoval download: SSDownload) {
-		guard let snapshot = DownloadSnapshot(to: action, download), snapshot.adamID == adamID else {
-			return
-		}
-
-		eventStreamContinuation.yield(.removed(snapshot))
-	}
-
-	func resumeOnce(performing action: (CheckedContinuation<Void, any Error>) -> Void) {
-		resumeOnce(
-			alreadyResumed: alreadyResumed,
-			pkgHardLinkURL: pkgHardLinkURL,
-			receiptHardLinkURL: receiptHardLinkURL,
-			performing: action,
-		)
-		alreadyResumed = true
-	}
-
-	private nonisolated func resumeOnce(
-		alreadyResumed: Bool,
-		pkgHardLinkURL: URL?,
-		receiptHardLinkURL: URL?,
-		performing action: (CheckedContinuation<Void, any Error>) -> Void,
-	) {
-		guard !alreadyResumed else {
-			return
-		}
-		guard let continuation = unsafe continuation else {
-			MAS.printer.error("Failed to get download continuation for ADAM ID \(adamID)")
-			return
-		}
-
-		action(continuation)
-		deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg")
-		deleteTempFolder(containing: receiptHardLinkURL, fileType: "receipt")
-	}
-
-	private func statusChanged(for snapshot: DownloadSnapshot) {
-		// Refresh hard links to latest artifacts in the download directory
-		do {
-			let downloadFolderChildURLs = try FileManager.default.contentsOfDirectory(
-				at: downloadFolderURL,
-				includingPropertiesForKeys: [.contentModificationDateKey, .isRegularFileKey],
-			)
-			do {
-				pkgHardLinkURL = try hardLinkURL(
-					to: try downloadFolderChildURLs.compactMap { url in
-						guard url.pathExtension == "pkg" else {
-							return (url: URL, date: Date)?.none
-						}
-
-						let resourceValues = try url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey])
-						return resourceValues.isRegularFile == true ? resourceValues.contentModificationDate.map { (url, $0) } : nil
-					}
-					.max { $0.date < $1.date }?
-					.url,
-					existing: pkgHardLinkURL,
-				)
-			} catch {
-				MAS.printer.warning("Failed to link pkg for", snapshot.appNameAndVersion, error: error)
-			}
-
-			do {
-				receiptHardLinkURL = try hardLinkURL(
-					to: downloadFolderChildURLs.first { $0.lastPathComponent == "receipt" },
-					existing: receiptHardLinkURL,
-				)
-			} catch {
-				MAS.printer.warning("Failed to link receipt for", snapshot.appNameAndVersion, error: error)
-			}
-		} catch {
-			MAS.printer.warning(
-				"Failed to read contents of download folder",
-				downloadFolderURL.filePath.quoted,
-				"for",
-				snapshot.appNameAndVersion,
-				error: error,
-			)
-		}
-
-		switch snapshot.activePhaseType {
-		case prevPhaseType:
-			break
-		case .downloading where prevPhaseType == .processing, .downloaded where prevPhaseType == .downloading, .performing:
-			MAS.printer.clearCurrentLine(of: .standardOutput)
-			MAS.printer.notice(snapshot.activePhaseType, snapshot.appNameAndVersion)
-		default:
-			break
-		}
-
-		if
-			FileHandle.standardOutput.isTerminal,
-			snapshot.phasePercentComplete != 0 || snapshot.activePhaseType != .processing
-		{
-			// Output the progress bar iff connected to a terminal
-			let totalLength = 60
-			let completedLength = Int(snapshot.phasePercentComplete * .init(totalLength))
-			MAS.printer.clearCurrentLine(of: .standardOutput)
-			MAS.printer.info(
-				String(repeating: "#", count: completedLength),
-				String(repeating: "-", count: totalLength - completedLength),
-				" ",
-				UInt64((snapshot.phasePercentComplete * 100).rounded()),
-				"% ",
-				snapshot.activePhaseType.performed,
-				separator: "",
-				terminator: "",
-			)
-		}
-
-		prevPhaseType = snapshot.activePhaseType
-	}
-
-	private func removed(_ snapshot: DownloadSnapshot) async {
-		MAS.printer.clearCurrentLine(of: .standardOutput)
-
-		do {
-			let appFolderURL: URL?
-			if let error = snapshot.error {
-				guard error is Ignorable else {
+				} catch {
 					throw error
 				}
-
-				MAS.printer.notice(PhaseType.downloaded, snapshot.appNameAndVersion)
-				MAS.printer.notice(action.performing.uppercasingFirst, snapshot.appNameAndVersion)
-				MAS.printer.info(action.rawValue.uppercasingFirst, "progress cannot be displayed", terminator: "")
-				appFolderURL = try await install(appNameAndVersion: snapshot.appNameAndVersion)
-				MAS.printer.clearCurrentLine(of: .standardOutput)
-			} else {
-				guard !snapshot.isFailed else {
-					throw MASError.error("Failed to download \(snapshot.appNameAndVersion)")
-				}
-				guard !shouldCancel(snapshot.version, false) else {
-					resumeOnce { $0.resume() }
-					return
-				}
-				guard !snapshot.isCancelled else {
-					throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
-				}
-
-				appFolderURL = snapshot.appFolderPath.map { .init(folderPath: $0) }
 			}
-
-			MAS.printer.notice(
-				[action.performed.uppercasingFirst, snapshot.appNameAndVersion]
-				+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()), // swiftformat:disable:this indent
-			)
-
-			if let appFolderURL {
-				let fileManager = FileManager.default
-				if
-					try applicationsFolderURLs.contains(
-						where: { applicationsFolderURL in
-							var relationship = FileManager.URLRelationship.other
-							try unsafe fileManager.getRelationship(
-								&relationship,
-								ofDirectoryAt: applicationsFolderURL,
-								toItemAt: appFolderURL,
-							)
-							return relationship == .contains
-						},
-					)
-				{
-					let appFolderPath = appFolderURL.filePath
-					let installedApps = try await installedApps(withADAMID: snapshot.adamID).filter { $0.path != appFolderPath }
-					if !installedApps.isEmpty {
-						MAS.printer.warning(
-							"Multiple installations of ",
-							snapshot.name ?? "unknown app",
-							" exist in the applications folders\n\n",
-							action.performed.uppercasingFirst,
-							":\n",
-							appFolderPath,
-							"\n\nOthers:\n",
-							installedApps.map(\.path).sorted(using: .localizedStandard).joined(separator: "\n"),
-							separator: "",
-						)
-					}
-				} else {
-					MAS.printer.warning(
-						action.performed.uppercasingFirst,
-						snapshot.appNameAndVersion,
-						"outside of the applications folders, in",
-						appFolderURL.filePath,
-					)
-				}
-			}
-
-			resumeOnce { $0.resume() }
-		} catch {
-			resumeOnce { $0.resume(throwing: error) }
 		}
 	}
 
-	private func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?) throws -> URL? {
-		guard let url, try !url.linksToSameInode(as: existingHardLinkURL) else {
-			return existingHardLinkURL
-		}
-
-		let fileManager = FileManager.default
-		let hardLinkURL = try fileManager.url(
-			for: .itemReplacementDirectory,
-			in: .userDomainMask,
-			appropriateFor: url,
-			create: true,
-		)
-		.appending(path: "\(adamID)-\(url.lastPathComponent)", directoryHint: .notDirectory)
-		try fileManager.linkItem(at: url, to: hardLinkURL)
-		return hardLinkURL
-	}
-
-	private func install(appNameAndVersion: String) async throws -> URL {
+	private func install(
+		appNameAndVersion: String,
+		pkgHardLinkURL: URL?,
+		receiptHardLinkURL: URL?,
+	) async throws -> URL {
 		guard let pkgHardLinkPath = pkgHardLinkURL?.filePath else {
-			throw MASError.error("Failed to find pkg to \(action) \(appNameAndVersion)")
+			throw MASError.error("Failed to find pkg to \(self) \(appNameAndVersion)")
 		}
 		guard let receiptHardLinkURL else {
 			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
@@ -428,7 +311,7 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver { // swiftlint:disa
 			pkgHardLinkPath,
 			"-target",
 			"/",
-			errorMessage: "Failed to \(action) \(appNameAndVersion) from \(pkgHardLinkPath)",
+			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		) { process in try run(asEffectiveUID: 0, andEffectiveGID: 0) { try process.run() } }
 
 		guard
@@ -481,12 +364,71 @@ private actor DownloadQueueObserver: CKDownloadQueueObserver { // swiftlint:disa
 		_ = try await run(
 			"/usr/bin/mdimport",
 			appFolderURL.filePath,
-			errorMessage: "Failed to \(action) \(appNameAndVersion) from \(pkgHardLinkPath)",
+			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
 
 		LSRegisterURL(appFolderURL as CFURL, true)
 
 		return appFolderURL
+	}
+}
+
+typealias AppStore = AppStoreAction
+
+private enum QueueEvent { // swiftlint:disable:this one_declaration_per_file
+	case statusChanged(DownloadSnapshot) // swiftlint:disable:this sorted_enum_cases
+	case removed(DownloadSnapshot) // swiftlint:disable:this sorted_enum_cases
+}
+
+private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
+	private let action: AppStoreAction // swiftlint:disable:previous one_declaration_per_file
+	private let adamID: ADAMID
+	private let shouldCancel: (String?, Bool) -> Bool
+	private let continuation: AsyncStream<QueueEvent>.Continuation
+
+	init(
+		action: AppStoreAction,
+		adamID: ADAMID,
+		shouldCancel: @escaping (String?, Bool) -> Bool,
+		continuation: AsyncStream<QueueEvent>.Continuation,
+	) {
+		self.action = action
+		self.adamID = adamID
+		self.shouldCancel = shouldCancel
+		self.continuation = continuation
+	}
+
+	deinit {
+		// Empty
+	}
+
+	func downloadQueue(_: CKDownloadQueue, changedWithAddition _: SSDownload) {
+		// Empty
+	}
+
+	func downloadQueue(_ queue: CKDownloadQueue, statusChangedFor download: SSDownload) {
+		guard
+			let snapshot = DownloadSnapshot(to: action, download),
+			snapshot.adamID == adamID,
+			!snapshot.isCancelled,
+			!snapshot.isFailed
+		else {
+			return
+		}
+		guard !shouldCancel(snapshot.version, true) else {
+			queue.cancelDownload(download, promptToConfirm: false, askToDelete: false)
+			return
+		}
+
+		continuation.yield(.statusChanged(snapshot))
+	}
+
+	func downloadQueue(_: CKDownloadQueue, changedWithRemoval download: SSDownload) {
+		guard let snapshot = DownloadSnapshot(to: action, download), snapshot.adamID == adamID else {
+			return
+		}
+
+		continuation.yield(.removed(snapshot))
 	}
 }
 
@@ -592,6 +534,23 @@ private extension URL {
 	}
 }
 
+private func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?, adamID: ADAMID) throws -> URL? {
+	guard let url, try !url.linksToSameInode(as: existingHardLinkURL) else {
+		return existingHardLinkURL
+	}
+
+	let fileManager = FileManager.default
+	let hardLinkURL = try fileManager.url(
+		for: .itemReplacementDirectory,
+		in: .userDomainMask,
+		appropriateFor: url,
+		create: true,
+	)
+	.appending(path: "\(adamID)-\(url.lastPathComponent)", directoryHint: .notDirectory)
+	try fileManager.linkItem(at: url, to: hardLinkURL)
+	return hardLinkURL
+}
+
 private func deleteTempFolder(containing url: URL?, fileType: String) {
 	if let url {
 		do {
@@ -602,4 +561,4 @@ private func deleteTempFolder(containing url: URL?, fileType: String) {
 	}
 }
 
-private let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/ // swiftlint:disable:this file_length
+private let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/

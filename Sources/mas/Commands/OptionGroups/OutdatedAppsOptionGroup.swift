@@ -6,7 +6,6 @@
 //
 
 internal import ArgumentParser
-private import Atomics
 private import Foundation
 
 struct OutdatedAppsOptionGroup: ParsableArguments {
@@ -57,29 +56,24 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 				if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
 					nil
 				} else {
-					await withCheckedContinuation { continuation in
-						Task {
-							let alreadyResumed = ManagedAtomic(false)
+					await AsyncStream { continuation in
+						let task = Task {
 							do {
 								try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
-									if
-										shouldOutput,
-										let appStoreVersion,
-										installedApp.version != appStoreVersion,
-										!alreadyResumed.exchange(true, ordering: .acquiringAndReleasing)
-									{
-										continuation.resume(returning: .init(installedApp: installedApp, newVersion: appStoreVersion))
+									if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
+										continuation.yield(.init(installedApp: installedApp, newVersion: appStoreVersion))
+										continuation.finish()
 									}
 									return true
 								}
 							} catch {
 								MAS.printer.error(error: error)
 							}
-							if !alreadyResumed.load(ordering: .acquiring) {
-								continuation.resume(returning: nil)
-							}
+							continuation.finish()
 						}
+						continuation.onTermination = { _ in task.cancel() }
 					}
+					.first { _ in true }
 				}
 			}
 			: { @Sendable installedApp in
