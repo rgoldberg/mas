@@ -12,15 +12,15 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `parses catalog app from things that go bump JSON`() {
-		let actual = consequencesOf(try decode(CatalogApp.self, fromResource: "things-lookup").adamID)
+	func `parses catalog app from things that go bump JSON`() async throws {
+		let actual = try await consequencesOf(try decode(CatalogApp.self, fromResource: "things-lookup").adamID)
 		let expected = Consequences(ADAMID(1_472_954_003))
 		#expect(actual == expected)
 	}
 
 	@Test
-	func `iTunes searches for slack`() async {
-		let actual = await consequencesOf(
+	func `iTunes searches for slack`() async throws {
+		let actual = try await consequencesOf(
 			try await Environment.$current.withValue(.init { _ in (try .init(fromResource: "slack"), .init()) }) {
 				try await search(for: "slack").count
 			},
@@ -32,7 +32,7 @@ private extension MASTests {
 	@Test
 	func `looks up slack`() async throws {
 		let adamID = ADAMID(803_453_959)
-		let actual = await consequencesOf(
+		let actual = try await consequencesOf(
 			try await Environment.$current.withValue(.init { _ in (try .init(fromResource: "slack-lookup"), .init()) }) {
 				try await lookup(appID: .adamID(adamID))
 			},

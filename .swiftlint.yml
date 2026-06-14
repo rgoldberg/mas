@@ -85,6 +85,8 @@ modifier_order:
   - owned
 multiline_arguments:
   first_argument_location: next_line
+no_empty_block:
+  disabled_block_types: [closure_blocks]
 non_optional_string_data_conversion:
   include_variables: true
 number_separator:
