@@ -27,17 +27,7 @@ extension MAS {
 		private var appIDString: String?
 
 		func run() async throws {
-			try await run(
-				appStorePageURLString: appIDString.map { appIDString in
-					try await Environment.current
-						.lookupAppFromAppID(.init(from: appIDString, forceBundleID: forceBundleIDOptionGroup.forceBundleID))
-						.appStorePageURLString
-				},
-			)
-		}
-
-		private func run(appStorePageURLString: String?) async throws {
-			guard let appStorePageURLString else {
+			guard let appIDString else {
 				// If no App Store Page URL was given, open the App Store
 				guard let macAppStoreSchemeURL = URL(string: "\(masScheme):") else {
 					throw MASError.error("Failed to create URL from \(masScheme) scheme")
@@ -52,22 +42,21 @@ extension MAS {
 				return
 			}
 
-			try await openMacAppStorePage(for: appStorePageURLString)
+			let appStorePageURLString = try await Environment.current
+				.lookupAppFromAppID(.init(from: appIDString, forceBundleID: forceBundleIDOptionGroup.forceBundleID))
+				.appStorePageURLString
+			guard var urlComponents = URLComponents(string: appStorePageURLString) else {
+				throw MASError.invalidURL(appStorePageURLString)
+			}
+
+			urlComponents.scheme = masScheme
+			guard let url = urlComponents.url else {
+				throw MASError.invalidURL(.init(describing: urlComponents))
+			}
+
+			_ = try await url.open()
 		}
 	}
-}
-
-private func openMacAppStorePage(for appStorePageURLString: String) async throws {
-	guard var urlComponents = URLComponents(string: appStorePageURLString) else {
-		throw MASError.invalidURL(appStorePageURLString)
-	}
-
-	urlComponents.scheme = masScheme
-	guard let url = urlComponents.url else {
-		throw MASError.invalidURL(.init(describing: urlComponents))
-	}
-
-	_ = try await url.open()
 }
 
 private let masScheme = "macappstore"
