@@ -313,7 +313,7 @@ private func lookup(appID: AppID, inRegion region: Region = appStoreRegion) asyn
 			additionalQueryItems: .init(),
 		)
 			.first // swiftformat:disable indent
-			.flatMap { try await CatalogApp(macDesktopAppObject: $0) }
+			.flatMap(CatalogApp.init(macDesktopAppObject:))
 			?? { throw MASError.unknownAppID(appID) }()
 	} // swiftformat:enable indent
 }
@@ -325,7 +325,7 @@ func search(for searchTerm: String) async throws -> [CatalogApp] {
 private func search(for searchTerm: String, inRegion region: Region = appStoreRegion) async throws -> [CatalogApp] {
 	let queryItem = URLQueryItem(name: "term", value: searchTerm)
 	let catalogApps = try await catalogAppJSONObjects(from: Environment.current.searchURL, queryItem, inRegion: region)
-		.map { try CatalogApp(object: $0) }
+		.map(CatalogApp.init(object:))
 	let adamIDSet = Set(catalogApps.map(\.adamID))
 	return catalogApps.priorityMerge(
 		try await catalogAppJSONObjects(
@@ -335,7 +335,7 @@ private func search(for searchTerm: String, inRegion region: Region = appStoreRe
 			additionalQueryItems: .init(),
 		)
 			.concurrentCompactMap { catalogAppJSONObject in // swiftformat:disable indent
-				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map { adamIDSet.contains($0) } == false
+				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
 				? try await .init(macDesktopAppObject: catalogAppJSONObject)
 				: nil
 			},

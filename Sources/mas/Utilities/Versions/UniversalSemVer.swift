@@ -65,7 +65,7 @@ private extension [String] {
 
 extension Substring? {
 	var elements: [String] {
-		map { $0.split(separator: ".") }?.map(String.init(_:)) ?? .init()
+		map { $0.split(separator: ".") }?.map(String.init) ?? .init()
 	}
 }
 

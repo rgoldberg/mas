@@ -116,10 +116,10 @@ struct Printer {
 	}
 
 	private func print(_ items: [String], separator: String, terminator: String, to fileHandle: FileHandle) {
-		unsafe items.joined(separator: separator)
+		try? unsafe items.joined(separator: separator)
 			.appending(terminator)
 			.utf8
-			.withContiguousStorageIfAvailable { try? unsafe fileHandle.write(contentsOf: unsafe $0) }
+			.withContiguousStorageIfAvailable(fileHandle.write(contentsOf:))
 	}
 
 	private func print(
