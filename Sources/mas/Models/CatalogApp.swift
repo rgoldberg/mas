@@ -324,22 +324,23 @@ func search(for searchTerm: String) async throws -> [CatalogApp] {
 
 private func search(for searchTerm: String, inRegion region: Region = appStoreRegion) async throws -> [CatalogApp] {
 	let queryItem = URLQueryItem(name: "term", value: searchTerm)
-	let catalogApps = try await catalogAppJSONObjects(from: Environment.current.searchURL, queryItem, inRegion: region)
+	async let macCatalogAppsTask = catalogAppJSONObjects(from: Environment.current.searchURL, queryItem, inRegion: region)
 		.map(CatalogApp.init(object:))
-	let adamIDSet = Set(catalogApps.map(\.adamID))
-	return catalogApps.priorityMerge(
-		try await catalogAppJSONObjects(
-			from: Environment.current.searchURL,
-			queryItem,
-			inRegion: region,
-			additionalQueryItems: .init(),
-		)
-			.concurrentCompactMap { catalogAppJSONObject in // swiftformat:disable indent
-				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
-					? try await .init(macDesktopAppObject: catalogAppJSONObject)
-					: nil
-			},
-	) { $0.name.similarity(to: searchTerm) } // swiftformat:enable indent
+	async let anyCatalogAppsTask = catalogAppJSONObjects(
+		from: Environment.current.searchURL,
+		queryItem,
+		inRegion: region,
+		additionalQueryItems: .init(),
+	)
+	let macCatalogApps = try await macCatalogAppsTask
+	let adamIDSet = Set(macCatalogApps.map(\.adamID))
+	return macCatalogApps.priorityMerge(
+		try await anyCatalogAppsTask.concurrentCompactMap { catalogAppJSONObject in
+			try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
+				? try await .init(macDesktopAppObject: catalogAppJSONObject)
+				: nil
+		},
+	) { $0.name.similarity(to: searchTerm) }
 }
 
 private func catalogAppJSONObjects(
