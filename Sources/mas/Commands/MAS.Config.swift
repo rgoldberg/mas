@@ -44,18 +44,15 @@ extension MAS {
 	}
 }
 
-private var runningSliceArchitecture: String {
-	var info = utsname()
-	return unsafe uname(&info) == 0
-	? unsafe withUnsafePointer(to: &info.machine) { pointer in // swiftformat:disable indent
-		unsafe pointer.withMemoryRebound(
-			to: CChar.self,
-			capacity: unsafe MemoryLayout.size(ofValue: unsafe pointer),
-			unsafe String.init(cString:),
-		)
-	}
-	: unknown
-} // swiftformat:enable indent
+private let runningSliceArchitecture = {
+	#if arch(arm64)
+	"arm64"
+	#elseif arch(x86_64)
+	"x86_64"
+	#else
+	"unknown"
+	#endif
+}()
 
 private var supportedSliceArchitectures: [String] {
 	Bundle.main.executableArchitectures.map { archIDs in
@@ -67,12 +64,6 @@ private var supportedSliceArchitectures: [String] {
 			return switch arch {
 			case NSBundleExecutableArchitectureARM64:
 				"arm64"
-			case NSBundleExecutableArchitectureI386:
-				"i386"
-			case NSBundleExecutableArchitecturePPC:
-				"ppc"
-			case NSBundleExecutableArchitecturePPC64:
-				"ppc64"
 			case NSBundleExecutableArchitectureX86_64:
 				"x86_64"
 			default:
