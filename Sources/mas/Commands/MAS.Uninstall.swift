@@ -82,7 +82,7 @@ extension MAS {
 				}
 
 				do {
-					try mas.run(asEffectiveUID: 0, andEffectiveGID: 0) {
+					try mas.runAsRoot {
 						try fileManager.setAttributes([.ownerAccountID: uid, .groupOwnerAccountID: gid], ofItemAtPath: appPath)
 					}
 				} catch {
@@ -93,7 +93,7 @@ extension MAS {
 				var chownPath = appPath
 				defer {
 					do {
-						try mas.run(asEffectiveUID: 0, andEffectiveGID: 0) {
+						try mas.runAsRoot {
 							try fileManager.setAttributes(
 								[.ownerAccountID: appUID, .groupOwnerAccountID: appGID],
 								ofItemAtPath: chownPath,

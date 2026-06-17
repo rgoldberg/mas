@@ -34,11 +34,3 @@ func set(effectiveUID uid: uid_t) throws(MASError) {
 		throw .error("Failed to switch effective user from \(geteuid().nameAndID) to \(uid.nameAndID)")
 	}
 }
-
-func reset(effectiveUID uid: uid_t) {
-	do {
-		try set(effectiveUID: uid)
-	} catch {
-		MAS.printer.warning(error: error)
-	}
-}

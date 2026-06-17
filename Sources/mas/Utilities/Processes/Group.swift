@@ -34,11 +34,3 @@ func set(effectiveGID gid: gid_t) throws(MASError) {
 		throw .error("Failed to switch effective group from \(getegid().nameAndID) to \(gid.nameAndID)")
 	}
 }
-
-func reset(effectiveGID gid: gid_t) {
-	do {
-		try set(effectiveGID: gid)
-	} catch {
-		MAS.printer.warning(error: error)
-	}
-}

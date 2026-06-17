@@ -298,7 +298,7 @@ enum AppStoreAction: String {
 			"-target",
 			"/",
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
-		) { process in try run(asEffectiveUID: 0, andEffectiveGID: 0) { try process.run() } }
+		) { process in try runAsRoot { try process.run() } }
 
 		guard
 			let appFolderURLSubstring = standardErrorString
@@ -321,7 +321,7 @@ enum AppStoreAction: String {
 		let receiptURL = appFolderURL.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
 		do {
 			let fileManager = FileManager.default
-			try run(asEffectiveUID: 0, andEffectiveGID: 0) {
+			try runAsRoot {
 				if fileManager.fileExists(atPath: receiptURL.filePath) {
 					try fileManager.removeItem(at: receiptURL)
 				} else {

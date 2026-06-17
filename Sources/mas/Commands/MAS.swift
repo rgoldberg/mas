@@ -45,6 +45,7 @@ struct MAS: AsyncParsableCommand {
 
 	private static func main(_ arguments: [String]?) async { // swiftlint:disable:this discouraged_optional_collection
 		do {
+			try? ProcessInfo.processInfo.dropRoot()
 			let command = try await asyncParseAsRoot(arguments)
 			if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
 				try await main(command)
@@ -79,9 +80,7 @@ extension MAS {
 
 	static func main<Command: ParsableCommand>(_ command: Command, _ body: (Command) throws -> Void) throws {
 		do {
-			try ProcessInfo.processInfo.runAsSudoEffectiveUserAndSudoEffectiveGroupIfRootEffectiveUser {
-				try body(command)
-			}
+			try body(command)
 		} catch {
 			printer.error(error: try error.failure)
 		}
@@ -90,9 +89,7 @@ extension MAS {
 	static func main<Command: AsyncParsableCommand>(_ command: Command, _ body: (Command) async throws -> Void)
 	async throws { // swiftformat:disable:this indent
 		do {
-			try await ProcessInfo.processInfo.runAsSudoEffectiveUserAndSudoEffectiveGroupIfRootEffectiveUser {
-				try await body(command)
-			}
+			try await body(command)
 		} catch {
 			printer.error(error: try error.failure)
 		}
