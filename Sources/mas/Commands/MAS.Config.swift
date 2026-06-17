@@ -35,6 +35,7 @@ extension MAS {
 						("store", .string(appStoreRegion)),
 						("region", .string(macRegion)),
 						("macos", .string(macOSVersion)),
+						("build", .string(configStringValue("kern.osversion"))),
 						("mac", .string(configStringValue("hw.product"))),
 						("cpu", .string(configStringValue("machdep.cpu.brand_string"))),
 						("arch", .string(configStringValue("hw.machine"))), // swiftlint:enable vertical_parameter_alignment_on_call
@@ -75,9 +76,8 @@ private var supportedSliceArchitectures: [String] {
 }
 
 private var macOSVersion: String {
-	.init(
-		ProcessInfo.processInfo.operatingSystemVersionString.dropFirst(8).replacing("Build ", with: "", maxReplacements: 1),
-	)
+	let version = ProcessInfo.processInfo.operatingSystemVersion
+	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
 }
 
 private func configStringValue(_ name: String) -> String {
@@ -86,14 +86,21 @@ private func configStringValue(_ name: String) -> String {
 		unsafe perror(sysCtlByName)
 		return unknown
 	}
-
-	var buffer = [CChar](repeating: 0, count: size)
-	guard unsafe sysctlbyname(name, &buffer, &size, nil, 0) == 0 else {
-		unsafe perror(sysCtlByName)
+	guard size > 0 else {
 		return unknown
 	}
 
-	return unsafe .init(cString: &buffer)
+	return unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
+		guard let baseAddress = buffer.baseAddress else {
+			return unknown
+		}
+		guard unsafe sysctlbyname(name, unsafe baseAddress, &size, nil, 0) == 0 else {
+			unsafe perror(sysCtlByName)
+			return unknown
+		}
+
+		return unsafe .init(cString: unsafe baseAddress)
+	}
 }
 
 private let unknown = "unknown"
