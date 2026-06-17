@@ -5,12 +5,6 @@
 // Copyright © 2025 mas-cli. All rights reserved.
 //
 
-extension Collection {
-	func dropLast(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
-		try indices.reversed().first { try !predicate(self[$0]) }.map { self[...$0] } ?? self[endIndex...]
-	}
-}
-
 extension Collection where Element: Sendable {
 	func concurrentMap<T: Sendable>( // swiftlint:disable:this unused_declaration
 		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
@@ -59,19 +53,20 @@ extension Collection where Element: Sendable {
 		maxConcurrentTaskCount: Int,
 		_ transform: @escaping @Sendable (Element) async throws -> T,
 	) async rethrows -> [T] {
-		try await withThrowingTaskGroup(of: (index: Int, result: T).self) { group in
+		try await withThrowingTaskGroup(of: (index: Int, result: T).self) { taskGroup in
 			var iterator = enumerated().makeIterator()
 			func addNextTask() {
 				if let next = iterator.next() {
-					group.addTask { (next.offset, try await transform(next.element)) }
+					taskGroup.addTask { (next.offset, try await transform(next.element)) }
 				}
 			}
 
+			let count = count
 			for _ in 0..<Swift.min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
 
-			return try await group.reduce(into: [T?](repeating: nil, count: count)) { results, indexedResult in
+			return try await taskGroup.reduce(into: Array(repeating: T?.none, count: count)) { results, indexedResult in
 				results[indexedResult.index] = .some(indexedResult.result)
 				addNextTask()
 			}
@@ -83,23 +78,24 @@ extension Collection where Element: Sendable {
 		maxConcurrentTaskCount: Int,
 		_ transform: @escaping @Sendable (Element) async throws -> T?,
 	) async rethrows -> [T] {
-		try await withThrowingTaskGroup(of: (index: Int, result: T?).self) { group in
+		try await withThrowingTaskGroup(of: (index: Int, result: T?).self) { taskGroup in
 			var iterator = enumerated().makeIterator()
 			func addNextTask() {
 				if let next = iterator.next() {
-					group.addTask { (next.offset, try await transform(next.element)) }
+					taskGroup.addTask { (next.offset, try await transform(next.element)) }
 				}
 			}
 
+			let count = count
 			for _ in 0..<Swift.min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
 
-			return try await group.reduce(into: [T?](repeating: nil, count: count)) { results, indexedResult in
+			return try await taskGroup.reduce(into: Array(repeating: T?.none, count: count)) { results, indexedResult in
 				results[indexedResult.index] = indexedResult.result
 				addNextTask()
 			}
-			.compactMap(\.self)
+				.compactMap(\.self) // swiftformat:disable:this indent
 		}
 	}
 }
