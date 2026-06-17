@@ -17,7 +17,7 @@ struct MASBuildToolPlugin: BuildToolPlugin {
 				executable: context.package.directoryURL.appending(path: "Scripts/prebuild", directoryHint: .notDirectory),
 				arguments: [
 					{ url in
-						unsafe url.withUnsafeFileSystemRepresentation { unsafe $0.map(unsafe String.init(cString:)) }
+						unsafe url.withUnsafeFileSystemRepresentation { unsafe $0.flatMap(unsafe String.init(validatingCString:)) }
 						?? url.path(percentEncoded: false) // swiftformat:disable:this indent
 					}(context.pluginWorkDirectoryURL),
 				],

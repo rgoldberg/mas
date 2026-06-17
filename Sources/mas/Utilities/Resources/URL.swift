@@ -11,8 +11,14 @@ private import ObjectiveC
 
 extension URL {
 	var filePath: String {
-		unsafe withUnsafeFileSystemRepresentation { unsafe $0.map(unsafe String.init(cString:)) }
-		?? .init(path(percentEncoded: false).dropLast { $0 == "/" }) // swiftformat:disable:this indent
+		if // swiftformat:disable:this wrap wrapArguments
+			let path = // swiftformat:disable:next indent
+				unsafe withUnsafeFileSystemRepresentation({ unsafe $0.flatMap(unsafe String.init(validatingCString:)) })
+		{
+			return path
+		}
+		let path = path(percentEncoded: false).dropLast { $0 == "/" }
+		return path.isEmpty ? "/" : .init(path)
 	}
 
 	init(folderPath path: String, relativeTo base: Self? = nil) {

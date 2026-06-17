@@ -65,19 +65,22 @@ extension MAS {
 				return
 			}
 
-			var executablePathBuffer = [CChar](repeating: 0, count: .init(PATH_MAX))
-			for unsafe pid in unsafe kinfoProcs.lazy.map(unsafe \.kp_proc.p_pid) {
-				guard
-					unsafe proc_pidpath(pid, &executablePathBuffer, .init(executablePathBuffer.count)) > 0,
-					let executablePath = String(cString: executablePathBuffer, encoding: .utf8),
-					executablePathSet.contains(executablePath)
-				else {
-					continue
+			unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
+				guard let baseAddress = buffer.baseAddress else {
+					return
 				}
 
-				let exitStatus = kill(pid, SIGTERM)
-				if exitStatus != 0 {
-					printer.error("Failed to terminate", executablePath, "getting exit status", exitStatus, "for pid", pid)
+				for unsafe pid in unsafe kinfoProcs.lazy.map(unsafe \.kp_proc.p_pid) {
+					if
+						unsafe proc_pidpath(pid, unsafe baseAddress, .init(buffer.count)) > 0,
+						let executablePath = unsafe String(validatingCString: unsafe baseAddress),
+						executablePathSet.contains(executablePath)
+					{
+						let exitStatus = kill(pid, SIGTERM)
+						if exitStatus != 0 {
+							printer.error("Failed to terminate", executablePath, "getting exit status", exitStatus, "for pid", pid)
+						}
+					}
 				}
 			}
 
