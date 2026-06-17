@@ -44,7 +44,7 @@ config:
   ol-prefix:
     style: ordered
   proper-names:
-    names: [mas]
+    names: [MAS, mas]
   reference-links-images:
     shortcut_syntax: true
   strong-style:

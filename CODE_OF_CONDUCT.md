@@ -27,11 +27,11 @@ To report violations privately to moderators (instead of to GitHub Support),
 click the **…** (three dot) menu on the relevant issue, PR, or comment, then
 select **Report content**.
 
-- If a reporting dialog appears, select **To repository admins**, then
-  follow the instructions
-- If no reporting dialog appears, instead create a [security
-  advisory](https://github.com/mas-cli/mas/security/advisories/new), including
-  links to, and attachments documenting, the alleged violations
+- If a reporting dialog appears, select **To repository admins**, then follow
+  the instructions
+- If no reporting dialog appears, create a [security
+  advisory](https://github.com/mas-cli/mas/security/advisories/new) including
+  attachments documenting, and/or links to, the alleged violations
 
 Moderators are obligated to maintain complainant confidentiality & to
 investigate complaints.
