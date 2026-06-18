@@ -5,6 +5,8 @@
 // Copyright © 2025 mas-cli. All rights reserved.
 //
 
+private import Foundation
+
 extension Sequence {
 	func forEach<E: Error>(attemptTo perform: String, _ body: (Element) async throws(E) -> Void) async {
 		await forEach(body) { MAS.printer.error($1 is MASError ? .init() : ["Failed to", perform, $0], error: $1) }
@@ -61,5 +63,22 @@ extension Sequence {
 		}
 
 		return merged
+	}
+}
+
+extension Sequence {
+	/// Transforms elements concurrently respecting backpressure while strictly preserving the original input order in the
+	/// output stream.
+	///
+	/// - Parameters:
+	///   - maxConcurrentTaskCount: The maximum number of concurrent tasks allowed to execute at any given time. Defaults
+	///     to system configuration.
+	///   - transform: The asynchronous, throwing closure to apply to each element.
+	/// - Returns: An `OrderedConcurrentMapSequence` emitting the transformed elements in their original sequence order.
+	func orderedConcurrentMap<T>( // swiftlint:disable:this unused_declaration
+		maxConcurrentTaskCount: Int = ProcessInfo.processInfo.activeProcessorCount,
+		_ transform: @escaping @Sendable (Element) async throws -> T,
+	) -> OrderedConcurrentMapSequence<Self, T> { // periphery:ignore
+		.init(base: self, maxConcurrentTaskCount: maxConcurrentTaskCount, transform: transform)
 	}
 }
