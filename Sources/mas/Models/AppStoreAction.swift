@@ -77,45 +77,26 @@ enum AppStoreAction: String {
 
 	@MainActor
 	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping (String?, Bool) -> Bool) async throws {
-		let purchase = SSPurchase(
-			buyParameters: """
-				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
-				\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
-				""",
-		)
-
-		// Possibly unnecessary…
-		purchase.isRedownload = self != .get
-		purchase.isUpdate = self == .update
-
-		purchase.itemIdentifier = adamID
-
-		let downloadMetadata = SSDownloadMetadata(kind: "software")
-		downloadMetadata.itemIdentifier = adamID
-		purchase.downloadMetadata = downloadMetadata
-
 		let (eventStream, eventContinuation) = AsyncStream.makeStream(of: QueueEvent.self)
-		let observer = DownloadQueueObserver(
-			action: self,
-			adamID: adamID,
-			shouldCancel: shouldCancel,
-			continuation: eventContinuation,
+		let observerUUID = CKDownloadQueue.shared().add(
+			DownloadQueueObserver(action: self, adamID: adamID, shouldCancel: shouldCancel, continuation: eventContinuation),
 		)
-		let observerUUID = CKDownloadQueue.shared().add(observer)
 		eventContinuation.onTermination = { _ in CKDownloadQueue.shared().removeObserver(observerUUID) }
-		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
-		var prevPhaseType = PhaseType.processing
-		var pkgHardLinkURL = URL?.none
-		var receiptHardLinkURL = URL?.none
+		defer { eventContinuation.finish() }
 
-		defer {
-			CKDownloadQueue.shared().removeObserver(observerUUID)
-			eventContinuation.finish()
-			deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg")
-			deleteTempFolder(containing: receiptHardLinkURL, fileType: "receipt")
-		}
-
-		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+		try await withCheckedThrowingContinuation { continuation in
+			let purchase = SSPurchase(
+				buyParameters: """
+					productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
+					\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
+					""",
+			)
+			purchase.isRedownload = self != .get // Possibly unnecessary
+			purchase.isUpdate = self == .update // Possibly unnecessary
+			purchase.itemIdentifier = adamID
+			let downloadMetadata = SSDownloadMetadata(kind: "software")
+			downloadMetadata.itemIdentifier = adamID
+			purchase.downloadMetadata = downloadMetadata
 			CKPurchaseController.shared().perform(purchase, withOptions: 0) { _, _, error, response in
 				if let error {
 					continuation.resume(throwing: error)
@@ -125,8 +106,14 @@ enum AppStoreAction: String {
 					continuation.resume()
 				}
 			}
-		}
+		} as Void
 
+		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
+		var pkgHardLinkURL = URL?.none
+		defer { deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg") }
+		var receiptHardLinkURL = URL?.none
+		defer { deleteTempFolder(containing: receiptHardLinkURL, fileType: "receipt") }
+		var prevPhaseType = PhaseType.processing
 		for await event in eventStream {
 			try Task.checkCancellation()
 			switch event {
@@ -148,8 +135,8 @@ enum AppStoreAction: String {
 								return
 									resourceValues.isRegularFile == true ? resourceValues.contentModificationDate.map { (url, $0) } : nil
 							}
-							.max { $0.date < $1.date }?
-							.url,
+								.max { $0.date < $1.date }? // swiftformat:disable:this indent
+								.url, // swiftformat:disable:this indent
 							existing: pkgHardLinkURL,
 							adamID: adamID,
 						)
