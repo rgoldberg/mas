@@ -12,7 +12,7 @@ internal import Foundation
 /// Prints to `FileHandle`s like `.standardOutput` & `.standardError` with ANSI
 /// color codes when connected to a terminal.
 struct Printer {
-	private let errorCounter = ManagedAtomic<UInt64>(0)
+	private let errorCounter = ManagedAtomic(UInt64(0))
 
 	var errorCount: UInt64 {
 		errorCounter.load(ordering: .acquiring)
@@ -85,7 +85,7 @@ struct Printer {
 
 	func clearCurrentLine(of fileHandle: FileHandle) {
 		if fileHandle.isTerminal {
-			try? fileHandle.write(contentsOf: clearLine)
+			try? fileHandle.write(contentsOf: clearLineData)
 		}
 	}
 
@@ -140,7 +140,6 @@ struct Printer {
 				)
 			)
 			"""
-
 		let formattedPrefix = prefix.formatted(with: format, for: fileHandle) // swiftformat:enable indent
 		print(
 			items.first.map { item in
@@ -169,5 +168,5 @@ let errorPrefix = "Error:"
 let errorFormat = "4;31"
 
 private let csi = "\u{001B}["
-private let clearLine = Data("\(csi)2K\(csi)0G".utf8)
+private let clearLineData = Data("\(csi)2K\(csi)0G".utf8)
 private let nonEmptyLineStartRegex = /\n(?!\n)/
