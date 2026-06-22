@@ -19,8 +19,8 @@ extension MAS {
 		@OptionGroup
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-		func run() async throws {
-			run(installedApps: try await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON))
+		func run() async {
+			run(installedApps: await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON))
 		}
 
 		func run(installedApps: [InstalledApp]) {

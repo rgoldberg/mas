@@ -247,8 +247,7 @@ enum AppStoreAction: String {
 							)
 						{
 							let appFolderPath = appFolderURL.filePath
-							let installedApps =
-								try await installedApps(withADAMID: snapshot.adamID).filter { $0.path != appFolderPath }
+							let installedApps = await installedApps(withADAMID: snapshot.adamID).filter { $0.path != appFolderPath }
 							if !installedApps.isEmpty {
 								MAS.printer.warning(
 									"Multiple installations of ",

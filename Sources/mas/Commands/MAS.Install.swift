@@ -24,7 +24,7 @@ extension MAS {
 			try await AppStore.install.apps(
 				withAppIDs: catalogAppsOptionGroup.appIDs,
 				force: forceOptionGroup.force,
-				installedApps: try await installedApps(),
+				installedApps: await installedApps(),
 			)
 		}
 	}

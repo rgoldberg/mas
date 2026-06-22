@@ -22,7 +22,7 @@ extension MAS {
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async throws {
-			try await run(installedApps: try await installedApps().filter(!\.isTestFlight))
+			try await run(installedApps: await installedApps().filter(!\.isTestFlight))
 		}
 
 		private func run(installedApps: [InstalledApp]) async throws {

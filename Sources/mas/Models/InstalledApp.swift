@@ -5,7 +5,6 @@
 // Copyright © 2018 mas-cli. All rights reserved.
 //
 
-private import Atomics
 private import CoreFoundation
 private import Foundation
 internal import JSONAST
@@ -281,87 +280,61 @@ private extension URL {
 	}
 }
 
-func installedApps(withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	try await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
+func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
+	await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
 }
 
-func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	try await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
+func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async -> [InstalledApp] {
+	await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
 }
 
 @MainActor
-func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	var observer = (any NSObjectProtocol)?.none
-	defer {
-		if let observer {
-			NotificationCenter.default.removeObserver(observer)
-		}
-	}
-
+private func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async -> [InstalledApp] {
 	let query = NSMetadataQuery()
 	query.predicate = .init(format: metadataQuery)
 	query.searchScopes = applicationsFolderURLs
+	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
+	query.start()
+	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
+		break
+	}
+	query.stop()
 
-	return try await withCheckedThrowingContinuation { continuation in
-		let alreadyResumed = ManagedAtomic(false)
-		observer = NotificationCenter.default.addObserver(
-			forName: .NSMetadataQueryDidFinishGathering,
-			object: query,
-			queue: nil,
-		) { notification in
-			guard !alreadyResumed.exchange(true, ordering: .acquiringAndReleasing) else {
-				return
-			}
-			guard let query = notification.object as? NSMetadataQuery else {
-				continuation.resume(
-					throwing: MASError.error(
-						"Notification Center returned a \(type(of: notification.object)) instead of a NSMetadataQuery",
-					),
-				)
-				return
-			}
+	let installedApps = query.results
+		.compactMap { ($0 as? NSMetadataItem).map { InstalledApp(for: $0, withFullJSON: withFullJSON) } }
+		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 
-			query.stop()
+	if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
+		let installedAppPathSet = Set(installedApps.map(\.path))
+		for installedAppURL in applicationsFolderURLs.flatMap(\.installedAppURLs)
+		where !installedAppPathSet.contains(installedAppURL.filePath) { // swiftformat:disable:this indent
+			MAS.printer.warning(
+				"Found a likely App Store app that is not indexed in Spotlight in ",
+				installedAppURL.filePath,
+				"""
 
-			let installedApps = query.results
-				.compactMap { ($0 as? NSMetadataItem).map { InstalledApp(for: $0, withFullJSON: withFullJSON) } }
-				.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 
-			if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
-				let installedAppPathSet = Set(installedApps.map(\.path))
-				for installedAppURL in applicationsFolderURLs.flatMap(\.installedAppURLs)
-				where !installedAppPathSet.contains(installedAppURL.filePath) { // swiftformat:disable:this indent
-					MAS.printer.warning(
-						"Found a likely App Store app that is not indexed in Spotlight in ",
+				Indexing now; will likely complete sometime after mas exits
+
+				Disable auto-indexing via: export MAS_NO_AUTO_INDEX=1
+				""",
+				separator: "",
+			)
+			Task {
+				do {
+					_ = try await run(
+						"/usr/bin/mdimport",
 						installedAppURL.filePath,
-						"""
-
-
-						Indexing now; will likely complete sometime after mas exits
-
-						Disable auto-indexing via: export MAS_NO_AUTO_INDEX=1
-						""",
-						separator: "",
+						errorMessage: "Failed to index the Spotlight data for \(installedAppURL.filePath)",
 					)
-					Task {
-						do {
-							_ = try await run(
-								"/usr/bin/mdimport",
-								installedAppURL.filePath,
-								errorMessage: "Failed to index the Spotlight data for \(installedAppURL.filePath)",
-							)
-						} catch {
-							MAS.printer.error(error: error)
-						}
-					}
+				} catch {
+					MAS.printer.error(error: error)
 				}
 			}
-
-			continuation.resume(returning: installedApps)
 		}
-
-		query.start()
 	}
+
+	return installedApps
 }
 
 // swiftformat:disable:next docComments
