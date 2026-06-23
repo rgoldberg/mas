@@ -9,8 +9,8 @@ private import ArgumentParser
 private import Atomics
 internal import Foundation
 
-/// Prints to `stdout` and `stderr` with ANSI color codes when connected to a
-/// terminal.
+/// Prints to `FileHandle`s like `.standardOutput` & `.standardError` with ANSI
+/// color codes when connected to a terminal.
 struct Printer {
 	private let errorCounter = ManagedAtomic<UInt64>(0)
 
