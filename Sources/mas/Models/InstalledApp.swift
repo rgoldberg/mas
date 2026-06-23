@@ -281,29 +281,7 @@ private extension URL {
 }
 
 func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
-	await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
-}
-
-func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async -> [InstalledApp] {
-	await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
-}
-
-@MainActor
-private func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async -> [InstalledApp] {
-	let query = NSMetadataQuery()
-	query.predicate = .init(format: metadataQuery)
-	query.searchScopes = applicationsFolderURLs
-	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
-	query.start()
-	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
-		break
-	}
-	query.stop()
-
-	let installedApps = query.results
-		.compactMap { ($0 as? NSMetadataItem).map { InstalledApp(for: $0, withFullJSON: withFullJSON) } }
-		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
-
+	let installedApps = await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
 	if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
 		let installedAppPathSet = Set(installedApps.map(\.path))
 		for installedAppURL in applicationsFolderURLs.flatMap(\.installedAppURLs)
@@ -333,8 +311,27 @@ private func installedApps(matching metadataQuery: String, withFullJSON: Bool = 
 			}
 		}
 	}
-
 	return installedApps
+}
+
+func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async -> [InstalledApp] {
+	await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
+}
+
+@MainActor
+private func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async -> [InstalledApp] {
+	let query = NSMetadataQuery()
+	query.predicate = .init(format: metadataQuery)
+	query.searchScopes = applicationsFolderURLs
+	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
+	query.start()
+	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
+		break
+	}
+	query.stop()
+	return query.results
+		.compactMap { ($0 as? NSMetadataItem).map { .init(for: $0, withFullJSON: withFullJSON) } }
+		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 }
 
 // swiftformat:disable:next docComments
