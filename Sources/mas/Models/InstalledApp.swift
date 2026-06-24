@@ -10,6 +10,8 @@ private import Foundation
 internal import JSONAST
 private import JSONParsing
 private import ObjectiveC
+private import Subprocess
+private import System // swiftlint:disable:this unused_import
 
 struct InstalledApp {
 	let adamID: ADAMID
@@ -284,11 +286,11 @@ func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
 	let installedApps = await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
 	if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
 		let installedAppPathSet = Set(installedApps.map(\.path))
-		for installedAppURL in applicationsFolderURLs.flatMap(\.installedAppURLs)
-		where !installedAppPathSet.contains(installedAppURL.filePath) { // swiftformat:disable:this indent
+		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
+		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
 			MAS.printer.warning(
 				"Found a likely App Store app that is not indexed in Spotlight in ",
-				installedAppURL.filePath,
+				installedAppPath,
 				"""
 
 
@@ -301,9 +303,9 @@ func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
 			Task {
 				do {
 					_ = try await run(
-						"/usr/bin/mdimport",
-						installedAppURL.filePath,
-						errorMessage: "Failed to index the Spotlight data for \(installedAppURL.filePath)",
+						.path("/usr/bin/mdimport"),
+						installedAppPath,
+						errorMessage: "Failed to index the Spotlight data for \(installedAppPath)",
 					)
 				} catch {
 					MAS.printer.error(error: error)

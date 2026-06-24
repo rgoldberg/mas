@@ -25,10 +25,6 @@ extension URL {
 		self.init(filePath: path, directoryHint: .isDirectory, relativeTo: base)
 	}
 
-	init(nonFolderPath path: String, relativeTo base: Self? = nil) {
-		self.init(filePath: path, directoryHint: .notDirectory, relativeTo: base)
-	}
-
 	func open(configuration: NSWorkspace.OpenConfiguration = .init()) async throws -> NSRunningApplication {
 		try await NSWorkspace.shared.open(self, configuration: configuration)
 	}

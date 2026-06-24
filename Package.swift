@@ -26,6 +26,7 @@ _ = Package(
 		.package(url: "https://github.com/attaswift/BigInt", from: "5.7.0"),
 		.package(url: "https://github.com/rarestype/swift-json", from: "3.5.0"),
 		.package(url: "https://github.com/scinfu/SwiftSoup", from: "2.13.6"),
+		.package(url: "https://github.com/swiftlang/swift-subprocess", from: "0.5.0"),
 	],
 	targets: [
 		.plugin(name: "MASBuildToolPlugin", capability: .buildTool()),
@@ -37,6 +38,7 @@ _ = Package(
 				.product(name: "Atomics", package: "swift-atomics"),
 				.product(name: "JSON", package: "swift-json"),
 				.product(name: "OrderedCollections", package: "swift-collections"),
+				.product(name: "Subprocess", package: "swift-subprocess"),
 				"BigInt",
 				"PrivateFrameworks",
 				"Sextant",

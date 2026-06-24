@@ -6,7 +6,6 @@
 //
 
 internal import Foundation
-@testable private import mas
 private import ObjectiveC
 
 struct Consequences<Value> {
@@ -86,6 +85,12 @@ private struct StandardStreamCapture { // swiftlint:disable:this one_declaration
 
 enum NoValue: Equatable { // swiftlint:disable:this one_declaration_per_file
 	// Empty
+}
+
+private extension Pipe {
+	func readToEnd(encoding: String.Encoding) throws -> String? {
+		try fileHandleForReading.readToEnd().flatMap { .init(data: $0, encoding: encoding) }
+	}
 }
 
 func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () throws -> Void)

@@ -14,6 +14,8 @@ private import Foundation
 private import ObjectiveC
 private import OrderedCollections
 private import StoreFoundation
+private import Subprocess
+private import System // swiftlint:disable:this unused_import
 
 enum AppStoreAction: String {
 	case get
@@ -291,14 +293,15 @@ enum AppStoreAction: String {
 		}
 
 		let (_, standardErrorString) = try await run(
-			"/usr/sbin/installer",
+			.path("/usr/sbin/installer"),
 			"-dumplog",
 			"-pkg",
 			pkgHardLinkPath,
 			"-target",
 			"/",
+			platformOptions: runAsRootAndWheel,
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
-		) { process in try runAsRoot { try process.run() } }
+		)
 
 		guard
 			let appFolderURLSubstring = standardErrorString
@@ -348,7 +351,7 @@ enum AppStoreAction: String {
 		}
 
 		_ = try await run(
-			"/usr/bin/mdimport",
+			.path("/usr/bin/mdimport"),
 			appFolderURL.filePath,
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
