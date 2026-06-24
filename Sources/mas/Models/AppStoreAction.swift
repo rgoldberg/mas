@@ -69,39 +69,20 @@ enum AppStoreAction: String {
 		}
 	}
 
-	@MainActor
-	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping (String?, Bool) -> Bool) async throws {
+	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) async throws {
 		let (eventStream, eventContinuation) = AsyncStream.makeStream(of: QueueEvent.self)
-		let observerUUID = CKDownloadQueue.shared().add(
-			DownloadQueueObserver(action: self, adamID: adamID, shouldCancel: shouldCancel, continuation: eventContinuation),
+		let observerUUID = await DownloadQueueObserver(
+			action: self,
+			adamID: adamID,
+			shouldCancel: shouldCancel,
+			continuation: eventContinuation,
 		)
-		eventContinuation.onTermination = { _ in CKDownloadQueue.shared().removeObserver(observerUUID) }
+		.start()
+		eventContinuation.onTermination = { _ in
+			Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) }
+		}
 		defer { eventContinuation.finish() }
-
-		try await withCheckedThrowingContinuation { continuation in
-			let purchase = SSPurchase(
-				buyParameters: """
-					productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
-					\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
-					""",
-			)
-			purchase.isRedownload = self != .get // Possibly unnecessary
-			purchase.isUpdate = self == .update // Possibly unnecessary
-			purchase.itemIdentifier = adamID
-			let downloadMetadata = SSDownloadMetadata(kind: "software")
-			downloadMetadata.itemIdentifier = adamID
-			purchase.downloadMetadata = downloadMetadata
-			CKPurchaseController.shared().perform(purchase, withOptions: 0) { _, _, error, response in
-				if let error {
-					continuation.resume(throwing: error)
-				} else if response?.downloads?.isEmpty != false {
-					continuation.resume(throwing: MASError.error("No downloads initiated for ADAM ID \(adamID)"))
-				} else {
-					continuation.resume()
-				}
-			}
-		} as Void
-
+		try await performPurchase(adamID: adamID)
 		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
 		var pkgHardLinkURL = URL?.none
 		defer { deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg") }
@@ -272,6 +253,33 @@ enum AppStoreAction: String {
 		}
 	}
 
+	@MainActor
+	private func performPurchase(adamID: ADAMID) async throws {
+		try await withCheckedThrowingContinuation { continuation in
+			let purchase = SSPurchase(
+				buyParameters: """
+					productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
+					\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
+					""",
+			)
+			purchase.isRedownload = self != .get // Possibly unnecessary
+			purchase.isUpdate = self == .update // Possibly unnecessary
+			purchase.itemIdentifier = adamID
+			let downloadMetadata = SSDownloadMetadata(kind: "software")
+			downloadMetadata.itemIdentifier = adamID
+			purchase.downloadMetadata = downloadMetadata
+			CKPurchaseController.shared().perform(purchase, withOptions: 0) { _, _, error, response in
+				if let error {
+					continuation.resume(throwing: error)
+				} else if response?.downloads?.isEmpty != false {
+					continuation.resume(throwing: MASError.error("No downloads initiated for ADAM ID \(adamID)"))
+				} else {
+					continuation.resume()
+				}
+			}
+		} as Void
+	}
+
 	private func install(
 		appNameAndVersion: String,
 		pkgHardLinkURL: URL?,
@@ -421,6 +429,11 @@ private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 
 	deinit {
 		// Empty
+	}
+
+	@MainActor
+	func start() -> String {
+		CKDownloadQueue.shared().add(self)
 	}
 
 	func downloadQueue(_: CKDownloadQueue, changedWithAddition _: SSDownload) {
