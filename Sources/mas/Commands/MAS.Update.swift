@@ -21,12 +21,12 @@ extension MAS {
 		@OptionGroup
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
-		func run() async throws {
-			try await run(installedApps: await installedApps().filter(!\.isTestFlight))
+		func run() async {
+			await run(installedApps: await installedApps().filter(!\.isTestFlight))
 		}
 
-		private func run(installedApps: [InstalledApp]) async throws {
-			try await run(
+		private func run(installedApps: [InstalledApp]) async {
+			await run(
 				outdatedApps: forceOptionGroup.force
 					? installedApps.filter(for: outdatedAppsOptionGroup.installedAppsOptionGroup.appIDs)
 						.map { OutdatedApp(installedApp: $0, newVersion: "") }
@@ -34,8 +34,8 @@ extension MAS {
 			)
 		}
 
-		private func run(outdatedApps: [OutdatedApp]) async throws {
-			try await AppStore.update.apps(withADAMIDs: outdatedApps.map(\.installedApp.adamID))
+		private func run(outdatedApps: [OutdatedApp]) async {
+			await AppStore.update.apps(withADAMIDs: outdatedApps.map(\.installedApp.adamID))
 		}
 	}
 }

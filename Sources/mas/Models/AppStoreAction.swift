@@ -5,11 +5,9 @@
 // Copyright © 2015 mas-cli. All rights reserved.
 //
 
-private import ArgumentParser
 private import CommerceKit
 private import CoreFoundation
 private import CoreServices
-private import Darwin
 private import Foundation
 private import ObjectiveC
 private import OrderedCollections
@@ -44,12 +42,12 @@ enum AppStoreAction: String {
 		}
 	}
 
-	func apps(withAppIDs appIDs: [AppID], force: Bool, installedApps: [InstalledApp]) async throws {
-		try await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force, installedApps: installedApps)
+	func apps(withAppIDs appIDs: [AppID], force: Bool, installedApps: [InstalledApp]) async {
+		await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force, installedApps: installedApps)
 	}
 
-	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool, installedApps: [InstalledApp]) async throws {
-		try await apps(
+	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool, installedApps: [InstalledApp]) async {
+		await apps(
 			withADAMIDs: adamIDs.filter { adamID in
 				if !force, let installedApp = installedApps.first(where: { $0.adamID == adamID }) {
 					MAS.printer.warning("Already ", performed, " ", installedApp.name, " (", adamID, ")", separator: "")
@@ -61,18 +59,12 @@ enum AppStoreAction: String {
 		)
 	}
 
-	func apps(withADAMIDs adamIDs: [ADAMID]) async throws {
+	func apps(withADAMIDs adamIDs: [ADAMID]) async {
 		guard !adamIDs.isEmpty else {
 			return
 		}
 
-		let adamIDOrderedSet = OrderedSet(adamIDs)
-		guard getuid() == 0 else {
-			try sudo(MAS._commandName, args: [rawValue, "--force"] + adamIDOrderedSet.map(String.init))
-			return
-		}
-
-		await adamIDOrderedSet.forEach(attemptTo: "\(self) app for ADAM ID") { adamID in
+		await OrderedSet(adamIDs).forEach(attemptTo: "\(self) app for ADAM ID") { adamID in
 			try await app(withADAMID: adamID) { _, _ in false }
 		}
 	}
@@ -120,7 +112,7 @@ enum AppStoreAction: String {
 			try Task.checkCancellation()
 			switch event {
 			case let .statusChanged(snapshot):
-				// Refresh hard links to latest artifacts in the download directory
+				// Refresh hard links to latest artifacts in the download folder
 				do {
 					let downloadFolderChildURLs = try FileManager.default.contentsOfDirectory(
 						at: downloadFolderURL,
@@ -292,14 +284,21 @@ enum AppStoreAction: String {
 			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
 		}
 
+		if
+			(try? await run(.path("/usr/bin/sudo"), arguments: ["-n", "true"], output: .discarded))?
+				.terminationStatus
+				.isSuccess != true
+		{
+			MAS.printer.info([])
+		}
 		let (_, standardErrorString) = try await run(
-			.path("/usr/sbin/installer"),
+			.path("/usr/bin/sudo"),
+			"/usr/sbin/installer",
 			"-dumplog",
 			"-pkg",
 			pkgHardLinkPath,
 			"-target",
 			"/",
-			platformOptions: runAsRootAndWheel,
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
 
@@ -322,30 +321,63 @@ enum AppStoreAction: String {
 		}
 
 		let receiptURL = appFolderURL.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
+		let receiptPath = receiptURL.filePath
+		let receiptHardLinkPath = receiptHardLinkURL.filePath
 		do {
-			let fileManager = FileManager.default
-			try runAsRoot {
-				if fileManager.fileExists(atPath: receiptURL.filePath) {
-					try fileManager.removeItem(at: receiptURL)
-				} else {
-					try fileManager.createDirectory(
-						at: receiptURL.deletingLastPathComponent(),
-						withIntermediateDirectories: true,
-						attributes: [.ownerAccountID: 0, .groupOwnerAccountID: 0, .posixPermissions: 0o755],
-					)
-				}
-				try fileManager.copyItem(at: receiptHardLinkURL, to: receiptURL)
-				try fileManager.setAttributes(
-					[.ownerAccountID: 0, .groupOwnerAccountID: 0, .posixPermissions: 0o755],
-					ofItemAtPath: receiptURL.filePath,
-				)
-			}
+			let receiptFolderPath = receiptURL.deletingLastPathComponent().filePath
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/bin/mkdir",
+				"-p",
+				receiptFolderPath,
+				errorMessage: "Failed to create receipt folder \(receiptFolderPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/bin/chmod",
+				"755",
+				receiptFolderPath,
+				errorMessage: "Failed to set permissions of receipt folder \(receiptFolderPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/usr/sbin/chown",
+				"0:0",
+				receiptFolderPath,
+				errorMessage: "Failed to set owner of receipt folder \(receiptFolderPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/bin/rm",
+				"-f",
+				receiptPath,
+				errorMessage: "Failed to remove existing receipt \(receiptPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/bin/cp",
+				"-c",
+				receiptHardLinkPath,
+				receiptPath,
+				errorMessage: "Failed to copy receipt to \(receiptPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/usr/sbin/chown",
+				"0:0",
+				receiptPath,
+				errorMessage: "Failed to set owner of receipt \(receiptPath)",
+			)
+			_ = try await run(
+				.path("/usr/bin/sudo"),
+				"/bin/chmod",
+				"644",
+				receiptPath,
+				errorMessage: "Failed to set permissions of receipt \(receiptPath)",
+			)
 		} catch {
-			throw MASError.error( // editorconfig-checker-disable
-				"""
-				Failed to copy receipt for \(appNameAndVersion) from \(receiptHardLinkURL.filePath.quoted) to\
-				 \(receiptURL.filePath.quoted)
-				""", // editorconfig-checker-enable
+			throw MASError.error(
+				"Failed to copy receipt for \(appNameAndVersion) from \(receiptHardLinkPath.quoted) to \(receiptPath.quoted)",
 				cause: error,
 			)
 		}
@@ -550,4 +582,4 @@ private func deleteTempFolder(containing url: URL?, fileType: String) {
 	}
 }
 
-private let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/
+private let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/ // swiftlint:disable:this file_length

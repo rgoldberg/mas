@@ -36,11 +36,11 @@ extension MAS {
 				throw MASError.noCatalogAppsFound(for: searchTerm)
 			}
 
-			try await run(installedApps: installedApps, adamID: adamID)
+			await run(installedApps: installedApps, adamID: adamID)
 		}
 
-		private func run(installedApps: [InstalledApp], adamID: ADAMID) async throws {
-			try await AppStore.install.apps(
+		private func run(installedApps: [InstalledApp], adamID: ADAMID) async {
+			await AppStore.install.apps(
 				withADAMIDs: [adamID],
 				force: forceOptionGroup.force,
 				installedApps: installedApps,
