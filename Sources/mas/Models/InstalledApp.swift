@@ -320,8 +320,13 @@ func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async 
 	await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
 }
 
-@MainActor
 private func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async -> [InstalledApp] {
+	await unsortedInstalledApps(matching: metadataQuery, withFullJSON: withFullJSON)
+		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
+}
+
+@MainActor
+private func unsortedInstalledApps(matching metadataQuery: String, withFullJSON: Bool) async -> [InstalledApp] {
 	let query = NSMetadataQuery()
 	query.predicate = .init(format: metadataQuery)
 	query.searchScopes = applicationsFolderURLs
@@ -331,9 +336,7 @@ private func installedApps(matching metadataQuery: String, withFullJSON: Bool = 
 		break
 	}
 	query.stop()
-	return query.results
-		.compactMap { ($0 as? NSMetadataItem).map { .init(for: $0, withFullJSON: withFullJSON) } }
-		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
+	return query.results.compactMap { ($0 as? NSMetadataItem).map { .init(for: $0, withFullJSON: withFullJSON) } }
 }
 
 // swiftformat:disable:next docComments
