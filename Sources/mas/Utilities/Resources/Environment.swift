@@ -5,12 +5,14 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+internal import Configuration
 internal import Foundation
 
 struct Environment {
 	@TaskLocal
 	static var current = Self()
 
+	var configReader: ConfigReader
 	@Required(URL(string: "https://itunes.apple.com/lookup"))
 	var lookupURL
 	@Required(URL(string: "https://itunes.apple.com/search"))
@@ -20,11 +22,13 @@ struct Environment {
 	let searchForAppsMatchingSearchTerm: @Sendable (String) async throws -> [CatalogApp]
 
 	init(
+		configReader: ConfigReader = .init(provider: EnvironmentVariablesProvider()),
 		dataFrom: // swiftformat:disable:next indent
 			@escaping @Sendable (URL) async throws -> (Data, URLResponse) = URLSession(configuration: .ephemeral).data,
 		lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp = lookup,
 		searchForAppsMatchingSearchTerm: @escaping @Sendable (String) async throws -> [CatalogApp] = search,
 	) {
+		self.configReader = configReader
 		self.dataFrom = dataFrom
 		self.lookupAppFromAppID = lookupAppFromAppID
 		self.searchForAppsMatchingSearchTerm = searchForAppsMatchingSearchTerm

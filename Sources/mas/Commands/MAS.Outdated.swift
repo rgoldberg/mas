@@ -11,14 +11,14 @@ internal import ArgumentParserConfiguration
 extension MAS {
 	/// Outputs a list of installed apps which have updates available to be
 	/// installed from the App Store.
+	@ConfigDefaults(reader: Environment.current.configReader)
 	struct Outdated: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
 			abstract: "List pending app updates from the App Store",
 		)
 
 		@ParentCommand // swiftlint:disable:next unused_declaration
-		private var parent: MAS // periphery:ignore
-		@ConfigDefault
+		private var parent: MAS
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup

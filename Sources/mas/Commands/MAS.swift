@@ -6,7 +6,9 @@
 //
 
 internal import ArgumentParser
+private import Configuration
 internal import Foundation
+private import SystemPackage
 
 @main
 struct MAS: AsyncParsableCommand {
@@ -45,15 +47,32 @@ struct MAS: AsyncParsableCommand {
 
 	private static func main(_ arguments: [String]?) async { // swiftlint:disable:this discouraged_optional_collection
 		do {
-			try? ProcessInfo.processInfo.dropRoot()
-			let command = try await asyncParseAsRoot(arguments)
-			if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
-				try await main(command)
-			} else {
-				try main(command)
+			let errorCount = try await Environment.$current.withValue(
+				.init(
+					configReader: .init(
+						providers: [
+							EnvironmentVariablesProvider(),
+							try await FileProvider<YAMLSnapshot>(
+								filePath: .init(
+									URL.applicationSupportDirectory
+										.appending(path: "mas/mas.yaml", directoryHint: .notDirectory)
+										.filePath,
+								),
+								allowMissing: true,
+							),
+						],
+					),
+				),
+			) {
+				try? ProcessInfo.processInfo.dropRoot()
+				let command = try await asyncParseAsRoot(arguments)
+				if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
+					try await main(command)
+				} else {
+					try main(command)
+				}
+				return printer.errorCount
 			}
-
-			let errorCount = printer.errorCount
 			if errorCount > 0 {
 				throw ExitCode(errorCount >= .init(Int32.max) ? .max : .init(errorCount))
 			}
