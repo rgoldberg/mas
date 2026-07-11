@@ -270,7 +270,7 @@ func installedApps(
 		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
 	{
 		let installedAppPathSet = Set(
-			(appIDs.isEmpty ? installedApps : await mas.installedApps(matching: .init(), withFullJSON: false)).map(\.path),
+			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), withFullJSON: false)).map(\.path),
 		)
 		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
 		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent

@@ -51,14 +51,14 @@ extension String {
 					matrix[i][j] = matrix[i - 1][j - 1]
 				} else {
 					// Standard edit costs
-					let cost = Swift.min(
+					let cost = Swift::min(
 						matrix[i - 1][j] + thisChar.structuralCost, // Deletion
 						matrix[i][j - 1] + thatChar.structuralCost, // Insertion
 						matrix[i - 1][j - 1] + thisChar.substitutionCost(for: thatChar),
 					)
 
 					matrix[i][j] = i > 1 && j > 1 && this[i - 1] == that[j - 2] && this[i - 2] == that[j - 1] // Transposition
-						? Swift.min(cost, matrix[i - 2][j - 2] + 0.4)
+						? min(cost, matrix[i - 2][j - 2] + 0.4)
 						: cost
 				}
 			}

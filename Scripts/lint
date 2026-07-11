@@ -48,7 +48,7 @@ swiftlint --strict --quiet --reporter relative-path
 ((exit_status |= ${?}))
 
 # shellcheck disable=SC1046,SC1047,SC1072,SC1073
-if is-at-least 6.3 "${${$(swift --version 2>/dev/null)##( |[[:alpha:]])##}%% *}" && ! [[ -v 'received_flag[-A]' ]]; then
+if ! [[ -v 'received_flag[-A]' ]]; then
 	printf -- $'--> 🔬 SwiftLint Analyze\n'
 	# shellcheck disable=SC1036
 	swiftlint analyze --strict --quiet --reporter relative-path --compiler-log-path\

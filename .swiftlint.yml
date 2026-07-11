@@ -136,9 +136,5 @@ unused_import:
     - _DarwinFoundation1
     - _DarwinFoundation2
     - _DarwinFoundation3
-  - module: Swift
-    allowed_transitive_imports:
-    - _Concurrency
-    - _StringProcessing
 vertical_whitespace_between_cases:
   separation: never

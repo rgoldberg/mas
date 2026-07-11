@@ -143,11 +143,11 @@ struct Printer {
 		let formattedPrefix = prefix.formatted(with: format, for: fileHandle) // swiftformat:enable indent
 		print(
 			items.first.map { item in
-				["\(formattedPrefix) \(mas.indent(item, with: indent))"]
-					+ items.dropFirst().map { mas.indent($0, with: indent) }
+				["\(formattedPrefix) \(mas::indent(item, with: indent))"]
+					+ items.dropFirst().map { mas::indent($0, with: indent) }
 			}
 				?? [formattedPrefix],
-			separator: mas.indent(separator, with: indent),
+			separator: mas::indent(separator, with: indent),
 			terminator: terminator,
 			to: fileHandle,
 		)

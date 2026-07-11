@@ -1,4 +1,4 @@
-// swift-tools-version:6.2
+// swift-tools-version:6.3
 
 private import PackageDescription
 
@@ -23,7 +23,7 @@ _ = Package(
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
 		.package(url: "https://github.com/apple/swift-atomics", from: "1.3.1"),
 		.package(url: "https://github.com/apple/swift-collections", from: "1.6.0"),
-		.package(url: "https://github.com/attaswift/BigInt", from: "5.7.0"),
+		.package(url: "https://github.com/attaswift/BigInt", from: "6.0.0"),
 		.package(url: "https://github.com/rarestype/swift-json", from: "3.5.0"),
 		.package(url: "https://github.com/scinfu/SwiftSoup", from: "2.13.6"),
 		.package(url: "https://github.com/swiftlang/swift-subprocess", from: "0.5.0"),

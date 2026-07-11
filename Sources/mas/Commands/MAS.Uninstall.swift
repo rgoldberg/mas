@@ -78,7 +78,7 @@ extension MAS {
 						)
 						.filePath
 					}
-					_ = try await mas.run(
+					_ = try await mas::run(
 						.path("/usr/bin/sudo"),
 						"/bin/mv",
 						appPath,

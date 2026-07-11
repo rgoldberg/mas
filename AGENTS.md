@@ -7,8 +7,8 @@ Read it before making repository changes.
 
 ## Minimum Versions
 
-- **Swift:** 6.2
-- **Xcode:** 26
+- **Swift:** 6.3
+- **Xcode:** 26.4
 - **macOS:** 13
 
 ## Quick Entry Points

@@ -8,14 +8,14 @@ development of `mas`, a command-line interface for the Mac App Store.
 - **Name:** `mas`
 - **Description:** A CLI for the Mac App Store, designed for scripting &
   automation.
-- **Language:** Swift 6.2 (using Swift Argument Parser)
+- **Language:** Swift 6.3 (using Swift Argument Parser)
 - **Target OS:** macOS 13+
 - **Project Type:** SwiftPM project
 
 ## Technical Stack
 
-- **Swift:** 6.2+ (Check [.swift-version](.swift-version))
-- **Xcode:** 26+ (Check [.xcode-version](.xcode-version))
+- **Swift:** 6.3+ (Check [.swift-version](.swift-version))
+- **Xcode:** 26.4+ (Check [.xcode-version](.xcode-version))
 - **macOS:** 13+ (Check [Package.swift](Package.swift))
 - **Private Frameworks:** Uses `CommerceKit` & `StoreFoundation` for App Store
   integration only where public APIs are insufficient.

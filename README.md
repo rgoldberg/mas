@@ -3,7 +3,7 @@
 [![current version](https://img.shields.io/github/v/release/mas-cli/mas.svg?style=for-the-badge)](https://github.com/mas-cli/mas/releases/latest)
 [![supported OS: macOS 13+](https://img.shields.io/badge/Supported_OS-macOS_13%2B-teal?style=for-the-badge)](Package.swift)
 [![license: MIT](https://img.shields.io/badge/license-MIT-750014.svg?style=for-the-badge)](LICENSE)
-[![language: Swift 6.2](https://img.shields.io/badge/language-Swift_6.2-F05138.svg?style=for-the-badge)](https://www.swift.org)
+[![language: Swift 6.3](https://img.shields.io/badge/language-Swift_6.3-F05138.svg?style=for-the-badge)](https://www.swift.org)
 [![build, test & lint status](https://img.shields.io/github/actions/workflow/status/mas-cli/mas/build-test.yaml?label=build,%20test%20%26%20lint&style=for-the-badge)](
   https://github.com/mas-cli/mas/actions/workflows/build-test.yaml?query=branch%3Amain
 )
@@ -93,12 +93,12 @@ Detailed documentation is available via `man mas` & `mas --help`.
 
 <!--markdownlint-disable line-length-->
 <!--editorconfig-checker-disable-->
-| Action                                                                  | Command                      |
-|:------------------------------------------------------------------------|:-----------------------------|
-| Build                                                                   | `Scripts/build` or Xcode 26+ |
-| Set up zsh wrapper                                                      | `Scripts/setup_libexec`      |
-| Run zsh wrapper                                                         | `Scripts/mas`                |
-| Test ([Swift Testing](https://developer.apple.com/xcode/swift-testing)) | `Scripts/test`               |
+| Action                                                                  | Command                        |
+|:------------------------------------------------------------------------|:-------------------------------|
+| Build                                                                   | `Scripts/build` or Xcode 26.4+ |
+| Set up zsh wrapper                                                      | `Scripts/setup_libexec`        |
+| Run zsh wrapper                                                         | `Scripts/mas`                  |
+| Test ([Swift Testing](https://developer.apple.com/xcode/swift-testing)) | `Scripts/test`                 |
 <!--editorconfig-checker-enable-->
 <!--markdownlint-enable line-length-->
 

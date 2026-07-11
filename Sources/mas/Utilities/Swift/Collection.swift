@@ -62,7 +62,7 @@ extension Collection where Element: Sendable {
 			}
 
 			let count = count
-			for _ in 0..<Swift.min(count, maxConcurrentTaskCount) {
+			for _ in 0..<Swift::min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
 
@@ -87,7 +87,7 @@ extension Collection where Element: Sendable {
 			}
 
 			let count = count
-			for _ in 0..<Swift.min(count, maxConcurrentTaskCount) {
+			for _ in 0..<Swift::min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
 
