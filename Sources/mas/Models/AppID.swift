@@ -5,24 +5,15 @@
 // Copyright © 2024 mas-cli. All rights reserved.
 //
 
-enum AppID: CustomStringConvertible {
+enum AppID {
 	case adamID(ADAMID)
 	case bundleID(String)
-
-	var description: String {
-		switch self {
-		case let .adamID(adamID):
-			"ADAM ID \(adamID)"
-		case let .bundleID(bundleID):
-			"bundle ID \(bundleID)"
-		}
-	}
 
 	var notInstalledMessage: String {
 		"No installed apps with \(self)"
 	}
 
-	init(from string: String, forceBundleID: Bool = false) {
+	init(from string: String, forceBundleID: Bool) {
 		guard !forceBundleID, let adamID = ADAMID(string) else {
 			self = .bundleID(string)
 			return
@@ -32,10 +23,22 @@ enum AppID: CustomStringConvertible {
 	}
 }
 
+extension AppID: CustomStringConvertible { // swiftlint:disable:this file_types_order
+	var description: String {
+		switch self {
+		case let .adamID(adamID):
+			"ADAM ID \(adamID)"
+		case let .bundleID(bundleID):
+			"bundle ID \(bundleID)"
+		}
+	}
+}
+
 extension [AppID] { // swiftlint:disable:this file_types_order
 	var catalogApps: [CatalogApp] {
 		get async {
-			await concurrentCompactMap(attemptingTo: "lookup app for", Environment.current.lookupAppFromAppID)
+			let lookupAppFromAppID = Environment.current.lookupAppFromAppID
+			return await concurrentCompactMap(attemptingTo: "lookup app for", lookupAppFromAppID)
 		}
 	}
 }
