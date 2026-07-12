@@ -28,8 +28,7 @@ struct InstalledApp {
 		lazyJSONObject.value
 	}
 
-	fileprivate init(for valueByAttribute: [String: Any]) {
-		adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID ?? 0
+	fileprivate init(for valueByAttribute: [String: Any]) async {
 		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
 		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
 		path = valueByAttribute[NSMetadataItemPathKey].map { pathAny in
@@ -39,7 +38,21 @@ struct InstalledApp {
 			?? ""
 		version = .init(describing: valueByAttribute[NSMetadataItemVersionKey] ?? "")
 
-		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
+		let (adamID, adamIDKeyValue) = if let adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID {
+			(adamID, [JSON.Object.Key: JSON.Node]())
+		} else if
+			let adamID = await URL(folderPath: path)
+				.appending(path: "Wrapper/iTunesMetadata.plist", directoryHint: .notDirectory)
+				.iTunesMetadata?
+				.adamID
+		{
+			(adamID, ["adamID": .number(adamID)])
+		} else {
+			(0, .init())
+		}
+		self.adamID = adamID
+
+		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) } + adamIDKeyValue)
 		let jsonObjectRaw = jsonObjectRaw
 		let name = name
 		lazyJSONObject = .init(
@@ -62,10 +75,20 @@ struct InstalledApp {
 	}
 }
 
-extension InstalledApp: CustomStringConvertible {
+extension InstalledApp: CustomStringConvertible { // swiftlint:disable:this file_types_order
 	var description: String {
 		lazyJSON.value
 	}
+}
+
+private struct ITunesMetadata: Decodable { // swiftlint:disable:this one_declaration_per_file
+	enum CodingKeys: String, CodingKey {
+		case adamID = "itemId" // swiftformat:disable:this acronyms
+		case bundleID = "softwareVersionBundleId"
+	}
+
+	let adamID: ADAMID
+	let bundleID: String
 }
 
 private extension JSON.Node {
@@ -228,7 +251,16 @@ private extension JSON.Key {
 }
 
 private extension URL {
-	var installedAppURLs: [Self] {
+	var iTunesMetadata: ITunesMetadata? { // TODO: not async?
+		get async {
+			await Task.detached(priority: .userInitiated) {
+				try? propertyListDecoder.decode(ITunesMetadata.self, from: try Data(contentsOf: self, options: .mappedIfSafe))
+			}
+			.value
+		}
+	}
+
+	func appSubpathURLs(for subpath: String) -> [Self] {
 		FileManager.default
 			.enumerator(at: self, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])
 			.map { enumerator in
@@ -242,10 +274,8 @@ private extension URL {
 					}
 
 					enumerator.skipDescendants()
-					return try? url.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
-						.resourceValues(forKeys: [.fileSizeKey])
-						.fileSize
-						.flatMap { $0 > 0 ? url : nil }
+					let queryURL = url.appending(path: subpath)
+					return try? queryURL.resourceValues(forKeys: [.fileSizeKey]).fileSize.flatMap { $0 > 0 ? queryURL : nil }
 				}
 			}
 			?? .init()
@@ -271,8 +301,9 @@ func installedApps(
 	{
 		let installedAppPathSet = Set(
 			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), withFullJSON: false)).map(\.path),
-		)
-		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
+		) // TODO: What about iPadOS & iOS in next line?
+		for installedAppPath in applicationsFolderURLs.flatMap({ $0.appSubpathURLs(for: "Contents/_MASReceipt/receipt") })
+			.map({ $0.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().filePath })
 		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
 			MAS.printer.warning(
 				"Found a likely App Store app that is not indexed in Spotlight in ",
@@ -303,12 +334,56 @@ func installedApps(
 }
 
 func installedApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
-	await unsortedInstalledApps(matching: appIDs, withFullJSON: withFullJSON)
-		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
+	let installedApps =
+		await installedAppDictionaries(matching: appIDs, withFullJSON: withFullJSON).concurrentMap(InstalledApp.init)
+	return await (
+		installedApps + unsortedInstalledApps(
+			matching: .init(
+				appIDs.compactMap { appID in
+					if case let .adamID(adamID) = appID, !installedApps.contains(where: { $0.adamID == adamID }) {
+						adamID
+					} else {
+						nil
+					}
+				},
+			),
+			withFullJSON: withFullJSON,
+		)
+	)
+	.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
+}
+
+private func unsortedInstalledApps(matching unresolvedADAMIDSet: Set<ADAMID>, withFullJSON: Bool)
+async -> [InstalledApp] { // swiftformat:disable:this indent
+	guard !unresolvedADAMIDSet.isEmpty else {
+		return .init()
+	}
+
+	let adamIDByBundleAppID = await applicationsFolderURLs
+		.flatMap { $0.appSubpathURLs(for: "Wrapper/iTunesMetadata.plist") }
+		.concurrentCompactMap { iTunesMetadataURL in
+			await iTunesMetadataURL.iTunesMetadata
+				.flatMap { unresolvedADAMIDSet.contains($0.adamID) ? (AppID.bundleID($0.bundleID), $0.adamID) : nil }
+		}
+		.reduce(into: [AppID: ADAMID]()) { $0[$1.0] = $1.1 }
+	return adamIDByBundleAppID.isEmpty
+		? .init()
+		: await installedAppDictionaries(matching: adamIDByBundleAppID.keys, withFullJSON: withFullJSON)
+			.concurrentMap { installedAppDictionary in
+				await .init(
+					for: (installedAppDictionary[NSMetadataItemCFBundleIdentifierKey] as? String)
+						.flatMap { bundleID in
+							adamIDByBundleAppID[.bundleID(bundleID)]
+								.map { installedAppDictionary.merging(["kMDItemAppStoreAdamID": $0]) { $1 } }
+						}
+						?? installedAppDictionary,
+				)
+			}
 }
 
 @MainActor
-private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
+private func installedAppDictionaries(matching appIDs: some Sequence<AppID>, withFullJSON: Bool)
+async -> [[String: any Sendable]] { // swiftformat:disable:this indent
 	let query = NSMetadataQuery()
 	let predicates = appIDs.map { appID in
 		switch appID {
@@ -320,7 +395,7 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 	}
 	query.predicate = switch predicates.count {
 	case 0:
-		.init(format: "kMDItemAppStoreAdamID LIKE '*'")
+		.init(format: "kMDItemAppStoreAdamID LIKE '*' || kMDItemAppStoreHasMetadataPlist = 1")
 	case 1:
 		predicates[0]
 	default:
@@ -334,24 +409,23 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 	}
 	query.stop()
 	return query.results.compactMap { result in
-		(result as? NSMetadataItem)
-			.flatMap { item in
-				item.values(
-					forAttributes: withFullJSON
-						? item.attributes + [NSMetadataItemPathKey]
-						: [
-							"kMDItemAppStoreAdamID",
-							NSMetadataItemCFBundleIdentifierKey,
-							"_kMDItemDisplayNameWithExtensions",
-							NSMetadataItemPathKey,
-							NSMetadataItemVersionKey,
-						],
-				)
-			}
-			.map(InstalledApp.init)
+		(result as? NSMetadataItem).flatMap { item in
+			item.values(
+				forAttributes: withFullJSON
+					? item.attributes + [NSMetadataItemPathKey]
+					: [
+						"kMDItemAppStoreAdamID",
+						NSMetadataItemCFBundleIdentifierKey,
+						"_kMDItemDisplayNameWithExtensions",
+						NSMetadataItemPathKey,
+						NSMetadataItemVersionKey,
+					],
+			)
+		}
 	}
 }
 
 // swiftformat:disable:next docComments
 // editorconfig-checker-disable-next-line
 private let keyRegex = /^_?kMDItem(?:(FS)|(?:AppStore)?(\p{Upper}(?=\p{Lower})|\p{Upper}+(?=$|\p{Upper}\p{Lower}))?)?/
+private let propertyListDecoder = PropertyListDecoder()

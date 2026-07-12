@@ -68,9 +68,8 @@ extension CatalogApp: JSONDecodable {
 		)
 	}
 
-	fileprivate init?(macDesktopAppObject object: JSON.Object) async throws {
+	fileprivate init(nonMacOSApp object: JSON.Object) async throws {
 		guard
-			try object["supportedDevices"]?.decode(to: [String]?.self)?.contains("MacDesktop-MacDesktop") == true,
 			let appStorePageURLString = try object["trackViewUrl"]?.decode(to: String?.self),
 			let minimumOSVersion = try? await URL(string: appStorePageURLString)
 				.flatMap(
@@ -88,7 +87,8 @@ extension CatalogApp: JSONDecodable {
 					},
 				)
 		else {
-			return nil
+			try self.init(object: object)
+			return
 		}
 
 		var object = object
@@ -308,7 +308,7 @@ private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp 
 	{
 		try .init(object: catalogAppJSONObject)
 	} else {
-		try await catalogAppJSONObjects(from: lookupURL, in: region).first.flatMap(CatalogApp.init)
+		try await catalogAppJSONObjects(from: lookupURL, in: region).first.map(CatalogApp.init)
 			?? { throw MASError.unknownAppID(appID) }()
 	}
 }
@@ -327,7 +327,7 @@ private func search(for term: String, in region: Region) async throws -> [Catalo
 	return macCatalogApps.priorityMerge(
 		try await anyCatalogAppsTask.concurrentCompactMap { catalogAppJSONObject in
 			try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
-				? try await .init(macDesktopAppObject: catalogAppJSONObject)
+				? try await .init(nonMacOSApp: catalogAppJSONObject)
 				: nil
 		},
 	) { $0.name.similarity(to: term) }
