@@ -65,6 +65,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.15.0",\
 			"name":"Things That Go Bump",\
 			"originalVersionReleaseDate":"2019-10-18T07:00:00Z",\
+			"platform":"macOS",\
 			"price":0.99,\
 			"primaryCategoryID":6014,\
 			"primaryCategoryName":"Games",\

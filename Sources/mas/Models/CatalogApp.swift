@@ -133,11 +133,23 @@ private extension JSON.Array {
 
 private extension JSON.Object {
 	var normalized: Self {
-		.init(
-			fields
-				.map { ($0.normalized, $1.normalized) }
-				.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
-		)
+		var kind = String?.none
+		var supportedDevicesJSON = JSON.Node?.none
+		var fields = fields.map { key, value in
+			switch key {
+			case "kind":
+				kind = value.as(String.self)
+			case "supportedDevices":
+				supportedDevicesJSON = value
+			default:
+				break
+			}
+			return (key.normalized, value.normalized)
+		}
+		if let platform = try? Platform(kind: kind, supportedDevicesJSON: supportedDevicesJSON) {
+			fields.append(("platform", .string(.init(describing: platform))))
+		}
+		return .init(fields.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)))
 	}
 }
 

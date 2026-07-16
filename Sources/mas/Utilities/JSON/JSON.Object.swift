@@ -15,7 +15,7 @@ extension JSON.Object {
 
 	subscript(key: JSON.Key) -> JSON.OptionalDecoder<JSON.Key> {
 		.init(key: key, value: self[nodeKey: key])
-	} // periphery:ignore
+	}
 
 	subscript(key: JSON.Key) -> JSON.FieldDecoder<JSON.Key>? {
 		self[nodeKey: key].map { .init(key: key, value: $0) }

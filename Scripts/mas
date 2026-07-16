@@ -43,7 +43,8 @@ try (
 	[
 		($adam_id | pad_spaces($max_adam_id_length)) + $adam_id,
 		.name,
-		"(" + $version'"${new_version_jq-}"' + ")"
+		"(" + $version'"${new_version_jq-}"' + ")",
+		.platform
 	]'"${output_price-}"' |
 	join("\u001f")
 ) catch ("'"${error_prefix}"' Invalid JSON: \(.)\n" | halt_error(1))
@@ -64,7 +65,8 @@ try (
 		"formattedPrice": "Price",
 		"sellerName": "By",
 		"currentVersionReleaseDate": "Released",
-		"minimumOSVersion": "Minimum OS",
+		"platform": "Platform",
+		"minimumOSVersion": "Min macOS",
 		"fileSizeBytes": "Size",
 		"appStorePageURL": "From"
 	} as $key_map |

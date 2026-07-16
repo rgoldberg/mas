@@ -64,6 +64,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.13.0",\
 			"name":"Things 3",\
 			"originalVersionReleaseDate":"2017-05-18T16:42:04Z",\
+			"platform":"macOS",\
 			"price":49.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -118,6 +119,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.12",\
 			"name":"TickTick: Things & Tasks To Do",\
 			"originalVersionReleaseDate":"2016-03-04T06:37:31Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -175,6 +177,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.6",\
 			"name":"Simple Antnotes",\
 			"originalVersionReleaseDate":"2014-03-28T12:49:14Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -248,6 +251,7 @@ private extension MASTests {
 			"minimumOSVersion":"11.0",\
 			"name":"Random: Lists & Decision Maker",\
 			"originalVersionReleaseDate":"2016-07-05T22:00:04Z",\
+			"platform":"Catalyst",\
 			"price":0.00,\
 			"primaryCategoryID":6012,\
 			"primaryCategoryName":"Lifestyle",\
@@ -372,6 +376,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.10",\
 			"name":"Task Planner - To Do List",\
 			"originalVersionReleaseDate":"2016-01-07T00:04:36Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6000,\
 			"primaryCategoryName":"Business",\
@@ -423,6 +428,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.10",\
 			"name":"Clear – Tasks, Reminders & To-Do Lists",\
 			"originalVersionReleaseDate":"2012-11-08T08:00:00Z",\
+			"platform":"macOS",\
 			"price":9.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -493,6 +499,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.12",\
 			"name":"Focus To-Do: Pomodoro & Tasks",\
 			"originalVersionReleaseDate":"2017-08-02T03:45:26Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -563,6 +570,7 @@ private extension MASTests {
 			"minimumOSVersion":"13.0",\
 			"name":"Planny 3 - Smart To Do List",\
 			"originalVersionReleaseDate":"2017-10-13T19:16:40Z",\
+			"platform":"Catalyst",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -679,6 +687,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.6.6",\
 			"name":"To-do Lists",\
 			"originalVersionReleaseDate":"2011-03-01T03:09:22Z",\
+			"platform":"macOS",\
 			"price":4.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -743,6 +752,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.14",\
 			"name":"OmniFocus 3",\
 			"originalVersionReleaseDate":"2018-09-24T12:28:36Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -807,6 +817,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.14",\
 			"name":"Focus - Time Management",\
 			"originalVersionReleaseDate":"2013-12-19T19:16:50Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
@@ -870,6 +881,7 @@ private extension MASTests {
 			"minimumOSVersion":"10.10",\
 			"name":"1Focus: Website & App Blocker",\
 			"originalVersionReleaseDate":"2015-03-15T05:54:46Z",\
+			"platform":"macOS",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\

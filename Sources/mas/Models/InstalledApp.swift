@@ -28,7 +28,7 @@ struct InstalledApp {
 		lazyJSONObject.value
 	}
 
-	fileprivate init(for valueByAttribute: [String: Any]) async {
+	fileprivate init(for valueByAttribute: [String: Any]) {
 		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
 		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
 		path = valueByAttribute[NSMetadataItemPathKey].map { pathAny in
@@ -38,10 +38,11 @@ struct InstalledApp {
 			?? ""
 		version = .init(describing: valueByAttribute[NSMetadataItemVersionKey] ?? "")
 
+		let url = URL(folderPath: path)
 		let (adamID, adamIDKeyValue) = if let adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID {
 			(adamID, [JSON.Object.Key: JSON.Node]())
 		} else if
-			let adamID = await URL(folderPath: path)
+			let adamID = url
 				.appending(path: "Wrapper/iTunesMetadata.plist", directoryHint: .notDirectory)
 				.iTunesMetadata?
 				.adamID
@@ -55,10 +56,15 @@ struct InstalledApp {
 		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) } + adamIDKeyValue)
 		let jsonObjectRaw = jsonObjectRaw
 		let name = name
+		let isNeitherMacNorCatalyst = valueByAttribute["kMDItemAppStoreHasMetadataPlist"] as? Int == 1
 		lazyJSONObject = .init(
 			.init(
-				(jsonObjectRaw.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
-					.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
+				(
+					jsonObjectRaw.fields.map { ($0.normalized, $1) }
+						+ [("name", .string(name))]
+						+ [("platform", .string(.init(describing: url.platform(isNeitherMacNorCatalyst: isNeitherMacNorCatalyst))))]
+				)
+				.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
 			),
 		)
 		let lazyJSONObject = lazyJSONObject
@@ -251,13 +257,19 @@ private extension JSON.Key {
 }
 
 private extension URL {
-	var iTunesMetadata: ITunesMetadata? { // TODO: not async?
-		get async {
-			await Task.detached(priority: .userInitiated) {
-				try? propertyListDecoder.decode(ITunesMetadata.self, from: try Data(contentsOf: self, options: .mappedIfSafe))
-			}
-			.value
+	var iTunesMetadata: ITunesMetadata? { // TODO: async?
+		try? propertyListDecoder.decode(ITunesMetadata.self, from: try .init(contentsOf: self, options: .mappedIfSafe))
+	}
+
+	func platform(isNeitherMacNorCatalyst: Bool) -> Platform { // TODO: async?
+		guard // swiftformat:disable:this wrap wrapArguments
+			let supportedDeviceFamilyIDs = Bundle(url: self)?.infoDictionary?["UIDeviceFamily"] as? [Int],
+			!supportedDeviceFamilyIDs.isEmpty
+		else {
+			return .macOS
 		}
+
+		return !isNeitherMacNorCatalyst ? .macCatalyst : supportedDeviceFamilyIDs.contains(2) ? .iPadOS : .iOS
 	}
 
 	func appSubpathURLs(for subpath: String) -> [Self] {
@@ -362,7 +374,7 @@ async -> [InstalledApp] { // swiftformat:disable:this indent
 	let adamIDByBundleAppID = await applicationsFolderURLs
 		.flatMap { $0.appSubpathURLs(for: "Wrapper/iTunesMetadata.plist") }
 		.concurrentCompactMap { iTunesMetadataURL in
-			await iTunesMetadataURL.iTunesMetadata
+			iTunesMetadataURL.iTunesMetadata
 				.flatMap { unresolvedADAMIDSet.contains($0.adamID) ? (AppID.bundleID($0.bundleID), $0.adamID) : nil }
 		}
 		.reduce(into: [AppID: ADAMID]()) { $0[$1.0] = $1.1 }
@@ -370,7 +382,7 @@ async -> [InstalledApp] { // swiftformat:disable:this indent
 		? .init()
 		: await installedAppDictionaries(matching: adamIDByBundleAppID.keys, withFullJSON: withFullJSON)
 			.concurrentMap { installedAppDictionary in
-				await .init(
+				.init(
 					for: (installedAppDictionary[NSMetadataItemCFBundleIdentifierKey] as? String)
 						.flatMap { bundleID in
 							adamIDByBundleAppID[.bundleID(bundleID)]
@@ -419,6 +431,7 @@ async -> [[String: any Sendable]] { // swiftformat:disable:this indent
 						"_kMDItemDisplayNameWithExtensions",
 						NSMetadataItemPathKey,
 						NSMetadataItemVersionKey,
+						"kMDItemAppStoreHasMetadataPlist",
 					],
 			)
 		}
