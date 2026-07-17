@@ -25,7 +25,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 
 	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool) async -> [OutdatedApp] {
 		considerAllOutdated
-			? await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON)
+			? await installedAppsOptionGroup.installedApps(onlyDeployable: accuracy == .accurate, withFullJSON: withFullJSON)
 				.map { .init(installedApp: $0, newVersion: "") }
 			: await outdatedApps(withFullJSON: withFullJSON)
 	}
@@ -61,35 +61,37 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 			}
 		}
 
-		return await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON).concurrentCompactMap(
-			accuracy == .accurate
-				? { @Sendable installedApp in
-					if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
-						return nil
-					}
-
-					let newVersionGate = OSAllocatedUnfairLock(initialState: String?.none)
-					do {
-						try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
-							if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
-								newVersionGate.withLock { $0 = appStoreVersion }
-							}
-							return true
+		return await installedAppsOptionGroup
+			.installedApps(onlyDeployable: accuracy == .accurate, withFullJSON: withFullJSON)
+			.concurrentCompactMap(
+				accuracy == .accurate
+					? { @Sendable installedApp in
+						if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
+							return nil
 						}
-					} catch is CancellationError {
-						// Fallthrough
-					} catch {
-						MAS.printer.error(error: error)
+
+						let newVersionGate = OSAllocatedUnfairLock(initialState: String?.none)
+						do {
+							try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
+								if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
+									newVersionGate.withLock { $0 = appStoreVersion }
+								}
+								return true
+							}
+						} catch is CancellationError {
+							// Fallthrough
+						} catch {
+							MAS.printer.error(error: error)
+						}
+						return newVersionGate.withLock(\.self).map { .init(installedApp: installedApp, newVersion: $0) }
 					}
-					return newVersionGate.withLock(\.self).map { .init(installedApp: installedApp, newVersion: $0) }
-				}
-				: { @Sendable installedApp in
-					await installableCatalogApp(from: installedApp).flatMap { catalogApp in
-						UniversalSemVer(rawValue: installedApp.version)
-							.compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
-							== .orderedAscending ? .init(installedApp: installedApp, newVersion: catalogApp.version) : nil
-					}
-				},
-		)
+					: { @Sendable installedApp in
+						await installableCatalogApp(from: installedApp).flatMap { catalogApp in
+							UniversalSemVer(rawValue: installedApp.version)
+								.compareSemVerAndBuild(to: .init(rawValue: catalogApp.version))
+								== .orderedAscending ? .init(installedApp: installedApp, newVersion: catalogApp.version) : nil
+						}
+					},
+			)
 	}
 }

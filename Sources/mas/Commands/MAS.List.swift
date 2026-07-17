@@ -21,8 +21,8 @@ extension MAS {
 
 		func run() async {
 			run(
-				installedApps: // swiftformat:disable:next indent
-					await installedAppsOptionGroup.installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON),
+				installedApps: await installedAppsOptionGroup
+					.installedApps(onlyDeployable: false, withFullJSON: outputFormatOptionGroup.shouldOutputJSON),
 			)
 		}
 

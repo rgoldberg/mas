@@ -17,8 +17,8 @@ struct InstalledAppsOptionGroup: ParsableArguments {
 		appIDStrings.map { .init(from: $0, forceBundleID: forceBundleIDOptionGroup.forceBundleID) }
 	}
 
-	func installedApps(withFullJSON: Bool) async -> [InstalledApp] {
-		await mas::installedApps(withAppIDs: appIDs, withFullJSON: withFullJSON) { appID in
+	func installedApps(onlyDeployable: Bool, withFullJSON: Bool) async -> [InstalledApp] {
+		await mas::installedApps(withAppIDs: appIDs, onlyDeployable: onlyDeployable, withFullJSON: withFullJSON) { appID in
 			MAS.printer.error("Failed to find installed app with \(appID)")
 		}
 	}

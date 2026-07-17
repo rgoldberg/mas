@@ -296,10 +296,11 @@ private extension URL {
 
 func installedApps(
 	withAppIDs appIDs: [AppID],
+	onlyDeployable: Bool,
 	withFullJSON: Bool,
 	unresolvedAppIDHandler handleUnresolvedAppID: (AppID) -> Void,
 ) async -> [InstalledApp] {
-	let installedApps = await installedApps(matching: appIDs, withFullJSON: withFullJSON)
+	let installedApps = await installedApps(matching: appIDs, onlyDeployable: onlyDeployable, withFullJSON: withFullJSON)
 	let unresolvedAppIDs = appIDs.filter { appID in
 		if installedApps.contains(where: { $0.matches(appID) }) {
 			return false
@@ -312,7 +313,12 @@ func installedApps(
 		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
 	{
 		let installedAppPathSet = Set(
-			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), withFullJSON: false)).map(\.path),
+			(
+				appIDs.isEmpty
+					? installedApps
+					: await mas::installedApps(matching: .init(), onlyDeployable: onlyDeployable, withFullJSON: false)
+			)
+				.map(\.path), // swiftformat:disable:this indent
 		) // TODO: What about iPadOS & iOS in next line?
 		for installedAppPath in applicationsFolderURLs.flatMap({ $0.appSubpathURLs(for: "Contents/_MASReceipt/receipt") })
 			.map({ $0.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().filePath })
@@ -345,9 +351,10 @@ func installedApps(
 	return appIDs.isEmpty ? installedApps.filter { $0.adamID != 0 } : installedApps // Remove TestFlight apps
 }
 
-func installedApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
+func installedApps(matching appIDs: [AppID], onlyDeployable: Bool, withFullJSON: Bool) async -> [InstalledApp] {
 	let installedApps =
-		await installedAppDictionaries(matching: appIDs, withFullJSON: withFullJSON).concurrentMap(InstalledApp.init)
+		await installedAppDictionaries(matching: appIDs, onlyDeployable: onlyDeployable, withFullJSON: withFullJSON)
+			.concurrentMap(InstalledApp.init)
 	return await (
 		installedApps + unsortedInstalledApps(
 			matching: .init(
@@ -380,21 +387,25 @@ async -> [InstalledApp] { // swiftformat:disable:this indent
 		.reduce(into: [AppID: ADAMID]()) { $0[$1.0] = $1.1 }
 	return adamIDByBundleAppID.isEmpty
 		? .init()
-		: await installedAppDictionaries(matching: adamIDByBundleAppID.keys, withFullJSON: withFullJSON)
-			.concurrentMap { installedAppDictionary in
-				.init(
-					for: (installedAppDictionary[NSMetadataItemCFBundleIdentifierKey] as? String)
-						.flatMap { bundleID in
-							adamIDByBundleAppID[.bundleID(bundleID)]
-								.map { installedAppDictionary.merging(["kMDItemAppStoreAdamID": $0]) { $1 } }
-						}
-						?? installedAppDictionary,
-				)
-			}
+		: await installedAppDictionaries(
+			matching: adamIDByBundleAppID.keys,
+			onlyDeployable: false,
+			withFullJSON: withFullJSON,
+		)
+		.concurrentMap { installedAppDictionary in
+			.init(
+				for: (installedAppDictionary[NSMetadataItemCFBundleIdentifierKey] as? String)
+					.flatMap { bundleID in
+						adamIDByBundleAppID[.bundleID(bundleID)]
+							.map { installedAppDictionary.merging(["kMDItemAppStoreAdamID": $0]) { $1 } }
+					}
+					?? installedAppDictionary,
+			)
+		}
 }
 
 @MainActor
-private func installedAppDictionaries(matching appIDs: some Sequence<AppID>, withFullJSON: Bool)
+private func installedAppDictionaries(matching appIDs: some Sequence<AppID>, onlyDeployable: Bool, withFullJSON: Bool)
 async -> [[String: any Sendable]] { // swiftformat:disable:this indent
 	let query = NSMetadataQuery()
 	let predicates = appIDs.map { appID in
@@ -407,7 +418,7 @@ async -> [[String: any Sendable]] { // swiftformat:disable:this indent
 	}
 	query.predicate = switch predicates.count {
 	case 0:
-		.init(format: "kMDItemAppStoreAdamID LIKE '*' || kMDItemAppStoreHasMetadataPlist = 1")
+		.init(format: "kMDItemAppStoreAdamID LIKE '*'\(onlyDeployable ? "" : " || kMDItemAppStoreHasMetadataPlist = 1")")
 	case 1:
 		predicates[0]
 	default:
