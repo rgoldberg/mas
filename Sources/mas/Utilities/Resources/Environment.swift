@@ -15,7 +15,7 @@ struct Environment {
 	var lookupURL
 	@Required(URL(string: "https://itunes.apple.com/search"))
 	var searchURL
-	let dataFrom: @Sendable (URL) async throws -> (Data, URLResponse)
+	let dataFrom: @Sendable (URL) async throws -> (data: Data, response: URLResponse)
 	let lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp
 	let searchForAppsMatchingSearchTerm: @Sendable (String) async throws -> [CatalogApp]
 

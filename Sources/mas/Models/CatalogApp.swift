@@ -75,7 +75,7 @@ extension CatalogApp: JSONDecodable {
 			let minimumOSVersion = try? await URL(string: appStorePageURLString)
 				.flatMap(
 					{ url in
-						try SwiftSoup.parse(try await Environment.current.dataFrom(url).0, appStorePageURLString)
+						try parse(try await Environment.current.dataFrom(url).data, appStorePageURLString)
 							.getElementById("serialized-server-data")? // swiftformat:disable:this acronyms
 							.data()
 							.query(
@@ -119,10 +119,16 @@ private extension JSON.Node {
 		case let .object(object):
 			.object(object.normalized)
 		case let .array(array):
-			.array(.init(array.elements.map(\.normalized)))
+			.array(array.normalized)
 		default:
 			self
 		}
+	}
+}
+
+private extension JSON.Array {
+	var normalized: Self {
+		.init(elements.map(\.normalized))
 	}
 }
 
@@ -286,52 +292,38 @@ private extension JSON.Key {
 }
 
 func lookup(appID: AppID) async throws -> CatalogApp {
-	try await lookup(appID: appID, inRegion: appStoreRegion)
+	try await lookup(appID: appID, in: appStoreRegion)
 }
 
-private func lookup(appID: AppID, inRegion region: Region = appStoreRegion) async throws -> CatalogApp {
+private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp {
 	let queryItem = switch appID {
 	case let .adamID(adamID):
 		URLQueryItem(name: "id", value: .init(adamID))
 	case let .bundleID(bundleID):
 		URLQueryItem(name: "bundleId", value: bundleID)
 	}
+	let lookupURL = Environment.current.lookupURL.appending(queryItems: [queryItem])
 	return if // swiftformat:disable:this wrap wrapArguments
-		let catalogAppJSONObject = try await catalogAppJSONObjects(
-			from: Environment.current.lookupURL,
-			queryItem,
-			inRegion: region,
-		)
-			.first // swiftformat:disable:this indent
+		let catalogAppJSONObject = // swiftformat:disable:next indent
+			try await catalogAppJSONObjects(from: lookupURL.appending(queryItems: macAppsURLQueryItem), in: region).first
 	{
 		try .init(object: catalogAppJSONObject)
 	} else {
-		try await catalogAppJSONObjects(
-			from: Environment.current.lookupURL,
-			queryItem,
-			inRegion: region,
-			additionalQueryItems: .init(),
-		)
-			.first // swiftformat:disable indent
-			.flatMap(CatalogApp.init(macDesktopAppObject:))
+		try await catalogAppJSONObjects(from: lookupURL, in: region).first.flatMap(CatalogApp.init(macDesktopAppObject:))
 			?? { throw MASError.unknownAppID(appID) }()
-	} // swiftformat:enable indent
+	}
 }
 
-func search(for searchTerm: String) async throws -> [CatalogApp] {
-	try await search(for: searchTerm, inRegion: appStoreRegion)
+func search(for term: String) async throws -> [CatalogApp] {
+	try await search(for: term, in: appStoreRegion)
 }
 
-private func search(for searchTerm: String, inRegion region: Region = appStoreRegion) async throws -> [CatalogApp] {
-	let queryItem = URLQueryItem(name: "term", value: searchTerm)
-	async let macCatalogAppsTask = catalogAppJSONObjects(from: Environment.current.searchURL, queryItem, inRegion: region)
-		.map(CatalogApp.init(object:))
-	async let anyCatalogAppsTask = catalogAppJSONObjects(
-		from: Environment.current.searchURL,
-		queryItem,
-		inRegion: region,
-		additionalQueryItems: .init(),
-	)
+private func search(for term: String, in region: Region) async throws -> [CatalogApp] {
+	let searchURL = Environment.current.searchURL.appending(queryItems: [.init(name: "term", value: term)])
+	async let macCatalogAppsTask =
+		catalogAppJSONObjects(from: searchURL.appending(queryItems: macAppsURLQueryItem), in: region)
+			.map(CatalogApp.init(object:))
+	async let anyCatalogAppsTask = catalogAppJSONObjects(from: searchURL, in: region)
 	let macCatalogApps = try await macCatalogAppsTask
 	let adamIDSet = Set(macCatalogApps.map(\.adamID))
 	return macCatalogApps.priorityMerge(
@@ -340,26 +332,17 @@ private func search(for searchTerm: String, inRegion region: Region = appStoreRe
 				? try await .init(macDesktopAppObject: catalogAppJSONObject)
 				: nil
 		},
-	) { $0.name.similarity(to: searchTerm) }
+	) { $0.name.similarity(to: term) }
 }
 
-private func catalogAppJSONObjects(
-	from url: URL,
-	_ queryItem: URLQueryItem,
-	inRegion region: Region,
-	additionalQueryItems: [URLQueryItem] = [.init(name: "entity", value: "desktopSoftware")],
-) async throws -> [JSON.Object] {
+private func catalogAppJSONObjects(from url: URL, in region: Region) async throws -> [JSON.Object] {
 	try await unsafe Environment.current
 		.dataFrom(
-			url.appending(
-				queryItems: [.init(name: "media", value: "software")]
-					+ additionalQueryItems
-					+ [.init(name: "country", value: region), queryItem],
-			),
+			url.appending(queryItems: [.init(name: "media", value: "software"), .init(name: "country", value: region)]),
 		)
-		.0
+		.data
 		.withUnsafeBytes { bufferPointer in
-			try CatalogAppResults(json: .init(parsing: unsafe RawSpan(_unsafeBytes: unsafe bufferPointer))).resultObjects
+			try CatalogAppResults(json: try .init(parsing: unsafe RawSpan(_unsafeBytes: unsafe bufferPointer))).resultObjects
 		}
 }
 
@@ -368,3 +351,4 @@ private let artworkURLRegex = /(?:^artworkUrl|ArtworkUrl)(\d+)/
 private let trackRegex = /((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/ // editorconfig-checker-disable-next-line
 private let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
 private let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
+private let macAppsURLQueryItem = [URLQueryItem(name: "entity", value: "desktopSoftware")]
