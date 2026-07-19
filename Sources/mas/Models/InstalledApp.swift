@@ -28,19 +28,7 @@ struct InstalledApp {
 		lazyJSONObject.value
 	}
 
-	fileprivate init(for item: NSMetadataItem, withFullJSON: Bool) {
-		let valueByAttribute = item.values(
-			forAttributes: withFullJSON
-				? item.attributes + [NSMetadataItemPathKey]
-				: [
-					"kMDItemAppStoreAdamID",
-					NSMetadataItemCFBundleIdentifierKey,
-					"_kMDItemDisplayNameWithExtensions",
-					NSMetadataItemPathKey,
-					NSMetadataItemVersionKey,
-				],
-		)
-			?? .init()
+	fileprivate init(for valueByAttribute: [String: Any]) {
 		adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID ?? 0
 		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
 		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
@@ -346,7 +334,23 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 		break
 	}
 	query.stop()
-	return query.results.compactMap { ($0 as? NSMetadataItem).map { .init(for: $0, withFullJSON: withFullJSON) } }
+	return query.results.compactMap { result in
+		(result as? NSMetadataItem)
+			.flatMap { item in
+				item.values(
+					forAttributes: withFullJSON
+						? item.attributes + [NSMetadataItemPathKey]
+						: [
+							"kMDItemAppStoreAdamID",
+							NSMetadataItemCFBundleIdentifierKey,
+							"_kMDItemDisplayNameWithExtensions",
+							NSMetadataItemPathKey,
+							NSMetadataItemVersionKey,
+						],
+				)
+			}
+			.map(InstalledApp.init(for:))
+	}
 }
 
 // swiftformat:disable:next docComments
