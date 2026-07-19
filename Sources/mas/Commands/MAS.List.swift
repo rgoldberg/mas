@@ -17,14 +17,14 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var installedAppIDsOptionGroup: InstalledAppIDsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func run() async throws {
 			run(installedApps: try await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON))
 		}
 
 		func run(installedApps: [InstalledApp]) {
-			let installedApps = installedApps.filter(for: installedAppIDsOptionGroup.appIDs)
+			let installedApps = installedApps.filter(for: installedAppsOptionGroup.appIDs)
 			guard !installedApps.isEmpty else {
 				printer.warning( // editorconfig-checker-disable
 					"""

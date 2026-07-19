@@ -20,10 +20,10 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var catalogAppIDsOptionGroup: CatalogAppIDsOptionGroup
+		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
 		func run() async {
-			await run(catalogApps: await catalogAppIDsOptionGroup.appIDs.catalogApps)
+			await run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
 		}
 
 		func run(catalogApps: [CatalogApp]) async {

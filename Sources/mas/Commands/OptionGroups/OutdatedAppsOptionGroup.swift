@@ -1,5 +1,5 @@
 //
-// OutdatedAppOptionGroup.swift
+// OutdatedAppsOptionGroup.swift
 // mas
 //
 // Copyright © 2025 mas-cli. All rights reserved.
@@ -9,7 +9,7 @@ internal import ArgumentParser
 private import Atomics
 private import Foundation
 
-struct OutdatedAppOptionGroup: ParsableArguments {
+struct OutdatedAppsOptionGroup: ParsableArguments {
 	@Flag
 	private var accuracy = OutdatedAccuracy.inaccurate // swiftformat:disable:this organizeDeclarations
 	@Flag(
@@ -21,7 +21,7 @@ struct OutdatedAppOptionGroup: ParsableArguments {
 	@Flag(name: .customLong("verbose"), help: "Warn about app IDs unknown to the App Store")
 	private var shouldWarnIfUnknownApp = false // swiftformat:disable:this organizeDeclarations
 	@OptionGroup
-	var installedAppIDsOptionGroup: InstalledAppIDsOptionGroup
+	var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 	func outdatedApps(from installedApps: [InstalledApp]) async -> [OutdatedApp] {
 		@Sendable
@@ -51,7 +51,7 @@ struct OutdatedAppOptionGroup: ParsableArguments {
 			}
 		}
 
-		return await installedApps.filter(for: installedAppIDsOptionGroup.appIDs).concurrentCompactMap(
+		return await installedApps.filter(for: installedAppsOptionGroup.appIDs).concurrentCompactMap(
 			accuracy == .accurate
 			? { @Sendable installedApp in // swiftformat:disable indent
 				if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {

@@ -19,7 +19,7 @@ extension MAS {
 		@OptionGroup
 		private var forceOptionGroup: ForceOptionGroup
 		@OptionGroup
-		private var outdatedAppOptionGroup: OutdatedAppOptionGroup
+		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async throws {
 			try await run(installedApps: try await installedApps().filter(!\.isTestFlight))
@@ -28,9 +28,9 @@ extension MAS {
 		private func run(installedApps: [InstalledApp]) async throws {
 			try await run(
 				outdatedApps: forceOptionGroup.force // swiftformat:disable:next indent
-				? installedApps.filter(for: outdatedAppOptionGroup.installedAppIDsOptionGroup.appIDs)
+				? installedApps.filter(for: outdatedAppsOptionGroup.installedAppsOptionGroup.appIDs)
 					.map { OutdatedApp(installedApp: $0, newVersion: "") } // swiftformat:disable:this indent
-				: await outdatedAppOptionGroup.outdatedApps(from: installedApps),
+				: await outdatedAppsOptionGroup.outdatedApps(from: installedApps),
 			)
 		}
 

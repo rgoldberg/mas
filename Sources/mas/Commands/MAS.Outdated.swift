@@ -18,7 +18,7 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var outdatedAppOptionGroup: OutdatedAppOptionGroup
+		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async throws {
 			await run(
@@ -28,7 +28,7 @@ extension MAS {
 		}
 
 		private func run(installedApps: [InstalledApp]) async {
-			run(outdatedApps: await outdatedAppOptionGroup.outdatedApps(from: installedApps))
+			run(outdatedApps: await outdatedAppsOptionGroup.outdatedApps(from: installedApps))
 		}
 
 		private func run(outdatedApps: [OutdatedApp]) {

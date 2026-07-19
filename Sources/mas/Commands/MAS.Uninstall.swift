@@ -22,10 +22,10 @@ extension MAS {
 		@Flag(name: .customLong("all"), help: "Uninstall all App Store apps")
 		private var isUninstallingAll = false
 		@OptionGroup
-		private var installedAppIDsOptionGroup: InstalledAppIDsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func validate() throws(ValidationError) {
-			if isUninstallingAll != installedAppIDsOptionGroup.appIDs.isEmpty {
+			if isUninstallingAll != installedAppsOptionGroup.appIDs.isEmpty {
 				throw .init(
 					isUninstallingAll
 					? "Cannot specify both --all & app IDs" // swiftformat:disable:this indent
@@ -40,7 +40,7 @@ extension MAS {
 
 		private func run(installedApps: [InstalledApp]) throws {
 			let uninstallingADAMIDByPathOrdered = (
-				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppIDsOptionGroup.appIDs,
+				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs,
 			)
 			.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
 				let uninstallingApps = installedApps.filter { $0.matches(appID) }

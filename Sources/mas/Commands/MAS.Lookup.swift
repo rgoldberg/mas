@@ -22,10 +22,10 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var catalogAppIDsOptionGroup: CatalogAppIDsOptionGroup
+		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
 		func run() async {
-			run(catalogApps: await catalogAppIDsOptionGroup.appIDs.catalogApps)
+			run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
 		}
 
 		func run(catalogApps: [CatalogApp]) {
