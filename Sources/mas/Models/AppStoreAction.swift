@@ -49,14 +49,16 @@ enum AppStoreAction: String {
 	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async {
 		let installedApps = await installedApps(withAppIDs: adamIDs.map(AppID.adamID(_:)), withFullJSON: false) { _ in }
 		await apps(
-			withADAMIDs: adamIDs.filter { adamID in
-				if !force, let installedApp = installedApps.first(where: { $0.adamID == adamID }) {
+			withADAMIDs: force
+				? adamIDs
+				: adamIDs.filter { adamID in
+					guard let installedApp = installedApps.first(where: { $0.adamID == adamID }) else {
+						return true
+					}
+
 					MAS.printer.warning("Already ", performed, " ", installedApp.name, " (", adamID, ")", separator: "")
 					return false
-				}
-
-				return true
-			},
+				},
 		)
 	}
 
