@@ -28,10 +28,6 @@ struct InstalledApp {
 		lazyJSONObject.value
 	}
 
-	var isTestFlight: Bool {
-		adamID == 0
-	}
-
 	fileprivate init(for item: NSMetadataItem, withFullJSON: Bool) {
 		let valueByAttribute = item.values(
 			forAttributes: withFullJSON
@@ -81,20 +77,6 @@ struct InstalledApp {
 extension InstalledApp: CustomStringConvertible {
 	var description: String {
 		lazyJSON.value
-	}
-}
-
-extension [InstalledApp] {
-	func filter(for appIDs: [AppID]) -> [Element] {
-		appIDs.isEmpty
-			? self
-			: appIDs.flatMap { appID in
-				let installedApps = filter { $0.matches(appID) }
-				if installedApps.isEmpty {
-					MAS.printer.error(appID.notInstalledMessage)
-				}
-				return installedApps
-			}
 	}
 }
 
@@ -265,8 +247,8 @@ private extension URL {
 				enumerator.compactMap { item in
 					guard
 						let url = item as? Self,
-						(try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true,
-						url.pathExtension == "app"
+						url.pathExtension == "app",
+						(try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
 					else {
 						return Self?.none
 					}
@@ -282,10 +264,25 @@ private extension URL {
 	}
 }
 
-func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
-	let installedApps = await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
-	if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
-		let installedAppPathSet = Set(installedApps.map(\.path))
+func installedApps(
+	withAppIDs appIDs: [AppID],
+	withFullJSON: Bool = false,
+	unresolvedAppIDHandler handleUnresolvedAppID: (AppID) -> Void,
+) async -> [InstalledApp] {
+	let installedApps = await installedApps(matching: appIDs, withFullJSON: withFullJSON)
+	let unresolvedAppIDs = appIDs.filter { appID in
+		if installedApps.contains(where: { $0.matches(appID) }) {
+			return false
+		}
+		handleUnresolvedAppID(appID)
+		return true
+	}
+	if
+		appIDs.isEmpty || !unresolvedAppIDs.isEmpty,
+		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
+	{
+		let installedAppPathSet =
+			Set((appIDs.isEmpty ? installedApps : await mas.installedApps(matching: .init())).map(\.path))
 		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
 		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
 			MAS.printer.warning(
@@ -313,22 +310,34 @@ func installedApps(withFullJSON: Bool = false) async -> [InstalledApp] {
 			}
 		}
 	}
-	return installedApps
+	// Remove TestFlight apps from global fetch results
+	return appIDs.isEmpty ? installedApps.filter { $0.adamID != 0 } : installedApps
 }
 
-func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async -> [InstalledApp] {
-	await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
-}
-
-private func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async -> [InstalledApp] {
-	await unsortedInstalledApps(matching: metadataQuery, withFullJSON: withFullJSON)
+func installedApps(matching appIDs: [AppID], withFullJSON: Bool = false) async -> [InstalledApp] {
+	await unsortedInstalledApps(matching: appIDs, withFullJSON: withFullJSON)
 		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 }
 
 @MainActor
-private func unsortedInstalledApps(matching metadataQuery: String, withFullJSON: Bool) async -> [InstalledApp] {
+private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
 	let query = NSMetadataQuery()
-	query.predicate = .init(format: metadataQuery)
+	let predicates = appIDs.map { appID in
+		switch appID {
+		case let .adamID(adamID): // swiftlint:disable:next legacy_objc_type
+			NSPredicate(format: "kMDItemAppStoreAdamID = %@", NSNumber(value: adamID))
+		case let .bundleID(bundleID):
+			NSPredicate(format: "kMDItemCFBundleIdentifier = %@", bundleID)
+		}
+	}
+	query.predicate = switch predicates.count {
+	case 0:
+		.init(format: "kMDItemAppStoreAdamID LIKE '*'")
+	case 1:
+		predicates[0]
+	default:
+		NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
+	}
 	query.searchScopes = applicationsFolderURLs
 	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
 	query.start()

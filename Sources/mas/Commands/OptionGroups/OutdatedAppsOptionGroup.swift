@@ -10,23 +10,31 @@ private import Foundation
 
 struct OutdatedAppsOptionGroup: ParsableArguments {
 	@Flag
-	private var accuracy = OutdatedAccuracy.inaccurate // swiftformat:disable:this organizeDeclarations
+	private var accuracy = OutdatedAccuracy.inaccurate
 	@Flag(
 		name: .customLong("check-min-os"),
 		inversion: .prefixedNo,
 		help: "Check if macOS can install latest app version",
 	)
-	private var shouldCheckMinimumOSVersion = true // swiftformat:disable:this organizeDeclarations
+	private var shouldCheckMinimumOSVersion = true
 	@Flag(name: .customLong("verbose"), help: "Warn about app IDs unknown to the App Store")
-	private var shouldWarnIfUnknownApp = false // swiftformat:disable:this organizeDeclarations
+	private var shouldWarnIfUnknownApp = false
 	@OptionGroup
-	var installedAppsOptionGroup: InstalledAppsOptionGroup
+	private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-	func outdatedApps(from installedApps: [InstalledApp]) async -> [OutdatedApp] {
+	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool = false) async -> [OutdatedApp] {
+		considerAllOutdated
+			? await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON)
+				.map { .init(installedApp: $0, newVersion: "") }
+			: await outdatedApps(withFullJSON: withFullJSON)
+	}
+
+	func outdatedApps(withFullJSON: Bool) async -> [OutdatedApp] {
+		let lookupAppFromAppID = Environment.current.lookupAppFromAppID
 		@Sendable
 		func installableCatalogApp(from installedApp: InstalledApp) async -> CatalogApp? {
 			do {
-				let catalogApp = try await Environment.current.lookupAppFromAppID(.bundleID(installedApp.bundleID))
+				let catalogApp = try await lookupAppFromAppID(.bundleID(installedApp.bundleID))
 				return shouldCheckMinimumOSVersion
 					&& UniversalSemVerInt(rawValue: catalogApp.minimumOSVersion).map { minimumOSVersion in
 						ProcessInfo.processInfo.isOperatingSystemAtLeast(
@@ -50,7 +58,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 			}
 		}
 
-		return await installedApps.filter(for: installedAppsOptionGroup.appIDs).concurrentCompactMap(
+		return await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON).concurrentCompactMap(
 			accuracy == .accurate
 				? { @Sendable installedApp in
 					if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {

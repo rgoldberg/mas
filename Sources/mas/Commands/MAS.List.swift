@@ -20,11 +20,13 @@ extension MAS {
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func run() async {
-			run(installedApps: await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON))
+			run(
+				installedApps: // swiftformat:disable:next indent
+					await installedAppsOptionGroup.installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON),
+			)
 		}
 
 		func run(installedApps: [InstalledApp]) {
-			let installedApps = installedApps.filter(for: installedAppsOptionGroup.appIDs)
 			guard !installedApps.isEmpty else {
 				printer.warning( // editorconfig-checker-disable
 					"""

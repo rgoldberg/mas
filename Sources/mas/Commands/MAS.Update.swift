@@ -22,20 +22,10 @@ extension MAS {
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async {
-			await run(installedApps: await installedApps().filter(!\.isTestFlight))
-		}
-
-		private func run(installedApps: [InstalledApp]) async {
-			await run(
-				outdatedApps: forceOptionGroup.force
-					? installedApps.filter(for: outdatedAppsOptionGroup.installedAppsOptionGroup.appIDs)
-						.map { OutdatedApp(installedApp: $0, newVersion: "") }
-					: await outdatedAppsOptionGroup.outdatedApps(from: installedApps),
+			await AppStore.update.apps(
+				withADAMIDs: await outdatedAppsOptionGroup.outdatedApps(considerAllOutdated: forceOptionGroup.force)
+					.map(\.installedApp.adamID),
 			)
-		}
-
-		private func run(outdatedApps: [OutdatedApp]) async {
-			await AppStore.update.apps(withADAMIDs: outdatedApps.map(\.installedApp.adamID))
 		}
 	}
 }

@@ -9,10 +9,6 @@ enum AppID {
 	case adamID(ADAMID)
 	case bundleID(String)
 
-	var notInstalledMessage: String {
-		"No installed apps with \(self)"
-	}
-
 	init(from string: String, forceBundleID: Bool) {
 		guard !forceBundleID, let adamID = ADAMID(string) else {
 			self = .bundleID(string)

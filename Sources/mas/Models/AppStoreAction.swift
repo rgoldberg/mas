@@ -42,11 +42,12 @@ enum AppStoreAction: String {
 		}
 	}
 
-	func apps(withAppIDs appIDs: [AppID], force: Bool, installedApps: [InstalledApp]) async {
-		await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force, installedApps: installedApps)
+	func apps(withAppIDs appIDs: [AppID], force: Bool) async {
+		await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force)
 	}
 
-	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool, installedApps: [InstalledApp]) async {
+	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async {
+		let installedApps = await installedApps(withAppIDs: adamIDs.map(AppID.adamID(_:))) { _ in }
 		await apps(
 			withADAMIDs: adamIDs.filter { adamID in
 				if !force, let installedApp = installedApps.first(where: { $0.adamID == adamID }) {
@@ -222,7 +223,8 @@ enum AppStoreAction: String {
 							)
 						{
 							let appFolderPath = appFolderURL.filePath
-							let installedApps = await installedApps(withADAMID: snapshot.adamID).filter { $0.path != appFolderPath }
+							let installedApps =
+								await installedApps(matching: [.adamID(snapshot.adamID)]).filter { $0.path != appFolderPath }
 							if !installedApps.isEmpty {
 								MAS.printer.warning(
 									"Multiple installations of ",

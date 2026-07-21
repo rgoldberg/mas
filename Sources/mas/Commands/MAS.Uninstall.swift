@@ -27,7 +27,7 @@ extension MAS {
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func validate() throws(ValidationError) {
-			if isUninstallingAll != installedAppsOptionGroup.appIDs.isEmpty {
+			if isUninstallingAll != installedAppsOptionGroup.appIDStrings.isEmpty {
 				throw .init(
 					isUninstallingAll
 						? "Cannot specify both --all & app IDs"
@@ -37,22 +37,13 @@ extension MAS {
 		}
 
 		func run() async {
-			await run(installedApps: await installedApps())
-		}
-
-		private func run(installedApps: [InstalledApp]) async {
-			let uninstallingADAMIDByPathOrdered = (
-				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs,
-			)
-			.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
-				let uninstallingApps = installedApps.filter { $0.matches(appID) }
-				guard !uninstallingApps.isEmpty else {
-					printer.error(appID.notInstalledMessage)
-					return
-				}
-
-				uninstallingADAMIDByPathOrdered.merge(uninstallingApps.map { ($0.path, .init($0.adamID)) }) { $1 }
-			}
+			let installedApps = await installedAppsOptionGroup.installedApps()
+			let uninstallingADAMIDByPathOrdered =
+				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
+					.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
+						uninstallingADAMIDByPathOrdered
+							.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
+					}
 			guard !uninstallingADAMIDByPathOrdered.isEmpty else {
 				return
 			}
