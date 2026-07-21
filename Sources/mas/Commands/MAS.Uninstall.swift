@@ -37,7 +37,7 @@ extension MAS {
 		}
 
 		func run() async {
-			let installedApps = await installedAppsOptionGroup.installedApps()
+			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
 			let uninstallingADAMIDByPathOrdered =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
 					.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in

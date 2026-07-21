@@ -22,7 +22,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 	@OptionGroup
 	private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool = false) async -> [OutdatedApp] {
+	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool) async -> [OutdatedApp] {
 		considerAllOutdated
 			? await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON)
 				.map { .init(installedApp: $0, newVersion: "") }

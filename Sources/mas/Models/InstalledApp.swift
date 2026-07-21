@@ -266,7 +266,7 @@ private extension URL {
 
 func installedApps(
 	withAppIDs appIDs: [AppID],
-	withFullJSON: Bool = false,
+	withFullJSON: Bool,
 	unresolvedAppIDHandler handleUnresolvedAppID: (AppID) -> Void,
 ) async -> [InstalledApp] {
 	let installedApps = await installedApps(matching: appIDs, withFullJSON: withFullJSON)
@@ -281,8 +281,9 @@ func installedApps(
 		appIDs.isEmpty || !unresolvedAppIDs.isEmpty,
 		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
 	{
-		let installedAppPathSet =
-			Set((appIDs.isEmpty ? installedApps : await mas.installedApps(matching: .init())).map(\.path))
+		let installedAppPathSet = Set(
+			(appIDs.isEmpty ? installedApps : await mas.installedApps(matching: .init(), withFullJSON: false)).map(\.path),
+		)
 		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
 		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
 			MAS.printer.warning(
@@ -314,7 +315,7 @@ func installedApps(
 	return appIDs.isEmpty ? installedApps.filter { $0.adamID != 0 } : installedApps
 }
 
-func installedApps(matching appIDs: [AppID], withFullJSON: Bool = false) async -> [InstalledApp] {
+func installedApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
 	await unsortedInstalledApps(matching: appIDs, withFullJSON: withFullJSON)
 		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 }
