@@ -30,7 +30,7 @@ extension MAS {
 		func run(catalogApps: [CatalogApp]) async {
 			await catalogApps.compactMap { catalogApp in
 				guard let sellerURLString = catalogApp.sellerURLString else {
-					printer.error("No seller website available for ADAM ID", catalogApp.adamID)
+					printer.error("Failed to find seller app web page for ADAM ID", catalogApp.adamID)
 					return String?.none
 				}
 

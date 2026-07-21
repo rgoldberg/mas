@@ -276,7 +276,7 @@ enum AppStoreAction: String {
 				if let error {
 					continuation.resume(throwing: error)
 				} else if response?.downloads?.isEmpty != false {
-					continuation.resume(throwing: MASError.error("No downloads initiated for ADAM ID \(adamID)"))
+					continuation.resume(throwing: MASError.error("Failed to initiate download for ADAM ID \(adamID)"))
 				} else {
 					continuation.resume()
 				}
