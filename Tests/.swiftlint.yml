@@ -1,0 +1,9 @@
+#
+# Tests/.swiftlint.yml
+# mas
+#
+# SwiftLint 0.65.0
+#
+---
+disabled_rules:
+- superfluous_disable_command
