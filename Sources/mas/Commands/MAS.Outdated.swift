@@ -16,7 +16,7 @@ extension MAS {
 		)
 
 		@ParentCommand // swiftlint:disable:next unused_declaration
-		private var parent: MAS
+		private var parent: MAS // periphery:ignore
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup

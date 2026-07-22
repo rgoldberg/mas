@@ -12,7 +12,7 @@ struct Environment {
 	@TaskLocal
 	static var current = Self()
 
-	var configReader: ConfigReader
+	var configReader: ConfigReader // periphery:ignore
 	@Required(URL(string: "https://itunes.apple.com/lookup"))
 	var lookupURL
 	@Required(URL(string: "https://itunes.apple.com/search"))
