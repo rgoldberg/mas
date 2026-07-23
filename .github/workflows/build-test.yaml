@@ -50,7 +50,9 @@ jobs:
         echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
 
     - name: 👢 Bootstrap
-      run: Scripts/bootstrap
+      run: |
+        brew untap -fq aws/tap 2>/dev/null || true
+        Scripts/bootstrap
 
     - name: 🕊 Use Swiftly Swift
       if: ${{!startsWith(matrix.runner, 'macos-26')}}
