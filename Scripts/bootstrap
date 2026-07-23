@@ -21,7 +21,7 @@ fi
 brew update -q
 installed_formulae=("${(f)$(brew list --formulae)}")
 readonly -a installed_formulae
-bootstrap_formulae=("${(f)$(brew deps --union "${(f)$(brew bundle list --formulae)}")}")
+bootstrap_formulae=("${(f)$(HOMEBREW_NO_ENV_HINTS=1 brew deps --union "${(f)$(brew bundle list --formulae)}")}")
 readonly -a bootstrap_formulae
 # shellcheck disable=SC2086
 (("${#installed_formulae:*bootstrap_formulae}")) &&
