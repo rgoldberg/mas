@@ -11,8 +11,8 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `searches for slack`() { // swiftlint:disable:this function_body_length
-		let actual = consequencesOf(
+	func `searches for slack`() async throws {
+		let actual = try await consequencesOf(
 			try MAS.main(try MAS.Search.parse(["--json", "things"])) { command in
 				try command.run(catalogApps: try decode(CatalogAppResults.self, fromResource: "things").results)
 			},
@@ -217,7 +217,7 @@ private extension MASTests {
 			"contentRating":"4+",\
 			"currency":"USD",\
 			"currentVersionReleaseDate":"2020-08-29T19:21:51Z",\
-			"description":"Need a random number? Or can’t you decide what to do? Random is a powerful app that will solve all such problems.\\n\\nFeatures:\\n• Number generator (from a range 0 - 999999999)\\n• Letter generator\\n• Dice roller (roll up to 4 regular dices in one go)\\n• A custom item from a list generator\\n• Yes or No \\n• Coin flipper\\n• Card generator\\n• Rock-Paper-Scissors\\n• Map Point\\n\\nGenerate a new random number simply by tapping a ​randomize button or by touching the Apple Watch screen. For those who want a bit of additional exercise, shaking your iOS device will also result in a new random response.\\n\\nUse Force Touch for setting the minimum or maximum values in your Apple Watch app. Same for the number of dices​, cards, and selection of lists.\\n\\nRandom Premium subscription benefits:\\n• Sync: Get access to your data from all your devices.\\n• Themes: Customize the app with various themes and background images.\\n• No advertising.\\n\\nIf you decide to get Random Premium subscription, your purchase will be charged to your iTunes account. 1 month costs $2.99 and 1 year costs $11.99. Active subscriptions will be auto-renewed 24 hours before the expiry date. You can manage subscriptions from Account in iTunes after subscribing, you’ll also be able to cancel the auto-renewing subscription from there at any time. Any unused portion of the free trial period will be forfeited if you purchase a subscription to Random Premium before your trial expires.\\n\\nTerms & Conditions: https://yahenskyi.dev/terms-conditions/\\nPrivacy Policy: https://yahenskyi.dev/privacy-policy/",\
+			"description":"Need a random number? Or can’t you decide what to do? Random is a powerful app that will solve all such problems.\\n\\nFeatures:\\n• Number generator (from a range 0 - 999999999)\\n• Letter generator\\n• Dice roller (roll up to 4 regular dices in one go)\\n• A custom item from a list generator\\n• Yes or No \\n• Coin flipper\\n• Card generator\\n• Rock-Paper-Scissors\\n• Map Point\\n\\nGenerate a new random number simply by tapping a \u{200B}randomize button or by touching the Apple Watch screen. For those who want a bit of additional exercise, shaking your iOS device will also result in a new random response.\\n\\nUse Force Touch for setting the minimum or maximum values in your Apple Watch app. Same for the number of dices\u{200B}, cards, and selection of lists.\\n\\nRandom Premium subscription benefits:\\n• Sync: Get access to your data from all your devices.\\n• Themes: Customize the app with various themes and background images.\\n• No advertising.\\n\\nIf you decide to get Random Premium subscription, your purchase will be charged to your iTunes account. 1 month costs $2.99 and 1 year costs $11.99. Active subscriptions will be auto-renewed 24 hours before the expiry date. You can manage subscriptions from Account in iTunes after subscribing, you’ll also be able to cancel the auto-renewing subscription from there at any time. Any unused portion of the free trial period will be forfeited if you purchase a subscription to Random Premium before your trial expires.\\n\\nTerms & Conditions: https://yahenskyi.dev/terms-conditions/\\nPrivacy Policy: https://yahenskyi.dev/privacy-policy/",\
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/volodymyr-yahenskyi/id961335645?uo=4",\
 			"developerID":961335645,\
 			"developerName":"Volodymyr Yahenskyi",\
@@ -893,9 +893,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `cannot search for nonexistent app`() {
+	func `cannot search for nonexistent app`() async throws {
 		let searchTerm = "nonexistent"
-		let actual = consequencesOf(try MAS.main(try MAS.Search.parse([searchTerm])) { try $0.run(catalogApps: .init()) })
+		let actual =
+			try await consequencesOf(try MAS.main(try MAS.Search.parse([searchTerm])) { try $0.run(catalogApps: .init()) })
 		let expected = Consequences(nil, "", "Error: \(MASError.noCatalogAppsFound(for: searchTerm))\n")
 		#expect(actual == expected)
 	}

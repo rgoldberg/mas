@@ -12,6 +12,9 @@ on:
   - cron: 44 14 * * 4
   workflow_dispatch: {}
 permissions: {}
+defaults:
+  run:
+    shell: /bin/zsh -Negku {0}
 jobs:
   analyze:
     name: Analyze ${{matrix.language}}
@@ -49,9 +52,11 @@ jobs:
 
     - name: 🏗 Build Swift
       if: matrix.language == 'swift'
-      shell: bash
       run: |
-        sudo xcode-select -s /Applications/Xcode_26.4.app
+        setopt extendedglob globassign
+        XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
+        sudo xcode-select -s "${XCODE_PATH}"
+        echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
         Scripts/build codeql -c release
 
     - name: 🔍 Perform CodeQL analysis

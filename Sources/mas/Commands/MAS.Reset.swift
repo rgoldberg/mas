@@ -43,7 +43,7 @@ extension MAS {
 					"/System/Library/PrivateFrameworks/AppStoreComponents.framework/Support/appstorecomponentsd",
 					"/System/Library/PrivateFrameworks/AppStoreDaemon.framework/Support/appstoreagent",
 					"/System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices"
-					+ "/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService", // swiftformat:disable:this indent
+						+ "/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService",
 					"/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/storeaccountd",
 					"/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/storeassetd",
 					"/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/storedownloadd",
@@ -59,25 +59,28 @@ extension MAS {
 				return
 			}
 
-			var kinfoProcs = unsafe [kinfo_proc](repeating: kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
+			var kinfoProcs = unsafe Array(repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
 			guard unsafe sysctl(&processListMIB, u_int(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list")
 				return
 			}
 
-			var executablePathBuffer = [CChar](repeating: 0, count: .init(PATH_MAX))
-			for pid in unsafe kinfoProcs.map(\.kp_proc.p_pid) {
-				guard
-					unsafe proc_pidpath(pid, &executablePathBuffer, .init(executablePathBuffer.count)) > 0,
-					let executablePath = String(cString: executablePathBuffer, encoding: .utf8),
-					executablePathSet.contains(executablePath)
-				else {
-					continue
+			unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
+				guard let baseAddress = buffer.baseAddress else {
+					return
 				}
 
-				let exitStatus = kill(pid, SIGTERM)
-				if exitStatus != 0 {
-					printer.error("Failed to terminate", executablePath, "getting exit status", exitStatus, "for pid", pid)
+				for unsafe pid in unsafe kinfoProcs.lazy.map(unsafe \.kp_proc.p_pid) {
+					if
+						unsafe proc_pidpath(pid, unsafe baseAddress, .init(buffer.count)) > 0,
+						let executablePath = unsafe String(validatingCString: unsafe baseAddress),
+						executablePathSet.contains(executablePath)
+					{
+						let exitStatus = kill(pid, SIGTERM)
+						if exitStatus != 0 {
+							printer.error("Failed to terminate", executablePath, "getting exit status", exitStatus, "for pid", pid)
+						}
+					}
 				}
 			}
 

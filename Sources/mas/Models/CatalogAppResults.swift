@@ -12,11 +12,11 @@ struct CatalogAppResults: JSONDecodable {
 	let resultCount: Int // periphery:ignore
 	let resultObjects: [JSON.Object]
 
-	private let _results: ThrowingLazy<[CatalogApp]>
+	private let lazyResults: Lazy<Result<[CatalogApp], any Error>>
 
 	var results: [CatalogApp] { // periphery:ignore
 		get throws { // swiftlint:disable:previous unused_declaration
-			try _results.value
+			try lazyResults.value.get()
 		}
 	}
 
@@ -39,6 +39,6 @@ struct CatalogAppResults: JSONDecodable {
 		}
 
 		let resultObjects = resultObjects
-		_results = .init(try resultObjects.map { try CatalogApp(json: .object($0)) })
+		lazyResults = .init { .init { try resultObjects.map { try .init(json: .object($0)) } } }
 	}
 }

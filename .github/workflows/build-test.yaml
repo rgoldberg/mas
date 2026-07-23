@@ -19,15 +19,10 @@ jobs:
       matrix:
         include:
         - runner: macos-14
-          xcode: swift
         - runner: macos-15
-          xcode: 26.3
         - runner: macos-15-intel
-          xcode: 26.3
         - runner: macos-26
-          xcode: 26.4
         - runner: macos-26-intel
-          xcode: 26.4
     runs-on: ${{matrix.runner}}
     defaults:
       run:
@@ -47,18 +42,23 @@ jobs:
     - name: 🔧 Setup repo
       run: Scripts/setup_workflow_repo
 
-    - name: 🛠 Select Xcode version
-      if: matrix.xcode != 'swift'
-      run: sudo xcode-select -s /Applications/Xcode_${{matrix.xcode}}.app
+    - name: 🛠 Select latest stable Xcode
+      run: |
+        setopt extendedglob globassign
+        XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
+        sudo xcode-select -s "${XCODE_PATH}"
+        echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
 
     - name: 👢 Bootstrap
       run: Scripts/bootstrap
 
-    - name: 🕊 Use Homebrew Core Swift
-      if: matrix.xcode == 'swift'
+    - name: 🕊 Use Swiftly Swift
+      if: ${{!startsWith(matrix.runner, 'macos-26')}}
       run: |
-        brew install swift
-        printf $'%s\n' "$(brew --prefix swift)/bin" >> "${GITHUB_PATH}"
+        swiftly init -ny
+        git reset --hard HEAD
+        swiftly link latest
+        printf %s ~/.swiftly/bin >>"${GITHUB_PATH}"
 
     - name: 🏗 Build
       run: Scripts/build build-test -c release

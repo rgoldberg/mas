@@ -9,10 +9,10 @@ private import ArgumentParser
 private import Atomics
 internal import Foundation
 
-/// Prints to `stdout` and `stderr` with ANSI color codes when connected to a
-/// terminal.
+/// Prints to `FileHandle`s like `.standardOutput` & `.standardError` with ANSI
+/// color codes when connected to a terminal.
 struct Printer {
-	private let errorCounter = ManagedAtomic<UInt64>(0)
+	private let errorCounter = ManagedAtomic(UInt64(0))
 
 	var errorCount: UInt64 {
 		errorCounter.load(ordering: .acquiring)
@@ -85,7 +85,7 @@ struct Printer {
 
 	func clearCurrentLine(of fileHandle: FileHandle) {
 		if fileHandle.isTerminal {
-			try? fileHandle.write(contentsOf: clearLine)
+			try? fileHandle.write(contentsOf: clearLineData)
 		}
 	}
 
@@ -110,16 +110,16 @@ struct Printer {
 				let errorDescription = String(describing: error)
 				return "\(errorDescription.isEmpty ? "" : items.isEmpty ? " " : "\n")\(errorDescription)\(terminator)"
 			}
-			?? terminator, // swiftformat:disable:this indent
+				?? terminator,
 			to: .standardError,
 		)
 	}
 
 	private func print(_ items: [String], separator: String, terminator: String, to fileHandle: FileHandle) {
-		unsafe items.joined(separator: separator)
+		try? unsafe items.joined(separator: separator)
 			.appending(terminator)
 			.utf8
-			.withContiguousStorageIfAvailable { try? unsafe fileHandle.write(contentsOf: unsafe $0) }
+			.withContiguousStorageIfAvailable(fileHandle.write(contentsOf:))
 	}
 
 	private func print(
@@ -140,15 +140,14 @@ struct Printer {
 				)
 			)
 			"""
-
 		let formattedPrefix = prefix.formatted(with: format, for: fileHandle) // swiftformat:enable indent
 		print(
 			items.first.map { item in
-				["\(formattedPrefix) \(mas.indent(item, with: indent))"]
-				+ items.dropFirst().map { mas.indent($0, with: indent) } // swiftformat:disable:this indent
+				["\(formattedPrefix) \(mas::indent(item, with: indent))"]
+					+ items.dropFirst().map { mas::indent($0, with: indent) }
 			}
-			?? [formattedPrefix], // swiftformat:disable:this indent
-			separator: mas.indent(separator, with: indent),
+				?? [formattedPrefix],
+			separator: mas::indent(separator, with: indent),
 			terminator: terminator,
 			to: fileHandle,
 		)
@@ -169,5 +168,5 @@ let errorPrefix = "Error:"
 let errorFormat = "4;31"
 
 private let csi = "\u{001B}["
-private let clearLine = Data("\(csi)2K\(csi)0G".utf8)
+private let clearLineData = Data("\(csi)2K\(csi)0G".utf8)
 private let nonEmptyLineStartRegex = /\n(?!\n)/

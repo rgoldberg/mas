@@ -5,12 +5,13 @@
 // Copyright © 2018 mas-cli. All rights reserved.
 //
 
-private import Atomics
 private import CoreFoundation
 private import Foundation
 internal import JSONAST
 private import JSONParsing
 private import ObjectiveC
+private import Subprocess
+private import System // swiftlint:disable:this unused_import
 
 struct InstalledApp {
 	let adamID: ADAMID
@@ -20,30 +21,14 @@ struct InstalledApp {
 	let version: String
 
 	private let jsonObjectRaw: JSON.Object
-	private let _jsonObject: Lazy<JSON.Object>
-	private let json: Lazy<String>
+	private let lazyJSONObject: Lazy<JSON.Object>
+	private let lazyJSON: Lazy<String>
 
 	var jsonObject: JSON.Object {
-		_jsonObject.value
+		lazyJSONObject.value
 	}
 
-	var isTestFlight: Bool {
-		adamID == 0
-	}
-
-	fileprivate init(for item: NSMetadataItem, withFullJSON: Bool) {
-		let valueByAttribute = item.values(
-			forAttributes: withFullJSON
-			? item.attributes + [NSMetadataItemPathKey] // swiftformat:disable:this indent
-			: [
-				"kMDItemAppStoreAdamID",
-				NSMetadataItemCFBundleIdentifierKey,
-				"_kMDItemDisplayNameWithExtensions",
-				NSMetadataItemPathKey,
-				NSMetadataItemVersionKey,
-			],
-		)
-		?? .init() // swiftformat:disable:this indent
+	fileprivate init(for valueByAttribute: [String: Any]) {
 		adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID ?? 0
 		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
 		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
@@ -51,20 +36,20 @@ struct InstalledApp {
 			let path = String(describing: pathAny)
 			return (try? URL(folderPath: path).resourceValues(forKeys: [.canonicalPathKey]))?.canonicalPath ?? path
 		}
-		?? "" // swiftformat:disable:this indent
+			?? ""
 		version = .init(describing: valueByAttribute[NSMetadataItemVersionKey] ?? "")
 
 		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let jsonObjectRaw = jsonObjectRaw
 		let name = name
-		_jsonObject = .init(
+		lazyJSONObject = .init(
 			.init(
 				(jsonObjectRaw.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
 					.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
 			),
 		)
-		let jsonObject = _jsonObject
-		json = .init(.init(jsonObject.value))
+		let lazyJSONObject = lazyJSONObject
+		lazyJSON = .init(.init(lazyJSONObject.value))
 	}
 
 	func matches(_ appID: AppID) -> Bool {
@@ -79,51 +64,37 @@ struct InstalledApp {
 
 extension InstalledApp: CustomStringConvertible {
 	var description: String {
-		json.value
-	}
-}
-
-extension [InstalledApp] {
-	func filter(for appIDs: [AppID]) -> [Element] {
-		appIDs.isEmpty
-		? self // swiftformat:disable:this indent
-		: appIDs.flatMap { appID in
-			let installedApps = filter { $0.matches(appID) }
-			if installedApps.isEmpty {
-				MAS.printer.error(appID.notInstalledMessage)
-			}
-			return installedApps
-		}
+		lazyJSON.value
 	}
 }
 
 private extension JSON.Node {
 	init(for value: Any?) {
 		self = switch value {
-		case let jsonNode as JSON.Node:
+		case let jsonNode as Self:
 			jsonNode
 		case let number as NSNumber: // swiftlint:disable:this legacy_objc_type
 			number === kCFBooleanTrue || number === kCFBooleanFalse
-			? .bool(number.boolValue) // swiftformat:disable:this indent
-			: .init(.init(describing: number)) ?? .null
+				? .bool(number.boolValue)
+				: .init(.init(describing: number)) ?? .null
 		case let date as Date:
 			.string(date.formatted(.iso8601))
 		case let data as Data:
 			data.isEmpty // swiftlint:disable:next void_function_in_ternary
-			? .string("") // swiftformat:disable:this indent
-			: {
-				var hex = "0x"
-				hex.reserveCapacity(2 + data.count * 2)
-				return .string(
-					data.reduce(into: hex) { hex, byte in
-						let byteHex = String(byte, radix: 16)
-						if byteHex.count < 2 {
-							hex += "0"
-						}
-						hex += byteHex
-					},
-				)
-			}()
+				? .string("")
+				: {
+					var hex = "0x"
+					hex.reserveCapacity(2 + data.count * 2)
+					return .string(
+						data.reduce(into: hex) { hex, byte in
+							let byteHex = String(byte, radix: 16)
+							if byteHex.count < 2 {
+								hex += "0"
+							}
+							hex += byteHex
+						},
+					)
+				}()
 		case let array as [Any?]:
 			.array(.init(array.map { .init(for: $0) }))
 		default:
@@ -257,17 +228,17 @@ private extension JSON.Key {
 }
 
 private extension URL {
-	var installedAppURLs: [URL] {
+	var installedAppURLs: [Self] {
 		FileManager.default
 			.enumerator(at: self, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])
 			.map { enumerator in
 				enumerator.compactMap { item in
 					guard
-						let url = item as? URL,
-						(try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true,
-						url.pathExtension == "app"
+						let url = item as? Self,
+						url.pathExtension == "app",
+						(try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
 					else {
-						return URL?.none
+						return Self?.none
 					}
 
 					enumerator.skipDescendants()
@@ -281,86 +252,104 @@ private extension URL {
 	}
 }
 
-func installedApps(withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	try await installedApps(matching: "kMDItemAppStoreAdamID LIKE '*'", withFullJSON: withFullJSON)
+func installedApps(
+	withAppIDs appIDs: [AppID],
+	withFullJSON: Bool,
+	unresolvedAppIDHandler handleUnresolvedAppID: (AppID) -> Void,
+) async -> [InstalledApp] {
+	let installedApps = await installedApps(matching: appIDs, withFullJSON: withFullJSON)
+	let unresolvedAppIDs = appIDs.filter { appID in
+		if installedApps.contains(where: { $0.matches(appID) }) {
+			return false
+		}
+		handleUnresolvedAppID(appID)
+		return true
+	}
+	if
+		appIDs.isEmpty || !unresolvedAppIDs.isEmpty,
+		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
+	{
+		let installedAppPathSet = Set(
+			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), withFullJSON: false)).map(\.path),
+		)
+		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
+		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
+			MAS.printer.warning(
+				"Found a likely App Store app that is not indexed in Spotlight in ",
+				installedAppPath,
+				"""
+
+
+				Indexing now; will likely complete sometime after mas exits
+
+				Disable auto-indexing via: export MAS_NO_AUTO_INDEX=1
+				""",
+				separator: "",
+			)
+			Task {
+				do {
+					_ = try await run(
+						.path("/usr/bin/mdimport"),
+						installedAppPath,
+						errorMessage: "Failed to index the Spotlight data for \(installedAppPath)",
+					)
+				} catch {
+					MAS.printer.error(error: error)
+				}
+			}
+		}
+	}
+	// Remove TestFlight apps from global fetch results
+	return appIDs.isEmpty ? installedApps.filter { $0.adamID != 0 } : installedApps
 }
 
-func installedApps(withADAMID adamID: ADAMID, withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	try await installedApps(matching: "kMDItemAppStoreAdamID = \(adamID)", withFullJSON: withFullJSON)
+func installedApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
+	await unsortedInstalledApps(matching: appIDs, withFullJSON: withFullJSON)
+		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 }
 
 @MainActor
-func installedApps(matching metadataQuery: String, withFullJSON: Bool = false) async throws -> [InstalledApp] {
-	var observer = (any NSObjectProtocol)?.none
-	defer {
-		if let observer {
-			NotificationCenter.default.removeObserver(observer)
+private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
+	let query = NSMetadataQuery()
+	let predicates = appIDs.map { appID in
+		switch appID {
+		case let .adamID(adamID): // swiftlint:disable:next legacy_objc_type
+			NSPredicate(format: "kMDItemAppStoreAdamID = %@", NSNumber(value: adamID))
+		case let .bundleID(bundleID):
+			NSPredicate(format: "kMDItemCFBundleIdentifier = %@", bundleID)
 		}
 	}
-
-	let query = NSMetadataQuery()
-	query.predicate = .init(format: metadataQuery)
+	query.predicate = switch predicates.count {
+	case 0:
+		.init(format: "kMDItemAppStoreAdamID LIKE '*'")
+	case 1:
+		predicates[0]
+	default:
+		NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
+	}
 	query.searchScopes = applicationsFolderURLs
-
-	return try await withCheckedThrowingContinuation { continuation in
-		let alreadyResumed = ManagedAtomic(false)
-		observer = NotificationCenter.default.addObserver(
-			forName: .NSMetadataQueryDidFinishGathering,
-			object: query,
-			queue: nil,
-		) { notification in
-			guard !alreadyResumed.exchange(true, ordering: .acquiringAndReleasing) else {
-				return
-			}
-			guard let query = notification.object as? NSMetadataQuery else {
-				continuation.resume(
-					throwing: MASError.error(
-						"Notification Center returned a \(type(of: notification.object)) instead of a NSMetadataQuery",
-					),
+	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
+	query.start()
+	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
+		break
+	}
+	query.stop()
+	return query.results.compactMap { result in
+		(result as? NSMetadataItem)
+			.flatMap { item in
+				item.values(
+					forAttributes: withFullJSON
+						? item.attributes + [NSMetadataItemPathKey]
+						: [
+							"kMDItemAppStoreAdamID",
+							NSMetadataItemCFBundleIdentifierKey,
+							"_kMDItemDisplayNameWithExtensions",
+							NSMetadataItemPathKey,
+							NSMetadataItemVersionKey,
+						],
 				)
-				return
 			}
-
-			query.stop()
-
-			let installedApps = query.results
-				.compactMap { ($0 as? NSMetadataItem).map { InstalledApp(for: $0, withFullJSON: withFullJSON) } }
-				.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
-
-			if !["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased()) {
-				let installedAppPathSet = Set(installedApps.map(\.path))
-				for installedAppURL in applicationsFolderURLs.flatMap(\.installedAppURLs)
-				where !installedAppPathSet.contains(installedAppURL.filePath) { // swiftformat:disable:this indent
-					MAS.printer.warning(
-						"Found a likely App Store app that is not indexed in Spotlight in ",
-						installedAppURL.filePath,
-						"""
-
-
-						Indexing now; will likely complete sometime after mas exits
-
-						Disable auto-indexing via: export MAS_NO_AUTO_INDEX=1
-						""",
-						separator: "",
-					)
-					Task {
-						do {
-							_ = try await run(
-								"/usr/bin/mdimport",
-								installedAppURL.filePath,
-								errorMessage: "Failed to index the Spotlight data for \(installedAppURL.filePath)",
-							)
-						} catch {
-							MAS.printer.error(error: error)
-						}
-					}
-				}
-			}
-
-			continuation.resume(returning: installedApps)
-		}
-
-		query.start()
+			.map(InstalledApp.init(for:))
 	}
 }
 

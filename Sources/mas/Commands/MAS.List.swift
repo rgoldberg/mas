@@ -6,7 +6,6 @@
 //
 
 internal import ArgumentParser
-private import Foundation
 
 extension MAS {
 	/// Lists all apps installed from the App Store.
@@ -18,14 +17,16 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var installedAppIDsOptionGroup: InstalledAppIDsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-		func run() async throws {
-			run(installedApps: try await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON))
+		func run() async {
+			run(
+				installedApps: // swiftformat:disable:next indent
+					await installedAppsOptionGroup.installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON),
+			)
 		}
 
 		func run(installedApps: [InstalledApp]) {
-			let installedApps = installedApps.filter(for: installedAppIDsOptionGroup.appIDs)
 			guard !installedApps.isEmpty else {
 				printer.warning( // editorconfig-checker-disable
 					"""

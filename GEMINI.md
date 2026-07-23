@@ -1,6 +1,6 @@
 # Gemini Guidelines for `mas`
 
-You are an expert Swift and Zsh developer assisting with the maintenance and
+You are an expert Swift & Zsh developer assisting with the maintenance &
 development of `mas`, a command-line interface for the Mac App Store.
 
 ## Project Overview
@@ -8,16 +8,16 @@ development of `mas`, a command-line interface for the Mac App Store.
 - **Name:** `mas`
 - **Description:** A CLI for the Mac App Store, designed for scripting &
   automation.
-- **Language:** Swift 6.2 (using Swift Argument Parser)
+- **Language:** Swift 6.3 (using Swift Argument Parser)
 - **Target OS:** macOS 13+
 - **Project Type:** SwiftPM project
 
 ## Technical Stack
 
-- **Swift:** 6.2+ (Check [.swift-version](.swift-version))
-- **Xcode:** 26+ (Check [.xcode-version](.xcode-version))
+- **Swift:** 6.3+ (Check [.swift-version](.swift-version))
+- **Xcode:** 26.4+ (Check [.xcode-version](.xcode-version))
 - **macOS:** 13+ (Check [Package.swift](Package.swift))
-- **Private Frameworks:** Uses `CommerceKit` and `StoreFoundation` for App Store
+- **Private Frameworks:** Uses `CommerceKit` & `StoreFoundation` for App Store
   integration only where public APIs are insufficient.
 
 ## Development Workflows
@@ -60,10 +60,11 @@ Refer to [AGENTS.md](AGENTS.md) for comprehensive guidelines. Key highlights:
 
 ### Markdown Guidelines
 
-- **Style:** ATX headings, fenced code blocks with backticks, underscore
-  emphasis, asterisk strong.
-- **Language:** Only `console` and `shell` are allowed in code fences.
-- **HTML:** Limited to `<details>`, `<h1>`, `<summary>`.
+- **Style:** GitHub-Flavored Markdown (GFM), ATX headings, backtick-fenced code
+  blocks with language identifier, underscore emphasis, asterisk strong & hyphen
+  bullets.
+- **HTML:** Limited to elements supported by GFM that don't have an equivalent
+  in GFM for the use case.
 
 ### YAML Guidelines
 
@@ -76,11 +77,11 @@ Refer to [AGENTS.md](AGENTS.md) for comprehensive guidelines. Key highlights:
 - **Shebang:** `#!/bin/zsh -Ndefgku`
 - **Setup:** Start scripts with `. "${0:A:h}/_setup_script"`
 - **Preference:** Use zsh builtins over external commands.
-- **Commands:** Use `cp -c` and `trash` (not `rm`).
+- **Commands:** Use `cp -c` & `trash` (not `rm`).
 
 ### Swift Development
 
-- **Structure:** Organized by `AppStore/`, `Commands/`, `Models/`, `Utilities/`.
+- **Structure:** Organized by `Commands/`, `Models/`, `Utilities/`.
 - **Force Unwrapping:** Avoid in `Sources/mas/`.
 - **Naming:** Capitalize acronyms consistently (e.g., `ADAM`, `API`, `JSON`).
 - **Organization:** Group computed properties below stored properties.
@@ -93,7 +94,7 @@ Refer to [AGENTS.md](AGENTS.md) for comprehensive guidelines. Key highlights:
 - **Commits:** Follow [conventional commit style](
     https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
   ).
-- **Pre-commit:** Always run `Scripts/format` and `Scripts/lint` before
+- **Pre-commit:** Always run `Scripts/format` & `Scripts/lint` before
   committing.
 
 ## Testing Requirements

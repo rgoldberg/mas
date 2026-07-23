@@ -11,15 +11,15 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `cannot lookup app info for unknown app ID`() {
-		let actual = consequencesOf(try MAS.main(try MAS.Lookup.parse(["1"])) { $0.run(catalogApps: .init()) })
+	func `cannot lookup app info for unknown app ID`() async throws {
+		let actual = try await consequencesOf(try MAS.main(try MAS.Lookup.parse(["1"])) { $0.run(catalogApps: .init()) })
 		let expected = Consequences()
 		#expect(actual == expected)
 	}
 
 	@Test
-	func `outputs app info`() {
-		let actual = consequencesOf(
+	func `outputs app info`() async throws {
+		let actual = try await consequencesOf(
 			try MAS.main(try MAS.Lookup.parse(["--json", "1472954003"])) { command in
 				command.run(catalogApps: [try decode(CatalogApp.self, fromResource: "things-lookup")])
 			},

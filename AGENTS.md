@@ -1,158 +1,51 @@
 # Project Guidelines
 
-## Notes for automated/codegen agents
+## Purpose & Scope
 
-- Read this `AGENTS.md` in full before making any changes to the repository; it
-  is the canonical source of project conventions
-- No repository-level AI instruction files were found (e.g.,
-  `.github/copilot-instructions.md`, `AGENT.md`, `CLAUDE.md`, or
-  `.cursor`/`.cursorrules` files); rely on this document & the concrete files
-  listed below
-- Quick entry points (use these scripts rather than invoking swift directly when
-  possible):
-  - `Scripts/bootstrap`
-  - `Scripts/format`
-  - `Scripts/lint -AP` (quick) / `Scripts/lint` (full)
-  - `Scripts/test`
-  - `Scripts/build` / `Scripts/build '' -c release`
-- Useful code locations & examples (look here for patterns to follow):
-  - CLI commands: `Sources/mas/Commands/` (e.g. `Install.swift`, `List.swift`)
-  - Models: `Sources/mas/Models/` (e.g. `AppID.swift`, `CatalogApp.swift`)
-  - Utilities: `Sources/mas/Utilities/` (e.g. `Output/Printer.swift`)
-  - Tests & test naming: `Tests/MASTests/` (see `MASTests+*.swift` files)
-  - Private framework headers: `Sources/PrivateFrameworks/include/CommerceKit/`
-    & `Sources/PrivateFrameworks/include/StoreFoundation/` (used via the
-    `PrivateFrameworks` target)
-  - Build plugin: `Plugins/MASBuildToolPlugin/MASBuildToolPlugin.swift`
-  - Completion scripts: `contrib/completion/` (bash/fish)
-  - Packaged runtime: `libexec/bin/mas` (used by `Scripts/mas` wrapper)
-- Edits & commits: preserve formatting & style (tabs, max line length, single
-  newline at EOF).
-- Before committing automated edits: run `Scripts/format` until it no longer
-  changes files, then `Scripts/lint` & fix violations.
-
-## Code Refactoring Guidelines
-
-Do NOT refactor code if doing so makes the caller interface worse. Specifically:
-
-- **Inline a utility function or computed var at a call site iff it is
-  single-use**. Inlining multi-use functions or computed vars increases
-  verbosity, introduces duplication bugs & makes code harder to maintain. Keep
-  clean abstractions. Example of what NOT to do:
-  ```swift
-  // ❌ BAD: Inlining uppercasingFirst at multiple call sites
-  action1.performing.prefix(1).uppercased() + action.performing.dropFirst()
-  action2.performing.prefix(1).uppercased() + action.performing.dropFirst()
-  // ✅ GOOD: Use the utility function
-  action1.performing.uppercasingFirst
-  action2.performing.uppercasingFirst
-  ```
-- **Never replace a clean, readable abstraction with a verbose closure**. e.g.,
-  if a custom `SortComparator` or similar is used multiple times, keep it.
-  Consider inlining only if the abstraction is used in exactly one place.
-  Example of what NOT to do:
-  ```swift
-  // ❌ BAD: Replacing a clean comparator with verbose closure
-  [6, 9, 3].sorted { $0.compare($1, options: .numeric) == .orderedAscending }
-  [2, 8, 4].sorted { $0.compare($1, options: .numeric) == .orderedAscending }
-  // ✅ GOOD: Keep the abstraction
-  [6, 9, 3].sorted(using: NumericStringComparator.forward)
-  [2, 8, 4].sorted(using: NumericStringComparator.forward)
-  ```
-- **Replace a utility call** only when the new calling interface is at least as
-  simple as the current calling interface
-- **Replace a utility implementation** when the new implementation is more
-  correct, performant, and/or simpler than the existing implementation, in
-  descending order of priority
+This file is the canonical source of project conventions for humans & agents.
+Read it before making repository changes.
 
 ## Minimum Versions
 
-- **Swift:** [6.2](.swift-version)
-- **Xcode:** [26](.xcode-version)
-- **macOS:** [13](Package.swift)
+- **Swift:** 6.3
+- **Xcode:** 26.4
+- **macOS:** 13
 
-## Distributions
+## Quick Entry Points
 
-1. [Homebrew Core](https://formulae.brew.sh/formula/mas) (`brew install mas` for
-   macOS 14+)
-2. [Homebrew custom tap formula](https://github.com/mas-cli/homebrew-tap)
-   (`brew install mas-cli/tap/mas` for macOS 13+)
-3. [GitHub Releases](https://github.com/mas-cli/mas/releases)
-4. [MacPorts](https://ports.macports.org/port/mas/)
-5. [Nix](https://mynixos.com/nixpkgs/package/mas)
-
-## Development Workflows
-
-### Bootstrap Development Tools
-
-```shell
-Scripts/bootstrap
-```
-
-### Lint (quick)
-
-```shell
-Scripts/lint -AP
-```
-
-### Lint (slow, includes unused code checks)
-
-```shell
-Scripts/lint
-```
-
-### Format
-
-```shell
-Scripts/format
-```
-
-### Build (debug)
-
-```shell
-Scripts/build
-```
-
-### Build (release)
-
-```shell
-Scripts/build '' -c release
-```
-
-### Test
-
-```shell
-Scripts/test
-```
-
-### Package
-
-```shell
-Scripts/package
-```
+- `Scripts/bootstrap`
+- `Scripts/format`
+- `Scripts/lint -AP` (quick) / `Scripts/lint` (includes unused code checks)
+- `Scripts/build` (debug) / `Scripts/build '' -c release` (release)
+- `Scripts/test`
+- `Scripts/package`
 
 ## Git Workflow
 
-- **Trunk-based development:** `main` is the trunk
-- **Topic branches:** Branch from `main` (e.g., `git checkout -b feature main`)
+- `main` is the trunk
+- Branch topics from `main`
+- Before committing (to preserve tokens, agents should skip steps 2 & 3):
+  1. Add or edit tests for non-trivial changes
+  2. Repeatedly run `Scripts/format` until no modifications are made
+  3. Repeatedly run `Scripts/lint` & fix all violations until no violations are
+     reported
 - **Commit messages:** Follow [commit message conventions](
     https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
   )
-- **Release tags:** Format like `v1.2.3`
-- **Before committing:** Run `Scripts/format` repeatedly until it no longer
-  modifies any files, then run `Scripts/lint`, then fix all violations
+- Tag releases as `vX.Y.Z`
 
 ## Content Formatting
 
 - **Newlines:** UNIX (i.e. `\n`)
 - **Indentation:** Tabs (width: 2)
-- **Max line length:** 120 characters
+- **Max line length:** 120 characters (tabs count as 2 characters)
 - **Unnecessary trailing whitespace:** Remove
 - **File ends:** Single newline
 
-## Content Preservation
+## Refactoring Rules
 
-Unless absolutely necessary for functionality or fixes, do not:
+Unless absolutely necessary for functionality or fixes, or unless violations of
+standards are discovered, do not:
 
 - reformat
 - rename
@@ -160,71 +53,84 @@ Unless absolutely necessary for functionality or fixes, do not:
 - respace
 - reword
 - remove comments
+- refactor if it worsens the caller interface
+
+Refactoring should:
+
+- Keep clean abstractions
+- Inline a utility iff it is single-use
+- Replace a utility iff the new version is more correct, performant, and/or
+  simpler than the existing version, in descending order of priority
 
 ## Scripting
 
-### Zsh
-
-All scripting must be written in zsh, except completion scripts (which are
-written in their target shell).
-
-Zsh scripts must be compatible with all zsh versions starting with the version
-([currently 5.9](https://opensource.apple.com/releases/)) bundled with the
-newest version ([currently 13.5.x](https://opensource.apple.com/releases/))
-of the oldest-mas-supported macOS major version ([currently 13](Package.swift)).
-
-### Safe Operations
-
+- Use zsh for scripts (except for shell-specific completion scripts)
+- Zsh scripts must be compatible with all zsh versions starting with the version
+  ([currently 5.9](https://opensource.apple.com/releases/)) bundled with the
+  newest version ([currently 13.5.x](https://opensource.apple.com/releases/))
+  of the oldest macOS major version supported by mas
+  ([currently 13](Package.swift))
 - Use `#!/bin/zsh` shebang (with `-Ndefgku` options, unless any changes to the
   options are absolutely necessary)
-- Run `. "${0:A:h}/_setup_script"` at the beginning of all development scripts
-- Prefer concision over verbosity (e.g., expansions over loops)
-- Prefer zsh syntax & builtins over equivalent external commands
-- Ensure all function variables are local unless global is absolutely necessary
-- Make variables readonly once they will no longer be modified
-- Always use:
+- Run `. "${0:A:h}/_setup_script"` at the start of all development scripts
+- Prefer concision over verbosity
+- If performance is at least almost equivalent or better, prefer in descending
+  order:
+  - zsh expansions
+  - zsh globs
+  - zsh builtins
+  - zsh loops
+  - external commands
+- Make variables local & readonly when possible
+- Use:
   - `cp -c` instead of `cp`
   - `trash` instead of `rm`
 
 ## Swift
-
-### Project Structure
 
 mas is a SwiftPM project that uses Swift Argument Parser to interact with the
 command-line.
 
 ### Apple Private Frameworks
 
-The `PrivateFrameworks` SwiftPM target allows using the following Apple private
+The `PrivateFrameworks` SwiftPM target exposes the following Apple private
 frameworks (via Objective-C headers extracted from the DSC) to deploy App Store
 apps:
 
 - **CommerceKit:** Controllers
 - **StoreFoundation:** Models
 
-Use them only where public APIs are insufficient.
+Use private frameworks only when public APIs are insufficient.
 
-Newer Apple private frameworks (e.g., AppStoreDaemon) seem to supersede the
-currently used ones, but the newer ones seem usable only by code with
-Apple-exclusive entitlements.
+Newer Apple private frameworks (e.g., AppStoreDaemon & AppleMediaServices) seem
+to supersede the currently used ones, but the newer ones seem usable only by
+code with Apple-exclusive entitlements.
 
-### Source Folder Hierarchy
+### Swift Source Folder Hierarchy
 
-Source is organized in folders by concern:
+Swift source is organized in subfolders of `Sources/mas`:
 
-- **AppStore:** App Store integration
 - **Commands:** CLI implementation
-- **Models:** Data types
+- **Models:** Data types & suppliers
 - **Utilities:** Utilities
+
+### Command Implementation Patterns
+
+Commands follow a consistent structure:
+
+- Commands are nested structs within the `MAS` main command
+- Use `@OptionGroup` to compose reusable argument sets from dedicated types
+  that conform to `ParsableArguments`
+- Implement `func run() async { … }` as the main command entry point
+- Use the static `MAS.printer` for all output to ensure consistent formatting
+- Call methods on `AppStoreAction` enum cases (accessible via the `AppStore`
+  typealias) to execute business logic, e.g., `await AppStore.install.apps(…)`
 
 ### Style Essentials
 
-- Avoid force unwrapping (`!` suffix) in code under `Sources/mas/` folder
 - Name most function parameters
 - Capitalize acronym & initialism characters consistently (e.g., `HTTPRequest`,
   not `HttpRequest`)
-- Group computed properties below stored properties
-- Use blank lines above & below each section
 - Shadow variables if the respective original will no longer be used
 - Strongify weak references instead of evaluating them multiple times
 
@@ -373,10 +279,11 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 
 ### Testing Requirements
 
-- Write tests for all non-trivial changes
+- Add tests for all non-trivial changes
 - Implement in [Swift Testing](https://github.com/swiftlang/swift-testing)
 - Derive test file paths from source file paths:
-  - replace the `Sources/mas/` source path folder prefix with `Tests/MASTests/`
+  - replace the `Sources/mas` source path folder prefix with `Tests/MASTests`
   - prepend `MASTests+` to the source file name
-  - e.g., `Sources/mas/X.swift` → `Tests/MASTests/MASTests+X.swift`
-- Use force unwrapping (`!` suffix)
+  - e.g., `Sources/mas/Commands/X.swift` →
+    `Tests/MASTests/Commands/MASTests+X.swift`
+- Use force unwrapping in tests where appropriate

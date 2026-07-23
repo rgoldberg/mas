@@ -62,8 +62,12 @@ jobs:
           exit 3
         fi
 
-    - name: 🛠 Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_26.4.app
+    - name: 🛠 Select latest stable Xcode
+      run: |
+        setopt extendedglob globassign
+        XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
+        sudo xcode-select -s "${XCODE_PATH}"
+        echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
 
     - name: 📦 Build Apple & Intel installers
       run: |

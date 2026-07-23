@@ -35,6 +35,7 @@ extension MAS {
 						("store", .string(appStoreRegion)),
 						("region", .string(macRegion)),
 						("macos", .string(macOSVersion)),
+						("build", .string(configStringValue("kern.osversion"))),
 						("mac", .string(configStringValue("hw.product"))),
 						("cpu", .string(configStringValue("machdep.cpu.brand_string"))),
 						("arch", .string(configStringValue("hw.machine"))), // swiftlint:enable vertical_parameter_alignment_on_call
@@ -44,18 +45,15 @@ extension MAS {
 	}
 }
 
-private var runningSliceArchitecture: String {
-	var info = utsname()
-	return unsafe uname(&info) == 0
-	? unsafe withUnsafePointer(to: &info.machine) { pointer in // swiftformat:disable indent
-		unsafe pointer.withMemoryRebound(
-			to: CChar.self,
-			capacity: unsafe MemoryLayout.size(ofValue: unsafe pointer),
-			unsafe String.init(cString:),
-		)
-	}
-	: unknown
-} // swiftformat:enable indent
+private let runningSliceArchitecture = {
+	#if arch(arm64)
+	"arm64"
+	#elseif arch(x86_64)
+	"x86_64"
+	#else
+	"unknown"
+	#endif
+}()
 
 private var supportedSliceArchitectures: [String] {
 	Bundle.main.executableArchitectures.map { archIDs in
@@ -67,12 +65,6 @@ private var supportedSliceArchitectures: [String] {
 			return switch arch {
 			case NSBundleExecutableArchitectureARM64:
 				"arm64"
-			case NSBundleExecutableArchitectureI386:
-				"i386"
-			case NSBundleExecutableArchitecturePPC:
-				"ppc"
-			case NSBundleExecutableArchitecturePPC64:
-				"ppc64"
 			case NSBundleExecutableArchitectureX86_64:
 				"x86_64"
 			default:
@@ -80,13 +72,12 @@ private var supportedSliceArchitectures: [String] {
 			}
 		}
 	}
-	?? .init() // swiftformat:disable:this indent
+		?? .init()
 }
 
 private var macOSVersion: String {
-	.init(
-		ProcessInfo.processInfo.operatingSystemVersionString.dropFirst(8).replacing("Build ", with: "", maxReplacements: 1),
-	)
+	let version = ProcessInfo.processInfo.operatingSystemVersion
+	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
 }
 
 private func configStringValue(_ name: String) -> String {
@@ -95,14 +86,21 @@ private func configStringValue(_ name: String) -> String {
 		unsafe perror(sysCtlByName)
 		return unknown
 	}
-
-	var buffer = [CChar](repeating: 0, count: size)
-	guard unsafe sysctlbyname(name, &buffer, &size, nil, 0) == 0 else {
-		unsafe perror(sysCtlByName)
+	guard size > 0 else {
 		return unknown
 	}
 
-	return unsafe .init(cString: &buffer)
+	return unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
+		guard let baseAddress = buffer.baseAddress else {
+			return unknown
+		}
+		guard unsafe sysctlbyname(name, unsafe baseAddress, &size, nil, 0) == 0 else {
+			unsafe perror(sysCtlByName)
+			return unknown
+		}
+
+		return unsafe .init(cString: unsafe baseAddress)
+	}
 }
 
 private let unknown = "unknown"

@@ -11,8 +11,8 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `lists apps`() {
-		let actual = consequencesOf(try MAS.main(try MAS.List.parse(.init())) { $0.run(installedApps: .init()) })
+	func `lists apps`() async throws {
+		let actual = try await consequencesOf(try MAS.main(try MAS.List.parse(.init())) { $0.run(installedApps: .init()) })
 		let expected = Consequences(
 			nil,
 			"", // editorconfig-checker-disable

@@ -11,7 +11,7 @@ struct OutdatedApp {
 	let installedApp: InstalledApp
 	let newVersion: String // periphery:ignore
 
-	private let json: Lazy<String>
+	private let lazyJSON: Lazy<String>
 
 	init(installedApp: InstalledApp, newVersion: String) {
 		self.installedApp = installedApp
@@ -24,13 +24,13 @@ struct OutdatedApp {
 				.lowerBound(of: newVersionKey.rawValue, using: NumericStringComparator.forward),
 		)
 		let jsonObject = jsonObjectInstalled
-		json = .init(.init(describing: jsonObject))
+		lazyJSON = .init(.init(describing: jsonObject))
 	}
 }
 
 extension OutdatedApp: CustomStringConvertible {
 	var description: String {
-		json.value
+		lazyJSON.value
 	}
 }
 

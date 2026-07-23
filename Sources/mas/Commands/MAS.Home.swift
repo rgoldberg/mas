@@ -20,18 +20,14 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var catalogAppIDsOptionGroup: CatalogAppIDsOptionGroup
+		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
 		func run() async {
-			await run(catalogApps: await catalogAppIDsOptionGroup.appIDs.catalogApps)
+			await run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
 		}
 
 		func run(catalogApps: [CatalogApp]) async {
-			await run(appStorePageURLStrings: catalogApps.map(\.appStorePageURLString))
-		}
-
-		private func run(appStorePageURLStrings: [String]) async {
-			await appStorePageURLStrings.forEach(attemptTo: "open") { appStorePageURLString in
+			await catalogApps.map(\.appStorePageURLString).forEach(attemptTo: "open") { appStorePageURLString in
 				guard let url = URL(string: appStorePageURLString) else {
 					throw MASError.invalidURL(appStorePageURLString)
 				}

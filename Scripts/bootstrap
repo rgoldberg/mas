@@ -26,5 +26,5 @@ readonly -a bootstrap_formulae
 # shellcheck disable=SC2086
 (("${#installed_formulae:*bootstrap_formulae}")) &&
 	brew upgrade --overwrite -q ${installed_formulae:*bootstrap_formulae} || true
-brew bundle upgrade -fq "${@}"
+brew bundle upgrade -q "${@}"
 brew upgrade --overwrite -q "${bootstrap_formulae[@]}"

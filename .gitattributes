@@ -1,2 +1,21 @@
+* text=auto eol=lf
+*.bash text eol=lf
+*.c text eol=lf
+*.fish text eol=lf
+*.h text eol=lf
+*.json text eol=lf
 # Do not remove potentially intentional trailing spaces in Markdown.
-**/*.md whitespace=-blank-at-eol
+*.md text eol=lf whitespace=-blank-at-eol
+*.modulemap text eol=lf
+*.png binary
+*.resolved text eol=lf
+*.swift text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+.editorconfig text eol=lf
+.geminiignore text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.swift-version text eol=lf
+.swiftformat text eol=lf
+.xcode-version text eol=lf

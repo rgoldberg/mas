@@ -8,6 +8,8 @@
 internal import ArgumentParser
 private import Foundation
 private import OrderedCollections
+private import Subprocess
+private import System // swiftlint:disable:this unused_import
 
 extension MAS {
 	/// Uninstalls apps installed from the App Store.
@@ -22,35 +24,26 @@ extension MAS {
 		@Flag(name: .customLong("all"), help: "Uninstall all App Store apps")
 		private var isUninstallingAll = false
 		@OptionGroup
-		private var installedAppIDsOptionGroup: InstalledAppIDsOptionGroup
+		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func validate() throws(ValidationError) {
-			if isUninstallingAll != installedAppIDsOptionGroup.appIDs.isEmpty {
+			if isUninstallingAll != installedAppsOptionGroup.appIDStrings.isEmpty {
 				throw .init(
 					isUninstallingAll
-					? "Cannot specify both --all & app IDs" // swiftformat:disable:this indent
-					: "Must specify either --all or at least one app ID",
+						? "Cannot specify both --all & app IDs"
+						: "Must specify either --all or at least one app ID",
 				)
 			}
 		}
 
-		func run() async throws {
-			try run(installedApps: try await installedApps())
-		}
-
-		private func run(installedApps: [InstalledApp]) throws {
-			let uninstallingADAMIDByPathOrdered = (
-				isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppIDsOptionGroup.appIDs,
-			)
-			.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
-				let uninstallingApps = installedApps.filter { $0.matches(appID) }
-				guard !uninstallingApps.isEmpty else {
-					printer.error(appID.notInstalledMessage)
-					return
-				}
-
-				uninstallingADAMIDByPathOrdered.merge(uninstallingApps.map { ($0.path, .init($0.adamID)) }) { $1 }
-			}
+		func run() async {
+			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
+			let uninstallingADAMIDByPathOrdered =
+				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
+					.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
+						uninstallingADAMIDByPathOrdered
+							.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
+					}
 			guard !uninstallingADAMIDByPathOrdered.isEmpty else {
 				return
 			}
@@ -61,72 +54,51 @@ extension MAS {
 				}
 				return
 			}
-			guard getuid() == 0 else {
-				try sudo(MAS._commandName, args: [Self._commandName] + uninstallingADAMIDByPathOrdered.values)
-				return
-			}
 
-			let processInfo = ProcessInfo.processInfo
-			let uid = try processInfo.sudoUID
-			let gid = try processInfo.sudoGID
 			let fileManager = FileManager.default
 			for appPath in uninstallingADAMIDByPathOrdered.keys {
-				let attributes = try fileManager.attributesOfItem(atPath: appPath)
-				guard let appUID = attributes[.ownerAccountID] as? uid_t else {
-					printer.error("Failed to get uid of", appPath)
-					continue
-				}
-				guard let appGID = attributes[.groupOwnerAccountID] as? gid_t else {
-					printer.error("Failed to get gid of", appPath)
-					continue
-				}
-
 				do {
-					try mas.run(asEffectiveUID: 0, andEffectiveGID: 0) {
-						try fileManager.setAttributes([.ownerAccountID: uid, .groupOwnerAccountID: gid], ofItemAtPath: appPath)
-					}
-				} catch {
-					printer.error("Failed to change ownership of", appPath.quoted, "to uid", uid, "& gid", gid, error: error)
-					continue
-				}
-
-				var chownPath = appPath
-				defer {
-					do {
-						try mas.run(asEffectiveUID: 0, andEffectiveGID: 0) {
-							try fileManager.setAttributes(
-								[.ownerAccountID: appUID, .groupOwnerAccountID: appGID],
-								ofItemAtPath: chownPath,
-							)
-						}
-					} catch {
-						printer.warning(
-							"Failed to revert ownership of",
-							chownPath.quoted,
-							"back to uid",
-							appUID,
-							"& gid",
-							appGID,
-							error: error,
-						)
-					}
-				}
-
-				var uninstalledAppNSURL = NSURL?.none // swiftlint:disable:this legacy_objc_type
-				try unsafe fileManager.trashItem(at: .init(folderPath: appPath), resultingItemURL: &uninstalledAppNSURL)
-				guard let uninstalledAppPath = uninstalledAppNSURL?.path else {
-					printer.error( // editorconfig-checker-disable
-						"""
-						Failed to revert ownership of uninstalled \(appPath.quoted) back to uid \(appUID) & gid \(appGID):\
-						 failed to get uninstalled app URL
-						""", // editorconfig-checker-enable
+					let appURL = URL(folderPath: appPath)
+					let trashURL = try fileManager.url(
+						for: .trashDirectory,
+						in: .userDomainMask,
+						appropriateFor: appURL,
+						create: true,
 					)
-					continue
+					var destinationPath = trashURL.appending(path: appURL.lastPathComponent, directoryHint: .isDirectory).filePath
+					if fileManager.fileExists(atPath: destinationPath) {
+						let pathExtension = appURL.pathExtension
+						destinationPath = trashURL.appending(
+							path: """
+								\(appURL.deletingPathExtension().lastPathComponent) \
+								\(Date().formatted(trashCollisionDateFormatStyle))\
+								\(pathExtension.isEmpty ? "" : ".\(pathExtension)")
+								""",
+							directoryHint: .isDirectory,
+						)
+						.filePath
+					}
+					_ = try await mas::run(
+						.path("/usr/bin/sudo"),
+						"/bin/mv",
+						appPath,
+						destinationPath,
+						errorMessage: "Failed to trash \(appPath.quoted) to \(destinationPath.quoted)",
+					)
+					printer.info("Uninstalled", appPath.quoted, "to", destinationPath.quoted)
+				} catch {
+					printer.error("Failed to uninstall", appPath, error: error)
 				}
-
-				chownPath = uninstalledAppPath
-				printer.info("Uninstalled", appPath.quoted, "to", chownPath.quoted)
 			}
 		}
 	}
 }
+
+private let trashCollisionDateFormatStyle = Date.VerbatimFormatStyle( // editorconfig-checker-disable
+	format: """
+		\(hour: .defaultDigits(clock: .twelveHour, hourCycle: .oneBased)).\(minute: .twoDigits).\(second: .twoDigits)\
+		 \(dayPeriod: .standard(.narrow))
+		""", // editorconfig-checker-enable
+	timeZone: .current,
+	calendar: .current,
+)

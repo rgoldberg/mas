@@ -27,24 +27,12 @@ extension MAS {
 		private var searchTermOptionGroup: SearchTermOptionGroup
 
 		func run() async throws {
-			try await run(installedApps: try await installedApps())
-		}
-
-		private func run(installedApps: [InstalledApp]) async throws {
 			let searchTerm = searchTermOptionGroup.searchTerm
-			guard let adamID = try await Dependencies.current.searchForAppsMatchingSearchTerm(searchTerm).first?.adamID else {
+			guard let adamID = try await Environment.current.searchForAppsMatchingSearchTerm(searchTerm).first?.adamID else {
 				throw MASError.noCatalogAppsFound(for: searchTerm)
 			}
 
-			try await run(installedApps: installedApps, adamID: adamID)
-		}
-
-		private func run(installedApps: [InstalledApp], adamID: ADAMID) async throws {
-			try await AppStore.install.apps(
-				withADAMIDs: [adamID],
-				force: forceOptionGroup.force,
-				installedApps: installedApps,
-			)
+			await AppStore.install.apps(withADAMIDs: [adamID], force: forceOptionGroup.force)
 		}
 	}
 }

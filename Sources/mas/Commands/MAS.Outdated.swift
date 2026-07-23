@@ -18,20 +18,11 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@OptionGroup
-		private var outdatedAppOptionGroup: OutdatedAppOptionGroup
+		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
-		func run() async throws {
-			await run(
-				installedApps: // swiftformat:disable:next indent
-					try await installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON).filter(!\.isTestFlight),
-			)
-		}
-
-		private func run(installedApps: [InstalledApp]) async {
-			run(outdatedApps: await outdatedAppOptionGroup.outdatedApps(from: installedApps))
-		}
-
-		private func run(outdatedApps: [OutdatedApp]) {
+		func run() async {
+			let outdatedApps =
+				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON)
 			if !outdatedApps.isEmpty {
 				outputFormatOptionGroup.info(outdatedApps.map { .init(describing: $0) }.joined(separator: "\n"))
 			}
