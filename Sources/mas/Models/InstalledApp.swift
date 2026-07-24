@@ -349,7 +349,7 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 						],
 				)
 			}
-			.map(InstalledApp.init(for:))
+			.map(InstalledApp.init)
 	}
 }
 

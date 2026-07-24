@@ -50,7 +50,7 @@ private extension String {
 		locale: Locale? = nil,
 	) -> ComparisonResult {
 		let thatInteger = BigUInt(that)
-		return BigUInt(self).map { thatInteger.map($0.compare(to:)) ?? .orderedAscending }
+		return BigUInt(self).map { thatInteger.map($0.compare) ?? .orderedAscending }
 			?? thatInteger.map { _ in .orderedDescending }
 			?? compare(that, options: mask, range: range, locale: locale)
 	}

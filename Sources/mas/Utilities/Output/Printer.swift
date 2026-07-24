@@ -119,7 +119,7 @@ struct Printer {
 		try? unsafe items.joined(separator: separator)
 			.appending(terminator)
 			.utf8
-			.withContiguousStorageIfAvailable(fileHandle.write(contentsOf:))
+			.withContiguousStorageIfAvailable(fileHandle.write)
 	}
 
 	private func print(
