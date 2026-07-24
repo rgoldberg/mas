@@ -303,10 +303,11 @@ private extension JSON.Key {
 }
 
 func lookup(appID: AppID) async throws -> CatalogApp {
-	try await lookup(appID: appID, in: appStoreRegion)
+	try await lookup(appID: appID, for: .macOS)
 }
 
-private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp {
+private func lookup(appID: AppID, for platform: Platform, in region: Region = appStoreRegion)
+async throws -> CatalogApp { // swiftformat:disable:this indent
 	let queryItem = switch appID {
 	case let .adamID(adamID):
 		URLQueryItem(name: "id", value: .init(adamID))
@@ -315,8 +316,11 @@ private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp 
 	}
 	let lookupURL = Environment.current.lookupURL.appending(queryItems: [queryItem])
 	return if // swiftformat:disable:this wrap wrapArguments
-		let catalogAppJSONObject = // swiftformat:disable:next indent
-			try await catalogAppJSONObjects(from: lookupURL.appending(queryItems: macAppsURLQueryItem), in: region).first
+		let catalogAppJSONObject = try await catalogAppJSONObjects(
+			from: lookupURL.appending(queryItems: [.init(name: "entity", value: platform.iTunesSearchEntity)]),
+			in: region,
+		)
+		.first
 	{
 		try .init(object: catalogAppJSONObject)
 	} else {
@@ -326,23 +330,43 @@ private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp 
 }
 
 func search(for term: String) async throws -> [CatalogApp] {
-	try await search(for: term, in: appStoreRegion)
+	try await search(for: term, for: .macOS)
 }
 
-private func search(for term: String, in region: Region) async throws -> [CatalogApp] {
-	let searchURL = Environment.current.searchURL.appending(queryItems: [.init(name: "term", value: term)])
-	async let macCatalogAppsTask =
-		catalogAppJSONObjects(from: searchURL.appending(queryItems: macAppsURLQueryItem), in: region).map(CatalogApp.init)
-	async let anyCatalogAppsTask = catalogAppJSONObjects(from: searchURL, in: region)
-	let macCatalogApps = try await macCatalogAppsTask
-	let adamIDSet = Set(macCatalogApps.map(\.adamID))
-	return macCatalogApps.priorityMerge(
-		try await anyCatalogAppsTask.concurrentCompactMap { catalogAppJSONObject in
-			try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
-				? try await .init(nonMacOSApp: catalogAppJSONObject)
-				: nil
-		},
-	) { $0.name.similarity(to: term) }
+private func search(for term: String, for platform: Platform, in region: Region = appStoreRegion)
+async throws -> [CatalogApp] { // swiftformat:disable:this indent
+	// Search for apps for compatible platforms, in order of preference.
+	// Macs with Apple Silicon can run iPad & iPhone apps.
+	// TODO: .macCatalyst
+	#if arch(arm64)
+	let platforms = [Platform.macOS, .iPadOS, .iOS]
+	#else
+	let platforms = [Platform.macOS]
+	#endif
+	return try await platforms.concurrentFlatMap { platform in
+		let searchURL = Environment.current.searchURL.appending(queryItems: [.init(name: "term", value: term)])
+		async let macCatalogAppsTask = catalogAppJSONObjects(
+			from: searchURL.appending(queryItems: [.init(name: "entity", value: platform.iTunesSearchEntity)]),
+			in: region,
+		)
+		.map(CatalogApp.init)
+		async let anyCatalogAppsTask = catalogAppJSONObjects(from: searchURL, in: region)
+		let macCatalogApps = try await macCatalogAppsTask
+		let adamIDSet = Set(macCatalogApps.map(\.adamID))
+		return macCatalogApps.priorityMerge(
+			try await anyCatalogAppsTask.concurrentCompactMap { catalogAppJSONObject in
+				try catalogAppJSONObject["trackId"]?.decode(to: ADAMID?.self).map(adamIDSet.contains) == false
+					? try await .init(nonMacOSApp: catalogAppJSONObject)
+					: nil
+			},
+		) { $0.name.similarity(to: term) }
+	}
+	.reduce(into: (catalogApps: [CatalogApp](), seenIDs: Set<ADAMID>())) { state, catalogApp in
+		if state.seenIDs.insert(catalogApp.adamID).inserted {
+			state.catalogApps.append(catalogApp)
+		}
+	}
+	.catalogApps
 }
 
 private func catalogAppJSONObjects(from url: URL, in region: Region) async throws -> [JSON.Object] {
@@ -361,4 +385,3 @@ private let artworkURLRegex = /(?:^artworkUrl|ArtworkUrl)(\d+)/
 private let trackRegex = /((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/ // editorconfig-checker-disable-next-line
 private let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
 private let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
-private let macAppsURLQueryItem = [URLQueryItem(name: "entity", value: "desktopSoftware")]

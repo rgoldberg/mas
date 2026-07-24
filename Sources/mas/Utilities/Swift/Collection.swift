@@ -34,6 +34,20 @@ extension Collection where Element: Sendable {
 		try await concurrentCompactTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform)
 	}
 
+	func concurrentFlatMap<SegmentOfResult: Sequence & Sendable>( // swiftlint:disable:this unused_declaration
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async -> SegmentOfResult,
+	) async -> [SegmentOfResult.Element] where SegmentOfResult.Element: Sendable { // periphery:ignore
+		await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).flatMap(\.self)
+	}
+
+	func concurrentFlatMap<SegmentOfResult: Sequence & Sendable>(
+		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,
+		_ transform: @escaping @Sendable (Element) async throws -> SegmentOfResult,
+	) async rethrows -> [SegmentOfResult.Element] where SegmentOfResult.Element: Sendable {
+		try await concurrentTransform(maxConcurrentTaskCount: maxConcurrentTaskCount, transform).flatMap(\.self)
+	}
+
 	func concurrentCompactMap<T: Sendable>(
 		attemptingTo perform: String,
 		maxConcurrentTaskCount: Int = defaultMaxConcurrentTaskCount,

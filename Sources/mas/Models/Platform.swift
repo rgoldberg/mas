@@ -15,8 +15,8 @@ enum Platform: String {
 	case macCatalyst
 	case macOS
 
-	var iTunesSearchEntity: String { // periphery:ignore
-		switch self { // swiftlint:disable:previous unused_declaration
+	var iTunesSearchEntity: String {
+		switch self {
 		case .any:
 			"macSoftware"
 		case .iOS:
