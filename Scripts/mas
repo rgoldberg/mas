@@ -36,12 +36,11 @@ def pad_spaces($count):
 	" " * ($count - (. | length))
 ;
 try (
-	(map(.adamID | tostring | length) | max) as $max_adam_id_length |'"${max_version_length_jq-}"'
+	(map(.bundleID | length) | max) as $max_bundle_id_length |'"${max_version_length_jq-}"'
 	.[] |
-	(.adamID | tostring) as $adam_id |
 	(.version // "") as $version |
 	[
-		($adam_id | pad_spaces($max_adam_id_length)) + $adam_id,
+		(.bundleID | pad_spaces($max_bundle_id_length)) + .bundleID,
 		.name,
 		"(" + $version'"${new_version_jq-}"' + ")",
 		.platform
