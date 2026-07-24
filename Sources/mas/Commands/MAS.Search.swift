@@ -36,7 +36,7 @@ extension MAS {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
 
-			outputFormatOptionGroup.info(catalogApps.map(String.init(describing:)).joined(separator: "\n"))
+			outputFormatOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }

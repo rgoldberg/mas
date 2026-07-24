@@ -48,7 +48,7 @@ extension MAS {
 				return
 			}
 
-			outputFormatOptionGroup.info(installedApps.map(String.init(describing:)).joined(separator: "\n"))
+			outputFormatOptionGroup.info(installedApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }

@@ -29,7 +29,7 @@ extension MAS {
 		}
 
 		func run(catalogApps: [CatalogApp]) {
-			outputFormatOptionGroup.info(catalogApps.map(String.init(describing:)).joined(separator: "\n"))
+			outputFormatOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }

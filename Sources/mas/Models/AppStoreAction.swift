@@ -47,7 +47,7 @@ enum AppStoreAction: String {
 	}
 
 	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async {
-		let installedApps = await installedApps(withAppIDs: adamIDs.map(AppID.adamID(_:)), withFullJSON: false) { _ in }
+		let installedApps = await installedApps(withAppIDs: adamIDs.map(AppID.adamID), withFullJSON: false) { _ in }
 		await apps(
 			withADAMIDs: force
 				? adamIDs

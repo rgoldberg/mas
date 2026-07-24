@@ -309,7 +309,7 @@ private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp 
 	{
 		try .init(object: catalogAppJSONObject)
 	} else {
-		try await catalogAppJSONObjects(from: lookupURL, in: region).first.flatMap(CatalogApp.init(macDesktopAppObject:))
+		try await catalogAppJSONObjects(from: lookupURL, in: region).first.flatMap(CatalogApp.init)
 			?? { throw MASError.unknownAppID(appID) }()
 	}
 }
@@ -321,8 +321,7 @@ func search(for term: String) async throws -> [CatalogApp] {
 private func search(for term: String, in region: Region) async throws -> [CatalogApp] {
 	let searchURL = Environment.current.searchURL.appending(queryItems: [.init(name: "term", value: term)])
 	async let macCatalogAppsTask =
-		catalogAppJSONObjects(from: searchURL.appending(queryItems: macAppsURLQueryItem), in: region)
-			.map(CatalogApp.init(object:))
+		catalogAppJSONObjects(from: searchURL.appending(queryItems: macAppsURLQueryItem), in: region).map(CatalogApp.init)
 	async let anyCatalogAppsTask = catalogAppJSONObjects(from: searchURL, in: region)
 	let macCatalogApps = try await macCatalogAppsTask
 	let adamIDSet = Set(macCatalogApps.map(\.adamID))
