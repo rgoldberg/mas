@@ -65,7 +65,7 @@ extension MAS {
 				return
 			}
 
-			unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
+			withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
 				guard let baseAddress = buffer.baseAddress else {
 					return
 				}

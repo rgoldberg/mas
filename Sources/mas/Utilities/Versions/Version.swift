@@ -10,7 +10,7 @@ protocol Version: RawRepresentable<String> {
 	var prereleaseElements: [String] { get }
 	var buildElements: [String] { get } // swiftlint:disable unused_declaration
 
-	var core: String { get } // periphery:ignore
-	var prerelease: String? { get } // periphery:ignore
-	var build: String? { get } // periphery:ignore
-} // swiftlint:enable unused_declaration
+	var core: String { get }
+	var prerelease: String? { get }
+	var build: String? { get } // swiftlint:enable unused_declaration
+}

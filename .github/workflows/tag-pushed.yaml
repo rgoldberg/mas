@@ -14,7 +14,7 @@ defaults:
 jobs:
   tag-pushed:
     if: ${{!github.event.repository.fork}}
-    runs-on: macos-26
+    runs-on: xcode-27
     permissions:
       contents: write
     steps:

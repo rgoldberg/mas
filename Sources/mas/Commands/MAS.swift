@@ -64,6 +64,7 @@ struct MAS: AsyncParsableCommand {
 }
 
 extension MAS {
+	@_disfavoredOverload
 	static func main(_ command: some ParsableCommand) throws {
 		try main(command) { command in
 			var command = command
@@ -78,6 +79,7 @@ extension MAS {
 		}
 	}
 
+	@_disfavoredOverload
 	static func main<Command: ParsableCommand>(_ command: Command, _ body: (Command) throws -> Void) throws {
 		do {
 			try body(command)
@@ -87,7 +89,7 @@ extension MAS {
 	}
 
 	static func main<Command: AsyncParsableCommand>(_ command: Command, _ body: (Command) async throws -> Void)
-	async throws { // swiftformat:disable:this indent
+	async throws {
 		do {
 			try await body(command)
 		} catch {
@@ -118,10 +120,10 @@ private func cast<T>(_ instance: Any, as _: T.Type) -> T? {
 	instance as? T
 }
 
-private let applicationsFolderPath = "/Applications"
-private let applicationsFolderURL = URL(folderPath: applicationsFolderPath)
-
 let applicationsFolderURLs = UserDefaults(suiteName: "com.apple.appstored")?
 	.dictionary(forKey: "PreferredVolume")?["name"]
 	.map { [applicationsFolderURL, .init(folderPath: "/Volumes/\($0)\(applicationsFolderPath)")] }
 	?? [applicationsFolderURL]
+
+private let applicationsFolderPath = "/Applications"
+private let applicationsFolderURL = URL(folderPath: applicationsFolderPath)
