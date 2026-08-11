@@ -9,7 +9,7 @@ internal import ArgumentParser
 private import Foundation
 private import OrderedCollections
 private import Subprocess
-private import System // swiftlint:disable:this unused_import
+private import System
 
 extension MAS {
 	/// Uninstalls apps installed from the App Store.
@@ -40,10 +40,10 @@ extension MAS {
 			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
 			let uninstallingADAMIDByPathOrdered =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
-					.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
-						uninstallingADAMIDByPathOrdered
-							.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
-					}
+				.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
+					uninstallingADAMIDByPathOrdered
+						.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
+				}
 			guard !uninstallingADAMIDByPathOrdered.isEmpty else {
 				return
 			}

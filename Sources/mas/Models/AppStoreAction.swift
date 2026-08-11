@@ -13,7 +13,7 @@ private import ObjectiveC
 private import OrderedCollections
 private import StoreFoundation
 private import Subprocess
-private import System // swiftlint:disable:this unused_import
+private import System
 
 enum AppStoreAction: String {
 	case get

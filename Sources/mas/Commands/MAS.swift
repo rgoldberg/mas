@@ -87,7 +87,7 @@ extension MAS {
 	}
 
 	static func main<Command: AsyncParsableCommand>(_ command: Command, _ body: (Command) async throws -> Void)
-	async throws { // swiftformat:disable:this indent
+	async throws {
 		do {
 			try await body(command)
 		} catch {

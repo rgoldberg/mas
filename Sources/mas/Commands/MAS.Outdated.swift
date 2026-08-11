@@ -24,7 +24,7 @@ extension MAS {
 			let outdatedApps =
 				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON)
 			if !outdatedApps.isEmpty {
-				outputFormatOptionGroup.info(outdatedApps.map { .init(describing: $0) }.joined(separator: "\n"))
+				outputFormatOptionGroup.info(outdatedApps.lazy.map { .init(describing: $0) }.joined(separator: "\n"))
 			}
 		}
 	}

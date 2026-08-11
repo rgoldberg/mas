@@ -2,7 +2,7 @@
 # .swiftformat
 # mas
 #
-# SwiftFormat 0.62.1
+# SwiftFormat 0.63.0
 #
 
 # Disabled rules (enabled by default)
@@ -11,6 +11,7 @@
 
 # Disabled rules (disabled by default)
 #--enable blankLineAfterSwitchCase
+#--enable ifExpressions
 #--enable markTypes
 #--enable preferExplicitFalse
 #--enable testSuiteAccessControl
@@ -31,11 +32,13 @@
 --enable preferFinalClasses
 --enable preferFirstWhere
 --enable preferFlatMap
+--enable preferLazyMap
 --enable preferMinOverSorted
 --enable preferSwiftStringAPI
 --enable preferSwiftTesting
 --enable privateStateVariables
 --enable propertyTypes
+--enable redundantExtendedLifetime
 --enable redundantSendable
 --enable singlePropertyPerLine
 --enable sortSwitchCases
@@ -48,47 +51,49 @@
 --enable wrapMultilineFunctionChains
 
 # Rule options
---acronyms ADAM,ADI,AE,ANSI,API,CD,CEO,CF,CI,CK,CPU,DAV,DOS,DS,DSID,DVD,EOF,FAQ,FAT,FD,FTP,GB,GID,GUI,GUID,HTML,HTTP,HTTPS,ID,IFS,ISO,JSON,KB,MAS,MD,MDM,MDS,MIB,MIT,NS,OS,OSX,PDF,PR,QL,SB,SDK,SHA,SS,SSH,STDQ,STDRDL,UDF,UI,UID,URL,US,UTF,UUID,VPP,XML,XPC,YAML
---allow-partial-wrapping false
---complex-attributes prev-line
---computed-var-attributes prev-line
---conditional-assignment always
---doc-comments before-non-local-declarations
---exponent-grouping enabled
---file-macro "#fileID"
---fraction-grouping enabled
---func-attributes prev-line
---header //\n// {file}\n// mas\n//\n// Copyright © {created.year} mas-cli\. All rights reserved\.\n//
---hex-literal-case lowercase
---ifdef no-indent
---import-grouping alpha
---indent tab
---indent-strings true
---language-mode 6
---line-after-marks false
---mark-categories false
---max-width 120
---organization-mode type
---organize-types actor,class,enum,extension,struct
---property-types inferred
---ranges no-space
---redundant-async always
---redundant-throws always
---semicolons never
---short-optionals always
---single-line-for-each convert
---stored-var-attributes prev-line
---suite-name-format standard-identifiers
---tab-width 2
---timezone utc
---type-attributes prev-line
---type-body-marks remove
---type-order beforeMarks,nestedType,staticProperty,staticPropertyWithBody,classPropertyWithBody,staticMethod,classMethod,overriddenProperty,swiftUIPropertyWrapper,instanceProperty,computedProperty,instanceLifecycle,swiftUIProperty,swiftUIMethod,overriddenMethod,instanceMethod
---wrap-arguments before-first
---wrap-collections before-first
---wrap-conditions before-first
---wrap-effects never
---wrap-parameters before-first
---wrap-return-type never
---wrap-ternary before-operators
---wrap-type-aliases before-first
+--acronyms                   ADAM,ADI,AE,ANSI,API,CD,CEO,CF,CI,CK,CPU,DAV,DOS,DS,DSID,DVD,EOF,FAQ,FAT,FD,FTP,GB,GID,GUI,GUID,HTML,HTTP,HTTPS,ID,IFS,ISO,JSON,KB,MAS,MD,MDM,MDS,MIB,MIT,NS,OS,OSX,PDF,PR,QL,SB,SDK,SHA,SS,SSH,STDQ,STDRDL,UDF,UI,UID,URL,US,UTF,UUID,VPP,XML,XPC,YAML
+--allow-partial-wrapping     false
+--complex-attributes         prev-line
+--computed-var-attributes    prev-line
+--conditional-assignment     always
+--doc-comments               before-non-local-declarations
+--exponent-grouping          enabled
+--file-macro                 "#fileID"
+--fraction-grouping          enabled
+--func-attributes            prev-line
+--header                     //\n// {file}\n// mas\n//\n// Copyright © {created.year} mas-cli\. All rights reserved\.\n//
+--hex-literal-case           lowercase
+--ifdef                      no-indent
+--import-grouping            alpha
+--indent                     tab
+--indent-strings             true
+--language-mode              6
+--mark-categories            false
+--max-width                  120
+--organization-mode          type
+--organize-types             actor,class,enum,extension,protocol,struct,typealias
+--property-types             inferred
+--ranges                     no-space
+--redundant-async            always
+--redundant-optional-binding always
+--redundant-throws           always
+--semicolons                 never
+--short-optionals            always
+--single-line-for-each       convert
+--stored-var-attributes      prev-line
+--suite-name-format          standard-identifiers
+--tab-width                  2
+--timezone                   utc
+--type-attributes            prev-line
+--type-body-marks            remove
+--type-order                 beforeMarks,nestedType,staticProperty,staticPropertyWithBody,classPropertyWithBody,staticMethod,classMethod,overriddenProperty,swiftUIPropertyWrapper,instanceProperty,instancePropertyWithBody,computedProperty,instanceLifecycle,swiftUIProperty,swiftUIMethod,overriddenMethod,instanceMethod
+--wrap-arguments             before-first
+--wrap-collections           before-first
+--wrap-conditions            before-first
+--wrap-effects               never
+--wrap-parameters            before-first
+--wrap-return-type           never
+--wrap-string-interpolation  true
+--wrap-ternary               before-operators
+--wrap-type-aliases          before-first
+--xcode-indentation          enabled
