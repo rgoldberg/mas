@@ -10,7 +10,6 @@
 # Please keep in sync with Scripts/format.
 #
 
-# shellcheck disable=SC1036,SC1056,SC1072
 . "${0:A:h}/_setup_script"
 
 print_notice '🚨 Linting' "${@}"
@@ -28,7 +27,7 @@ ensure_command_available\
 autoload -Uz is-at-least
 is-at-least 15 "$(sw_vers -productVersion)" && [[ "$(/usr/bin/arch)" = arm64 ]]
 integer -r can_use_periphery="$((! ?))"
-# shellcheck disable=SC1073,SC1083
+# shellcheck disable=SC1083
 ((can_use_periphery)) && { ensure_command_available periphery || exit }
 
 zmodload zsh/zutil

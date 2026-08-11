@@ -2,7 +2,7 @@
 # Tests/.swiftlint.yml
 # mas
 #
-# SwiftLint 0.65.0
+# SwiftLint 0.65.1
 #
 ---
 disabled_rules:

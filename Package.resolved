@@ -1,13 +1,13 @@
 {
-	"originHash" : "1258f65541610f93b99036489fb6f1ff4c4fa75f237e9462d1c5185364a3a9f4",
+	"originHash" : "efad20895657ad36e5eed2c5f6983853aec9b4867884003bef07ec10e86e7d18",
 	"pins" : [
 		{
 			"identity" : "bigint",
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/attaswift/BigInt",
 			"state" : {
-				"revision" : "1352e54a022205438e3ef75a32941b47f2f5c189",
-				"version" : "6.0.0"
+				"revision" : "63feef7820abb1a8fb08587d7da56bb0b7db8751",
+				"version" : "6.0.1"
 			}
 		},
 		{
@@ -33,8 +33,8 @@
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/KittyMac/Hitch",
 			"state" : {
-				"revision" : "eeb9638609bfdc3567162d909745b781833f9fad",
-				"version" : "0.4.156"
+				"revision" : "9f18510885ce8fbf925f120f0ce28672bc9a7eaa",
+				"version" : "0.4.160"
 			}
 		},
 		{
@@ -51,8 +51,8 @@
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/KittyMac/Spanker",
 			"state" : {
-				"revision" : "7177446066ac3b106e16184420ff2a1aa1f6df96",
-				"version" : "0.2.60"
+				"revision" : "28e3c419ebe1ef4b40f07f2e93c5941cd26f1347",
+				"version" : "0.2.67"
 			}
 		},
 		{
@@ -105,8 +105,8 @@
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/apple/swift-system",
 			"state" : {
-				"revision" : "50688cacbd41d547e9eb9f7a213542340b7c442b",
-				"version" : "1.7.5"
+				"revision" : "869129b7bf4ecc57b97d0193ad29690ca2134750",
+				"version" : "1.8.1"
 			}
 		},
 		{
@@ -114,8 +114,8 @@
 			"kind" : "remoteSourceControl",
 			"location" : "https://github.com/scinfu/SwiftSoup",
 			"state" : {
-				"revision" : "8d6ad267714cac3ae747cefdd21f7a6665006e1f",
-				"version" : "2.13.7"
+				"revision" : "18b80329749eca5ea29fc50211dca5c7eff5bfec",
+				"version" : "2.13.9"
 			}
 		}
 	],

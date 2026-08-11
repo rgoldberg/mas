@@ -23,9 +23,9 @@ _ = Package(
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
 		.package(url: "https://github.com/apple/swift-atomics", from: "1.3.1"),
 		.package(url: "https://github.com/apple/swift-collections", from: "1.6.0"),
-		.package(url: "https://github.com/attaswift/BigInt", from: "6.0.0"),
+		.package(url: "https://github.com/attaswift/BigInt", from: "6.0.1"),
 		.package(url: "https://github.com/rarestype/swift-json", from: "3.5.0"),
-		.package(url: "https://github.com/scinfu/SwiftSoup", from: "2.13.7"),
+		.package(url: "https://github.com/scinfu/SwiftSoup", from: "2.13.9"),
 		.package(url: "https://github.com/swiftlang/swift-subprocess", from: "0.5.0"),
 	],
 	targets: [
