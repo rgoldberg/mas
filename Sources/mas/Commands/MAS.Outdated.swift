@@ -6,8 +6,9 @@
 //
 
 internal import ArgumentParser
+private import JSONAST
 
-extension MAS {
+extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs a list of already installed apps that have pending updates from
 	/// the App Store.
 	struct Outdated: AsyncParsableCommand {
@@ -16,16 +17,20 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
 		@OptionGroup
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async {
-			let outdatedApps =
-				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputConfigOptionGroup.shouldOutputJSON)
-			if !outdatedApps.isEmpty {
-				outputConfigOptionGroup.info(outdatedApps.lazy.map { .init(describing: $0) }.joined(separator: "\n"))
-			}
+			outputConfigOptionGroup.output(
+				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputConfigOptionGroup.withFullJSON)
+					.map(\.jsonObject),
+			)
 		}
 	}
+}
+
+private struct TableConfig: OutputConfig, Keyed {
+	static let defaultFormat = OutputFormat.table
+	static let keys = [JSON.Key("adamID"), "name", "version", "newVersion"]
 }
