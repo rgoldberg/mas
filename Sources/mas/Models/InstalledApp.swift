@@ -20,9 +20,7 @@ struct InstalledApp {
 	let path: String
 	let version: String
 
-	private let jsonObjectRaw: JSON.Object
 	private let lazyJSONObject: Lazy<JSON.Object>
-	private let lazyJSON: Lazy<String>
 
 	var jsonObject: JSON.Object {
 		lazyJSONObject.value
@@ -41,17 +39,14 @@ struct InstalledApp {
 			?? ""
 		version = valueByAttribute[NSMetadataItemVersionKey].map(String.init(describing:)) ?? ""
 
-		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
-		let jsonObjectRaw = jsonObjectRaw
+		let jsonObject = JSON.Object(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let name = name
 		lazyJSONObject = .init(
 			.init(
-				(jsonObjectRaw.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
+				(jsonObject.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
 					.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
 			),
 		)
-		let lazyJSONObject = lazyJSONObject
-		lazyJSON = .init(.init(lazyJSONObject.value))
 	}
 
 	func matches(_ appID: AppID) -> Bool {
@@ -61,12 +56,6 @@ struct InstalledApp {
 		case let .bundleID(bundleID):
 			self.bundleID == bundleID
 		}
-	}
-}
-
-extension InstalledApp: CustomStringConvertible {
-	var description: String {
-		lazyJSON.value
 	}
 }
 
