@@ -6,8 +6,9 @@
 //
 
 internal import ArgumentParser
+private import JSONAST
 
-extension MAS {
+extension MAS { // swiftlint:disable:this file_types_order
 	/// Searches for apps in the App Store.
 	///
 	/// Uses the iTunes Search API:
@@ -19,9 +20,9 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup
-		@Flag(help: "Output the price of each app") // swiftlint:disable:next unused_declaration
-		private var price = false // swiftformat:disable:this unusedPrivateDeclarations
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
+		@Flag(help: "Output the price of each app")
+		private var price = false
 		@OptionGroup
 		private var searchTermOptionGroup: SearchTermOptionGroup
 
@@ -35,7 +36,22 @@ extension MAS {
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
-			outputConfigOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
+			if price {
+				OutputConfigOptionGroup<PriceTableConfig>(outputFormat: outputConfigOptionGroup.outputFormat)
+					.output(catalogApps.map(\.jsonObject))
+			} else {
+				outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
+			}
 		}
 	}
+}
+
+private struct TableConfig: OutputConfig, Keyed { // swiftlint:disable:this file_types_order
+	static let defaultFormat = OutputFormat.table
+	static let keys = [JSON.Key("adamID"), "name", "version"]
+}
+
+private struct PriceTableConfig: OutputConfig, Keyed { // swiftlint:disable:this one_declaration_per_file
+	static let defaultFormat = OutputFormat.table
+	static let keys = [JSON.Key("adamID"), "name", "version", "price"]
 }
