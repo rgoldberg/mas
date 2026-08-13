@@ -431,7 +431,7 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 		adamID = metadata.itemIdentifier
 		name = metadata.title
 		version = metadata.bundleVersion
-		appNameAndVersion = "\(metadata.title ?? "unknown app") (\(version ?? "unknown version"))"
+		appNameAndVersion = "\(metadata.title ?? "unknown app") \(version ?? "unknown version")"
 		activePhaseType = .init(action, rawValue: status.activePhase?.phaseType)
 		phasePercentComplete = status.phasePercentComplete
 		appFolderPath = download.installPath

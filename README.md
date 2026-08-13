@@ -42,11 +42,11 @@ Detailed documentation is available via `man mas` & `mas --help`.
 <!--markdownlint-disable line-length-->
 | Command                       | Functionality                                 | Notes                                                                                                       | Aliases    |
 |:------------------------------|:----------------------------------------------|:------------------------------------------------------------------------------------------------------------|:-----------|
-| `search <term>…`              | Search for App Store apps                     | [json](#json-app-output)                                                                                    |            |
-| `lookup <id>…`                | Output App Store app details                  | [json](#json-app-output)                                                                                    | `info`     |
-| `list [<id>…]`                | Output installed apps                         | [spotlight](#spotlight), [json](#json-app-output)                                                           |            |
-| `outdated [<id>…]`            | Output outdated apps                          | [spotlight](#spotlight), [json](#json-app-output)                                                           |            |
-| `outdated --accurate [<id>…]` | Output outdated apps                          | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [json](#json-app-output)         |            |
+| `search <term>…`              | Search for App Store apps                     | [formats](#output-formats)                                                                                  |            |
+| `lookup <id>…`                | Output App Store app details                  | [formats](#output-formats)                                                                                  | `info`     |
+| `list [<id>…]`                | Output installed apps                         | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
+| `outdated [<id>…]`            | Output outdated apps                          | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
+| `outdated --accurate [<id>…]` | Output outdated apps                          | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [formats](#output-formats)       |            |
 | `get <id>…`                   | [Get free apps](#paid-apps), install any apps | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements-for-get) | `purchase` |
 | `install <id>…`               | Install already owned apps                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
 | `lucky <term>…`               | Install first matching app                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
@@ -58,7 +58,7 @@ Detailed documentation is available via `man mas` & `mas --help`.
 | `home <id>…`                  | Open app web pages                            |                                                                                                             |            |
 | `seller <id>…`                | Open seller app web pages                     |                                                                                                             | `vendor`   |
 | `reset`                       | Reset App Store processes                     |                                                                                                             |            |
-| `config`                      | Output config                                 | [json](#json-config-output)                                                                                 |            |
+| `config`                      | Output config                                 | [formats](#output-formats)                                                                                  |            |
 | `version`                     | Output version                                |                                                                                                             |            |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -98,8 +98,6 @@ Detailed documentation is available via `man mas` & `mas --help`.
 | Action                                                                  | Command                        |
 |:------------------------------------------------------------------------|:-------------------------------|
 | Build                                                                   | `Scripts/build` or Xcode 26.4+ |
-| Set up zsh wrapper                                                      | `Scripts/setup_libexec`        |
-| Run zsh wrapper                                                         | `Scripts/mas`                  |
 | Test ([Swift Testing](https://developer.apple.com/xcode/swift-testing)) | `Scripts/test`                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -131,42 +129,29 @@ ADAM IDs can be found via:
   4. Extract the ADAM ID from the URL in the copied text. e.g., `497799835` from
      `https://apps.apple.com/us/app/xcode/id497799835?mt=12`.
 
-## JSON App Output
+## Output Formats
 
-`list`, `outdated` & `search` normally output tabular data, with a few fields
-for each app on its own row.
+Commands whose primary purpose is to output information to stdout support 3
+output formats, each selectable via a flag (note: an item is normally an app):
 
-`lookup` normally outputs fields as key-value pairs—one per line—in a contiguous
-block for each app, with a blank line between apps.
+- **Table** (`--table`): Row per item, column per selected field (if an item has
+  multiple values for a field, the last value is used). Default for:
+  - `list`
+  - `outdated`
+  - `search`
+- **Key-Value** (`--key-value`): Key-value pair on its own row per selected
+  field, blank line between items (if an item has multiple values for a field,
+  the last value is used). Default for:
+  - `config`
+  - `lookup`
+- **JSON** (`--json`): Streamed JSON object per item, key-value pair per each
+  field (if an item has multiple values for a field, all values are output with
+  their relative input order preserved in the output). Key-value pairs are
+  sorted by key.
 
-If `--json` is supplied, these commands output a stream of JSON objects—one per
-app—each containing all fields provided by Apple for that app.
-
-Many of the keys provided by Apple are poorly named, so they are mapped to
-better names by an algorithm.
-
-<!--editorconfig-checker-disable-->
-Mapped keys are [sorted](
-  https://developer.apple.com/documentation/foundation/nsstring/compareoptions/numeric
-).
-<!--editorconfig-checker-enable-->
-
-Each key should be unique within an object; if duplicate keys exist in an
-object, their relative ordering in the input is preserved in the output.
-
-For tabular output, if an object contains duplicate keys, the last value is
-used.
-
-If Apple renames or adds keys, suboptimal keys might be output until the mapping
-is updated.
-
-## JSON Config Output
-
-`config` normally outputs settings as key-value pairs, one per line.
-
-If `--json` is supplied, `config` outputs all settings in a single JSON object.
-
-Since the keys are defined by mas, they are guaranteed to be unique & correct.
+Many fields provided by Apple are poorly named, so they are renamed by an
+algorithm. If Apple renames or adds fields, suboptimal field names might be
+output until the algorithm is updated.
 
 ## Spotlight
 

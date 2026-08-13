@@ -6,8 +6,9 @@
 //
 
 internal import ArgumentParser
+private import JSONAST
 
-extension MAS {
+extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs apps already installed from the App Store.
 	struct List: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
@@ -15,14 +16,14 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
 		@OptionGroup
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func run() async {
 			run(
 				installedApps: // swiftformat:disable:next indent
-					await installedAppsOptionGroup.installedApps(withFullJSON: outputConfigOptionGroup.shouldOutputJSON),
+					await installedAppsOptionGroup.installedApps(withFullJSON: outputConfigOptionGroup.withFullJSON),
 			)
 		}
 
@@ -48,7 +49,12 @@ extension MAS {
 				return
 			}
 
-			outputConfigOptionGroup.info(installedApps.map(String.init).joined(separator: "\n"))
+			outputConfigOptionGroup.output(installedApps.map(\.jsonObject))
 		}
 	}
+}
+
+private struct TableConfig: OutputConfig, Keyed {
+	static let defaultFormat = OutputFormat.table
+	static let keys = [JSON.Key("adamID"), "name", "version"]
 }

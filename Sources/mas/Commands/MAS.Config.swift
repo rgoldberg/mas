@@ -10,7 +10,7 @@ private import Darwin
 private import Foundation
 private import JSONAST
 
-extension MAS {
+extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs mas config & related system info.
 	struct Config: ParsableCommand {
 		static let configuration = CommandConfiguration(
@@ -18,66 +18,54 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueConfig>
 
 		func run() {
-			outputConfigOptionGroup.info(
-				JSON.Object( // swiftformat:disable:this wrap wrapArguments
-					dictionaryLiteral: // swiftlint:disable vertical_parameter_alignment_on_call
-						("mas", .string(version)), // swiftformat:disable indent
-						("slice", .string(runningSliceArchitecture)),
-						("slices", .string(supportedSliceArchitectures.joined(separator: " "))),
-						("dist", .string(distribution)),
-						("origin", .string(gitOrigin)),
-						("rev", .string(gitRevision)),
-						("swift", .string(swiftVersion)),
-						("driver", .string(swiftDriverVersion)),
-						("store", .string(appStoreRegion)),
-						("region", .string(macRegion)),
-						("macos", .string(macOSVersion)),
-						("build", .string(configStringValue("kern.osversion"))),
-						("mac", .string(configStringValue("hw.product"))),
-						("cpu", .string(configStringValue("machdep.cpu.brand_string"))),
-						("arch", .string(configStringValue("hw.machine"))), // swiftlint:enable vertical_parameter_alignment_on_call
-				), // swiftformat:enable indent
+			outputConfigOptionGroup.output(
+				[
+					.init( // swiftformat:disable:this wrap wrapArguments
+						dictionaryLiteral: // swiftlint:disable vertical_parameter_alignment_on_call
+							("mas", .string(version)), // swiftformat:disable indent
+							("slice", .string(runningSliceArchitecture)),
+							("slices", .string(supportedSliceArchitectures.joined(separator: " "))),
+							("dist", .string(distribution)),
+							("origin", .string(gitOrigin)),
+							("rev", .string(gitRevision)),
+							("swift", .string(swiftVersion)),
+							("driver", .string(swiftDriverVersion)),
+							("store", .string(appStoreRegion)),
+							("region", .string(macRegion)),
+							("macos", .string(macOSVersion)),
+							("build", .string(configStringValue("kern.osversion"))),
+							("mac", .string(configStringValue("hw.product"))),
+							("cpu", .string(configStringValue("machdep.cpu.brand_string"))),
+							("arch", .string(configStringValue("hw.machine"))),
+					), // swiftformat:enable indent // swiftlint:enable vertical_parameter_alignment_on_call
+				],
 			)
 		}
 	}
 }
 
-private let runningSliceArchitecture = {
-	#if arch(arm64)
-	"arm64"
-	#elseif arch(x86_64)
-	"x86_64"
-	#else
-	"unknown"
-	#endif
-}()
-
-private var supportedSliceArchitectures: [String] {
-	Bundle.main.executableArchitectures.map { archIDs in
-		archIDs.map { archID in
-			guard let arch = Int(exactly: archID) else {
-				return "unknown_\(archID)"
-			}
-
-			return switch arch {
-			case NSBundleExecutableArchitectureARM64:
-				"arm64"
-			case NSBundleExecutableArchitectureX86_64:
-				"x86_64"
-			default:
-				"unknown_0x\(String(arch, radix: 16))"
-			}
-		}
-	}
-		?? .init()
-}
-
-private var macOSVersion: String {
-	let version = ProcessInfo.processInfo.operatingSystemVersion
-	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+private struct KeyValueConfig: OutputConfig, Keyed {
+	static let defaultFormat = OutputFormat.keyValue
+	static let keys = [
+		JSON.Key("mas"),
+		"slice",
+		"slices",
+		"dist",
+		"origin",
+		"rev",
+		"swift",
+		"driver",
+		"store",
+		"region",
+		"macos",
+		"build",
+		"mac",
+		"cpu",
+		"arch",
+	]
 }
 
 private func configStringValue(_ name: String) -> String {
@@ -102,6 +90,39 @@ private func configStringValue(_ name: String) -> String {
 		return unsafe .init(cString: unsafe baseAddress)
 	}
 }
+
+private let runningSliceArchitecture = {
+	#if arch(arm64)
+	"arm64"
+	#elseif arch(x86_64)
+	"x86_64"
+	#else
+	"unknown"
+	#endif
+}()
+
+private let supportedSliceArchitectures = Bundle.main.executableArchitectures.map { archIDs in
+	archIDs.map { archID in
+		guard let arch = Int(exactly: archID) else {
+			return "unknown_\(archID)"
+		}
+
+		return switch arch {
+		case NSBundleExecutableArchitectureARM64:
+			"arm64"
+		case NSBundleExecutableArchitectureX86_64:
+			"x86_64"
+		default:
+			"unknown_0x\(String(arch, radix: 16))"
+		}
+	}
+}
+	?? .init()
+
+private let macOSVersion = {
+	let version = ProcessInfo.processInfo.operatingSystemVersion
+	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+}()
 
 private let unknown = "unknown"
 private let sysCtlByName = "sysctlbyname"
