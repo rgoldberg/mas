@@ -6,22 +6,17 @@
 //
 
 private import ArgumentParser
-private import Darwin
-private import Foundation
+internal import JSONAST
 
-struct OutputConfigOptionGroup: ParsableArguments {
-	@Flag(name: .customLong("json"), help: "Output JSON")
-	private(set) var shouldOutputJSON = false
+struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
+	@Flag(help: "Output format")
+	private(set) var outputFormat = Config.defaultFormat
 
-	func info(_ items: Any..., separator: String = " ", terminator: String = "\n") {
-		var stat = stat()
-		MAS.printer.info(
-			items,
-			separator: separator,
-			terminator: terminator,
-			to: unsafe shouldOutputJSON || fstat(3, &stat) != 0 || (stat.st_mode & S_IFMT) != S_IFIFO
-				? .standardOutput
-				: .init(fileDescriptor: 3),
-		)
+	var withFullJSON: Bool {
+		outputFormat == .json
+	}
+
+	func output(_ objects: [JSON.Object]) {
+		Config.output(objects, as: outputFormat)
 	}
 }

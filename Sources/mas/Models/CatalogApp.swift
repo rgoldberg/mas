@@ -6,7 +6,7 @@
 //
 
 private import Foundation
-private import JSONAST
+internal import JSONAST
 private import JSONDecoding
 private import JSONParsing
 private import Sextant
@@ -20,7 +20,11 @@ struct CatalogApp {
 	let sellerURLString: String?
 	let version: String
 
-	private let lazyJSON: Lazy<String>
+	private let lazyJSONObject: Lazy<JSON.Object>
+
+	var jsonObject: JSON.Object {
+		lazyJSONObject.value
+	}
 
 	private init(
 		adamID: ADAMID,
@@ -37,13 +41,7 @@ struct CatalogApp {
 		self.name = name
 		self.sellerURLString = sellerURLString
 		self.version = version
-		lazyJSON = .init(.init(jsonObject.normalized))
-	}
-}
-
-extension CatalogApp: CustomStringConvertible {
-	var description: String {
-		lazyJSON.value
+		lazyJSONObject = .init(jsonObject.normalized)
 	}
 }
 
