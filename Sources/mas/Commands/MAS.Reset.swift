@@ -54,13 +54,13 @@ extension MAS {
 
 			var processListMIB = [CTL_KERN, KERN_PROC, KERN_PROC_ALL]
 			var length = 0
-			guard unsafe sysctl(&processListMIB, u_int(processListMIB.count), nil, &length, nil, 0) == 0 else {
+			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), nil, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list length")
 				return
 			}
 
 			var kinfoProcs = unsafe Array(repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
-			guard unsafe sysctl(&processListMIB, u_int(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
+			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list")
 				return
 			}
