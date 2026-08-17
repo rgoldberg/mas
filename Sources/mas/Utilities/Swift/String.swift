@@ -46,9 +46,9 @@ extension String {
 		}
 
 		let columnCount = thatLength + 1
-		var rowTwoPrevious = [Double](repeating: 0, count: columnCount)
+		var rowTwoPrevious = Array(repeating: Double(0), count: columnCount)
 		var rowPrevious = (0...thatLength).map(Double.init)
-		var rowCurrent = [Double](repeating: 0, count: columnCount)
+		var rowCurrent = Array(repeating: Double(0), count: columnCount)
 		for i in 1...thisLength { // swiftlint:disable:this identifier_name
 			let thisChar = thisChars[i - 1]
 			func cost(of thatChar: ScoredCharacter, at thatIndex: Int) -> Double {
