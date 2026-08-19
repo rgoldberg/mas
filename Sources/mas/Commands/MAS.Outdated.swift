@@ -16,15 +16,15 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputFormatOptionGroup: OutputFormatOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup
 		@OptionGroup
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
 		func run() async {
 			let outdatedApps =
-				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON)
+				await outdatedAppsOptionGroup.outdatedApps(withFullJSON: outputConfigOptionGroup.shouldOutputJSON)
 			if !outdatedApps.isEmpty {
-				outputFormatOptionGroup.info(outdatedApps.lazy.map { .init(describing: $0) }.joined(separator: "\n"))
+				outputConfigOptionGroup.info(outdatedApps.lazy.map { .init(describing: $0) }.joined(separator: "\n"))
 			}
 		}
 	}

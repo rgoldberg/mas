@@ -15,14 +15,14 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputFormatOptionGroup: OutputFormatOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup
 		@OptionGroup
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
 		func run() async {
 			run(
 				installedApps: // swiftformat:disable:next indent
-					await installedAppsOptionGroup.installedApps(withFullJSON: outputFormatOptionGroup.shouldOutputJSON),
+					await installedAppsOptionGroup.installedApps(withFullJSON: outputConfigOptionGroup.shouldOutputJSON),
 			)
 		}
 
@@ -48,7 +48,7 @@ extension MAS {
 				return
 			}
 
-			outputFormatOptionGroup.info(installedApps.map(String.init).joined(separator: "\n"))
+			outputConfigOptionGroup.info(installedApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }
