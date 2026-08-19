@@ -18,10 +18,10 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputFormatOptionGroup: OutputFormatOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup
 
 		func run() {
-			outputFormatOptionGroup.info(
+			outputConfigOptionGroup.info(
 				JSON.Object( // swiftformat:disable:this wrap wrapArguments
 					dictionaryLiteral: // swiftlint:disable vertical_parameter_alignment_on_call
 						("mas", .string(version)), // swiftformat:disable indent
