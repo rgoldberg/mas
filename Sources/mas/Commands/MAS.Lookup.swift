@@ -40,7 +40,9 @@ private struct KeyValueConfig: OutputConfig, FieldConfigured {
 	static let defaultFormat = OutputFormat.keyValue
 
 	static let fieldConfigs = [
-		(key: JSON.Key("name"), label: "App", transform: defaultTransform),
+		(key: JSON.Key("name"), label: "Name", transform: defaultTransform),
+		(key: "adamID", label: "ADAM ID", transform: defaultTransform),
+		(key: "bundleID", label: "Bundle ID", transform: defaultTransform),
 		(key: "version", label: "Version", transform: defaultTransform),
 		(key: "formattedPrice", label: "Price", transform: defaultTransform),
 		(key: "sellerName", label: "By", transform: defaultTransform),
