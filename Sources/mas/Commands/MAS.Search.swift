@@ -19,7 +19,7 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputFormatOptionGroup: OutputFormatOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup
 		@Flag(help: "Output the price of each app") // swiftlint:disable:next unused_declaration
 		private var price = false // swiftformat:disable:this unusedPrivateDeclarations
 		@OptionGroup
@@ -35,7 +35,7 @@ extension MAS {
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
-			outputFormatOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
+			outputConfigOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }
