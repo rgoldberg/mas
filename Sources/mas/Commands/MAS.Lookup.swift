@@ -20,7 +20,7 @@ extension MAS {
 		)
 
 		@OptionGroup
-		private var outputFormatOptionGroup: OutputFormatOptionGroup
+		private var outputConfigOptionGroup: OutputConfigOptionGroup
 		@OptionGroup
 		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
@@ -29,7 +29,7 @@ extension MAS {
 		}
 
 		func run(catalogApps: [CatalogApp]) {
-			outputFormatOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
+			outputConfigOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
 		}
 	}
 }
