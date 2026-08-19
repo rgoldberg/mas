@@ -1,5 +1,5 @@
 //
-// OutputFormatOptionGroup.swift
+// OutputConfigOptionGroup.swift
 // mas
 //
 // Copyright © 2026 mas-cli. All rights reserved.
@@ -9,7 +9,7 @@ private import ArgumentParser
 private import Darwin
 private import Foundation
 
-struct OutputFormatOptionGroup: ParsableArguments {
+struct OutputConfigOptionGroup: ParsableArguments {
 	@Flag(name: .customLong("json"), help: "Output JSON")
 	private(set) var shouldOutputJSON = false
 
