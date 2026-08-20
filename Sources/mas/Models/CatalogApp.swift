@@ -218,11 +218,7 @@ private extension JSON.Key {
 			.init(
 				rawValue: rawValue.replacing(artworkURLRegex) { match in
 					let output = match.output
-					guard let first = output.0.first else {
-						return ""
-					}
-
-					return first.isLowercase ? "icon\(output.1)URL" : "Icon\(output.1)URL"
+					return output.0.first.map { $0.isLowercase ? "icon\(output.1)URL" : "Icon\(output.1)URL" } ?? ""
 				}
 					.replacing(trackRegex) { match in // swiftformat:disable indent
 						func track(_ prefix: String) -> String {
