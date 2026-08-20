@@ -5,8 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import BigInt
-internal import Foundation
+private import Foundation
 
 struct UniversalSemVer: SemVerSyntax, ExpressibleByStringLiteral {
 	let coreElements: [String]
@@ -30,61 +29,77 @@ struct UniversalSemVer: SemVerSyntax, ExpressibleByStringLiteral {
 	}
 }
 
-private extension BigUInt {
-	func compare(to that: Self) -> ComparisonResult {
-		self < that ? .orderedAscending : self == that ? .orderedSame : .orderedDescending
+struct UniversalSemVerInt: SemVerSyntaxInteger { // swiftlint:disable:this one_declaration_per_file
+	let coreIntegers: [Int]
+	let prereleaseElements: [String]
+	let buildElements: [String]
+	let rawValue: String
+
+	var majorInteger: Int {
+		coreIntegers[0]
+	}
+
+	var minorInteger: Int {
+		coreIntegers[1]
+	}
+
+	var patchInteger: Int {
+		coreIntegers[2]
+	}
+
+	init(
+		coreIntegers: [Int],
+		prereleaseElements: [String] = .init(),
+		buildElements: [String] = .init(),
+	) { // periphery:ignore
+		self.init(
+			coreIntegers: coreIntegers,
+			prereleaseElements: prereleaseElements,
+			buildElements: buildElements,
+			rawValue: """
+				\(Self.core(from: Self.coreElements(from: coreIntegers)))\
+				\(Self.prerelease(from: prereleaseElements).map { "-\($0)" } ?? "")\
+				\(Self.build(from: buildElements).map { "+\($0)" } ?? "")
+				""",
+		)
+	}
+
+	init?(rawValue: String) {
+		do {
+			guard let match = rawValue.wholeMatch(of: universalSemVerRegex) else {
+				preconditionFailure("Failed to match regex \(universalSemVerRegex)")
+			}
+
+			self = .init(
+				coreIntegers: try match.1.elements.map { coreElement in
+					try .init(coreElement) ?? { throw MASError.error(coreElement) }()
+				},
+				prereleaseElements: match.2.elements,
+				buildElements: match.3.elements,
+				rawValue: rawValue,
+			)
+		} catch {
+			return nil
+		}
+	}
+
+	private init(
+		coreIntegers: [Int],
+		prereleaseElements: [String],
+		buildElements: [String],
+		rawValue: String,
+	) {
+		self.coreIntegers = coreIntegers.padding(toCount: 3, with: 0)
+		self.prereleaseElements = prereleaseElements
+		self.buildElements = buildElements
+		self.rawValue = rawValue
 	}
 }
 
-private extension FixedWidthInteger {
-	func compare(to that: Self) -> ComparisonResult {
-		self < that ? .orderedAscending : self == that ? .orderedSame : .orderedDescending
-	}
-}
-
-private extension String {
-	func compareSemVerElement(
-		to that: Self,
-		options mask: CompareOptions = .init(),
-		range: Range<Self.Index>? = nil,
-		locale: Locale? = nil,
-	) -> ComparisonResult {
-		let thatInteger = BigUInt(that)
-		return BigUInt(self).map { thatInteger.map($0.compare) ?? .orderedAscending }
-			?? thatInteger.map { _ in .orderedDescending }
-			?? compare(that, options: mask, range: range, locale: locale)
-	}
-}
-
-private extension [String] {
-	func compareSemVerElements(to that: Self) -> ComparisonResult {
-		zip(self, that).first { $0 != $1 }.map { $0.compareSemVerElement(to: $1) }
-			?? dropLast { $0 == "0" }.count.compare(to: that.dropLast { $0 == "0" }.count)
-	}
-}
-
-extension Substring? {
+private extension Substring? {
 	var elements: [String] {
 		map { $0.split(separator: ".") }?.map(String.init) ?? .init()
 	}
 }
 
-extension Version {
-	func compareSemVer(to that: Self) -> ComparisonResult {
-		let coreComparison = coreElements.compareSemVerElements(to: that.coreElements)
-		return coreComparison != .orderedSame
-			? coreComparison
-			: prereleaseElements.isEmpty != that.prereleaseElements.isEmpty // swiftformat:disable:next wrap wrapArguments
-				? prereleaseElements.isEmpty ? .orderedDescending : .orderedAscending
-				: prereleaseElements.compareSemVerElements(to: that.prereleaseElements)
-	}
-
-	func compareSemVerAndBuild(to that: Self) -> ComparisonResult {
-		let semVerComparison = compareSemVer(to: that)
-		return semVerComparison == .orderedSame
-			? buildElements.compareSemVerElements(to: that.buildElements)
-			: semVerComparison
-	}
-}
-
-let universalSemVerRegex = /([^-+]*+)?+(?:-([^+]*+))?+(?:\+(.*+))?+/
+private let universalSemVerRegex = /([^-+]*+)?+(?:-([^+]*+))?+(?:\+(.*+))?+/
