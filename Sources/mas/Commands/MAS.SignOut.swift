@@ -10,7 +10,7 @@ private import StoreFoundation
 
 extension MAS {
 	/// Signs out of the Apple Account currently signed in to the App Store.
-	struct SignOut: ParsableCommand {
+	struct SignOut: ParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			commandName: "signout",
 			abstract: "Sign out of the App Store",

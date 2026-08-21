@@ -70,11 +70,10 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 
 					let newVersionMutex = Mutex(String?.none)
 					do {
-						try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
-							if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
+						try await AppStore.install.app(withADAMID: installedApp.adamID, shouldCancel: true) { appStoreVersion in
+							if let appStoreVersion, installedApp.version != appStoreVersion {
 								newVersionMutex.withLock { $0 = appStoreVersion }
 							}
-							return true
 						}
 					} catch is CancellationError {
 						// Fallthrough

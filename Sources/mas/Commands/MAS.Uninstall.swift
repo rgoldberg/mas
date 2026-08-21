@@ -13,7 +13,7 @@ private import System
 
 extension MAS {
 	/// Uninstalls apps already installed from the App Store.
-	struct Uninstall: AsyncParsableCommand {
+	struct Uninstall: AsyncParsableCommand, PrivilegePreserving {
 		static let configuration = CommandConfiguration(
 			abstract: "Uninstall apps already installed from the App Store",
 			discussion: requiresRootPrivilegesMessage(),
@@ -36,54 +36,42 @@ extension MAS {
 			}
 		}
 
-		func run() async {
+		func run() async throws {
 			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
-			let uninstallingADAMIDByPathOrdered =
+			let appPathOrderedSet =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
-				.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
-					uninstallingADAMIDByPathOrdered
-						.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
+				.reduce(into: OrderedSet<String>()) { appPathOrderedSet, appID in
+					appPathOrderedSet.formUnion(installedApps.compactMap { $0.matches(appID) ? $0.path : nil })
 				}
-			guard !uninstallingADAMIDByPathOrdered.isEmpty else {
+			guard !appPathOrderedSet.isEmpty else {
 				return
 			}
 			guard !isPerformingDryRun else {
 				printer.notice("Dry run. A wet run would uninstall:\n")
-				for appPath in uninstallingADAMIDByPathOrdered.keys {
+				for appPath in appPathOrderedSet {
 					printer.info(appPath)
 				}
 				return
 			}
+			guard runningAsRoot else {
+				try await nestedSudoMAS()
+				return
+			}
 
-			let fileManager = FileManager.default
-			for appPath in uninstallingADAMIDByPathOrdered.keys {
+			let uid = try ProcessInfo.processInfo.sudoUID
+			guard setreuid(uid, 0) == 0 else {
+				throw
+					MASError.error("Failed to set ruid to \(uid) & euid to 0: \(unsafe String(cString: unsafe strerror(errno)))")
+			}
+
+			for appPath in appPathOrderedSet {
 				do {
-					let appURL = URL(folderPath: appPath)
-					let trashURL = try fileManager.url(
-						for: .trashDirectory,
-						in: .userDomainMask,
-						appropriateFor: appURL,
-						create: true,
-					)
-					let destinationPath = trashURL.appending(path: appURL.lastPathComponent, directoryHint: .isDirectory).filePath
 					_ = try await mas::run(
-						.path("/usr/bin/sudo"),
-						"/bin/mv",
-						appPath,
-						fileManager.fileExists(atPath: destinationPath)
-							? trashURL.appending(
-								path: """
-									\(appURL.deletingPathExtension().lastPathComponent) \
-									\(Date().formatted(trashCollisionDateFormatStyle))\
-									\(appURL.pathExtension.ifNotEmptyPrepend("."))
-									""",
-								directoryHint: .isDirectory,
-							)
-							.filePath
-							: destinationPath,
-						errorMessage: "Failed to trash \(appPath.quoted) to \(destinationPath.quoted)",
+						"/usr/bin/trash",
+						arguments: [appPath],
+						errorMessage: "Failed to uninstall \(appPath)",
 					)
-					printer.info("Uninstalled", appPath.quoted, "to", destinationPath.quoted)
+					printer.info("Uninstalled", appPath)
 				} catch {
 					printer.error("Failed to uninstall", appPath, error: error)
 				}
@@ -91,12 +79,3 @@ extension MAS {
 		}
 	}
 }
-
-private let trashCollisionDateFormatStyle = Date.VerbatimFormatStyle( // editorconfig-checker-disable
-	format: """
-		\(hour: .defaultDigits(clock: .twelveHour, hourCycle: .oneBased)).\(minute: .twoDigits).\(second: .twoDigits)\
-		 \(dayPeriod: .standard(.narrow))
-		""", // editorconfig-checker-enable
-	timeZone: .current,
-	calendar: .current,
-)

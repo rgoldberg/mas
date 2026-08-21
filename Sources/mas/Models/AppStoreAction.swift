@@ -42,14 +42,14 @@ enum AppStoreAction: String {
 		}
 	}
 
-	func apps(withAppIDs appIDs: [AppID], force: Bool) async {
-		await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force)
+	func apps(withAppIDs appIDs: [AppID], force: Bool) async throws {
+		try await apps(withADAMIDs: await appIDs.catalogApps.map(\.adamID), force: force)
 	}
 
-	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async {
+	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async throws {
 		let installedAppByADAMID = await installedApps(withAppIDs: adamIDs.map(AppID.adamID), withFullJSON: false) { _ in }
 			.reduce(into: [ADAMID: InstalledApp]()) { $0[$1.adamID] = $1 }
-		await apps(
+		try await apps(
 			withADAMIDs: force
 				? adamIDs
 				: adamIDs.filter { adamID in
@@ -63,27 +63,35 @@ enum AppStoreAction: String {
 		)
 	}
 
-	func apps(withADAMIDs adamIDs: [ADAMID]) async {
+	func apps(withADAMIDs adamIDs: [ADAMID]) async throws {
 		guard !adamIDs.isEmpty else {
+			return
+		}
+		guard runningAsRoot else {
+			try await nestedSudoMAS()
 			return
 		}
 
 		await OrderedSet(adamIDs)
-			.forEach(attemptTo: "\(self) app for ADAM ID") { try await app(withADAMID: $0) { _, _ in false } }
+			.forEach(attemptTo: "\(self) app for ADAM ID") { try await app(withADAMID: $0, shouldCancel: false) }
 	}
 
-	func app(withADAMID adamID: ADAMID, shouldCancel: @escaping @Sendable (String?, Bool) -> Bool) async throws {
+	func app(
+		withADAMID adamID: ADAMID,
+		shouldCancel: Bool,
+		onStatusChanged: @escaping @Sendable (String?) -> Void = { _ in },
+	) async throws {
 		let (eventStream, eventContinuation) = AsyncStream.makeStream(of: QueueEvent.self)
 		let observerUUID = await DownloadQueueObserver(
 			action: self,
 			adamID: adamID,
 			shouldCancel: shouldCancel,
+			onStatusChanged: onStatusChanged,
 			continuation: eventContinuation,
 		)
 		.start()
-		eventContinuation.onTermination = { _ in
-			Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) }
-		}
+		eventContinuation.onTermination =
+			{ _ in Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) } }
 		defer { eventContinuation.finish() }
 		try await withCheckedThrowingContinuation { continuation in
 			let purchase = SSPurchase(
@@ -108,6 +116,7 @@ enum AppStoreAction: String {
 				}
 			}
 		} as Void
+		let fileManager = FileManager.default
 		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
 		var pkgHardLinkURL = URL?.none
 		defer { deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg") }
@@ -120,7 +129,7 @@ enum AppStoreAction: String {
 			case let .statusChanged(snapshot):
 				// Refresh hard links to latest artifacts in the download folder
 				do {
-					let downloadFolderChildURLs = try FileManager.default.contentsOfDirectory(
+					let downloadFolderChildURLs = try fileManager.contentsOfDirectory(
 						at: downloadFolderURL,
 						includingPropertiesForKeys: [.contentModificationDateKey, .isRegularFileKey],
 					)
@@ -154,10 +163,10 @@ enum AppStoreAction: String {
 					}
 				} catch {
 					MAS.printer.warning(
-						"Failed to read contents of download folder",
-						downloadFolderURL.filePath.quoted,
-						"for",
+						"Failed to read contents of",
 						snapshot.appNameAndVersion,
+						"download folder",
+						downloadFolderURL.filePath,
 						error: error,
 					)
 				}
@@ -201,11 +210,14 @@ enum AppStoreAction: String {
 					guard error is Ignorable else {
 						throw error
 					}
+					guard !shouldCancel else {
+						return
+					}
 
 					MAS.printer.notice(PhaseType.downloaded, snapshot.appNameAndVersion)
 					MAS.printer.notice(performing.uppercasingFirst, snapshot.appNameAndVersion)
 					MAS.printer.info(rawValue.uppercasingFirst, "progress cannot be displayed", terminator: "")
-					appFolderURL = try await install(
+					appFolderURL = try await modify(
 						appNameAndVersion: snapshot.appNameAndVersion,
 						pkgHardLinkURL: pkgHardLinkURL,
 						receiptHardLinkURL: receiptHardLinkURL,
@@ -215,7 +227,7 @@ enum AppStoreAction: String {
 					guard !snapshot.isFailed else {
 						throw MASError.error("Failed to download \(snapshot.appNameAndVersion)")
 					}
-					guard !shouldCancel(snapshot.version, false) else {
+					guard !shouldCancel else {
 						return
 					}
 					guard !snapshot.isCancelled else {
@@ -231,7 +243,6 @@ enum AppStoreAction: String {
 				)
 
 				if let appFolderURL {
-					let fileManager = FileManager.default
 					if
 						try applicationsFolderURLs.contains(
 							where: { applicationsFolderURL in
@@ -275,11 +286,7 @@ enum AppStoreAction: String {
 		}
 	}
 
-	private func install(
-		appNameAndVersion: String,
-		pkgHardLinkURL: URL?,
-		receiptHardLinkURL: URL?,
-	) async throws -> URL {
+	private func modify(appNameAndVersion: String, pkgHardLinkURL: URL?, receiptHardLinkURL: URL?) async throws -> URL {
 		guard let pkgHardLinkPath = pkgHardLinkURL?.filePath else {
 			throw MASError.error("Failed to find pkg to \(self) \(appNameAndVersion)")
 		}
@@ -287,62 +294,45 @@ enum AppStoreAction: String {
 			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
 		}
 
-		if
-			(try? await run(.path("/usr/bin/sudo"), arguments: ["-n", "true"], output: .discarded))?
-				.terminationStatus
-				.isSuccess != true
-		{
-			MAS.printer.info()
-		}
-		let (_, standardErrorString) = try await run(
-			.path("/usr/bin/sudo"),
+		let (_, stderrString) = try await run(
 			"/usr/sbin/installer",
-			"-dumplog",
-			"-pkg",
-			pkgHardLinkPath,
-			"-target",
-			"/",
+			arguments: ["-dumplog", "-pkg", pkgHardLinkPath, "-target", "/"],
+			platformOptions: runAsRootAndWheel,
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
-
-		guard
-			let appFolderURLSubstring = standardErrorString
-				.matches(of: appFolderURLRegex)
-				.compactMap(\.1)
-				.min(by: { $0.count < $1.count })
+		guard // swiftformat:disable:this wrap wrapArguments
+			let appFolderURLSubstring = // swiftformat:disable:next indent
+				stderrString.matches(of: appFolderURLRegex).compactMap(\.1).min(by: { $0.count < $1.count })
 		else {
 			throw MASError.error(
 				"Failed to find app folder URL in installer output for \(appNameAndVersion)",
-				cause: standardErrorString,
+				cause: stderrString,
 			)
 		}
 		guard let appFolderURL = URL(string: .init(appFolderURLSubstring)), appFolderURL.isFileURL else {
 			throw MASError.error(
 				"Failed to parse app folder URL for \(appNameAndVersion) from \(appFolderURLSubstring)",
-				cause: standardErrorString,
+				cause: stderrString,
 			)
 		}
 
 		let receiptURL = appFolderURL.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
-		let receiptPath = receiptURL.filePath
-		let receiptHardLinkPath = receiptHardLinkURL.filePath
-		_ = try await run(
-			.path("/usr/bin/sudo"),
-			"/bin/sh",
-			"-c",
-			#"/bin/mkdir -pm 755 "$1" && /bin/cp -cf "$2" "$3" && /usr/sbin/chown 0:0 "$3" && /bin/chmod 644 "$3""#,
-			"--",
-			receiptURL.deletingLastPathComponent().filePath,
-			receiptHardLinkPath,
-			receiptPath,
-			errorMessage: // swiftformat:disable:next indent
-				"Failed to copy receipt for \(appNameAndVersion) from \(receiptHardLinkPath.quoted) to \(receiptPath.quoted)",
-		)
+		try set(effectiveGID: 0)
+		let result = Result {
+			try set(effectiveUID: 0)
+			try receiptHardLinkURL.secureCloneOrCopy(to: receiptURL)
+		}
+		do {
+			try ProcessInfo.processInfo.dropEffectiveRootWheel()
+		} catch {
+			fatalError("Failed to drop elevated privileges: \(error)")
+		}
 
+		try result.get()
 		_ = try await run(
-			.path("/usr/bin/mdimport"),
-			appFolderURL.filePath,
-			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
+			"/usr/bin/mdimport",
+			arguments: [appFolderURL.filePath],
+			errorMessage: "Failed to index Spotlight data for \(appNameAndVersion)",
 		)
 
 		LSRegisterURL(appFolderURL as CFURL, true)
@@ -361,18 +351,21 @@ private enum QueueEvent { // swiftlint:disable:this one_declaration_per_file
 private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 	private let action: AppStoreAction // swiftlint:disable:previous one_declaration_per_file
 	private let adamID: ADAMID
-	private let shouldCancel: (String?, Bool) -> Bool
+	private let shouldCancel: Bool
+	private let onStatusChanged: (String?) -> Void
 	private let continuation: AsyncStream<QueueEvent>.Continuation
 
 	init(
 		action: AppStoreAction,
 		adamID: ADAMID,
-		shouldCancel: @escaping (String?, Bool) -> Bool,
+		shouldCancel: Bool,
+		onStatusChanged: @escaping (String?) -> Void,
 		continuation: AsyncStream<QueueEvent>.Continuation,
 	) {
 		self.action = action
 		self.adamID = adamID
 		self.shouldCancel = shouldCancel
+		self.onStatusChanged = onStatusChanged
 		self.continuation = continuation
 	}
 
@@ -394,7 +387,9 @@ private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 		else {
 			return
 		}
-		guard !shouldCancel(snapshot.version, true) else {
+
+		onStatusChanged(snapshot.version)
+		guard !shouldCancel else {
 			queue.cancelDownload(download, promptToConfirm: false, askToDelete: false)
 			return
 		}
