@@ -10,7 +10,7 @@ private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs apps already installed from the App Store.
-	struct List: AsyncParsableCommand {
+	struct List: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output apps already installed from the App Store",
 		)
