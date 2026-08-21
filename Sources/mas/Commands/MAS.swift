@@ -6,10 +6,11 @@
 //
 
 internal import ArgumentParser
+private import Darwin
 internal import Foundation
 
 @main
-struct MAS: AsyncParsableCommand {
+struct MAS: AsyncParsableCommand, RealDropping {
 	static let configuration = CommandConfiguration(
 		abstract: "Mac App Store command-line interface",
 		version: Self.version,
@@ -45,8 +46,19 @@ struct MAS: AsyncParsableCommand {
 
 	private static func main(_ arguments: [String]?) async { // swiftlint:disable:this discouraged_optional_collection
 		do {
-			try? ProcessInfo.processInfo.dropEffectiveRootWheel()
+			let envVars = try envVars(from: .standardInput)
+			if let envVars, let (name, value) = envVars.first(where: { unsafe setenv($0, $1, 1) != 0 }) {
+				throw error("Failed to set environment variable \(name) to \(value)")
+			}
 			let command = try await asyncParseAsRoot(arguments)
+			if let command = cast(command, as: (any PrivilegeModifying).self) {
+				try command.modifyPrivileges()
+			} else {
+				let commandTypeName = String(reflecting: type(of: command))
+				if commandTypeName.prefix(while: { $0 != "." }) != "ArgumentParser" {
+					throw error("\(commandTypeName) does not declare privilege-modifying behavior")
+				}
+			}
 			if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
 				try await main(command)
 			} else {
@@ -116,6 +128,48 @@ extension ParsableCommand {
 
 private func cast<T>(_ instance: Any, as _: T.Type) -> T? {
 	instance as? T
+}
+
+// swiftlint:disable:next discouraged_optional_collection
+private func envVars(from fileHandle: FileHandle) throws(MASError) -> [(name: String, value: String)]? {
+	func nextByte() -> UInt8? {
+		try? fileHandle.read(upToCount: 1)?.first
+	}
+
+	guard fcntl(fileHandle.fileDescriptor, F_GETFL) != -1, !fileHandle.isTerminal else {
+		return nil
+	}
+	guard var byte = nextByte() else {
+		return nil
+	}
+	var envVars = [(name: String, value: String)]()
+	var data = Data()
+	while true {
+		if byte != 0 {
+			data.append(byte)
+		} else {
+			if data.isEmpty {
+				return envVars
+			}
+			guard let token = String(validating: data, as: UTF8.self) else {
+				throw error("Failed to parse input")
+			}
+			let components = token.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+			guard components.count == 2, components[0].hasPrefix("MAS_") else {
+				throw error("Failed to find a 'MAS_'-prefixed assignment in \(token)")
+			}
+			envVars.append((.init(components[0]), .init(components[1])))
+			data.removeAll(keepingCapacity: true)
+		}
+		guard let nextByte = nextByte() else {
+			break
+		}
+		byte = nextByte
+	}
+	guard data.isEmpty else {
+		throw error("Unterminated setting in stdin\(String(validating: data, as: UTF8.self).map { ": \($0)" } ?? "")")
+	}
+	return envVars
 }
 
 let applicationsFolderURLs = UserDefaults(suiteName: "com.apple.appstored")?

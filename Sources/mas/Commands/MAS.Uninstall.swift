@@ -13,7 +13,7 @@ private import System
 
 extension MAS {
 	/// Uninstalls apps already installed from the App Store.
-	struct Uninstall: AsyncParsableCommand {
+	struct Uninstall: AsyncParsableCommand, PrivilegePreserving {
 		static let configuration = CommandConfiguration(
 			abstract: "Uninstall apps already installed from the App Store",
 			discussion: requiresRootPrivilegesMessage(),
@@ -36,7 +36,7 @@ extension MAS {
 			}
 		}
 
-		func run() async {
+		func run() async throws {
 			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
 			let appPathOrderedSet =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
@@ -53,37 +53,22 @@ extension MAS {
 				}
 				return
 			}
-			let fileManager = FileManager.default
+			guard runningAsRoot else {
+				try await nestedSudoMAS()
+				return
+			}
+			let uid = try ProcessInfo.processInfo.sudoUID
+			guard setreuid(uid, 0) == 0 else {
+				throw error("Failed to set ruid to \(uid) & euid to 0: \(Errno(rawValue: errno))")
+			}
 			for appPath in appPathOrderedSet {
 				do {
-					let appURL = URL(folderPath: appPath)
-					let trashURL = try fileManager.url(
-						for: .trashDirectory,
-						in: .userDomainMask,
-						appropriateFor: appURL,
-						create: true,
-					)
-					let destinationPath = trashURL.appending(path: appURL.lastPathComponent, directoryHint: .isDirectory).filePath
 					_ = try await mas::run(
-						"/usr/bin/sudo",
-						arguments: [
-							"/bin/mv",
-							appPath,
-							fileManager.fileExists(atPath: destinationPath)
-								? trashURL.appending(
-									path: """
-										\(appURL.deletingPathExtension().lastPathComponent) \
-										\(Date().formatted(trashCollisionDateFormatStyle))\
-										\(appURL.pathExtension.ifNotEmptyPrepend("."))
-										""",
-									directoryHint: .isDirectory,
-								)
-								.filePath
-								: destinationPath,
-						],
-						errorMessage: "Failed to uninstall \(appPath.quoted) to \(destinationPath.quoted)",
+						"/usr/bin/trash",
+						arguments: [appPath],
+						errorMessage: "Failed to uninstall \(appPath)",
 					)
-					printer.info("Uninstalled", appPath.quoted, "to", destinationPath.quoted)
+					printer.info("Uninstalled", appPath)
 				} catch {
 					printer.error("Failed to uninstall", appPath, error: error)
 				}
@@ -91,12 +76,3 @@ extension MAS {
 		}
 	}
 }
-
-private let trashCollisionDateFormatStyle = Date.VerbatimFormatStyle( // editorconfig-checker-disable
-	format: """
-		\(hour: .defaultDigits(clock: .twelveHour, hourCycle: .oneBased)).\(minute: .twoDigits).\(second: .twoDigits)\
-		 \(dayPeriod: .standard(.narrow))
-		""", // editorconfig-checker-enable
-	timeZone: .current,
-	calendar: .current,
-)
