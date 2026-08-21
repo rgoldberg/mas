@@ -9,7 +9,7 @@ internal import ArgumentParser
 
 extension MAS {
 	/// Gets & installs free apps from the App Store.
-	struct Get: AsyncParsableCommand {
+	struct Get: AsyncParsableCommand, EffectiveDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Get & install free apps from the App Store",
 			discussion: requiresRootPrivilegesMessage(),
@@ -21,8 +21,8 @@ extension MAS {
 		@OptionGroup
 		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
-		func run() async {
-			await AppStore.get.apps(withAppIDs: catalogAppsOptionGroup.appIDs, force: forceOptionGroup.force)
+		func run() async throws {
+			try await AppStore.get.apps(withAppIDs: catalogAppsOptionGroup.appIDs, force: forceOptionGroup.force)
 		}
 	}
 }
