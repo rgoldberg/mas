@@ -21,7 +21,7 @@ extension ProcessInfo {
 		}
 	}
 
-	func dropRoot() throws {
+	func dropEffectiveRootWheel() throws {
 		if getegid() == 0 {
 			try set(effectiveGID: try sudoGID)
 		}
@@ -29,4 +29,17 @@ extension ProcessInfo {
 			try set(effectiveUID: try sudoUID)
 		}
 	}
+
+	func dropRootWheel() throws {
+		if getegid() == 0 || getgid() == 0 {
+			try set(gid: try sudoGID)
+		}
+		if geteuid() == 0 || getuid() == 0 {
+			try set(uid: try sudoUID)
+		}
+	}
+}
+
+var runningAsRoot: Bool {
+	getuid() == 0
 }

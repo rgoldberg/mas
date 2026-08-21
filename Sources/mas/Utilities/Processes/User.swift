@@ -7,8 +7,8 @@
 
 internal import Darwin
 
-private extension uid_t {
-	var nameAndID: String {
+extension uid_t {
+	var nameAndUID: String {
 		let bufferLength = sysconf(_SC_GETPW_R_SIZE_MAX)
 		guard bufferLength > 0 else {
 			return "(\(self))"
@@ -31,6 +31,12 @@ private extension uid_t {
 
 func set(effectiveUID uid: uid_t) throws(MASError) {
 	guard seteuid(uid) == 0 else {
-		throw .error("Failed to switch effective user from \(geteuid().nameAndID) to \(uid.nameAndID)")
+		throw .error("Failed to switch effective user from \(geteuid().nameAndUID) to \(uid.nameAndUID)")
+	}
+}
+
+func set(uid: uid_t) throws(MASError) {
+	guard setuid(uid) == 0 else {
+		throw .error("Failed to switch user from \(getuid().nameAndUID) to \(uid.nameAndUID)")
 	}
 }
