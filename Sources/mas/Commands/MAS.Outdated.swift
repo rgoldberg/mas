@@ -11,7 +11,7 @@ private import JSONAST
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs a list of already installed apps that have pending updates from
 	/// the App Store.
-	struct Outdated: AsyncParsableCommand {
+	struct Outdated: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output pending app updates from the App Store",
 		)

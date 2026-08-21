@@ -14,7 +14,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 	/// Uses the iTunes Search API:
 	///
 	/// https://performance-partners.apple.com/search-api
-	struct Search: AsyncParsableCommand {
+	struct Search: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Search for apps in the App Store",
 		)

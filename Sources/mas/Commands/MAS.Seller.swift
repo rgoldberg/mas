@@ -14,7 +14,7 @@ extension MAS {
 	/// Uses the iTunes Lookup API:
 	///
 	/// https://performance-partners.apple.com/search-api
-	struct Seller: AsyncParsableCommand {
+	struct Seller: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Open apps' seller pages in the default web browser",
 			aliases: ["vendor"],

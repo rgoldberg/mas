@@ -12,7 +12,7 @@ private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs mas config & related system info.
-	struct Config: ParsableCommand {
+	struct Config: ParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output mas config & related system info",
 		)

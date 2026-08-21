@@ -22,7 +22,7 @@ extension MAS {
 	///
 	/// As `storeagent` no longer exists, terminates all processes known to be
 	/// associated with the App Store.
-	struct Reset: ParsableCommand {
+	struct Reset: ParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Reset App Store processes & clear cached App Store downloads",
 		)
