@@ -13,7 +13,6 @@ extension gid_t {
 		guard bufferLength > 0 else {
 			return "(\(self))"
 		}
-
 		var grp = unsafe group()
 		var buffer = Array(repeating: CChar(0), count: bufferLength)
 		var result = unsafe UnsafeMutablePointer<group>?.none

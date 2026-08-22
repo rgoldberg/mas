@@ -36,7 +36,6 @@ extension MAS {
 					}
 				}
 			}
-
 			let executablePathSet = Set(
 				[
 					"/System/Library/Frameworks/StoreKit.framework/Support/storekitagent",
@@ -51,25 +50,21 @@ extension MAS {
 					"/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/storelegacy",
 				],
 			)
-
 			var processListMIB = [CTL_KERN, KERN_PROC, KERN_PROC_ALL]
 			var length = 0
 			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), nil, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list length")
 				return
 			}
-
 			var kinfoProcs = unsafe Array(repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
 			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
 				printer.error("Failed to get process list")
 				return
 			}
-
 			unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
 				guard let baseAddress = buffer.baseAddress else {
 					return
 				}
-
 				for unsafe pid in unsafe kinfoProcs.lazy.map(unsafe \.kp_proc.p_pid) {
 					if
 						unsafe proc_pidpath(pid, unsafe baseAddress, .init(buffer.count)) > 0,
@@ -83,7 +78,6 @@ extension MAS {
 					}
 				}
 			}
-
 			let folder = CKDownloadDirectory(nil)
 			do {
 				try FileManager.default.removeItem(atPath: folder)

@@ -11,6 +11,7 @@
 
 # Disabled rules (disabled by default)
 #--enable blankLineAfterSwitchCase
+#--enable blankLinesAfterGuardStatements
 #--enable ifExpressions
 #--enable markTypes
 #--enable preferExplicitFalse
@@ -20,7 +21,6 @@
 
 # Enabled rules (disabled by default)
 --enable acronyms
---enable blankLinesAfterGuardStatements
 --enable blockComments
 --enable emptyExtensions
 --enable isEmpty

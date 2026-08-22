@@ -36,7 +36,6 @@ extension StringProtocol {
 		guard thatLength > 0 else {
 			return 0
 		}
-
 		let columnCount = thatLength + 1
 		var rowTwoPrevious = Array(repeating: Double(0), count: columnCount)
 		var rowPrevious = (0...thatLength).map(Double.init)
@@ -60,7 +59,6 @@ extension StringProtocol {
 						rowCurrent[j] = rowPrevious[j - 1]
 						continue
 					}
-
 					let cost = cost(of: thatChar, at: j)
 					// Damerau-Levenshtein transposition check
 					rowCurrent[j] = j > 1 && thisChar == thatChars[j - 2] && previousThisChar == thatChar
@@ -76,7 +74,6 @@ extension StringProtocol {
 			swap(&rowTwoPrevious, &rowPrevious)
 			swap(&rowPrevious, &rowCurrent)
 		}
-
 		let maxCost = Swift::max(thisCost, thatCost)
 		return maxCost == 0 ? 1 : Swift::max(0, 1 - rowPrevious[thatLength] / maxCost)
 	}

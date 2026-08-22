@@ -30,7 +30,6 @@ extension JSON.Object {
 		guard !isEmpty else {
 			return ""
 		}
-
 		let data = fieldConfigs.reduce(
 			into: (
 				fieldConfigAndLabelWidths: [(key: JSON.Key, label: String, labelWidth: Int, transform: (String?) -> String)](
@@ -69,7 +68,6 @@ extension [JSON.Object] {
 		guard !isEmpty else {
 			return ""
 		}
-
 		let columns = keys.map { key in
 			reduce(into: (cells: [String](reservedCapacity: count), maxWidth: 0)) { column, object in
 				column.cells.append(
@@ -82,11 +80,9 @@ extension [JSON.Object] {
 				)
 			}
 		}
-
 		guard let firstColumn = columns.first else {
 			return ""
 		}
-
 		let trailingColumns = columns.dropFirst()
 		guard let lastColumn = trailingColumns.last else {
 			return (0..<count)
@@ -95,7 +91,6 @@ extension [JSON.Object] {
 				}
 				.joined(separator: "\n")
 		}
-
 		let middleColumns = trailingColumns.dropLast()
 		return (0..<count)
 			.map { index in

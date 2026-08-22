@@ -34,12 +34,10 @@ extension URL {
 		guard isFileURL else {
 			throw MASError.error("\(self) is not a file URL")
 		}
-
 		var nextFD = unsafe Darwin::open("/", O_RDONLY | O_DIRECTORY | O_CLOEXEC)
 		guard nextFD >= 0 else {
 			throw MASError.error("Failed to open /: \(unsafe String(cString: unsafe strerror(errno)))")
 		}
-
 		for component in standardizedFileURL.pathComponents.dropFirst() {
 			let currentFD = nextFD
 			defer { close(currentFD) }
@@ -48,18 +46,15 @@ extension URL {
 				guard errno == ENOENT else {
 					throw MASError.error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
-
 				let wasCreated = unsafe mkdirat(currentFD, component, 0o755) == 0
 				guard wasCreated || errno == EEXIST else {
 					throw
 						MASError.error("Failed to create \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
-
 				nextFD = unsafe openat(currentFD, component, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
 				guard nextFD >= 0 else {
 					throw MASError.error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
-
 				if wasCreated {
 					guard fchown(nextFD, 0, 0) == 0 else {
 						close(nextFD)
@@ -83,12 +78,10 @@ extension URL {
 		guard isFileURL, destinationURL.isFileURL else {
 			throw MASError.error("\(self) or \(destinationURL) is not a file URL")
 		}
-
 		let sourceFD = unsafe Darwin::open(filePath, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
 		guard sourceFD >= 0 else {
 			throw MASError.error("Failed to open \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 		}
-
 		defer { close(sourceFD) }
 		let destinationFolderFD = try destinationURL.deletingLastPathComponent().openOrCreateFolder()
 		defer { close(destinationFolderFD) }
@@ -107,7 +100,6 @@ extension URL {
 				"Failed to open \(stagingFolderURL.filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))",
 			)
 		}
-
 		defer { close(stagingFolderFD) }
 		let stagingName = "staging_file"
 		let stagingFD: Int32
@@ -126,7 +118,6 @@ extension URL {
 				close(createdFD)
 				throw MASError.error("Failed to copy \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 			}
-
 			stagingFD = createdFD
 		}
 		var wasRenamed = false
@@ -153,7 +144,6 @@ extension URL {
 				""",
 			)
 		}
-
 		wasRenamed = true
 	}
 }

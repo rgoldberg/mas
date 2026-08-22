@@ -104,7 +104,6 @@ final class Printer: Sendable {
 		guard !items.isEmpty || (error != nil && !(error is ExitCode)) else {
 			return
 		}
-
 		print(
 			items,
 			prefix: prefix,

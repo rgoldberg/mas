@@ -64,7 +64,6 @@ struct MAS: AsyncParsableCommand, RealDropping {
 			} else {
 				try main(command)
 			}
-
 			let errorCount = printer.errorCount
 			if errorCount > 0 {
 				throw ExitCode(errorCount >= .init(Int32.max) ? .max : .init(errorCount))
@@ -114,7 +113,6 @@ private extension Error {
 			guard !MAS.exitCode(for: self).isSuccess else {
 				throw self
 			}
-
 			return self
 		}
 	}
@@ -142,7 +140,6 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 	guard var byte = nextByte() else {
 		return nil
 	}
-
 	var envVars = [(name: String, value: String)]()
 	var data = Data()
 	while true {
@@ -155,27 +152,21 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 			guard let token = String(data: data, encoding: .utf8) else {
 				throw MASError.error("Failed to parse input")
 			}
-
 			let components = token.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
 			guard components.count == 2, components[0].hasPrefix("MAS_") else {
 				throw MASError.error("Failed to find a 'MAS_'-prefixed assignment in \(token)")
 			}
-
 			envVars.append((.init(components[0]), .init(components[1])))
 			data.removeAll(keepingCapacity: true)
 		}
-
 		guard let nextByte = nextByte() else {
 			break
 		}
-
 		byte = nextByte
 	}
-
 	guard data.isEmpty else {
 		throw MASError.error("Unterminated setting in stdin\(String(data: data, encoding: .utf8).map { ": \($0)" } ?? "")")
 	}
-
 	return envVars
 }
 

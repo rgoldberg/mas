@@ -13,7 +13,6 @@ extension uid_t {
 		guard bufferLength > 0 else {
 			return "(\(self))"
 		}
-
 		var pwd = unsafe passwd()
 		var buffer = Array(repeating: CChar(0), count: bufferLength)
 		var result = unsafe UnsafeMutablePointer<passwd>?.none

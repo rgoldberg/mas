@@ -231,7 +231,6 @@ private extension URL {
 					else {
 						return Self?.none
 					}
-
 					enumerator.skipDescendants()
 					return try? url.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
 						.resourceValues(forKeys: [.fileSizeKey])

@@ -67,7 +67,6 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 					if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {
 						return nil
 					}
-
 					let newVersionMutex = Mutex(String?.none)
 					do {
 						try await AppStore.install.app(withADAMID: installedApp.adamID, shouldCancel: true) { appStoreVersion in

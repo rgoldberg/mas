@@ -94,7 +94,6 @@ private final class StreamRedirector: Sendable { // swiftlint:disable:this one_d
 		guard !alreadyStopped.exchange(true, ordering: .acquiringAndReleasing) else {
 			return
 		}
-
 		switch originalFD {
 		case FileHandle.standardOutput.fileDescriptor:
 			unsafe fflush(unsafe stdout)
