@@ -24,7 +24,6 @@ extension OutputConfig where Self: Keyed { // swiftlint:disable:this file_types_
 		guard !objects.isEmpty else {
 			return
 		}
-
 		switch outputFormat {
 		case .json:
 			MAS.printer.info(objects as [Any], separator: "\n")
@@ -47,7 +46,6 @@ extension OutputConfig where Self: FieldConfigured {
 		guard !objects.isEmpty else {
 			return
 		}
-
 		switch outputFormat {
 		case .json:
 			MAS.printer.info(objects as [Any], separator: "\n")

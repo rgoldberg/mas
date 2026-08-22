@@ -36,7 +36,6 @@ extension MAS {
 				guard let url = URL(string: sellerURLString) else {
 					throw MASError.invalidURL(sellerURLString)
 				}
-
 				_ = try await url.open()
 			}
 		}

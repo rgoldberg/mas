@@ -48,7 +48,6 @@ extension MAS { // swiftlint:disable:this file_types_order
 				)
 				return
 			}
-
 			outputConfigOptionGroup.output(installedApps.map(\.jsonObject))
 		}
 	}

@@ -36,7 +36,6 @@ extension MAS { // swiftlint:disable:this file_types_order
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
-
 			if price {
 				OutputConfigOptionGroup<PriceTableConfig>(outputFormat: outputConfigOptionGroup.outputFormat)
 					.output(catalogApps.map(\.jsonObject))

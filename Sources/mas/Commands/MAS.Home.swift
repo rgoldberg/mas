@@ -31,7 +31,6 @@ extension MAS {
 				guard let url = URL(string: catalogApp.appStorePageURLString) else {
 					throw MASError.invalidURL(catalogApp.appStorePageURLString)
 				}
-
 				_ = try await url.open()
 			}
 		}

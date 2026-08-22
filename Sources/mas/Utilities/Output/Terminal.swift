@@ -22,7 +22,6 @@ extension String { // swiftlint:disable:next function_default_parameter_at_end
 		guard existingWidth < minimumWidth else {
 			return self
 		}
-
 		let paddingWidth = minimumWidth - existingWidth
 		return switch justification {
 		case .start:

@@ -10,7 +10,6 @@ extension Optional {
 		guard let self else {
 			return nil
 		}
-
 		return try await transform(self)
 	}
 }

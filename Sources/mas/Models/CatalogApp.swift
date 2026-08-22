@@ -50,7 +50,6 @@ extension CatalogApp: JSONDecodable {
 		guard case let .object(object) = json else {
 			throw MASError.invalidJSON(.init(json))
 		}
-
 		try self.init(object: object)
 	}
 
@@ -88,7 +87,6 @@ extension CatalogApp: JSONDecodable {
 		else {
 			return nil
 		}
-
 		var object = object
 		if try object[minimumOSVersionKey]?.decode() != minimumOSVersion {
 			if let index = object.fields.firstIndex(where: { $0.key == minimumOSVersionKey }) {
@@ -97,7 +95,6 @@ extension CatalogApp: JSONDecodable {
 				object.fields.append((minimumOSVersionKey, .string(minimumOSVersion)))
 			}
 		}
-
 		self.init(
 			adamID: try object["trackId"]?.decode() ?? 0,
 			appStorePageURLString: appStorePageURLString,

@@ -19,7 +19,6 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 	guard let executablePath = Bundle.main.executablePath else {
 		throw MASError.error("Failed to determine executable path")
 	}
-
 	let execResult = try await run(
 		.path("/usr/bin/sudo"),
 		arguments: .init(
@@ -46,7 +45,6 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 				guard writtenByteCount > 0 else {
 					throw MASError.error("Failed to write \(substring.quoted) from \(string.quoted) to sudo's stdin")
 				}
-
 				substring.removeFirst(writtenByteCount)
 			}
 		}
@@ -101,7 +99,6 @@ func run<Encoding: Unicode.Encoding>(
 			""",
 		)
 	}
-
 	return (execResult.standardOutput, execResult.standardError)
 }
 
