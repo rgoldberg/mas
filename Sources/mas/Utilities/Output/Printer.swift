@@ -130,7 +130,7 @@ struct Printer {
 		terminator: String,
 		to fileHandle: FileHandle,
 	) { // swiftformat:disable indent
-		let indent = """
+		let indentation = """
 
 			\(
 				String( // swiftlint:disable:this indentation_width
@@ -143,11 +143,11 @@ struct Printer {
 		let formattedPrefix = prefix.formatted(with: format, for: fileHandle) // swiftformat:enable indent
 		print(
 			items.first.map { item in
-				["\(formattedPrefix) \(mas::indent(item, with: indent))"]
-					+ items.dropFirst().map { mas::indent($0, with: indent) }
+				["\(formattedPrefix) \(indent(item, with: indentation))"]
+					+ items.dropFirst().map { indent($0, with: indentation) }
 			}
 				?? [formattedPrefix],
-			separator: mas::indent(separator, with: indent),
+			separator: indent(separator, with: indentation),
 			terminator: terminator,
 			to: fileHandle,
 		)
@@ -160,8 +160,8 @@ extension String {
 	}
 }
 
-private func indent(_ item: Any, with indent: String) -> String {
-	.init(describing: item).replacing(nonEmptyLineStartRegex, with: indent)
+private func indent(_ item: Any, with indentation: String) -> String {
+	.init(describing: item).replacing(nonEmptyLineStartRegex, with: indentation)
 }
 
 let errorPrefix = "Error:"
