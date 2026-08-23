@@ -17,7 +17,7 @@ private extension MASTests {
 			nil,
 			"", // editorconfig-checker-disable
 			"""
-			Warning: No installed apps found
+			Warning: Failed to find any installed apps
 
 			         If this is unexpected, index apps in Spotlight (which might take some time):
 

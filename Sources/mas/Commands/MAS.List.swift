@@ -8,10 +8,10 @@
 internal import ArgumentParser
 
 extension MAS {
-	/// Lists all apps installed from the App Store.
+	/// Outputs apps already installed from the App Store.
 	struct List: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
-			abstract: "List apps installed from the App Store",
+			abstract: "Output apps already installed from the App Store",
 		)
 
 		@OptionGroup
@@ -30,7 +30,7 @@ extension MAS {
 			guard !installedApps.isEmpty else {
 				printer.warning( // editorconfig-checker-disable
 					"""
-					No installed apps found
+					Failed to find any installed apps
 
 					If this is unexpected, index apps in Spotlight (which might take some time):
 
