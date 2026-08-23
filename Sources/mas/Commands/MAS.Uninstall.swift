@@ -12,10 +12,10 @@ private import Subprocess
 private import System
 
 extension MAS {
-	/// Uninstalls apps installed from the App Store.
+	/// Uninstalls apps already installed from the App Store.
 	struct Uninstall: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
-			abstract: "Uninstall apps installed from the App Store",
+			abstract: "Uninstall apps already installed from the App Store",
 			discussion: requiresRootPrivilegesMessage(),
 		)
 
