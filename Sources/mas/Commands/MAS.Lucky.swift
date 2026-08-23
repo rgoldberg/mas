@@ -9,7 +9,7 @@ internal import ArgumentParser
 
 extension MAS {
 	/// Installs the first app returned from searching the App Store (app must
-	/// have been previously gotten).
+	/// already be owned).
 	///
 	/// Uses the iTunes Search API:
 	///
@@ -18,7 +18,7 @@ extension MAS {
 		static let configuration = CommandConfiguration(
 			abstract: "Install the first app returned from searching the App Store",
 			discussion: // swiftformat:disable:next indent
-				"App will install only if it has already been gotten\n\n\(requiresRootPrivilegesMessage(to: "install"))",
+				"App will install only if it is already owned\n\n\(requiresRootPrivilegesMessage(to: "install"))",
 		)
 
 		@OptionGroup
