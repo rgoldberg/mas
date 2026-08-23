@@ -8,11 +8,11 @@
 internal import ArgumentParser
 
 extension MAS {
-	/// Outputs a list of installed apps which have updates available to be
-	/// installed from the App Store.
+	/// Outputs a list of already installed apps that have pending updates from
+	/// the App Store.
 	struct Outdated: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
-			abstract: "List pending app updates from the App Store",
+			abstract: "Output pending app updates from the App Store",
 		)
 
 		@OptionGroup

@@ -1,15 +1,15 @@
-function __fish_mas_list_available -d 'Lists applications available from the App Store'
+function __fish_mas_list_available -d 'List apps available from the App Store'
 	set -l query (commandline -ct)
 	if test -n "$query"
 		command mas search "$query" 2>/dev/null | string trim --left | string replace -r '\s+' '\t'
 	end
 end
 
-function __fish_mas_list_installed -d 'Lists installed applications from the App Store'
+function __fish_mas_list_installed -d 'List apps already installed from the App Store'
 	command mas list 2>/dev/null | string trim --left | string replace -r '\s+' '\t'
 end
 
-function __fish_mas_outdated_installed -d 'Lists outdated installed applications from the App Store'
+function __fish_mas_outdated_installed -d 'List pending app updates from the App Store'
 	command mas outdated 2>/dev/null | string trim --left | string replace -r '\s+' '\t'
 end
 
@@ -19,18 +19,18 @@ complete -c mas -n __fish_use_subcommand -fa config -d 'Output mas config & rela
 complete -c mas -n __fish_use_subcommand -fa get -d 'Get & install free apps from the App Store'
 complete -c mas -n __fish_use_subcommand -fa help -d 'Output general or command-specific help'
 complete -c mas -n __fish_use_subcommand -fa home -d 'Open App Store app pages in the default web browser'
-complete -c mas -n __fish_use_subcommand -fa install -d 'Install previously gotten apps from the App Store'
-complete -c mas -n __fish_use_subcommand -fa list -d 'List apps installed from the App Store'
+complete -c mas -n __fish_use_subcommand -fa install -d 'Install already owned apps from the App Store'
+complete -c mas -n __fish_use_subcommand -fa list -d 'Output apps already installed from the App Store'
 complete -c mas -n __fish_use_subcommand -fa lookup -d 'Output app info from the App Store'
 complete -c mas -n __fish_use_subcommand -fa lucky -d 'Install the first app returned from searching the App Store'
 complete -c mas -n __fish_use_subcommand -fa open -d 'Open app page in \'App Store.app\''
-complete -c mas -n __fish_use_subcommand -fa outdated -d 'List pending app updates from the App Store'
+complete -c mas -n __fish_use_subcommand -fa outdated -d 'Output pending app updates from the App Store'
 complete -c mas -n __fish_use_subcommand -fa reset -d 'Reset App Store processes & clear cached App Store downloads'
 complete -c mas -n __fish_use_subcommand -fa search -d 'Search for apps in the App Store'
 complete -c mas -n __fish_use_subcommand -fa seller -d 'Open apps\' seller pages in the default web browser'
 complete -c mas -n __fish_use_subcommand -fa signout -d 'Sign out of the App Store'
-complete -c mas -n __fish_use_subcommand -fa uninstall -d 'Uninstall apps installed from the App Store'
-complete -c mas -n __fish_use_subcommand -fa update -d 'Update outdated apps installed from the App Store'
+complete -c mas -n __fish_use_subcommand -fa uninstall -d 'Uninstall apps already installed from the App Store'
+complete -c mas -n __fish_use_subcommand -fa update -d 'Update outdated apps already installed from the App Store'
 complete -c mas -n __fish_use_subcommand -fa version -d 'Output version number' # editorconfig-checker-disable
 
 complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json' -l json -d 'Output JSON'
