@@ -48,7 +48,7 @@ Detailed documentation is available via `man mas` & `mas --help`.
 | `outdated [<id>…]`            | Output outdated apps                          | [spotlight](#spotlight), [json](#json-app-output)                                                           |            |
 | `outdated --accurate [<id>…]` | Output outdated apps                          | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [json](#json-app-output)         |            |
 | `get <id>…`                   | [Get free apps](#paid-apps), install any apps | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements-for-get) | `purchase` |
-| `install <id>…`               | Install gotten or purchased apps              | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
+| `install <id>…`               | Install already owned apps                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
 | `lucky <term>…`               | Install first matching app                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
 | `update [<id>…]`              | Update outdated apps                          | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
 | `update --accurate [<id>…]`   | Update outdated apps                          | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
