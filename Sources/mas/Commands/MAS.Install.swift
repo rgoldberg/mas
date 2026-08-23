@@ -8,10 +8,10 @@
 internal import ArgumentParser
 
 extension MAS {
-	/// Installs previously gotten apps from the App Store.
+	/// Installs already owned apps from the App Store.
 	struct Install: AsyncParsableCommand {
 		static let configuration = CommandConfiguration(
-			abstract: "Install previously gotten apps from the App Store",
+			abstract: "Install already owned apps from the App Store",
 			discussion: requiresRootPrivilegesMessage(),
 		)
 

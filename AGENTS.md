@@ -277,8 +277,7 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 
 #### Void Types
 
-1. `()` for void parameter type
-2. `Void` for void return type
+1. `Void` instead of `()`.
 
 #### Closure Syntax
 
