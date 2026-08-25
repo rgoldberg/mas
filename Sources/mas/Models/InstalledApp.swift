@@ -30,14 +30,16 @@ struct InstalledApp {
 
 	fileprivate init(for valueByAttribute: [String: Any]) {
 		adamID = valueByAttribute["kMDItemAppStoreAdamID"] as? ADAMID ?? 0
-		bundleID = .init(describing: valueByAttribute[NSMetadataItemCFBundleIdentifierKey] ?? "")
-		name = .init(describing: valueByAttribute["_kMDItemDisplayNameWithExtensions"] ?? "").removingSuffix(".app")
+		bundleID = valueByAttribute[NSMetadataItemCFBundleIdentifierKey].map(String.init(describing:)) ?? ""
+		name =
+			valueByAttribute["_kMDItemDisplayNameWithExtensions"].map { .init(String(describing: $0).removingSuffix(".app")) }
+				?? ""
 		path = valueByAttribute[NSMetadataItemPathKey].map { pathAny in
 			let path = String(describing: pathAny)
 			return (try? URL(folderPath: path).resourceValues(forKeys: [.canonicalPathKey]))?.canonicalPath ?? path
 		}
 			?? ""
-		version = .init(describing: valueByAttribute[NSMetadataItemVersionKey] ?? "")
+		version = valueByAttribute[NSMetadataItemVersionKey].map(String.init(describing:)) ?? ""
 
 		jsonObjectRaw = .init(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let jsonObjectRaw = jsonObjectRaw
