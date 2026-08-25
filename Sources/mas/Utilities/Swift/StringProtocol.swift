@@ -1,5 +1,5 @@
 //
-// String.swift
+// StringProtocol.swift
 // mas
 //
 // Copyright © 2025 mas-cli. All rights reserved.
@@ -7,21 +7,13 @@
 
 private import Foundation
 
-extension String {
-	var uppercasingFirst: Self {
+extension StringProtocol {
+	var uppercasingFirst: String {
 		prefix(1).uppercased() + dropFirst()
 	}
 
-	var quoted: Self {
-		"'\(replacing("'", with: "\\'"))'"
-	}
-
-	func ifNotEmptyPrepend(_ prefix: String) -> Self {
-		isEmpty ? self : prefix + self
-	}
-
-	func removingSuffix(_ suffix: Self) -> Self {
-		hasSuffix(suffix) ? .init(dropLast(suffix.count)) : self
+	func removingSuffix(_ suffix: some StringProtocol) -> any StringProtocol {
+		hasSuffix(suffix) ? dropLast(suffix.count) : self
 	}
 
 	func similarity(to that: Self) -> Double {
@@ -72,7 +64,7 @@ extension String {
 					let cost = cost(of: thatChar, at: j)
 					// Damerau-Levenshtein transposition check
 					rowCurrent[j] = j > 1 && thisChar == thatChars[j - 2] && previousThisChar == thatChar
-						? min(cost, rowTwoPrevious[j - 2] + 0.4)
+						? Swift::min(cost, rowTwoPrevious[j - 2] + 0.4)
 						: cost
 				}
 			} else {
@@ -85,8 +77,18 @@ extension String {
 			swap(&rowPrevious, &rowCurrent)
 		}
 
-		let maxCost = max(thisCost, thatCost)
-		return maxCost == 0 ? 1 : max(0, 1 - rowPrevious[thatLength] / maxCost)
+		let maxCost = Swift::max(thisCost, thatCost)
+		return maxCost == 0 ? 1 : Swift::max(0, 1 - rowPrevious[thatLength] / maxCost)
+	}
+}
+
+extension StringProtocol where Self: RangeReplaceableCollection {
+	var quoted: String {
+		"'\(replacing("'", with: "\\'"))'"
+	}
+
+	func ifNotEmptyPrepend(_ prefix: some StringProtocol) -> Self {
+		isEmpty ? self : prefix + self
 	}
 }
 
@@ -102,9 +104,9 @@ private struct ScoredCharacter: Equatable {
 
 	init(_ character: Character) {
 		self.character = character
-		let string = String(character)
-		lowercased = string.lowercased()
-		folded = character.isASCII ? string : string.folding(options: .diacriticInsensitive, locale: .current)
+		lowercased = character.lowercased()
+		folded =
+			character.isASCII ? .init(character) : .init(character).folding(options: .diacriticInsensitive, locale: .current)
 		cost = character.isWhitespace || character.isPunctuation || character.isSymbol ? 0.25 : 1
 	}
 
