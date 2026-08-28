@@ -1,9 +1,7 @@
 function __fish_mas_list_available -d 'Lists applications available from the App Store'
-	set query (commandline -ct)
-	if test -n "$query"; and set results (command mas search "$query" 2>/dev/null)
-		for res in $results
-			echo "$res"
-		end | string trim --left | string replace -r '\s+' '\t'
+	set -l query (commandline -ct)
+	if test -n "$query"
+		command mas search "$query" 2>/dev/null | string trim --left | string replace -r '\s+' '\t'
 	end
 end
 
