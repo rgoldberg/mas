@@ -2,19 +2,21 @@
 
 _mas() {
 	local cur prev words cword
-	local shell_opts="$(shopt -p extglob)"
-	shopt -s extglob
-
 	if declare -F _init_completion >/dev/null 2>&1; then
-		_init_completion
+		_init_completion || return
 	else
 		COMPREPLY=()
-		_comp_get_words cur prev words cword
+		cur="${COMP_WORDS[COMP_CWORD]}"
+		prev="${COMP_WORDS[COMP_CWORD-1]}"
+		words=("${COMP_WORDS[@]}")
+		cword="${COMP_CWORD}"
 	fi
 	if [[ "${cword}" -eq 1 ]]; then
+		local shell_opts="$(shopt -p extglob)"
+		shopt -s extglob
 		local -r ifs_old="${IFS}"
 		IFS=$'\n'
-		local -a mas_help=($(mas help))
+		local -a mas_help=($(mas help 2>/dev/null))
 		mas_help=("${mas_help[@]:6:${#mas_help[@]}-7}")
 		mas_help=("${mas_help[@]#  }")
 		local -a commands=(help)
@@ -26,9 +28,7 @@ _mas() {
 		COMPREPLY=($(compgen -W "${commands[*]}" -- "${cur}"))
 		IFS="${ifs_old}"
 		eval "${shell_opts}"
-		return 0
 	fi
-	eval "${shell_opts}"
 }
 
 complete -F _mas mas
