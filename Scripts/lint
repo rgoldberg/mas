@@ -1,4 +1,4 @@
-#!/bin/zsh -Ndfgku
+#!/bin/zsh -f
 #
 # Scripts/lint
 # mas
@@ -11,6 +11,7 @@
 #
 
 . "${0:A:h}/_setup-script"
+unsetopt err_exit
 
 print_notice '🚨 Linting' "${@}"
 
@@ -89,7 +90,7 @@ git diff --check
 
 printf -- $'--> 💤 Zsh\n'
 for script in Scripts/***/*(.); do
-	/bin/zsh -n "${script}"
+	/bin/zsh -fn "${script}"
 	((exit_status |= ${?}))
 done
 
