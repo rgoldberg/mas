@@ -29,7 +29,7 @@ jobs:
         fetch-depth: 0
 
     - name: 🔧 Setup repo
-      run: Scripts/setup_workflow_repo
+      run: Scripts/setup-workflow-repo
 
     - name: 🖋 Delete tag lacking valid signature
       run: |
@@ -80,7 +80,7 @@ jobs:
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
-        export HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate_token)"
+        export HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
 
         brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
 

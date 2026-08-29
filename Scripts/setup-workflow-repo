@@ -1,6 +1,6 @@
 #!/bin/zsh -Ndefgku
 #
-# Scripts/setup_workflow_repo
+# Scripts/setup-workflow-repo
 # mas
 #
 # Copyright © 2025 mas-cli. All rights reserved.
@@ -8,7 +8,7 @@
 # Sets up the repo for use in a GitHub workflow.
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 # shellcheck disable=SC2066
 for branch in\
