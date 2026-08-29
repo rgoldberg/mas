@@ -10,7 +10,7 @@ permissions: {}
 defaults:
   run:
     # Force all run commands to not use Rosetta 2
-    shell: arch -arm64 /bin/zsh -Negku {0}
+    shell: arch -arm64 /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}
 jobs:
   tag-pushed:
     if: ${{!github.event.repository.fork}}
@@ -64,7 +64,7 @@ jobs:
 
     - name: 🛠 Select latest stable Xcode
       run: |
-        setopt extendedglob globassign
+        setopt glob_assign
         XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
         sudo xcode-select -s "${XCODE_PATH}"
         echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
@@ -84,7 +84,7 @@ jobs:
 
         brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
 
-        unsetopt errexit
+        unsetopt err_exit
         # editorconfig-checker-disable
         bump_output="$(brew bump-formula-pr\
          --tag "${GITHUB_REF_NAME}"\
@@ -97,7 +97,7 @@ jobs:
          "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
          2>&1)"
         exit_status="${?}" # editorconfig-checker-enable
-        setopt errexit
+        setopt err_exit
 
         printf %s "${bump_output}"
         printf %s "${${(f)bump_output}[-1]}" > .build/bump.url
