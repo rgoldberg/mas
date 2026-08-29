@@ -55,9 +55,9 @@ jobs:
       if: matrix.language == 'swift'
       run: |
         setopt glob_assign
-        XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
-        sudo xcode-select -s "${XCODE_PATH}"
-        echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"
+        readonly xcode_path=/Applications/Xcode_[0-9.]##.app(/On[1])
+        sudo xcode-select -s "${xcode_path}"
+        printf $'DEVELOPER_DIR=%s/Contents/Developer\n' "${xcode_path}" >>"${GITHUB_ENV}"
         Scripts/build codeql -c release
 
     - name: 🔍 Perform CodeQL analysis
