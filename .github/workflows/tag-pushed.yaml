@@ -34,11 +34,10 @@ jobs:
     - name: 🖋 Delete tag lacking valid signature
       run: |
         git fetch --force origin "${GITHUB_REF}:${GITHUB_REF}"
-        # editorconfig-checker-disable
-        if [[\
-         "$(git cat-file tag "${GITHUB_REF_NAME}")" != *'-----BEGIN SSH SIGNATURE-----'*'-----END SSH SIGNATURE-----' \
-        ]]; then # editorconfig-checker-enable
-          printf $'Error: Deleting tag %s because it does not have a valid signature\n' "${GITHUB_REF_NAME}" >&2
+        if [[
+          "$(git cat-file tag "${GITHUB_REF_NAME}")" != *'-----BEGIN SSH SIGNATURE-----'*'-----END SSH SIGNATURE-----'
+        ]]; then
+          printf $'::error::Tag %s does not have a valid signature; deleting\n' "${GITHUB_REF_NAME}" >&2
           git push -d origin "${GITHUB_REF_NAME}"
           exit 1
         fi
@@ -46,18 +45,16 @@ jobs:
     - name: 🏷 Exit if not a version tag
       run: |
         if [[ ! "${GITHUB_REF_NAME}" =~ '^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
-          printf $'Exiting because %s is not a version tag\n' "${GITHUB_REF_NAME}"
+          printf $'::error::%s is not a version tag\n' "${GITHUB_REF_NAME}" >&2
           exit 2
         fi
 
-    - name: 🌳 Delete version tag not on default branch
+    - name: 🌿 Delete version tag not on default branch
       env:
-        DEFAULT_BRANCH_NAME: ${{github.event.repository.default_branch}}
+        DEFAULT_BRANCH: ${{github.event.repository.default_branch}}
       run: |
-        git fetch --force origin "${DEFAULT_BRANCH_NAME}:${DEFAULT_BRANCH_NAME}"
-        if ! git merge-base --is-ancestor "${GITHUB_REF_NAME}" "${DEFAULT_BRANCH_NAME}"; then
-          printf $'Error: Deleting version tag %s because it is not on the %s branch\n' "${GITHUB_REF_NAME}"\
-           "${DEFAULT_BRANCH_NAME}" >&2 # editorconfig-checker-disable-line
+        if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}"; then
+          printf $'::error::Tag %s is not on the %s branch; deleting\n' "${GITHUB_REF_NAME}" "${DEFAULT_BRANCH}" >&2
           git push -d origin "${GITHUB_REF_NAME}"
           exit 3
         fi
@@ -80,42 +77,37 @@ jobs:
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
-        export HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
-
+        HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
+        export -r HOMEBREW_GITHUB_API_TOKEN
         brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
-
         unsetopt err_exit
-        # editorconfig-checker-disable
         bump_output="$(brew bump-formula-pr\
-         --tag "${GITHUB_REF_NAME}"\
-         --revision "${GITHUB_SHA}"\
-         --no-fork\
-         --no-browse\
-         --online\
-         --strict\
-         --verbose\
-         "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
-         2>&1)"
-        exit_status="${?}" # editorconfig-checker-enable
+          --tag "${GITHUB_REF_NAME}"\
+          --revision "${GITHUB_SHA}"\
+          --no-fork\
+          --no-browse\
+          --online\
+          --strict\
+          --verbose\
+          "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
+          2>&1
+        )"
+        bump_status="${?}"
         setopt err_exit
-
         printf %s "${bump_output}"
         printf %s "${${(f)bump_output}[-1]}" > .build/bump.url
-
-        exit "${exit_status}"
+        exit "${bump_status}"
 
     - name: 📝 Create draft release
       env:
         GH_TOKEN: ${{github.token}}
       run: |
-        # editorconfig-checker-disable
         gh release create\
-         "${GITHUB_REF_NAME}"\
-         ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
-         ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"\
-         .build/bump.url\
-         -d\
-         ${"${GITHUB_REF_NAME//[^-]}":+-p}\
-         -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
-         --generate-notes
-        # editorconfig-checker-enable
+          "${GITHUB_REF_NAME}"\
+          ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
+          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"\
+          .build/bump.url\
+          -d\
+          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
+          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
+          --generate-notes
