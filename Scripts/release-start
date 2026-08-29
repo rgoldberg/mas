@@ -1,13 +1,13 @@
 #!/bin/zsh -Ndefgku
 #
-# Scripts/release_start
+# Scripts/release-start
 # mas
 #
 # Copyright © 2025 mas-cli. All rights reserved.
 #
 # Starts the release process by creating & pushing a signed annotated version tag to the GitHub mas-cli/mas repo.
 #
-# Usage: release_start <version-tag-name> <version-title> [<version-ref>]
+# Usage: release-start <version-tag-name> <version-title> [<version-ref>]
 #
 # <version-tag-name> must match the following zsh pattern:
 #
@@ -18,7 +18,7 @@
 # <version-ref> if optional value supplied, must be on the main branch; defaults to HEAD
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 readonly tag="${1}"
 readonly title="${2}"

@@ -41,7 +41,7 @@ jobs:
         fetch-depth: 0
 
     - name: 🔧 Setup repo
-      run: Scripts/setup_workflow_repo
+      run: Scripts/setup-workflow-repo
 
     - name: 🔩 Initialize CodeQL
       uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3

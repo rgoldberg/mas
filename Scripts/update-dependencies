@@ -1,6 +1,6 @@
 #!/bin/zsh -GNdefgku
 #
-# Scripts/update_dependencies
+# Scripts/update-dependencies
 # mas
 #
 # Copyright © 2025 mas-cli. All rights reserved.
@@ -8,7 +8,7 @@
 # Update dependencies.
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 print_notice '⬆️​ Updating dependencies for' "${@}"
 
