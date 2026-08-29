@@ -10,7 +10,7 @@ permissions: {}
 defaults:
   run:
     # Force all run commands to not use Rosetta 2
-    shell: arch -arm64 /bin/zsh -Negku {0}
+    shell: arch -arm64 /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}
 jobs:
   release-published:
     if: ${{!github.event.repository.fork}}
@@ -41,10 +41,10 @@ jobs:
       run: |
         export GH_TOKEN="$(Scripts/generate-token)"
 
-        unsetopt errexit
+        unsetopt err_exit
         bump_url="$(gh release -R "${GITHUB_REPOSITORY}" download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"
         found_bump_url="${?}"
-        setopt errexit
+        setopt err_exit
 
         if [[ "${found_bump_url}" -eq 0 ]]; then
           [[ -n "${bump_url}" ]] && gh pr edit "${bump_url}" --add-label pr-pull
