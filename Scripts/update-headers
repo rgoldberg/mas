@@ -1,4 +1,4 @@
-#!/bin/zsh -GNdefgku
+#!/bin/zsh -f
 #
 # Scripts/update-headers
 # mas
@@ -15,7 +15,7 @@ ensure_command_available ipsw
 zmodload zsh/zutil
 zparseopts -D -A received_flag C X
 
-readonly -a frameworks_globs=("${@:-*(/)}")
+readonly -a frameworks_globs=("${@:-*(/N)}")
 
 cd Sources/PrivateFrameworks/include
 
