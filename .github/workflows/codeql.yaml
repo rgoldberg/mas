@@ -14,7 +14,7 @@ on:
 permissions: {}
 defaults:
   run:
-    shell: /bin/zsh -Negku {0}
+    shell: /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}
 jobs:
   analyze:
     name: Analyze ${{matrix.language}}
@@ -53,7 +53,7 @@ jobs:
     - name: 🏗 Build Swift
       if: matrix.language == 'swift'
       run: |
-        setopt extendedglob globassign
+        setopt glob_assign
         XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
         sudo xcode-select -s "${XCODE_PATH}"
         echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"

@@ -26,7 +26,12 @@ jobs:
     defaults:
       run:
         # Force all run commands to not use Rosetta 2 on arm64
-        shell: ${{endsWith(matrix.runner, '-intel') && '/bin/zsh -Negku {0}' || 'arch -arm64 /bin/zsh -Negku {0}'}}
+        shell: >-
+          ${{
+            endsWith(matrix.runner, '-intel')
+            && '/bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}'
+            || 'arch -arm64 /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}'
+          }}
     steps:
     - name: 🛒 Checkout repo
       env:
@@ -43,7 +48,7 @@ jobs:
 
     - name: 🛠 Select latest stable Xcode
       run: |
-        setopt extendedglob globassign
+        setopt glob_assign
         XCODE_PATH=/Applications/Xcode_[0-9.]##.app(/On[1])
         sudo xcode-select -s "${XCODE_PATH}"
         echo "DEVELOPER_DIR=${XCODE_PATH}/Contents/Developer" >>"${GITHUB_ENV}"

@@ -1,4 +1,4 @@
-#!/bin/zsh -GNdefgku
+#!/bin/zsh -f
 #
 # Scripts/update-dependencies
 # mas
