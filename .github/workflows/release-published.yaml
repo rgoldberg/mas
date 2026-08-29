@@ -31,7 +31,7 @@ jobs:
         fetch-depth: 0
 
     - name: 🔧 Setup repo
-      run: Scripts/setup_workflow_repo
+      run: Scripts/setup-workflow-repo
 
     - name: 🚰 Apply pr-pull label to tap formula bump PR
       env:
@@ -39,7 +39,7 @@ jobs:
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
-        export GH_TOKEN="$(Scripts/generate_token)"
+        export GH_TOKEN="$(Scripts/generate-token)"
 
         unsetopt errexit
         bump_url="$(gh release -R "${GITHUB_REPOSITORY}" download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"

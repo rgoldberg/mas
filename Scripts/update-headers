@@ -1,6 +1,6 @@
 #!/bin/zsh -GNdefgku
 #
-# Scripts/update_headers
+# Scripts/update-headers
 # mas
 #
 # Copyright © 2025 mas-cli. All rights reserved.
@@ -8,7 +8,7 @@
 # Generates headers for Apple private frameworks.
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 ensure_command_available ipsw
 

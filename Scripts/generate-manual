@@ -1,6 +1,6 @@
 #!/bin/zsh -Ndefgku
 #
-# Scripts/generate_manual
+# Scripts/generate-manual
 # mas
 #
 # Copyright © 2025 mas-cli. All rights reserved.
@@ -8,7 +8,7 @@
 # Generates man page.
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 print_notice '📖 Generating man pages for' "${@}"
 
