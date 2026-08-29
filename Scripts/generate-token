@@ -11,14 +11,28 @@
 . "${0:A:h}/_setup-script"
 
 readonly header=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9
-readonly payload="${${$(printf '{"iss":%s,"iat":%s,"exp":%s}' "${TOKEN_APP_ID}" "$(("$(date +%s)" - 60))"\
-	"$(("$(date +%s)" + 540))" | base64)//[=$'\n']}//\/+/_-}"
+payload="${${${$(
+	printf '{"iss":%s,"iat":%s,"exp":%s}' "${TOKEN_APP_ID}" "$(("$(date +%s)" - 60))" "$(("$(date +%s)" + 540))" | base64
+)//[=$'\n']}//+/-}//\//_}"
+readonly payload
 
-# shellcheck disable=SC1036,SC1072,SC1073
-curl\
-	-sX POST\
-	-H "Authorization: Bearer ${header}.${payload}.${${$(printf %s "${header}.${payload}" |
-	openssl dgst -sha256 -sign =(printf %s "${TOKEN_APP_PRIVATE_KEY}") | base64)//[=$'\n']}//\/+/_-}"\
+# shellcheck disable=SC2154
+response="$(curl\
+	-sSX POST\
+	-H "Authorization: Bearer ${header}.${payload}.${${${$(printf %s "${header}.${payload}" |
+		openssl dgst -sha256 -sign <(printf %s "${TOKEN_APP_PRIVATE_KEY}") | base64)//[=$'\n']}//+/-}//\//_}"\
 	-H 'Accept: application/vnd.github+json'\
-	"https://api.github.com/app/installations/${TOKEN_APP_INSTALLATION_ID}/access_tokens" |
-	jq -r .token
+	"https://api.github.com/app/installations/${TOKEN_APP_INSTALLATION_ID}/access_tokens"
+)" ||
+{
+	printf $'Error: Failed to contact GitHub API\n' >&2
+	exit 1
+}
+readonly response
+token="$(printf %s "${response}" | jq -r .token 2>/dev/null || true)"
+readonly token
+if [[ -z "${token}" || "${token}" = null ]]; then
+	printf $'Error: Failed to parse installation token from:\n%s\n' "${response}" >&2
+	exit 2
+fi
+printf %s "${token}"
