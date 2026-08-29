@@ -36,7 +36,7 @@ jobs:
         persist-credentials: false
 
     - name: 🔧 Setup repo
-      run: Scripts/setup_workflow_repo
+      run: Scripts/setup-workflow-repo
 
     - name: 🛠 Select latest stable Xcode
       run: |

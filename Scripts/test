@@ -8,7 +8,7 @@
 # Runs mas tests.
 #
 
-. "${0:A:h}/_setup_script"
+. "${0:A:h}/_setup-script"
 
 print_notice '🧪 Testing' "${@}"
 
