@@ -65,44 +65,58 @@ jobs:
           exit 4
         fi
 
-    - name: 🛠 Select latest stable Xcode
-      run: |
-        setopt glob_assign
-        readonly xcode_path=/Applications/Xcode_[0-9.]##.app(/On[1])
-        sudo xcode-select -s "${xcode_path}"
-        printf $'DEVELOPER_DIR=%s/Contents/Developer\n' "${xcode_path}" >>"${GITHUB_ENV}"
-
-    - name: 📦 Build Apple & Intel installers
-      run: |
-        Scripts/package package --arch arm64
-        Scripts/package package --arch x86_64
-
-    - name: 📝 Create draft release
+    - name: ⚖️ Verify draft release title & tag message match
       env:
         GH_TOKEN: ${{github.token}}
       run: |
-        gh release create\
-          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
-          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
-          -d\
-          --generate-notes\
-          --verify-tag\
-          "${GITHUB_REF_NAME}"\
-          ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
-          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"
+        unsetopt err_exit
+        draft_title=\
+        "$(gh release view "${GITHUB_REF_NAME}" --json name,isDraft -q 'select(.isDraft == true) | .name' 2>/dev/null)"
+        readonly found_draft="${?}"
+        readonly draft_title
+        setopt err_exit
+        if [[ "${found_draft}" -ne 0 || -z "${draft_title}" ]]; then
+          printf $'::error::Failed to find draft release for tag %s; deleting\n' "${GITHUB_REF_NAME}" >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 5
+        fi
+        tag_title="${GITHUB_REF_NAME}: $(git tag -l --format='%(contents:subject)' "${GITHUB_REF_NAME}")"
+        readonly tag_title
+        if [[ "${draft_title}" != "${tag_title}" ]]; then
+          printf\
+            $'::error::Draft release title (%s) does not match tag title (%s); deleting\n'\
+            "${draft_title}"\
+            "${tag_title}"\
+            >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 6
+        fi
 
-    - name: 🚰 Bump tap formula
+    - name: 📢 Publish release
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: gh release edit "${GITHUB_REF_NAME}" --draft=false
+
+    - name: 🚰 Update tap formula bump PR
       env:
         GH_TOKEN: ${{github.token}}
         TOKEN_APP_ID: ${{secrets.TOKEN_APP_ID}}
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
+        unsetopt err_exit
+        bump_url="$(gh release download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"
+        readonly found_bump_url="${?}"
+        readonly bump_url
+        setopt err_exit
+        if [[ "${found_bump_url}" -ne 0 || -z "${bump_url}" ]]; then
+          printf $'::error::Failed to find tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
+          exit 7
+        fi
         HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
         export -r HOMEBREW_GITHUB_API_TOKEN
         brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
-        unsetopt err_exit
-        bump_output="$(brew bump-formula-pr\
+        brew bump-formula-pr\
           --tag "${GITHUB_REF_NAME}"\
           --revision "${GITHUB_SHA}"\
           --no-fork\
@@ -110,21 +124,5 @@ jobs:
           --online\
           --strict\
           --verbose\
-          "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
-          2>&1
-        )"
-        readonly bump_status="${?}"
-        readonly bump_output
-        setopt err_exit
-        printf %s "${bump_output}"
-        if [[ "${bump_status}" -ne 0 ]]; then
-          printf $'::error::Failed to bump tap formula for tag %s\n' "${GITHUB_REF_NAME}" >&2
-          exit 2
-        fi
-        if [[ "${bump_output}" != *(#b)(https://github.com/"${GITHUB_REPOSITORY_OWNER}"/homebrew-tap/pull/[0-9]##)* ]]
-        then
-          printf $'::error::Failed to parse tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
-          exit 3
-        fi
-        printf %s "${match[1]}" > .build/bump.url
-        gh release upload "${GITHUB_REF_NAME}" .build/bump.url --clobber
+          "${GITHUB_REPOSITORY_OWNER}/tap/mas"
+        gh release delete-asset "${GITHUB_REF_NAME}" bump.url -y

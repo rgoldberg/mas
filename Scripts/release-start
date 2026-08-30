@@ -5,32 +5,37 @@
 #
 # Copyright © 2025 mas-cli. All rights reserved.
 #
-# Starts the release process by creating & pushing a signed annotated version tag to the GitHub mas-cli/mas repo.
+# Starts the release process by triggering workflow dispatch to create a GitHub draft release & bump tap formula.
 #
-# Usage: release-start <version-tag-name> <version-title> [<version-ref>]
+# Usage: release-start [-f <path>] <version> <title> [<ref>]
 #
-# <version-tag-name> must match the following zsh pattern:
+# <version> must match the following zsh pattern:
 #
-# ^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$
+# ^[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$
 #
-# <version-title> may contain at most 64 characters, which cannot be control characters
+# <title> may contain at most 64 characters, which cannot be control characters
 #
-# <version-ref> if optional value supplied, must be on the main branch; defaults to HEAD
+# <ref> if optional ref supplied, must be on the main branch; defaults to main
 #
 
 . "${0:A:h}/_setup-script"
 
-readonly tag="${1}"
-readonly title="${2}"
-readonly ref="${3:-HEAD}"
+zmodload zsh/zutil
+zparseopts -D -F -A option_value f:
+readonly -A option_value
 
-export MAS_VERSION="${tag#v}"
+readonly version="${1}"
+readonly title="${2}"
+readonly ref="${3:-main}"
+readonly formula_path="${option_value[-f]}"
+
+export MAS_VERSION="${version}"
 print_notice '🚀 Starting release for' "${@}"
 unset MAS_VERSION
 printf $'\n'
 
-if [[ ! "${tag}" =~ '^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
-	printf $'Error: %s is not a valid version tag\n' "${tag}" >&2
+if [[ ! "${version}" =~ '^[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
+	printf $'Error: %s is not a valid version\n' "${version}" >&2
 	exit 1
 fi
 
@@ -62,6 +67,13 @@ if ! git merge-base --is-ancestor "${ref}" "${default_branch_sha}"; then
 	exit 5
 fi
 
-git tag -s "${tag}" -m "${title}" "${ref}"
-printf $'Created version tag %s with title \'%s\' for reference %s\n\n' "${tag}" "${(q)title}" "${ref}"
-git push "https://github.com/${gh_repo}.git" tag "${tag}"
+if [[ -n "${formula_path}" && ! -f "${formula_path}" ]]; then
+	printf $'Error: No file exists at \'%s\'\n' "${(q)formula_path}" >&2
+	exit 6
+fi
+
+gh workflow run release-start.yaml\
+	-f version="${version}"\
+	-f title="${title}"\
+	-f ref="${ref}"\
+	${formula_path:+-F formula=@"${formula_path}"}
