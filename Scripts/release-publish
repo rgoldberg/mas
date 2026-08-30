@@ -1,0 +1,38 @@
+#!/bin/zsh -f
+#
+# Scripts/release-publish
+# mas
+#
+# Copyright © 2025 mas-cli. All rights reserved.
+#
+# Publishes a draft release by pushing a user-signed tag to GitHub to trigger tag-pushed.yaml.
+#
+# Usage: release-publish <version>
+#
+
+. "${0:A:h}/_setup-script"
+
+readonly version="${1}"
+readonly tag="v${version}"
+
+export MAS_VERSION="${version}"
+print_notice '📢 Publishing release for' "${@}"
+unset MAS_VERSION
+printf $'\n'
+
+gh_repo_url="$(gh repo view --json url -q .url)"
+readonly gh_repo_url
+
+read -r target title < <(
+	gh release view "${tag}" --json name,targetCommitish -q '.targetCommitish + " " + .name'
+) || true
+readonly target title
+if [[ -z "${title}" ]]; then
+	printf $'Error: Draft release %s not found on GitHub\n' "${tag}" >&2
+	exit 1
+fi
+
+git fetch -q "${gh_repo_url}.git" "${target}"
+git tag -s --cleanup=whitespace "${tag}" -m "${title#"${tag}": }" "${target}"
+printf $'Created signed tag %s for reference %s & pushing to %s\n\n' "${tag}" "${target}" "${gh_repo_url}"
+git push "${gh_repo_url}.git" tag "${tag}"
