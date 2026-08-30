@@ -77,8 +77,23 @@ jobs:
         Scripts/package package --arch arm64
         Scripts/package package --arch x86_64
 
+    - name: 📝 Create draft release
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: |
+        gh release create\
+          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
+          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
+          -d\
+          --generate-notes\
+          --verify-tag\
+          "${GITHUB_REF_NAME}"\
+          ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
+          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"
+
     - name: 🚰 Bump tap formula
       env:
+        GH_TOKEN: ${{github.token}}
         TOKEN_APP_ID: ${{secrets.TOKEN_APP_ID}}
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
@@ -112,18 +127,4 @@ jobs:
           exit 3
         fi
         printf %s "${match[1]}" > .build/bump.url
-
-    - name: 📝 Create draft release
-      env:
-        GH_TOKEN: ${{github.token}}
-      run: |
-        gh release create\
-          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
-          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
-          -d\
-          --generate-notes\
-          --verify-tag\
-          "${GITHUB_REF_NAME}"\
-          ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
-          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"\
-          .build/bump.url
+        gh release upload "${GITHUB_REF_NAME}" .build/bump.url --clobber
