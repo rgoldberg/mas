@@ -118,11 +118,12 @@ jobs:
         GH_TOKEN: ${{github.token}}
       run: |
         gh release create\
+          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
+          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
+          -d\
+          --generate-notes\
+          --verify-tag\
           "${GITHUB_REF_NAME}"\
           ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
           ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"\
-          .build/bump.url\
-          -d\
-          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
-          -t "${GITHUB_REF_NAME}: ${$(git tag -l "${GITHUB_REF_NAME}" --format='%(contents)')%%$'\n'*}"\
-          --generate-notes
+          .build/bump.url
