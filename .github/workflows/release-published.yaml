@@ -16,9 +16,7 @@ jobs:
     if: ${{!github.event.repository.fork}}
     runs-on: macos-26
     permissions:
-      actions: read
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
     - name: 🛒 Checkout repo
       env:
