@@ -28,4 +28,4 @@ else
 	printf $'\nWarning: Failed to find tap formula bump PR URL for draft release tag %s\n\n' "${tag}" >&2
 fi
 
-gh release -R mas-cli/mas delete "${tag}" --cleanup-tag -y
+gh release -R mas-cli/mas delete "${tag}" -y

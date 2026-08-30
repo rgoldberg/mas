@@ -1,0 +1,201 @@
+#
+# .github/workflows/release-start.yaml
+#
+---
+name: release-start
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git reference
+        required: true
+        default: main
+        type: string
+      version:
+        description: Version
+        required: true
+        type: string
+      title:
+        description: Title
+        required: true
+        type: string
+      formula:
+        description: Formula
+        required: false
+        type: string
+permissions: {}
+defaults:
+  run:
+    # Force all run commands to not use Rosetta 2
+    shell: arch -arm64 /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}
+jobs:
+  validate-inputs:
+    if: ${{!github.event.repository.fork}}
+    runs-on: macos-26
+    outputs:
+      commit_sha: ${{steps.resolve-sha.outputs.commit_sha}}
+    steps:
+    - name: 🔢 Reject invalid version
+      env:
+        VERSION: ${{inputs.version}}
+      run: |
+        if [[ ! "${VERSION}" =~ '^[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
+          printf $'::error::%s is not a valid version\n' "${VERSION}" >&2
+          exit 1
+        fi
+
+    - name: 🔤 Reject invalid title
+      env:
+        TITLE: ${{inputs.title}}
+      run: |
+        if (("${#TITLE}" > 64)); then
+          printf $'::error::Title \'%s\' contains more than 64 characters\n' "${(q)TITLE}" >&2
+          exit 2
+        fi
+        if [[ "${TITLE}" =~ [[:cntrl:]] ]]; then
+          printf $'::error::Title \'%s\' contains control characters\n' "${(q)TITLE}" >&2
+          exit 3
+        fi
+        if [[ "${TITLE}" = (' '*|*' ') ]]; then
+          printf $'::error::Title \'%s\' begins or ends with a space\n' "${(q)TITLE}" >&2
+          exit 4
+        fi
+
+    - name: 🛒 Checkout repo
+      env:
+        GIT_CONFIG_COUNT: 1
+        GIT_CONFIG_KEY_0: init.defaultBranch
+        GIT_CONFIG_VALUE_0: ${{github.event.repository.default_branch}}
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{inputs.ref}}
+        # Include all history & tags for Scripts/version
+        fetch-depth: 0
+
+    - name: 🔧 Setup repo
+      run: Scripts/setup-workflow-repo
+
+    - name: 🌿 Reject reference not on default branch
+      env:
+        DEFAULT_BRANCH: ${{github.event.repository.default_branch}}
+        REF: ${{inputs.ref}}
+      run: |
+        if ! git merge-base --is-ancestor "${REF}" "origin/${DEFAULT_BRANCH}"; then
+          printf $'::error::%s is not on the %s branch\n' "${REF}" "${DEFAULT_BRANCH}" >&2
+          exit 5
+        fi
+
+    - name: 🔎 Resolve release commit SHA
+      id: resolve-sha
+      env:
+        REF: ${{inputs.ref}}
+      run: |
+        commit_sha="$(git rev-parse "${REF}")"
+        readonly commit_sha
+        printf $'commit_sha=%s\n' "${commit_sha}" >>"${GITHUB_OUTPUT}"
+
+  test-homebrew-core-formula:
+    if: ${{!github.event.repository.fork}}
+    needs: validate-inputs
+    uses: ./.github/workflows/test-homebrew-core-formula.yaml
+    with:
+      commit_sha: ${{needs.validate-inputs.outputs.commit_sha}}
+      version: ${{inputs.version}}
+      formula: ${{inputs.formula}}
+
+  release-start:
+    if: ${{!github.event.repository.fork}}
+    needs: [validate-inputs, test-homebrew-core-formula]
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+    - name: 🛒 Checkout repo
+      env:
+        GIT_CONFIG_COUNT: 1
+        GIT_CONFIG_KEY_0: init.defaultBranch
+        GIT_CONFIG_VALUE_0: ${{github.event.repository.default_branch}}
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{needs.validate-inputs.outputs.commit_sha}}
+        # Include all history & tags for Scripts/version
+        fetch-depth: 0
+
+    - name: 🔧 Setup repo
+      run: Scripts/setup-workflow-repo
+
+    - name: 🏷 Locally tag for version resolution
+      env:
+        COMMIT_SHA: ${{needs.validate-inputs.outputs.commit_sha}}
+        VERSION: ${{inputs.version}}
+      run: git tag -f "v${VERSION}" "${COMMIT_SHA}"
+
+    - name: 🛠 Select latest stable Xcode
+      run: |
+        setopt glob_assign
+        readonly xcode_path=/Applications/Xcode_[0-9.]##.app(/On[1])
+        sudo xcode-select -s "${xcode_path}"
+        printf $'DEVELOPER_DIR=%s/Contents/Developer\n' "${xcode_path}" >>"${GITHUB_ENV}"
+
+    - name: 📦 Build Apple & Intel installers
+      run: |
+        Scripts/package package --arch arm64
+        Scripts/package package --arch x86_64
+
+    - name: 📝 Create draft release
+      env:
+        COMMIT_SHA: ${{needs.validate-inputs.outputs.commit_sha}}
+        GH_TOKEN: ${{github.token}}
+        TITLE: ${{inputs.title}}
+        VERSION: ${{inputs.version}}
+      run: |
+        gh release create\
+          --target "${COMMIT_SHA}"\
+          -t "v${VERSION}: ${TITLE}"\
+          ${"${VERSION//[^-]}":+-p}\
+          -d\
+          --generate-notes\
+          "v${VERSION}"\
+          ".build/mas-${VERSION}-arm64.pkg"\
+          ".build/mas-${VERSION}-x86_64.pkg"
+
+    - name: 🚰 Bump tap formula
+      env:
+        COMMIT_SHA: ${{needs.validate-inputs.outputs.commit_sha}}
+        GH_TOKEN: ${{github.token}}
+        TOKEN_APP_ID: ${{secrets.TOKEN_APP_ID}}
+        TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
+        TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
+        VERSION: ${{inputs.version}}
+      run: |
+        HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
+        export -r HOMEBREW_GITHUB_API_TOKEN
+        brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
+        unsetopt err_exit
+        bump_output="$(
+          brew bump-formula-pr\
+            --url "https://github.com/${GITHUB_REPOSITORY}/archive/${COMMIT_SHA}.tar.gz"\
+            --version "${VERSION}"\
+            --no-fork\
+            --no-browse\
+            --online\
+            --strict\
+            --verbose\
+            "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
+            2>&1
+        )"
+        readonly bump_status="${?}"
+        readonly bump_output
+        setopt err_exit
+        printf %s "${bump_output}"
+        if [[ "${bump_status}" -ne 0 ]]; then
+          printf $'::error::Failed to bump tap formula to version %s\n' "${VERSION}" >&2
+          exit 6
+        fi
+        if [[ "${bump_output}" != *(#b)(https://github.com/"${GITHUB_REPOSITORY_OWNER}"/homebrew-tap/pull/[0-9]##)* ]]
+        then
+          printf $'::error::Failed to parse tap formula bump PR URL for version %s\n' "${VERSION}" >&2
+          exit 7
+        fi
+        printf %s "${match[1]}" > .build/bump.url
+        gh release upload "v${VERSION}" .build/bump.url --clobber
