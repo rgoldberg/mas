@@ -21,7 +21,7 @@ unset ENV
 unset TMPSUFFIX
 
 readonly mas_folder="${0:A:h:h}"
-if ! cd -- "${mas_folder}"; then
+if ! cd "${mas_folder}"; then
 	printf $'Error: Failed to cd into mas folder: %s\n' "${mas_folder}" >&2
 	exit 1
 fi
@@ -44,11 +44,8 @@ ensure_command_available() {
 	local -i return_status=0
 	local command
 	for command in "${@}"; do
-		if ! whence "${command}" >/dev/null; then
-			printf $'error: %s is not installed. Run \'Scripts/bootstrap\' or \'brew install %s\'.\n'\
-				"${command}"\
-				"${command}"\
-				>&2
+		if ! whence -- "${command}" >/dev/null; then # shellcheck disable=SC2183
+			printf $'Error: %1$s is not installed. Run \'Scripts/bootstrap\' or \'brew install %1$s\'.\n' "${command}" >&2
 			return_status=1
 		fi
 	done
