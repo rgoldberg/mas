@@ -16,10 +16,7 @@ jobs:
     if: ${{!github.event.repository.fork}}
     runs-on: xcode-27
     permissions:
-      artifact-metadata: write
-      attestations: write
       contents: write
-      id-token: write
     steps:
     - name: 🛒 Checkout repo
       env:
@@ -68,62 +65,69 @@ jobs:
           exit 4
         fi
 
-    - name: 🛠 Select latest stable Xcode
-      run: |
-        setopt glob_assign
-        readonly xcode_path=/Applications/Xcode_[0-9.]##.app(/On[1])
-        sudo xcode-select -s "${xcode_path}"
-        printf $'DEVELOPER_DIR=%s/Contents/Developer\n' "${xcode_path}" >>"${GITHUB_ENV}"
-
-    - name: 📦 Build Apple & Intel installers
-      id: package
-      run: |
-        Scripts/package package --arch arm64
-        Scripts/package package --arch x86_64
-        printf $'version=%s\n' "${GITHUB_REF_NAME#v}" >>"${GITHUB_OUTPUT}"
-
-    - name: 🔏 Attest Apple installer SBOM
-      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-      with:
-        subject-path: .build/mas-${{steps.package.outputs.version}}-arm64.pkg
-        sbom-path: .build/mas-${{steps.package.outputs.version}}-arm64.cdx.json
-
-    - name: 🔏 Attest Intel installer SBOM
-      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-      with:
-        subject-path: .build/mas-${{steps.package.outputs.version}}-x86_64.pkg
-        sbom-path: .build/mas-${{steps.package.outputs.version}}-x86_64.cdx.json
-
-    - name: 📝 Create draft release
+    - name: ⚖️ Verify draft release target & title match tag
       env:
         GH_TOKEN: ${{github.token}}
       run: |
-        gh release create\
-          -t "${GITHUB_REF_NAME}: $(git tag -l "${GITHUB_REF_NAME}" --format='%(contents:subject)')"\
-          ${"${GITHUB_REF_NAME//[^-]}":+-p}\
-          -d\
-          --generate-notes\
-          --verify-tag\
-          "${GITHUB_REF_NAME}"\
-          ".build/mas-${GITHUB_REF_NAME#v}-arm64.pkg"\
-          ".build/mas-${GITHUB_REF_NAME#v}-arm64.cdx.json"\
-          ".build/mas-${GITHUB_REF_NAME#v}-arm64.spdx.json"\
-          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.pkg"\
-          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.cdx.json"\
-          ".build/mas-${GITHUB_REF_NAME#v}-x86_64.spdx.json"
+        read -r draft_target draft_title < <(
+          gh release view "${GITHUB_REF_NAME}"\
+            --json isDraft,name,targetCommitish\
+            -q 'select(.isDraft == true) | .targetCommitish + " " + .name'
+        ) || true
+        readonly draft_target draft_title
+        if [[ -z "${draft_title}" ]]; then
+          printf $'::error::Failed to find draft release for tag %s; deleting\n' "${GITHUB_REF_NAME}" >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 5
+        fi
+        tag_commit="$(git rev-parse "${GITHUB_REF_NAME}^{commit}")"
+        readonly tag_commit
+        if [[ "${draft_target}" != "${tag_commit}" ]]; then
+          printf\
+            $'::error::Draft release target (%s) does not match tag commit (%s); deleting\n'\
+            "${draft_target}"\
+            "${tag_commit}"\
+            >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 6
+        fi
+        tag_title="${GITHUB_REF_NAME}: $(git tag -l --format='%(contents:subject)' "${GITHUB_REF_NAME}")"
+        readonly tag_title
+        if [[ "${draft_title}" != "${tag_title}" ]]; then
+          printf\
+            $'::error::Draft release title (%s) does not match tag title (%s); deleting\n'\
+            "${draft_title}"\
+            "${tag_title}"\
+            >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 7
+        fi
 
-    - name: 🚰 Bump tap formula
+    - name: 📢 Publish release
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: gh release edit "${GITHUB_REF_NAME}" --draft=false
+
+    - name: 🚰 Update tap formula bump PR
       env:
         GH_TOKEN: ${{github.token}}
         TOKEN_APP_ID: ${{secrets.TOKEN_APP_ID}}
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
+        unsetopt err_exit
+        bump_url="$(gh release download "${GITHUB_REF_NAME}" -p bump.url -O -)"
+        readonly found_bump_url="${?}"
+        readonly bump_url
+        setopt err_exit
+        if [[ "${found_bump_url}" -ne 0 || -z "${bump_url}" ]]; then
+          printf $'::error::Failed to find tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
+          exit 8
+        fi
         HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
         export -r HOMEBREW_GITHUB_API_TOKEN
         brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
-        unsetopt err_exit
-        bump_output="$(brew bump-formula-pr\
+        brew bump-formula-pr\
           --tag "${GITHUB_REF_NAME}"\
           --revision "${GITHUB_SHA}"\
           --no-fork\
@@ -131,21 +135,5 @@ jobs:
           --online\
           --strict\
           --verbose\
-          "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
-          2>&1
-        )"
-        readonly bump_status="${?}"
-        readonly bump_output
-        setopt err_exit
-        printf %s "${bump_output}"
-        if [[ "${bump_status}" -ne 0 ]]; then
-          printf $'::error::Failed to bump tap formula for tag %s\n' "${GITHUB_REF_NAME}" >&2
-          exit 2
-        fi
-        if [[ "${bump_output}" != *(#b)("https://github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-tap/pull/"[0-9]##)* ]]
-        then
-          printf $'::error::Failed to parse tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
-          exit 3
-        fi
-        printf %s "${match[1]}" > .build/bump.url
-        gh release upload "${GITHUB_REF_NAME}" .build/bump.url --clobber
+          "${GITHUB_REPOSITORY_OWNER}/tap/mas"
+        gh release delete-asset "${GITHUB_REF_NAME}" bump.url -y
