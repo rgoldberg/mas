@@ -7,14 +7,15 @@
 #
 # Cancels a GitHub draft release.
 #
-# Usage: release-cancel <draft-release-tag>
+# Usage: release-cancel <version>
 #
 
 . "${0:A:h}/_setup-script"
 
-readonly tag="${1}"
+readonly version="${1}"
+readonly tag="v${version}"
 
-export MAS_VERSION="${tag#v}"
+export MAS_VERSION="${version}"
 print_notice '❌ Canceling release for' "${@}"
 unset MAS_VERSION
 
@@ -33,4 +34,4 @@ else
 	printf $'\nWarning: Failed to find tap formula bump PR URL for draft release tag %s\n\n' "${tag}" >&2
 fi
 
-gh release delete "${tag}" --cleanup-tag -y
+gh release delete "${tag}" -y
