@@ -98,11 +98,20 @@ jobs:
           "${GITHUB_REPOSITORY_OWNER}/tap/mas"\
           2>&1
         )"
-        bump_status="${?}"
+        readonly bump_status="${?}"
+        readonly bump_output
         setopt err_exit
         printf %s "${bump_output}"
-        printf %s "${${(f)bump_output}[-1]}" > .build/bump.url
-        exit "${bump_status}"
+        if [[ "${bump_status}" -ne 0 ]]; then
+          printf $'::error::Failed to bump tap formula for tag %s\n' "${GITHUB_REF_NAME}" >&2
+          exit 2
+        fi
+        if [[ "${bump_output}" != *(#b)(https://github.com/"${GITHUB_REPOSITORY_OWNER}"/homebrew-tap/pull/[0-9]##)* ]]
+        then
+          printf $'::error::Failed to parse tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
+          exit 3
+        fi
+        printf %s "${match[1]}" > .build/bump.url
 
     - name: 📝 Create draft release
       env:
