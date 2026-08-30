@@ -40,7 +40,7 @@ jobs:
         GH_TOKEN="$(Scripts/generate-token)"
         export -r GH_TOKEN
         unsetopt err_exit
-        bump_url="$(gh release -R "${GITHUB_REPOSITORY}" download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"
+        bump_url="$(gh release download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"
         found_bump_url="${?}"
         setopt err_exit
         if [[ "${found_bump_url}" -ne 0 || -z "${bump_url}" ]]; then
@@ -48,4 +48,4 @@ jobs:
           exit 1
         fi
         gh pr edit "${bump_url}" --add-label pr-pull
-        gh release -R "${GITHUB_REPOSITORY}" delete-asset "${GITHUB_REF_NAME}" bump.url -y
+        gh release delete-asset "${GITHUB_REF_NAME}" bump.url -y
