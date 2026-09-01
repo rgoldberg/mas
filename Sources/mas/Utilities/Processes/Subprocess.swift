@@ -26,18 +26,16 @@ func run<Encoding: Unicode.Encoding>(
 		output: .string(limit: maxCaptureByteCount, encoding: encoding),
 		error: .string(limit: maxCaptureByteCount, encoding: encoding),
 	)
-	let outString = execResult.standardOutput ?? ""
-	let errString = execResult.standardError ?? ""
 	guard execResult.terminationStatus.isSuccess else {
 		throw error(
 			"""
 			\(errorMessage())
 
 			Exit status: \(execResult.terminationStatus)\
-			\(outString.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstdout:\n"))\
-			\(errString.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstderr:\n"))
+			\(execResult.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstdout:\n"))\
+			\(execResult.standardError.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstderr:\n"))
 			""",
 		)
 	}
-	return (outString, errString)
+	return (execResult.standardOutput, execResult.standardError)
 }

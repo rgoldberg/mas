@@ -17,7 +17,7 @@ jobs:
     name: Build, Test, and Lint
     strategy:
       matrix:
-        runner: [macos-14, macos-15, macos-15-intel, macos-26, macos-26-intel, xcode-27]
+        runner: [macos-15, macos-15-intel, macos-26, macos-26-intel, xcode-27]
     runs-on: ${{matrix.runner}}
     defaults:
       run:
@@ -61,7 +61,6 @@ jobs:
       run: Scripts/build build-test -c release
 
     - name: 🧪 Test
-      if: matrix.runner != 'macos-14'
       run: Scripts/test
 
     - name: 🚨 Lint
