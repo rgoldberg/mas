@@ -5,7 +5,7 @@
 #
 # Copyright © 2025 mas-cli. All rights reserved.
 #
-# Starts the release process by creating & pushing a signed annotated version tag to the GitHub mas-cli/mas repo.
+# Starts the release process by creating & pushing a signed annotated version tag to the GitHub repo.
 #
 # Usage: release-start <version-tag-name> <version-title> [<version-ref>]
 #
@@ -30,33 +30,43 @@ unset MAS_VERSION
 printf $'\n'
 
 if [[ ! "${tag}" =~ '^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
-	printf $'%s is not a valid version tag\n' "${tag}" >&2
+	printf $'Error: %s is not a valid version tag\n' "${tag}" >&2
 	exit 1
 fi
 
 if (("${#title}" > 64)); then
-	printf $'\'%s\' is too long for a version title, which cannot contain more than 64 characters\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' contains more than 64 characters\n' "${(q)title}" >&2
 	exit 2
 fi
 
 if [[ "${title}" =~ [[:cntrl:]] ]]; then
-	printf $'\'%s\' is not a valid version title, which cannot contain control characters\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' contains control characters\n' "${(q)title}" >&2
 	exit 3
 fi
 
 # shellcheck disable=SC1027,SC1036,SC1072,SC1073
 if [[ "${title}" = (' '*|*' ') ]]; then
-	printf $'\'%s\' is not a valid version title, which cannot begin or end with a space\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' begins or ends with a space\n' "${(q)title}" >&2
 	exit 4
 fi
 
-if ! git merge-base --is-ancestor "${ref}" upstream/main; then
-	printf $'%s is not a valid reference for a version, which must be on the upstream/main branch\n' "${ref}" >&2
+read -r gh_repo_url default_branch default_branch_sha < <(
+	gh repo view --json url,defaultBranchRef -q '.url + " " + .defaultBranchRef.name + " " + .defaultBranchRef.target.oid'
+)
+readonly gh_repo_url default_branch default_branch_sha
+
+git fetch -q "${gh_repo_url}.git" "${default_branch}"
+commit_sha="$(git rev-parse --verify "${ref}^{commit}")"
+readonly commit_sha
+if ! git merge-base --is-ancestor "${commit_sha}" "${default_branch_sha}"; then
+	printf $'Error: %s is not on the %s branch of %s\n' "${ref}" "${default_branch}" "${gh_repo_url}" >&2
 	exit 5
 fi
 
-git tag -s "${tag}" -m "${title}" "${ref}"
-
-printf $'Created version tag %s with title \'%s\' for reference %s\n\n' "${tag}" "${(q)title}" "${ref}"
-
-git push upstream tag "${tag}"
+git tag -s --cleanup=whitespace "${tag}" -m "${title}" "${commit_sha}"
+printf $'Created version tag %s with title \'%s\' for reference %s; pushing to %s\n\n'\
+	"${tag}"\
+	"${(q)title}"\
+	"${ref}"\
+	"${gh_repo_url}"
+git push "${gh_repo_url}.git" tag "${tag}"
