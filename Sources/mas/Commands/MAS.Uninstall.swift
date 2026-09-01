@@ -59,8 +59,7 @@ extension MAS {
 			}
 			let uid = try ProcessInfo.processInfo.sudoUID
 			guard setreuid(uid, 0) == 0 else {
-				throw
-					MASError.error("Failed to set ruid to \(uid) & euid to 0: \(unsafe String(cString: unsafe strerror(errno)))")
+				throw error("Failed to set ruid to \(uid) & euid to 0: \(unsafe String(cString: unsafe strerror(errno)))")
 			}
 			for appPath in appPathOrderedSet {
 				do {

@@ -69,9 +69,7 @@ struct UniversalSemVerInt: SemVerSyntaxInteger { // swiftlint:disable:this one_d
 				preconditionFailure("Failed to match regex \(universalSemVerRegex)")
 			}
 			self = .init(
-				coreIntegers: try match.1.elements.map { coreElement in
-					try .init(coreElement) ?? { throw MASError.error(coreElement) }()
-				},
+				coreIntegers: try match.1.elements.map { try .init($0) ?? { throw error($0) }($0) },
 				prereleaseElements: match.2.elements,
 				buildElements: match.3.elements,
 				rawValue: rawValue,
