@@ -7,7 +7,7 @@
 
 internal import ArgumentParser
 private import Foundation
-private import os
+private import Synchronization
 
 struct OutdatedAppsOptionGroup: ParsableArguments {
 	@Flag
@@ -68,11 +68,11 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 						return nil
 					}
 
-					let newVersionGate = OSAllocatedUnfairLock(initialState: String?.none)
+					let newVersionMutex = Mutex(String?.none)
 					do {
 						try await AppStore.install.app(withADAMID: installedApp.adamID) { appStoreVersion, shouldOutput in
 							if shouldOutput, let appStoreVersion, installedApp.version != appStoreVersion {
-								newVersionGate.withLock { $0 = appStoreVersion }
+								newVersionMutex.withLock { $0 = appStoreVersion }
 							}
 							return true
 						}
@@ -81,7 +81,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 					} catch {
 						MAS.printer.error(error: error)
 					}
-					return newVersionGate.withLock(\.self).map { .init(installedApp: installedApp, newVersion: $0) }
+					return newVersionMutex.withLock(\.self).map { .init(installedApp: installedApp, newVersion: $0) }
 				}
 				: { @Sendable installedApp in
 					await installableCatalogApp(from: installedApp).flatMap { catalogApp in

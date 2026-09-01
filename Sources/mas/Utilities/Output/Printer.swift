@@ -6,16 +6,20 @@
 //
 
 private import ArgumentParser
-private import Atomics
 internal import Foundation
+private import Synchronization
 
 /// Prints to `FileHandle`s like `.standardOutput` & `.standardError` with ANSI
 /// color codes when connected to a terminal.
-struct Printer {
-	private let errorCounter = ManagedAtomic(UInt64(0))
+final class Printer: Sendable {
+	private let errorCounter = Atomic(UInt64(0))
 
 	var errorCount: UInt64 {
 		errorCounter.load(ordering: .acquiring)
+	}
+
+	deinit {
+		// Empty
 	}
 
 	func resetErrorCount() { // periphery:ignore
@@ -79,7 +83,7 @@ struct Printer {
 	/// Prints to `stderr`, prefixed with "Error: "; if connected to a terminal,
 	/// the prefix is red & underlined.
 	func error(_ items: [Any], error: (any Error)? = nil, separator: String = " ", terminator: String = "\n") {
-		errorCounter.wrappingIncrement(ordering: .relaxed)
+		errorCounter.wrappingAdd(1, ordering: .relaxed)
 		problem(items, prefix: errorPrefix, format: errorFormat, error: error, separator: separator, terminator: terminator)
 	}
 

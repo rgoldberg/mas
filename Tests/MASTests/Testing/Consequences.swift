@@ -5,9 +5,9 @@
 // Copyright © 2024 mas-cli. All rights reserved.
 //
 
-private import Atomics
 internal import Foundation
 private import ObjectiveC
+private import Synchronization
 
 struct Consequences<Value> {
 	let value: Value?
@@ -63,13 +63,13 @@ private struct StandardStreamCapture { // swiftlint:disable:this one_declaration
 	}
 }
 
-private struct StreamRedirector { // swiftlint:disable:this one_declaration_per_file
+private final class StreamRedirector: Sendable { // swiftlint:disable:this one_declaration_per_file
 	private let originalFD: Int32
 	private let duplicateFD: Int32
 	private let encoding: String.Encoding
 	private let pipe = Pipe()
 	private let task: Task<Data, any Error>
-	private let alreadyStopped = ManagedAtomic(false)
+	private let alreadyStopped = Atomic(false)
 
 	var string: String {
 		get async throws {
@@ -84,6 +84,10 @@ private struct StreamRedirector { // swiftlint:disable:this one_declaration_per_
 		self.encoding = encoding
 		let readHandle = pipe.fileHandleForReading
 		task = .init { try await readHandle.bytes.reduce(into: .init()) { $0.append($1) } }
+	}
+
+	deinit {
+		stop()
 	}
 
 	func stop() {
