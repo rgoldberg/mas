@@ -32,11 +32,11 @@ extension URL {
 
 	func openOrCreateFolder() throws(MASError) -> Int32 {
 		guard isFileURL else {
-			throw MASError.error("\(self) is not a file URL")
+			throw error("\(self) is not a file URL")
 		}
 		var nextFD = unsafe Darwin::open("/", O_RDONLY | O_DIRECTORY | O_CLOEXEC)
 		guard nextFD >= 0 else {
-			throw MASError.error("Failed to open /: \(unsafe String(cString: unsafe strerror(errno)))")
+			throw error("Failed to open /: \(unsafe String(cString: unsafe strerror(errno)))")
 		}
 		for component in standardizedFileURL.pathComponents.dropFirst() {
 			let currentFD = nextFD
@@ -44,27 +44,24 @@ extension URL {
 			nextFD = unsafe openat(currentFD, component, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
 			if nextFD < 0 {
 				guard errno == ENOENT else {
-					throw MASError.error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
+					throw error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
 				let wasCreated = unsafe mkdirat(currentFD, component, 0o755) == 0
 				guard wasCreated || errno == EEXIST else {
-					throw
-						MASError.error("Failed to create \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
+					throw error("Failed to create \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
 				nextFD = unsafe openat(currentFD, component, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
 				guard nextFD >= 0 else {
-					throw MASError.error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
+					throw error("Failed to open \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 				}
 				if wasCreated {
 					guard fchown(nextFD, 0, 0) == 0 else {
 						close(nextFD)
-						throw MASError.error(
-							"Failed to set owner of \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))",
-						)
+						throw error("Failed to set owner of \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 					}
 					guard fchmod(nextFD, 0o755) == 0 else {
 						close(nextFD)
-						throw MASError.error(
+						throw error(
 							"Failed to set permissions of \(component.quoted): \(unsafe String(cString: unsafe strerror(errno)))",
 						)
 					}
@@ -76,11 +73,11 @@ extension URL {
 
 	func secureCloneOrCopy(to destinationURL: Self) throws {
 		guard isFileURL, destinationURL.isFileURL else {
-			throw MASError.error("\(self) or \(destinationURL) is not a file URL")
+			throw error("\(self) or \(destinationURL) is not a file URL")
 		}
 		let sourceFD = unsafe Darwin::open(filePath, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
 		guard sourceFD >= 0 else {
-			throw MASError.error("Failed to open \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
+			throw error("Failed to open \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 		}
 		defer { close(sourceFD) }
 		let destinationFolderFD = try destinationURL.deletingLastPathComponent().openOrCreateFolder()
@@ -96,7 +93,7 @@ extension URL {
 		let stagingFolderFD =
 			unsafe Darwin::open(stagingFolderURL.filePath, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
 		guard stagingFolderFD >= 0 else {
-			throw MASError.error(
+			throw error(
 				"Failed to open \(stagingFolderURL.filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))",
 			)
 		}
@@ -106,17 +103,17 @@ extension URL {
 		if unsafe fclonefileat(sourceFD, stagingFolderFD, stagingName, 0) == 0 {
 			stagingFD = unsafe openat(stagingFolderFD, stagingName, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
 			guard stagingFD >= 0 else {
-				throw MASError.error("Failed to open cloned staging file: \(unsafe String(cString: unsafe strerror(errno)))")
+				throw error("Failed to open cloned staging file: \(unsafe String(cString: unsafe strerror(errno)))")
 			}
 		} else { // Since cloning isn't possible (e.g., crossing volumes): fall back to a regular copy
 			let createdFD =
 				unsafe openat(stagingFolderFD, stagingName, O_RDWR | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0o600)
 			guard createdFD >= 0 else {
-				throw MASError.error("Failed to create staging file: \(unsafe String(cString: unsafe strerror(errno)))")
+				throw error("Failed to create staging file: \(unsafe String(cString: unsafe strerror(errno)))")
 			}
 			guard fcopyfile(sourceFD, createdFD, nil, .init(COPYFILE_DATA)) == 0 else {
 				close(createdFD)
-				throw MASError.error("Failed to copy \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
+				throw error("Failed to copy \(filePath.quoted): \(unsafe String(cString: unsafe strerror(errno)))")
 			}
 			stagingFD = createdFD
 		}
@@ -128,16 +125,15 @@ extension URL {
 			}
 		}
 		guard fchown(stagingFD, 0, 0) == 0 else {
-			throw MASError.error("Failed to set owner of staging file: \(unsafe String(cString: unsafe strerror(errno)))")
+			throw error("Failed to set owner of staging file: \(unsafe String(cString: unsafe strerror(errno)))")
 		}
 		guard fchmod(stagingFD, 0o644) == 0 else {
-			throw
-				MASError.error("Failed to set permissions of staging file: \(unsafe String(cString: unsafe strerror(errno)))")
+			throw error("Failed to set permissions of staging file: \(unsafe String(cString: unsafe strerror(errno)))")
 		}
 		guard
 			unsafe renameat(stagingFolderFD, stagingName, destinationFolderFD, destinationURL.lastPathComponent) == 0
 		else {
-			throw MASError.error(
+			throw error(
 				"""
 				Failed to move staging file to \(destinationURL.filePath.quoted): \
 				\(unsafe String(cString: unsafe strerror(errno)))

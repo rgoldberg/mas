@@ -17,7 +17,7 @@ internal import System
 /// its own errors; only the exit status is checked here.
 func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWriteInput = .inputWriter) async throws {
 	guard let executablePath = Bundle.main.executablePath else {
-		throw MASError.error("Failed to determine executable path")
+		throw error("Failed to determine executable path")
 	}
 	let execResult = try await run(
 		.path("/usr/bin/sudo"),
@@ -43,7 +43,7 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 			while !substring.isEmpty {
 				let writtenByteCount = try await stdin.write(substring)
 				guard writtenByteCount > 0 else {
-					throw MASError.error("Failed to write \(substring.quoted) from \(string.quoted) to sudo's stdin")
+					throw error("Failed to write \(substring.quoted) from \(string.quoted) to sudo's stdin")
 				}
 				substring.removeFirst(writtenByteCount)
 			}
@@ -52,13 +52,13 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 		for (name, value) in ProcessInfo.processInfo.environment
 		where name.hasPrefix("MAS_") && name != "MAS_NO_AUTO_INDEX" { // swiftformat:disable:this indent
 			if name.contains("=") {
-				throw MASError.error("Setting name contains illegal '=': \(name)")
+				throw error("Setting name contains illegal '=': \(name)")
 			}
 			if name.contains("\0") {
-				throw MASError.error("Setting name contains illegal NUL: \(name)")
+				throw error("Setting name contains illegal NUL: \(name)")
 			}
 			if value.contains("\0") {
-				throw MASError.error("Setting value contains illegal NUL: \(value)")
+				throw error("Setting value contains illegal NUL: \(value)")
 			}
 			try await writeFully(name)
 			try await writeFully("=")
@@ -89,7 +89,7 @@ func run<Encoding: Unicode.Encoding>(
 		error: .string(limit: .max, encoding: encoding),
 	)
 	guard execResult.terminationStatus.isSuccess else {
-		throw MASError.error(
+		throw error(
 			"""
 			\(errorMessage())
 

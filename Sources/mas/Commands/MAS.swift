@@ -48,7 +48,7 @@ struct MAS: AsyncParsableCommand, RealDropping {
 		do {
 			let envVars = try envVars(from: .standardInput)
 			if let envVars, let (name, value) = envVars.first(where: { unsafe setenv($0, $1, 1) != 0 }) {
-				throw MASError.error("Failed to set environment variable \(name) to \(value)")
+				throw error("Failed to set environment variable \(name) to \(value)")
 			}
 			let command = try await asyncParseAsRoot(arguments)
 			if let command = cast(command, as: (any PrivilegeModifying).self) {
@@ -56,7 +56,7 @@ struct MAS: AsyncParsableCommand, RealDropping {
 			} else {
 				let commandTypeName = String(reflecting: type(of: command))
 				if commandTypeName.prefix(while: { $0 != "." }) != "ArgumentParser" {
-					throw MASError.error("\(commandTypeName) does not declare privilege-modifying behavior")
+					throw error("\(commandTypeName) does not declare privilege-modifying behavior")
 				}
 			}
 			if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
@@ -150,11 +150,11 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 				return envVars
 			}
 			guard let token = String(data: data, encoding: .utf8) else {
-				throw MASError.error("Failed to parse input")
+				throw error("Failed to parse input")
 			}
 			let components = token.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
 			guard components.count == 2, components[0].hasPrefix("MAS_") else {
-				throw MASError.error("Failed to find a 'MAS_'-prefixed assignment in \(token)")
+				throw error("Failed to find a 'MAS_'-prefixed assignment in \(token)")
 			}
 			envVars.append((.init(components[0]), .init(components[1])))
 			data.removeAll(keepingCapacity: true)
@@ -165,7 +165,7 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 		byte = nextByte
 	}
 	guard data.isEmpty else {
-		throw MASError.error("Unterminated setting in stdin\(String(data: data, encoding: .utf8).map { ": \($0)" } ?? "")")
+		throw error("Unterminated setting in stdin\(String(data: data, encoding: .utf8).map { ": \($0)" } ?? "")")
 	}
 	return envVars
 }
