@@ -30,33 +30,38 @@ unset MAS_VERSION
 printf $'\n'
 
 if [[ ! "${tag}" =~ '^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
-	printf $'%s is not a valid version tag\n' "${tag}" >&2
+	printf $'Error: %s is not a valid version tag\n' "${tag}" >&2
 	exit 1
 fi
 
 if (("${#title}" > 64)); then
-	printf $'\'%s\' is too long for a version title, which cannot contain more than 64 characters\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' contains more than 64 characters\n' "${(q)title}" >&2
 	exit 2
 fi
 
 if [[ "${title}" =~ [[:cntrl:]] ]]; then
-	printf $'\'%s\' is not a valid version title, which cannot contain control characters\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' contains control characters\n' "${(q)title}" >&2
 	exit 3
 fi
 
 # shellcheck disable=SC1027,SC1036,SC1072,SC1073
 if [[ "${title}" = (' '*|*' ') ]]; then
-	printf $'\'%s\' is not a valid version title, which cannot begin or end with a space\n' "${(q)title}" >&2
+	printf $'Error: Title \'%s\' begins or ends with a space\n' "${(q)title}" >&2
 	exit 4
 fi
 
-if ! git merge-base --is-ancestor "${ref}" upstream/main; then
-	printf $'%s is not a valid reference for a version, which must be on the upstream/main branch\n' "${ref}" >&2
+read -r gh_repo default_branch default_branch_sha < <(
+	gh repo view\
+		--json nameWithOwner,defaultBranchRef\
+		-q '.nameWithOwner + " " + .defaultBranchRef.name + " " + .defaultBranchRef.target.oid'
+)
+readonly gh_repo default_branch default_branch_sha
+
+if ! git merge-base --is-ancestor "${ref}" "${default_branch_sha}"; then
+	printf $'Error: %s is not on the %s/%s branch\n' "${ref}" "${gh_repo}" "${default_branch}" >&2
 	exit 5
 fi
 
 git tag -s "${tag}" -m "${title}" "${ref}"
-
 printf $'Created version tag %s with title \'%s\' for reference %s\n\n' "${tag}" "${(q)title}" "${ref}"
-
-git push upstream tag "${tag}"
+git push "https://github.com/${gh_repo}.git" tag "${tag}"
