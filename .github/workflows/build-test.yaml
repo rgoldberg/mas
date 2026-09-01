@@ -18,7 +18,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - runner: macos-14
         - runner: macos-15
         - runner: macos-15-intel
         - runner: macos-26
@@ -66,7 +65,6 @@ jobs:
       run: Scripts/build build-test -c release
 
     - name: 🧪 Test
-      if: matrix.runner != 'macos-14'
       run: Scripts/test
 
     - name: 🚨 Lint

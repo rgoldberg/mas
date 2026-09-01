@@ -4,9 +4,9 @@ brew "gh"                   # 2.100.0
 brew "git"                  # 2.55.0
 brew "ipsw"                 # 3.1.717
 brew "markdownlint-cli2"    # 0.23.2
-brew "periphery" if MacOS.version >= :sequoia && `/usr/bin/arch` == "arm64" # 3.8.0
+brew "periphery"            if `/usr/bin/arch` == "arm64" # 3.8.0
 brew "shellcheck"           # 0.11.0
 brew "swiftformat"          # 0.63.0
 brew "swiftlint"            # 0.65.1
-brew "swiftly" if MacOS.version < :tahoe # 1.1.3
+brew "swiftly"              if MacOS.version < :tahoe     # 1.1.3
 brew "yamllint"             # 1.38.0

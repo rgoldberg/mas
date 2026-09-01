@@ -23,8 +23,8 @@ func run<Encoding: Unicode.Encoding>(
 		output: .string(limit: maxCaptureByteCount, encoding: encoding),
 		error: .string(limit: maxCaptureByteCount, encoding: encoding),
 	)
-	let outString = executionResult.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-	let errString = executionResult.standardError?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+	let outString = executionResult.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines)
+	let errString = executionResult.standardError.trimmingCharacters(in: .whitespacesAndNewlines)
 	guard executionResult.terminationStatus.isSuccess else {
 		throw MASError.error(
 			"""

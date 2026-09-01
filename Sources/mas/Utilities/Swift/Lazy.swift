@@ -5,18 +5,18 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import os
+private import Synchronization
 
-final class Lazy<Value: Sendable>: Sendable {
+final class Lazy<Value>: Sendable {
 	private enum State {
 		case uninitialized(@Sendable () -> Value)
 		case initialized(Value)
 	}
 
-	private let stateGate: OSAllocatedUnfairLock<State>
+	private let stateMutex: Mutex<State>
 
 	var value: Value {
-		stateGate.withLock { state in
+		stateMutex.withLock { state in
 			switch state {
 			case let .uninitialized(initialize):
 				let value = initialize()
@@ -29,7 +29,7 @@ final class Lazy<Value: Sendable>: Sendable {
 	}
 
 	init(_ initialize: @escaping @Sendable () -> Value) {
-		stateGate = .init(initialState: .uninitialized(initialize))
+		stateMutex = .init(.uninitialized(initialize))
 	}
 
 	convenience init(_ initialize: @autoclosure @escaping @Sendable () -> Value) {
