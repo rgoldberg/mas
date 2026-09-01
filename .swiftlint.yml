@@ -40,8 +40,8 @@ disabled_rules:
 attributes:
   always_on_line_above: ['@Flag', '@MainActor', '@OptionGroup', '@TaskLocal']
 deployment_target:
-  macOS_deployment_target: 13
-  macOSApplicationExtension_deployment_target: 13
+  macOS_deployment_target: 15
+  macOSApplicationExtension_deployment_target: 15
   iOS_deployment_target: 99
   iOSApplicationExtension_deployment_target: 99
   tvOS_deployment_target: 99

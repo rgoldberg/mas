@@ -9,7 +9,7 @@ Read it before making repository changes.
 
 - **Swift:** 6.3
 - **Xcode:** 26.4
-- **macOS:** 13
+- **macOS:** 15
 
 ## Quick Entry Points
 
@@ -92,9 +92,7 @@ Refactoring should:
 - Use zsh for scripts (except for shell-specific completion scripts)
 - Zsh scripts must be compatible with all zsh versions starting with the version
   ([currently 5.9](https://opensource.apple.com/releases/)) bundled with the
-  newest version ([currently 13.5.x](https://opensource.apple.com/releases/))
-  of the oldest macOS major version supported by mas
-  ([currently 13](Package.swift))
+  oldest macOS major version supported by mas ([currently 15](Package.swift))
 - Use `#!/bin/zsh` shebang (with `-Ndefgku` options, unless any changes to the
   options are absolutely necessary)
 - Run `. "${0:A:h}/_setup_script"` at the start of all development scripts
