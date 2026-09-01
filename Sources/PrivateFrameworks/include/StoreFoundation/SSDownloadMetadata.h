@@ -34,7 +34,7 @@
 @property (readonly, nullable) NSNumber *iapContentSize;
 @property (readonly, nullable) NSString *iapContentVersion;
 @property (retain, nullable) NSString *iapInstallPath;
-@property (retain, nullable) NSData *ipaInstallBookmarkData NS_AVAILABLE_MAC(14);
+@property (retain, nullable) NSData *ipaInstallBookmarkData;
 @property (retain, nullable) NSString *ipaInstallPath;
 @property (readonly) BOOL isExplicitContents;
 @property BOOL isMDMProvided;
