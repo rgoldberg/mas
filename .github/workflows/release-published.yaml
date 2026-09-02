@@ -37,16 +37,15 @@ jobs:
         TOKEN_APP_INSTALLATION_ID: ${{secrets.TOKEN_APP_INSTALLATION_ID}}
         TOKEN_APP_PRIVATE_KEY: ${{secrets.TOKEN_APP_PRIVATE_KEY}}
       run: |
-        export GH_TOKEN="$(Scripts/generate-token)"
-
+        GH_TOKEN="$(Scripts/generate-token)"
+        export -r GH_TOKEN
         unsetopt err_exit
         bump_url="$(gh release -R "${GITHUB_REPOSITORY}" download "${GITHUB_REF_NAME}" -p bump.url -O - 2>/dev/null)"
         found_bump_url="${?}"
         setopt err_exit
-
-        if [[ "${found_bump_url}" -eq 0 ]]; then
-          [[ -n "${bump_url}" ]] && gh pr edit "${bump_url}" --add-label pr-pull
-          gh release -R "${GITHUB_REPOSITORY}" delete-asset "${GITHUB_REF_NAME}" bump.url -y
-        else
-          printf $'No tap formula bump PR URL found for tag %s\n' "${GITHUB_REF_NAME}"
+        if [[ "${found_bump_url}" -ne 0 || -z "${bump_url}" ]]; then
+          printf $'::error::Failed to find tap formula bump PR URL for tag %s\n' "${GITHUB_REF_NAME}" >&2
+          exit 1
         fi
+        gh pr edit "${bump_url}" --add-label pr-pull
+        gh release -R "${GITHUB_REPOSITORY}" delete-asset "${GITHUB_REF_NAME}" bump.url -y
