@@ -32,6 +32,7 @@ integer -r can_use_periphery="$((! ?))"
 
 zmodload zsh/zutil
 zparseopts -D -A received_flag A P
+readonly -A received_flag
 
 export -r MAS_DISTRIBUTION=lint
 
