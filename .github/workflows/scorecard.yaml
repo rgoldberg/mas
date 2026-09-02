@@ -7,8 +7,7 @@ on:
   branch_protection_rule:
     types: [created, deleted, edited]
   pull_request:
-    branches:
-    - main
+    branches: [main]
   push:
     branches: [main]
   schedule:
