@@ -20,7 +20,7 @@ spelling_language = en_US
 tab_width = 2
 trim_trailing_whitespace = true
 
-[*.{h,json,swiftformat}]
+[{*.{h,json,swiftformat},allowed_signers}]
 max_line_length = off
 
 [*.md]

@@ -31,22 +31,28 @@ jobs:
     - name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo
 
-    - name: 🖋 Delete tag lacking valid signature
+    - name: 🖋 Delete tag lacking trusted SSH signature
       run: |
         git fetch --force origin "${GITHUB_REF}:${GITHUB_REF}"
         if [[
-          "$(git cat-file tag "${GITHUB_REF_NAME}")" != *'-----BEGIN SSH SIGNATURE-----'*'-----END SSH SIGNATURE-----'
+          "$(git tag -l --format='%(contents:signature)' "${GITHUB_REF_NAME}")" != '-----BEGIN SSH SIGNATURE-----'*
         ]]; then
-          printf $'::error::Tag %s does not have a valid signature; deleting\n' "${GITHUB_REF_NAME}" >&2
+          printf $'::error::Tag %s does not have an SSH signature; deleting\n' "${GITHUB_REF_NAME}" >&2
           git push -d origin "${GITHUB_REF_NAME}"
           exit 1
+        fi
+        git config gpg.ssh.allowedSignersFile .github/allowed_signers
+        if ! git verify-tag "${GITHUB_REF_NAME}" &>/dev/null; then
+          printf $'::error::Tag %s SSH signature is not trusted; deleting\n' "${GITHUB_REF_NAME}" >&2
+          git push -d origin "${GITHUB_REF_NAME}"
+          exit 2
         fi
 
     - name: 🏷 Exit if not a version tag
       run: |
         if [[ ! "${GITHUB_REF_NAME}" =~ '^v[[:digit:]]+(\.[[:digit:]]+)*(-(alpha|beta|rc)\.[[:digit:]]+)?$' ]]; then
           printf $'::error::%s is not a version tag\n' "${GITHUB_REF_NAME}" >&2
-          exit 2
+          exit 3
         fi
 
     - name: 🌿 Delete version tag not on default branch
@@ -56,7 +62,7 @@ jobs:
         if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}"; then
           printf $'::error::Tag %s is not on the %s branch; deleting\n' "${GITHUB_REF_NAME}" "${DEFAULT_BRANCH}" >&2
           git push -d origin "${GITHUB_REF_NAME}"
-          exit 3
+          exit 4
         fi
 
     - name: 🛠 Select latest stable Xcode
