@@ -13,7 +13,7 @@
 ensure_command_available ipsw
 
 zmodload zsh/zutil
-zparseopts -D -A received_flag C X
+zparseopts -D -F -A received_flag C X
 readonly -A received_flag
 
 readonly -a frameworks_globs=("${@:-*(/N)}")
