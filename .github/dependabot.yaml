@@ -5,6 +5,10 @@ updates:
   schedule:
     interval: daily
   directory: /
+  groups:
+    github-actions:
+      patterns:
+      - '*'
   labels: [dependencies]
   commit-message:
     prefix: ⬆️
