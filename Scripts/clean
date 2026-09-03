@@ -13,7 +13,7 @@
 print_notice '🗑​ Cleaning' "${@}"
 
 zmodload zsh/zutil
-zparseopts -D -A received_flag D P r x
+zparseopts -D -F -A received_flag D P r x
 readonly -A received_flag
 
 if ! [[ -v 'received_flag[-P]' ]]; then

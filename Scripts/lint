@@ -27,7 +27,7 @@ ensure_command_available\
 	exit
 
 zmodload zsh/zutil
-zparseopts -D -A received_flag A
+zparseopts -D -F -A received_flag A
 readonly -A received_flag
 
 export -r MAS_DISTRIBUTION=lint
