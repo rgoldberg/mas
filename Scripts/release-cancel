@@ -18,14 +18,19 @@ export MAS_VERSION="${tag#v}"
 print_notice '❌ Canceling release for' "${@}"
 unset MAS_VERSION
 
-bump_url="$(gh release -R mas-cli/mas download "${tag}" -p bump.url -O - 2>/dev/null || true)"
+if [[ "$(gh release view "${tag}" --json isDraft -q .isDraft)" != true ]]; then
+	printf $'\nError: %s is not a draft release\n' "${tag}" >&2
+	exit 1
+fi
+
+bump_url="$(gh release download "${tag}" -p bump.url -O - || true)"
 readonly bump_url
 if [[ -n "${bump_url}" ]]; then
 	printf $'\n'
 	gh pr close "${bump_url}" -d
 	printf $'\n'
 else
-	printf $'\nNo tap formula bump PR URL found for draft release tag %s\n\n' "${tag}"
+	printf $'\nWarning: Failed to find tap formula bump PR URL for draft release tag %s\n\n' "${tag}" >&2
 fi
 
-gh release -R mas-cli/mas delete "${tag}" --cleanup-tag -y
+gh release delete "${tag}" --cleanup-tag -y
