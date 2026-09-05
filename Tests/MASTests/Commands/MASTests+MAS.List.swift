@@ -13,7 +13,7 @@ private extension MASTests {
 	@Test
 	func `lists apps`() async throws {
 		let actual =
-			try await consequencesOf(try await MAS.main(try MAS.List.parse(.init())) { $0.run(installedApps: .init()) })
+			try await consequencesOf(try await MAS.main(try MAS.List.parse(.init())) { try $0.run(installedApps: .init()) })
 		let expected = Consequences(
 			nil,
 			"", // editorconfig-checker-disable

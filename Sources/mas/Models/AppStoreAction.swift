@@ -47,8 +47,9 @@ enum AppStoreAction: String {
 	}
 
 	func apps(withADAMIDs adamIDs: [ADAMID], force: Bool) async throws {
-		let installedAppByADAMID = await installedApps(withAppIDs: adamIDs.map(AppID.adamID), withFullJSON: false) { _ in }
-			.reduce(into: [ADAMID: InstalledApp]()) { $0[$1.adamID] = $1 }
+		let installedAppByADAMID =
+			await installedApps(withAppIDs: adamIDs.map(AppID.adamID), fields: ["adamID", "name"]) { _ in }
+				.reduce(into: [ADAMID: InstalledApp]()) { $0[$1.adamID] = $1 }
 		try await apps(
 			withADAMIDs: force
 				? adamIDs
@@ -250,7 +251,7 @@ enum AppStoreAction: String {
 						)
 					{
 						let appFolderPath = appFolderURL.filePath
-						let installedApps = await installedApps(matching: [.adamID(snapshot.adamID)], withFullJSON: false)
+						let installedApps = await installedApps(matching: [.adamID(snapshot.adamID)], fields: ["adamID", "path"])
 							.filter { $0.path != appFolderPath }
 						if !installedApps.isEmpty {
 							MAS.printer.warning(
