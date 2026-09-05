@@ -130,6 +130,26 @@ chosen), except always use `.md` for Markdown.
   than the text's continuation lines, then put `)` on the next line at the
   continuation lines' indentation
 
+## Specs
+
+`Specs/*.md` define mas's option syntaxes & semantics. Whenever a spec changes,
+make every other file (code, tests, docs, completions, `Temp/`, etc.) consistent
+with it.
+
+## Temp Files
+
+`Temp/*` track in-progress work: `Temp/progress.md` (implementation status &
+history), `Temp/todo.md` (open issues & questions) & `Temp/terms.md` (standard
+terminology). Whenever any change (to specs, code, tests, docs, etc.) affects
+anything a `Temp/*` file says, update every affected `Temp/*` file in the same
+change, so that each:
+
+- Uses only the current specs' nonterminal names & syntax, and the code's
+  current identifiers, never vestigial ones.
+- Describes the current implementation state accurately.
+- Omits issues that the change resolves & includes issues that it raises but
+  doesn't resolve.
+
 ## Refactoring Rules
 
 Unless absolutely necessary for functionality or fixes, or unless violations of
