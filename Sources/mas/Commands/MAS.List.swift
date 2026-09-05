@@ -6,7 +6,6 @@
 //
 
 internal import ArgumentParser
-private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs apps already installed from the App Store.
@@ -16,18 +15,18 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableOutputConfig>
 		@OptionGroup
 		private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-		func run() async {
-			run(
-				installedApps: // swiftformat:disable:next indent
-					await installedAppsOptionGroup.installedApps(withFullJSON: outputConfigOptionGroup.withFullJSON),
+		func run() async throws {
+			try run(
+				installedApps: await installedAppsOptionGroup
+					.installedApps(fields: try outputConfigOptionGroup.fetchFieldNames()),
 			)
 		}
 
-		func run(installedApps: [InstalledApp]) {
+		func run(installedApps: [InstalledApp]) throws {
 			guard !installedApps.isEmpty else {
 				printer.warning(
 					"""
@@ -49,12 +48,29 @@ extension MAS { // swiftlint:disable:this file_types_order
 				)
 				return
 			}
-			outputConfigOptionGroup.output(installedApps.map(\.jsonObject))
+			try outputConfigOptionGroup.output(installedApps.map(\.jsonObject))
 		}
 	}
 }
 
-private struct TableConfig: OutputConfig, Keyed {
-	static let defaultFormat = OutputFormat.table
-	static let keys = [JSON.Key("adamID"), "name", "version"]
+private struct TableOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.table(.default)
+	static let standardFieldsConfig = SelectedFieldsConfig(
+		fieldSpecs: [
+			.init(
+				name: "adamID",
+				label: "ADAM ID",
+				format: .default(fieldName: "adamID"),
+				sortSpec: nil, // no default item sort: preserve today's natural (unsorted) output order unless requested
+				justification: defaultJustification(forFieldNamed: "adamID"),
+			),
+			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+		],
+	)
+	/// The field set is open-ended (dynamically-discovered Spotlight
+	/// attributes); `resolveBaseFieldsConfig(...)`'s generic default for `all`
+	/// (sort alphabetically by label) applies here, absent a user-requested
+	/// order, rather than showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

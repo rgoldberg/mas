@@ -44,7 +44,6 @@ complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt check-min-os; and not __fish_contains_opt no-check-min-os' -l check-min-os -d 'Check if macOS can install latest app version'
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt check-min-os; and not __fish_contains_opt no-check-min-os' -l no-check-min-os -d 'Do not check if macOS can install latest app version'
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt verbose' -l verbose -d 'Warn about app IDs unknown to the App Store'
-complete -c mas -n '__fish_seen_subcommand_from search; and not __fish_contains_opt price' -l price -d 'Output the price of each app'
 complete -c mas -n '__fish_seen_subcommand_from uninstall; and not __fish_contains_opt all' -l all -d 'Uninstall all App Store apps'
 complete -c mas -n '__fish_seen_subcommand_from uninstall; and not __fish_contains_opt dry-run' -l dry-run -d 'Perform dry run'
 complete -c mas -n '__fish_seen_subcommand_from update upgrade' -xa '(__fish_mas_outdated_installed)'
