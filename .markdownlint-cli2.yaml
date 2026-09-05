@@ -22,7 +22,7 @@ config:
   emphasis-style:
     style: underscore
   fenced-code-language:
-    allowed_languages: [console, shell]
+    allowed_languages: [console, ebnf, shell]
     language_only: true
   heading-style:
     style: atx
@@ -33,6 +33,8 @@ config:
   link-image-style:
     shortcut: false
     url_inline: false
+  no-duplicate-heading:
+    siblings_only: true
   no-hard-tabs:
     code_blocks: false
     spaces_per_tab: 2
