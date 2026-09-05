@@ -6,8 +6,6 @@
 //
 
 internal import ArgumentParser
-private import Foundation
-private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs app info from the App Store.
@@ -26,48 +24,72 @@ extension MAS { // swiftlint:disable:this file_types_order
 		@OptionGroup
 		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
-		func run() async {
-			run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
+		func run() async throws {
+			try run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
 		}
 
-		func run(catalogApps: [CatalogApp]) {
-			outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
+		func run(catalogApps: [CatalogApp]) throws {
+			try outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
 		}
 	}
 }
 
-private struct KeyValueConfig: OutputConfig, FieldConfigured {
+private struct KeyValueConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.keyValue
-
-	static let fieldConfigs = [
-		(key: JSON.Key("name"), label: "Name", transform: defaultTransform),
-		(key: "adamID", label: "ADAM ID", transform: defaultTransform),
-		(key: "bundleID", label: "Bundle ID", transform: defaultTransform),
-		(key: "version", label: "Version", transform: defaultTransform),
-		(key: "formattedPrice", label: "Price", transform: defaultTransform),
-		(key: "sellerName", label: "By", transform: defaultTransform),
-		(
-			key: "currentVersionReleaseDate",
-			label: "Released",
-			transform: { @Sendable (string: String?) in string?.isoLocalDate ?? "" },
-		),
-		(key: "minimumOSVersion", label: "Minimum OS", transform: defaultTransform),
-		(key: "fileSizeBytes", label: "Size", transform: { (string: String?) in string?.megabyteCount ?? "" }),
-		(key: "appStorePageURL", label: "From", transform: defaultTransform),
-	]
-}
-
-private extension String {
-	var megabyteCount: Self {
-		Int64(self).map { size in
-			((size + 500_000) / 1_000_000 * 1_000_000)
-				.formatted(.byteCount(style: .file, allowedUnits: .mb, spellsOutZero: false))
-		}
-			?? self
-	}
-
-	var isoLocalDate: Self {
-		(try? Date(self, strategy: .iso8601).formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
-			?? self
-	}
+	static let standardFieldsConfig = SelectedFieldsConfig(
+		fieldSpecs: [
+			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			.init(name: "adamID", label: "ADAM ID", format: .default(fieldName: "adamID"), sortSpec: nil),
+			.init(name: "bundleID", label: "Bundle ID", format: .default(fieldName: "bundleID"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+			.init(name: "formattedPrice", label: "Price", format: .default(fieldName: "formattedPrice"), sortSpec: nil),
+			.init(name: "sellerName", label: "By", format: .default(fieldName: "sellerName"), sortSpec: nil),
+			.init(
+				name: "currentVersionReleaseDate",
+				label: "Released",
+				// `%D.dateOnly++`: the release date, date-only, in the local time zone
+				format: // swiftformat:disable:next indent
+					.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))]),
+				sortSpec: nil,
+			),
+			.init(
+				name: "minimumOSVersion",
+				label: "Minimum OS",
+				format: .default(fieldName: "minimumOSVersion"),
+				sortSpec: nil,
+			),
+			.init(
+				name: "fileSizeBytes",
+				label: "Size",
+				// A byte count as whole decimal megabytes, with an appended " MB"
+				format: .parts(
+					[
+						.placeholder(
+							.number(
+								negated: false,
+								coerced: true,
+								success: .reference(
+									.init(
+										namedFormat: nil,
+										transforms: [.scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0)],
+									),
+								),
+								failure: nil,
+							),
+						),
+						.text(" MB"),
+					],
+				),
+				sortSpec: nil,
+			),
+			.init(name: "appStorePageURL", label: "From", format: .default(fieldName: "appStorePageURL"), sortSpec: nil),
+		],
+	)
+	/// The field set is open-ended (dynamically-discovered API fields), so,
+	/// absent a user-requested order, sort alphabetically by label rather than
+	/// showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
+		fieldSpecs: standardFieldsConfig.fieldSpecs,
+		fieldOrder: .byLabel(.ascending),
+	)
 }

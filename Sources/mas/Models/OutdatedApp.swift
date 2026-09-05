@@ -22,12 +22,7 @@ struct OutdatedApp {
 		self.newVersion = newVersion
 		lazyJSONObject = .init {
 			var jsonObject = installedApp.jsonObject
-			jsonObject.fields.insert(
-				(newVersionKey, .string(newVersion)),
-				at: jsonObject.fields
-					.map(\.key.rawValue)
-					.lowerBound(of: newVersionKey.rawValue, using: NumericStringComparator.forward),
-			)
+			jsonObject.fields.append((newVersionKey, .string(newVersion)))
 			return jsonObject
 		}
 	}

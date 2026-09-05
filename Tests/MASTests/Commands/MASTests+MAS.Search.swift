@@ -21,19 +21,13 @@ private extension MASTests {
 			nil, // editorconfig-checker-disable
 			"""
 			{\
-			"adamID":904280696,\
+			"ADAM ID":904280696,\
 			"appStorePageURL":"https://apps.apple.com/us/app/things-3/id904280696?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.culturedcode.ThingsMac",\
-			"categories":[\
-			"Productivity",\
-			"Business"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6000"\
-			],\
+			"categories":["Productivity","Business"],\
+			"categoryIDs":["6007","6000"],\
 			"censoredName":"Things 3",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -50,51 +44,30 @@ private extension MASTests {
 			"icon512URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/69/3b/12/693b12e6-67d5-8252-7607-3438e420bbaa/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"IT",\
-			"JA",\
-			"RU",\
-			"ZH",\
-			"ES",\
-			"ZH"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","IT","JA","RU","ZH","ES","ZH"],\
 			"minimumOSVersion":"10.13.0",\
-			"name":"Things 3",\
+			"Name":"Things 3",\
 			"originalVersionReleaseDate":"2017-05-18T16:42:04Z",\
 			"price":49.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"• Moved the database file to a new location (now at /Library/Group Containers/).\\n• Increased the clickable area of items in the sidebar.\\n• Improved the formatting of years in Japanese.\\n• Fixed some crashes that could occur when hitting Cmd+[ or ] in Quick Entry while the When popover was visible.\\n• Updated the crash reporter.\\n• Some sync improvements.\\n\\n\\nNEW IN 3.12\\n\\nWe’re excited to release Things 3.12 – a big update for our Watch app!\\n\\nWe’ve entirely rebuilt its foundation to allow it to sync and operate without your phone being nearby. We’ve also taken this opportunity to add some often-requested features to the app. For more information about this release, please visit our blog: thingsapp.com\\n\\nThere are no huge changes in this release for Mac, but there’s one great new feature you should know about: you can now edit the Tags or Deadlines of collapsed to-dos – even for multiple to-dos at once – by hitting Cmd+Shift+T or D. It’s super convenient :)",\
-			"screenshotURLs":[\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/6f/4c/e5/6f4ce5d6-7caa-d1eb-bbc9-86558e97d2ba/pr_source.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/92/b4/f8/92b4f8f5-f133-abd8-db17-135ac27bb1fa/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/72/63/63/726363b9-45ff-f93e-975c-fb69836eaf1a/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/29/fa/63/29fa63e3-3cb2-8b8a-8541-31fa9b7ef27f/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/da/17/5f/da175f95-c2cd-e5df-8cbc-d800d6770c64/pr_source.png/800x500bb.jpg",\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/f1/82/37/f182376c-4f25-6dbb-c6a8-5e6c1c617620/pr_source.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/6f/4c/e5/6f4ce5d6-7caa-d1eb-bbc9-86558e97d2ba/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/92/b4/f8/92b4f8f5-f133-abd8-db17-135ac27bb1fa/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/72/63/63/726363b9-45ff-f93e-975c-fb69836eaf1a/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/29/fa/63/29fa63e3-3cb2-8b8a-8541-31fa9b7ef27f/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/da/17/5f/da175f95-c2cd-e5df-8cbc-d800d6770c64/pr_source.png/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/f1/82/37/f182376c-4f25-6dbb-c6a8-5e6c1c617620/pr_source.png/800x500bb.jpg"],\
 			"sellerName":"Cultured Code GmbH & Co. KG",\
 			"sellerURL":"https://culturedcode.com/things/",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"3.12.6",\
+			"Version":"3.12.6",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":966085870,\
+			"ADAM ID":966085870,\
 			"appStorePageURL":"https://apps.apple.com/us/app/ticktick-things-tasks-to-do/id966085870?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.TickTick.task.mac",\
-			"categories":[\
-			"Productivity"\
-			],\
-			"categoryIDs":[\
-			"6007"\
-			],\
+			"categories":["Productivity"],\
+			"categoryIDs":["6007"],\
 			"censoredName":"TickTick: Things & Tasks To Do",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -111,45 +84,30 @@ private extension MASTests {
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/09/64/61/096461c1-f392-ec7d-13dd-2caa927d8244/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"ZH"\
-			],\
+			"languageCodesISO2A":["EN","ZH"],\
 			"minimumOSVersion":"10.12",\
-			"name":"TickTick: Things & Tasks To Do",\
+			"Name":"TickTick: Things & Tasks To Do",\
 			"originalVersionReleaseDate":"2016-03-04T06:37:31Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"- Bug fixes and improvements.\\n\\nRecent Updates:\\n- Customizable Section in List View.\\n- Tag names can be capitalized.\\n- The number of Pomos can now be estimated beforehand.\\n- Lists under different folders can share the same name.\\n- New city themes! Los Angeles and Cairo.\\n\\nThanks for using TickTick! We'll bring regular updates to give you more pleasant experience with performance and stability.\\nWe'll read all reviews in App Store and evaluate your feedbacks carefully. Any issues encountered during the use, you may write to us via Avatar -> Feedback & Suggestions -> Submit feedback, we will get back to you asap.\\nTickTick team with love.",\
-			"screenshotURLs":[\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/c9/5d/af/c95daf17-c405-56f0-90f5-9411828e44d2/pr_source.jpg/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/94/32/3b/94323b37-f81b-7ba8-a280-b951e7e840de/pr_source.jpg/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/82/f1/35/82f1356d-1e68-8f9d-3967-566e256f9265/pr_source.jpg/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/dc/ad/83/dcad839b-7705-e4c0-180a-2f97cb68054d/pr_source.jpg/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/21/50/6a/21506a09-c48c-d25e-dfa5-c0d6aa4cdd9d/pr_source.jpg/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/c9/5d/af/c95daf17-c405-56f0-90f5-9411828e44d2/pr_source.jpg/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/94/32/3b/94323b37-f81b-7ba8-a280-b951e7e840de/pr_source.jpg/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/82/f1/35/82f1356d-1e68-8f9d-3967-566e256f9265/pr_source.jpg/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/dc/ad/83/dcad839b-7705-e4c0-180a-2f97cb68054d/pr_source.jpg/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/21/50/6a/21506a09-c48c-d25e-dfa5-c0d6aa4cdd9d/pr_source.jpg/800x500bb.jpg"],\
 			"sellerName":"Appest Limited",\
 			"sellerURL":"https://ticktick.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"3.7.11",\
+			"Version":"3.7.11",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":846599902,\
+			"ADAM ID":846599902,\
 			"appStorePageURL":"https://apps.apple.com/us/app/simple-antnotes/id846599902?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"ua.com.AntLogic.SimpleAntnotes",\
-			"categories":[\
-			"Productivity",\
-			"Utilities"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6002"\
-			],\
+			"categories":["Productivity","Utilities"],\
+			"categoryIDs":["6007","6002"],\
 			"censoredName":"Simple Antnotes",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -166,52 +124,32 @@ private extension MASTests {
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple71/v4/ff/4d/6b/ff4d6b03-2f12-e12d-9bb3-b3607bcd8ad8/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"DE",\
-			"RU",\
-			"UK"\
-			],\
+			"languageCodesISO2A":["EN","DE","RU","UK"],\
 			"minimumOSVersion":"10.6",\
-			"name":"Simple Antnotes",\
+			"Name":"Simple Antnotes",\
 			"originalVersionReleaseDate":"2014-03-28T12:49:14Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"- added option to disable gradient background\\n- added option to create new notes in bottom left/right corners\\n- changed delay for close/options buttons showing\\n- some minor compatibility and UI fixes\\n- fixed German localisation",\
-			"screenshotURLs":[\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple1/v4/79/5c/63/795c63aa-698c-1c6c-b6da-e7ebba718d01/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple30/v4/15/4d/40/154d4071-4a6f-dcd7-0d15-2e495f6f4710/mzm.mvtkjcyn.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple2/v4/e0/31/dc/e031dc74-ce06-afe3-fd8e-8693f6c7c50c/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple1/v4/fc/8d/23/fc8d2367-725d-11dd-6da9-816a7780a1d9/pr_source.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is2-ssl.mzstatic.com/image/thumb/Purple1/v4/79/5c/63/795c63aa-698c-1c6c-b6da-e7ebba718d01/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple30/v4/15/4d/40/154d4071-4a6f-dcd7-0d15-2e495f6f4710/mzm.mvtkjcyn.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple2/v4/e0/31/dc/e031dc74-ce06-afe3-fd8e-8693f6c7c50c/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple1/v4/fc/8d/23/fc8d2367-725d-11dd-6da9-816a7780a1d9/pr_source.png/800x500bb.jpg"],\
 			"sellerName":"Mykola Olshevskyi",\
 			"sellerURL":"https://www.antlogic.com/apps/antnotes",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"1.6.1",\
+			"Version":"1.6.1",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":1128190780,\
+			"ADAM ID":1128190780,\
 			"advisories":[],\
-			"appStorePageURL":"https://apps.apple.com/us/app/random-lists-decision-maker/id1128190780?uo=4",\
 			"appleTVScreenshotURLs":[],\
+			"appStorePageURL":"https://apps.apple.com/us/app/random-lists-decision-maker/id1128190780?uo=4",\
 			"averageUserRating":4.6104900000000004212097337585873901844024658203125,\
 			"averageUserRatingForCurrentVersion":4.6104900000000004212097337585873901844024658203125,\
 			"bundleID":"com.yahenskyi.random",\
-			"categories":[\
-			"Lifestyle",\
-			"Family",\
-			"Games",\
-			"Board"\
-			],\
-			"categoryIDs":[\
-			"6012",\
-			"7009",\
-			"6014",\
-			"7004"\
-			],\
+			"categories":["Lifestyle","Family","Games","Board"],\
+			"categoryIDs":["6012","7009","6014","7004"],\
 			"censoredName":"Random: Lists & Decision Maker",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -221,126 +159,41 @@ private extension MASTests {
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/volodymyr-yahenskyi/id961335645?uo=4",\
 			"developerID":961335645,\
 			"developerName":"Volodymyr Yahenskyi",\
-			"features":[\
-			"iosUniversal"\
-			],\
+			"features":["iosUniversal"],\
 			"fileSizeBytes":"76392448",\
 			"formattedPrice":"Free",\
-			"iPadScreenshotURLs":[\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/3f/23/5e/3f235e16-c049-8ee8-ebdc-3d52f25f2636/pr_source.png/552x414bb.png",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/80/48/1d/80481dff-e404-721c-920e-4688f860cf27/pr_source.png/552x414bb.png",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/58/a2/c9/58a2c970-1bd3-6f4d-1bdc-502f75faaa6a/pr_source.png/552x414bb.png",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/2c/a6/06/2ca606eb-8b40-219a-34c5-626f79b7e593/pr_source.png/552x414bb.png",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/c7/d7/04/c7d70441-51bd-1417-c7bf-a5d2702380e4/pr_source.png/552x414bb.png",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/87/e0/75/87e075fd-a979-6151-5744-56ab76ac8f18/pr_source.png/552x414bb.png"\
-			],\
 			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/60x60bb.jpg",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/100x100bb.jpg",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/512x512bb.jpg",\
+			"iPadScreenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/3f/23/5e/3f235e16-c049-8ee8-ebdc-3d52f25f2636/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/80/48/1d/80481dff-e404-721c-920e-4688f860cf27/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/58/a2/c9/58a2c970-1bd3-6f4d-1bdc-502f75faaa6a/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/2c/a6/06/2ca606eb-8b40-219a-34c5-626f79b7e593/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/c7/d7/04/c7d70441-51bd-1417-c7bf-a5d2702380e4/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/87/e0/75/87e075fd-a979-6151-5744-56ab76ac8f18/pr_source.png/552x414bb.png"],\
 			"isGameCenterEnabled":false,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"RU",\
-			"UK"\
-			],\
+			"languageCodesISO2A":["EN","RU","UK"],\
 			"minimumOSVersion":"11.0",\
-			"name":"Random: Lists & Decision Maker",\
+			"Name":"Random: Lists & Decision Maker",\
 			"originalVersionReleaseDate":"2016-07-05T22:00:04Z",\
 			"price":0.00,\
 			"primaryCategoryID":6012,\
 			"primaryCategoryName":"Lifestyle",\
 			"releaseNotes":"• Fixed crash when adding items to a new list\\n• Fixed lists sync on Apple Watch\\n\\nThanks for using the Random!\\nThis release also contains bug fixes and performance improvements.",\
-			"screenshotURLs":[\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/2b/ce/8f/2bce8ffa-545b-050c-1dd9-2aeef532facd/pr_source.png/406x228bb.png",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/fb/36/14/fb36142e-17ba-fdab-90c6-e8f9d3c080ef/pr_source.png/406x228bb.png",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/4e/e2/de/4ee2de74-d0ef-010b-19f6-63755aa0175c/pr_source.png/406x228bb.png",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/46/8e/bd/468ebdd3-73a9-ec6a-b4da-6931ce887cff/pr_source.png/406x228bb.png",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/a4/9c/fa/a49cfa14-69e0-f1cf-3924-6ff878027b2d/pr_source.png/406x228bb.png",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/c1/94/cc/c194ccb6-c15a-c0a5-47a6-3ddd625fd98d/pr_source.png/406x228bb.png"\
-			],\
+			"screenshotURLs":["https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/2b/ce/8f/2bce8ffa-545b-050c-1dd9-2aeef532facd/pr_source.png/406x228bb.png","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/fb/36/14/fb36142e-17ba-fdab-90c6-e8f9d3c080ef/pr_source.png/406x228bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/4e/e2/de/4ee2de74-d0ef-010b-19f6-63755aa0175c/pr_source.png/406x228bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/46/8e/bd/468ebdd3-73a9-ec6a-b4da-6931ce887cff/pr_source.png/406x228bb.png","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/a4/9c/fa/a49cfa14-69e0-f1cf-3924-6ff878027b2d/pr_source.png/406x228bb.png","https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/c1/94/cc/c194ccb6-c15a-c0a5-47a6-3ddd625fd98d/pr_source.png/406x228bb.png"],\
 			"sellerName":"Volodymyr Yahenskyi",\
 			"sellerURL":"https://yahenskyi.dev/random/",\
-			"supportedDevices":[\
-			"iPadMini4-iPadMini4",\
-			"iPadProSecondGen-iPadProSecondGen",\
-			"iPhone11-iPhone11",\
-			"iPad71-iPad71",\
-			"iPadMiniRetinaCellular-iPadMiniRetinaCellular",\
-			"iPhone8Plus-iPhone8Plus",\
-			"iPhone6sPlus-iPhone6sPlus",\
-			"iPadMini5-iPadMini5",\
-			"iPadProFourthGen-iPadProFourthGen",\
-			"iPhoneXS-iPhoneXS",\
-			"iPadAir3Cellular-iPadAir3Cellular",\
-			"iPadAir3-iPadAir3",\
-			"iPadMini4Cellular-iPadMini4Cellular",\
-			"iPadProCellular-iPadProCellular",\
-			"MacDesktop-MacDesktop",\
-			"iPadMini3-iPadMini3",\
-			"iPhoneXR-iPhoneXR",\
-			"iPhoneSE-iPhoneSE",\
-			"iPad611-iPad611",\
-			"iPhone7-iPhone7",\
-			"iPad73-iPad73",\
-			"iPad812-iPad812",\
-			"iPadAir2Cellular-iPadAir2Cellular",\
-			"iPhoneX-iPhoneX",\
-			"iPadMini5Cellular-iPadMini5Cellular",\
-			"iPadPro97-iPadPro97",\
-			"iPad834-iPad834",\
-			"iPadProSecondGenCellular-iPadProSecondGenCellular",\
-			"iPhone5s-iPhone5s",\
-			"iPad75-iPad75",\
-			"iPadMini3Cellular-iPadMini3Cellular",\
-			"iPad878-iPad878",\
-			"iPhone6-iPhone6",\
-			"iPadAir-iPadAir",\
-			"iPadPro97Cellular-iPadPro97Cellular",\
-			"iPadSeventhGen-iPadSeventhGen",\
-			"iPodTouchSixthGen-iPodTouchSixthGen",\
-			"iPhoneXSMax-iPhoneXSMax",\
-			"iPad612-iPad612",\
-			"iPadPro-iPadPro",\
-			"iPodTouchSeventhGen-iPodTouchSeventhGen",\
-			"iPhone11ProMax-iPhone11ProMax",\
-			"iPadMiniRetina-iPadMiniRetina",\
-			"iPad76-iPad76",\
-			"iPadProFourthGenCellular-iPadProFourthGenCellular",\
-			"iPadSeventhGenCellular-iPadSeventhGenCellular",\
-			"iPhoneSESecondGen-iPhoneSESecondGen",\
-			"iPad74-iPad74",\
-			"iPhone6s-iPhone6s",\
-			"iPhone7Plus-iPhone7Plus",\
-			"iPadAir2-iPadAir2",\
-			"iPad72-iPad72",\
-			"iPhone6Plus-iPhone6Plus",\
-			"iPadAirCellular-iPadAirCellular",\
-			"Watch4-Watch4",\
-			"iPhone8-iPhone8",\
-			"iPad856-iPad856",\
-			"iPhone11Pro-iPhone11Pro"\
-			],\
+			"supportedDevices":["iPadMini4-iPadMini4","iPadProSecondGen-iPadProSecondGen","iPhone11-iPhone11","iPad71-iPad71","iPadMiniRetinaCellular-iPadMiniRetinaCellular","iPhone8Plus-iPhone8Plus","iPhone6sPlus-iPhone6sPlus","iPadMini5-iPadMini5","iPadProFourthGen-iPadProFourthGen","iPhoneXS-iPhoneXS","iPadAir3Cellular-iPadAir3Cellular","iPadAir3-iPadAir3","iPadMini4Cellular-iPadMini4Cellular","iPadProCellular-iPadProCellular","MacDesktop-MacDesktop","iPadMini3-iPadMini3","iPhoneXR-iPhoneXR","iPhoneSE-iPhoneSE","iPad611-iPad611","iPhone7-iPhone7","iPad73-iPad73","iPad812-iPad812","iPadAir2Cellular-iPadAir2Cellular","iPhoneX-iPhoneX","iPadMini5Cellular-iPadMini5Cellular","iPadPro97-iPadPro97","iPad834-iPad834","iPadProSecondGenCellular-iPadProSecondGenCellular","iPhone5s-iPhone5s","iPad75-iPad75","iPadMini3Cellular-iPadMini3Cellular","iPad878-iPad878","iPhone6-iPhone6","iPadAir-iPadAir","iPadPro97Cellular-iPadPro97Cellular","iPadSeventhGen-iPadSeventhGen","iPodTouchSixthGen-iPodTouchSixthGen","iPhoneXSMax-iPhoneXSMax","iPad612-iPad612","iPadPro-iPadPro","iPodTouchSeventhGen-iPodTouchSeventhGen","iPhone11ProMax-iPhone11ProMax","iPadMiniRetina-iPadMiniRetina","iPad76-iPad76","iPadProFourthGenCellular-iPadProFourthGenCellular","iPadSeventhGenCellular-iPadSeventhGenCellular","iPhoneSESecondGen-iPhoneSESecondGen","iPad74-iPad74","iPhone6s-iPhone6s","iPhone7Plus-iPhone7Plus","iPadAir2-iPadAir2","iPad72-iPad72","iPhone6Plus-iPhone6Plus","iPadAirCellular-iPadAirCellular","Watch4-Watch4","iPhone8-iPhone8","iPad856-iPad856","iPhone11Pro-iPhone11Pro"],\
 			"userRatingCount":1525,\
 			"userRatingCountForCurrentVersion":1525,\
-			"version":"2.2.10",\
+			"Version":"2.2.10",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":1063681909,\
+			"ADAM ID":1063681909,\
 			"appStorePageURL":"https://apps.apple.com/us/app/task-planner-to-do-list/id1063681909?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.newtechnologies.iPlanTasksinapp",\
-			"categories":[\
-			"Business",\
-			"Productivity"\
-			],\
-			"categoryIDs":[\
-			"6000",\
-			"6007"\
-			],\
+			"categories":["Business","Productivity"],\
+			"categoryIDs":["6000","6007"],\
 			"censoredName":"Task Planner - To Do List",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -357,50 +210,29 @@ private extension MASTests {
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b0/7b/ed/b07bed5e-d977-6655-7a6a-d35a90901fba/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"IT",\
-			"JA",\
-			"KO",\
-			"PT",\
-			"RU",\
-			"ZH",\
-			"ES"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
 			"minimumOSVersion":"10.10",\
-			"name":"Task Planner - To Do List",\
+			"Name":"Task Planner - To Do List",\
 			"originalVersionReleaseDate":"2016-01-07T00:04:36Z",\
 			"price":0.00,\
 			"primaryCategoryID":6000,\
 			"primaryCategoryName":"Business",\
 			"releaseNotes":"We’ve updated the app! In the new version:\\n- less bugs;\\n- minor changes in the interface;\\n- some general improvements.\\nYour opinion is important to us! Please, leave your feedback - we will gladly consider all your wishes and suggestions.",\
-			"screenshotURLs":[\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple71/v4/0e/74/bb/0e74bb9a-5ac2-5d5f-516a-5f1c12e95328/pr_source.jpg/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple71/v4/36/54/f0/3654f064-4013-95e6-2683-c89ab8e51102/pr_source.jpg/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple71/v4/1a/75/86/1a758637-9db5-007c-595b-b724e9083321/pr_source.jpg/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is2-ssl.mzstatic.com/image/thumb/Purple71/v4/0e/74/bb/0e74bb9a-5ac2-5d5f-516a-5f1c12e95328/pr_source.jpg/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple71/v4/36/54/f0/3654f064-4013-95e6-2683-c89ab8e51102/pr_source.jpg/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple71/v4/1a/75/86/1a758637-9db5-007c-595b-b724e9083321/pr_source.jpg/800x500bb.jpg"],\
 			"sellerName":"Any Case Solutions, OOO",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"2.1.2",\
+			"Version":"2.1.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":504544917,\
+			"ADAM ID":504544917,\
 			"appStorePageURL":"https://apps.apple.com/us/app/clear-tasks-reminders-to-do-lists/id504544917?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.realmacsoftware.clear.mac",\
-			"categories":[\
-			"Productivity",\
-			"Lifestyle"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6012"\
-			],\
+			"categories":["Productivity","Lifestyle"],\
+			"categoryIDs":["6007","6012"],\
 			"censoredName":"Clear – Tasks, Reminders & To-Do Lists",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -417,44 +249,30 @@ private extension MASTests {
 			"icon512URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple69/v4/ac/6e/9a/ac6e9aea-8f4b-66bd-6046-c1735f27806f/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN"\
-			],\
+			"languageCodesISO2A":["EN"],\
 			"minimumOSVersion":"10.10",\
-			"name":"Clear – Tasks, Reminders & To-Do Lists",\
+			"Name":"Clear – Tasks, Reminders & To-Do Lists",\
 			"originalVersionReleaseDate":"2012-11-08T08:00:00Z",\
 			"price":9.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"Thanks for using Clear! Just two small enhancements in today’s update:\\n\\n- We’ve tweaked (increased) the delay before “Click to Clear” appears.\\n- We’ve ensured compatibility with OS X El Capitan.\\n\\nStay productive, and follow @realmacsoftware on Twitter for the latest news!",\
-			"screenshotURLs":[\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/69/a0/58/69a0583d-02fd-1d37-cb33-19b80578e9e5/pr_source.jpg/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/09/be/29/09be2981-4d08-a021-423a-29cc212c1b59/pr_source.jpg/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple7/v4/28/5a/f4/285af4d8-37e6-118a-ff28-a4211eeb1122/pr_source.jpg/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple3/v4/50/4d/52/504d520c-4f8c-b011-d1e0-18addb5700a8/pr_source.jpg/800x500bb.jpg",\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple3/v4/f2/6e/07/f26e0760-efb1-0353-3ebd-9fd2803f4b3d/pr_source.jpg/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/69/a0/58/69a0583d-02fd-1d37-cb33-19b80578e9e5/pr_source.jpg/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/09/be/29/09be2981-4d08-a021-423a-29cc212c1b59/pr_source.jpg/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple7/v4/28/5a/f4/285af4d8-37e6-118a-ff28-a4211eeb1122/pr_source.jpg/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple3/v4/50/4d/52/504d520c-4f8c-b011-d1e0-18addb5700a8/pr_source.jpg/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple3/v4/f2/6e/07/f26e0760-efb1-0353-3ebd-9fd2803f4b3d/pr_source.jpg/800x500bb.jpg"],\
 			"sellerName":"Realmac Software Limited",\
 			"sellerURL":"https://impending.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"1.1.7",\
+			"Version":"1.1.7",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":1258530160,\
+			"ADAM ID":1258530160,\
 			"appStorePageURL":"https://apps.apple.com/us/app/focus-to-do-pomodoro-tasks/id1258530160?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.macpomodoro",\
-			"categories":[\
-			"Productivity",\
-			"Utilities"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6002"\
-			],\
+			"categories":["Productivity","Utilities"],\
+			"categoryIDs":["6007","6002"],\
 			"censoredName":"Focus To-Do: Pomodoro & Tasks",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -471,60 +289,31 @@ private extension MASTests {
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/6b/f0/58/6bf058c1-90ab-5bdf-7c06-18de305efd6d/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"CS",\
-			"EN",\
-			"FR",\
-			"DE",\
-			"ID",\
-			"IT",\
-			"JA",\
-			"KO",\
-			"PL",\
-			"PT",\
-			"RO",\
-			"RU",\
-			"ZH",\
-			"ES",\
-			"ZH",\
-			"TR",\
-			"VI"\
-			],\
+			"languageCodesISO2A":["CS","EN","FR","DE","ID","IT","JA","KO","PL","PT","RO","RU","ZH","ES","ZH","TR","VI"],\
 			"minimumOSVersion":"10.12",\
-			"name":"Focus To-Do: Pomodoro & Tasks",\
+			"Name":"Focus To-Do: Pomodoro & Tasks",\
 			"originalVersionReleaseDate":"2017-08-02T03:45:26Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"1.Support new languages\\n2.Bug fix",\
-			"screenshotURLs":[\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/cd/bd/44/cdbd44af-06eb-21d6-a793-43dae1077c47/pr_source.jpg/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/e9/8f/17/e98f17c6-787b-b180-6f8d-fb8385ceedd3/pr_source.jpg/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/43/12/a2/4312a25b-f773-9c1a-ddd4-2515d948cc27/pr_source.jpg/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/97/0d/b4/970db444-bbd9-ed77-439e-001bce006e17/pr_source.jpg/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/cd/bd/44/cdbd44af-06eb-21d6-a793-43dae1077c47/pr_source.jpg/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/e9/8f/17/e98f17c6-787b-b180-6f8d-fb8385ceedd3/pr_source.jpg/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/43/12/a2/4312a25b-f773-9c1a-ddd4-2515d948cc27/pr_source.jpg/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/97/0d/b4/970db444-bbd9-ed77-439e-001bce006e17/pr_source.jpg/800x500bb.jpg"],\
 			"sellerName":"Shenzhen Tomato Software Technology Co., Ltd.",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"6.3",\
+			"Version":"6.3",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":1289070327,\
+			"ADAM ID":1289070327,\
 			"advisories":[],\
-			"appStorePageURL":"https://apps.apple.com/us/app/planny-3-smart-to-do-list/id1289070327?uo=4",\
 			"appleTVScreenshotURLs":[],\
+			"appStorePageURL":"https://apps.apple.com/us/app/planny-3-smart-to-do-list/id1289070327?uo=4",\
 			"averageUserRating":4.3897300000000001318767317570745944976806640625,\
 			"averageUserRatingForCurrentVersion":4.3897300000000001318767317570745944976806640625,\
 			"bundleID":"com.kevinreutter.Callisto",\
-			"categories":[\
-			"Productivity",\
-			"Utilities"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6002"\
-			],\
+			"categories":["Productivity","Utilities"],\
+			"categoryIDs":["6007","6002"],\
 			"censoredName":"Planny 3 - Smart To Do List",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -534,125 +323,41 @@ private extension MASTests {
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/kevin-reutter/id1273424431?uo=4",\
 			"developerID":1273424431,\
 			"developerName":"Kevin Reutter",\
-			"features":[\
-			"gameCenter",\
-			"iosUniversal"\
-			],\
+			"features":["gameCenter","iosUniversal"],\
 			"fileSizeBytes":"47687680",\
 			"formattedPrice":"Free",\
-			"iPadScreenshotURLs":[\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/43/19/bb/4319bb4b-5700-0f6b-2c19-7bd386bf186c/pr_source.jpg/552x414bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/5d/51/1a/5d511a30-7fab-fd18-6967-c0caf9674d55/pr_source.jpg/552x414bb.jpg"\
-			],\
 			"icon60URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/60x60bb.jpg",\
 			"icon100URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/100x100bb.jpg",\
 			"icon512URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/512x512bb.jpg",\
+			"iPadScreenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/43/19/bb/4319bb4b-5700-0f6b-2c19-7bd386bf186c/pr_source.jpg/552x414bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/5d/51/1a/5d511a30-7fab-fd18-6967-c0caf9674d55/pr_source.jpg/552x414bb.jpg"],\
 			"isGameCenterEnabled":true,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"IT",\
-			"RU",\
-			"ZH",\
-			"ES",\
-			"TR"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","IT","RU","ZH","ES","TR"],\
 			"minimumOSVersion":"13.0",\
-			"name":"Planny 3 - Smart To Do List",\
+			"Name":"Planny 3 - Smart To Do List",\
 			"originalVersionReleaseDate":"2017-10-13T19:16:40Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"Stay tuned! Planny 4 ships in a few week and will be a free update with many great features!\\n\\n• SwiftUI \\nNow Planny uses SwiftUI in some parts of the app. SwiftUI is an innovative, exceptionally simple way to build user interfaces across all Apple platforms with the power of Swift. Over time more and more of the app will be created with SwiftUI to avoid crashes and improve performance. \\n\\n• Advanced Cursor Support\\nWhen using a Trackpad on iPadOS or on the Mac, specific Elements become larger when you come closer to make clicking easier\\n\\n• Alternative App icons\\nChoose the icon color you’d like in settings (iOS for iPhone only)\\n\\n• New Onboarding Experience\\nA new tutorial shows the key features \\n\\n• New Purchase View\\nThe purchase view is now much simpler. Feel free to subscribe :) \\n\\n• Fixed deadlines on macOS\\n• Direct Deadlines now support days and time \\n• Fixed issues with overdue tasks \\n\\nDo you have any wishes for Planny 4? Feel free to submit ideas on the website!",\
-			"screenshotURLs":[\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/95/33/5f/95335f94-26d3-3567-93ac-77d60ab821dd/pr_source.png/392x696bb.png",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/03/53/b9/0353b9b1-ef2a-7ff1-a1b8-4124867af41b/pr_source.png/392x696bb.png",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple124/v4/ef/63/ce/ef63ce41-371a-2508-b101-fb99e9c7758f/pr_source.png/392x696bb.png"\
-			],\
+			"screenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/95/33/5f/95335f94-26d3-3567-93ac-77d60ab821dd/pr_source.png/392x696bb.png","https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/03/53/b9/0353b9b1-ef2a-7ff1-a1b8-4124867af41b/pr_source.png/392x696bb.png","https://is5-ssl.mzstatic.com/image/thumb/Purple124/v4/ef/63/ce/ef63ce41-371a-2508-b101-fb99e9c7758f/pr_source.png/392x696bb.png"],\
 			"sellerName":"Kevin Reutter",\
 			"sellerURL":"https://www.kevinreutter.de/planny-3/",\
-			"supportedDevices":[\
-			"iPadMini4-iPadMini4",\
-			"iPadProSecondGen-iPadProSecondGen",\
-			"iPhone11-iPhone11",\
-			"iPad71-iPad71",\
-			"iPadMiniRetinaCellular-iPadMiniRetinaCellular",\
-			"iPhone8Plus-iPhone8Plus",\
-			"iPhone6sPlus-iPhone6sPlus",\
-			"iPadMini5-iPadMini5",\
-			"iPadProFourthGen-iPadProFourthGen",\
-			"iPhoneXS-iPhoneXS",\
-			"iPadAir3Cellular-iPadAir3Cellular",\
-			"iPadAir3-iPadAir3",\
-			"iPadMini4Cellular-iPadMini4Cellular",\
-			"iPadProCellular-iPadProCellular",\
-			"MacDesktop-MacDesktop",\
-			"iPadMini3-iPadMini3",\
-			"iPhoneXR-iPhoneXR",\
-			"iPhoneSE-iPhoneSE",\
-			"iPad611-iPad611",\
-			"iPhone7-iPhone7",\
-			"iPad73-iPad73",\
-			"iPad812-iPad812",\
-			"iPadAir2Cellular-iPadAir2Cellular",\
-			"iPhoneX-iPhoneX",\
-			"iPadMini5Cellular-iPadMini5Cellular",\
-			"iPadPro97-iPadPro97",\
-			"iPad834-iPad834",\
-			"iPadProSecondGenCellular-iPadProSecondGenCellular",\
-			"iPhone5s-iPhone5s",\
-			"iPad75-iPad75",\
-			"iPadMini3Cellular-iPadMini3Cellular",\
-			"iPad878-iPad878",\
-			"iPhone6-iPhone6",\
-			"iPadAir-iPadAir",\
-			"iPadPro97Cellular-iPadPro97Cellular",\
-			"iPadSeventhGen-iPadSeventhGen",\
-			"iPodTouchSixthGen-iPodTouchSixthGen",\
-			"iPhoneXSMax-iPhoneXSMax",\
-			"iPad612-iPad612",\
-			"iPadPro-iPadPro",\
-			"iPodTouchSeventhGen-iPodTouchSeventhGen",\
-			"iPhone11ProMax-iPhone11ProMax",\
-			"iPadMiniRetina-iPadMiniRetina",\
-			"iPad76-iPad76",\
-			"iPadProFourthGenCellular-iPadProFourthGenCellular",\
-			"iPadSeventhGenCellular-iPadSeventhGenCellular",\
-			"iPhoneSESecondGen-iPhoneSESecondGen",\
-			"iPad74-iPad74",\
-			"iPhone6s-iPhone6s",\
-			"iPhone7Plus-iPhone7Plus",\
-			"iPadAir2-iPadAir2",\
-			"iPad72-iPad72",\
-			"iPhone6Plus-iPhone6Plus",\
-			"iPadAirCellular-iPadAirCellular",\
-			"Watch4-Watch4",\
-			"iPhone8-iPhone8",\
-			"iPad856-iPad856",\
-			"iPhone11Pro-iPhone11Pro"\
-			],\
+			"supportedDevices":["iPadMini4-iPadMini4","iPadProSecondGen-iPadProSecondGen","iPhone11-iPhone11","iPad71-iPad71","iPadMiniRetinaCellular-iPadMiniRetinaCellular","iPhone8Plus-iPhone8Plus","iPhone6sPlus-iPhone6sPlus","iPadMini5-iPadMini5","iPadProFourthGen-iPadProFourthGen","iPhoneXS-iPhoneXS","iPadAir3Cellular-iPadAir3Cellular","iPadAir3-iPadAir3","iPadMini4Cellular-iPadMini4Cellular","iPadProCellular-iPadProCellular","MacDesktop-MacDesktop","iPadMini3-iPadMini3","iPhoneXR-iPhoneXR","iPhoneSE-iPhoneSE","iPad611-iPad611","iPhone7-iPhone7","iPad73-iPad73","iPad812-iPad812","iPadAir2Cellular-iPadAir2Cellular","iPhoneX-iPhoneX","iPadMini5Cellular-iPadMini5Cellular","iPadPro97-iPadPro97","iPad834-iPad834","iPadProSecondGenCellular-iPadProSecondGenCellular","iPhone5s-iPhone5s","iPad75-iPad75","iPadMini3Cellular-iPadMini3Cellular","iPad878-iPad878","iPhone6-iPhone6","iPadAir-iPadAir","iPadPro97Cellular-iPadPro97Cellular","iPadSeventhGen-iPadSeventhGen","iPodTouchSixthGen-iPodTouchSixthGen","iPhoneXSMax-iPhoneXSMax","iPad612-iPad612","iPadPro-iPadPro","iPodTouchSeventhGen-iPodTouchSeventhGen","iPhone11ProMax-iPhone11ProMax","iPadMiniRetina-iPadMiniRetina","iPad76-iPad76","iPadProFourthGenCellular-iPadProFourthGenCellular","iPadSeventhGenCellular-iPadSeventhGenCellular","iPhoneSESecondGen-iPhoneSESecondGen","iPad74-iPad74","iPhone6s-iPhone6s","iPhone7Plus-iPhone7Plus","iPadAir2-iPadAir2","iPad72-iPad72","iPhone6Plus-iPhone6Plus","iPadAirCellular-iPadAirCellular","Watch4-Watch4","iPhone8-iPhone8","iPad856-iPad856","iPhone11Pro-iPhone11Pro"],\
 			"userRatingCount":331,\
 			"userRatingCountForCurrentVersion":331,\
-			"version":"3.4.2",\
+			"Version":"3.4.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":416993121,\
+			"ADAM ID":416993121,\
 			"appStorePageURL":"https://apps.apple.com/us/app/to-do-lists/id416993121?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"ua.com.AntLogic.ToDoLists",\
-			"categories":[\
-			"Productivity",\
-			"Business"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6000"\
-			],\
+			"categories":["Productivity","Business"],\
+			"categoryIDs":["6007","6000"],\
 			"censoredName":"To-do Lists",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -669,48 +374,30 @@ private extension MASTests {
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/6b/67/f2/6b67f2d4-2603-ec03-504c-fd408d3577d7/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"RU",\
-			"UK"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","RU","UK"],\
 			"minimumOSVersion":"10.6.6",\
-			"name":"To-do Lists",\
+			"Name":"To-do Lists",\
 			"originalVersionReleaseDate":"2011-03-01T03:09:22Z",\
 			"price":4.99,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"fixed accidentally broken compatibility for Mac OS 10.6-10.7",\
-			"screenshotURLs":[\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple/v4/4f/ff/f9/4ffff968-2932-48af-431f-fd1b086026cf/mzl.srudbvwp.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple4/v4/2a/4f/9f/2a4f9fad-c1a7-fa80-56d7-fea2d3beaa0a/mzl.dcyubghz.png/800x500bb.jpg",\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple6/v4/56/3a/a7/563aa771-8288-e21a-cfe8-e28e77ffad83/mzl.lzjpfyct.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple4/v4/1e/8d/4e/1e8d4eaa-17f7-5295-1f36-975b62164d19/mzl.yufjavxy.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple4/v4/fb/9b/85/fb9b851d-6ef5-792f-0945-ff2f1a78ce7a/mzl.gycjiioz.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple/v4/4f/ff/f9/4ffff968-2932-48af-431f-fd1b086026cf/mzl.srudbvwp.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple4/v4/2a/4f/9f/2a4f9fad-c1a7-fa80-56d7-fea2d3beaa0a/mzl.dcyubghz.png/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple6/v4/56/3a/a7/563aa771-8288-e21a-cfe8-e28e77ffad83/mzl.lzjpfyct.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple4/v4/1e/8d/4e/1e8d4eaa-17f7-5295-1f36-975b62164d19/mzl.yufjavxy.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple4/v4/fb/9b/85/fb9b851d-6ef5-792f-0945-ff2f1a78ce7a/mzl.gycjiioz.png/800x500bb.jpg"],\
 			"sellerName":"Mykola Olshevskyi",\
 			"sellerURL":"https://www.antlogic.com/#to-do-lists",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"1.7.7",\
+			"Version":"1.7.7",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":1346203938,\
+			"ADAM ID":1346203938,\
 			"appStorePageURL":"https://apps.apple.com/us/app/omnifocus-3/id1346203938?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.omnigroup.OmniFocus3.MacAppStore",\
-			"categories":[\
-			"Productivity",\
-			"Business"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6000"\
-			],\
+			"categories":["Productivity","Business"],\
+			"categoryIDs":["6007","6000"],\
 			"censoredName":"OmniFocus 3",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -727,59 +414,30 @@ private extension MASTests {
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/71/6f/f0/716ff030-f8ec-536c-41ca-f5116ae1f497/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"NL",\
-			"EN",\
-			"FR",\
-			"DE",\
-			"IT",\
-			"JA",\
-			"KO",\
-			"PT",\
-			"RU",\
-			"ZH",\
-			"ES"\
-			],\
+			"languageCodesISO2A":["NL","EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
 			"minimumOSVersion":"10.14",\
-			"name":"OmniFocus 3",\
+			"Name":"OmniFocus 3",\
 			"originalVersionReleaseDate":"2018-09-24T12:28:36Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"OmniFocus 3.9.2 is a minor update focused on bug fixes.\\n\\n• Omni Automation — OmniFocus now recognizes simple plug-ins that use the .omnifocusjs file extention.\\n• First Run — Improved reliability of the first run flow.\\n• Notice Bar — Fixed bugs related to the Trial Mode & Free Viewer notice bars.\\n\\nIf you have any feedback or questions, we’d love to hear from you! The Omni Group offers free tech support; you can email omnifocus@omnigroup.com, call 1–800–315–6664 or 1–206–523–4152, or tweet @OmniFocus.\\n\\nIf OmniFocus empowers you, we would appreciate an App Store review. Your review will help other people find OmniFocus and make them more productive too.",\
-			"screenshotURLs":[\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/a8/e9/42/a8e942ec-8eea-03b3-ea37-cc6e2837fb5e/pr_source.png/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/5f/62/5c/5f625c38-c559-3b8d-5042-94e241735ef1/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/aa/a1/e7/aaa1e746-e660-2b6e-6833-d751e7879752/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/c0/6f/7d/c06f7de4-17b9-7475-8778-22a97c13cdce/pr_source.png/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/84/3d/8d/843d8de0-6257-7bf0-6a66-6f3ce41af803/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/ad/0d/28/ad0d28c6-ff1d-c394-266a-fdff0b8e9cc6/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/36/28/a3/3628a3e9-6073-0ce4-17d7-9d9a5f479c64/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/a9/ac/b9/a9acb983-76e2-d76d-fbc8-c35388dcee48/pr_source.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/8f/41/90/8f4190f5-ebb8-370b-c8a6-afb47c56140d/pr_source.png/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/09/37/83/09378396-de11-2185-24f4-360be20dbcac/pr_source.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/a8/e9/42/a8e942ec-8eea-03b3-ea37-cc6e2837fb5e/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/5f/62/5c/5f625c38-c559-3b8d-5042-94e241735ef1/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/aa/a1/e7/aaa1e746-e660-2b6e-6833-d751e7879752/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/c0/6f/7d/c06f7de4-17b9-7475-8778-22a97c13cdce/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple113/v4/84/3d/8d/843d8de0-6257-7bf0-6a66-6f3ce41af803/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/ad/0d/28/ad0d28c6-ff1d-c394-266a-fdff0b8e9cc6/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/36/28/a3/3628a3e9-6073-0ce4-17d7-9d9a5f479c64/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/a9/ac/b9/a9acb983-76e2-d76d-fbc8-c35388dcee48/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/8f/41/90/8f4190f5-ebb8-370b-c8a6-afb47c56140d/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/09/37/83/09378396-de11-2185-24f4-360be20dbcac/pr_source.png/800x500bb.jpg"],\
 			"sellerName":"The Omni Group",\
 			"sellerURL":"https://www.omnigroup.com/omnifocus/",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"3.9.2",\
+			"Version":"3.9.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":777233759,\
+			"ADAM ID":777233759,\
 			"appStorePageURL":"https://apps.apple.com/us/app/focus-time-management/id777233759?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.malteundjan.focus-osx",\
-			"categories":[\
-			"Productivity",\
-			"Education"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6017"\
-			],\
+			"categories":["Productivity","Education"],\
+			"categoryIDs":["6007","6017"],\
 			"censoredName":"Focus - Time Management",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -796,51 +454,30 @@ private extension MASTests {
 			"icon512URL":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/5a/cf/6c/5acf6c83-c496-d5fb-2445-96ef44f13a82/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"JA",\
-			"ZH",\
-			"ES"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","JA","ZH","ES"],\
 			"minimumOSVersion":"10.14",\
-			"name":"Focus - Time Management",\
+			"Name":"Focus - Time Management",\
 			"originalVersionReleaseDate":"2013-12-19T19:16:50Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"Subscription status is now properly unlocked on all devices.",\
-			"screenshotURLs":[\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/1a/72/1d/1a721d98-fbc4-ed9e-2aae-ef9d5b538693/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/a2/b1/10/a2b110fd-aa90-286a-658b-2abd85bd1c68/mzl.menowpkq.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/26/f3/32/26f3322f-8ef9-6171-2864-715f571300e6/mzl.qxibkqwt.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/a4/1b/12/a41b12dc-6e1d-74ff-7ad3-1d6888c31462/mzl.fdlcjqnh.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple124/v4/83/83/24/83832412-85d1-78ff-a9ab-86a37b31121d/mzl.ateekpxr.png/800x500bb.jpg",\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/e6/7c/c7/e67cc703-d274-a1fc-88af-b5a8ce9cbfd8/mzl.grtjmgef.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/18/a8/f2/18a8f211-61b5-7b7e-b343-784b260de31d/mzl.ulsghntx.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/1a/72/1d/1a721d98-fbc4-ed9e-2aae-ef9d5b538693/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/a2/b1/10/a2b110fd-aa90-286a-658b-2abd85bd1c68/mzl.menowpkq.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/26/f3/32/26f3322f-8ef9-6171-2864-715f571300e6/mzl.qxibkqwt.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/a4/1b/12/a41b12dc-6e1d-74ff-7ad3-1d6888c31462/mzl.fdlcjqnh.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple124/v4/83/83/24/83832412-85d1-78ff-a9ab-86a37b31121d/mzl.ateekpxr.png/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/e6/7c/c7/e67cc703-d274-a1fc-88af-b5a8ce9cbfd8/mzl.grtjmgef.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/18/a8/f2/18a8f211-61b5-7b7e-b343-784b260de31d/mzl.ulsghntx.png/800x500bb.jpg"],\
 			"sellerName":"Masterbuilders",\
 			"sellerURL":"https://www.focusapp.io",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"6.2.3",\
+			"Version":"6.2.3",\
 			"wrapperType":"software"\
 			}
 			{\
-			"adamID":969210610,\
+			"ADAM ID":969210610,\
 			"appStorePageURL":"https://apps.apple.com/us/app/1focus-website-app-blocker/id969210610?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"com.onefocusapp.OneFocus",\
-			"categories":[\
-			"Productivity",\
-			"Education"\
-			],\
-			"categoryIDs":[\
-			"6007",\
-			"6017"\
-			],\
+			"categories":["Productivity","Education"],\
+			"categoryIDs":["6007","6017"],\
 			"censoredName":"1Focus: Website & App Blocker",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -857,33 +494,20 @@ private extension MASTests {
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple114/v4/12/30/fb/1230fb0c-42fd-1a80-9379-29be0ba0f612/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN",\
-			"FR",\
-			"DE",\
-			"JA",\
-			"KO",\
-			"RU",\
-			"ZH",\
-			"ES"\
-			],\
+			"languageCodesISO2A":["EN","FR","DE","JA","KO","RU","ZH","ES"],\
 			"minimumOSVersion":"10.10",\
-			"name":"1Focus: Website & App Blocker",\
+			"Name":"1Focus: Website & App Blocker",\
 			"originalVersionReleaseDate":"2015-03-15T05:54:46Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
 			"primaryCategoryName":"Productivity",\
 			"releaseNotes":"- Allows updating 1Focus while blocking is active\\n- Fixed toolbar overflow on macOS High Sierra\\n- Improved status item width\\n- Fixed quick start menu starting wrong task\\n- Other bug fixes",\
-			"screenshotURLs":[\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple124/v4/35/03/5a/35035a62-e2da-2f4b-6ece-63475bd7cd02/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/b5/ac/1f/b5ac1fe2-431d-e45d-63e0-57ddbfbd525f/pr_source.png/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/6c/18/ee/6c18eeff-ca66-2b01-82f3-f81576336ab7/pr_source.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple124/v4/35/03/5a/35035a62-e2da-2f4b-6ece-63475bd7cd02/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/b5/ac/1f/b5ac1fe2-431d-e45d-63e0-57ddbfbd525f/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/6c/18/ee/6c18eeff-ca66-2b01-82f3-f81576336ab7/pr_source.png/800x500bb.jpg"],\
 			"sellerName":"Niklas Behrens",\
 			"sellerURL":"https://onefocusapp.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"version":"3.4.4",\
+			"Version":"3.4.4",\
 			"wrapperType":"software"\
 			}
 

@@ -39,14 +39,12 @@ struct InstalledApp {
 			?? ""
 		version = valueByAttribute[NSMetadataItemVersionKey].map(String.init(describing:)) ?? ""
 
+		// `valueByAttribute` is a `Dictionary`, whose iteration order is
+		// unspecified, so there's no meaningful "original" field order to
+		// preserve here, unlike `CatalogApp`'s ordered API response
 		let jsonObject = JSON.Object(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let name = name
-		lazyJSONObject = .init(
-			.init(
-				(jsonObject.fields.map { ($0.normalized, $1) } + [("name", .string(name))])
-					.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
-			),
-		)
+		lazyJSONObject = .init(.init(jsonObject.fields.map { ($0.normalized, $1) } + [("name", .string(name))]))
 	}
 
 	func matches(_ appID: AppID) -> Bool {
@@ -244,10 +242,10 @@ private extension URL {
 
 func installedApps(
 	withAppIDs appIDs: [AppID],
-	withFullJSON: Bool,
+	fields: [String],
 	unresolvedAppIDHandler handleUnresolvedAppID: (AppID) -> Void,
 ) async -> [InstalledApp] {
-	let installedApps = await installedApps(matching: appIDs, withFullJSON: withFullJSON)
+	let installedApps = await installedApps(matching: appIDs, fields: fields)
 	let unresolvedAppIDs = appIDs.filter { appID in
 		if installedApps.contains(where: { $0.matches(appID) }) {
 			return false
@@ -260,7 +258,7 @@ func installedApps(
 		!["1", "true", "yes"].contains(ProcessInfo.processInfo.environment["MAS_NO_AUTO_INDEX"]?.lowercased())
 	{
 		let installedAppPathSet = Set(
-			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), withFullJSON: false)).map(\.path),
+			(appIDs.isEmpty ? installedApps : await mas::installedApps(matching: .init(), fields: ["path"])).map(\.path),
 		)
 		for installedAppPath in applicationsFolderURLs.flatMap(\.installedAppURLs).map(\.filePath)
 		where !installedAppPathSet.contains(installedAppPath) { // swiftformat:disable:this indent
@@ -292,13 +290,13 @@ func installedApps(
 	return appIDs.isEmpty ? installedApps.filter { $0.adamID != 0 } : installedApps // Remove TestFlight apps
 }
 
-func installedApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
-	await unsortedInstalledApps(matching: appIDs, withFullJSON: withFullJSON)
+func installedApps(matching appIDs: [AppID], fields: [String]) async -> [InstalledApp] {
+	await unsortedInstalledApps(matching: appIDs, fields: fields)
 		.sorted(using: KeyPathComparator(\.name, comparator: .localizedStandard))
 }
 
 @MainActor
-private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool) async -> [InstalledApp] {
+private func unsortedInstalledApps(matching appIDs: [AppID], fields: [String]) async -> [InstalledApp] {
 	let query = NSMetadataQuery()
 	let predicates = appIDs.map { appID in
 		switch appID {
@@ -326,21 +324,41 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 	return query.results.compactMap { result in
 		(result as? NSMetadataItem)
 			.flatMap { item in
-				item.values(
-					forAttributes: withFullJSON
-						? item.attributes + [NSMetadataItemPathKey]
-						: [
-							"kMDItemAppStoreAdamID",
-							NSMetadataItemCFBundleIdentifierKey,
-							"_kMDItemDisplayNameWithExtensions",
-							NSMetadataItemPathKey,
-							NSMetadataItemVersionKey,
-						],
-				)
+				item.values(forAttributes: spotlightAttributeKeys(for: fields) ?? item.attributes + [NSMetadataItemPathKey])
 			}
 			.map(InstalledApp.init)
 	}
 }
+
+/// Translates our normalized field names to the raw Spotlight attribute keys
+/// `InstalledApp.init` needs, always including the core set it populates
+/// unconditionally (`matches(_:)` / sorting / warnings depend on them
+/// regardless of what's being displayed). Returns `nil` (meaning "fetch
+/// everything") for an empty `fields`, or if any requested name isn't a
+/// Spotlight attribute this handles: there's no complete reverse mapping for
+/// arbitrary dynamic `all` field names; fetching everything is always correct,
+/// just potentially slower.
+private func spotlightAttributeKeys(for fields: [String]) -> [String]? {
+	guard !fields.isEmpty else { // swiftlint:disable:previous discouraged_optional_collection
+		return nil
+	}
+	var keySet = Set(coreSpotlightAttributeKeysByFieldName.values)
+	for field in fields {
+		guard let key = coreSpotlightAttributeKeysByFieldName[field] else {
+			return nil
+		}
+		keySet.insert(key)
+	}
+	return .init(keySet)
+}
+
+private let coreSpotlightAttributeKeysByFieldName: [String: String] = [
+	"adamID": "kMDItemAppStoreAdamID",
+	"bundleID": NSMetadataItemCFBundleIdentifierKey,
+	"name": "_kMDItemDisplayNameWithExtensions",
+	"path": NSMetadataItemPathKey,
+	"version": NSMetadataItemVersionKey,
+]
 
 // swiftformat:disable:next docComments
 // editorconfig-checker-disable-next-line

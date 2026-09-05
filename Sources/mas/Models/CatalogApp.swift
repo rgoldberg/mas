@@ -127,12 +127,10 @@ private extension JSON.Array {
 }
 
 private extension JSON.Object {
+	/// Renames keys only; never reorders fields (see `FieldOrder.original`) or
+	/// changes values.
 	var normalized: Self {
-		.init(
-			fields
-				.map { ($0.normalized, $1.normalized) }
-				.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
-		)
+		.init(fields.map { ($0.normalized, $1.normalized) })
 	}
 }
 

@@ -6,7 +6,6 @@
 //
 
 internal import ArgumentParser
-private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Searches for apps in the App Store.
@@ -21,8 +20,6 @@ extension MAS { // swiftlint:disable:this file_types_order
 
 		@OptionGroup
 		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
-		@Flag(help: "Output the price of each app")
-		private var price = false
 		@OptionGroup
 		private var searchTermOptionGroup: SearchTermOptionGroup
 
@@ -36,22 +33,30 @@ extension MAS { // swiftlint:disable:this file_types_order
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
-			if price {
-				OutputConfigOptionGroup<PriceTableConfig>(outputFormat: outputConfigOptionGroup.outputFormat)
-					.output(catalogApps.map(\.jsonObject))
-			} else {
-				outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
-			}
+			try outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
 		}
 	}
 }
 
-private struct TableConfig: OutputConfig, Keyed { // swiftlint:disable:this file_types_order
+private struct TableConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.table
-	static let keys = [JSON.Key("adamID"), "name", "version"]
-}
-
-private struct PriceTableConfig: OutputConfig, Keyed { // swiftlint:disable:this one_declaration_per_file
-	static let defaultFormat = OutputFormat.table
-	static let keys = [JSON.Key("adamID"), "name", "version", "price"]
+	static let standardFieldsConfig = SelectedFieldsConfig(
+		fieldSpecs: [
+			.init(
+				name: "adamID",
+				label: "ADAM ID",
+				format: .default(fieldName: "adamID"),
+				sortSpec: nil, // no default item sort: preserve today's natural (unsorted) output order unless requested
+			),
+			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+		],
+	)
+	/// The field set is open-ended (dynamically-discovered API fields), so,
+	/// absent a user-requested order, sort alphabetically by label rather than
+	/// showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
+		fieldSpecs: standardFieldsConfig.fieldSpecs,
+		fieldOrder: .byLabel(.ascending),
+	)
 }
