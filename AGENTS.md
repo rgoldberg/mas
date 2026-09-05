@@ -142,6 +142,54 @@ chosen), except always use `.md` for Markdown.
   except in a code comment, which cannot hold a link, so it names the file &
   quotes the section's heading (e.g., `Temp/todo.md "Sorting"`)
 
+## Specs
+
+`Specs/*.md` define mas's option syntaxes & semantics. Whenever a spec changes,
+make every other file (code, tests, docs, completions, `Temp/`, etc.) consistent
+with it.
+
+Never limit a spec, or argue against a spec change, based on existing code,
+which merely implements the specs; when proposing or evaluating a spec change,
+never mention that code must be changed to match it, since that is always
+implied.
+
+In specs, terminate every single-letter option's / setting's payload with `:`.
+
+In specs, give each construct's constant syntax (e.g., a prefix) its own
+constant nonterminal, named for that construct (e.g.,
+`field-order-tiebreaker-prefix`), rather than reusing another construct's, even
+if their values are equal.
+
+In specs, annotate an outer bare whitespace treatment on the expression whose
+tokens need it (e.g., `-[ <format-block> ]-`), rather than on its neighbors'
+constant nonterminals (e.g., not `-"/"` for a following `/`).
+
+In specs, make a nonterminal's references optional, never its definition, since
+an expression that consumes no token is never present.
+
+In specs, make every block reference optional & give every block a direct
+default of an empty string.
+
+In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
+value", not "the `<branch>`'s value").
+
+Keep spec wording input-format agnostic (e.g., "as a string", not "as its JSON
+text"), since input need not be JSON.
+
+## Temp Files
+
+`Temp/*` track in-progress work: `Temp/progress.md` (implementation status &
+history), `Temp/todo.md` (open issues & questions) & `Temp/terms.md` (standard
+terminology). Whenever any change (to specs, code, tests, docs, etc.) affects
+anything a `Temp/*` file says, update every affected `Temp/*` file in the same
+change, so that each:
+
+- Uses only the current specs' nonterminal names & syntax, and the code's
+  current identifiers, never vestigial ones.
+- Describes the current implementation state accurately.
+- Omits issues that the change resolves & includes issues that it raises but
+  does not resolve.
+
 ## Refactoring Rules
 
 Unless absolutely necessary for functionality or fixes, or unless violations of
