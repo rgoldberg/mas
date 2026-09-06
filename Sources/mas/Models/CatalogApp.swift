@@ -42,44 +42,18 @@ extension CatalogApp {
 	}
 
 	static func lookup(appID: AppID, in region: Region) async throws -> Self? {
-		let token = try await fetchToken()
-		let regionCode = region.lowercased()
 		switch appID {
 		case let .adamID(adamID):
-			var components = URLComponents(string: "https://amp-api.apps.apple.com/v1/catalog/\(regionCode)/apps/\(adamID)")!
-			components.queryItems = [
-				.init(name: "platform", value: "mac"),
-				.init(name: "additionalPlatforms", value: "appletv,ipad,iphone,watch"),
-			]
-			guard let url = components.url else {
-				return nil
-			}
-
-			return try parseApp(
-				from: try await Environment.current
-					.dataFrom(
-						.init(url: url, headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"]),
-					)
-					.data,
+			try parseApp(
+				from:
+					try await data(from: "https://amp-api.apps.apple.com/v1/catalog/\(region.lowercased())/apps/\(adamID)?platform=mac&additionalPlatforms=appletv,ipad,iphone,watch"),
 			)
 		case let .bundleID(bundleID):
-			var components = URLComponents(string: "https://amp-api.apps.apple.com/v1/catalog/\(regionCode)/search")!
-			components.queryItems = [
-				.init(name: "term", value: bundleID),
-				.init(name: "types", value: "apps"),
-				.init(name: "platform", value: "mac"),
-				.init(name: "limit", value: "1"),
-			]
-			guard let url = components.url else {
-				return nil
-			}
-
-			return try parseSearchApps(
-				from: try await Environment.current
-					.dataFrom(
-						.init(url: url, headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"]),
-					)
-					.data,
+			try parseSearchApps(
+				from: try await data(
+					from:
+						"https://amp-api.apps.apple.com/v1/catalog/\(region.lowercased())/search?types=apps&platform=mac&limit=1&term=\(bundleID)",
+				),
 			)
 			.first
 		}
@@ -90,23 +64,16 @@ extension CatalogApp {
 	}
 
 	static func search(for term: String, in region: Region) async throws -> [Self] {
-		let token = try await fetchToken()
-		let regionCode = region.lowercased()
-		var components = URLComponents(string: "https://amp-api.apps.apple.com/v1/catalog/\(regionCode)/search")!
-		components.queryItems = [
-			.init(name: "term", value: term),
-			.init(name: "types", value: "apps"),
-			.init(name: "platform", value: "mac"),
-			.init(name: "limit", value: "20"),
-		]
-		guard let url = components.url else {
-			return .init()
-		}
-
-		return try parseSearchApps(
+		try parseSearchApps(
 			from: try await Environment.current
 				.dataFrom(
-					.init(url: url, headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"]),
+					.init(
+						url: .init(
+							string: "https://amp-api.apps.apple.com/v1/catalog/\(region.lowercased())/search?types=apps&platform=mac&limit=20"
+						)!
+							.appending(queryItems: [.init(name: "term", value: term)]),
+						headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"]
+					),
 				)
 				.data,
 		)
@@ -114,36 +81,11 @@ extension CatalogApp {
 }
 
 private extension CatalogApp {
-	static func fetchToken() async throws -> String {
-		var components = URLComponents(string: "https://sf-api-token-service.itunes.apple.com/apiToken")!
-		components.queryItems = [
-			.init(name: "clientClass", value: "apple"),
-			.init(name: "clientId", value: "appstore"),
-			.init(name: "os", value: "macOS"),
-		]
-		guard let url = components.url else {
-			return ""
-		}
-
-		struct TokenResponse: Decodable {
-			let token: String
-		}
-
-		return try JSONDecoder()
-			.decode(TokenResponse.self, from: try await Environment.current.dataFrom(.init(url: url)).data)
-			.token
-	}
-
 	static func parseApp(from data: Data) throws -> CatalogApp? {
-		guard
-			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-			let dataArray = json["data"] as? [[String: Any]],
-			let firstApp = dataArray.first
-		else {
-			return nil
-		}
-
-		return try makeCatalogApp(from: firstApp)
+		try (
+			(try JSONSerialization.jsonObject(with: data) as? [String: Any])?["data"] as? [[String: Any]])?.first
+			.flatMap(makeCatalogApp(from:)
+		)
 	}
 
 	static func parseSearchApps(from data: Data) throws -> [CatalogApp] {
@@ -202,4 +144,36 @@ private extension CatalogApp {
 			lazyJSON: .init { jsonString },
 		)
 	}
+}
+
+private extension CatalogApp {
+	static let token = try await fetchToken()
+
+	private static func fetchToken() async throws -> String {
+		struct TokenResponse: Decodable {
+			let token: String
+		}
+
+		return try JSONDecoder()
+		.decode(
+			TokenResponse.self,
+			from: try await Environment.current.dataFrom(
+				.init(
+					url: .init(string: "https://sf-api-token-service.itunes.apple.com/apiToken?clientClass=apple&clientId=appstore&os=macOS")!
+				)
+			)
+			.data
+		)
+		.token
+	}
+}
+
+private func data(from urlString: String) async throws -> Data {
+	try await Environment.current.dataFrom(
+		.init(
+			url: .init(string: urlString)!,
+			headers: ["Authorization": "Bearer \(CatalogApp.token)", "Origin": "https://apps.apple.com"],
+		),
+	)
+		.data
 }
