@@ -148,25 +148,13 @@ private func parseSearchApps(from data: Data) throws -> [CatalogApp] {
 	return try dataArray.compactMap(CatalogApp.init)
 }
 
-private let token = try await fetchToken()
-
-private func fetchToken() async throws -> String {
-	struct TokenResponse: Decodable {
-		let token: String
-	}
-
-	return try JSONDecoder()
-		.decode(
-			TokenResponse.self,
-			from: try await Environment.current.dataFrom(.init(url: Environment.current.tokenURL)).data,
-		)
-		.token
-}
-
 private func data(from url: URL) async throws -> Data {
 	try await Environment.current
 		.dataFrom(
-			.init(url: url, headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"]),
+			.init(
+				url: url,
+				headers: ["Authorization": "Bearer \(try await Environment.current.token)", "Origin": "https://apps.apple.com"],
+			),
 		)
 		.data
 }

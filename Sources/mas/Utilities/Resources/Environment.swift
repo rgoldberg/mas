@@ -6,6 +6,7 @@
 //
 
 internal import Foundation
+private import os
 
 struct Environment {
 	@TaskLocal
@@ -26,6 +27,14 @@ struct Environment {
 	let lookupAppFromAppID: @Sendable (AppID) async throws -> CatalogApp
 	let searchForAppsMatchingSearchTerm: @Sendable (String) async throws -> [CatalogApp]
 
+	private let tokenProvider: TokenProvider
+
+	var token: String {
+		get async throws {
+			try await tokenProvider.token(using: dataFrom, tokenURL: tokenURL)
+		}
+	}
+
 	init(
 		dataFrom: // swiftformat:disable:next indent
 			@escaping @Sendable (URLRequest) async throws -> (Data, URLResponse) = URLSession(configuration: .ephemeral).data,
@@ -35,5 +44,35 @@ struct Environment {
 		self.dataFrom = dataFrom
 		self.lookupAppFromAppID = lookupAppFromAppID
 		self.searchForAppsMatchingSearchTerm = searchForAppsMatchingSearchTerm
+		tokenProvider = .init()
+	}
+}
+
+private final class TokenProvider: Sendable { // swiftlint:disable:this one_declaration_per_file
+	private let taskGate = OSAllocatedUnfairLock(initialState: Task<String, any Error>?.none)
+
+	deinit {
+		// Empty
+	}
+
+	func token(
+		using dataFrom: @escaping @Sendable (URLRequest) async throws -> (data: Data, response: URLResponse),
+		tokenURL: URL,
+	) async throws -> String {
+		let task = taskGate.withLock { task in
+			if let existing = task {
+				return existing
+			}
+			let newTask = Task {
+				struct TokenResponse: Decodable {
+					let token: String
+				}
+				let (data, _) = try await dataFrom(.init(url: tokenURL))
+				return try JSONDecoder().decode(TokenResponse.self, from: data).token
+			}
+			task = newTask
+			return newTask
+		}
+		return try await task.value
 	}
 }
