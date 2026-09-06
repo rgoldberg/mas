@@ -6,6 +6,9 @@
 //
 
 private import Foundation
+private import JSONAST
+private import JSONDecoding
+private import JSONParsing
 
 struct CatalogApp {
 	let adamID: ADAMID
@@ -16,51 +19,23 @@ struct CatalogApp {
 	let version: String
 
 	private let lazyJSON: Lazy<String>
-}
 
-private extension CatalogApp {
-	init?(from appDict: [String: Any]) throws {
-		guard
-			let idString = appDict["id"] as? String,
-			let attributes = appDict["attributes"] as? [String: Any],
-			let name = attributes["name"] as? String,
-			let urlString = attributes["url"] as? String,
-			let version = attributes["version"] as? String,
-			let idInt = Int(idString)
-		else {
-			return nil
-		}
-
-		// Fallbacks handling variations across desktop platforms and universal apps
-		let minimumOSVersion = (attributes["minimumMacOSVersion"] as? String)
-			?? (attributes["minimumOSVersion"] as? String)
-			?? "0.0"
-
-		let sellerURLString = attributes["sellerUrl"] as? String ?? (attributes["artistUrl"] as? String)
-
-		// Re-serialize keys uniformly to maintain downstream safety (e.g. `mas info` formatting)
-		let normalizedDict: [String: Any] = [
-			"adamID": idInt,
-			"appStorePageURL": urlString,
-			"minimumOSVersion": minimumOSVersion,
-			"name": name,
-			"sellerURL": sellerURLString as Any,
-			"version": version,
-		]
-		let jsonString = String(
-			data: try JSONSerialization.data(withJSONObject: normalizedDict, options: [.sortedKeys, .prettyPrinted]),
-			encoding: .utf8,
-		)
-			?? "{}"
-		self.init(
-			adamID: .init(idInt),
-			appStorePageURLString: urlString,
-			minimumOSVersion: minimumOSVersion,
-			name: name,
-			sellerURLString: sellerURLString,
-			version: version,
-			lazyJSON: .init { jsonString },
-		)
+	private init(
+		adamID: ADAMID,
+		appStorePageURLString: String,
+		minimumOSVersion: String,
+		name: String,
+		sellerURLString: String?,
+		version: String,
+		jsonObject: JSON.Object,
+	) {
+		self.adamID = adamID
+		self.appStorePageURLString = appStorePageURLString
+		self.minimumOSVersion = minimumOSVersion
+		self.name = name
+		self.sellerURLString = sellerURLString
+		self.version = version
+		lazyJSON = .init(.init(jsonObject.normalized))
 	}
 }
 
@@ -82,24 +57,79 @@ extension CatalogApp: Hashable {
 	}
 }
 
+extension CatalogApp: JSONDecodable {
+	fileprivate init(json: JSON.Node) throws {
+		guard case let .object(object) = json else {
+			throw MASError.invalidJSON(.init(json))
+		}
+
+		try self.init(object: object)
+	}
+
+	fileprivate init(object: JSON.Object) throws {
+		self.init(
+			adamID: try object["id"]?.decode() ?? 0,
+			appStorePageURLString: try object["attributes.url"]?.decode() ?? "",
+			minimumOSVersion: try object["attributes.minimumOsVersion"]?.decode() ?? "", // minimumMacOSVersion
+			name: try object["attributes.name"]?.decode() ?? "",
+			sellerURLString: try object["attributes.sellerUrl"]?.decode(),
+			version: try object["attributes.version"]?.decode() ?? "",
+			jsonObject: object,
+		)
+	}
+}
+
+private extension JSON.Node {
+	var normalized: Self {
+		switch self {
+		case let .object(object):
+			.object(object.normalized)
+		case let .array(array):
+			.array(array.normalized)
+		default:
+			self
+		}
+	}
+}
+
+private extension JSON.Array {
+	var normalized: Self {
+		.init(elements.map(\.normalized))
+	}
+}
+
+private extension JSON.Object {
+	var normalized: Self {
+		.init(
+			fields
+				.map { ($0, $1.normalized) }
+				.sorted(using: KeyPathComparator(\.0.rawValue, comparator: NumericStringComparator.forward)),
+		)
+	}
+}
+
 func lookup(appID: AppID) async throws -> CatalogApp {
 	try await lookup(appID: appID, in: appStoreRegion) ?? { throw MASError.unknownAppID(appID) }()
 }
 
-func lookup(appID: AppID, in region: Region) async throws -> CatalogApp? {
+private func lookup(appID: AppID, in region: Region) async throws -> CatalogApp? {
 	switch appID {
 	case let .adamID(adamID):
-		try parseApp(
-			from: try await Environment.current.catalogData(
-				from: Environment.current
-					.catalogURL
-					.appending(path: "/\(region.lowercased())/apps/\(adamID)")
-					.appending(
-						queryItems: [
-							.init(name: "platform", value: "mac"),
-							.init(name: "additionalPlatforms", value: "appletv,ipad,iphone,watch"),
-						],
-					),
+		try .init(
+			json: .init(
+				parsing: try await Environment.current
+					.catalogData(
+						from: Environment.current
+							.catalogURL
+							.appending(path: "/\(region.lowercased())/apps/\(adamID)")
+							.appending(
+								queryItems: [
+									.init(name: "platform", value: "mac"),
+									.init(name: "additionalPlatforms", value: "appletv,ipad,iphone,watch"),
+								],
+							),
+					)
+						.bytes, // swiftformat:disable:this indent
 			),
 		)
 	case let .bundleID(bundleID):
@@ -108,6 +138,20 @@ func lookup(appID: AppID, in region: Region) async throws -> CatalogApp? {
 		)
 		.first
 	}
+}
+
+func search(for term: String) async throws -> [CatalogApp] {
+	try await search(for: term, in: appStoreRegion)
+}
+
+private func search(for term: String, in region: Region) async throws -> [CatalogApp] {
+	try parseSearchApps(
+		from: try await Environment.current.catalogData(from: searchURL(for: term, limit: 20, region: region)),
+	)
+}
+
+private func parseSearchApps(from data: Data) throws -> [CatalogApp] {
+	[try .init(json: .init(parsing: data.bytes))]
 }
 
 private func searchURL(for term: String, limit: UInt, region: Region) -> URL {
@@ -122,33 +166,4 @@ private func searchURL(for term: String, limit: UInt, region: Region) -> URL {
 				.init(name: "term", value: term),
 			],
 		)
-}
-
-func search(for term: String) async throws -> [CatalogApp] {
-	try await search(for: term, in: appStoreRegion)
-}
-
-func search(for term: String, in region: Region) async throws -> [CatalogApp] {
-	try parseSearchApps(
-		from: try await Environment.current.catalogData(from: searchURL(for: term, limit: 20, region: region)),
-	)
-}
-
-private func parseApp(from data: Data) throws -> CatalogApp? {
-	try ((try JSONSerialization.jsonObject(with: data) as? [String: Any])?["data"] as? [[String: Any]])?
-		.first
-		.flatMap(CatalogApp.init)
-}
-
-private func parseSearchApps(from data: Data) throws -> [CatalogApp] {
-	guard
-		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-		let results = json["results"] as? [String: Any],
-		let apps = results["apps"] as? [String: Any],
-		let dataArray = apps["data"] as? [[String: Any]]
-	else {
-		return .init()
-	}
-
-	return try dataArray.compactMap(CatalogApp.init)
 }

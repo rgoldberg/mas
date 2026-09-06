@@ -18,4 +18,4 @@ private extension MASTests {
 		let expected = Consequences(nil, "", "Error: \(MASError.noCatalogAppsFound(for: searchTerm))\n")
 		#expect(actual == expected)
 	}
-} // swiftlint:disable:this file_length
+}

@@ -53,11 +53,10 @@ final class AsyncLazy<Value: Sendable>: Sendable { // periphery:ignore
 		stateGate = .init(initialState: .uninitialized(initialize))
 	}
 
-	/*
+	// swiftlint:disable:next async_without_await
 	convenience init(_ initialize: @autoclosure @escaping @Sendable () async -> Value) async {
-		self.init(initialize)
+		self.init(initialize) // swiftformat:disable:previous redundantAsync
 	}
-	*/
 
 	deinit {
 		// Empty

@@ -11,10 +11,6 @@ struct Environment {
 	@TaskLocal
 	static var current = Self()
 
-	@Required(URL(string: "https://itunes.apple.com/lookup"))
-	var lookupURL
-	@Required(URL(string: "https://itunes.apple.com/search"))
-	var searchURL
 	@Required(URL(string: "https://amp-api.apps.apple.com/v1/catalog"))
 	var catalogURL
 
@@ -40,7 +36,7 @@ struct Environment {
 				}
 				@Required(
 					URL(
-						string:
+						string: // swiftformat:disable:next indent
 							"https://sf-api-token-service.itunes.apple.com/apiToken?clientClass=apple&clientId=appstore&os=macOS",
 					),
 				)
@@ -57,9 +53,9 @@ struct Environment {
 		try await dataFrom(
 			.init(
 				url: url,
-				headers: ["Authorization": "Bearer \(token)", "Origin": "https://apps.apple.com"],
+				headers: ["Authorization": "Bearer \(token.value)", "Origin": "https://apps.apple.com"],
 			),
 		)
-			.data
+		.data
 	}
 }
