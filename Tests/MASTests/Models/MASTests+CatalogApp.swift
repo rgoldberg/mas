@@ -44,7 +44,6 @@ private extension MASTests {
 		#expect(catalogApp.adamID == adamID)
 		#expect(catalogApp.appStorePageURLString == "https://apps.apple.com/us/app/slack-for-desktop/id803453959?mt=12")
 		#expect(catalogApp.minimumOSVersion == "10.9")
-		#expect(catalogApp.name == "Slack")
 		#expect(catalogApp.sellerURLString == "https://slack.com")
 		#expect(catalogApp.version == "3.3.3")
 	}

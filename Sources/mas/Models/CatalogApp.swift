@@ -14,7 +14,6 @@ struct CatalogApp {
 	let adamID: ADAMID
 	let appStorePageURLString: String
 	let minimumOSVersion: String
-	let name: String
 	let sellerURLString: String?
 	let version: String
 
@@ -24,7 +23,6 @@ struct CatalogApp {
 		adamID: ADAMID,
 		appStorePageURLString: String,
 		minimumOSVersion: String,
-		name: String,
 		sellerURLString: String?,
 		version: String,
 		jsonObject: JSON.Object,
@@ -32,7 +30,6 @@ struct CatalogApp {
 		self.adamID = adamID
 		self.appStorePageURLString = appStorePageURLString
 		self.minimumOSVersion = minimumOSVersion
-		self.name = name
 		self.sellerURLString = sellerURLString
 		self.version = version
 		lazyJSON = .init(.init(jsonObject.normalized))
@@ -71,7 +68,6 @@ extension CatalogApp: JSONDecodable {
 			adamID: try object["id"]?.decode() ?? 0,
 			appStorePageURLString: try object["attributes.url"]?.decode() ?? "",
 			minimumOSVersion: try object["attributes.minimumOsVersion"]?.decode() ?? "", // minimumMacOSVersion
-			name: try object["attributes.name"]?.decode() ?? "",
 			sellerURLString: try object["attributes.sellerUrl"]?.decode(),
 			version: try object["attributes.version"]?.decode() ?? "",
 			jsonObject: object,
