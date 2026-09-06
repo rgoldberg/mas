@@ -15,7 +15,9 @@ struct Environment {
 	var lookupURL
 	@Required(URL(string: "https://itunes.apple.com/search"))
 	var searchURL
-	@Required(URL(string: "https://sf-api-token-service.itunes.apple.com/apiToken"))
+	@Required(
+		URL(string: "https://sf-api-token-service.itunes.apple.com/apiToken?clientClass=apple&clientId=appstore&os=macOS"),
+	)
 	var tokenURL
 	@Required(URL(string: "https://amp-api.apps.apple.com/v1/catalog"))
 	var catalogURL
@@ -27,8 +29,8 @@ struct Environment {
 	init(
 		dataFrom: // swiftformat:disable:next indent
 			@escaping @Sendable (URLRequest) async throws -> (Data, URLResponse) = URLSession(configuration: .ephemeral).data,
-		lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp = CatalogApp.lookup,
-		searchForAppsMatchingSearchTerm: @escaping @Sendable (String) async throws -> [CatalogApp] = CatalogApp.search,
+		lookupAppFromAppID: @escaping @Sendable (AppID) async throws -> CatalogApp = lookup,
+		searchForAppsMatchingSearchTerm: @escaping @Sendable (String) async throws -> [CatalogApp] = search,
 	) {
 		self.dataFrom = dataFrom
 		self.lookupAppFromAppID = lookupAppFromAppID
