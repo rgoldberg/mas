@@ -90,7 +90,7 @@ func lookup(appID: AppID, in region: Region) async throws -> CatalogApp? {
 	switch appID {
 	case let .adamID(adamID):
 		try parseApp(
-			from: try await data(
+			from: try await Environment.current.catalogData(
 				from: Environment.current
 					.catalogURL
 					.appending(path: "/\(region.lowercased())/apps/\(adamID)")
@@ -103,7 +103,10 @@ func lookup(appID: AppID, in region: Region) async throws -> CatalogApp? {
 			),
 		)
 	case let .bundleID(bundleID):
-		try parseSearchApps(from: try await data(from: searchURL(for: bundleID, limit: 1, region: region))).first
+		try parseSearchApps(
+			from: try await Environment.current.catalogData(from: searchURL(for: bundleID, limit: 1, region: region)),
+		)
+		.first
 	}
 }
 
@@ -126,7 +129,9 @@ func search(for term: String) async throws -> [CatalogApp] {
 }
 
 func search(for term: String, in region: Region) async throws -> [CatalogApp] {
-	try parseSearchApps(from: try await data(from: searchURL(for: term, limit: 20, region: region)))
+	try parseSearchApps(
+		from: try await Environment.current.catalogData(from: searchURL(for: term, limit: 20, region: region)),
+	)
 }
 
 private func parseApp(from data: Data) throws -> CatalogApp? {
@@ -146,15 +151,4 @@ private func parseSearchApps(from data: Data) throws -> [CatalogApp] {
 	}
 
 	return try dataArray.compactMap(CatalogApp.init)
-}
-
-private func data(from url: URL) async throws -> Data {
-	try await Environment.current
-		.dataFrom(
-			.init(
-				url: url,
-				headers: ["Authorization": "Bearer \(try await Environment.current.token)", "Origin": "https://apps.apple.com"],
-			),
-		)
-		.data
 }
