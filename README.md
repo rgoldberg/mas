@@ -23,54 +23,67 @@ automation.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Provider                                                                                | Method                         | mas                                                                                                                                                                                                                                         | macOS             |
-|:----------------------------------------------------------------------------------------|:-------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------|
-| [Homebrew](https://brew.sh) [Core](https://github.com/Homebrew/homebrew-core)           | `brew install mas`             | [![Homebrew Core](https://repology.org/badge/version-for-repo/homebrew/mas-mac-app-store.svg?header=)](https://formulae.brew.sh/formula/mas)                                                                                                | 15+ (recommended) |
-| [Homebrew](https://brew.sh) [Tap](https://github.com/mas-cli/homebrew-tap)              | `brew install mas-cli/tap/mas` | [![Homebrew Tap](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2Fmas-cli%2Fhomebrew-tap%2Freleases%2Flatest&query=%24.name&label=&color=4c1)](https://github.com/mas-cli/homebrew-tap/releases/latest) | 15+               |
-| [MacPorts](https://www.macports.org/install.php)                                        | `sudo port install mas`        | [![MacPorts](https://repology.org/badge/version-for-repo/macports/mas-mac-app-store.svg?header=)](https://ports.macports.org/port/mas/details/)                                                                                             | 15+               |
-| [Nix](https://nixos.org) [Nixpkgs unstable](https://nixos.org/manual/nixpkgs/unstable/) | `nix-shell -p mas`             | [![Nixpkgs unstable](https://repology.org/badge/version-for-repo/nix_unstable/mas-mac-app-store.svg?header=)](https://search.nixos.org/packages?channel=unstable&query=mas#show=mas)                                                        | 15+               |
-| [Nix](https://nixos.org) [Nixpkgs stable](https://nixos.org/manual/nixpkgs/stable/)     | `nix-shell -p mas`             | [![Nixpkgs stable](https://img.shields.io/badge/%3F-lightgrey)](https://search.nixos.org/packages?query=mas#show=mas)                                                                                                                       | 15+               |
-| [GitHub Releases](https://github.com/mas-cli/mas/releases)                              | Installers & source archives   | All                                                                                                                                                                                                                                         | Release-dependent |
+| Provider                                                                    | Package                                                                                                                                     | mas Versions                                                                                         | Method                            |
+|:----------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------|:----------------------------------|
+| [Aqua](https://aquaproj.github.io)                                          | [mas-cli/mas](https://github.com/aquaproj/aqua-registry/tree/main/pkgs/mas-cli/mas)                                                         | Various                                                                                              | `aqua g -i mas-cli/mas && aqua i` |
+| [GitHub Releases](https://github.com/mas-cli/mas/releases)                  | [latest](https://github.com/mas-cli/mas/releases/latest)                                                                                    | All                                                                                                  | Installers & source archives      |
+| [Homebrew](https://brew.sh)                                                 | [Core](https://github.com/Homebrew/homebrew-core) [mas](https://formulae.brew.sh/formula/mas)                                               | ![Homebrew Core](https://repology.org/badge/version-for-repo/homebrew/mas-mac-app-store.svg?header=) | `brew install mas`                |
+| [Homebrew](https://brew.sh)                                                 | [mas-cli tap](https://github.com/mas-cli/homebrew-tap) [mas](https://github.com/mas-cli/homebrew-tap/blob/main/Formula/mas.rb)              | Latest per macOS                                                                                     | `brew install mas-cli/tap/mas`    |
+| [MacPorts](https://www.macports.org/install.php)                            | [mas](https://ports.macports.org/port/mas/details/)                                                                                         | ![MacPorts](https://repology.org/badge/version-for-repo/macports/mas-mac-app-store.svg?header=)      | `sudo port install mas`           |
+| [mise](https://mise.jdx.dev)                                                | [mas](https://github.com/jdx/mise/blob/main/registry/mas.toml)                                                                              | Various                                                                                              | `mise use mas`                    |
+| [Nix](https://nixos.org) [Darwin](https://github.com/nix-darwin/nix-darwin) | [Nixpkgs unstable](https://nixos.org/manual/nixpkgs/unstable/) [mas](https://search.nixos.org/packages?channel=unstable&query=mas#show=mas) | Various                                                                                              | `nix profile add nixpkgs#mas`     |
+| [Nix](https://nixos.org) [Darwin](https://github.com/nix-darwin/nix-darwin) | [Nixpkgs stable](https://nixos.org/manual/nixpkgs/stable/) [mas](https://search.nixos.org/packages?query=mas#show=mas)                      | Various                                                                                              | `nix profile add nixpkgs#mas`     |
+| [pkgx](https://pkgx.dev)                                                    | [mas](https://pkgx.dev/pkgs/github.com/mas-cli/mas/)                                                                                        | ≥ 1.8.7                                                                                              | `pkgm install mas`                |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+Many other tools wrap the above providers; e.g., Ansible can install mas via
+Homebrew or MacPorts.
 
 ## Commands
 
-Detailed documentation is available via `man mas` & `mas --help`.
-
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Command                       | Functionality                                 | Notes                                                                                                       | Aliases    |
-|:------------------------------|:----------------------------------------------|:------------------------------------------------------------------------------------------------------------|:-----------|
-| `search <term>…`              | Search for App Store apps                     | [formats](#output-formats)                                                                                  |            |
-| `lookup <id>…`                | Output App Store app details                  | [formats](#output-formats)                                                                                  | `info`     |
-| `list [<id>…]`                | Output installed apps                         | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
-| `outdated [<id>…]`            | Output outdated apps                          | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
-| `outdated --accurate [<id>…]` | Output outdated apps                          | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [formats](#output-formats)       |            |
-| `get <id>…`                   | [Get free apps](#paid-apps), install any apps | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements-for-get) | `purchase` |
-| `install <id>…`               | Install already owned apps                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
-| `lucky <term>…`               | Install first matching app                    | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
-| `update [<id>…]`              | Update outdated apps                          | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
-| `update --accurate [<id>…]`   | Update outdated apps                          | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
-| `uninstall (<id>…\|--all)`    | Uninstall apps                                | [spotlight](#spotlight), [root](#root-privileges)                                                           |            |
-| `signout`                     | Sign out from App Store                       |                                                                                                             |            |
-| `open [<id>]`                 | Open app App Store page                       |                                                                                                             |            |
-| `home <id>…`                  | Open app web pages                            |                                                                                                             |            |
-| `seller <id>…`                | Open seller app web pages                     |                                                                                                             | `vendor`   |
-| `reset`                       | Reset App Store processes                     |                                                                                                             |            |
-| `config`                      | Output config                                 | [formats](#output-formats)                                                                                  |            |
-| `version`                     | Output version                                |                                                                                                             |            |
+| Command                       | Functionality                             | Notes                                                                                                       | Aliases    |
+|:------------------------------|:------------------------------------------|:------------------------------------------------------------------------------------------------------------|:-----------|
+| `search <term>…`              | Search for App Store apps                 | [formats](#output-formats)                                                                                  |            |
+| `lookup <id>…`                | Output App Store app info                 | [formats](#output-formats)                                                                                  | `info`     |
+| `list [<id>…]`                | Output installed apps                     | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
+| `outdated [<id>…]`            | Output outdated apps                      | [spotlight](#spotlight), [formats](#output-formats)                                                         |            |
+| `outdated --accurate [<id>…]` | Output outdated apps                      | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [formats](#output-formats)       |            |
+| `get <id>…`                   | [Get free apps](#paid-apps), install apps | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements-for-get) | `purchase` |
+| `install <id>…`               | Install already owned apps                | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
+| `lucky <term>…`               | Install first matching app                | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
+| `update [<id>…]`              | Update outdated apps                      | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
+| `update --accurate [<id>…]`   | Update outdated apps                      | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
+| `uninstall (<id>…\|--all)`    | Uninstall apps                            | [spotlight](#spotlight), [root](#root-privileges)                                                           |            |
+| `signout`                     | Sign out from App Store                   |                                                                                                             |            |
+| `open [<id>]`                 | Open app App Store page                   |                                                                                                             |            |
+| `home <id>…`                  | Open app web pages                        |                                                                                                             |            |
+| `seller <id>…`                | Open seller app web pages                 |                                                                                                             | `vendor`   |
+| `reset`                       | Reset App Store processes                 |                                                                                                             |            |
+| `config`                      | Output config                             | [formats](#output-formats)                                                                                  |            |
+| `version`                     | Output version                            |                                                                                                             |            |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+Detailed documentation is available via `man mas` & `mas --help`.
 
 ## Integrations
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Tool                                                             | Functionality                                                               |
-|:-----------------------------------------------------------------|:----------------------------------------------------------------------------|
-| [Homebrew Bundle](https://docs.brew.sh/Brew-Bundle-and-Brewfile) | Include installed apps in `Brewfile`; get, install & update `Brewfile` apps |
-| [Topgrade](https://github.com/topgrade-rs/topgrade)              | Update apps                                                                 |
+| Tool                                                                        | Module                                                                                                                  | Interface | Functionality                                                               |
+|:----------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|:----------|:----------------------------------------------------------------------------|
+| [Ansible](https://ansible.com)                                              | [community.general.mas](https://docs.ansible.com/projects/ansible/latest/collections/community/general/mas_module.html) | CLI       | Get, install & update apps listed in a config file                          |
+| [Bold Brew](https://bold-brew.com)                                          | -                                                                                                                       | TUI       | Manage `Brewfile` apps                                                      |
+| [Homebrew](https://brew.sh)                                                 | [Bundle](https://docs.brew.sh/Brew-Bundle-and-Brewfile)                                                                 | CLI       | Include installed apps in `Brewfile`; get, install & update `Brewfile` apps |
+| [mise](https://mise.jdx.dev)                                                | [Mac App Store bootstrap.packages](https://mise.jdx.dev/bootstrap/packages/mas.html)                                    | CLI       | Get, install & update apps listed in a config file                          |
+| [mpm](https://mpm.run)                                                      | [Mac App Store manager](https://mpm.run/managers/mas/)                                                                  | CLI       | List, list outdated, search, install, update & uninstall apps               |
+| [Nix](https://nixos.org) [Darwin](https://github.com/nix-darwin/nix-darwin) | [homebrew.masApps](https://nix-darwin.github.io/nix-darwin/manual/index.html#opt-homebrew.masApps)                      | CLI       | Get, install & update apps listed in a config file                          |
+| [Taphouse](https://taphouse.multimodalsolutions.gr)                         | -                                                                                                                       | GUI       | Search, get, install & update apps; manage `Brewfile`s                      |
+| [Topgrade](https://github.com/topgrade-rs/topgrade)                         | -                                                                                                                       | CLI       | Update apps                                                                 |
+| [Updatest](https://updatest.app)                                            | -                                                                                                                       | GUI       | Update apps                                                                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
