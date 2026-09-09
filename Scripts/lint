@@ -39,7 +39,8 @@ export -r MAS_DISTRIBUTION=lint
 integer exit_status=0
 
 printf -- $'--> 🕊​ SwiftFormat\n'
-script -q /dev/null swiftformat --lint --markdown-files format-strict . | # editorconfig-checker-disable-next-line
+script -q /dev/null swiftformat --lint --markdown-files format-strict . --symlinks follow |
+	# editorconfig-checker-disable-next-line
 	(grep -vxE '(?:\^D\x08{2})?Running SwiftFormat\.{3}\r|\(lint mode - no files will be changed\.\)\r|Reading (?:config|swift-version) file at .*|\x1b\[32mSwiftFormat completed in \d+(?:\.\d+)?s\.\x1b\[0m\r|0/\d+ files require formatting\.\r|Source input did not pass lint check\.\r' || true)
 ((exit_status |= ${?}))
 
