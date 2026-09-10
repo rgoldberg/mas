@@ -6,7 +6,7 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]
+format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <chain-terminator> ] [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]
 format-text = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
 ```
 <!--markdownlint-enable line-length-->
@@ -27,14 +27,18 @@ distinction).
 
 `<named-format>`, if present, is the base value; `<format-transform-pipeline>`
 (see "Format Transforms" below), if present, always comes next, before
-anything else.
+anything else. What follows is either a `<string-transform-pipeline>` (applied
+to `<named-format>`'s value, or `%v`'s if `<named-format>` is absent) or an
+inline template (`<placeholder>` / `<format-text>`); never both.
 
-What follows depends on whether `<named-format>` is present: if so, an
-optional trailing `<string-transform-pipeline>` (applied to `<named-format>`'s
-value) is all that's allowed — an inline template is an error, since a named
-format already stands in for the whole render. If `<named-format>` is absent,
-an inline template (`<placeholder>` / `<format-text>`) is allowed instead of
-(never in addition to) a `<string-transform-pipeline>` (applied to `%v`).
+Neither a name nor a transform name stops at `<placeholder-prefix>` on its
+own: `<name-prefix>hidden%v` is an attempt at a named format literally called
+`hidden%v` (& fails as one, since it doesn't exist), not `hidden` followed by
+a `%v` placeholder. A `<chain-terminator>` (see "Format Transforms") — needed
+even with 0 `<format-transform>`s, e.g., right after a bare `<named-format>`
+— or `<transform-call-prefix>` (for another transform) is what actually
+separates them: `<name-prefix>hidden<chain-terminator>%v` is `hidden` followed
+by a `%v` placeholder.
 
 ##### References
 
@@ -153,14 +157,15 @@ radix point.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+ [ <chain-terminator> ]
-chain-terminator          = ":"
+format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+
 
 format-transform     = <left-justify> | <center-start-justify> | <center-end-justify> | <right-justify>
 left-justify         = "leftJustify"
 center-start-justify = "centerStartJustify"
 center-end-justify   = "centerEndJustify"
 right-justify        = "rightJustify"
+
+chain-terminator = ":"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -183,14 +188,18 @@ puts it before the value (leaving it nearer the column's end).
 
 If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
 
-`<chain-terminator>` closes the pipeline; it's needed only when what follows
-wouldn't otherwise unambiguously end it (i.e., isn't itself
-`<transform-call-prefix>`, `<placeholder-prefix>`, or an existing `<format>`
-terminator, e.g., `<sort-modifier-prefix>` / `<field-spec-separator>`) —
-otherwise, whatever follows is read as (part of) an attempted, likely invalid,
-transform name. E.g., `.rightJustify:` unambiguously ends a pipeline before
-literal template text; `.rightJustify` alone doesn't need it before `%v` or a
-sort modifier.
+`<chain-terminator>` (see `<format>` above; it's not part of
+`<format-transform-pipeline>` itself, since it can appear even with 0
+`<format-transform>`s, e.g., right after a bare `<named-format>`) closes off
+naming / transforms before whatever follows (a `<string-transform-pipeline>`
+or a template). It's needed only when what follows wouldn't otherwise
+unambiguously do so (i.e., isn't itself `<transform-call-prefix>`, or an
+existing `<format>` terminator, e.g., `<sort-modifier-prefix>` /
+`<field-spec-separator>`) — otherwise, whatever follows (a `<placeholder>`
+included) is read as (part of) an attempted, likely invalid, name. E.g.,
+`.rightJustify:` unambiguously ends a pipeline before literal template text or
+a `%v` placeholder; `.rightJustify` alone doesn't need it before a sort
+modifier, since that already unambiguously ends it.
 
 ###### `iso` & `localTimeZone`
 

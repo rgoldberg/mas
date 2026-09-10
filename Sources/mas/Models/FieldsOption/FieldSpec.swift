@@ -65,7 +65,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingEndFence
 	case missingFieldName
 	case missingSortPriority
-	case namedFormatFollowedByTemplate(name: String)
 	case nonexistentFieldSpec(forName: String)
 	case unknownNamedFormat(String)
 
@@ -95,8 +94,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected field name"
 		case .missingSortPriority:
 			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
-		case let .namedFormatFollowedByTemplate(name):
-			"Named format '\(name)' cannot be followed by a placeholder or literal text"
 		case let .nonexistentFieldSpec(name):
 			"""
 			Expected existing field spec for field name: \(
@@ -651,12 +648,16 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 }
 
 /// Parses `<format>`: `[ <named-format> ] [ <format-transform-pipeline> ]
-/// [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]`.
-/// `<format-transform-pipeline>` (currently just `<justify-transform>`) is
-/// recognized only here, right after the optional named format & before
-/// anything else — never inside a placeholder's own success / failure
-/// sub-format (`parseDelimitedFormat`/`parseDateSpec` in `Format.swift` don't
-/// call this).
+/// [ <chain-terminator> ] [ <string-transform-pipeline> | ( <placeholder> |
+/// <format-text> )+ ]`. `<format-transform-pipeline>` (currently just
+/// `<justify-transform>`) is recognized only here, right after the optional
+/// named format & before anything else — never inside a placeholder's own
+/// success / failure sub-format (`parseDelimitedFormat`/`parseDateSpec` in
+/// `Format.swift` don't call this). A name / transform name never stops at
+/// `<placeholder-prefix>` on its own: `.uppercase%v` is an attempt at a
+/// transform literally named `uppercase%v` (& fails as one), not `.uppercase`
+/// followed by a `%v` placeholder — `<chain-terminator>` (or `.` for another
+/// transform) is what actually separates them.
 private func parseFormat(_ input: inout Substring, fieldName: String)
 throws(ParsingError) -> (format: Format, justification: Justification)? {
 	guard input.first == formatModifierPrefix else {
@@ -671,24 +672,23 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	var namedFormat = String?.none
 	if first == namePrefix {
 		input.removeFirst()
-		let name = try parseEscapedText(
-			&input,
-			terminatorSet: terminatorSet.union([transformCallPrefix, placeholderPrefix]),
-		)
+		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
 		guard knownNamedFormatNameSet.contains(name) else {
 			throw .unknownNamedFormat(name)
 		}
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
-	if let namedFormat, let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
-		// A template would occupy the rest of `<format>`, incompatible with a
-		// preceding named format, which already stands in for the whole render
-		throw .namedFormatFollowedByTemplate(name: namedFormat)
+	if input.first == chainTerminator {
+		input.removeFirst()
 	}
 	let format: Format =
 		if let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
-			// `%` (a placeholder) or literal text: a template occupies the rest of `<format>`
+			// `%` (a placeholder) or literal text: a template occupies the rest of
+			// `<format>`. `namedFormat`, if present, is discarded here: only `hidden`
+			// exists today, & it has no value to embed in the template.
+			// TODO: once user-defined named formats exist, splice `namedFormat`'s own
+			//  rendered value in as this template's first part, instead of discarding it.
 			try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
 		} else if let reference = try FormatReferenceParser(kind: .string, terminatorSet: terminatorSet).parse(&input) {
 			// A trailing `<string-transform-pipeline>` (`namedFormat` was already
@@ -705,32 +705,27 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 }
 
 /// Parses `<format-transform-pipeline>` (`( <transform-call-prefix>
-/// <format-transform> )+ [ <chain-terminator> ]`): as many leading
-/// `<format-transform>`s as match (last 1 wins), consuming a trailing
-/// `<chain-terminator>` iff present & iff at least 1 matched. Backtracks
-/// (consuming nothing) as soon as a `.`-prefixed name doesn't match a known
-/// `<format-transform>`, leaving it for the caller to try as something else
-/// (e.g., a `<string-transform>`) — per fields-formatting.md, a
-/// `<format-transform>` & every other transform share no names, so there's
-/// nothing to disambiguate: this is 1st-match-wins ordering, not a lookup.
+/// <format-transform> )+`): as many leading `<format-transform>`s as match
+/// (last 1 wins). Backtracks (consuming nothing) as soon as a `.`-prefixed
+/// name doesn't match a known `<format-transform>`, leaving it for the caller
+/// to try as something else (e.g., a `<string-transform>`) — per
+/// fields-formatting.md, a `<format-transform>` & every other transform share
+/// no names, so there's nothing to disambiguate: this is 1st-match-wins
+/// ordering, not a lookup. The caller (`parseFormat`), not this function,
+/// handles a trailing `<chain-terminator>`, since 1 may appear here even with
+/// 0 matches (e.g., right after a bare named format, before a template).
 private func parseFormatTransformPipeline(_ input: inout Substring, terminatorSet: Set<Character>)
 throws(ParsingError) -> Justification? {
 	var justification = Justification?.none
 	while input.first == transformCallPrefix {
 		let beforeTransform = input
 		input.removeFirst()
-		let name = try parseEscapedText(
-			&input,
-			terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator, placeholderPrefix]),
-		)
+		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
 		guard let formatTransform = FormatTransform(simpleName: name) else {
 			input = beforeTransform
 			break
 		}
 		justification = formatTransform.justification
-	}
-	if justification != nil, input.first == chainTerminator {
-		input.removeFirst()
 	}
 	return justification
 }

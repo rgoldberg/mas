@@ -518,10 +518,24 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a named format cannot be followed by an inline template`() {
-		#expect(throws: ParsingError.namedFormatFollowedByTemplate(name: "hidden")) {
+	func `a name / transform name swallows a following placeholder prefix absent a separator`() {
+		// No separator between "hidden" & "%v": the whole run is 1 attempted named
+		// format name, "hidden%v", which doesn't exist — not `hidden` followed by a
+		// `%v` placeholder.
+		#expect(throws: ParsingError.unknownNamedFormat("hidden%v")) {
 			try parseFieldSpecs("adamID::hidden%v")
 		}
+	}
+
+	@Test
+	func `an explicit chain terminator separates a bare named format from a following template`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID::hidden:%v").first)
+		#expect(fieldSpec.justification == .start)
+		// Renders as plain `%v`: `hidden` is discarded (`parseFormat` doesn't yet
+		// embed a named format's own value into a following template), since it has
+		// no value to embed anyway; this only exercises the separator's parsing, not
+		// any real named-format composition.
+		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "ab")
 	}
 
 	@Test
