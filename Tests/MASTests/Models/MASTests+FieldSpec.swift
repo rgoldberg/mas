@@ -124,20 +124,31 @@ private extension MASTests {
 
 	@Test
 	func `fetchFieldNames returns empty for an all-derived base`() throws {
-		#expect(try fetchFieldNames(for: "@all", standard: standardFixture, all: allFixture, outputFormat: .table).isEmpty)
+		#expect(try fetchFieldNames(for: "@all", standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+			.isEmpty)
 	}
 
 	@Test
 	func `fetchFieldNames unions base names with insert names`() throws {
 		let nameSet =
-			Set(try fetchFieldNames(for: ".+extra", standard: standardFixture, all: allFixture, outputFormat: .table))
+			Set(try fetchFieldNames(
+				for: ".+extra",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			))
 		#expect(nameSet == ["adamID", "extra"])
 	}
 
 	@Test
 	func `fetchFieldNames for an absolute config is just its field names`() throws {
 		let nameSet =
-			Set(try fetchFieldNames(for: "adamID,bundleID", standard: standardFixture, all: allFixture, outputFormat: .table))
+			Set(try fetchFieldNames(
+				for: "adamID,bundleID",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			))
 		#expect(nameSet == ["adamID", "bundleID"])
 	}
 
@@ -563,11 +574,10 @@ private extension MASTests {
 			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
 		]
 		let expected = [
-			.init(repeating: " ", count: 5) + "ID" + "  " + "Name",
 			.init(repeating: " ", count: 6) + "7" + "  " + "Slack",
 			"1234567" + "  " + "A",
 		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
 	}
 
 	@Test
@@ -581,11 +591,10 @@ private extension MASTests {
 			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
 		]
 		let expected = [
-			"Name" + .init(repeating: " ", count: 1 + 2 + 5) + "ID",
 			"A" + .init(repeating: " ", count: 4 + 2) + "1234567",
 			"Slack" + .init(repeating: " ", count: 0 + 2 + 6) + "7",
 		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
 	}
 
 	@Test
@@ -600,11 +609,10 @@ private extension MASTests {
 			FieldSpec(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
 		]
 		let expected = [
-			"Name" + .init(repeating: " ", count: 1 + 2 + 5) + "ID" + .init(repeating: " ", count: 2) + "Version",
 			"A" + .init(repeating: " ", count: 4 + 2) + "1234567" + .init(repeating: " ", count: 2) + "1.0",
 			"Slack" + .init(repeating: " ", count: 2 + 6) + "7" + .init(repeating: " ", count: 2) + "2.0",
 		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
 	}
 }
 
@@ -665,5 +673,6 @@ private let standardFixture = SelectedFieldsConfig(fieldSpecs: [adamIDFieldSpec]
 private let allFixture = BaseIncludesAllFieldsConfig(fieldSpecs: [adamIDFieldSpec, bundleIDFieldSpec])
 
 private func parseFieldSpecs(_ value: String) throws -> [FieldSpec] {
-	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: .table).fieldSpecs
+	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+		.fieldSpecs
 }

@@ -81,20 +81,23 @@ extension JSON.Object {
 }
 
 extension [JSON.Object] {
-	/// `table`, but driven by `--fields`-resolved field specs: a header row of
-	/// labels, then a cell per field per item (fields.md: label is a field spec's
+	/// `table`, but driven by `--fields`-resolved field specs & `tableConfig`
+	/// (table.md): an optional header row of labels, an optional separator
+	/// line, then a cell per field per item (fields.md: label is a field spec's
 	/// "Header for table"). Every item gets a cell for every field, per
 	/// fields.md's "Absent Values" (absent ⇒ empty string, via
 	/// `Format.rendered`'s null-passthrough).
-	func table(fieldSpecs: some Sequence<FieldSpec>) -> String {
+	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) -> String {
 		guard !isEmpty else {
 			return ""
 		}
+		let showsHeader = tableConfig.header != nil
 		let columns = fieldSpecs.map { fieldSpec in
 			reduce(
 				into: (
-					cells: [fieldSpec.label],
-					maxWidth: fieldSpec.label.terminalWidth,
+					label: fieldSpec.label,
+					cells: [String](),
+					maxWidth: showsHeader ? fieldSpec.label.terminalWidth : 0,
 					justification: fieldSpec.justification,
 				),
 			) { column, object in
@@ -110,30 +113,46 @@ extension [JSON.Object] {
 				column.cells.append(cell)
 			}
 		}
-		guard let firstColumn = columns.first else {
+		guard !columns.isEmpty else {
 			return ""
 		}
-		let trailingColumns = columns.dropFirst()
-		guard let lastColumn = trailingColumns.last else {
-			return (0...count)
-				.map { index in
-					firstColumn.cells[index].terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
-				}
-				.joined(separator: "\n")
+		let columnSpacing = tableConfig.columnSpacing
+		let columnMetadata = columns.map { (maxWidth: $0.maxWidth, justification: $0.justification) }
+		var rows = [String]()
+		if let header = tableConfig.header {
+			let headerRow = renderedTableRow(
+				cells: columns.map(\.label),
+				columns: columnMetadata,
+				columnSpacing: columnSpacing,
+			)
+			rows.append(header.sgrCodes.isEmpty ? headerRow : "\u{1B}[\(header.sgrCodes)m\(headerRow)\u{1B}[0m")
 		}
-		let middleColumns = trailingColumns.dropLast()
-		return (0...count)
-			.map { index in
-				firstColumn.cells[index].terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
-					+ columnSpacing
-					+ middleColumns
-					.map { $0.cells[index].terminalJustify($0.justification, to: $0.maxWidth) + columnSpacing }
-					.joined()
-					+ (lastColumn.justification == .start
-						? lastColumn.cells[index]
-						: lastColumn.cells[index].terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
-			}
-			.joined(separator: "\n")
+		if let separator = tableConfig.separator {
+			rows.append(
+				separator.broken
+					? renderedTableRow(
+						cells: columnMetadata.map { repeatedTablePattern(separator.pattern, toWidth: $0.maxWidth) },
+						columns: columnMetadata,
+						columnSpacing: columnSpacing,
+					)
+					: repeatedTablePattern(
+						separator.pattern,
+						toWidth: columnMetadata.map(\.maxWidth).reduce(0, +)
+							+ columnSpacing.terminalWidth * (columnMetadata.count - 1),
+					),
+			)
+		}
+		rows.append(
+			contentsOf: (0..<count)
+				.map { index in
+					renderedTableRow(
+						cells: columns.map { $0.cells[index] },
+						columns: columnMetadata,
+						columnSpacing: columnSpacing,
+					)
+				},
+		)
+		return rows.joined(separator: "\n")
 	}
 
 	/// `keyValue`, but driven by `--fields`-resolved field specs.
@@ -148,13 +167,58 @@ extension [JSON.Object] {
 	}
 }
 
-/// The gap between adjacent `table` columns. Applied as a literal suffix after
-/// each column is independently justified to its own width — never baked into
-/// a column's own justify width, since that only produces a real trailing gap
-/// for `.start` justification (`.end` / `.centerStart` / `.centerEnd` would
-/// place some or all of it as leading / split padding instead, eliminating or
-/// shrinking the visible gap).
-private let columnSpacing = "  "
+/// Justifies & joins 1 `table` row (header, separator, or data): each column's
+/// cell to its own width, gapped by `columnSpacing` applied as a literal
+/// suffix after each non-last column — never baked into a column's own
+/// justify width, since that only produces a real trailing gap for `.start`
+/// justification (`.end` / `.centerStart` / `.centerEnd` would place some or
+/// all of it as leading / split padding instead, eliminating or shrinking the
+/// visible gap). The last column is padded only if it isn't `.start`-justified
+/// (matching every other column), since nothing follows it to gap from.
+private func renderedTableRow(
+	cells: [String],
+	columns: [(maxWidth: Int, justification: Justification)],
+	columnSpacing: String,
+) -> String {
+	guard let firstCell = cells.first, let firstColumn = columns.first else {
+		return ""
+	}
+	let trailingCells = cells.dropFirst()
+	guard let lastCell = trailingCells.last, let lastColumn = columns.dropFirst().last else {
+		return firstCell.terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
+	}
+	let middleCells = trailingCells.dropLast()
+	let middleColumns = columns.dropFirst().dropLast()
+	return firstCell.terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
+		+ columnSpacing
+		+ zip(middleCells, middleColumns)
+		.map { cell, column in cell.terminalJustify(column.justification, to: column.maxWidth) + columnSpacing }
+		.joined()
+		+ (lastColumn.justification == .start
+			? lastCell
+			: lastCell.terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
+}
+
+/// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition (never
+/// padding) if `pattern`'s width doesn't evenly divide `targetWidth` (table.md:
+/// a separator line's repetition cuts off immediately, even mid-character-
+/// group, rather than rounding to a whole number of repetitions).
+private func repeatedTablePattern(_ pattern: String, toWidth targetWidth: Int) -> String {
+	guard !pattern.isEmpty, targetWidth > 0 else {
+		return ""
+	}
+	let patternCharacters = Array(pattern)
+	var result = ""
+	var width = 0
+	var index = 0
+	while width < targetWidth {
+		let character = patternCharacters[index % patternCharacters.count]
+		result.append(character)
+		width += String(character).terminalWidth
+		index += 1
+	}
+	return result
+}
 
 private extension JSON.Node {
 	var isNull: Bool {

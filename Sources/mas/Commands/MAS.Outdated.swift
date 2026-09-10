@@ -16,7 +16,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<TableOutputConfig>
 		@OptionGroup
 		private var outdatedAppsOptionGroup: OutdatedAppsOptionGroup
 
@@ -29,8 +29,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 	}
 }
 
-private struct TableConfig: OutputConfig {
-	static let defaultFormat = OutputFormat.table
+private struct TableOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.table(.default)
 	static let standardFieldsConfig = SelectedFieldsConfig(
 		fieldSpecs: [
 			.init(

@@ -54,8 +54,8 @@ extension OutputConfig {
 			MAS.printer.info(sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs) as [Any], separator: "\n")
 		case .keyValue:
 			MAS.printer.info(sortedObjects.keyValue(fieldSpecs: displayFieldSpecs))
-		case .table:
-			MAS.printer.info(sortedObjects.table(fieldSpecs: displayFieldSpecs))
+		case let .table(tableConfig):
+			MAS.printer.info(sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
 		}
 	}
 }
