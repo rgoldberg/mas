@@ -169,11 +169,11 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 	static let dateTransformSet = Set([Self.iso, .dateOnly, .localTimeZone])
 	static let justifyTransformSet = Set([Self.centerEndJustify, .centerStartJustify, .leftJustify, .rightJustify])
 
-	/// Parses a bare `<transform>` `name` (its `<scale-parameters>`, for
+	/// Parses a bare `<transform>` `name` (its `<scale-arguments>`, for
 	/// `scale`, included verbatim) valid for `kind`. Returns `nil` if `name`
 	/// isn't a known transform for `kind`.
 	static func parsed(name: String, kind: TransformKind) throws(ParsingError) -> Self? {
-		if name.hasPrefix(scaleNamePrefix), name.hasSuffix(scaleParameterFence) {
+		if name.hasPrefix(scaleNamePrefix), name.hasSuffix(argumentFence) {
 			kind == .number ? try scaleTransform(name: name) : nil
 		} else {
 			.init(simpleName: name).flatMap { kind.allowedTransformSet.contains($0) ? $0 : nil }
@@ -275,30 +275,30 @@ private extension Transform { // swiftlint:disable:this file_types_order
 	}
 }
 
-/// Parses `scale`'s `<scale-parameters>`
+/// Parses `scale`'s `<scale-arguments>`
 /// (`radix,exponent,[significantDigits],fractionalDigits`, fenced by
-/// `scaleParameterFence`) from `name`, which must already carry both.
+/// `argumentFence`) from `name`, which must already carry both.
 private func scaleTransform(name: String) throws(ParsingError) -> Transform {
-	let parameters = name.dropFirst(scaleNamePrefix.count)
-		.dropLast(scaleParameterFence.count)
-		.split(separator: ",", omittingEmptySubsequences: false)
+	let arguments = name.dropFirst(scaleNamePrefix.count)
+		.dropLast(argumentFence.count)
+		.split(separator: argumentSeparator, omittingEmptySubsequences: false)
 	guard
-		parameters.count == 4,
-		let radix = Int(parameters[0]), (2...36).contains(radix),
-		let exponent = Int(parameters[1]), exponent >= 0,
-		let fractionalDigits = Int(parameters[3]), fractionalDigits >= 0
+		arguments.count == 4,
+		let radix = Int(arguments[0]), (2...36).contains(radix),
+		let exponent = Int(arguments[1]), exponent >= 0,
+		let fractionalDigits = Int(arguments[3]), fractionalDigits >= 0
 	else {
-		throw .invalidTransformParameters(name: name)
+		throw .invalidTransformArguments(name: name)
 	}
 	return .scale(
 		radix: radix,
 		exponent: exponent,
-		significantDigits: try parsedSignificantDigits(from: parameters[2], transformName: name),
+		significantDigits: try parsedSignificantDigits(from: arguments[2], transformName: name),
 		fractionalDigits: fractionalDigits,
 	)
 }
 
-/// Parses `scale`'s optional `significantDigits` parameter: `nil` for an empty `text` (no cap), else a validated
+/// Parses `scale`'s optional `significantDigits` argument: `nil` for an empty `text` (no cap), else a validated
 /// positive integer.
 private func parsedSignificantDigits(from text: Substring, transformName: String) throws(ParsingError) -> Int? {
 	if text.isEmpty {
@@ -306,7 +306,7 @@ private func parsedSignificantDigits(from text: Substring, transformName: String
 	} else if let significantDigits = Int(text), significantDigits >= 1 {
 		significantDigits
 	} else {
-		throw .invalidTransformParameters(name: transformName)
+		throw .invalidTransformArguments(name: transformName)
 	}
 }
 
@@ -1080,5 +1080,6 @@ private let dateInputOutputSeparator = Character("_")
 private let hiddenNamedFormatName = "hidden"
 private let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
 
-private let scaleNamePrefix = "scale" + scaleParameterFence
-private let scaleParameterFence = ":"
+private let scaleNamePrefix = "scale" + argumentFence
+private let argumentFence = ":"
+private let argumentSeparator = Character(",")

@@ -93,7 +93,7 @@ uppercase       = "uppercase"
 
 absolute-value  = "absoluteValue"
 round           = "round"
-scale           = "scale" <scale-parameters>
+scale           = "scale" <scale-arguments>
 
 iso             = "iso"
 date-only       = "dateOnly"
@@ -105,9 +105,9 @@ center-start-justify  = "centerStartJustify"
 center-end-justify    = "centerEndJustify"
 right-justify         = "rightJustify"
 
-scale-parameters          = <scale-parameter-fence> <radix> <scale-parameter-separator> <exponent> <scale-parameter-separator> [ <significant-digits> ] <scale-parameter-separator> <fractional-digits> <scale-parameter-fence>
-scale-parameter-fence     = ":"
-scale-parameter-separator = ","
+scale-arguments    = <argument-fence> <radix> <argument-separator> <exponent> <argument-separator> [ <significant-digits> ] <argument-separator> <fractional-digits> <argument-fence>
+argument-fence     = ":" (* fences any transform's argument list; generic, not `scale`-specific *)
+argument-separator = "," (* separates a transform's own arguments; generic, not `scale`-specific *)
 
 radix              = {positive integer}     (* 2-36; base for `exponent` & the rendered digits *)
 exponent           = {non-negative integer} (* divides the field's value by `radix^exponent` before rendering *)

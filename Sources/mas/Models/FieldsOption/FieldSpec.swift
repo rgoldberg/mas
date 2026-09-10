@@ -61,7 +61,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidPosition(Int)
 	case invalidSortOption(Character)
 	case invalidTransform(name: String, expectedKind: String)
-	case invalidTransformParameters(name: String)
+	case invalidTransformArguments(name: String)
 	case missingEndFence
 	case missingFieldName
 	case missingSortPriority
@@ -86,8 +86,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid sort option: \(sortOption)"
 		case let .invalidTransform(name, expectedKind):
 			"Invalid \(expectedKind) transform: \(name)"
-		case let .invalidTransformParameters(name):
-			"Invalid parameters for transform: \(name)"
+		case let .invalidTransformArguments(name):
+			"Invalid arguments for transform: \(name)"
 		case .missingEndFence:
 			"Expected end fence"
 		case .missingFieldName:
