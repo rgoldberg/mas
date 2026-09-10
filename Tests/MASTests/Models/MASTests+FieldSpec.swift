@@ -458,6 +458,94 @@ private extension MASTests {
 			try parseFieldSpecs(".adamID:%cv")
 		}
 	}
+
+	@Test
+	func `justify transforms don't alter the rendered value, & map to their table justification`() {
+		#expect(Transform.leftJustify.applied(to: "x") == "x")
+		#expect(Transform.centerStartJustify.applied(to: "x") == "x")
+		#expect(Transform.centerEndJustify.applied(to: "x") == "x")
+		#expect(Transform.rightJustify.applied(to: "x") == "x")
+		#expect(Transform.leftJustify.justification == .start)
+		#expect(Transform.centerStartJustify.justification == .centerStart)
+		#expect(Transform.centerEndJustify.justification == .centerEnd)
+		#expect(Transform.rightJustify.justification == .end)
+		#expect(Transform.uppercase.justification == nil)
+	}
+
+	@Test
+	func `a justify transform is valid in a string-transform pipeline, but not a number or date one`() throws {
+		#expect(try Transform.parsed(name: "rightJustify", kind: .string) == .rightJustify)
+		#expect(try Transform.parsed(name: "rightJustify", kind: .number) == nil)
+		#expect(try Transform.parsed(name: "rightJustify", kind: .date) == nil)
+	}
+
+	@Test
+	func `a top-level justify transform sets justification & is stripped from the rendered format`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
+		#expect(fieldSpec.justification == .end)
+		// Stripped from the format: a real transform would force stringification
+		// (see `%cn coerces...`), but a bare justify-only pipeline leaves a JSON
+		// number passed through unchanged.
+		#expect(isJSONNumber(fieldSpec.format.rendered(value: .number(42), label: "L", name: "n")))
+	}
+
+	@Test
+	func `the last justify transform in a pipeline wins`() throws {
+		let rightThenLeft = try #require(parseFieldSpecs("adamID:.rightJustify.leftJustify").first)
+		#expect(rightThenLeft.justification == .start)
+		let leftThenRight = try #require(parseFieldSpecs("adamID:.leftJustify.rightJustify").first)
+		#expect(leftThenRight.justification == .end)
+	}
+
+	@Test
+	func `a field spec with no justify transform defaults to start justification`() throws {
+		#expect(try #require(parseFieldSpecs("adamID:.uppercase").first).justification == .start)
+		#expect(try #require(parseFieldSpecs("adamID").first).justification == .start)
+	}
+
+	@Test
+	func `table right-justifies a field per its field spec's justification; a left-justified last column isn't padded`() {
+		let objects: [JSON.Object] = [
+			["adamID": .number(7), "name": .string("Slack")],
+			["adamID": .number(1_234_567), "name": .string("A")],
+		]
+		let fieldSpecs = [
+			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+		]
+		let expected = [
+			.init(repeating: " ", count: 5) + "ID" + "  " + "Name",
+			.init(repeating: " ", count: 6) + "7" + "  " + "Slack",
+			"1234567" + "  " + "A",
+		].joined(separator: "\n")
+		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+	}
+
+	@Test
+	func `table pads even a right-justified last column`() {
+		let objects: [JSON.Object] = [
+			["name": .string("A"), "adamID": .number(1_234_567)],
+			["name": .string("Slack"), "adamID": .number(7)],
+		]
+		let fieldSpecs = [
+			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+		]
+		let expected = [
+			"Name" + .init(repeating: " ", count: 1 + 2 + 5) + "ID",
+			"A" + .init(repeating: " ", count: 4 + 2) + "1234567",
+			"Slack" + .init(repeating: " ", count: 0 + 2 + 6) + "7",
+		].joined(separator: "\n")
+		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+	}
+}
+
+private func isJSONNumber(_ node: JSON.Node) -> Bool {
+	if case .number = node {
+		true
+	} else {
+		false
+	}
 }
 
 private func underscoreBoundaries(

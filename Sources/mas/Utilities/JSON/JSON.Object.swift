@@ -91,7 +91,13 @@ extension [JSON.Object] {
 			return ""
 		}
 		let columns = fieldSpecs.map { fieldSpec in
-			reduce(into: (cells: [fieldSpec.label], maxWidth: fieldSpec.label.terminalWidth)) { column, object in
+			reduce(
+				into: (
+					cells: [fieldSpec.label],
+					maxWidth: fieldSpec.label.terminalWidth,
+					justification: fieldSpec.justification,
+				),
+			) { column, object in
 				let cell = fieldSpec.format
 					.rendered(
 						value: object[nodeKey: .init(rawValue: fieldSpec.name)],
@@ -111,17 +117,19 @@ extension [JSON.Object] {
 		guard let lastColumn = trailingColumns.last else {
 			return (0...count)
 				.map { index in
-					firstColumn.cells[index].terminalJustify(.end, to: firstColumn.maxWidth)
+					firstColumn.cells[index].terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
 				}
 				.joined(separator: "\n")
 		}
 		let middleColumns = trailingColumns.dropLast()
 		return (0...count)
 			.map { index in
-				firstColumn.cells[index].terminalJustify(.end, to: firstColumn.maxWidth)
+				firstColumn.cells[index].terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
 					+ "  "
-					+ middleColumns.map { $0.cells[index].terminalJustify(to: $0.maxWidth + 2) }.joined()
-					+ lastColumn.cells[index]
+					+ middleColumns.map { $0.cells[index].terminalJustify($0.justification, to: $0.maxWidth + 2) }.joined()
+					+ (lastColumn.justification == .start
+						? lastColumn.cells[index]
+						: lastColumn.cells[index].terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
 			}
 			.joined(separator: "\n")
 	}

@@ -39,7 +39,13 @@ private struct KeyValueConfig: OutputConfig {
 	static let standardFieldsConfig = SelectedFieldsConfig(
 		fieldSpecs: [
 			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			.init(name: "adamID", label: "ADAM ID", format: .default(fieldName: "adamID"), sortSpec: nil),
+			.init(
+				name: "adamID",
+				label: "ADAM ID",
+				format: .default(fieldName: "adamID"),
+				sortSpec: nil,
+				justification: defaultJustification(forFieldNamed: "adamID"),
+			),
 			.init(name: "bundleID", label: "Bundle ID", format: .default(fieldName: "bundleID"), sortSpec: nil),
 			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
 			.init(name: "formattedPrice", label: "Price", format: .default(fieldName: "formattedPrice"), sortSpec: nil),
@@ -81,6 +87,7 @@ private struct KeyValueConfig: OutputConfig {
 					],
 				),
 				sortSpec: nil,
+				justification: defaultJustification(forFieldNamed: "fileSizeBytes"),
 			),
 			.init(name: "appStorePageURL", label: "From", format: .default(fieldName: "appStorePageURL"), sortSpec: nil),
 		],

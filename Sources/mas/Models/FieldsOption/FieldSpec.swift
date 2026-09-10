@@ -16,13 +16,27 @@ struct FieldSpec: Equatable {
 	/// fetch (e.g., `outdated`'s `newVersion`, from comparing the installed &
 	/// latest versions), so it's never itself something to fetch.
 	let isSynthesized: Bool
+	/// Table-only column alignment (ignored by `json` / `keyValue` output, which
+	/// have no column to align). Set directly by a display command's own
+	/// `standard` / `all` fields config (see `defaultJustification(forFieldNamed:)`
+	/// in `FieldsConfig.swift`), or by a `--fields` justify transform (see
+	/// `extractJustification(from:)` below).
+	let justification: Justification
 
-	init(name: String, label: String, format: Format, sortSpec: SortSpec?, isSynthesized: Bool = false) {
+	init(
+		name: String,
+		label: String,
+		format: Format,
+		sortSpec: SortSpec?,
+		isSynthesized: Bool = false,
+		justification: Justification = .start,
+	) {
 		self.name = name
 		self.label = label
 		self.format = format
 		self.sortSpec = sortSpec
 		self.isSynthesized = isSynthesized
+		self.justification = justification
 	}
 }
 
@@ -31,7 +45,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 		"""
 		FieldSpec(name: "\(name)", label: "\(label)", format: \(format), sortSpec: \(
 			sortSpec.map(String.init(describing:)) ?? "nil"
-		))
+		), justification: \(justification))
 		"""
 	}
 }
@@ -399,12 +413,15 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	mutating func parseAbsoluteConfig(_ input: inout Substring) throws {
 		while true {
 			let name = try parseName(&input)
+			let label = try parseLabel(&input) ?? name
+			let parsed = try parseFormat(&input, fieldName: name).map(extractJustification)
 			fieldSpecs.append(
 				.init(
 					name: name,
-					label: try parseLabel(&input) ?? name,
-					format: try parseFormat(&input, fieldName: name) ?? .default(fieldName: name),
+					label: label,
+					format: parsed?.format ?? .default(fieldName: name),
 					sortSpec: try parseSortSpecModifier(&input, existing: nil, fieldName: name, outputFormat: outputFormat),
+					justification: parsed?.justification ?? .start,
 				),
 			)
 			guard !input.isEmpty else {
@@ -437,6 +454,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					interpretation: contextualDefault.interpretation,
 					boundaries: contextualDefault.boundaries,
 				),
+				justification: fieldSpec.justification,
 			)
 		}
 			?? fieldSpec
@@ -504,12 +522,14 @@ private extension FieldSpecsBuilder {
 		format: Format?,
 		sortModifierInput input: inout Substring,
 	) throws {
+		let parsed = format.map(extractJustification)
 		let merged = FieldSpec(
 			name: name,
 			label: label ?? existing?.label ?? name,
-			format: format ?? existing?.format ?? .default(fieldName: name),
+			format: parsed?.format ?? existing?.format ?? .default(fieldName: name),
 			sortSpec: // swiftformat:disable:next indent
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
+			justification: parsed?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
 		case .insert:
@@ -608,6 +628,28 @@ private func parseFormat(_ input: inout Substring, fieldName: String) throws(Par
 	} else {
 		try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
 	}
+}
+
+/// Extracts `format`'s last justify transform (if any), for `FieldSpec`'s own
+/// `justification`, stripping it (& any others) from the returned `format` so
+/// it never reaches `Format.rendered` (a justify transform is a no-op there
+/// anyway, but leaving even 1 in a bare `<format-reference>`'s pipeline would
+/// force `%v`-equivalent JSON output to stringify, losing the value's real
+/// type). Only a field's own top-level `<format-reference>` is examined; a
+/// justify transform nested in a placeholder's own success / failure
+/// sub-format (e.g., `%n`'s) has no effect.
+private func extractJustification(from format: Format) -> (format: Format, justification: Justification?) {
+	guard case let .reference(reference) = format else {
+		return (format, nil)
+	}
+	guard let justification = reference.transforms.compactMap(\.justification).last else {
+		return (format, nil)
+	}
+	let valueTransforms = reference.transforms.filter { $0.justification == nil }
+	let strippedFormat = reference.namedFormat == nil && valueTransforms.isEmpty
+		? Format.default(fieldName: "")
+		: .reference(.init(namedFormat: reference.namedFormat, transforms: valueTransforms))
+	return (strippedFormat, justification)
 }
 
 private func parseSortSpecModifier(

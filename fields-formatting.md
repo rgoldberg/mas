@@ -81,7 +81,7 @@ date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
 transform-call-prefix = "."
 
 transform        = <string-transform> | <number-transform> | <date-transform>
-string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
+string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase> | <justify-transform>
 number-transform = <absolute-value> | <round> | <scale>
 date-transform   = <iso> | <date-only> | <local-time-zone>
 
@@ -98,6 +98,12 @@ scale           = "scale" <scale-parameters>
 iso             = "iso"
 date-only       = "dateOnly"
 local-time-zone = "localTimeZone"
+
+justify-transform     = <left-justify> | <center-start-justify> | <center-end-justify> | <right-justify>
+left-justify          = "leftJustify"
+center-start-justify  = "centerStartJustify"
+center-end-justify    = "centerEndJustify"
+right-justify         = "rightJustify"
 
 scale-parameters          = <scale-parameter-fence> <radix> <scale-parameter-separator> <exponent> <scale-parameter-separator> [ <significant-digits> ] <scale-parameter-separator> <fractional-digits> <scale-parameter-fence>
 scale-parameter-fence     = ":"
@@ -132,6 +138,24 @@ radix point.
 - `0` always renders as `0` (`0` followed by `fractional-digits` `0`s, if
   any), never spelled out.
 - E.g., a byte count as whole decimal megabytes: `.scale:10,6,,0:`.
+
+###### Justify Transforms
+
+A `<justify-transform>` sets the field's `table`-output column alignment
+(default: `leftJustify`). `centerStartJustify` & `centerEndJustify` differ only
+when the column's padding is odd-width: `centerStartJustify` puts the extra
+padding character after the value (leaving it nearer the column's start);
+`centerEndJustify` puts it before the value (leaving it nearer the column's
+end). It has no effect on the field's rendered value, so it's a no-op for
+`json` / `key-value` output (which have no column to align), & doesn't force
+`%v` / `%V`'s type-preserving `json` passthrough into a string, unlike every
+other transform.
+
+A `<justify-transform>` only takes effect as part of a field's own top-level
+`<format-reference>` (e.g., `:.rightJustify`, or `:someName.rightJustify`); one
+nested inside a placeholder's own `<success>` / `<failure>` sub-format (e.g.,
+inside `%n`'s success format) has no effect. If more than 1
+`<justify-transform>` appears in a pipeline, the last 1 wins.
 
 ###### `iso` & `localTimeZone`
 

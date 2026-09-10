@@ -38,6 +38,7 @@ private struct TableConfig: OutputConfig {
 				label: "ADAM ID",
 				format: .default(fieldName: "adamID"),
 				sortSpec: nil, // no default item sort: preserve today's natural (unsorted) output order unless requested
+				justification: defaultJustification(forFieldNamed: "adamID"),
 			),
 			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
 			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),

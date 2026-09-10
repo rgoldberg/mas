@@ -136,3 +136,17 @@ func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat
 private let priceFieldNameSet = Set(["price", "formattedPrice"])
 private let versionFieldNameSet = Set(["version", "newVersion", "minimumOSVersion"])
 private let pathFieldNameSet = Set(["path"])
+
+/// Maps a field name directly to its default table-column justification (mas's
+/// own built-in `standard` / `all` fields configs' shared policy: a number, or
+/// a value with a fixed textual suffix that reads better right-aligned, e.g.,
+/// `fileSizeBytes`'s appended `" MB"`, is right-justified; everything else is
+/// left-justified). Consulted only by each display command's own field-spec
+/// construction, not applied generically elsewhere; a user's own `--fields`
+/// justify transform (see `extractJustification(from:)` in `FieldSpec.swift`)
+/// overrides it per field spec.
+func defaultJustification(forFieldNamed fieldName: String) -> Justification {
+	rightJustifiedFieldNameSet.contains(fieldName) ? .end : .start
+}
+
+private let rightJustifiedFieldNameSet = Set(["adamID", "fileSizeBytes"])
