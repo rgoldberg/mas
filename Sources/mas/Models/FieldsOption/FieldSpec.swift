@@ -253,6 +253,45 @@ private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_f
 	case remove // swiftlint:enable sorted_enum_cases
 }
 
+/// A `<format-transform>`: table-output column alignment. Distinct from
+/// `Transform` (never valid inside a placeholder's own success / failure
+/// sub-format), consumed entirely at parse time into `FieldSpec.justification`
+/// — never part of a rendered `Format`.
+private enum FormatTransform: Hashable { // swiftlint:disable:this one_declaration_per_file
+	case centerEndJustify
+	case centerStartJustify
+	case leftJustify
+	case rightJustify
+
+	var justification: Justification {
+		switch self {
+		case .centerEndJustify:
+			.centerEnd
+		case .centerStartJustify:
+			.centerStart
+		case .leftJustify:
+			.start
+		case .rightJustify:
+			.end
+		}
+	}
+
+	init?(simpleName name: String) {
+		switch name {
+		case "centerEndJustify":
+			self = .centerEndJustify
+		case "centerStartJustify":
+			self = .centerStartJustify
+		case "leftJustify":
+			self = .leftJustify
+		case "rightJustify":
+			self = .rightJustify
+		default:
+			return nil
+		}
+	}
+}
+
 /// Applies `<field-order-section>` / `<item-sort-section>` /
 /// `<field-specs-section>` against a baseline `[FieldSpec]`, producing the
 /// working (final) `[FieldSpec]`.
@@ -414,7 +453,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		while true {
 			let name = try parseName(&input)
 			let label = try parseLabel(&input) ?? name
-			let parsed = try parseFormat(&input, fieldName: name).map(extractJustification)
+			let parsed = try parseFormat(&input, fieldName: name)
 			fieldSpecs.append(
 				.init(
 					name: name,
@@ -519,17 +558,16 @@ private extension FieldSpecsBuilder {
 		name: String,
 		existing: FieldSpec?,
 		label: String?,
-		format: Format?,
+		format: (format: Format, justification: Justification)?,
 		sortModifierInput input: inout Substring,
 	) throws {
-		let parsed = format.map(extractJustification)
 		let merged = FieldSpec(
 			name: name,
 			label: label ?? existing?.label ?? name,
-			format: parsed?.format ?? existing?.format ?? .default(fieldName: name),
+			format: format?.format ?? existing?.format ?? .default(fieldName: name),
 			sortSpec: // swiftformat:disable:next indent
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
-			justification: parsed?.justification ?? existing?.justification ?? .start,
+			justification: format?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
 		case .insert:
@@ -609,7 +647,15 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 	return try parseEscapedText(&input, terminatorSet: [formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator])
 }
 
-private func parseFormat(_ input: inout Substring, fieldName: String) throws(ParsingError) -> Format? {
+/// Parses `<format>`: `[ <named-format> ] [ <format-transform-pipeline> ]
+/// [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]`.
+/// `<format-transform-pipeline>` (currently just `<justify-transform>`) is
+/// recognized only here, right after the optional named format & before
+/// anything else — never inside a placeholder's own success / failure
+/// sub-format (`parseDelimitedFormat`/`parseDateSpec` in `Format.swift` don't
+/// call this).
+private func parseFormat(_ input: inout Substring, fieldName: String)
+throws(ParsingError) -> (format: Format, justification: Justification)? {
 	guard input.first == formatModifierPrefix else {
 		return nil
 	}
@@ -617,39 +663,66 @@ private func parseFormat(_ input: inout Substring, fieldName: String) throws(Par
 	let terminatorSet = Set([sortModifierPrefix, fieldSpecSeparator])
 	guard let first = input.first, !terminatorSet.contains(first) else {
 		// `<format-modifier>` present, `<format>` absent: reset to contextual default
-		return .default(fieldName: fieldName)
+		return (.default(fieldName: fieldName), .start)
 	}
-	return if first == placeholderPrefix {
-		try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
-	} else if let reference = try FormatReferenceParser(kind: .string, terminatorSet: terminatorSet).parse(&input) {
-		// A bare `<format-reference>` (`:hidden`, `:someTransform.trimWhitespace`,
-		// etc.) occupies the _whole_ `<format>`
-		.reference(reference)
-	} else {
-		try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
+	var namedFormat = String?.none
+	if first == namePrefix {
+		input.removeFirst()
+		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix]))
+		guard knownNamedFormatNameSet.contains(name) else {
+			throw .unknownNamedFormat(name)
+		}
+		namedFormat = name
 	}
+	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
+	let format: Format =
+		if let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
+			// `%` (a placeholder) or literal text: a template occupies the rest of
+			// `<format>`
+			try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
+		} else if let reference = try FormatReferenceParser(kind: .string, terminatorSet: terminatorSet).parse(&input) {
+			// A trailing `<string-transform-pipeline>` (`namedFormat` was already
+			// consumed above, if present)
+			.reference(namedFormat == nil ? reference : .init(namedFormat: namedFormat, transforms: reference.transforms))
+		} else if let namedFormat {
+			.reference(.init(namedFormat: namedFormat, transforms: .init()))
+		} else {
+			// No name, no format transform survived (backtracked), nothing trailing:
+			// implicit `%v`, preserving the value's real JSON type
+			.default(fieldName: fieldName)
+		}
+	return (format, justification ?? .start)
 }
 
-/// Extracts `format`'s last justify transform (if any), for `FieldSpec`'s own
-/// `justification`, stripping it (& any others) from the returned `format` so
-/// it never reaches `Format.rendered` (a justify transform is a no-op there
-/// anyway, but leaving even 1 in a bare `<format-reference>`'s pipeline would
-/// force `%v`-equivalent JSON output to stringify, losing the value's real
-/// type). Only a field's own top-level `<format-reference>` is examined; a
-/// justify transform nested in a placeholder's own success / failure
-/// sub-format (e.g., `%n`'s) has no effect.
-private func extractJustification(from format: Format) -> (format: Format, justification: Justification?) {
-	guard case let .reference(reference) = format else {
-		return (format, nil)
+/// Parses `<format-transform-pipeline>` (`( <transform-call-prefix>
+/// <format-transform> )+ [ <chain-terminator> ]`): as many leading
+/// `<format-transform>`s as match (last 1 wins), consuming a trailing
+/// `<chain-terminator>` iff present & iff at least 1 matched. Backtracks
+/// (consuming nothing) as soon as a `.`-prefixed name doesn't match a known
+/// `<format-transform>`, leaving it for the caller to try as something else
+/// (e.g., a `<string-transform>`) — per fields-formatting.md, a
+/// `<format-transform>` & every other transform share no names, so there's
+/// nothing to disambiguate: this is 1st-match-wins ordering, not a lookup.
+private func parseFormatTransformPipeline(_ input: inout Substring, terminatorSet: Set<Character>)
+throws(ParsingError) -> Justification? {
+	var justification = Justification?.none
+	while input.first == transformCallPrefix {
+		let beforeTransform = input
+		input.removeFirst()
+		let name = try parseEscapedText(
+			&input,
+			terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator, placeholderPrefix]),
+		)
+		guard let formatTransform = FormatTransform(simpleName: name) else {
+			input = beforeTransform
+			break
+		}
+		justification = formatTransform.justification
 	}
-	guard let justification = reference.transforms.compactMap(\.justification).last else {
-		return (format, nil)
+	if justification != nil, input.first == chainTerminator {
+		input.removeFirst()
 	}
-	let valueTransforms = reference.transforms.filter { $0.justification == nil }
-	let strippedFormat = reference.namedFormat == nil && valueTransforms.isEmpty
-		? Format.default(fieldName: "")
-		: .reference(.init(namedFormat: reference.namedFormat, transforms: valueTransforms))
-	return (strippedFormat, justification)
+	return justification
 }
 
 private func parseSortSpecModifier(
@@ -848,6 +921,12 @@ let removeIndicator = Character("-")
 
 let labelModifierPrefix = Character("=")
 let sortModifierPrefix = Character("/")
+
+/// Optionally closes a `<format-transform-pipeline>` when its last
+/// `<format-transform>` wouldn't otherwise be followed by something that
+/// unambiguously ends it (e.g., a template's literal text starting with a
+/// letter).
+private let chainTerminator = Character(":")
 
 let indexPrefix = Character("@")
 

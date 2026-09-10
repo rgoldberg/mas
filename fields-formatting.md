@@ -6,7 +6,7 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-format      = <format-reference> | ( <placeholder> | <format-text> )+
+format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]
 format-text = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
 ```
 <!--markdownlint-enable line-length-->
@@ -25,18 +25,28 @@ is reset to its contextual default. Formatting has no separate global-default
 tier (unlike item sorting's `<reset-to-contextual>` / `<reset-to-global>`
 distinction).
 
+`<named-format>`, if present, is the base value; `<format-transform-pipeline>`
+(see "Format Transforms" below), if present, always comes next, before
+anything else. What follows is either a `<string-transform-pipeline>` (applied
+to the base value) or an inline template (`<placeholder>` / `<format-text>`);
+never both, & never in the other order.
+
 ##### References
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-format-reference             = <named-format> [ <string-transform-pipeline> ] | <string-transform-pipeline>
 string-placeholder-reference = <named-string-format> [ <string-transform-pipeline> ] | <string-transform-pipeline>
 number-placeholder-reference = <named-number-format> [ <number-transform-pipeline> ] | <number-transform-pipeline>
 date-placeholder-reference   = <named-date-format> [ <date-transform-pipeline> ] | <date-transform-pipeline>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+A placeholder's own `<success>` / `<failure>` sub-format uses these
+placeholder-level references, not `<format>` itself — so a
+`<format-transform-pipeline>` (only ever part of `<format>`) never applies
+inside one.
 
 ##### Named Formats
 
@@ -81,7 +91,7 @@ date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
 transform-call-prefix = "."
 
 transform        = <string-transform> | <number-transform> | <date-transform>
-string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase> | <justify-transform>
+string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
 number-transform = <absolute-value> | <round> | <scale>
 date-transform   = <iso> | <date-only> | <local-time-zone>
 
@@ -98,12 +108,6 @@ scale           = "scale" <scale-arguments>
 iso             = "iso"
 date-only       = "dateOnly"
 local-time-zone = "localTimeZone"
-
-justify-transform     = <left-justify> | <center-start-justify> | <center-end-justify> | <right-justify>
-left-justify          = "leftJustify"
-center-start-justify  = "centerStartJustify"
-center-end-justify    = "centerEndJustify"
-right-justify         = "rightJustify"
 
 scale-arguments    = <argument-fence> <radix> <argument-separator> <exponent> <argument-separator> [ <significant-digits> ] <argument-separator> <fractional-digits> <argument-fence>
 argument-fence     = ":" (* fences any transform's argument list; generic, not `scale`-specific *)
@@ -139,23 +143,49 @@ radix point.
   any), never spelled out.
 - E.g., a byte count as whole decimal megabytes: `.scale:10,6,,0:`.
 
-###### Justify Transforms
+##### Format Transforms
 
-A `<justify-transform>` sets the field's `table`-output column alignment
-(default: `leftJustify`). `centerStartJustify` & `centerEndJustify` differ only
-when the column's padding is odd-width: `centerStartJustify` puts the extra
-padding character after the value (leaving it nearer the column's start);
-`centerEndJustify` puts it before the value (leaving it nearer the column's
-end). It has no effect on the field's rendered value, so it's a no-op for
-`json` / `key-value` output (which have no column to align), & doesn't force
-`%v` / `%V`'s type-preserving `json` passthrough into a string, unlike every
-other transform.
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
+```ebnf
+format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+ [ <chain-terminator> ]
+chain-terminator          = ":"
 
-A `<justify-transform>` only takes effect as part of a field's own top-level
-`<format-reference>` (e.g., `:.rightJustify`, or `:someName.rightJustify`); one
-nested inside a placeholder's own `<success>` / `<failure>` sub-format (e.g.,
-inside `%n`'s success format) has no effect. If more than 1
-`<justify-transform>` appears in a pipeline, the last 1 wins.
+format-transform     = <left-justify> | <center-start-justify> | <center-end-justify> | <right-justify>
+left-justify         = "leftJustify"
+center-start-justify = "centerStartJustify"
+center-end-justify   = "centerEndJustify"
+right-justify        = "rightJustify"
+```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
+
+Unlike a `<transform>`, a `<format-transform>` doesn't act on any value — it
+sets a property of the field itself, currently just its `table`-output column
+alignment (default: `leftJustify`). So it has no effect on the field's
+rendered value: it's a no-op for `json` / `key-value` output (which have no
+column to align), & doesn't force `%v` / `%V`'s type-preserving `json`
+passthrough into a string, unlike every other transform. For this reason, a
+`<format-transform-pipeline>` may only appear where `<format>` itself allows
+it (right after the field's own optional `<named-format>`, before anything
+else) — never inside a placeholder's own `<success>` / `<failure>`
+sub-format, where only ordinary `<transform>`s are valid.
+
+`centerStartJustify` & `centerEndJustify` differ only when the column's
+padding is odd-width: `centerStartJustify` puts the extra padding character
+after the value (leaving it nearer the column's start); `centerEndJustify`
+puts it before the value (leaving it nearer the column's end).
+
+If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
+
+`<chain-terminator>` closes the pipeline; it's needed only when what follows
+wouldn't otherwise unambiguously end it (i.e., isn't itself
+`<transform-call-prefix>`, `<placeholder-prefix>`, or an existing `<format>`
+terminator, e.g., `<sort-modifier-prefix>` / `<field-spec-separator>`) —
+otherwise, whatever follows is read as (part of) an attempted, likely invalid,
+transform name. E.g., `.rightJustify:` unambiguously ends a pipeline before
+literal template text; `.rightJustify` alone doesn't need it before `%v` or a
+sort modifier.
 
 ###### `iso` & `localTimeZone`
 

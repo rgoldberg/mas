@@ -460,26 +460,6 @@ private extension MASTests {
 	}
 
 	@Test
-	func `justify transforms don't alter the rendered value, & map to their table justification`() {
-		#expect(Transform.leftJustify.applied(to: "x") == "x")
-		#expect(Transform.centerStartJustify.applied(to: "x") == "x")
-		#expect(Transform.centerEndJustify.applied(to: "x") == "x")
-		#expect(Transform.rightJustify.applied(to: "x") == "x")
-		#expect(Transform.leftJustify.justification == .start)
-		#expect(Transform.centerStartJustify.justification == .centerStart)
-		#expect(Transform.centerEndJustify.justification == .centerEnd)
-		#expect(Transform.rightJustify.justification == .end)
-		#expect(Transform.uppercase.justification == nil)
-	}
-
-	@Test
-	func `a justify transform is valid in a string-transform pipeline, but not a number or date one`() throws {
-		#expect(try Transform.parsed(name: "rightJustify", kind: .string) == .rightJustify)
-		#expect(try Transform.parsed(name: "rightJustify", kind: .number) == nil)
-		#expect(try Transform.parsed(name: "rightJustify", kind: .date) == nil)
-	}
-
-	@Test
 	func `a top-level justify transform sets justification & is stripped from the rendered format`() throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
 		#expect(fieldSpec.justification == .end)
@@ -501,6 +481,32 @@ private extension MASTests {
 	func `a field spec with no justify transform defaults to start justification`() throws {
 		#expect(try #require(parseFieldSpecs("adamID:.uppercase").first).justification == .start)
 		#expect(try #require(parseFieldSpecs("adamID").first).justification == .start)
+	}
+
+	@Test
+	func `a justify transform composes with a trailing string transform, in that order only`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify.uppercase").first)
+		#expect(fieldSpec.justification == .end)
+		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
+		// Reversed order: `rightJustify` isn't a string transform, so it's a parse
+		// error once it's no longer in leading position.
+		#expect(throws: ParsingError.self) {
+			try parseFieldSpecs("adamID:.uppercase.rightJustify")
+		}
+	}
+
+	@Test
+	func `a chain terminator lets a justify transform be followed directly by template text`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify: MB").first)
+		#expect(fieldSpec.justification == .end)
+		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == " MB")
+	}
+
+	@Test
+	func `a justify transform has no effect inside a placeholder's own success format`() throws {
+		#expect(throws: ParsingError.self) {
+			try parseFieldSpecs("adamID:%V.rightJustify+")
+		}
 	}
 
 	@Test

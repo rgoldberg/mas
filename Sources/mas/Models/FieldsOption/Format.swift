@@ -149,25 +149,12 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 
 	case iso
 	case dateOnly
-	case localTimeZone
-
-	/// Table-only column justification: no effect on the rendered value itself
-	/// (`applied(to:)` is identity). Recognized only in a field's own top-level
-	/// `<format-reference>` (see `extractJustification(from:)` in
-	/// `FieldSpec.swift`), where it's extracted into `FieldSpec.justification` &
-	/// stripped before rendering, so it never reaches `applied(to:)` in
-	/// practice; the case still needs a defined behavior since `Transform`
-	/// itself doesn't track where a value came from.
-	case centerEndJustify
-	case centerStartJustify
-	case leftJustify
-	case rightJustify // swiftlint:enable sorted_enum_cases
+	case localTimeZone // swiftlint:enable sorted_enum_cases
 
 	static let stringTransformSet = Set([Self.capitalize, .lowercase, .sentenceCase, .trimWhitespace, .uppercase])
 	/// `scale` is parameterized & validated separately; see `parsed(name:kind:)`.
 	static let numberTransformSet = Set([Self.absoluteValue, .round])
 	static let dateTransformSet = Set([Self.iso, .dateOnly, .localTimeZone])
-	static let justifyTransformSet = Set([Self.centerEndJustify, .centerStartJustify, .leftJustify, .rightJustify])
 
 	/// Parses a bare `<transform>` `name` (its `<scale-arguments>`, for
 	/// `scale`, included verbatim) valid for `kind`. Returns `nil` if `name`
@@ -212,27 +199,6 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 				?? string
 		case .dateOnly, .iso, .localTimeZone:
 			string // Unreachable here; see doc comment above
-		case .centerEndJustify, .centerStartJustify, .leftJustify, .rightJustify:
-			string // No effect on the value itself; see doc comment above
-		}
-	}
-}
-
-extension Transform { // swiftlint:disable:this file_types_order
-	/// The `Justification` a justify transform requests, `nil` for every other
-	/// transform.
-	var justification: Justification? {
-		switch self {
-		case .centerEndJustify:
-			.centerEnd
-		case .centerStartJustify:
-			.centerStart
-		case .leftJustify:
-			.start
-		case .rightJustify:
-			.end
-		default:
-			nil
 		}
 	}
 }
@@ -261,14 +227,6 @@ private extension Transform { // swiftlint:disable:this file_types_order
 			self = .dateOnly
 		case "localTimeZone":
 			self = .localTimeZone
-		case "centerEndJustify":
-			self = .centerEndJustify
-		case "centerStartJustify":
-			self = .centerStartJustify
-		case "leftJustify":
-			self = .leftJustify
-		case "rightJustify":
-			self = .rightJustify
 		default:
 			return nil
 		}
@@ -372,14 +330,6 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"dateOnly"
 		case .localTimeZone:
 			"localTimeZone"
-		case .centerEndJustify:
-			"centerEndJustify"
-		case .centerStartJustify:
-			"centerStartJustify"
-		case .leftJustify:
-			"leftJustify"
-		case .rightJustify:
-			"rightJustify"
 		}
 	}
 }
@@ -800,7 +750,7 @@ enum TransformKind: String { // swiftlint:disable:this one_declaration_per_file
 		case .number:
 			Transform.numberTransformSet
 		case .string:
-			Transform.stringTransformSet.union(Transform.justifyTransformSet)
+			Transform.stringTransformSet
 		}
 	}
 }
@@ -1072,13 +1022,13 @@ let formatDelimiter = Character("+")
 
 private let placeholderNegation = Character("-")
 private let placeholderCoercion = Character("c")
-private let namePrefix = Character(":")
-private let transformCallPrefix = Character(".")
+let namePrefix = Character(":")
+let transformCallPrefix = Character(".")
 private let dateInputFormatSeparator = Character(",")
 private let dateInputOutputSeparator = Character("_")
 
 private let hiddenNamedFormatName = "hidden"
-private let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
+let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
 
 private let scaleNamePrefix = "scale" + argumentFence
 private let argumentFence = ":"
