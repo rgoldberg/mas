@@ -27,9 +27,14 @@ distinction).
 
 `<named-format>`, if present, is the base value; `<format-transform-pipeline>`
 (see "Format Transforms" below), if present, always comes next, before
-anything else. What follows is either a `<string-transform-pipeline>` (applied
-to the base value) or an inline template (`<placeholder>` / `<format-text>`);
-never both, & never in the other order.
+anything else.
+
+What follows depends on whether `<named-format>` is present: if so, an
+optional trailing `<string-transform-pipeline>` (applied to `<named-format>`'s
+value) is all that's allowed — an inline template is an error, since a named
+format already stands in for the whole render. If `<named-format>` is absent,
+an inline template (`<placeholder>` / `<format-text>`) is allowed instead of
+(never in addition to) a `<string-transform-pipeline>` (applied to `%v`).
 
 ##### References
 

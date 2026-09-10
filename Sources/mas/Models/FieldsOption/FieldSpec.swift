@@ -19,8 +19,8 @@ struct FieldSpec: Equatable {
 	/// Table-only column alignment (ignored by `json` / `keyValue` output, which
 	/// have no column to align). Set directly by a display command's own
 	/// `standard` / `all` fields config (see `defaultJustification(forFieldNamed:)`
-	/// in `FieldsConfig.swift`), or by a `--fields` justify transform (see
-	/// `extractJustification(from:)` below).
+	/// in `FieldsConfig.swift`), or by a `--fields` `<format-transform-pipeline>`
+	/// (see `parseFormat(_:fieldName:)` below).
 	let justification: Justification
 
 	init(
@@ -65,6 +65,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingEndFence
 	case missingFieldName
 	case missingSortPriority
+	case namedFormatFollowedByTemplate(name: String)
 	case nonexistentFieldSpec(forName: String)
 	case unknownNamedFormat(String)
 
@@ -94,6 +95,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected field name"
 		case .missingSortPriority:
 			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
+		case let .namedFormatFollowedByTemplate(name):
+			"Named format '\(name)' cannot be followed by a placeholder or literal text"
 		case let .nonexistentFieldSpec(name):
 			"""
 			Expected existing field spec for field name: \(
@@ -668,17 +671,24 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	var namedFormat = String?.none
 	if first == namePrefix {
 		input.removeFirst()
-		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix]))
+		let name = try parseEscapedText(
+			&input,
+			terminatorSet: terminatorSet.union([transformCallPrefix, placeholderPrefix]),
+		)
 		guard knownNamedFormatNameSet.contains(name) else {
 			throw .unknownNamedFormat(name)
 		}
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
+	if let namedFormat, let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
+		// A template would occupy the rest of `<format>`, incompatible with a
+		// preceding named format, which already stands in for the whole render
+		throw .namedFormatFollowedByTemplate(name: namedFormat)
+	}
 	let format: Format =
 		if let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
-			// `%` (a placeholder) or literal text: a template occupies the rest of
-			// `<format>`
+			// `%` (a placeholder) or literal text: a template occupies the rest of `<format>`
 			try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
 		} else if let reference = try FormatReferenceParser(kind: .string, terminatorSet: terminatorSet).parse(&input) {
 			// A trailing `<string-transform-pipeline>` (`namedFormat` was already

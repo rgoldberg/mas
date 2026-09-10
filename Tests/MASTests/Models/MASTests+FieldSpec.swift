@@ -510,6 +510,21 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a named format is the base for a trailing justify transform & string transform`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID::hidden.rightJustify.uppercase").first)
+		#expect(fieldSpec.justification == .end)
+		#expect(fieldSpec.format.isHidden == false) // The trailing `.uppercase` disqualifies it from `isHidden`
+		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
+	}
+
+	@Test
+	func `a named format cannot be followed by an inline template`() {
+		#expect(throws: ParsingError.namedFormatFollowedByTemplate(name: "hidden")) {
+			try parseFieldSpecs("adamID::hidden%v")
+		}
+	}
+
+	@Test
 	func `table right-justifies a field per its field spec's justification; a left-justified last column isn't padded`() {
 		let objects: [JSON.Object] = [
 			["adamID": .number(7), "name": .string("Slack")],
