@@ -125,8 +125,10 @@ extension [JSON.Object] {
 		return (0...count)
 			.map { index in
 				firstColumn.cells[index].terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
-					+ "  "
-					+ middleColumns.map { $0.cells[index].terminalJustify($0.justification, to: $0.maxWidth + 2) }.joined()
+					+ columnSpacing
+					+ middleColumns
+					.map { $0.cells[index].terminalJustify($0.justification, to: $0.maxWidth) + columnSpacing }
+					.joined()
 					+ (lastColumn.justification == .start
 						? lastColumn.cells[index]
 						: lastColumn.cells[index].terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
@@ -145,6 +147,14 @@ extension [JSON.Object] {
 		map { $0.jsonObject(fieldSpecs: fieldSpecs) }
 	}
 }
+
+/// The gap between adjacent `table` columns. Applied as a literal suffix after
+/// each column is independently justified to its own width — never baked into
+/// a column's own justify width, since that only produces a real trailing gap
+/// for `.start` justification (`.end` / `.centerStart` / `.centerEnd` would
+/// place some or all of it as leading / split padding instead, eliminating or
+/// shrinking the visible gap).
+private let columnSpacing = "  "
 
 private extension JSON.Node {
 	var isNull: Bool {

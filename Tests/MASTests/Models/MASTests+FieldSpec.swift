@@ -234,7 +234,7 @@ private extension MASTests {
 						localization: .canonical,
 						grouping: .ungrouped,
 						interpretation: .numeric,
-						boundaries: .default,
+						boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
 					),
 				),
 			],
@@ -587,6 +587,25 @@ private extension MASTests {
 		].joined(separator: "\n")
 		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
 	}
+
+	@Test
+	func `table still gaps a right-justified middle column from the column after it`() {
+		let objects: [JSON.Object] = [
+			["name": .string("A"), "adamID": .number(1_234_567), "version": .string("1.0")],
+			["name": .string("Slack"), "adamID": .number(7), "version": .string("2.0")],
+		]
+		let fieldSpecs = [
+			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+			FieldSpec(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+		]
+		let expected = [
+			"Name" + .init(repeating: " ", count: 1 + 2 + 5) + "ID" + .init(repeating: " ", count: 2) + "Version",
+			"A" + .init(repeating: " ", count: 4 + 2) + "1234567" + .init(repeating: " ", count: 2) + "1.0",
+			"Slack" + .init(repeating: " ", count: 2 + 6) + "7" + .init(repeating: " ", count: 2) + "2.0",
+		].joined(separator: "\n")
+		#expect(objects.table(fieldSpecs: fieldSpecs) == expected)
+	}
 }
 
 private func isJSONNumber(_ node: JSON.Node) -> Bool {
@@ -608,8 +627,10 @@ private func underscoreBoundaries(
 	)
 }
 
-private func numericSortSpec(interpretation: SortSpec.Interpretation, boundaries: SortSpec.Boundaries = .default)
--> SortSpec {
+private func numericSortSpec(
+	interpretation: SortSpec.Interpretation,
+	boundaries: SortSpec.Boundaries = .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
+) -> SortSpec {
 	.init(
 		priority: 0,
 		source: .input,
@@ -634,7 +655,7 @@ private let adamIDFieldSpec = FieldSpec(
 		localization: .canonical,
 		grouping: .ungrouped,
 		interpretation: .numeric,
-		boundaries: .default,
+		boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
 	),
 )
 private let bundleIDFieldSpec =

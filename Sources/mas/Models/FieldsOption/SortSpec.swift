@@ -192,8 +192,6 @@ struct SortSpec: Equatable {
 
 	/// A fully-parsed `<boundaries>` value.
 	struct Boundaries: Equatable, CustomStringConvertible {
-		static let `default` = Self(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost)
-
 		/// Ordered highest- to lowest-precedence; empty means no explicit
 		/// boundaries at all (only `whitespacePlacement` may still apply).
 		let groups: [BoundaryGroup]
