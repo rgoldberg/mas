@@ -241,10 +241,10 @@ verbose-standard-placeholder-character = <verbose-null> | <verbose-empty> | <ver
 
 concise-null       = "u" (* is null;                       default: empty string; negated default: verbatim field value *)
 verbose-null       = "U" (* is null;                       default: empty string; negated default: verbatim field value *)
-concise-empty      = "e" (* is null or empty;              default: empty string; negated default: verbatim field value *)
-verbose-empty      = "E" (* is null or empty;              default: empty string; negated default: verbatim field value *)
-concise-whitespace = "w" (* is null, empty, or whitespace; default: empty string; negated default: verbatim field value *)
-verbose-whitespace = "W" (* is null, empty, or whitespace; default: empty string; negated default: verbatim field value *)
+concise-empty      = "e" (* is null or an empty string;              default: empty string; negated default: verbatim field value *)
+verbose-empty      = "E" (* is null or an empty string;              default: empty string; negated default: verbatim field value *)
+concise-whitespace = "w" (* is null, an empty string, or a string of only whitespace; default: empty string; negated default: verbatim field value *)
+verbose-whitespace = "W" (* is null, an empty string, or a string of only whitespace; default: empty string; negated default: verbatim field value *)
 
 concise-boolean    = "o" (* is boolean;                    default: verbatim field value *)
 verbose-boolean    = "O" (* is boolean;                    default: verbatim field value *)

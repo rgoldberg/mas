@@ -517,9 +517,9 @@ enum StandardKind: Character { // swiftlint:disable:this one_declaration_per_fil
 		case .isNull:
 			value.isNullish
 		case .isEmpty:
-			value.isNullish || value?.stringValue?.isEmpty == true
+			value.isNullish || value?.as(String.self)?.isEmpty == true
 		case .isWhitespace:
-			value.isNullish || value?.stringValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true
+			value.isNullish || value?.as(String.self)?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true
 		case .isBoolean:
 			if case .bool = value {
 				true

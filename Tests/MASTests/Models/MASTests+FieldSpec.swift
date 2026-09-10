@@ -175,6 +175,26 @@ private extension MASTests {
 	}
 
 	@Test
+	func `evaluates standard placeholders %e & %w as string-only, not structural, emptiness checks`() {
+		let emptyFormat = Format.parts(
+			[.placeholder(.standard(.isEmpty, negated: true, coerced: false, success: nil, failure: nil))],
+		)
+		let whitespaceFormat = Format.parts(
+			[.placeholder(.standard(.isWhitespace, negated: true, coerced: false, success: nil, failure: nil))],
+		)
+		// negated %e / %w default to the verbatim field value when NOT matched,
+		// so an empty array / object (structurally empty, but not an empty
+		// string) round-trips unchanged, proving these placeholders test JSON
+		// string values (or null), not arrays / objects.
+		#expect(emptyFormat.rendered(value: .array(.init([])), label: "L", name: "n").stringValue == "[]")
+		#expect(emptyFormat.rendered(value: .object(.init([])), label: "L", name: "n").stringValue == "{}")
+		#expect(whitespaceFormat.rendered(value: .array(.init([])), label: "L", name: "n").stringValue == "[]")
+		#expect(whitespaceFormat.rendered(value: .object(.init([])), label: "L", name: "n").stringValue == "{}")
+		#expect(emptyFormat.rendered(value: .string(""), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(whitespaceFormat.rendered(value: .string(" "), label: "L", name: "n").stringValue?.isEmpty == true)
+	}
+
+	@Test
 	func `evaluates standard placeholder %u for null & non-null values`() {
 		let placeholder = Placeholder.standard(.isNull, negated: false, coerced: false, success: nil, failure: nil)
 		let format = Format.parts([.placeholder(placeholder)])

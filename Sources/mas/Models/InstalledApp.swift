@@ -44,7 +44,7 @@ struct InstalledApp {
 		// preserve here, unlike `CatalogApp`'s ordered API response
 		let jsonObject = JSON.Object(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let name = name
-		lazyJSONObject = .init(.init(jsonObject.fields.map { ($0.normalized, $1) } + [("name", .string(name))]))
+		lazyJSONObject = .init(.init(jsonObject.normalized.fields + [("name", .string(name))]))
 	}
 
 	func matches(_ appID: AppID) -> Bool {
@@ -89,6 +89,32 @@ private extension JSON.Node {
 		default:
 			value.map { .string(.init(describing: $0)) } ?? .null
 		}
+	}
+}
+
+private extension JSON.Node {
+	var normalized: Self {
+		switch self {
+		case let .object(object):
+			.object(object.normalized)
+		case let .array(array):
+			.array(array.normalized)
+		default:
+			self
+		}
+	}
+}
+
+private extension JSON.Array {
+	var normalized: Self {
+		.init(elements.map(\.normalized))
+	}
+}
+
+private extension JSON.Object {
+	/// Renames keys only; never reorders fields or changes non-key-name values.
+	var normalized: Self {
+		.init(fields.map { ($0.normalized, $1.normalized) })
 	}
 }
 
