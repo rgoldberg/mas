@@ -510,11 +510,8 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a named format is the base for a trailing justify transform & string transform`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID::hidden.rightJustify.uppercase").first)
-		#expect(fieldSpec.justification == .end)
-		#expect(fieldSpec.format.isHidden == false) // The trailing `.uppercase` disqualifies it from `isHidden`
-		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
+	func `a bare hidden named format parses successfully & hides the field`() throws {
+		#expect(try #require(parseFieldSpecs("adamID::hidden").first).format.isHidden)
 	}
 
 	@Test
@@ -528,14 +525,31 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an explicit chain terminator separates a bare named format from a following template`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID::hidden:%v").first)
-		#expect(fieldSpec.justification == .start)
-		// Renders as plain `%v`: `hidden` is discarded (`parseFormat` doesn't yet
-		// embed a named format's own value into a following template), since it has
-		// no value to embed anyway; this only exercises the separator's parsing, not
-		// any real named-format composition.
-		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "ab")
+	func `hidden must be the entire format-modifier: nothing may follow it, even with a separator`() {
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
+			try parseFieldSpecs("adamID::hidden.rightJustify")
+		}
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
+			try parseFieldSpecs("adamID::hidden.uppercase")
+		}
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
+			try parseFieldSpecs("adamID::hidden:%v")
+		}
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
+			try parseFieldSpecs("adamID::hidden:")
+		}
+	}
+
+	@Test
+	func `a sort modifier or later field spec may still follow ::hidden`() throws {
+		// Both terminate the format-modifier itself, so they're not "content
+		// following hidden" within it.
+		let sorted = try #require(parseFieldSpecs("adamID::hidden/1a").first)
+		#expect(sorted.format.isHidden)
+		#expect(sorted.sortSpec?.priority == 1)
+		let fieldSpecs = try parseFieldSpecs("adamID::hidden,bundleID")
+		#expect(fieldSpecs.map(\.name) == ["adamID", "bundleID"])
+		#expect(fieldSpecs.first?.format.isHidden == true)
 	}
 
 	@Test

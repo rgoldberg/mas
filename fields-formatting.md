@@ -32,13 +32,13 @@ to `<named-format>`'s value, or `%v`'s if `<named-format>` is absent) or an
 inline template (`<placeholder>` / `<format-text>`); never both.
 
 Neither a name nor a transform name stops at `<placeholder-prefix>` on its
-own: `<name-prefix>hidden%v` is an attempt at a named format literally called
-`hidden%v` (& fails as one, since it doesn't exist), not `hidden` followed by
-a `%v` placeholder. A `<chain-terminator>` (see "Format Transforms") — needed
-even with 0 `<format-transform>`s, e.g., right after a bare `<named-format>`
-— or `<transform-call-prefix>` (for another transform) is what actually
-separates them: `<name-prefix>hidden<chain-terminator>%v` is `hidden` followed
-by a `%v` placeholder.
+own: `<name-prefix>someFormat%v` is an attempt at a named format literally
+called `someFormat%v` (& fails as one if it doesn't exist), not `someFormat`
+followed by a `%v` placeholder. A `<chain-terminator>` (see "Format
+Transforms") — needed even with 0 `<format-transform>`s, e.g., right after a
+bare `<named-format>` — or `<transform-call-prefix>` (for another transform)
+is what actually separates them: `<name-prefix>someFormat<chain-terminator>%v`
+is `someFormat` followed by a `%v` placeholder.
 
 ##### References
 
@@ -86,7 +86,11 @@ If no named format exists for a referenced name, an error is reported.
 ###### Built-in Named Formats
 
 - `hidden`: Omits the field from output, allowing sorting by a field without
-  displaying it.
+  displaying it. Unlike any other named format, `hidden` must be the entire
+  `<format>` — no `<format-transform-pipeline>`, `<chain-terminator>`,
+  `<string-transform-pipeline>`, or template may follow it, since a hidden
+  field is never rendered, & anything following it would be dead
+  configuration.
 
 ##### Transforms
 

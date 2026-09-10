@@ -55,6 +55,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
 	case coercionNotSupported(Character)
 	case danglingEscape
+	case hiddenFormatFollowedByContent
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
 	case invalidLetter(Character)
@@ -74,6 +75,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Coercion ('c') isn't supported for placeholder letter: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
+		case .hiddenFormatFollowedByContent:
+			"'\(hiddenNamedFormatName)' must be the entire format-modifier; nothing may follow it"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
@@ -676,6 +679,13 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		guard knownNamedFormatNameSet.contains(name) else {
 			throw .unknownNamedFormat(name)
 		}
+		// `hidden` is special: unlike any other named format (once persisted named
+		// formats exist), it precludes anything else in the format-modifier — a
+		// hidden field is never rendered, so a trailing format-transform-pipeline,
+		// string-transform-pipeline, or template would be dead configuration.
+		if name == hiddenNamedFormatName, let next = input.first, !terminatorSet.contains(next) {
+			throw .hiddenFormatFollowedByContent
+		}
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
@@ -685,8 +695,10 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	let format: Format =
 		if let next = input.first, next != transformCallPrefix, !terminatorSet.contains(next) {
 			// `%` (a placeholder) or literal text: a template occupies the rest of
-			// `<format>`. `namedFormat`, if present, is discarded here: only `hidden`
-			// exists today, & it has no value to embed in the template.
+			// `<format>`. `namedFormat`, if present, is discarded here (`hidden` can
+			// never reach this branch: it precludes anything else in the
+			// format-modifier, checked above; only a future user-defined named format
+			// could have a template follow it).
 			// TODO: once user-defined named formats exist, splice `namedFormat`'s own
 			//  rendered value in as this template's first part, instead of discarding it.
 			try FormatContentParser(terminatorSet: terminatorSet).parse(&input)

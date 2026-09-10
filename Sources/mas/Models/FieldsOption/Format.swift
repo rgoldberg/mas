@@ -1027,7 +1027,7 @@ let transformCallPrefix = Character(".")
 private let dateInputFormatSeparator = Character(",")
 private let dateInputOutputSeparator = Character("_")
 
-private let hiddenNamedFormatName = "hidden"
+let hiddenNamedFormatName = "hidden"
 let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
 
 private let scaleNamePrefix = "scale" + argumentFence
