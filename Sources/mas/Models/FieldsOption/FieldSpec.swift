@@ -19,8 +19,8 @@ struct FieldSpec: Equatable {
 	/// Table-only column alignment (ignored by `json` / `keyValue` output, which
 	/// have no column to align). Set directly by a display command's own
 	/// `standard` / `all` fields config (see `defaultJustification(forFieldNamed:)`
-	/// in `FieldsConfig.swift`), or by a `--fields` `<format-transform-pipeline>`
-	/// (see `parseFormat(_:fieldName:)` below).
+	/// in `AppStoreFieldDefaults.swift`), or by a `--fields`
+	/// `<format-transform-pipeline>` (see `parseFormat(_:fieldName:)` below).
 	let justification: Justification
 
 	init(
