@@ -333,6 +333,34 @@ private struct BoundaryRankTable { // swiftlint:disable:this one_declaration_per
 }
 
 extension SortSpec {
+	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
+	/// field of `interpretation`, using `boundaryCharacter` as its single-
+	/// character boundary (`"/"` for Path, `"_"` for Text / Price / Version),
+	/// for `outputFormat`. Doesn't know or care what field this is for by
+	/// name — a caller (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
+	/// `AppStoreFieldDefaults.swift`) maps a field name to an `interpretation` &
+	/// `boundaryCharacter` first.
+	static func `default`(interpretation: Interpretation, boundaryCharacter: Character, outputFormat: OutputFormat)
+	-> Self {
+		let (caseSensitivity, localization) = outputFormat == .json
+			? (CaseSensitivity.sensitive, Localization.canonical)
+			: (.insensitive, .localized(.current))
+		return .init(
+			priority: 0, // Priority is never format- / type-defaulted; callers ignore this field & supply their own
+			source: .input,
+			direction: .ascending,
+			caseSensitivity: caseSensitivity,
+			localization: localization,
+			grouping: interpretation == .version ? .ungrouped : .grouped,
+			interpretation: interpretation,
+			boundaries: .init(
+				groups: [.init(boundaries: [.character(boundaryCharacter)])],
+				collapseContiguous: false,
+				whitespacePlacement: .endmost,
+			),
+		)
+	}
+
 	/// `fieldName` / `outputFormat` are only consulted when `existing` is `nil`
 	/// (a fresh `<sort>`, not inheriting from another field spec's sort): they
 	/// select the fields.md "Default Sort Options" row used to fill in any

@@ -5,8 +5,6 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import Foundation
-
 // MARK: - mas's own field-name defaults
 
 // The generic `--fields` engine (`Models/FieldsOption/`) has no concept of
@@ -16,31 +14,20 @@ private import Foundation
 // here, rather than in `Models/FieldsOption/`, keeps the generic engine
 // reusable independent of mas.
 
-/// Maps a field name (& the active output format) directly to the `SortSpec`
-/// dimensions used to fill in an otherwise-incomplete explicit `<sort>`
-/// (fields.md's "Default Sort Options" table), without an intermediate "value
-/// kind" type: callers that don't recognize `fieldName` as a price / version /
-/// path field get the generic (numeric-interpretation) row.
+/// Maps a field name directly to the `interpretation` & boundary character
+/// `SortSpec.default(interpretation:boundaryCharacter:outputFormat:)` needs to
+/// compute the fields.md "Default Sort Options" row used to fill in an
+/// otherwise-incomplete explicit `<sort>`. A field name this doesn't recognize
+/// as price / version / path gets the generic (numeric-interpretation,
+/// underscore-boundary) row.
 func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
 	let interpretation = priceFieldNameSet.contains(fieldName)
 		? SortSpec.Interpretation.price
 		: versionFieldNameSet.contains(fieldName) ? .version : .numeric
-	let (caseSensitivity, localization) = outputFormat == .json
-		? (SortSpec.CaseSensitivity.sensitive, SortSpec.Localization.canonical)
-		: (.insensitive, .localized(.current))
-	return .init(
-		priority: 0, // Priority is never format- / type-defaulted; callers ignore this field & supply their own
-		source: .input,
-		direction: .ascending,
-		caseSensitivity: caseSensitivity,
-		localization: localization,
-		grouping: interpretation == .version ? .ungrouped : .grouped,
+	return .default(
 		interpretation: interpretation,
-		boundaries: .init(
-			groups: [.init(boundaries: [.character(pathFieldNameSet.contains(fieldName) ? "/" : "_")])],
-			collapseContiguous: false,
-			whitespacePlacement: .endmost,
-		),
+		boundaryCharacter: pathFieldNameSet.contains(fieldName) ? "/" : "_",
+		outputFormat: outputFormat,
 	)
 }
 

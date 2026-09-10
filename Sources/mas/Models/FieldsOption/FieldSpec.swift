@@ -256,45 +256,6 @@ private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_f
 	case remove // swiftlint:enable sorted_enum_cases
 }
 
-/// A `<format-transform>`: table-output column alignment. Distinct from
-/// `Transform` (never valid inside a placeholder's own success / failure
-/// sub-format), consumed entirely at parse time into `FieldSpec.justification`
-/// — never part of a rendered `Format`.
-private enum FormatTransform: Hashable { // swiftlint:disable:this one_declaration_per_file
-	case centerEndJustify
-	case centerStartJustify
-	case leftJustify
-	case rightJustify
-
-	var justification: Justification {
-		switch self {
-		case .centerEndJustify:
-			.centerEnd
-		case .centerStartJustify:
-			.centerStart
-		case .leftJustify:
-			.start
-		case .rightJustify:
-			.end
-		}
-	}
-
-	init?(simpleName name: String) {
-		switch name {
-		case "centerEndJustify":
-			self = .centerEndJustify
-		case "centerStartJustify":
-			self = .centerStartJustify
-		case "leftJustify":
-			self = .leftJustify
-		case "rightJustify":
-			self = .rightJustify
-		default:
-			return nil
-		}
-	}
-}
-
 /// Applies `<field-order-section>` / `<item-sort-section>` /
 /// `<field-specs-section>` against a baseline `[FieldSpec]`, producing the
 /// working (final) `[FieldSpec]`.
@@ -716,6 +677,27 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	return (format, justification ?? .start)
 }
 
+private extension Justification {
+	/// A `<format-transform>`'s `<format-transform-name>`: table-output column
+	/// alignment. Consumed entirely at parse time into `FieldSpec.justification`
+	/// — never part of a rendered `Format` (unlike `Transform`, never valid
+	/// inside a placeholder's own success / failure sub-format).
+	init?(formatTransformSimpleName name: String) {
+		switch name {
+		case "centerEndJustify":
+			self = .centerEnd
+		case "centerStartJustify":
+			self = .centerStart
+		case "leftJustify":
+			self = .start
+		case "rightJustify":
+			self = .end
+		default:
+			return nil
+		}
+	}
+}
+
 /// Parses `<format-transform-pipeline>` (`( <transform-call-prefix>
 /// <format-transform> )+`): as many leading `<format-transform>`s as match
 /// (last 1 wins). Backtracks (consuming nothing) as soon as a `.`-prefixed
@@ -733,11 +715,11 @@ throws(ParsingError) -> Justification? {
 		let beforeTransform = input
 		input.removeFirst()
 		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
-		guard let formatTransform = FormatTransform(simpleName: name) else {
+		guard let matched = Justification(formatTransformSimpleName: name) else {
 			input = beforeTransform
 			break
 		}
-		justification = formatTransform.justification
+		justification = matched
 	}
 	return justification
 }
