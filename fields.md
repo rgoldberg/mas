@@ -615,6 +615,16 @@ ungrouped = "u"
 grouped   = "g"
 ```
 
+`<grouped>` strips a numeric grouping separator (e.g., `,` in `1,234`; see
+`<localization>` for which separator) from a value before comparing, so a
+grouped number compares as a single number (`1,234` as `1234`) rather than
+being broken into smaller ones by the separator. `<ungrouped>` doesn't strip
+it.
+
+Only affects `<numeric>` `<interpretation>`: meaningless for `<lexical>`
+(never parses a value as a number), & for `<price>` / `<version>` (each
+already has its own whole-value algorithm & ignores it, like `<boundaries>`).
+
 ##### Sort Interpretation
 
 <!--editorconfig-checker-disable-->
