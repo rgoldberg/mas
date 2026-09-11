@@ -15,6 +15,16 @@ internal import JSONAST
 enum Format: Equatable {
 	case parts([FormatPart])
 	case reference(FormatReference)
+	/// `<format>`'s own top-level `<value-transform-pipeline>` (`kind` inferred
+	/// at parse time from its 1st `<transform>`; see `parseValueTransform
+	/// PipelineThenTemplate(_:namedFormat:terminatorSet:)`), optionally followed
+	/// by a `<pipeline-terminator>`-separated template: unlike `.reference`
+	/// (used inside a placeholder's own sub-format, where the base value's
+	/// `stringValue` never fails to exist), `.number` / `.date` `kind`s first
+	/// coerce the field's value, mimicking `<placeholder-coercion>` — & mimicking
+	/// unhandled placeholder failure (blank) if that coercion fails. `template`
+	/// empty means no `<pipeline-terminator>` / template followed.
+	case valuePipeline(FormatReference, kind: TransformKind, template: [FormatPart])
 
 	/// The standard default: `%v`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
@@ -48,6 +58,8 @@ extension Format: CustomStringConvertible { // swiftlint:disable:this file_types
 			"parts(\(parts))"
 		case let .reference(reference):
 			"reference(\(reference))"
+		case let .valuePipeline(reference, kind, template):
+			"valuePipeline(\(reference), kind: \(kind), template: \(template))"
 		}
 	}
 }
@@ -67,24 +79,53 @@ extension Format { // swiftlint:disable:this file_types_order
 			if parts.count == 1, case .placeholder(.value(success: nil)) = parts[0] {
 				value ?? .null
 			} else {
-				.string(
-					parts.reduce(into: "") { result, part in
-						switch part {
-						case let .text(text):
-							result += text
-						case let .placeholder(placeholder):
-							guard let rendered = placeholder.rendered(value: value, label: label, name: name) else {
-								result = ""
-								return // Formatting aborts on unhandled placeholder failure; ignore the rest of `parts`
-							}
-							result += rendered
-						}
-					},
-				)
+				.string(renderedParts(parts, value: value, label: label, name: name) ?? "")
 			}
 		case let .reference(reference):
 			reference.rendered(value: value)
+		case let .valuePipeline(reference, kind, template):
+			.string(
+				renderedValuePipeline(reference, kind: kind, value: value).flatMap { pipelineString in
+					renderedParts(template, value: value, label: label, name: name).map { pipelineString + $0 }
+				} ?? "",
+			)
 		}
+	}
+}
+
+/// Renders `parts` against `value` / `label` / `name`. `nil` iff an unhandled
+/// placeholder failure aborts the whole format (formatting then renders
+/// blank; see callers).
+private func renderedParts(_ parts: [FormatPart], value: JSON.Node?, label: String, name: String) -> String? {
+	var result = ""
+	for part in parts {
+		switch part {
+		case let .text(text):
+			result += text
+		case let .placeholder(placeholder):
+			guard let rendered = placeholder.rendered(value: value, label: label, name: name) else {
+				return nil
+			}
+			result += rendered
+		}
+	}
+	return result
+}
+
+/// `Format.valuePipeline`'s own reference: `nil` iff coercing `value` to
+/// `kind` fails (`.string` never fails: `stringValue` always exists, `nil`
+/// becoming `""`). `reference.namedFormat` is ignored, same as
+/// `FormatReference.rendered(value:)` below (see its own doc comment).
+private func renderedValuePipeline(_ reference: FormatReference, kind: TransformKind, value: JSON.Node?) -> String? {
+	switch kind {
+	case .string:
+		reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
+	case .number:
+		isNumber(value, coerced: true)
+			? reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
+			: nil
+	case .date:
+		parsedDate(from: value).map { DateSpec(outputTransforms: reference.transforms).formatted($0) }
 	}
 }
 
@@ -777,8 +818,7 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 		var transforms = [Transform]()
 		while input.first == transformCallPrefix {
 			input.removeFirst()
-			let name =
-				try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix]).union(dateSeparatorSet))
+			let name = try parseTransformName(&input, terminatorSet: terminatorSet.union(dateSeparatorSet))
 			guard let transform = try Transform.parsed(name: name, kind: kind) else {
 				throw .invalidTransform(name: name, expectedKind: kind.rawValue)
 			}
@@ -792,6 +832,43 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 		}
 		return namedFormat != nil || !transforms.isEmpty ? .init(namedFormat: namedFormat, transforms: transforms) : nil
 	}
+}
+
+/// Parses 1 `<transform-call>`'s `<transform>` name, right after its
+/// already-consumed `<transform-call-prefix>`: its `<group-arguments>` /
+/// `<scale-arguments>` fence, if present, is included verbatim (exactly as
+/// `Transform.parsed(name:kind:)` expects). Unlike a bare `parseEscapedText`
+/// scan, `<chain-terminator>` (`:`) always ends the name UNLESS the name
+/// scanned so far is `group` / `scale` & is immediately followed by `:` (that
+/// transform's own argument fence) — only then does scanning continue through
+/// to the fence's own closing `:`. This keeps a bare (argument-less)
+/// transform's name from swallowing a subsequent `<pipeline-terminator>`
+/// (`::`) or stray `<chain-terminator>`, both only meaningful to `<format>`'s
+/// own top-level `<value-transform-pipeline>` (every other
+/// `<*-transform-pipeline>` site's `terminatorSet` never lets a
+/// `<chain-terminator>` reach this function in the first place).
+func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
+	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
+	var afterOpenFence = input
+	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == chainTerminator else {
+		return name
+	}
+	afterOpenFence.removeFirst() // the candidate fence's opening ':'
+	guard afterOpenFence.first != chainTerminator else {
+		// An immediately-empty fence is never valid syntax anyway (`group` /
+		// `scale` both require nonempty arguments), so this 2nd ':' can't be a
+		// fence's own closing 1: it's `<format>`'s `<pipeline-terminator>`
+		// (`::`) instead, & the 1st ':' isn't part of this (argument-less)
+		// name at all.
+		return name
+	}
+	input = afterOpenFence
+	let arguments = try parseEscapedText(&input, terminatorSet: Set([chainTerminator]))
+	guard input.first == chainTerminator else {
+		throw .missingEndFence
+	}
+	input.removeFirst() // the fence's closing ':'
+	return name + argumentFence + arguments + argumentFence
 }
 
 /// Parses `<standard-format>` / `<failure-format>` / `<number-format>`-shaped
@@ -832,10 +909,32 @@ struct FormatContentParser { // swiftlint:disable:this one_declaration_per_file
 /// The kind of transform pipeline expected at a given parse site, per
 /// `<date-transform-pipeline>` / `<number-transform-pipeline>` /
 /// `<string-transform-pipeline>`.
-enum TransformKind: String { // swiftlint:disable:this one_declaration_per_file
+enum TransformKind: String, CaseIterable { // swiftlint:disable:this one_declaration_per_file
 	case date
 	case number
 	case string
+
+	/// Which kind `name` (a `<transform>`'s own name, `<group-arguments>` /
+	/// `<scale-arguments>` included verbatim if present) belongs to: tried by
+	/// actually attempting to parse it as each kind in turn (rather than a
+	/// separate, duplicated name-shape check), keeping the 1st success. Every
+	/// `<transform>` name is unique across kinds, so this is never ambiguous:
+	/// trying a "wrong" kind for a given name always fails cleanly (`nil`, not a
+	/// thrown error, since `Transform.parsed(name:kind:)` only ever attempts
+	/// argument parsing — which is what can throw — once it's already matched
+	/// `name`'s own shape to `kind`), so a thrown error (e.g., invalid
+	/// `<group-arguments>`) can only come from the kind `name`'s shape actually
+	/// belongs to; propagating it immediately, without trying the remaining
+	/// kinds, is therefore correct. Used only by `<format>`'s own top-level
+	/// `<value-transform-pipeline>`, the 1 site that can't know its kind up
+	/// front (see `parseValueTransformPipelineThenTemplate(_:namedFormat:
+	/// terminatorSet:)` in `FieldSpec.swift`).
+	static func of(transformName name: String) throws(ParsingError) -> Self? {
+		for kind in allCases where try Transform.parsed(name: name, kind: kind) != nil {
+			return kind
+		}
+		return nil
+	}
 
 	var allowedTransformSet: Set<Transform> {
 		switch self {
@@ -1108,6 +1207,10 @@ let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with c
 
 private let groupSimpleName = "group"
 private let groupNamePrefix = groupSimpleName + argumentFence
-private let scaleNamePrefix = "scale" + argumentFence
+private let scaleSimpleName = "scale"
+private let scaleNamePrefix = scaleSimpleName + argumentFence
 private let argumentFence = ":"
 private let argumentSeparator = Character(",")
+/// The only `<transform>`s whose own grammar defines a `:`-fenced argument
+/// list; see `parseTransformName(_:terminatorSet:)`.
+private let fenceTakingSimpleNameSet = Set([groupSimpleName, scaleSimpleName])

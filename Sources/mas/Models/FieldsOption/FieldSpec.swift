@@ -56,6 +56,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case coercionNotSupported(Character)
 	case danglingEscape
 	case hiddenFormatFollowedByContent
+	case incompletePipelineTerminator
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
 	case invalidLetter(Character)
@@ -68,6 +69,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
 	case terminalNumberTransformFollowedByMore(name: String)
+	case transformCallAfterPipelineTerminator
 	case unknownNamedFormat(String)
 	case unsupportedDateInputFormat
 	case unsupportedDateOutputFormat
@@ -80,6 +82,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected a character to escape after trailing '\\'"
 		case .hiddenFormatFollowedByContent:
 			"'\(hiddenNamedFormatName)' must be the entire format-modifier; nothing may follow it"
+		case .incompletePipelineTerminator:
+			"Expected another ':' to complete the pipeline terminator '::'"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
@@ -108,6 +112,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"""
 		case let .terminalNumberTransformFollowedByMore(name):
 			"'\(name)' must be the last transform in its number-transform-pipeline; nothing may follow it"
+		case .transformCallAfterPipelineTerminator:
+			"A transform call ('.') cannot immediately follow a pipeline terminator ('::')"
 		case let .unknownNamedFormat(name):
 			"Unknown named format: \(name)"
 		case .unsupportedDateInputFormat:
@@ -705,10 +711,11 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			// TODO: once user-defined named formats exist, splice `namedFormat`'s own
 			//  rendered value in as this template's first part, instead of discarding it.
 			try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
-		} else if let reference = try FormatReferenceParser(kind: .string, terminatorSet: terminatorSet).parse(&input) {
-			// A trailing `<string-transform-pipeline>` (`namedFormat` was already
-			// consumed above, if present)
-			.reference(namedFormat == nil ? reference : .init(namedFormat: namedFormat, transforms: reference.transforms))
+		} else if input.first == transformCallPrefix {
+			// A trailing `<value-transform-pipeline>` (`namedFormat` was already
+			// consumed above, if present), optionally followed by a
+			// `<pipeline-terminator>` & a template.
+			try parseValueTransformPipelineThenTemplate(&input, namedFormat: namedFormat, terminatorSet: terminatorSet)
 		} else if let namedFormat {
 			.reference(.init(namedFormat: namedFormat, transforms: .init()))
 		} else {
@@ -717,6 +724,71 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			.default(fieldName: fieldName)
 		}
 	return (format, justification ?? .start)
+}
+
+/// `<format>`'s trailing `<value-transform-pipeline>` (generalizing the old
+/// `<string-transform-pipeline>`-only pipeline to `<number-transform-
+/// pipeline>` / `<date-transform-pipeline>` too): unlike every other
+/// `<*-transform-pipeline>` site, which always knows its kind statically from
+/// its own grammar position (e.g., `%n{...}`'s inner pipeline is always
+/// number-kind), `<format>` itself doesn't, since a field's raw value has no
+/// fixed type — so kind is inferred from the pipeline's own 1st `<transform>`
+/// instead. Every `<transform>` name is unique across kinds, so peeking just
+/// the 1st 1 unambiguously determines kind for the whole pipeline;
+/// `FormatReferenceParser.parse` then enforces that every later `<transform>`
+/// shares it (a mismatched name throws `.invalidTransform`, same as it always
+/// has). `namedFormat`, if present, folds into the returned reference,
+/// mirroring the old bare `<string-transform-pipeline>` case this replaces.
+///
+/// A trailing template may follow. A last `<transform>` that closed its own
+/// argument fence (`group` / `scale` with explicit arguments) already ends
+/// unambiguously, so — exactly like a `<format-transform-pipeline>`'s own
+/// `<chain-terminator>` before a template — nothing extra is needed: the
+/// template (if any) starts right after the fence's closing `:`. An
+/// argument-less last `<transform>`'s name-scan can't otherwise tell "more
+/// pipeline content" apart from "a template follows" on its own (`group` /
+/// `scale` also use `<chain-terminator>` (`:`) as their own argument fence),
+/// so it needs a doubled `<pipeline-terminator>` (`::`) first.
+private func parseValueTransformPipelineThenTemplate(
+	_ input: inout Substring,
+	namedFormat: String?,
+	terminatorSet: Set<Character>,
+) throws(ParsingError) -> Format {
+	var peek = input
+	peek.removeFirst() // '.'
+	let firstName = try parseTransformName(&peek, terminatorSet: terminatorSet)
+	guard let kind = try TransformKind.of(transformName: firstName) else {
+		throw .invalidTransform(name: firstName, expectedKind: "value")
+	}
+	let beforePipeline = input
+	guard let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) else {
+		preconditionFailure("Just confirmed a leading transform call for \(kind), so this always succeeds")
+	}
+	let finalReference =
+		namedFormat == nil ? reference : FormatReference(namedFormat: namedFormat, transforms: reference.transforms)
+	let lastTransformHadArguments = beforePipeline[beforePipeline.index(before: input.startIndex)] == chainTerminator
+	if !lastTransformHadArguments {
+		guard input.first == chainTerminator else {
+			return .valuePipeline(finalReference, kind: kind, template: [])
+		}
+		var afterFirstColon = input
+		afterFirstColon.removeFirst()
+		guard afterFirstColon.first == chainTerminator else {
+			throw .incompletePipelineTerminator
+		}
+		input = afterFirstColon
+		input.removeFirst() // the pipeline terminator's 2nd ':'
+	}
+	guard let next = input.first, !terminatorSet.contains(next) else {
+		return .valuePipeline(finalReference, kind: kind, template: [])
+	}
+	guard next != transformCallPrefix else {
+		throw .transformCallAfterPipelineTerminator
+	}
+	guard case let .parts(template) = try FormatContentParser(terminatorSet: terminatorSet).parse(&input) else {
+		preconditionFailure("FormatContentParser always returns .parts")
+	}
+	return .valuePipeline(finalReference, kind: kind, template: template)
 }
 
 private extension Justification {
@@ -969,8 +1041,10 @@ let sortModifierPrefix = Character("/")
 /// Optionally closes a `<format-transform-pipeline>` when its last
 /// `<format-transform>` wouldn't otherwise be followed by something that
 /// unambiguously ends it (e.g., a template's literal text starting with a
-/// letter).
-private let chainTerminator = Character(":")
+/// letter). Doubled, it's `<format>`'s own `<pipeline-terminator>` (see
+/// `Format.swift`'s `parseTransformName(_:terminatorSet:)`), which serves the
+/// same purpose for a `<value-transform-pipeline>`.
+let chainTerminator = Character(":")
 
 let indexPrefix = Character("@")
 

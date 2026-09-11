@@ -6,7 +6,8 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <chain-terminator> ] [ <string-transform-pipeline> | ( <placeholder> | <format-text> )+ ]
+format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <chain-terminator> ] [ <value-transform-pipeline> [ <pipeline-terminator> ] [ <template> ] | <template> ]
+template    = ( <placeholder> | <format-text> )+
 format-text = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
 ```
 <!--markdownlint-enable line-length-->
@@ -27,9 +28,23 @@ distinction).
 
 `<named-format>`, if present, is the base value; `<format-transform-pipeline>`
 (see "Format Transforms" below), if present, always comes next, before
-anything else. What follows is either a `<string-transform-pipeline>` (applied
-to `<named-format>`'s value, or `%v`'s if `<named-format>` is absent) or an
-inline template (`<placeholder>` / `<format-text>`); never both.
+anything else. What follows is a `<value-transform-pipeline>` (applied to
+`<named-format>`'s value, or `%v`'s if `<named-format>` is absent), a
+`<template>` (`<placeholder>` / `<format-text>`), or both, in that order — a
+`<value-transform-pipeline>` alone renders as its own output; followed by a
+`<template>`, its output is instead prepended to the template's own rendered
+value (see "Value Coercion" & "Pipeline Terminator" below for exactly when
+that combination needs a `<pipeline-terminator>` between the 2).
+
+Unlike every other `<*-transform-pipeline>` site — a placeholder's own
+`<success>` / `<failure>` sub-format always knows its kind up front from its
+own grammar position (e.g., `%n{...}`'s inner pipeline is always
+`<number-transform-pipeline>`) — `<value-transform-pipeline>` infers kind from
+its own 1st `<transform>` instead, since a field's raw value has no fixed
+type. This is never ambiguous: no 2 kinds define the same `<transform>` name,
+so the 1st `<transform>`'s name alone determines kind for the rest of the
+pipeline (mixing kinds in 1 pipeline is a `<transform>` name error, same as
+using any other unrecognized name would be).
 
 Neither a name nor a transform name stops at `<placeholder-prefix>` on its
 own: `<name-prefix>someFormat%v` is an attempt at a named format literally
@@ -97,6 +112,12 @@ If no named format exists for a referenced name, an error is reported.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
+(* Only `<format>` itself uses this directly; every other `<*-transform-
+   pipeline>` site (a placeholder's own `<success>` / `<failure>` sub-format)
+   already knows its kind statically & uses 1 of the 3 alternatives below
+   directly instead. *)
+value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <date-transform-pipeline>
+
 string-transform-pipeline = ( <transform-call-prefix> <string-transform> )+
 date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
 
@@ -158,6 +179,61 @@ fractional-digits  = {non-negative integer} (* exactly this many `radix` digits 
     `<named-date-format>` `n` immediately precedes `t`: `n`'s value.
   - Otherwise: the field's value.
 
+###### Value Coercion
+
+A `<value-transform-pipeline>` (`<format>`'s own top-level pipeline, per its
+inferred kind) coerces its input value first, the same way `<placeholder-
+coercion>` (see "Coercion" under "Placeholders" below) does for `%cn` /
+`%co` / `%ct` / `%cf`: a `<number-transform-pipeline>` also accepts a JSON
+string that itself parses as a number (not just a real JSON number); a
+`<date-transform-pipeline>` accepts anything `%d` would (ISO-8601 datetime,
+ISO-8601 date-only, or a Unix epoch numeric timestamp, as a real JSON number or
+a JSON string). Unlike `<placeholder-coercion>`, this is always on — there's
+no uncoerced `<value-transform-pipeline>` form to opt out of it with, since
+`<format>` has no placeholder-letter syntax slot for such a flag. A
+`<string-transform-pipeline>` never needs coercion: a field's `stringValue`
+(its rendered representation) always exists, even for `null` (`""`).
+
+If coercion fails, the entire `<format>` renders blank, mimicking an
+unhandled placeholder failure (see "Success & Failure" under "Placeholders"
+below) — this applies even when a `<template>` follows the
+`<value-transform-pipeline>` (see "Pipeline Terminator" next): the
+`<template>` is never rendered either.
+
+###### Pipeline Terminator
+
+A `<value-transform-pipeline>` may be followed directly by a `<template>`,
+whose rendered value is appended after the pipeline's own. Whether a
+`<pipeline-terminator>` (`::`) must separate the 2 depends on how the
+pipeline's own last `<transform>` ends:
+
+- If it closed its own `<argument-fence>` (`group` / `scale` with explicit
+  arguments): that closing `:` already unambiguously ends the pipeline, so
+  (exactly like a `<format-transform-pipeline>`'s own single
+  `<chain-terminator>`) nothing extra is needed at all — the `<template>`
+  starts right after it. E.g., `.scale:10,6,,0:.group:de_DE: MB` (no
+  `<pipeline-terminator>`).
+- Otherwise (an argument-less `<transform>`, incl. bare `group` / `scale`):
+  the pipeline's own name-scan can't tell "more pipeline content" apart from
+  "a `<template>` follows" on its own, since `group` / `scale` also use
+  `<chain-terminator>` as their own `<argument-fence>` — so a
+  `<pipeline-terminator>` is required. A single stray `<chain-terminator>`
+  there (`:` not doubled) is a parse error, not a lenient no-op.
+
+E.g., all of the following are valid:
+
+- `.round.absoluteValue` (no `<template>`: no `<pipeline-terminator>` needed
+  either)
+- `.round.absoluteValue::%v` (`<pipeline-terminator>`, then a `%v` placeholder)
+- `.round.absoluteValue/1d` (`<sort-modifier>` follows, not a `<template>`: no
+  `<pipeline-terminator>` needed)
+- `.round.absoluteValue,name` (`<field-spec-separator>` follows: likewise)
+
+But `.round::.absoluteValue` is invalid: a `<transform-call-prefix>` (`.`)
+can't immediately follow a `<pipeline-terminator>` (once a
+`<pipeline-terminator>` ends the pipeline, only a `<template>`, or nothing,
+may follow).
+
 ###### `group`
 
 `group` inserts `<group-separator>` into the field's integer part every
@@ -216,6 +292,11 @@ center-end-justify   = "centerEndJustify"
 right-justify        = "rightJustify"
 
 chain-terminator = ":"
+
+(* See "Pipeline Terminator" under "Transforms" above; unlike `<chain-
+   terminator>`, this is never part of `<format-transform-pipeline>`'s own
+   context, since a `<format-transform>` never takes arguments. *)
+pipeline-terminator = <chain-terminator> <chain-terminator>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -241,15 +322,18 @@ If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
 `<chain-terminator>` (see `<format>` above; it's not part of
 `<format-transform-pipeline>` itself, since it can appear even with 0
 `<format-transform>`s, e.g., right after a bare `<named-format>`) closes off
-naming / transforms before whatever follows (a `<string-transform-pipeline>`
-or a template). It's needed only when what follows wouldn't otherwise
+naming / transforms before whatever follows (a `<value-transform-pipeline>` or
+a `<template>`). It's needed only when what follows wouldn't otherwise
 unambiguously do so (i.e., isn't itself `<transform-call-prefix>`, or an
 existing `<format>` terminator, e.g., `<sort-modifier-prefix>` /
 `<field-spec-separator>`) — otherwise, whatever follows (a `<placeholder>`
 included) is read as (part of) an attempted, likely invalid, name. E.g.,
 `.rightJustify:` unambiguously ends a pipeline before literal template text or
 a `%v` placeholder; `.rightJustify` alone doesn't need it before a sort
-modifier, since that already unambiguously ends it.
+modifier, since that already unambiguously ends it. (A `<value-transform-
+pipeline>` followed directly by a `<template>` has its own, similar-in-spirit
+but not identical, disambiguation rule; see "Pipeline Terminator" under
+"Transforms" above.)
 
 ###### `iso` & `localTimeZone`
 

@@ -600,6 +600,59 @@ private extension MASTests {
 	}
 
 	@Test
+	func `infers a value-transform-pipeline's kind from its 1st transform`() throws {
+		let numberFormat = try #require(parseFieldSpecs("adamID:.round.absoluteValue").first).format
+		#expect(numberFormat.rendered(value: .number(-5.6), label: "L", name: "n").stringValue == "6")
+		let dateFormat = try #require(parseFieldSpecs("adamID:.dateOnly").first).format
+		let rendered = dateFormat.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n").stringValue
+		#expect(rendered?.count == "yyyy-MM-dd".count) // Exact day depends on the test machine's local time zone
+	}
+
+	@Test
+	func `a value-transform-pipeline's number / date kind coerces its value, blanking on failure`() throws {
+		let numberFormat = try #require(parseFieldSpecs("adamID:.round").first).format
+		#expect(numberFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue == "6")
+		#expect(numberFormat.rendered(value: .string("not a number"), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(numberFormat.rendered(value: nil, label: "L", name: "n").stringValue?.isEmpty == true)
+		let dateFormat = try #require(parseFieldSpecs("adamID:.dateOnly").first).format
+		#expect(dateFormat.rendered(value: .string("not a date"), label: "L", name: "n").stringValue?.isEmpty == true)
+	}
+
+	@Test
+	func `a pipeline terminator lets an argument-less value-transform-pipeline be followed directly by a template`(
+	) throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue:: MB").first)
+		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == "6 MB")
+	}
+
+	@Test
+	func `a fenced last transform needs no pipeline terminator before a template`() throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3: MB").first)
+		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "1.234.567 MB")
+	}
+
+	@Test
+	func `a single stray chain terminator (not doubled) after an argument-less last transform is a parse error`() {
+		#expect(throws: ParsingError.incompletePipelineTerminator) {
+			try parseFieldSpecs("adamID:.round.absoluteValue: MB")
+		}
+	}
+
+	@Test
+	func `a transform call cannot immediately follow a pipeline terminator`() {
+		#expect(throws: ParsingError.transformCallAfterPipelineTerminator) {
+			try parseFieldSpecs("adamID:.round::.absoluteValue")
+		}
+	}
+
+	@Test
+	func `an unhandled placeholder failure mid-template aborts the whole format to blank, not just what preceded it`() {
+		let failingPlaceholder = Placeholder.standard(.isNull, negated: false, coerced: false, success: nil, failure: nil)
+		let format = Format.parts([.text("A"), .placeholder(failingPlaceholder), .text("B")])
+		#expect(format.rendered(value: .string("x"), label: "L", name: "n").stringValue?.isEmpty == true)
+	}
+
+	@Test
 	func `a justify transform has no effect inside a placeholder's own success format`() throws {
 		#expect(throws: ParsingError.self) {
 			try parseFieldSpecs("adamID:%V.rightJustify+")
