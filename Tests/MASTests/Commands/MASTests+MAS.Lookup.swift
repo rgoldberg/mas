@@ -51,9 +51,9 @@ private extension MASTests {
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/tinybop-inc/id682046582?mt=12&uo=4",\
 			"developerID":682046582,\
 			"developerName":"Tinybop Inc.",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/512x512bb.png",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN"],\

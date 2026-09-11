@@ -41,9 +41,9 @@ private extension MASTests {
 			"developerName":"Cultured Code GmbH & Co. KG",\
 			"fileSizeBytes":"17474797",\
 			"formattedPrice":"$49.99",\
+			"icon60URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/69/3b/12/693b12e6-67d5-8252-7607-3438e420bbaa/source/60x60bb.png",\
 			"icon100URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/69/3b/12/693b12e6-67d5-8252-7607-3438e420bbaa/source/100x100bb.png",\
 			"icon512URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/69/3b/12/693b12e6-67d5-8252-7607-3438e420bbaa/source/512x512bb.png",\
-			"icon60URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/69/3b/12/693b12e6-67d5-8252-7607-3438e420bbaa/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","IT","JA","RU","ZH","ES","ZH"],\
@@ -81,9 +81,9 @@ private extension MASTests {
 			"developerName":"Appest Limited",\
 			"fileSizeBytes":"24698702",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/09/64/61/096461c1-f392-ec7d-13dd-2caa927d8244/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/09/64/61/096461c1-f392-ec7d-13dd-2caa927d8244/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/09/64/61/096461c1-f392-ec7d-13dd-2caa927d8244/source/512x512bb.png",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/09/64/61/096461c1-f392-ec7d-13dd-2caa927d8244/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","ZH"],\
@@ -121,9 +121,9 @@ private extension MASTests {
 			"developerName":"AntLogic",\
 			"fileSizeBytes":"1002100",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple71/v4/ff/4d/6b/ff4d6b03-2f12-e12d-9bb3-b3607bcd8ad8/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple71/v4/ff/4d/6b/ff4d6b03-2f12-e12d-9bb3-b3607bcd8ad8/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple71/v4/ff/4d/6b/ff4d6b03-2f12-e12d-9bb3-b3607bcd8ad8/source/512x512bb.png",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple71/v4/ff/4d/6b/ff4d6b03-2f12-e12d-9bb3-b3607bcd8ad8/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","DE","RU","UK"],\
@@ -165,9 +165,9 @@ private extension MASTests {
 			"fileSizeBytes":"76392448",\
 			"formattedPrice":"Free",\
 			"iPadScreenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/3f/23/5e/3f235e16-c049-8ee8-ebdc-3d52f25f2636/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/80/48/1d/80481dff-e404-721c-920e-4688f860cf27/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/58/a2/c9/58a2c970-1bd3-6f4d-1bdc-502f75faaa6a/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/2c/a6/06/2ca606eb-8b40-219a-34c5-626f79b7e593/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/c7/d7/04/c7d70441-51bd-1417-c7bf-a5d2702380e4/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/87/e0/75/87e075fd-a979-6151-5744-56ab76ac8f18/pr_source.png/552x414bb.png"],\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/60x60bb.jpg",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/100x100bb.jpg",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/512x512bb.jpg",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/60x60bb.jpg",\
 			"isGameCenterEnabled":false,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\
@@ -207,9 +207,9 @@ private extension MASTests {
 			"developerName":"Any Case Solutions",\
 			"fileSizeBytes":"27930644",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b0/7b/ed/b07bed5e-d977-6655-7a6a-d35a90901fba/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b0/7b/ed/b07bed5e-d977-6655-7a6a-d35a90901fba/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b0/7b/ed/b07bed5e-d977-6655-7a6a-d35a90901fba/source/512x512bb.png",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b0/7b/ed/b07bed5e-d977-6655-7a6a-d35a90901fba/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
@@ -246,9 +246,9 @@ private extension MASTests {
 			"developerName":"Realmac Software",\
 			"fileSizeBytes":"13109875",\
 			"formattedPrice":"$9.99",\
+			"icon60URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple69/v4/ac/6e/9a/ac6e9aea-8f4b-66bd-6046-c1735f27806f/source/60x60bb.png",\
 			"icon100URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple69/v4/ac/6e/9a/ac6e9aea-8f4b-66bd-6046-c1735f27806f/source/100x100bb.png",\
 			"icon512URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple69/v4/ac/6e/9a/ac6e9aea-8f4b-66bd-6046-c1735f27806f/source/512x512bb.png",\
-			"icon60URL":"https://is5-ssl.mzstatic.com/image/thumb/Purple69/v4/ac/6e/9a/ac6e9aea-8f4b-66bd-6046-c1735f27806f/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN"],\
@@ -286,9 +286,9 @@ private extension MASTests {
 			"developerName":"Shenzhen Tomato Software Technology Co., Ltd.",\
 			"fileSizeBytes":"12135791",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/6b/f0/58/6bf058c1-90ab-5bdf-7c06-18de305efd6d/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/6b/f0/58/6bf058c1-90ab-5bdf-7c06-18de305efd6d/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/6b/f0/58/6bf058c1-90ab-5bdf-7c06-18de305efd6d/source/512x512bb.png",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/6b/f0/58/6bf058c1-90ab-5bdf-7c06-18de305efd6d/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["CS","EN","FR","DE","ID","IT","JA","KO","PL","PT","RO","RU","ZH","ES","ZH","TR","VI"],\
@@ -329,9 +329,9 @@ private extension MASTests {
 			"fileSizeBytes":"47687680",\
 			"formattedPrice":"Free",\
 			"iPadScreenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/43/19/bb/4319bb4b-5700-0f6b-2c19-7bd386bf186c/pr_source.jpg/552x414bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/5d/51/1a/5d511a30-7fab-fd18-6967-c0caf9674d55/pr_source.jpg/552x414bb.jpg"],\
+			"icon60URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/60x60bb.jpg",\
 			"icon100URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/100x100bb.jpg",\
 			"icon512URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/512x512bb.jpg",\
-			"icon60URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/60x60bb.jpg",\
 			"isGameCenterEnabled":true,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\
@@ -371,9 +371,9 @@ private extension MASTests {
 			"developerName":"AntLogic",\
 			"fileSizeBytes":"2095731",\
 			"formattedPrice":"$4.99",\
+			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/6b/67/f2/6b67f2d4-2603-ec03-504c-fd408d3577d7/source/60x60bb.png",\
 			"icon100URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/6b/67/f2/6b67f2d4-2603-ec03-504c-fd408d3577d7/source/100x100bb.png",\
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/6b/67/f2/6b67f2d4-2603-ec03-504c-fd408d3577d7/source/512x512bb.png",\
-			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple3/v4/6b/67/f2/6b67f2d4-2603-ec03-504c-fd408d3577d7/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","RU","UK"],\
@@ -411,9 +411,9 @@ private extension MASTests {
 			"developerName":"The Omni Group",\
 			"fileSizeBytes":"64931473",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/71/6f/f0/716ff030-f8ec-536c-41ca-f5116ae1f497/source/60x60bb.png",\
 			"icon100URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/71/6f/f0/716ff030-f8ec-536c-41ca-f5116ae1f497/source/100x100bb.png",\
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/71/6f/f0/716ff030-f8ec-536c-41ca-f5116ae1f497/source/512x512bb.png",\
-			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/71/6f/f0/716ff030-f8ec-536c-41ca-f5116ae1f497/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["NL","EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
@@ -451,9 +451,9 @@ private extension MASTests {
 			"developerName":"Masterbuilders",\
 			"fileSizeBytes":"24637530",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/5a/cf/6c/5acf6c83-c496-d5fb-2445-96ef44f13a82/source/60x60bb.png",\
 			"icon100URL":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/5a/cf/6c/5acf6c83-c496-d5fb-2445-96ef44f13a82/source/100x100bb.png",\
 			"icon512URL":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/5a/cf/6c/5acf6c83-c496-d5fb-2445-96ef44f13a82/source/512x512bb.png",\
-			"icon60URL":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/5a/cf/6c/5acf6c83-c496-d5fb-2445-96ef44f13a82/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","JA","ZH","ES"],\
@@ -491,9 +491,9 @@ private extension MASTests {
 			"developerName":"Niklas Behrens",\
 			"fileSizeBytes":"8338821",\
 			"formattedPrice":"Free",\
+			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple114/v4/12/30/fb/1230fb0c-42fd-1a80-9379-29be0ba0f612/source/60x60bb.png",\
 			"icon100URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple114/v4/12/30/fb/1230fb0c-42fd-1a80-9379-29be0ba0f612/source/100x100bb.png",\
 			"icon512URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple114/v4/12/30/fb/1230fb0c-42fd-1a80-9379-29be0ba0f612/source/512x512bb.png",\
-			"icon60URL":"https://is3-ssl.mzstatic.com/image/thumb/Purple114/v4/12/30/fb/1230fb0c-42fd-1a80-9379-29be0ba0f612/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","JA","KO","RU","ZH","ES"],\
