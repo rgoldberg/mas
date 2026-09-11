@@ -152,7 +152,9 @@ Global:
 
 For each [leaf context](#context-stacks):
 
-- `all`: Includes all fields.
+- `all`: Includes all fields. Absent a user-requested field order, fields are
+  sorted by label, per the [Default Sort Options](#default-sort-options)
+  table's `Text` row for the current output format.
 - `standard`: Includes a select list of fields.
 
 Output format variants may exist for `all` and/or `standard`. If an output
@@ -705,8 +707,9 @@ By default, all whitespace characters are assigned to an implicit endmost group;
 - A **trailing** `<whitespace-boundary-modifier>` (without a leading one)
   includes in the **last** explicit group all whitespace characters for which no
   explicit boundaries are present.
-- A **leading** `<whitespace-boundary-modifier>` (without a trailing one)
-  positions the whitespace implicit group **before** all explicit groups.
+- A **solitary** or a **leading** `<whitespace-boundary-modifier>` (without a
+  trailing one) positions the whitespace implicit group **before** all explicit
+  groups.
 - Both a **leading & trailing** `<whitespace-boundary-modifier>` include in the
   **first** explicit group all whitespace characters for which no explicit
   boundaries are present.
