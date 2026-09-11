@@ -720,17 +720,22 @@ boundary group into one.
 
 ##### Default Sort Options
 
-| Format    | Type    | Default      |
-|:----------|:--------|:-------------|
-| Table     | Text    | `Iailgnb+_+` |
-| Table     | Price   | `Iailgpb+_+` |
-| Table     | Version | `Iailuvb+_+` |
-| Table     | Path    | `Iailgnb+/+` |
-| Key-Value | Text    | `Iailgnb+_+` |
-| Key-Value | Price   | `Iailgpb+_+` |
-| Key-Value | Version | `Iailuvb+_+` |
-| Key-Value | Path    | `Iailgnb+/+` |
-| JSON      | Text    | `Iascgnb+_+` |
-| JSON      | Price   | `Iascgpb+_+` |
-| JSON      | Version | `Iascuvb+_+` |
-| JSON      | Path    | `Iascgnb+/+` |
+| Format    | Type    | Default       |
+|:----------|:--------|:--------------|
+| Table     | Text    | `Iailgnb+\_+` |
+| Table     | Price   | `Iailgpb+\_+` |
+| Table     | Version | `Iailuvb+\_+` |
+| Table     | Path    | `Iailgnb+/+`  |
+| Key-Value | Text    | `Iailgnb+\_+` |
+| Key-Value | Price   | `Iailgpb+\_+` |
+| Key-Value | Version | `Iailuvb+\_+` |
+| Key-Value | Path    | `Iailgnb+/+`  |
+| JSON      | Text    | `Iascgnb+\_+` |
+| JSON      | Price   | `Iascgpb+\_+` |
+| JSON      | Version | `Iascuvb+\_+` |
+| JSON      | Path    | `Iascgnb+/+`  |
+
+`\_` (escaped) is required for Text / Price / Version's boundary character:
+unescaped, `_` is `<grouped-whitespace-boundary-modifier>` / `<group-
+separator>`, not a literal boundary character. `/` needs no escaping, since it
+isn't a grouped-boundaries syntax character.
