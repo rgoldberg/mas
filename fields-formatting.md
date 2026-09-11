@@ -114,17 +114,17 @@ sentence-case   = "sentenceCase"
 trim-whitespace = "trimWhitespace"
 uppercase       = "uppercase"
 
-absolute-value  = "absoluteValue"
-group           = "group" [ <group-arguments> ]
-round           = "round"
-scale           = "scale" <scale-arguments>
+absolute-value = "absoluteValue"
+group          = "group" [ <group-arguments> ]
+round          = "round"
+scale          = "scale" <scale-arguments>
 
 iso             = "iso"
 date-only       = "dateOnly"
 local-time-zone = "localTimeZone"
 
-group-arguments           = <argument-fence> ( <group-locale-name> | <explicit-group-arguments> ) <argument-fence>
-explicit-group-arguments  = <group-separator> <argument-separator> <group-digit-count>
+group-arguments          = <argument-fence> ( <group-locale-name> | <explicit-group-arguments> ) <argument-fence>
+explicit-group-arguments = <group-separator> <argument-separator> <group-digit-count>
 
 scale-arguments    = <argument-fence> <radix> <argument-separator> <exponent> <argument-separator> [ <significant-digits> ] <argument-separator> <fractional-digits> <argument-fence>
 argument-fence     = ":" (* fences any transform's argument list; generic, not `scale`-specific *)
