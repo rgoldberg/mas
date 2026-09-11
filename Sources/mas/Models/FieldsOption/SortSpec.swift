@@ -334,10 +334,9 @@ extension SortSpec {
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
 	/// field of `interpretation`, for `outputFormat`. `boundaryCharacter`, if
 	/// given, is a single explicit boundary character (`"/"` for Path); `nil`
-	/// (Text / Price / Version, table value `b+_+`, i.e., a solitary
-	/// `<grouped-whitespace-boundary-modifier>`) means no explicit boundary at
-	/// all. Doesn't know or care what field this is for by name — a caller
-	/// (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
+	/// (Text / Price / Version) means no explicit boundary at all. Doesn't know
+	/// or care what field this is for by name — a caller (e.g.,
+	/// `defaultSortSpec(forFieldNamed:outputFormat:)` in
 	/// `AppStoreFieldDefaults.swift`) maps a field name to an `interpretation` &
 	/// `boundaryCharacter` first.
 	static func `default`(interpretation: Interpretation, boundaryCharacter: Character?, outputFormat: OutputFormat)
@@ -356,16 +355,19 @@ extension SortSpec {
 			boundaries: .init(
 				groups: boundaryCharacter.map { [.init(boundaries: [.character($0)])] } ?? .init(),
 				collapseContiguous: false,
-				// `nil`: a solitary modifier (`b+_+`) — per fields.md, "a solitary or a
-				// leading … modifier … positions the whitespace implicit group before
-				// all explicit groups", i.e. `.leading`. Otherwise (`boundaryCharacter`
-				// given, `b+/+`): no modifier / suppressor at all, so the ordinary
-				// `.endmost` default applies. Behaviorally identical either way today
-				// (0 vs 1 explicit group's worth of difference doesn't change
-				// `.leading` vs `.endmost` when there's only ever 0 or 1 group here),
-				// but `.leading` is the semantically correct value for the solitary
-				// case.
-				whitespacePlacement: boundaryCharacter == nil ? .leading : .endmost,
+				// JSON suppresses the implicit whitespace boundary entirely (table
+				// value `+++` / `++/+`), matching its already-more-literal case-
+				// sensitive / canonical choices on the other axes: it's read by
+				// programs, so nothing gets special-cased. Table / Key-Value default
+				// it instead (`+_+` / `+/+`): a solitary modifier (`boundaryCharacter`
+				// `nil`) is `.leading` per fields.md ("a solitary or a leading …
+				// modifier … positions the whitespace implicit group before all
+				// explicit groups"); otherwise (a real boundary character, no modifier
+				// / suppressor at all) the ordinary `.endmost` default applies.
+				// `.leading` / `.endmost` are behaviorally identical today (there's
+				// only ever 0 or 1 explicit group here), but `.leading` is the
+				// semantically correct value for the solitary case.
+				whitespacePlacement: outputFormat == .json ? .suppressed : boundaryCharacter == nil ? .leading : .endmost,
 			),
 		)
 	}

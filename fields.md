@@ -720,17 +720,26 @@ boundary group into one.
 
 ##### Default Sort Options
 
-| Format    | Type    | Default      |
-|:----------|:--------|:-------------|
-| Table     | Text    | `Iailgnb+_+` |
-| Table     | Price   | `Iailgpb+_+` |
-| Table     | Version | `Iailuvb+_+` |
-| Table     | Path    | `Iailgnb+/+` |
-| Key-Value | Text    | `Iailgnb+_+` |
-| Key-Value | Price   | `Iailgpb+_+` |
-| Key-Value | Version | `Iailuvb+_+` |
-| Key-Value | Path    | `Iailgnb+/+` |
-| JSON      | Text    | `Iascgnb+_+` |
-| JSON      | Price   | `Iascgpb+_+` |
-| JSON      | Version | `Iascuvb+_+` |
-| JSON      | Path    | `Iascgnb+/+` |
+| Format    | Type    | Default       |
+|:----------|:--------|:--------------|
+| Table     | Text    | `Iailgnb+_+`  |
+| Table     | Price   | `Iailgpb+_+`  |
+| Table     | Version | `Iailuvb+_+`  |
+| Table     | Path    | `Iailgnb+/+`  |
+| Key-Value | Text    | `Iailgnb+_+`  |
+| Key-Value | Price   | `Iailgpb+_+`  |
+| Key-Value | Version | `Iailuvb+_+`  |
+| Key-Value | Path    | `Iailgnb+/+`  |
+| JSON      | Text    | `Iascgnb+++`  |
+| JSON      | Price   | `Iascgpb+++`  |
+| JSON      | Version | `Iascuvb+++`  |
+| JSON      | Path    | `Iascgnb++/+` |
+
+JSON suppresses the implicit whitespace boundary entirely (`+++` /
+`++/+`'s leading `+` after the fence) rather than defaulting it (`+_+` /
+`+/+`), matching its already-more-literal case-sensitive / canonical
+choices on the other axes: Table / Key-Value are read by people, so
+whitespace sorting like a low-precedence separator is the friendlier
+default; JSON is read by programs, so nothing gets special-cased. Path
+keeps its `/` boundary either way — the suppression only concerns
+whitespace.
