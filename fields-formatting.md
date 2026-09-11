@@ -105,7 +105,7 @@ transform-call-prefix = "."
 
 transform        = <string-transform> | <number-transform> | <date-transform>
 string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
-number-transform = <absolute-value> | <round> | <scale>
+number-transform = <absolute-value> | <group> | <round> | <scale>
 date-transform   = <iso> | <date-only> | <local-time-zone>
 
 capitalize      = "initialUppercase"
@@ -115,6 +115,7 @@ trim-whitespace = "trimWhitespace"
 uppercase       = "uppercase"
 
 absolute-value  = "absoluteValue"
+group           = "group" [ <group-arguments> ]
 round           = "round"
 scale           = "scale" <scale-arguments>
 
@@ -122,9 +123,16 @@ iso             = "iso"
 date-only       = "dateOnly"
 local-time-zone = "localTimeZone"
 
+group-arguments           = <argument-fence> ( <group-locale-name> | <explicit-group-arguments> ) <argument-fence>
+explicit-group-arguments  = <group-separator> <argument-separator> <group-digit-count>
+
 scale-arguments    = <argument-fence> <radix> <argument-separator> <exponent> <argument-separator> [ <significant-digits> ] <argument-separator> <fractional-digits> <argument-fence>
 argument-fence     = ":" (* fences any transform's argument list; generic, not `scale`-specific *)
 argument-separator = "," (* separates a transform's own arguments; generic, not `scale`-specific *)
+
+group-locale-name = {text} (* must not contain `,` / `:`; default: {system default locale name} *)
+group-separator   = {text} (* must not contain `,` / `:` *)
+group-digit-count = {positive integer}
 
 radix              = {positive integer}     (* 2-36; base for `exponent` & the rendered digits *)
 exponent           = {non-negative integer} (* divides the field's value by `radix^exponent` before rendering *)
@@ -140,6 +148,29 @@ fractional-digits  = {non-negative integer} (* exactly this many `radix` digits 
   - If `<named-format>`, `<named-string-format>`, `<named-number-format>`, or
     `<named-date-format>` `n` immediately precedes `t`: `n`'s value.
   - Otherwise: the field's value.
+
+###### `group`
+
+`group` inserts `<group-separator>` into the field's integer part every
+`<group-digit-count>` digits, counting from the right (e.g., a `<group-
+separator>` of `,` & a `<group-digit-count>` of `3` renders `1234567` as
+`1,234,567`); any fractional part (after a literal `.`) & a leading `-` sign
+are left untouched.
+
+- Absent `<group-arguments>` entirely, or given only `<group-locale-name>`,
+  `<group-separator>` & `<group-digit-count>` come from the system default
+  locale, or the named locale, respectively.
+- `<group-locale-name>` & `<explicit-group-arguments>` are distinguished by
+  content, not position: text with no `<argument-separator>` is a locale
+  name; text with exactly 1 is `<group-separator>` & `<group-digit-count>`.
+  Neither supports escaping (unlike most other `{text}` values in this spec),
+  so `<group-separator>` can't itself be `,` / `:` / `.` / `+` / `%`; use a
+  `<group-locale-name>` instead if you need 1 of those (e.g., a locale using
+  `.` for grouping).
+- E.g., `.group` (system locale; note the absent `<argument-fence>` — bare
+  `group`, not `group:`, since an empty `<group-arguments>` is invalid),
+  `.group:de_DE:` (a named locale's separator & digit count), `.group: ,3:`
+  (explicit: a space every 3 digits).
 
 ###### `scale`
 

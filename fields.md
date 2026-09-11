@@ -501,6 +501,14 @@ label                 = {text\\[:<format-modifier-prefix>:][:<sort-modifier-pref
 - A field spec's `<label>` is its:
   - Header for table.
   - Key for key-value & JSON.
+- Exception: for a built-in default fields config (`none` / `standard` / `all`)
+  specifically, JSON ignores every field spec's label (uses its name instead)
+  & any curated `<format>` (uses `%v` instead) — JSON is machine-consumed, so
+  a built-in default's human-facing curation (labels & formats alike, curated
+  for table / key-value) doesn't apply. A resolved fields config's own field
+  specs (i.e., anything `--fields` itself sets or overlays, including a
+  future persisted custom fields config) keep their label & format for JSON
+  like any other output format.
 
 #### Formatting
 

@@ -21,9 +21,7 @@ private extension MASTests {
 			nil, // editorconfig-checker-disable
 			"""
 			{\
-			"ADAM ID":904280696,\
-			"Name":"Things 3",\
-			"Version":"3.12.6",\
+			"adamID":904280696,\
 			"appStorePageURL":"https://apps.apple.com/us/app/things-3/id904280696?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -48,6 +46,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","IT","JA","RU","ZH","ES","ZH"],\
 			"minimumOSVersion":"10.13.0",\
+			"name":"Things 3",\
 			"originalVersionReleaseDate":"2017-05-18T16:42:04Z",\
 			"price":49.99,\
 			"primaryCategoryID":6007,\
@@ -58,12 +57,11 @@ private extension MASTests {
 			"sellerURL":"https://culturedcode.com/things/",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"3.12.6",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":966085870,\
-			"Name":"TickTick: Things & Tasks To Do",\
-			"Version":"3.7.11",\
+			"adamID":966085870,\
 			"appStorePageURL":"https://apps.apple.com/us/app/ticktick-things-tasks-to-do/id966085870?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -88,6 +86,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","ZH"],\
 			"minimumOSVersion":"10.12",\
+			"name":"TickTick: Things & Tasks To Do",\
 			"originalVersionReleaseDate":"2016-03-04T06:37:31Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -98,12 +97,11 @@ private extension MASTests {
 			"sellerURL":"https://ticktick.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"3.7.11",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":846599902,\
-			"Name":"Simple Antnotes",\
-			"Version":"1.6.1",\
+			"adamID":846599902,\
 			"appStorePageURL":"https://apps.apple.com/us/app/simple-antnotes/id846599902?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -128,6 +126,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","DE","RU","UK"],\
 			"minimumOSVersion":"10.6",\
+			"name":"Simple Antnotes",\
 			"originalVersionReleaseDate":"2014-03-28T12:49:14Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -138,12 +137,11 @@ private extension MASTests {
 			"sellerURL":"https://www.antlogic.com/apps/antnotes",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"1.6.1",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":1128190780,\
-			"Name":"Random: Lists & Decision Maker",\
-			"Version":"2.2.10",\
+			"adamID":1128190780,\
 			"advisories":[],\
 			"appStorePageURL":"https://apps.apple.com/us/app/random-lists-decision-maker/id1128190780?uo=4",\
 			"appleTVScreenshotURLs":[],\
@@ -157,7 +155,7 @@ private extension MASTests {
 			"contentRating":"4+",\
 			"currency":"USD",\
 			"currentVersionReleaseDate":"2020-08-29T19:21:51Z",\
-			"description":"Need a random number? Or can’t you decide what to do? Random is a powerful app that will solve all such problems.\\n\\nFeatures:\\n• Number generator (from a range 0 - 999999999)\\n• Letter generator\\n• Dice roller (roll up to 4 regular dices in one go)\\n• A custom item from a list generator\\n• Yes or No \\n• Coin flipper\\n• Card generator\\n• Rock-Paper-Scissors\\n• Map Point\\n\\nGenerate a new random number simply by tapping a \u{200B}randomize button or by touching the Apple Watch screen. For those who want a bit of additional exercise, shaking your iOS device will also result in a new random response.\\n\\nUse Force Touch for setting the minimum or maximum values in your Apple Watch app. Same for the number of dices\u{200B}, cards, and selection of lists.\\n\\nRandom Premium subscription benefits:\\n• Sync: Get access to your data from all your devices.\\n• Themes: Customize the app with various themes and background images.\\n• No advertising.\\n\\nIf you decide to get Random Premium subscription, your purchase will be charged to your iTunes account. 1 month costs $2.99 and 1 year costs $11.99. Active subscriptions will be auto-renewed 24 hours before the expiry date. You can manage subscriptions from Account in iTunes after subscribing, you’ll also be able to cancel the auto-renewing subscription from there at any time. Any unused portion of the free trial period will be forfeited if you purchase a subscription to Random Premium before your trial expires.\\n\\nTerms & Conditions: https://yahenskyi.dev/terms-conditions/\\nPrivacy Policy: https://yahenskyi.dev/privacy-policy/",\
+			"description":"Need a random number? Or can’t you decide what to do? Random is a powerful app that will solve all such problems.\\n\\nFeatures:\\n• Number generator (from a range 0 - 999999999)\\n• Letter generator\\n• Dice roller (roll up to 4 regular dices in one go)\\n• A custom item from a list generator\\n• Yes or No \\n• Coin flipper\\n• Card generator\\n• Rock-Paper-Scissors\\n• Map Point\\n\\nGenerate a new random number simply by tapping a \u{200b}randomize button or by touching the Apple Watch screen. For those who want a bit of additional exercise, shaking your iOS device will also result in a new random response.\\n\\nUse Force Touch for setting the minimum or maximum values in your Apple Watch app. Same for the number of dices\u{200b}, cards, and selection of lists.\\n\\nRandom Premium subscription benefits:\\n• Sync: Get access to your data from all your devices.\\n• Themes: Customize the app with various themes and background images.\\n• No advertising.\\n\\nIf you decide to get Random Premium subscription, your purchase will be charged to your iTunes account. 1 month costs $2.99 and 1 year costs $11.99. Active subscriptions will be auto-renewed 24 hours before the expiry date. You can manage subscriptions from Account in iTunes after subscribing, you’ll also be able to cancel the auto-renewing subscription from there at any time. Any unused portion of the free trial period will be forfeited if you purchase a subscription to Random Premium before your trial expires.\\n\\nTerms & Conditions: https://yahenskyi.dev/terms-conditions/\\nPrivacy Policy: https://yahenskyi.dev/privacy-policy/",\
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/volodymyr-yahenskyi/id961335645?uo=4",\
 			"developerID":961335645,\
 			"developerName":"Volodymyr Yahenskyi",\
@@ -173,6 +171,7 @@ private extension MASTests {
 			"kind":"software",\
 			"languageCodesISO2A":["EN","RU","UK"],\
 			"minimumOSVersion":"11.0",\
+			"name":"Random: Lists & Decision Maker",\
 			"originalVersionReleaseDate":"2016-07-05T22:00:04Z",\
 			"price":0.00,\
 			"primaryCategoryID":6012,\
@@ -184,12 +183,11 @@ private extension MASTests {
 			"supportedDevices":["iPadMini4-iPadMini4","iPadProSecondGen-iPadProSecondGen","iPhone11-iPhone11","iPad71-iPad71","iPadMiniRetinaCellular-iPadMiniRetinaCellular","iPhone8Plus-iPhone8Plus","iPhone6sPlus-iPhone6sPlus","iPadMini5-iPadMini5","iPadProFourthGen-iPadProFourthGen","iPhoneXS-iPhoneXS","iPadAir3Cellular-iPadAir3Cellular","iPadAir3-iPadAir3","iPadMini4Cellular-iPadMini4Cellular","iPadProCellular-iPadProCellular","MacDesktop-MacDesktop","iPadMini3-iPadMini3","iPhoneXR-iPhoneXR","iPhoneSE-iPhoneSE","iPad611-iPad611","iPhone7-iPhone7","iPad73-iPad73","iPad812-iPad812","iPadAir2Cellular-iPadAir2Cellular","iPhoneX-iPhoneX","iPadMini5Cellular-iPadMini5Cellular","iPadPro97-iPadPro97","iPad834-iPad834","iPadProSecondGenCellular-iPadProSecondGenCellular","iPhone5s-iPhone5s","iPad75-iPad75","iPadMini3Cellular-iPadMini3Cellular","iPad878-iPad878","iPhone6-iPhone6","iPadAir-iPadAir","iPadPro97Cellular-iPadPro97Cellular","iPadSeventhGen-iPadSeventhGen","iPodTouchSixthGen-iPodTouchSixthGen","iPhoneXSMax-iPhoneXSMax","iPad612-iPad612","iPadPro-iPadPro","iPodTouchSeventhGen-iPodTouchSeventhGen","iPhone11ProMax-iPhone11ProMax","iPadMiniRetina-iPadMiniRetina","iPad76-iPad76","iPadProFourthGenCellular-iPadProFourthGenCellular","iPadSeventhGenCellular-iPadSeventhGenCellular","iPhoneSESecondGen-iPhoneSESecondGen","iPad74-iPad74","iPhone6s-iPhone6s","iPhone7Plus-iPhone7Plus","iPadAir2-iPadAir2","iPad72-iPad72","iPhone6Plus-iPhone6Plus","iPadAirCellular-iPadAirCellular","Watch4-Watch4","iPhone8-iPhone8","iPad856-iPad856","iPhone11Pro-iPhone11Pro"],\
 			"userRatingCount":1525,\
 			"userRatingCountForCurrentVersion":1525,\
+			"version":"2.2.10",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":1063681909,\
-			"Name":"Task Planner - To Do List",\
-			"Version":"2.1.2",\
+			"adamID":1063681909,\
 			"appStorePageURL":"https://apps.apple.com/us/app/task-planner-to-do-list/id1063681909?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -214,6 +212,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
 			"minimumOSVersion":"10.10",\
+			"name":"Task Planner - To Do List",\
 			"originalVersionReleaseDate":"2016-01-07T00:04:36Z",\
 			"price":0.00,\
 			"primaryCategoryID":6000,\
@@ -223,12 +222,11 @@ private extension MASTests {
 			"sellerName":"Any Case Solutions, OOO",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"2.1.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":504544917,\
-			"Name":"Clear – Tasks, Reminders & To-Do Lists",\
-			"Version":"1.1.7",\
+			"adamID":504544917,\
 			"appStorePageURL":"https://apps.apple.com/us/app/clear-tasks-reminders-to-do-lists/id504544917?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -253,6 +251,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN"],\
 			"minimumOSVersion":"10.10",\
+			"name":"Clear – Tasks, Reminders & To-Do Lists",\
 			"originalVersionReleaseDate":"2012-11-08T08:00:00Z",\
 			"price":9.99,\
 			"primaryCategoryID":6007,\
@@ -263,12 +262,11 @@ private extension MASTests {
 			"sellerURL":"https://impending.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"1.1.7",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":1258530160,\
-			"Name":"Focus To-Do: Pomodoro & Tasks",\
-			"Version":"6.3",\
+			"adamID":1258530160,\
 			"appStorePageURL":"https://apps.apple.com/us/app/focus-to-do-pomodoro-tasks/id1258530160?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -293,6 +291,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["CS","EN","FR","DE","ID","IT","JA","KO","PL","PT","RO","RU","ZH","ES","ZH","TR","VI"],\
 			"minimumOSVersion":"10.12",\
+			"name":"Focus To-Do: Pomodoro & Tasks",\
 			"originalVersionReleaseDate":"2017-08-02T03:45:26Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -302,12 +301,11 @@ private extension MASTests {
 			"sellerName":"Shenzhen Tomato Software Technology Co., Ltd.",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"6.3",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":1289070327,\
-			"Name":"Planny 3 - Smart To Do List",\
-			"Version":"3.4.2",\
+			"adamID":1289070327,\
 			"advisories":[],\
 			"appStorePageURL":"https://apps.apple.com/us/app/planny-3-smart-to-do-list/id1289070327?uo=4",\
 			"appleTVScreenshotURLs":[],\
@@ -337,6 +335,7 @@ private extension MASTests {
 			"kind":"software",\
 			"languageCodesISO2A":["EN","FR","DE","IT","RU","ZH","ES","TR"],\
 			"minimumOSVersion":"13.0",\
+			"name":"Planny 3 - Smart To Do List",\
 			"originalVersionReleaseDate":"2017-10-13T19:16:40Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -348,12 +347,11 @@ private extension MASTests {
 			"supportedDevices":["iPadMini4-iPadMini4","iPadProSecondGen-iPadProSecondGen","iPhone11-iPhone11","iPad71-iPad71","iPadMiniRetinaCellular-iPadMiniRetinaCellular","iPhone8Plus-iPhone8Plus","iPhone6sPlus-iPhone6sPlus","iPadMini5-iPadMini5","iPadProFourthGen-iPadProFourthGen","iPhoneXS-iPhoneXS","iPadAir3Cellular-iPadAir3Cellular","iPadAir3-iPadAir3","iPadMini4Cellular-iPadMini4Cellular","iPadProCellular-iPadProCellular","MacDesktop-MacDesktop","iPadMini3-iPadMini3","iPhoneXR-iPhoneXR","iPhoneSE-iPhoneSE","iPad611-iPad611","iPhone7-iPhone7","iPad73-iPad73","iPad812-iPad812","iPadAir2Cellular-iPadAir2Cellular","iPhoneX-iPhoneX","iPadMini5Cellular-iPadMini5Cellular","iPadPro97-iPadPro97","iPad834-iPad834","iPadProSecondGenCellular-iPadProSecondGenCellular","iPhone5s-iPhone5s","iPad75-iPad75","iPadMini3Cellular-iPadMini3Cellular","iPad878-iPad878","iPhone6-iPhone6","iPadAir-iPadAir","iPadPro97Cellular-iPadPro97Cellular","iPadSeventhGen-iPadSeventhGen","iPodTouchSixthGen-iPodTouchSixthGen","iPhoneXSMax-iPhoneXSMax","iPad612-iPad612","iPadPro-iPadPro","iPodTouchSeventhGen-iPodTouchSeventhGen","iPhone11ProMax-iPhone11ProMax","iPadMiniRetina-iPadMiniRetina","iPad76-iPad76","iPadProFourthGenCellular-iPadProFourthGenCellular","iPadSeventhGenCellular-iPadSeventhGenCellular","iPhoneSESecondGen-iPhoneSESecondGen","iPad74-iPad74","iPhone6s-iPhone6s","iPhone7Plus-iPhone7Plus","iPadAir2-iPadAir2","iPad72-iPad72","iPhone6Plus-iPhone6Plus","iPadAirCellular-iPadAirCellular","Watch4-Watch4","iPhone8-iPhone8","iPad856-iPad856","iPhone11Pro-iPhone11Pro"],\
 			"userRatingCount":331,\
 			"userRatingCountForCurrentVersion":331,\
+			"version":"3.4.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":416993121,\
-			"Name":"To-do Lists",\
-			"Version":"1.7.7",\
+			"adamID":416993121,\
 			"appStorePageURL":"https://apps.apple.com/us/app/to-do-lists/id416993121?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -378,6 +376,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","RU","UK"],\
 			"minimumOSVersion":"10.6.6",\
+			"name":"To-do Lists",\
 			"originalVersionReleaseDate":"2011-03-01T03:09:22Z",\
 			"price":4.99,\
 			"primaryCategoryID":6007,\
@@ -388,12 +387,11 @@ private extension MASTests {
 			"sellerURL":"https://www.antlogic.com/#to-do-lists",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"1.7.7",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":1346203938,\
-			"Name":"OmniFocus 3",\
-			"Version":"3.9.2",\
+			"adamID":1346203938,\
 			"appStorePageURL":"https://apps.apple.com/us/app/omnifocus-3/id1346203938?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -418,6 +416,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["NL","EN","FR","DE","IT","JA","KO","PT","RU","ZH","ES"],\
 			"minimumOSVersion":"10.14",\
+			"name":"OmniFocus 3",\
 			"originalVersionReleaseDate":"2018-09-24T12:28:36Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -428,12 +427,11 @@ private extension MASTests {
 			"sellerURL":"https://www.omnigroup.com/omnifocus/",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"3.9.2",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":777233759,\
-			"Name":"Focus - Time Management",\
-			"Version":"6.2.3",\
+			"adamID":777233759,\
 			"appStorePageURL":"https://apps.apple.com/us/app/focus-time-management/id777233759?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -458,6 +456,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","JA","ZH","ES"],\
 			"minimumOSVersion":"10.14",\
+			"name":"Focus - Time Management",\
 			"originalVersionReleaseDate":"2013-12-19T19:16:50Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -468,12 +467,11 @@ private extension MASTests {
 			"sellerURL":"https://www.focusapp.io",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"6.2.3",\
 			"wrapperType":"software"\
 			}
 			{\
-			"ADAM ID":969210610,\
-			"Name":"1Focus: Website & App Blocker",\
-			"Version":"3.4.4",\
+			"adamID":969210610,\
 			"appStorePageURL":"https://apps.apple.com/us/app/1focus-website-app-blocker/id969210610?mt=12&uo=4",\
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
@@ -498,6 +496,7 @@ private extension MASTests {
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN","FR","DE","JA","KO","RU","ZH","ES"],\
 			"minimumOSVersion":"10.10",\
+			"name":"1Focus: Website & App Blocker",\
 			"originalVersionReleaseDate":"2015-03-15T05:54:46Z",\
 			"price":0.00,\
 			"primaryCategoryID":6007,\
@@ -508,6 +507,7 @@ private extension MASTests {
 			"sellerURL":"https://onefocusapp.com",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
+			"version":"3.4.4",\
 			"wrapperType":"software"\
 			}
 

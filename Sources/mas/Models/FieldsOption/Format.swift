@@ -140,6 +140,11 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 	case uppercase
 
 	case absoluteValue
+	/// Inserts `separator` into the field's integer part every `digitCount`
+	/// digits, counting from the right; a fractional part & leading `-` sign
+	/// are left untouched. See `<group>` in fields-formatting.md for full
+	/// semantics.
+	case group(separator: String, digitCount: Int)
 	case round
 	/// Divides the field's value by `radix^exponent`, optionally rounds it to
 	/// `significantDigits` total `radix` digits, then renders it in positional
@@ -152,15 +157,20 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 	case localTimeZone // swiftlint:enable sorted_enum_cases
 
 	static let stringTransformSet = Set([Self.capitalize, .lowercase, .sentenceCase, .trimWhitespace, .uppercase])
-	/// `scale` is parameterized & validated separately; see `parsed(name:kind:)`.
+	/// `group` & `scale` are parameterized & validated separately; see
+	/// `parsed(name:kind:)`.
 	static let numberTransformSet = Set([Self.absoluteValue, .round])
 	static let dateTransformSet = Set([Self.iso, .dateOnly, .localTimeZone])
 
-	/// Parses a bare `<transform>` `name` (its `<scale-arguments>`, for
-	/// `scale`, included verbatim) valid for `kind`. Returns `nil` if `name`
-	/// isn't a known transform for `kind`.
+	/// Parses a bare `<transform>` `name` (its `<group-arguments>` /
+	/// `<scale-arguments>`, for `group` / `scale`, included verbatim) valid for
+	/// `kind`. Returns `nil` if `name` isn't a known transform for `kind`.
 	static func parsed(name: String, kind: TransformKind) throws(ParsingError) -> Self? {
-		if name.hasPrefix(scaleNamePrefix), name.hasSuffix(argumentFence) {
+		if name == groupSimpleName {
+			kind == .number ? .group(locale: .current) : nil
+		} else if name.hasPrefix(groupNamePrefix), name.hasSuffix(argumentFence) {
+			kind == .number ? try groupTransform(name: name) : nil
+		} else if name.hasPrefix(scaleNamePrefix), name.hasSuffix(argumentFence) {
 			kind == .number ? try scaleTransform(name: name) : nil
 		} else {
 			.init(simpleName: name).flatMap { kind.allowedTransformSet.contains($0) ? $0 : nil }
@@ -184,6 +194,8 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 			string.uppercased()
 		case .absoluteValue:
 			Double(string).map { numberString(abs($0), matchingIntegerStyleOf: string) } ?? string
+		case let .group(separator, digitCount):
+			grouped(string, separator: separator, digitCount: digitCount)
 		case .round:
 			Double(string).map { .init(Int($0.rounded())) } ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
@@ -201,6 +213,42 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 			string // Unreachable here; see doc comment above
 		}
 	}
+}
+
+extension Transform { // swiftlint:disable:this file_types_order
+	/// Resolves `locale`'s grouping separator & digit count into a `.group`
+	/// transform (absent either, per `NumberFormatter`, which shouldn't happen
+	/// for a real locale: `,` & `3`, matching the system default locale's own
+	/// usual values).
+	static func group(locale: Locale) -> Self {
+		let formatter = NumberFormatter()
+		formatter.locale = locale
+		formatter.numberStyle = .decimal
+		return .group(separator: formatter.groupingSeparator ?? ",", digitCount: max(formatter.groupingSize, 1))
+	}
+}
+
+/// Applies `<group>`'s grouping to `string`'s integer part (i.e., up to, but
+/// not including, a literal `.`, if any): inserts `separator` every
+/// `digitCount` digits, counting from the right. A leading `-` sign & any
+/// fractional part are left untouched.
+private func grouped(_ string: String, separator: String, digitCount: Int) -> String {
+	let sign = string.hasPrefix("-") ? "-" : ""
+	let unsigned = string.dropFirst(sign.count)
+	let integerPart = unsigned.prefix { $0 != "." }
+	let fractionalPart = unsigned[integerPart.endIndex...]
+	guard integerPart.allSatisfy(\.isNumber), !integerPart.isEmpty else {
+		return string
+	}
+	let grouped = stride(from: integerPart.count, to: 0, by: -digitCount)
+		.map { end in
+			let start = max(0, end - digitCount)
+			return integerPart[integerPart.index(integerPart.startIndex, offsetBy: start)..<integerPart
+				.index(integerPart.startIndex, offsetBy: end)]
+		}
+		.reversed()
+		.joined(separator: separator)
+	return sign + grouped + fractionalPart
 }
 
 private extension Transform { // swiftlint:disable:this file_types_order
@@ -230,6 +278,31 @@ private extension Transform { // swiftlint:disable:this file_types_order
 		default:
 			return nil
 		}
+	}
+}
+
+/// Parses `group`'s `<group-arguments>` (fenced by `argumentFence`) from
+/// `name`, which must already carry both: either a bare locale name (no
+/// `argumentSeparator`), or `groupSeparator,groupDigitCount` (exactly 1).
+/// Neither `<group-locale-name>` nor `<group-separator>` support escaping
+/// `argumentSeparator` / `argumentFence` (unlike most other `{text}` values in
+/// this file): by the time a `<transform-call>`'s name reaches here, any
+/// backslash escapes in it have already been resolved by the caller's
+/// `parseEscapedText`, so there's no way to tell an escaped `,` from a literal
+/// 1 this far downstream.
+private func groupTransform(name: String) throws(ParsingError) -> Transform {
+	let arguments = name.dropFirst(groupNamePrefix.count).dropLast(argumentFence.count)
+	let parts = arguments.split(separator: argumentSeparator, omittingEmptySubsequences: false)
+	switch parts.count {
+	case 1 where !parts[0].isEmpty:
+		return .group(locale: .init(identifier: .init(parts[0])))
+	case 2:
+		guard let digitCount = Int(parts[1]), digitCount >= 1 else {
+			throw .invalidTransformArguments(name: name)
+		}
+		return .group(separator: .init(parts[0]), digitCount: digitCount)
+	default:
+		throw .invalidTransformArguments(name: name)
 	}
 }
 
@@ -316,6 +389,8 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"uppercase"
 		case .absoluteValue:
 			"absoluteValue"
+		case let .group(separator, digitCount):
+			"group(separator: \"\(separator)\", digitCount: \(digitCount))"
 		case .round:
 			"round"
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
@@ -1012,6 +1087,8 @@ private let dateInputOutputSeparator = Character("_")
 let hiddenNamedFormatName = "hidden"
 let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
 
+private let groupSimpleName = "group"
+private let groupNamePrefix = groupSimpleName + argumentFence
 private let scaleNamePrefix = "scale" + argumentFence
 private let argumentFence = ":"
 private let argumentSeparator = Character(",")

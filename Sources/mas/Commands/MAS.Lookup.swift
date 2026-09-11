@@ -6,6 +6,7 @@
 //
 
 internal import ArgumentParser
+private import Foundation
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs app info from the App Store.
@@ -67,7 +68,11 @@ private struct KeyValueConfig: OutputConfig {
 			.init(
 				name: "fileSizeBytes",
 				label: "Size",
-				// A byte count as whole decimal megabytes, with an appended " MB"
+				// A byte count as whole, comma-grouped decimal megabytes, with an
+				// appended " MB". JSON gets the raw byte count instead: `--json`
+				// resolves through `defaultedForJSON(outputFormat:)`, which discards
+				// this format (& the label above) for a built-in default fields
+				// config, per fields.md's Labeling section.
 				format: .parts(
 					[
 						.placeholder(
@@ -77,7 +82,10 @@ private struct KeyValueConfig: OutputConfig {
 								success: .reference(
 									.init(
 										namedFormat: nil,
-										transforms: [.scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0)],
+										transforms: [
+											.scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
+											.group(locale: .current),
+										],
 									),
 								),
 								failure: nil,

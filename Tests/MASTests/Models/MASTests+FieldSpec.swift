@@ -153,6 +153,19 @@ private extension MASTests {
 	}
 
 	@Test
+	func `defaultedForJSON resets a default config's labels & formats to bare defaults, only for JSON`() {
+		let curated = BaseIncludesAllFieldsConfig(fieldSpecs: [
+			.init(name: "fileSizeBytes", label: "Size", format: .parts([.text("custom")]), sortSpec: nil),
+		])
+		let json = curated.defaultedForJSON(outputFormat: .json)
+		#expect(json.fieldSpecs[0].label == "fileSizeBytes")
+		#expect(json.fieldSpecs[0].format == .default(fieldName: "fileSizeBytes"))
+		let table = curated.defaultedForJSON(outputFormat: .table(.default))
+		#expect(table.fieldSpecs[0].label == "Size")
+		#expect(table.fieldSpecs[0].format == .parts([.text("custom")]))
+	}
+
+	@Test
 	func `evaluates bare %v as the verbatim value, preserving its JSON type`() {
 		let format = Format.parts([.placeholder(.value(success: nil))])
 		// A number's description has no quotes, unlike a string's, confirms the
@@ -437,6 +450,45 @@ private extension MASTests {
 		#expect(Transform.absoluteValue.applied(to: "-5.5") == "5.5")
 		#expect(Transform.round.applied(to: "5.6") == "6")
 		#expect(Transform.absoluteValue.applied(to: "not a number") == "not a number")
+	}
+
+	@Test
+	func `applies group, grouping only the integer part, from the right, leaving sign & fraction alone`() {
+		let commaEvery3 = Transform.group(separator: ",", digitCount: 3)
+		#expect(commaEvery3.applied(to: "1234567") == "1,234,567")
+		#expect(commaEvery3.applied(to: "123") == "123")
+		#expect(commaEvery3.applied(to: "-1234567") == "-1,234,567")
+		#expect(commaEvery3.applied(to: "1234567.89") == "1,234,567.89")
+		#expect(Transform.group(separator: "'", digitCount: 2).applied(to: "1462715242") == "14'62'71'52'42")
+		#expect(commaEvery3.applied(to: "not a number") == "not a number")
+	}
+
+	@Test
+	func `group(locale:) resolves a locale's own grouping separator & digit count`() {
+		#expect(Transform.group(locale: .init(identifier: "en_US")).applied(to: "1234567") == "1,234,567")
+		#expect(Transform.group(locale: .init(identifier: "de_DE")).applied(to: "1234567") == "1.234.567")
+	}
+
+	@Test
+	func `parses group with no arguments as the current locale, with arguments as a locale name or explicit values`()
+	throws {
+		#expect(try Transform.parsed(name: "group", kind: .number) == .group(locale: .current))
+		#expect(try Transform.parsed(name: "group:de_DE:", kind: .number) == .group(locale: .init(identifier: "de_DE")))
+		#expect(try Transform.parsed(name: "group:.,3:", kind: .number) == .group(separator: ".", digitCount: 3))
+		#expect(try Transform.parsed(name: "group", kind: .string) == nil)
+	}
+
+	@Test
+	func `group with empty arguments, a non-positive digit count, or too many arguments is a parse error`() {
+		#expect(throws: ParsingError.invalidTransformArguments(name: "group:")) {
+			try Transform.parsed(name: "group:", kind: .number)
+		}
+		#expect(throws: ParsingError.invalidTransformArguments(name: "group:.,0:")) {
+			try Transform.parsed(name: "group:.,0:", kind: .number)
+		}
+		#expect(throws: ParsingError.invalidTransformArguments(name: "group:.,3,4:")) {
+			try Transform.parsed(name: "group:.,3,4:", kind: .number)
+		}
 	}
 
 	@Test

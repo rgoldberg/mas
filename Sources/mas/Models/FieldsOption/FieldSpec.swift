@@ -234,9 +234,13 @@ func resolveBaseFieldsConfig(
 	case noneFieldsConfigName:
 		SelectedFieldsConfig()
 	case allFieldsConfigName:
-		all.withDefaultFieldOrder(outputFormat: outputFormat)
+		all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
 	case defaultFieldsConfigName, standardFieldsConfigName:
-		appliesJSONSubstitution ? all.withDefaultFieldOrder(outputFormat: outputFormat) : standard
+		if appliesJSONSubstitution {
+			all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
+		} else {
+			standard.defaultedForJSON(outputFormat: outputFormat)
+		}
 	default:
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
