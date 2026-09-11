@@ -334,7 +334,7 @@ extension SortSpec {
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
 	/// field of `interpretation`, for `outputFormat`. `boundaryCharacter`, if
 	/// given, is a single explicit boundary character (`"/"` for Path); `nil`
-	/// (Text / Price / Version, table value `b+\_+`) means no explicit boundary
+	/// (Text / Price / Version, table value `b+_+`) means no explicit boundary
 	/// at all — just the endmost-whitespace default every `<boundaries>` value
 	/// gets. Doesn't know or care what field this is for by name — a caller
 	/// (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
