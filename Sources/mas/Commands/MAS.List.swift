@@ -67,11 +67,9 @@ private struct TableOutputConfig: OutputConfig {
 			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
 		],
 	)
-	/// The field set is open-ended (dynamically-discovered Spotlight attributes),
-	/// so, absent a user-requested order, sort alphabetically by label rather
-	/// than showing them in their arbitrary discovery order.
-	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
-		fieldSpecs: standardFieldsConfig.fieldSpecs,
-		fieldOrder: .byLabel(.fieldOrderDefault),
-	)
+	/// The field set is open-ended (dynamically-discovered Spotlight
+	/// attributes); `resolveBaseFieldsConfig(...)`'s generic default for `all`
+	/// (sort alphabetically by label) applies here, absent a user-requested
+	/// order, rather than showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

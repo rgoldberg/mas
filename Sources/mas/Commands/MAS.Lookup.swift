@@ -92,11 +92,9 @@ private struct KeyValueConfig: OutputConfig {
 			.init(name: "appStorePageURL", label: "From", format: .default(fieldName: "appStorePageURL"), sortSpec: nil),
 		],
 	)
-	/// The field set is open-ended (dynamically-discovered API fields), so,
-	/// absent a user-requested order, sort alphabetically by label rather than
-	/// showing them in their arbitrary discovery order.
-	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
-		fieldSpecs: standardFieldsConfig.fieldSpecs,
-		fieldOrder: .byLabel(.fieldOrderDefault),
-	)
+	/// The field set is open-ended (dynamically-discovered API fields);
+	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort
+	/// alphabetically by label) applies here, absent a user-requested order,
+	/// rather than showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

@@ -331,24 +331,6 @@ private struct BoundaryRankTable { // swiftlint:disable:this one_declaration_per
 }
 
 extension SortSpec {
-	/// The bare, per-axis defaults from each `<sort-option>` production's own
-	/// `(* default: … *)` comment in fields.md — distinct from the "Default
-	/// Sort Options" table (`defaultSortSpec(forFieldNamed:outputFormat:)`),
-	/// which is keyed by a specific field's value type & doesn't apply when
-	/// sorting bare field names / labels for `<field-order-option-set>`, the
-	/// only other place a bare `<sort-option-set>` (no `<sort-priority>`) is
-	/// parsed.
-	static let fieldOrderDefault = Self(
-		priority: 0, // Irrelevant: `<field-order-option-set>` has no `<sort-priority>`
-		source: .input,
-		direction: .ascending,
-		caseSensitivity: .sensitive,
-		localization: .canonical,
-		grouping: .ungrouped,
-		interpretation: .lexical,
-		boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
-	)
-
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
 	/// field of `interpretation`, using `boundaryCharacter` as its single-
 	/// character boundary (`"/"` for Path, `"_"` for Text / Price / Version),

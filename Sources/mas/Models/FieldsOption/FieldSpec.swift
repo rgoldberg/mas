@@ -234,9 +234,9 @@ func resolveBaseFieldsConfig(
 	case noneFieldsConfigName:
 		SelectedFieldsConfig()
 	case allFieldsConfigName:
-		all
+		all.withDefaultFieldOrder(outputFormat: outputFormat)
 	case defaultFieldsConfigName, standardFieldsConfigName:
-		appliesJSONSubstitution ? all : standard
+		appliesJSONSubstitution ? all.withDefaultFieldOrder(outputFormat: outputFormat) : standard
 	default:
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
@@ -319,7 +319,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			&input,
 			nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
 			priority: 0,
-			defaults: .fieldOrderDefault,
+			defaults: .default(interpretation: .lexical, boundaryCharacter: "_", outputFormat: outputFormat),
 		)
 		return switch sortSpec.source {
 		case .input:

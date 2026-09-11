@@ -60,11 +60,13 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 // MARK: - Field ordering (fields.md)
 
 enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
-	/// `<source>` `"O"`: sorts by label, per the full `<sort-option-set>`
-	/// (`SortSpec.fieldOrderDefault` fills in any axis left unspecified).
+	/// `<source>` `"O"`: sorts by label, per the full `<sort-option-set>` (any
+	/// axis left unspecified keeps its value from whatever `SortSpec` the
+	/// caller passed as `parsedOptionSet(_:nextSectionPrefixSet:priority:
+	/// defaults:)`'s `defaults`).
 	case byLabel(SortSpec)
-	/// `<source>` `"I"`: sorts by name, per the full `<sort-option-set>`
-	/// (`SortSpec.fieldOrderDefault` fills in any axis left unspecified).
+	/// `<source>` `"I"`: sorts by name, per the full `<sort-option-set>` (see
+	/// `byLabel`'s note on unspecified axes).
 	case byName(SortSpec)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the
@@ -97,5 +99,25 @@ extension FieldOrder {
 		case let .byLabel(sortSpec):
 			fieldSpecs.sorted { sortSpec.compare($0.label, $1.label) == .orderedAscending }
 		}
+	}
+}
+
+extension BaseIncludesAllFieldsConfig {
+	/// `all`'s own default field order: sorts by label, per `SortSpec`'s
+	/// generic Text-interpretation defaults for `outputFormat` — the same
+	/// output-format-driven case-sensitivity / localization split a specific
+	/// field's own default `SortSpec` already gets (`defaultSortSpec(
+	/// forFieldNamed:outputFormat:)`'s Text row), since a field's name / label
+	/// is itself always plain text. Applied only if a command hasn't already
+	/// customized `all`'s `fieldOrder` (i.e., it's still `.inherited`).
+	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
+		guard fieldOrder == .inherited else {
+			return self
+		}
+		return .init(
+			fieldSpecs: fieldSpecs,
+			fieldOrder: .byLabel(.default(interpretation: .lexical, boundaryCharacter: "_", outputFormat: outputFormat)),
+			itemSort: itemSort,
+		)
 	}
 }
