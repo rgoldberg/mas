@@ -18,15 +18,15 @@
 /// `SortSpec.default(interpretation:boundaryCharacter:outputFormat:)` needs to
 /// compute the fields.md "Default Sort Options" row used to fill in an
 /// otherwise-incomplete explicit `<sort>`. A field name this doesn't recognize
-/// as price / version / path gets the generic (numeric-interpretation,
-/// underscore-boundary) row.
+/// as price / version / path gets the generic (numeric-interpretation, no
+/// explicit boundary) row.
 func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
 	let interpretation = priceFieldNameSet.contains(fieldName)
 		? SortSpec.Interpretation.price
 		: versionFieldNameSet.contains(fieldName) ? .version : .numeric
 	return .default(
 		interpretation: interpretation,
-		boundaryCharacter: pathFieldNameSet.contains(fieldName) ? "/" : "_",
+		boundaryCharacter: pathFieldNameSet.contains(fieldName) ? "/" : nil,
 		outputFormat: outputFormat,
 	)
 }

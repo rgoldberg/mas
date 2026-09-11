@@ -319,7 +319,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			&input,
 			nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
 			priority: 0,
-			defaults: .default(interpretation: .lexical, boundaryCharacter: "_", outputFormat: outputFormat),
+			defaults: .default(interpretation: .lexical, boundaryCharacter: nil, outputFormat: outputFormat),
 		)
 		return switch sortSpec.source {
 		case .input:

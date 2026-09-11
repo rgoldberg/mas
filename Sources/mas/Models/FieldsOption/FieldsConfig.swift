@@ -116,7 +116,7 @@ extension BaseIncludesAllFieldsConfig {
 		}
 		return .init(
 			fieldSpecs: fieldSpecs,
-			fieldOrder: .byLabel(.default(interpretation: .lexical, boundaryCharacter: "_", outputFormat: outputFormat)),
+			fieldOrder: .byLabel(.default(interpretation: .lexical, boundaryCharacter: nil, outputFormat: outputFormat)),
 			itemSort: itemSort,
 		)
 	}

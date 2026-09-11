@@ -332,13 +332,15 @@ private struct BoundaryRankTable { // swiftlint:disable:this one_declaration_per
 
 extension SortSpec {
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
-	/// field of `interpretation`, using `boundaryCharacter` as its single-
-	/// character boundary (`"/"` for Path, `"_"` for Text / Price / Version),
-	/// for `outputFormat`. Doesn't know or care what field this is for by
-	/// name — a caller (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
+	/// field of `interpretation`, for `outputFormat`. `boundaryCharacter`, if
+	/// given, is a single explicit boundary character (`"/"` for Path); `nil`
+	/// (Text / Price / Version, table value `b+\_+`) means no explicit boundary
+	/// at all — just the endmost-whitespace default every `<boundaries>` value
+	/// gets. Doesn't know or care what field this is for by name — a caller
+	/// (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
 	/// `AppStoreFieldDefaults.swift`) maps a field name to an `interpretation` &
 	/// `boundaryCharacter` first.
-	static func `default`(interpretation: Interpretation, boundaryCharacter: Character, outputFormat: OutputFormat)
+	static func `default`(interpretation: Interpretation, boundaryCharacter: Character?, outputFormat: OutputFormat)
 	-> Self {
 		let (caseSensitivity, localization) = outputFormat == .json
 			? (CaseSensitivity.sensitive, Localization.canonical)
@@ -352,7 +354,7 @@ extension SortSpec {
 			grouping: interpretation == .version ? .ungrouped : .grouped,
 			interpretation: interpretation,
 			boundaries: .init(
-				groups: [.init(boundaries: [.character(boundaryCharacter)])],
+				groups: boundaryCharacter.map { [.init(boundaries: [.character($0)])] } ?? .init(),
 				collapseContiguous: false,
 				whitespacePlacement: .endmost,
 			),
