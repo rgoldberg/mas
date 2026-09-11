@@ -98,15 +98,24 @@ If no named format exists for a referenced name, an error is reported.
 <!--markdownlint-disable line-length-->
 ```ebnf
 string-transform-pipeline = ( <transform-call-prefix> <string-transform> )+
-number-transform-pipeline = ( <transform-call-prefix> <number-transform> )+
 date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
+
+(* A `<terminal-number-transform>` (currently just `group`) produces a value
+   no other `<number-transform>` can operate on further (see `group`'s own
+   note below), so it may only ever appear last: either alone, or after 1+
+   `<non-terminal-number-transform>`s. This is the 1 exception to `<transform>`
+   ordering being unconstrained; the grammar enforces it directly, rather than
+   leaving it to prose. *)
+number-transform-pipeline = ( <transform-call-prefix> <non-terminal-number-transform> )+ [ <transform-call-prefix> <terminal-number-transform> ]
+                          | <transform-call-prefix> <terminal-number-transform>
 
 transform-call-prefix = "."
 
-transform        = <string-transform> | <number-transform> | <date-transform>
-string-transform = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
-number-transform = <absolute-value> | <group> | <round> | <scale>
-date-transform   = <iso> | <date-only> | <local-time-zone>
+transform                     = <string-transform> | <non-terminal-number-transform> | <terminal-number-transform> | <date-transform>
+string-transform              = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
+non-terminal-number-transform = <absolute-value> | <round> | <scale>
+terminal-number-transform     = <group>
+date-transform                = <iso> | <date-only> | <local-time-zone>
 
 capitalize      = "initialUppercase"
 lowercase       = "lowercase"
@@ -115,9 +124,9 @@ trim-whitespace = "trimWhitespace"
 uppercase       = "uppercase"
 
 absolute-value = "absoluteValue"
-group          = "group" [ <group-arguments> ]
 round          = "round"
 scale          = "scale" <scale-arguments>
+group          = "group" [ <group-arguments> ]
 
 iso             = "iso"
 date-only       = "dateOnly"
@@ -157,6 +166,12 @@ separator>` of `,` & a `<group-digit-count>` of `3` renders `1234567` as
 `1,234,567`); any fractional part (after a literal `.`) & a leading `-` sign
 are left untouched.
 
+- `group` is a `<terminal-number-transform>`: its own output (digits
+  interspersed with `<group-separator>`) generally isn't itself a valid
+  number, so no further `<non-terminal-number-transform>` could meaningfully
+  operate on it. It may still be preceded by 1 or more of those (e.g., a byte
+  count scaled to megabytes, then grouped: `.scale:10,6,,0:.group`), just
+  never followed by another transform.
 - Absent `<group-arguments>` entirely, or given only `<group-locale-name>`,
   `<group-separator>` & `<group-digit-count>` come from the system default
   locale, or the named locale, respectively.

@@ -67,6 +67,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingFieldName
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
+	case terminalNumberTransformFollowedByMore(name: String)
 	case unknownNamedFormat(String)
 	case unsupportedDateInputFormat
 	case unsupportedDateOutputFormat
@@ -105,6 +106,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 				name.isEmpty || name.first?.isWhitespace == true || name.last?.isWhitespace == true ? "'\(name)'" : name
 			)
 			"""
+		case let .terminalNumberTransformFollowedByMore(name):
+			"'\(name)' must be the last transform in its number-transform-pipeline; nothing may follow it"
 		case let .unknownNamedFormat(name):
 			"Unknown named format: \(name)"
 		case .unsupportedDateInputFormat:

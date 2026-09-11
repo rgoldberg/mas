@@ -492,6 +492,20 @@ private extension MASTests {
 	}
 
 	@Test
+	func `group, a terminal-number-transform, may be preceded by others but never followed`() throws {
+		#expect(throws: ParsingError.terminalNumberTransformFollowedByMore(name: "group")) {
+			try parseFieldSpecs("adamID:%N.group.round++")
+		}
+		#expect(throws: ParsingError.terminalNumberTransformFollowedByMore(name: "group")) {
+			try parseFieldSpecs("adamID:%N.group.absoluteValue++")
+		}
+		// Doesn't throw: group alone, or preceded by 1+ non-terminal transforms
+		#expect(try parseFieldSpecs("adamID:%N.group++").count == 1)
+		#expect(try parseFieldSpecs("adamID:%N.round.group++").count == 1)
+		#expect(try parseFieldSpecs("adamID:%N.absoluteValue.round.group++").count == 1)
+	}
+
+	@Test
 	func `%cn coerces a numeric JSON string into a number, unlike plain %n`() {
 		let coerced = Format.parts([.placeholder(.number(negated: false, coerced: true, success: nil, failure: nil))])
 		#expect(coerced.rendered(value: .string("42"), label: "L", name: "n").stringValue == "42")

@@ -177,6 +177,19 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
+	/// Whether this is a `<terminal-number-transform>` (currently just `group`):
+	/// its own output isn't itself a value another `<non-terminal-number-
+	/// transform>` could meaningfully operate on, so the parser (`Format
+	/// ReferenceParser.parse(_:)`) rejects anything following it in the same
+	/// `<number-transform-pipeline>`.
+	var isTerminalNumberTransform: Bool {
+		if case .group = self {
+			true
+		} else {
+			false
+		}
+	}
+
 	/// Applies this transform to a string. `dateOnly` / `iso` / `localTimeZone`
 	/// are applied separately, by `DateSpec.rendered(value:label:name:)`, since
 	/// they need the field's parsed `Date`, not just its rendered string.
@@ -770,6 +783,12 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 				throw .invalidTransform(name: name, expectedKind: kind.rawValue)
 			}
 			transforms.append(transform)
+			// A `<terminal-number-transform>` may only ever be last in its
+			// `<number-transform-pipeline>`; `input.first == transformCallPrefix` here
+			// means the loop is about to try parsing another 1
+			guard !transform.isTerminalNumberTransform || input.first != transformCallPrefix else {
+				throw .terminalNumberTransformFollowedByMore(name: name)
+			}
 		}
 		return namedFormat != nil || !transforms.isEmpty ? .init(namedFormat: namedFormat, transforms: transforms) : nil
 	}
