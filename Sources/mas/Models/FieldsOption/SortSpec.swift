@@ -470,6 +470,24 @@ extension SortSpec {
 		}
 	}
 
+	/// `grouping`'s effective separator: only meaningful for `.numeric`
+	/// (`.lexical` never treats a value as a number at all; `.price` / `.version`
+	/// already strip / split on their own & never consult `grouping`, same as
+	/// `boundaries`). `.canonical` uses `,`, matching a plain, locale-independent
+	/// reading of a grouped number (e.g., `1,234`); `.localized` uses that
+	/// locale's own separator.
+	private var groupingSeparator: String? {
+		guard interpretation == .numeric, grouping == .grouped else {
+			return nil
+		}
+		switch localization {
+		case .canonical:
+			return ","
+		case let .localized(locale):
+			return locale.groupingSeparator
+		}
+	}
+
 	/// Compares 2 field values (already-rendered strings; `nil` for a missing /
 	/// absent value) per this spec's effective source-independent options.
 	///
@@ -479,9 +497,14 @@ extension SortSpec {
 	/// splitting) that fields.md doesn't define any boundary interaction for,
 	/// so layering boundary tokenization on top of them would be a new,
 	/// unspecified behavior rather than an implementation of the spec.
+	/// `grouping`, when `.grouped` & `.numeric`, strips `groupingSeparator`
+	/// from both sides first (e.g., `"1,234"` compares as `1234`), so a
+	/// grouped number's digits aren't broken up into smaller ones by the
+	/// separator; `.ungrouped` (or `.lexical`, or `.price` / `.version`)
+	/// leaves the value as-is.
 	func compare(_ lhs: String?, _ rhs: String?) -> ComparisonResult {
-		let lhs = lhs ?? ""
-		let rhs = rhs ?? ""
+		let lhs = strippedOfGroupingSeparator(lhs ?? "")
+		let rhs = strippedOfGroupingSeparator(rhs ?? "")
 		let result = switch interpretation {
 		case .lexical, .numeric:
 			compareBoundaryAware(lhs, rhs)
@@ -491,6 +514,13 @@ extension SortSpec {
 			compareVersions(lhs, rhs)
 		}
 		return direction == .ascending ? result : result.reversed
+	}
+
+	private func strippedOfGroupingSeparator(_ string: String) -> String {
+		guard let groupingSeparator, !groupingSeparator.isEmpty else {
+			return string
+		}
+		return string.replacing(groupingSeparator, with: "")
 	}
 
 	/// Tokenizes `lhs` & `rhs` per `boundaries` (see `BoundaryRankTable`), then
