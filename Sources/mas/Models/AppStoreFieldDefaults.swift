@@ -14,21 +14,22 @@
 // here, rather than in `Models/FieldsOption/`, keeps the generic engine
 // reusable independent of mas.
 
-/// Maps a field name directly to the `interpretation` & boundary character
-/// `SortSpec.default(interpretation:boundaryCharacter:outputFormat:)` needs to
-/// compute the fields.md "Default Sort Options" row used to fill in an
-/// otherwise-incomplete explicit `<sort>`. A field name this doesn't recognize
-/// as price / version / path gets the generic (numeric-interpretation, no
-/// explicit boundary) row.
+/// Maps a field name to the fields.md "Default Sort Options" row used to fill
+/// in an otherwise-incomplete explicit `<sort>`. A field name this doesn't
+/// recognize as price / version / path gets `SortSpec.textDefault(
+/// outputFormat:)` — the same Text-row default `<field-order-option-set>`
+/// uses, kept as 1 shared definition so the 2 can't drift apart.
 func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
-	let interpretation = priceFieldNameSet.contains(fieldName)
-		? SortSpec.Interpretation.price
-		: versionFieldNameSet.contains(fieldName) ? .version : .numeric
-	return .default(
-		interpretation: interpretation,
-		boundaryCharacter: pathFieldNameSet.contains(fieldName) ? "/" : nil,
-		outputFormat: outputFormat,
-	)
+	if priceFieldNameSet.contains(fieldName) {
+		return .default(interpretation: .price, boundaryCharacter: nil, outputFormat: outputFormat)
+	}
+	if versionFieldNameSet.contains(fieldName) {
+		return .default(interpretation: .version, boundaryCharacter: nil, outputFormat: outputFormat)
+	}
+	if pathFieldNameSet.contains(fieldName) {
+		return .default(interpretation: .numeric, boundaryCharacter: "/", outputFormat: outputFormat)
+	}
+	return .textDefault(outputFormat: outputFormat)
 }
 
 private let priceFieldNameSet = Set(["price", "formattedPrice"])

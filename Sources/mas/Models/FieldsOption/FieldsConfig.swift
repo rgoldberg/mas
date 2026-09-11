@@ -103,20 +103,20 @@ extension FieldOrder {
 }
 
 extension BaseIncludesAllFieldsConfig {
-	/// `all`'s own default field order: sorts by label, per `SortSpec`'s
-	/// generic Text-interpretation defaults for `outputFormat` — the same
-	/// output-format-driven case-sensitivity / localization split a specific
-	/// field's own default `SortSpec` already gets (`defaultSortSpec(
-	/// forFieldNamed:outputFormat:)`'s Text row), since a field's name / label
-	/// is itself always plain text. Applied only if a command hasn't already
-	/// customized `all`'s `fieldOrder` (i.e., it's still `.inherited`).
+	/// `all`'s own default field order: sorts by label, per `SortSpec.
+	/// textDefault(outputFormat:)` — the same shared Text-row default a
+	/// specific field's own default `SortSpec` also uses (`defaultSortSpec(
+	/// forFieldNamed:outputFormat:)`, for any name it doesn't recognize as
+	/// price / version / path), since a field's name / label is itself always
+	/// plain text. Applied only if a command hasn't already customized `all`'s
+	/// `fieldOrder` (i.e., it's still `.inherited`).
 	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
 		guard fieldOrder == .inherited else {
 			return self
 		}
 		return .init(
 			fieldSpecs: fieldSpecs,
-			fieldOrder: .byLabel(.default(interpretation: .numeric, boundaryCharacter: nil, outputFormat: outputFormat)),
+			fieldOrder: .byLabel(.textDefault(outputFormat: outputFormat)),
 			itemSort: itemSort,
 		)
 	}

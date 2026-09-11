@@ -334,9 +334,9 @@ extension SortSpec {
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
 	/// field of `interpretation`, for `outputFormat`. `boundaryCharacter`, if
 	/// given, is a single explicit boundary character (`"/"` for Path); `nil`
-	/// (Text / Price / Version, table value `b+_+`) means no explicit boundary
-	/// at all — just the endmost-whitespace default every `<boundaries>` value
-	/// gets. Doesn't know or care what field this is for by name — a caller
+	/// (Text / Price / Version, table value `b+_+`, i.e., a solitary
+	/// `<grouped-whitespace-boundary-modifier>`) means no explicit boundary at
+	/// all. Doesn't know or care what field this is for by name — a caller
 	/// (e.g., `defaultSortSpec(forFieldNamed:outputFormat:)` in
 	/// `AppStoreFieldDefaults.swift`) maps a field name to an `interpretation` &
 	/// `boundaryCharacter` first.
@@ -356,9 +356,29 @@ extension SortSpec {
 			boundaries: .init(
 				groups: boundaryCharacter.map { [.init(boundaries: [.character($0)])] } ?? .init(),
 				collapseContiguous: false,
-				whitespacePlacement: .endmost,
+				// `nil`: a solitary modifier (`b+_+`) — per fields.md, "a solitary or a
+				// leading … modifier … positions the whitespace implicit group before
+				// all explicit groups", i.e. `.leading`. Otherwise (`boundaryCharacter`
+				// given, `b+/+`): no modifier / suppressor at all, so the ordinary
+				// `.endmost` default applies. Behaviorally identical either way today
+				// (0 vs 1 explicit group's worth of difference doesn't change
+				// `.leading` vs `.endmost` when there's only ever 0 or 1 group here),
+				// but `.leading` is the semantically correct value for the solitary
+				// case.
+				whitespacePlacement: boundaryCharacter == nil ? .leading : .endmost,
 			),
 		)
+	}
+
+	/// The generic engine's own default for a field-agnostic `<sort-option-set>`
+	/// (i.e., a bare `<field-order-option-set>`, which sorts field names /
+	/// labels, never a specific field's value): exactly `default(interpretation:
+	/// boundaryCharacter:outputFormat:)`'s Text row (`interpretation: .numeric,
+	/// boundaryCharacter: nil`) — the same call `defaultSortSpec(forFieldNamed:
+	/// outputFormat:)` makes for any field name it doesn't recognize as price /
+	/// version / path, kept as 1 shared definition so the 2 can't drift apart.
+	static func textDefault(outputFormat: OutputFormat) -> Self {
+		.default(interpretation: .numeric, boundaryCharacter: nil, outputFormat: outputFormat)
 	}
 
 	/// Parses a bare `<sort-option-set>` (`<sort-option>+`; no leading
