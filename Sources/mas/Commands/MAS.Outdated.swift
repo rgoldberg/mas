@@ -56,6 +56,6 @@ private struct TableOutputConfig: OutputConfig {
 	/// than showing them in their arbitrary discovery order.
 	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
 		fieldSpecs: standardFieldsConfig.fieldSpecs,
-		fieldOrder: .byLabel(.ascending),
+		fieldOrder: .byLabel(.fieldOrderDefault),
 	)
 }

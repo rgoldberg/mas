@@ -144,7 +144,7 @@ func fetchFieldNames(
 		guard !base.baseIncludesAllFields else {
 			return .init()
 		}
-		skipFieldOrderAndItemSortSections(&input)
+		try skipFieldOrderAndItemSortSections(&input, outputFormat: outputFormat)
 		return .init(
 			Set(base.fieldSpecs.compactMap { $0.isSynthesized ? nil : $0.name })
 				.union(try topLevelFieldSpecNames(in: input, requiringPrefix: insertIndicator)),
@@ -176,7 +176,7 @@ func resolvedFieldsConfig(
 		}
 		let base = try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat)
 		var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat)
-		let parsedFieldOrder = builder.parseFieldOrderSection(&input)
+		let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
 		let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 		let tiebreakDirection = try builder.parseItemSortSection(&input)
 		try builder.parseFieldSpecsSection(&input)
@@ -297,33 +297,35 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		referenceFieldSpecs = fieldSpecs
 	}
 
-	mutating func parseFieldOrderSection(_ input: inout Substring) -> FieldOrder {
+	mutating func parseFieldOrderSection(_ input: inout Substring) throws -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
 			return .inherited
 		}
 		input.removeFirst()
-		var sawOriginalOrder = false
-		var sawSource = SortSpec.Source?.none
-		var direction = SortSpec.Direction?.none
-		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
-			if char == originalOrderOption {
-				sawOriginalOrder = true
-			} else if let match = SortSpec.Source(rawValue: char) {
-				sawSource = match
-			} else if let match = SortSpec.Direction(rawValue: char) {
-				direction = match
-			}
-			input.removeFirst()
+		guard let first = input.first, first != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(first) else {
+			return .workingOrder
 		}
-		return if sawOriginalOrder {
-			.original(direction)
-		} else {
-			switch sawSource {
-			case .input, nil:
-				direction == nil ? .workingOrder : .byName(direction ?? .ascending)
-			case .output:
-				.byLabel(direction ?? .ascending)
+		guard !isOriginalOrderOptionSet(input) else {
+			var direction = SortSpec.Direction?.none
+			while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
+				if let match = SortSpec.Direction(rawValue: char) {
+					direction = match
+				}
+				input.removeFirst()
 			}
+			return .original(direction)
+		}
+		let sortSpec = try SortSpec.parsedOptionSet(
+			&input,
+			nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
+			priority: 0,
+			defaults: .fieldOrderDefault,
+		)
+		return switch sortSpec.source {
+		case .input:
+			.byName(sortSpec)
+		case .output:
+			.byLabel(sortSpec)
 		}
 	}
 
@@ -471,6 +473,30 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 			?? fieldSpec
 	}
+}
+
+/// Whether `input`'s `<field-order-option-set>` (up to, but not including, its
+/// terminating `<field-spec-separator>` / `<item-sort-section-prefix>` /
+/// `<field-specs-section-prefix>`) is an `<original-order-option-set>`: every
+/// top-level character is in `{"o", "a", "d"}`, with at least 1 `"o"` (its
+/// mandatory `<original-order>`). Any other top-level character (including 1
+/// that introduces a fenced `<sort-option>`, e.g., `"l"` / `"b"`) means it's a
+/// `<sort-option-set>` instead: the 2 alternatives share no valid text (an
+/// all-`{"a", "d"}` sequence with no `"o"` can only be `<sort-option-set>`,
+/// since `<original-order-option-set>` requires `"o"`), so checking without
+/// consuming `input` is safe — only 1 alternative ever actually gets parsed.
+private func isOriginalOrderOptionSet(_ input: Substring) -> Bool {
+	var sawOriginalOrder = false
+	for char in input {
+		if char == fieldSpecSeparator || itemSortAndFieldSpecsPrefixSet.contains(char) {
+			break
+		}
+		guard char == originalOrderOption || SortSpec.Direction(rawValue: char) != nil else {
+			return false
+		}
+		sawOriginalOrder = sawOriginalOrder || char == originalOrderOption
+	}
+	return sawOriginalOrder
 }
 
 // MARK: Private: field-spec-reference resolution
@@ -852,15 +878,18 @@ extension Substring {
 
 /// Skips (without interpreting) an optional `<field-order-section>` &
 /// `<item-sort-section>`, leaving `input` positioned at the start of
-/// `<field-specs-section>` (or empty). Neither section's option alphabet (`o` /
-/// `I` / `O` / `a` / `d` / `r` / `R`) overlaps with `.` / `/` / `,`, so this
-/// doesn't need to understand their grammar beyond that.
-private func skipFieldOrderAndItemSortSections(_ input: inout Substring) {
+/// `<field-specs-section>` (or empty). `<field-order-section>` is skipped via
+/// the real parser (`FieldSpecsBuilder.parseFieldOrderSection(_:)`, result
+/// discarded): unlike `<item-sort-section>`, its `<sort-option-set>`
+/// alternative can carry fenced sub-content (a `<localization>` locale name,
+/// `<boundaries>`) that may itself contain an unescaped `.` / `/`, so a naive
+/// scan for those characters isn't safe here. `<item-sort-section>`'s own
+/// option alphabet (`a` / `d` / `r` / `R`) has no such fencing & never
+/// overlaps with `.`, so it can still be skipped directly.
+private func skipFieldOrderAndItemSortSections(_ input: inout Substring, outputFormat: OutputFormat) throws {
 	if input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) {
-		input.removeFirst()
-		while let char = input.first, char != fieldOrderSectionPrefix, char != fieldSpecsSectionPrefix {
-			input.removeFirst()
-		}
+		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat)
+		_ = try builder.parseFieldOrderSection(&input)
 	}
 	if input.hasPrefix(itemSortSectionPrefix) {
 		input.removeFirst(itemSortSectionPrefix.count)

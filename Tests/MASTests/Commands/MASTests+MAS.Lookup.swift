@@ -30,10 +30,17 @@ private extension MASTests {
 			"""
 			{\
 			"ADAM ID":1472954003,\
-			"averageUserRating":0,\
-			"averageUserRatingForCurrentVersion":0,\
 			"Bundle ID":"uikitformac.com.tinybop.thingamabops",\
 			"By":"Tinybop Inc.",\
+			"From":"https://apps.apple.com/us/app/things-that-go-bump/id1472954003?mt=12&uo=4",\
+			"Minimum OS":"10.15.0",\
+			"Name":"Things That Go Bump",\
+			"Price":"$0.99",\
+			"Released":"2020-03-18",\
+			"Size":"12 MB",\
+			"Version":"1.3.0",\
+			"averageUserRating":0,\
+			"averageUserRatingForCurrentVersion":0,\
 			"categories":["Games","Action","Family"],\
 			"categoryIDs":["6014","7001","7009"],\
 			"censoredName":"Things That Go Bump",\
@@ -44,28 +51,21 @@ private extension MASTests {
 			"developerAppStorePageURL":"https://apps.apple.com/us/developer/tinybop-inc/id682046582?mt=12&uo=4",\
 			"developerID":682046582,\
 			"developerName":"Tinybop Inc.",\
-			"From":"https://apps.apple.com/us/app/things-that-go-bump/id1472954003?mt=12&uo=4",\
-			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/60x60bb.png",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/100x100bb.png",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/512x512bb.png",\
+			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/60x60bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
 			"languageCodesISO2A":["EN"],\
-			"Minimum OS":"10.15.0",\
-			"Name":"Things That Go Bump",\
 			"originalVersionReleaseDate":"2019-10-18T07:00:00Z",\
 			"price":0.99,\
-			"Price":"$0.99",\
 			"primaryCategoryID":6014,\
 			"primaryCategoryName":"Games",\
-			"Released":"2020-03-18",\
 			"releaseNotes":"* BOOM *, this is a BIG update. The house spawns a game room, complete with video games you can ENTER INTO. It's fun and a little bit weird! Try it! \\n»-(¯`·.·´¯)->",\
 			"screenshotURLs":["https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/36/fe/ff/36feffbc-a07b-e61e-f0e5-88dcc4455871/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/c6/85/09/c68509b2-c2c8-3000-bf85-4ead056b26f3/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/18/42/aa/1842aab5-0500-b08b-b9a5-fc364f83fbdb/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/de/b9/99/deb99962-f1d0-a7ad-0fc8-ef4bf906515b/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/41/70/7d/41707d88-8ba1-5a28-1f2f-0f2e43a73706/pr_source.png/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/be/a3/a2/bea3a233-d82f-34bf-b0cd-38f262b04939/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/e5/41/b4/e541b49d-06ed-9ec6-1544-3df88c8dc340/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/8f/08/49/8f0849f4-7d20-567f-47e6-ef1bfb901619/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/7d/74/8a/7d748af9-50fa-e009-39a8-b5eb7774b2be/pr_source.png/800x500bb.jpg"],\
 			"sellerURL":"https://tinybop.com",\
-			"Size":"12 MB",\
 			"userRatingCount":0,\
 			"userRatingCountForCurrentVersion":0,\
-			"Version":"1.3.0",\
 			"wrapperType":"software"\
 			}
 

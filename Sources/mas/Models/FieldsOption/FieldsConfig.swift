@@ -60,10 +60,12 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 // MARK: - Field ordering (fields.md)
 
 enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
-	/// `<source>` `"O"`.
-	case byLabel(SortSpec.Direction)
-	/// `<source>` `"I"`.
-	case byName(SortSpec.Direction)
+	/// `<source>` `"O"`: sorts by label, per the full `<sort-option-set>`
+	/// (`SortSpec.fieldOrderDefault` fills in any axis left unspecified).
+	case byLabel(SortSpec)
+	/// `<source>` `"I"`: sorts by name, per the full `<sort-option-set>`
+	/// (`SortSpec.fieldOrderDefault` fills in any axis left unspecified).
+	case byName(SortSpec)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the
 	/// resolved base fields config's own `fieldOrder`.
@@ -82,23 +84,18 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 extension FieldOrder {
 	/// Reorders `fieldSpecs` per this order. `.inherited` & `.workingOrder` are
 	/// both identity; `.original` is identity too, unless its direction is
-	/// `.descending`.
+	/// `.descending`. `.byName` / `.byLabel` sort per their full `SortSpec`
+	/// (direction included: `SortSpec.compare(_:_:)` already accounts for it).
 	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
 		switch self {
 		case .inherited, .workingOrder:
 			fieldSpecs
 		case let .original(direction):
 			direction == .descending ? .init(fieldSpecs.reversed()) : fieldSpecs
-		case let .byName(direction):
-			fieldSpecs.sorted(using: KeyPathComparator(\.name, order: direction.sortOrder))
-		case let .byLabel(direction):
-			fieldSpecs.sorted(using: KeyPathComparator(\.label, order: direction.sortOrder))
+		case let .byName(sortSpec):
+			fieldSpecs.sorted { sortSpec.compare($0.name, $1.name) == .orderedAscending }
+		case let .byLabel(sortSpec):
+			fieldSpecs.sorted { sortSpec.compare($0.label, $1.label) == .orderedAscending }
 		}
-	}
-}
-
-private extension SortSpec.Direction {
-	var sortOrder: SortOrder {
-		self == .ascending ? .forward : .reverse
 	}
 }

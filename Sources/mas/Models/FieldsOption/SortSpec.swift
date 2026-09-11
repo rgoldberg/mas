@@ -331,6 +331,24 @@ private struct BoundaryRankTable { // swiftlint:disable:this one_declaration_per
 }
 
 extension SortSpec {
+	/// The bare, per-axis defaults from each `<sort-option>` production's own
+	/// `(* default: … *)` comment in fields.md — distinct from the "Default
+	/// Sort Options" table (`defaultSortSpec(forFieldNamed:outputFormat:)`),
+	/// which is keyed by a specific field's value type & doesn't apply when
+	/// sorting bare field names / labels for `<field-order-option-set>`, the
+	/// only other place a bare `<sort-option-set>` (no `<sort-priority>`) is
+	/// parsed.
+	static let fieldOrderDefault = Self(
+		priority: 0, // Irrelevant: `<field-order-option-set>` has no `<sort-priority>`
+		source: .input,
+		direction: .ascending,
+		caseSensitivity: .sensitive,
+		localization: .canonical,
+		grouping: .ungrouped,
+		interpretation: .lexical,
+		boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
+	)
+
 	/// fields.md's "Default Sort Options" table: the default `SortSpec` for a
 	/// field of `interpretation`, using `boundaryCharacter` as its single-
 	/// character boundary (`"/"` for Path, `"_"` for Text / Price / Version),
@@ -359,26 +377,20 @@ extension SortSpec {
 		)
 	}
 
-	/// `fieldName` / `outputFormat` are only consulted when `existing` is `nil`
-	/// (a fresh `<sort>`, not inheriting from another field spec's sort): they
-	/// select the fields.md "Default Sort Options" row used to fill in any
-	/// unspecified dimension.
-	init?(
-		from input: inout Substring,
+	/// Parses a bare `<sort-option-set>` (`<sort-option>+`; no leading
+	/// `<sort-priority>`), applying each recognized option over `defaults`
+	/// (last 1 per axis wins), leaving every other axis at its `defaults`
+	/// value. Shared by `init(from:nextSectionPrefixSet:existing:fieldName:
+	/// outputFormat:)` (which parses `<sort>`'s optional leading
+	/// `<sort-priority>` itself, before calling this) & `<field-order-
+	/// option-set>` (fields.md's `field-order-option-set = … | <sort-option-
+	/// set>`, which has no priority at all).
+	static func parsedOptionSet(
+		_ input: inout Substring,
 		nextSectionPrefixSet: Set<Character>,
-		existing sortSpec: SortSpec?,
-		fieldName: String,
-		outputFormat: OutputFormat,
-	) throws {
-		input = input.drop(while: \.isWhitespace)
-		guard let first = input.first, first != fieldSpecSeparator, !nextSectionPrefixSet.contains(first) else {
-			return nil
-		}
-		let priority = parseUInt64(&input)
-		guard priority != nil || sortSpec != nil else {
-			throw ParsingError.missingSortPriority
-		}
-		let defaults = sortSpec ?? defaultSortSpec(forFieldNamed: fieldName, outputFormat: outputFormat)
+		priority: UInt64,
+		defaults: Self,
+	) throws -> Self {
 		var source = defaults.source
 		var direction = defaults.direction
 		var caseSensitivity = defaults.caseSensitivity
@@ -415,8 +427,8 @@ extension SortSpec {
 				}
 			}
 		}
-		self.init(
-			priority: priority ?? sortSpec?.priority ?? 0,
+		return .init(
+			priority: priority,
 			source: source,
 			direction: direction,
 			caseSensitivity: caseSensitivity,
@@ -424,6 +436,33 @@ extension SortSpec {
 			grouping: grouping,
 			interpretation: interpretation,
 			boundaries: boundaries,
+		)
+	}
+
+	/// `fieldName` / `outputFormat` are only consulted when `existing` is `nil`
+	/// (a fresh `<sort>`, not inheriting from another field spec's sort): they
+	/// select the fields.md "Default Sort Options" row used to fill in any
+	/// unspecified dimension.
+	init?(
+		from input: inout Substring,
+		nextSectionPrefixSet: Set<Character>,
+		existing sortSpec: SortSpec?,
+		fieldName: String,
+		outputFormat: OutputFormat,
+	) throws {
+		input = input.drop(while: \.isWhitespace)
+		guard let first = input.first, first != fieldSpecSeparator, !nextSectionPrefixSet.contains(first) else {
+			return nil
+		}
+		let priority = parseUInt64(&input)
+		guard priority != nil || sortSpec != nil else {
+			throw ParsingError.missingSortPriority
+		}
+		self = try Self.parsedOptionSet(
+			&input,
+			nextSectionPrefixSet: nextSectionPrefixSet,
+			priority: priority ?? sortSpec?.priority ?? 0,
+			defaults: sortSpec ?? defaultSortSpec(forFieldNamed: fieldName, outputFormat: outputFormat),
 		)
 	}
 }
@@ -662,7 +701,10 @@ private extension Substring {
 			throw ParsingError.missingEndFence
 		}
 		let content = body[..<outerCloseOffset]
-		currentIndex = body.index(after: outerCloseOffset)
+		// `currentIndex` lands ON the closing fence (matching `parseFencedValue`'s
+		// convention), not past it: `parseOptions`'s caller-side `defer` always
+		// advances 1 more position after this call returns.
+		currentIndex = outerCloseOffset
 
 		var elements = [Self]()
 		var remainder = content
