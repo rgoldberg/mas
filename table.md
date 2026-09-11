@@ -19,13 +19,17 @@ table-option = <header-option> | <separator-option> | <broken-option> | <column-
 
 ## Header
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 header-option = <header-off> | <header-on>
 header-off    = "h"
-header-on     = "H" [ <sgr-parameters> ] [ <table-value-terminator> ]
+header-on     = "H" [ <sgr-parameters> ] ( <table-value-terminator> | <end-of-shell-word> )
 
 sgr-parameters = {positive integer} ( ";" {positive integer} )*
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `h`: no header row. The default, absent `--table` entirely, or absent any
   header / separator option in `--table`'s value.
@@ -35,11 +39,15 @@ sgr-parameters = {positive integer} ( ";" {positive integer} )*
 
 ## Separator
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 separator-option = <separator-off> | <separator-on>
 separator-off     = "s"
-separator-on      = "S" [ {text} ] [ <table-value-terminator> ]
+separator-on      = "S" [ {text} ] ( <table-value-terminator> | <end-of-shell-word> )
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `s`: no separator line. The default.
 - `S`: a line between the header row & the 1st data row. Its pattern (the
@@ -63,11 +71,15 @@ happens when 1 isn't otherwise present).
 
 ## Column Spacing
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 column-spacing-option  = <column-spacing-default> | <column-spacing-custom>
 column-spacing-default = "c"
-column-spacing-custom  = "C" {text} <table-value-terminator>
+column-spacing-custom  = "C" {text} ( <table-value-terminator> | <end-of-shell-word> )
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `c`: resets column spacing to the built-in default (currently 2 spaces) —
   tracks the default's own current value, rather than fixing today's value
@@ -80,13 +92,16 @@ column-spacing-custom  = "C" {text} <table-value-terminator>
 
 ```ebnf
 table-value-terminator = ":"
+end-of-shell-word      = {the end of --table's whole value}
 ```
 
-Closes an `H` / `S` / `C` option's value. Needed only when what follows
-wouldn't otherwise unambiguously end it (i.e., isn't itself the end of
-`--table`'s whole value, or another option letter that couldn't be mistaken
-for more of the same value) — otherwise, whatever follows is read as (part
-of) an attempted, likely invalid, value.
+Closes an `H` / `S` / `C` option's value: each of those options' value
+otherwise runs through the rest of `--table`'s whole value (i.e., the whole
+shell word), with no other way to end early. `<table-value-terminator>` is
+therefore omittable only at `<end-of-shell-word>`; anywhere else, whatever
+follows is read as (part of) that option's value, e.g., in `--table Hb`, `b`
+is read as (invalid) `<sgr-parameters>` text, not as a separate
+`<broken-option>`.
 
 ## Implied Options
 
@@ -112,4 +127,4 @@ value it appears.
   line.
 - `--table S-+:b`: a header row (implied) & a `-+`-patterned, broken
   separator line.
-- `--table C....:`: no header, no separator, `....` between columns.
+- `--table C....`: no header, no separator, `....` between columns.
