@@ -899,36 +899,39 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 	/// `<format-delimiter>`.
 	private func parseBranches(_ input: inout Substring) throws(ParsingError) -> Branches {
 		var branches = [Branch]()
-		while input.first == placeholderPrefix {
-			var branchInput = input
-			branchInput.removeFirst()
+		while let first = input.first, first != formatDelimiter {
 			var negated = false
-			if branchInput.first == placeholderNegation {
+			if input.first == placeholderNegation {
 				negated = true
-				branchInput.removeFirst()
+				input.removeFirst()
 			}
 			var coerced = false
-			if branchInput.first == placeholderCoercion {
+			if input.first == placeholderCoercion {
 				coerced = true
-				branchInput.removeFirst()
+				input.removeFirst()
 			}
-			guard let letter = branchInput.first else {
+			guard let letter = input.first else {
 				throw .missingFieldName
 			}
 			guard letter != "b", letter != "B" else {
 				throw .invalidLetter(letter) // `%b` / `%B` may not themselves be used as branches
 			}
-			input = branchInput
 			input.removeFirst()
 			let isVerbose = letter.isUppercase
 			let branch: Branch
 			switch letter {
 			case "v":
+				guard !negated else {
+					throw .invalidLetter(letter) // `<value>` has no defined negated meaning
+				}
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
 				branch = .value(success: nil)
 			case "V":
+				guard !negated else {
+					throw .invalidLetter(letter) // `<value>` has no defined negated meaning
+				}
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
