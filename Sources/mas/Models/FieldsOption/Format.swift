@@ -23,7 +23,13 @@ enum Format: Equatable {
 	/// `stringValue` never fails to exist), `.number` / `.date` `kind`s first
 	/// coerce the field's value, mimicking `<placeholder-coercion>` — & mimicking
 	/// unhandled placeholder failure (blank) if that coercion fails. `template`
-	/// empty means no `<pipeline-terminator>` / template followed.
+	/// empty means no `<pipeline-terminator>` / template followed; non-empty,
+	/// `template` renders against the pipeline's OWN output, not the field's
+	/// original value — a `%v` / `%V` (or any other placeholder) inside it reads
+	/// the transformed value, not the raw 1, so nothing is duplicated & a
+	/// template with no placeholder at all (e.g., a literal unit suffix alone)
+	/// simply doesn't include the transformed value at all; write `%v` to
+	/// include it.
 	case valuePipeline(FormatReference, kind: TransformKind, template: [FormatPart])
 
 	/// The standard default: `%v`. Fields needing a different one are configured
@@ -84,11 +90,19 @@ extension Format { // swiftlint:disable:this file_types_order
 		case let .reference(reference):
 			reference.rendered(value: value)
 		case let .valuePipeline(reference, kind, template):
-			.string(
-				renderedValuePipeline(reference, kind: kind, value: value).flatMap { pipelineString in
-					renderedParts(template, value: value, label: label, name: name).map { pipelineString + $0 }
-				} ?? "",
-			)
+			if let pipelineString = renderedValuePipeline(reference, kind: kind, value: value) {
+				// A trailing `<template>` renders against the pipeline's own output,
+				// not the field's original value: e.g., `%v` inside it means "the
+				// pipeline's result", not "the field's raw value" (see `Format
+				// .valuePipeline`'s own doc comment).
+				if template.isEmpty {
+					.string(pipelineString)
+				} else {
+					.string(renderedParts(template, value: .string(pipelineString), label: label, name: name) ?? "")
+				}
+			} else {
+				.string("")
+			}
 		}
 	}
 }

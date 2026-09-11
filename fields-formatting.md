@@ -30,11 +30,15 @@ distinction).
 (see "Format Transforms" below), if present, always comes next, before
 anything else. What follows is a `<value-transform-pipeline>` (applied to
 `<named-format>`'s value, or `%v`'s if `<named-format>` is absent), a
-`<template>` (`<placeholder>` / `<format-text>`), or both, in that order — a
-`<value-transform-pipeline>` alone renders as its own output; followed by a
-`<template>`, its output is instead prepended to the template's own rendered
-value (see "Value Coercion" & "Pipeline Terminator" below for exactly when
-that combination needs a `<pipeline-terminator>` between the 2).
+`<template>` (`<placeholder>` / `<format-text>`), or both, in that order. A
+`<value-transform-pipeline>` alone renders as its own output. Followed by a
+`<template>`, the `<template>` renders against the pipeline's own output
+instead of the field's original value: a `<placeholder>` inside it (e.g.,
+`%v` / `%V`) reads the transformed value, not the raw 1, so nothing is
+duplicated — & a `<template>` with no `<placeholder>` at all (e.g., a literal
+unit suffix alone) simply doesn't include the transformed value; write `%v`
+to include it. (See "Value Coercion" & "Pipeline Terminator" below for
+exactly when this combination needs a `<pipeline-terminator>` between the 2.)
 
 Unlike every other `<*-transform-pipeline>` site — a placeholder's own
 `<success>` / `<failure>` sub-format always knows its kind up front from its
@@ -202,17 +206,19 @@ below) — this applies even when a `<template>` follows the
 
 ###### Pipeline Terminator
 
-A `<value-transform-pipeline>` may be followed directly by a `<template>`,
-whose rendered value is appended after the pipeline's own. Whether a
-`<pipeline-terminator>` (`::`) must separate the 2 depends on how the
-pipeline's own last `<transform>` ends:
+A `<value-transform-pipeline>` may be followed directly by a `<template>`
+(see "Value Coercion" above for what the `<template>` then renders against).
+Whether a `<pipeline-terminator>` (`::`) must separate the 2 depends on how
+the pipeline's own last `<transform>` ends:
 
 - If it closed its own `<argument-fence>` (`group` / `scale` with explicit
   arguments): that closing `:` already unambiguously ends the pipeline, so
   (exactly like a `<format-transform-pipeline>`'s own single
   `<chain-terminator>`) nothing extra is needed at all — the `<template>`
-  starts right after it. E.g., `.scale:10,6,,0:.group:de_DE: MB` (no
-  `<pipeline-terminator>`).
+  starts right after it. Any further `:` there is just literal `<template>`
+  text (`<format-text>`), not a `<pipeline-terminator>`: e.g.,
+  `.group:de_DE:::%v` is `group`, then the `<template>` `::%v` — literal `::`,
+  then a `%v` placeholder reading `group`'s own output.
 - Otherwise (an argument-less `<transform>`, incl. bare `group` / `scale`):
   the pipeline's own name-scan can't tell "more pipeline content" apart from
   "a `<template>` follows" on its own, since `group` / `scale` also use
@@ -224,7 +230,9 @@ E.g., all of the following are valid:
 
 - `.round.absoluteValue` (no `<template>`: no `<pipeline-terminator>` needed
   either)
-- `.round.absoluteValue::%v` (`<pipeline-terminator>`, then a `%v` placeholder)
+- `.round.absoluteValue::%v` (`<pipeline-terminator>`, then a `%v` placeholder
+  reading `absoluteValue`'s own output — not the field's original value, so
+  this isn't a redundant "the value twice")
 - `.round.absoluteValue/1d` (`<sort-modifier>` follows, not a `<template>`: no
   `<pipeline-terminator>` needed)
 - `.round.absoluteValue,name` (`<field-spec-separator>` follows: likewise)

@@ -622,13 +622,30 @@ private extension MASTests {
 	func `a pipeline terminator lets an argument-less value-transform-pipeline be followed directly by a template`(
 	) throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue:: MB").first)
+		// The template renders against the pipeline's OWN output, not the field's
+		// original value: with no `%v` in the template, the transformed value
+		// isn't shown at all — only the literal text is
+		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == " MB")
+	}
+
+	@Test
+	func `a value-transform-pipeline's template renders %v against the pipeline's own output, never doubling it`(
+	) throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue::%v MB").first)
 		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == "6 MB")
 	}
 
 	@Test
 	func `a fenced last transform needs no pipeline terminator before a template`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3: MB").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:%v MB").first)
 		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "1.234.567 MB")
+	}
+
+	@Test
+	func `extra chain terminators after a fenced last transform are literal template text, not a pipeline terminator`(
+	) throws {
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:::%v").first)
+		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "::1.234.567")
 	}
 
 	@Test
