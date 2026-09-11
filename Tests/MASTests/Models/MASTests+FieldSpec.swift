@@ -405,6 +405,26 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a custom input-date-format is a parse error, not a silent no-op`() {
+		#expect(throws: ParsingError.unsupportedDateInputFormat) {
+			try parseFieldSpecs("adamID:%D.iso_++")
+		}
+		#expect(throws: ParsingError.unsupportedDateInputFormat) {
+			try parseFieldSpecs("adamID:%D.iso,.dateOnly_++")
+		}
+	}
+
+	@Test
+	func `a named or literal output-date-format is a parse error, not a silent fallback to the default`() {
+		#expect(throws: ParsingError.unsupportedDateOutputFormat) {
+			try parseFieldSpecs("adamID:%D:hidden++")
+		}
+		#expect(throws: ParsingError.unsupportedDateOutputFormat) {
+			try parseFieldSpecs("adamID:%DliteralPattern++")
+		}
+	}
+
+	@Test
 	func `evaluates %n for a JSON number vs. a non-number`() {
 		let format = Format.parts([.placeholder(.number(negated: false, coerced: false, success: nil, failure: nil))])
 		#expect(format.rendered(value: .number(42), label: "L", name: "n").stringValue == "42")

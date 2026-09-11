@@ -399,27 +399,22 @@ date-input-output-separator = "_"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- If one or more `<input-date-format>` are present, the earliest that matches
-  the input is used.
-- Otherwise, the following formats are tried in descending order:
-  - Content: integer:
-    - Unix epoch
-  - Content: string:
-    - ISO-8601
-    - …
-  - Defaults also based on:
-    - Field names
-    - Field labels
-    - Context
-    - Etc.?
+Input is always auto-detected, trying, in order: ISO-8601 datetime, ISO-8601
+date-only, then a Unix epoch (seconds) numeric timestamp. If
+`<output-date-format>` is absent, output defaults to ISO-8601 datetime in the
+local time zone. Neither depends on field name, label, output format, or any
+other context.
 
-If `<output-date-format>` is absent, default output format is determined by:
+A custom `<input-date-format>`, & an `<output-date-format>` that isn't a bare
+`<date-transform-pipeline>` (i.e., a named-format reference, or literal
+pattern text), aren't implemented yet — using either is a parse error, rather
+than silently falling back to the defaults above:
 
-- Context?
-- Output format?
-- Field label?
-- Field name?
-- Default: ISO-8601 datetime in local time zone.
+- `<input-date-format>` needs a defined pattern language for
+  `<inline-date-format>`, which doesn't exist yet.
+- A named `<output-date-format>` needs persisted named formats (see
+  "Named Formats" above); a literal one needs the same pattern language
+  `<input-date-format>` does.
 
 ###### Branched Formatting (`%b` & `%B`)
 

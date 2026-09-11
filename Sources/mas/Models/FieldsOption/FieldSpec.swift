@@ -68,6 +68,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
 	case unknownNamedFormat(String)
+	case unsupportedDateInputFormat
+	case unsupportedDateOutputFormat
 
 	var description: String {
 		switch self {
@@ -105,6 +107,13 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"""
 		case let .unknownNamedFormat(name):
 			"Unknown named format: \(name)"
+		case .unsupportedDateInputFormat:
+			"A custom <input-date-format> isn't supported yet; omit it (input is always auto-detected)"
+		case .unsupportedDateOutputFormat:
+			"""
+			A named format or literal pattern isn't supported yet for a date's output format; \
+			use a bare date-transform-pipeline (e.g., .iso, .dateOnly) instead
+			"""
 		}
 	}
 }

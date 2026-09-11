@@ -775,6 +775,12 @@ func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind) throws(
 }
 
 /// Parses `<date>` up to, but not including, its closing `<format-delimiter>`.
+/// A custom `<input-date-format>` & a non-bare `<output-date-format>` (a
+/// named-format reference or literal pattern text) aren't implemented yet
+/// (fields.md defines no pattern language for `<inline-date-format>`, & a
+/// named reference needs persistence) — since fields.md's own grammar makes
+/// both look like they should do something, using either is a parse error
+/// here, rather than silently falling back to `DateSpec.default`.
 func parseDateSpec(_ input: inout Substring) throws(ParsingError) -> DateSpec? {
 	let terminatorSet = Set([placeholderPrefix, formatDelimiter, dateInputFormatSeparator, dateInputOutputSeparator])
 	func parseOneDateFormat() throws(ParsingError) -> Format {
@@ -784,44 +790,17 @@ func parseDateSpec(_ input: inout Substring) throws(ParsingError) -> DateSpec? {
 		return try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
 	}
 
-	var sawAnyFormat = false
-	var leadingFormats = [Format]()
-	if input.first != dateInputOutputSeparator, input.first != formatDelimiter {
-		leadingFormats.append(try parseOneDateFormat())
-		sawAnyFormat = true
-		while input.first == dateInputFormatSeparator {
-			input.removeFirst()
-			leadingFormats.append(try parseOneDateFormat())
-		}
-	}
-	var outputFormat = Format?.none
-	if input.first == dateInputOutputSeparator {
-		sawAnyFormat = true
-		input.removeFirst()
-		// `leadingFormats` (parsed above, if any) were `<input-date-format>`s:
-		// custom input-format parsing isn't supported (fields.md defines no pattern
-		// language for `<inline-date-format>`), so they're kept only to advance the
-		// cursor correctly; date values are always parsed the same way (see
-		// `parsedDate(from:)`)
-		if input.first != formatDelimiter {
-			outputFormat = try parseOneDateFormat()
-		}
-	} else {
-		// No separator ⇒ whatever was parsed above is the `<output-date-format>`
-		outputFormat = leadingFormats.first
-	}
-	guard sawAnyFormat else {
+	guard input.first != formatDelimiter else {
 		return nil
 	}
-	// A bare transform-pipeline output format (no named-format prefix) is applied
-	// directly; anything else (a named-format reference, which needs persistence,
-	// or literal custom pattern text, for which fields.md defines no pattern
-	// language) falls back to `DateSpec.default`
-	return if case let .reference(reference) = outputFormat, reference.namedFormat == nil {
-		.init(outputTransforms: reference.transforms)
-	} else {
-		.default
+	let format = try parseOneDateFormat()
+	guard input.first != dateInputFormatSeparator, input.first != dateInputOutputSeparator else {
+		throw .unsupportedDateInputFormat
 	}
+	guard case let .reference(reference) = format, reference.namedFormat == nil else {
+		throw .unsupportedDateOutputFormat
+	}
+	return .init(outputTransforms: reference.transforms)
 }
 
 /// Parses a single `<placeholder>`, including any `<standard>` / `<failure>` /
