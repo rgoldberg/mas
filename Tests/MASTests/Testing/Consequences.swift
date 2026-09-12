@@ -45,11 +45,11 @@ extension Consequences where Value == Void { // swiftlint:disable:this file_type
 	}
 }
 
-private struct StandardStreamCapture { // swiftlint:disable:this one_declaration_per_file
-	private let outRedirector: StreamRedirector
-	private let errRedirector: StreamRedirector
+private struct StandardStreamCapture<Encoding: Unicode.Encoding> where Encoding.CodeUnit == UInt8 {
+	private let outRedirector: StreamRedirector<Encoding> // swiftlint:disable:previous one_declaration_per_file
+	private let errRedirector: StreamRedirector<Encoding>
 
-	init(encoding: String.Encoding) {
+	init(encoding: Encoding.Type) {
 		outRedirector = .init(from: FileHandle.standardOutput.fileDescriptor, encoding: encoding)
 		errRedirector = .init(from: FileHandle.standardError.fileDescriptor, encoding: encoding)
 	}
@@ -63,25 +63,23 @@ private struct StandardStreamCapture { // swiftlint:disable:this one_declaration
 	}
 }
 
-private final class StreamRedirector: Sendable { // swiftlint:disable:this one_declaration_per_file
-	private let originalFD: Int32
+private final class StreamRedirector<Encoding: Unicode.Encoding>: Sendable where Encoding.CodeUnit == UInt8 {
+	private let originalFD: Int32 // swiftlint:disable:previous one_declaration_per_file
 	private let duplicateFD: Int32
-	private let encoding: String.Encoding
 	private let pipe = Pipe()
 	private let task: Task<Data, any Error>
 	private let alreadyStopped = Atomic(false)
 
 	var string: String {
 		get async throws {
-			.init(data: try await task.value, encoding: encoding) ?? ""
+			.init(validating: try await task.value, as: Encoding.self) ?? ""
 		}
 	}
 
-	init(from fileDescriptor: Int32, encoding: String.Encoding) {
+	init(from fileDescriptor: Int32, encoding _: Encoding.Type) {
 		originalFD = fileDescriptor
 		duplicateFD = dup(originalFD)
 		dup2(pipe.fileHandleForWriting.fileDescriptor, originalFD)
-		self.encoding = encoding
 		let readHandle = pipe.fileHandleForReading
 		task = .init { try await readHandle.bytes.reduce(into: .init()) { $0.append($1) } }
 	}
@@ -108,8 +106,10 @@ private final class StreamRedirector: Sendable { // swiftlint:disable:this one_d
 	}
 }
 
-func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () async throws -> Void)
-async throws -> Consequences<Void> {
+func consequencesOf<Encoding: Unicode.Encoding>(
+	encoding: Encoding.Type = UTF8.self,
+	_ body: @autoclosure () async throws -> Void,
+) async throws -> Consequences<Void> where Encoding.CodeUnit == UInt8 {
 	let capture = StandardStreamCapture(encoding: encoding)
 	do {
 		try await body()
@@ -119,8 +119,10 @@ async throws -> Consequences<Void> {
 	return try await capture.consequences()
 }
 
-func consequencesOf<Value>(encoding: String.Encoding = .utf8, _ body: @autoclosure () async throws -> Value?)
-async throws -> Consequences<Value> {
+func consequencesOf<Value, Encoding: Unicode.Encoding>(
+	encoding: Encoding.Type = UTF8.self,
+	_ body: @autoclosure () async throws -> Value?,
+) async throws -> Consequences<Value> where Encoding.CodeUnit == UInt8 {
 	let capture = StandardStreamCapture(encoding: encoding)
 	let value: Value?
 	do {
