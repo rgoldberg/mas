@@ -9,8 +9,8 @@ format-modifier-prefix = ":"
 format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipeline> ]
        | <format-transform-pipeline> [ <value-transform-pipeline> ]
        | <value-transform-pipeline>
-       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <transform-call-prefix> <parameterized-value-transform> <template>
-       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <transform-call-prefix> <unparameterized-value-transform> <pipeline-terminator> <template>
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <parameterized-value-transform-call> <template>
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <unparameterized-value-transform-call> <pipeline-terminator> <template>
        | [ <named-format> ] <format-transform-pipeline> <pipeline-terminator> <template>
        | <named-format> <pipeline-terminator> <template>
        | <template>
@@ -58,10 +58,11 @@ success / failure sub-format always knows its kind up front from its own
 grammar position (e.g., `%N`'s own success sub-format is always number-kind,
 so it may contain a `<number-transform-pipeline>` but never a
 `<string-transform-pipeline>`) — `<value-transform-pipeline>` infers kind from
-its own 1st `<transform>` instead, since a field's raw value has no fixed
-type. This is never ambiguous: no 2 kinds define the same `<transform>` name,
-so the 1st `<transform>`'s name alone determines kind for the rest of the
-pipeline (mixing kinds in 1 pipeline is a `<transform>` name error, same as
+its own 1st `<value-transform>` instead, since a field's raw value has no
+fixed type. This is never ambiguous: no 2 kinds define the same
+`<value-transform>` name, so the 1st `<value-transform>`'s name alone
+determines kind for the rest of the pipeline (mixing kinds in 1 pipeline is a
+`<value-transform>` name error, same as
 using any other unrecognized name would be).
 
 Neither a name nor a transform name stops at `<placeholder-prefix>` on its
@@ -136,37 +137,52 @@ If no named format exists for a referenced name, an error is reported.
    instead. *)
 value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <date-transform-pipeline>
 
-(* A doubled `<transform-call-prefix>` right before a `<value-transform-
-   pipeline>`'s own 1st `<transform>` (e.g., `..round`, not `.round`); see
-   "Value Coercion" above. Meaningful only there; harmless but inert
-   anywhere else a `<transform-call-prefix>` appears. *)
-value-transform-coercion = <transform-call-prefix> <transform-call-prefix>
-
-string-transform-pipeline = ( <transform-call-prefix> <string-transform> )+
-date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
+string-transform-pipeline = <string-transform-call>+
+date-transform-pipeline   = <date-transform-call>+
 
 (* A `<terminal-number-transform>` (currently just `group`) produces a value
    no other `<non-terminal-number-transform>` can operate on further (see
    `group`'s own note below), so it may only ever appear last: either alone,
    or after 1+ `<non-terminal-number-transform>`s. This is the 1 exception to
-   `<transform>` ordering being unconstrained; the grammar enforces it
+   `<value-transform>` ordering being unconstrained; the grammar enforces it
    directly, rather than leaving it to prose. *)
-number-transform-pipeline = ( <transform-call-prefix> <non-terminal-number-transform> )+ [ <transform-call-prefix> <terminal-number-transform> ]
-                          | <transform-call-prefix> <terminal-number-transform>
+number-transform-pipeline = <non-terminal-number-transform-call>+ [ <terminal-number-transform-call> ]
+                          | <terminal-number-transform-call>
+
+(* Composes a `<transform-call-prefix>`, an optional `<value-transform-
+   coercion>`, & the transform itself. `<value-transform-call>` is the
+   generic form; each other `*-transform-call` below parallels 1 specific
+   subset of `<value-transform>`, for use wherever only that subset is
+   valid. *)
+value-transform-call = <transform-call-prefix> [ <value-transform-coercion> ] <value-transform>
+
+string-transform-call              = <transform-call-prefix> [ <value-transform-coercion> ] <string-transform>
+non-terminal-number-transform-call = <transform-call-prefix> [ <value-transform-coercion> ] <non-terminal-number-transform>
+terminal-number-transform-call     = <transform-call-prefix> [ <value-transform-coercion> ] <terminal-number-transform>
+date-transform-call                = <transform-call-prefix> [ <value-transform-coercion> ] <date-transform>
+
+parameterized-value-transform-call   = <transform-call-prefix> [ <value-transform-coercion> ] <parameterized-value-transform>
+unparameterized-value-transform-call = <transform-call-prefix> [ <value-transform-coercion> ] <unparameterized-value-transform>
+
+(* Meaningful only on `<format>`'s own top-level `<value-transform-pipeline>`'s
+   1st `<value-transform-call>`; see "Value Coercion" above. Harmless but
+   inert on every other `<*-transform-call>`, since the shared parsing logic
+   doesn't special-case position. *)
+value-transform-coercion = "."
 
 transform-call-prefix = "."
 
-transform                     = <string-transform> | <non-terminal-number-transform> | <terminal-number-transform> | <date-transform>
-string-transform              = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
-non-terminal-number-transform = <absolute-value> | <round> | <scale>
-terminal-number-transform     = <group>
-date-transform                = <iso> | <date-only> | <local-time-zone>
+value-transform                = <string-transform> | <non-terminal-number-transform> | <terminal-number-transform> | <date-transform>
+string-transform               = <capitalize> | <lowercase> | <sentence-case> | <trim-whitespace> | <uppercase>
+non-terminal-number-transform  = <absolute-value> | <round> | <scale>
+terminal-number-transform      = <group>
+date-transform                 = <iso> | <date-only> | <local-time-zone>
 
-(* The only 2 `<transform>`s with a `:`-fenced argument list of their own; see
-   "Pipeline Terminator" below. `scale`'s is mandatory, so it always closes
-   1; `group`'s is optional, so it closes 1 only when given. *)
+(* The only 2 `<value-transform>`s with a `:`-fenced argument list of their
+   own; see "Pipeline Terminator" below. `scale`'s is mandatory, so it always
+   closes 1; `group`'s is optional, so it closes 1 only when given. *)
 parameterized-value-transform = <group> | <scale>
-(* Every other `<transform>`: never `:`-fenced, so never closes 1. *)
+(* Every other `<value-transform>`: never `:`-fenced, so never closes 1. *)
 unparameterized-value-transform = <string-transform> | <absolute-value> | <round> | <date-transform>
 
 capitalize      = "initialUppercase"
@@ -214,13 +230,13 @@ fractional-digits  = {non-negative integer} (* exactly this many `radix` digits 
 
 A `<value-transform-pipeline>` (`<format>`'s own top-level pipeline, per its
 inferred kind) may coerce its input value first, controlled by a
-`<value-transform-coercion>` (a doubled `<transform-call-prefix>`, i.e., `..`
-instead of `.`, right before the pipeline's own 1st `<transform>`) —
-conceptually the same marker as `<placeholder-coercion>` (see "Coercion"
-under "Placeholders" below), & spelled with the same character, just in a
-different position (there's no placeholder-letter syntax slot at `<format>`'s
-own top level to attach `<placeholder-coercion>` to directly). Only
-`<number-transform-pipeline>` may be coerced this way: coerced, it also
+`<value-transform-coercion>` (a 2nd `.` right after the pipeline's own 1st
+`<value-transform-call>`'s `<transform-call-prefix>`, i.e., `..` instead of
+`.`) — conceptually the same marker as `<placeholder-coercion>` (see
+"Coercion" under "Placeholders" below), & spelled with the same character,
+just in a different position (there's no placeholder-letter syntax slot at
+`<format>`'s own top level to attach `<placeholder-coercion>` to directly).
+Only `<number-transform-pipeline>` may be coerced this way: coerced, it also
 accepts a JSON string that itself parses as a number (not just a real JSON
 number); uncoerced (the default, no `..`), it requires a real JSON number,
 same as plain `%n`. `<value-transform-coercion>` on a `<string-transform-
@@ -233,12 +249,13 @@ JSON number or a JSON string) unconditionally, the same way `%d` itself
 never supports `<placeholder-coercion>` either — there's no uncoerced form
 to distinguish it from.
 
-Only the pipeline's own 1st `<transform>` currently affects rendering, since
-`<value-transform-pipeline>`'s kind & coercion are both decided once, up
-front, from it. A `<value-transform-coercion>` is nonetheless syntactically
-permitted (parsed, with no effect) on a later `<transform>` in the same
-pipeline too, since a later, wrongly-typed `<transform>` would already have
-failed regardless of whether it too was marked — so this is reserved for a
+Only the pipeline's own 1st `<value-transform-call>` currently affects
+rendering, since `<value-transform-pipeline>`'s kind & coercion are both
+decided once, up front, from it. A `<value-transform-coercion>` is
+nonetheless syntactically permitted (parsed, with no effect) on a later
+`<value-transform-call>` in the same pipeline too, since a later,
+wrongly-typed `<value-transform>` would already have failed regardless of
+whether it too was marked — so this is reserved for a
 possible future where coercion could apply mid-pipeline, not a currently
 meaningful position.
 
@@ -294,7 +311,7 @@ Once a `<pipeline-terminator>` (or a closed `<argument-fence>`) ends
 the last-present part, whatever follows is ordinary `<template>` content —
 even 1 starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
 parses `.absoluteValue` as literal `<format-text>`, not as another
-`<transform-call-prefix>`-led `<transform>`. It's still rejected, but for a
+`<value-transform-call>`. It's still rejected, but for a
 different, more general reason: see "Templates Need a Placeholder" below.
 
 ###### Templates Need a Placeholder
@@ -396,8 +413,9 @@ right-justify        = "rightJustify"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Unlike a `<transform>`, a `<format-transform>` doesn't act on any value — it
-sets a property of the field itself, currently just its `table`-output column
+Unlike a `<value-transform>`, a `<format-transform>` doesn't act on any
+value — it sets a property of the field itself, currently just its
+`table`-output column
 alignment (default: `leftJustify`). So it has no effect on the field's
 rendered value: it's a no-op for `json` / `key-value` output (which have no
 column to align), & doesn't force `%v` / `%V`'s type-preserving `json`
@@ -405,7 +423,7 @@ passthrough into a string, unlike every other transform. For this reason, a
 `<format-transform-pipeline>` may only appear where `<format>` itself allows
 it (right after the field's own optional `<named-format>`, before anything
 else) — never inside a placeholder's own success / failure sub-format, where
-only ordinary `<transform>`s are valid.
+only ordinary `<value-transform>`s are valid.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's
 padding is odd-width: `centerStartJustify` puts the extra padding character
