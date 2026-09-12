@@ -169,7 +169,7 @@ extension [JSON.Object] {
 
 /// Justifies & joins 1 `table` row (header, separator, or data): each column's
 /// cell to its own width, gapped by `columnSpacing` applied as a literal
-/// suffix after each non-last column — never baked into a column's own
+/// suffix after each non-last column, never baked into a column's own
 /// justify width, since that only produces a real trailing gap for `.start`
 /// justification (`.end` / `.centerStart` / `.centerEnd` would place some or
 /// all of it as leading / split padding instead, eliminating or shrinking the

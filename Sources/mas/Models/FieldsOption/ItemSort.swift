@@ -23,7 +23,7 @@ struct ItemSort: Equatable {
 	/// back to `tiebreakDirection` for objects left unordered by every key.
 	/// `stringValue(index:key:)` reads a field's rendered value for a given
 	/// object & sort key, letting the caller decide, e.g., how absent values are
-	/// treated, & which of the field's input/output values to read for
+	/// treated, & which of the field's input / output values to read for
 	/// `key.sortSpec.source`.
 	func sortedIndices(count: Int, stringValue: (_ index: Int, _ key: ItemSortKey) -> String?) -> [Int] {
 		guard !keys.isEmpty else {

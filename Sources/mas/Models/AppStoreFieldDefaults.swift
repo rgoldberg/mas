@@ -12,12 +12,12 @@
 // `all` fields configs (& fields a user names via `--fields` text) care about
 // these specific App Store / Spotlight field names. Keeping that knowledge
 // here, rather than in `Models/FieldsOption/`, keeps the generic engine
-// reusable independent of mas.
+// reusable independent of mas
 
 /// Maps a field name to the fields.md "Default Sort Options" row used to fill
 /// in an otherwise-incomplete explicit `<sort>`. A field name this doesn't
 /// recognize as price / version / path gets `SortSpec.textDefault(
-/// outputFormat:)` — the same Text-row default `<field-order-option-set>`
+/// outputFormat:)`, the same Text-row default `<field-order-option-set>`
 /// uses, kept as 1 shared definition so the 2 can't drift apart.
 func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
 	if priceFieldNameSet.contains(fieldName) {

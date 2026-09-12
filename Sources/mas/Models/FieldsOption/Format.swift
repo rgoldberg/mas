@@ -23,11 +23,11 @@ enum Format: Equatable {
 	/// `stringValue` never fails to exist), `.number` `kind` first coerces the
 	/// field's value iff `coerced` (a doubled leading `.` on the pipeline's own
 	/// 1st `<transform>`; never valid for `.string` / `.date` `kind`, so always
-	/// `false` for either), mimicking `<placeholder-coercion>` — & mimicking
+	/// `false` for either), mimicking `<placeholder-coercion>` & mimicking
 	/// unhandled placeholder failure (blank) if that coercion fails. `template`
 	/// empty means no `<pipeline-terminator>` / template followed; non-empty,
 	/// `template` renders against the pipeline's OWN output, not the field's
-	/// original value — a `%v` / `%V` (or any other placeholder) inside it reads
+	/// original value; a `%v` / `%V` (or any other placeholder) inside it reads
 	/// the transformed value, not the raw 1, so nothing is duplicated & a
 	/// template with no placeholder at all (e.g., a literal unit suffix alone)
 	/// simply doesn't include the transformed value at all; write `%v` to
@@ -96,7 +96,7 @@ extension Format { // swiftlint:disable:this file_types_order
 				// A trailing `<template>` renders against the pipeline's own output,
 				// not the field's original value: e.g., `%v` inside it means "the
 				// pipeline's result", not "the field's raw value" (see `Format
-				// .valuePipeline`'s own doc comment).
+				// .valuePipeline`'s own doc comment)
 				if template.isEmpty {
 					.string(pipelineString)
 				} else {
@@ -131,7 +131,7 @@ private func renderedParts(_ parts: [FormatPart], value: JSON.Node?, label: Stri
 /// `Format.valuePipeline`'s own reference: `nil` iff coercing (`.number`
 /// `kind` only, & only if `coerced`) `value` to `kind` fails (`.string` never
 /// fails: `stringValue` always exists, `nil` becoming `""`; `.date` always
-/// parses permissively, so `coerced` is always `false` there — see
+/// parses permissively, so `coerced` is always `false` there; see
 /// `Format.valuePipeline`'s own doc comment). `reference.namedFormat` is
 /// ignored, same as `FormatReference.rendered(value:)` below (see its own
 /// doc comment).
@@ -184,10 +184,12 @@ extension FormatReference: CustomStringConvertible { // swiftlint:disable:this f
 
 private extension FormatReference { // swiftlint:disable:this file_types_order
 	/// Only the built-in `hidden` named format exists (filtered out before
-	/// reaching here) & user-defined named formats are out of scope (they need
-	/// persistence), so this only ever has a bare `<string-transform-pipeline>`
+	/// reaching here), so this only ever has a bare `<string-transform-pipeline>`
 	/// to apply to the field's own verbatim value.
-	func rendered(value: JSON.Node?) -> JSON.Node { // TODO: user-defined named formats
+	/// TODO: once persisted user-defined named formats exist, resolve
+	///  `namedFormat` to its definition & apply `transforms` to that definition's
+	///  rendering of `value` instead of to `value` itself.
+	func rendered(value: JSON.Node?) -> JSON.Node {
 		.string(transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) })
 	}
 }
@@ -407,8 +409,8 @@ private func scaleTransform(name: String) throws(ParsingError) -> Transform {
 	)
 }
 
-/// Parses `scale`'s optional `significantDigits` argument: `nil` for an empty `text` (no cap), else a validated
-/// positive integer.
+/// Parses `scale`'s optional `significantDigits` argument: `nil` for an empty
+/// `text` (no cap), else a validated positive integer.
 private func parsedSignificantDigits(from text: Substring, transformName: String) throws(ParsingError) -> Int? {
 	if text.isEmpty {
 		nil
@@ -419,7 +421,8 @@ private func parsedSignificantDigits(from text: Substring, transformName: String
 	}
 }
 
-/// Renders `rawValue` per `scale`'s semantics (see its doc comment on `Transform.scale`).
+/// Renders `rawValue` per `scale`'s semantics (see its doc comment on
+/// `Transform.scale`).
 private func radixScaled(
 	_ rawValue: Double,
 	radix: Int,
@@ -846,10 +849,10 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 			// only ever meaningful on `<format>`'s own top-level pipeline's 1st
 			// `<transform>` (see `parseValueTransformPipelineThenTemplate(_:
 			// namedFormat:terminatorSet:)`, which strips it there before this
-			// function ever sees it) — anywhere else (a later `<transform>` in that
+			// function ever sees it); anywhere else (a later `<transform>` in that
 			// same pipeline, or any `<transform>` inside a placeholder's own
 			// sub-format), it's syntactically harmless but has no effect, so it's
-			// simply skipped, not specially recognized or rejected.
+			// simply skipped, not specially recognized or rejected
 			if input.first == transformCallPrefix {
 				input.removeFirst()
 			}
@@ -859,8 +862,8 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 			}
 			transforms.append(transform)
 			// A `<terminal-number-transform>` may only ever be last in its
-			// `<number-transform-pipeline>`; `input.first == transformCallPrefix` here
-			// means the loop is about to try parsing another 1
+			// `<number-transform-pipeline>`; `input.first == transformCallPrefix`
+			// here means the loop is about to try parsing another 1
 			guard !transform.isTerminalNumberTransform || input.first != transformCallPrefix else {
 				throw .terminalNumberTransformFollowedByMore(name: name)
 			}
@@ -875,7 +878,7 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 /// `Transform.parsed(name:kind:)` expects). Unlike a bare `parseEscapedText`
 /// scan, `:` always ends the name UNLESS the name scanned so far is `group` /
 /// `scale` & is immediately followed by `:` (that transform's own argument
-/// fence) — only then does scanning continue through to the fence's own
+/// fence); only then does scanning continue through to the fence's own
 /// closing `:`. This keeps a bare (argument-less) transform's name from
 /// swallowing a subsequent `<pipeline-terminator>` (`::`) or stray `:`, both
 /// only meaningful to `<format>`'s own top-level `<value-transform-pipeline>`
@@ -893,7 +896,7 @@ func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>)
 		// `scale` both require nonempty arguments), so this 2nd ':' can't be a
 		// fence's own closing 1: it's `<format>`'s `<pipeline-terminator>`
 		// (`::`) instead, & the 1st ':' isn't part of this (argument-less)
-		// name at all.
+		// name at all
 		return name
 	}
 	input = afterOpenFence
@@ -955,7 +958,7 @@ enum TransformKind: String, CaseIterable { // swiftlint:disable:this one_declara
 	/// `<transform>` name is unique across kinds, so this is never ambiguous:
 	/// trying a "wrong" kind for a given name always fails cleanly (`nil`, not a
 	/// thrown error, since `Transform.parsed(name:kind:)` only ever attempts
-	/// argument parsing — which is what can throw — once it's already matched
+	/// argument parsing (which is what can throw) once it's already matched
 	/// `name`'s own shape to `kind`), so a thrown error (e.g., invalid
 	/// `<group-arguments>`) can only come from the kind `name`'s shape actually
 	/// belongs to; propagating it immediately, without trying the remaining
@@ -1011,7 +1014,7 @@ func formatLacksPlaceholder(_ format: Format?) -> Bool {
 /// only for a top-level, standalone infallible placeholder's (`%v` / `%V`,
 /// `%l` / `%L`) own success format, which always applies, unlike a fallible
 /// placeholder's (e.g., `%n` / `%N`) own success / failure, reached only
-/// conditionally — so it'd otherwise render the same output regardless of
+/// conditionally, so it'd otherwise render the same output regardless of
 /// the field's value, something a bare literal could already do with no
 /// placeholder wrapping it at all. A `%v` / `%V` / `%l` / `%L` used as 1 of
 /// `%b`'s own `<branches>` is exempt even though it's still infallible: no
@@ -1041,7 +1044,7 @@ throws(ParsingError) -> Format? {
 /// A custom `<input-date-format>` & a non-bare `<output-date-format>` (a
 /// named-format reference or literal pattern text) aren't implemented yet
 /// (fields.md defines no pattern language for `<inline-date-format>`, & a
-/// named reference needs persistence) — since fields.md's own grammar makes
+/// named reference needs persistence); since fields.md's own grammar makes
 /// both look like they should do something, using either is a parse error
 /// here, rather than silently falling back to `DateSpec.default`.
 func parseDateSpec(_ input: inout Substring) throws(ParsingError) -> DateSpec? {
@@ -1291,7 +1294,8 @@ private let dateInputFormatSeparator = Character(",")
 private let dateInputOutputSeparator = Character("_")
 
 let hiddenNamedFormatName = "hidden"
-let knownNamedFormatNameSet = Set([hiddenNamedFormatName]) // TODO: union with custom named formats
+// TODO: once persisted user-defined named formats exist, union their names in
+let knownNamedFormatNameSet = Set([hiddenNamedFormatName])
 
 private let groupSimpleName = "group"
 private let groupNamePrefix = groupSimpleName + argumentFence

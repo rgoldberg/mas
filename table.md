@@ -4,9 +4,9 @@ Uses the custom EBNF grammar defined in [ebnf.md](ebnf.md).
 
 `--table` selects table output for a display command (see
 [fields.md](fields.md) for `--fields`, which drives field selection,
-labeling, formatting, & sorting independent of the output format).
+labeling, formatting & sorting independent of the output format).
 `--table`'s own, optional value configures the table's header row,
-separator line, & column spacing.
+separator line & column spacing.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -81,7 +81,7 @@ column-spacing-custom  = "C" {text} ( <table-value-terminator> | <end-of-shell-w
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `c`: resets column spacing to the built-in default (currently 2 spaces) —
+- `c`: resets column spacing to the built-in default (currently 2 spaces);
   tracks the default's own current value, rather than fixing today's value
   literally.
 - `C`: a literal custom spacing string between adjacent columns (e.g., `C:`
@@ -109,10 +109,10 @@ is read as (invalid) `<sgr-parameters>` text, not as a separate
   line), not a blank 1, since a blank line would defeat the point of
   distinguishing broken from unbroken.
 - Any separator line (explicit or implied) implies a header row, if none is
-  otherwise set: `H` (unstyled) — a separator line's whole point is to
+  otherwise set: `H` (unstyled), since a separator line's whole point is to
   separate a header from the data.
 
-An option that explicitly sets an axis — even to "off" (`h` / `s`) — always
+An option that explicitly sets an axis, even to "off" (`h` / `s`), always
 wins over an axis's implied default, regardless of where in `--table`'s
 value it appears.
 

@@ -35,8 +35,8 @@ private extension MASTests {
 	func `an omitted trailing table-value terminator is only valid at the end of the value`() throws {
 		// "H1" (no ':', end of value): fine, value is "1"
 		#expect(try parseTableConfig("H1").header == .init(sgrCodes: "1"))
-		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value & fails
-		// SGR validation, rather than silently treating 'S' as a 2nd option
+		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value &
+		// fails SGR validation, rather than silently treating 'S' as a 2nd option
 		#expect(throws: TableConfigParsingError.invalidHeaderStyle("1S-")) { try parseTableConfig("H1S-") }
 	}
 
@@ -62,7 +62,8 @@ private extension MASTests {
 		#expect(broken.header == .init(sgrCodes: "")) // transitively implied, via the implied separator
 		let unbroken = try parseTableConfig("u")
 		#expect(unbroken.separator == .init(pattern: "-", broken: false))
-		// An explicit separator pattern is kept; only broken-ness & (if unset) header come from b / u
+		// An explicit separator pattern is kept; only broken-ness & (if unset)
+		// header come from b / u
 		#expect(try parseTableConfig("S=:b").separator == .init(pattern: "=", broken: true))
 	}
 
@@ -138,7 +139,8 @@ private extension MASTests {
 				],
 				tableConfig: try parseTableConfig("S-+:"),
 			)
-		// Total width: "Name" (4) + "  " (2) + "Version" (7) = 13; "-+" repeated & cut off mid-pair
+		// Total width: "Name" (4) + "  " (2) + "Version" (7) = 13; "-+" repeated &
+		// cut off mid-pair
 		#expect(table == "Name  Version\n-+-+-+-+-+-+-\nA     1.0")
 	}
 

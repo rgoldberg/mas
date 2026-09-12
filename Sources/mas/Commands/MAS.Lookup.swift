@@ -72,7 +72,7 @@ private struct KeyValueConfig: OutputConfig {
 				// appended " MB". JSON gets the raw byte count instead: `--json`
 				// resolves through `defaultedForJSON(outputFormat:)`, which discards
 				// this format (& the label above) for a built-in default fields
-				// config, per fields.md's Labeling section.
+				// config, per fields.md's Labeling section
 				format: .parts(
 					[
 						.placeholder(

@@ -219,7 +219,7 @@ struct SortSpec: Equatable {
 	let boundaries: Boundaries
 }
 
-// MARK: - Boundary-aware tokenization (new: applies `SortSpec.Boundaries` to a value)
+// MARK: - Boundary-aware tokenization (applying `SortSpec.Boundaries`)
 
 /// Reduces a `SortSpec.Boundaries` value to a per-character sort-precedence
 /// rank: lower ranks sort before higher ranks & before `textRank` (ordinary,
@@ -335,7 +335,7 @@ extension SortSpec {
 	/// field of `interpretation`, for `outputFormat`. `boundaryCharacter`, if
 	/// given, is a single explicit boundary character (`"/"` for Path); `nil`
 	/// (Text / Price / Version) means no explicit boundary at all. Doesn't know
-	/// or care what field this is for by name — a caller (e.g.,
+	/// or care what field this is for by name; a caller (e.g.,
 	/// `defaultSortSpec(forFieldNamed:outputFormat:)` in
 	/// `AppStoreFieldDefaults.swift`) maps a field name to an `interpretation` &
 	/// `boundaryCharacter` first.
@@ -366,7 +366,7 @@ extension SortSpec {
 				// / suppressor at all) the ordinary `.endmost` default applies.
 				// `.leading` / `.endmost` are behaviorally identical today (there's
 				// only ever 0 or 1 explicit group here), but `.leading` is the
-				// semantically correct value for the solitary case.
+				// semantically correct value for the solitary case
 				whitespacePlacement: outputFormat == .json ? .suppressed : boundaryCharacter == nil ? .leading : .endmost,
 			),
 		)
@@ -376,7 +376,7 @@ extension SortSpec {
 	/// (i.e., a bare `<field-order-option-set>`, which sorts field names /
 	/// labels, never a specific field's value): exactly `default(interpretation:
 	/// boundaryCharacter:outputFormat:)`'s Text row (`interpretation: .numeric,
-	/// boundaryCharacter: nil`) — the same call `defaultSortSpec(forFieldNamed:
+	/// boundaryCharacter: nil`), the same call `defaultSortSpec(forFieldNamed:
 	/// outputFormat:)` makes for any field name it doesn't recognize as price /
 	/// version / path, kept as 1 shared definition so the 2 can't drift apart.
 	static func textDefault(outputFormat: OutputFormat) -> Self {
@@ -473,7 +473,7 @@ extension SortSpec {
 	}
 }
 
-// MARK: - Comparator (new: applies a `SortSpec` to compare 2 field values)
+// MARK: - Comparator (applies a `SortSpec` to compare 2 field values)
 
 extension SortSpec {
 	private var textCompareOptions: String.CompareOptions {
@@ -739,7 +739,7 @@ private extension Substring {
 		let content = body[..<outerCloseOffset]
 		// `currentIndex` lands ON the closing fence (matching `parseFencedValue`'s
 		// convention), not past it: `parseOptions`'s caller-side `defer` always
-		// advances 1 more position after this call returns.
+		// advances 1 more position after this call returns
 		currentIndex = outerCloseOffset
 
 		var elements = [Self]()

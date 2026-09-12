@@ -153,13 +153,13 @@ private extension MASTests {
 
 	@Test
 	func `defaultedForJSON resets a default config's labels & formats to bare defaults, only for JSON`() {
-		let curated = BaseIncludesAllFieldsConfig(
+		let builtIn = BaseIncludesAllFieldsConfig(
 			fieldSpecs: [.init(name: "fileSizeBytes", label: "Size", format: .parts([.text("custom")]), sortSpec: nil)],
 		)
-		let json = curated.defaultedForJSON(outputFormat: .json)
+		let json = builtIn.defaultedForJSON(outputFormat: .json)
 		#expect(json.fieldSpecs[0].label == "fileSizeBytes")
 		#expect(json.fieldSpecs[0].format == .default(fieldName: "fileSizeBytes"))
-		let table = curated.defaultedForJSON(outputFormat: .table(.default))
+		let table = builtIn.defaultedForJSON(outputFormat: .table(.default))
 		#expect(table.fieldSpecs[0].label == "Size")
 		#expect(table.fieldSpecs[0].format == .parts([.text("custom")]))
 	}
@@ -206,7 +206,7 @@ private extension MASTests {
 		// negated %e / %w default to the verbatim field value when NOT matched,
 		// so an empty array / object (structurally empty, but not an empty
 		// string) round-trips unchanged, proving these placeholders test JSON
-		// string values (or null), not arrays / objects.
+		// string values (or null), not arrays / objects
 		#expect(emptyFormat.rendered(value: .array(.init(.init())), label: "L", name: "n").stringValue == "[]")
 		#expect(emptyFormat.rendered(value: .object(.init(.init())), label: "L", name: "n").stringValue == "{}")
 		#expect(whitespaceFormat.rendered(value: .array(.init(.init())), label: "L", name: "n").stringValue == "[]")
@@ -288,7 +288,7 @@ private extension MASTests {
 		// Plain lexical would put "file10" before "file_2" ('1' < '_' in ASCII);
 		// boundary-aware tokenization instead treats "_" as a higher-precedence
 		// boundary than ordinary text, so "file" (up to the boundary) is compared
-		// first, & "file" < "file10" makes "file_2" sort first
+		// first; "file" < "file10" makes "file_2" sort first
 		#expect(sortSpec.compare("file10", "file_2") == .orderedDescending)
 	}
 
@@ -575,7 +575,7 @@ private extension MASTests {
 	func `a %V / %L branch inside %b may be placeholder-less, even though it's infallible`() throws {
 		// A `%b` branch, unlike a standalone top-level placeholder, can't be
 		// replaced by a bare literal without losing "only if every earlier
-		// branch failed" — true even for an infallible %V / %L branch used as
+		// branch failed", true even for an infallible %V / %L branch used as
 		// the catch-all last branch
 		let format = try #require(parseFieldSpecs("adamID:%bNnumber+Oboolean+Vother++").first).format
 		#expect(format.rendered(value: .number(42), label: "L", name: "n").stringValue == "number")
@@ -595,7 +595,7 @@ private extension MASTests {
 		#expect(fieldSpec.justification == .end)
 		// Stripped from the format: a real transform would force stringification
 		// (see `%.n coerces...`), but a bare justify-only pipeline leaves a JSON
-		// number passed through unchanged.
+		// number passed through unchanged
 		#expect(isJSONNumber(fieldSpec.format.rendered(value: .number(42), label: "L", name: "n")))
 	}
 
@@ -619,7 +619,7 @@ private extension MASTests {
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
 		// Reversed order: `rightJustify` isn't a string transform, so it's a parse
-		// error once it's no longer in leading position.
+		// error once it's no longer in leading position
 		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:.uppercase.rightJustify") }
 	}
 
@@ -758,8 +758,8 @@ private extension MASTests {
 	@Test
 	func `a name / transform name swallows a following placeholder prefix absent a separator`() {
 		// No separator between "hidden" & "%v": the whole run is 1 attempted named
-		// format name, "hidden%v", which doesn't exist — not `hidden` followed by a
-		// `%v` placeholder.
+		// format name, "hidden%v", which doesn't exist, not `hidden` followed by a
+		// `%v` placeholder
 		#expect(throws: ParsingError.unknownNamedFormat("hidden%v")) { try parseFieldSpecs("adamID::hidden%v") }
 	}
 
@@ -774,7 +774,7 @@ private extension MASTests {
 	@Test
 	func `a sort modifier or later field spec may still follow ::hidden`() throws {
 		// Both terminate the format-modifier itself, so they're not "content
-		// following hidden" within it.
+		// following hidden" within it
 		let sorted = try #require(parseFieldSpecs("adamID::hidden/1a").first)
 		#expect(sorted.format.isHidden)
 		#expect(sorted.sortSpec?.priority == 1)

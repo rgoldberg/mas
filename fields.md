@@ -503,9 +503,9 @@ label                 = {text\\[:<format-modifier-prefix>:][:<sort-modifier-pref
   - Key for key-value & JSON.
 - Exception: for a built-in default fields config (`none` / `standard` / `all`)
   specifically, JSON ignores every field spec's label (uses its name instead)
-  & any curated `<format>` (uses `%v` instead) — JSON is machine-consumed, so
-  a built-in default's human-facing curation (labels & formats alike, curated
-  for table / key-value) doesn't apply. A resolved fields config's own field
+  & any selected `<format>` (uses `%v` instead): JSON is machine-consumed,
+  so a built-in default's human-facing labels & formats (selected for
+  table / key-value) don't apply. A resolved fields config's own field
   specs (i.e., anything `--fields` itself sets or overlays, including a
   future persisted custom fields config) keep their label & format for JSON
   like any other output format.
@@ -630,7 +630,7 @@ being broken into smaller ones by the separator. `<ungrouped>` doesn't strip
 it.
 
 Only affects `<numeric>` `<interpretation>`: meaningless for `<lexical>`
-(never parses a value as a number), & for `<price>` / `<version>` (each
+(never parses a value as a number) & for `<price>` / `<version>` (each
 already has its own whole-value algorithm & ignores it, like `<boundaries>`).
 
 ##### Sort Interpretation
@@ -759,5 +759,5 @@ JSON suppresses the implicit whitespace boundary entirely (`+++` /
 choices on the other axes: Table / Key-Value are read by people, so
 whitespace sorting like a low-precedence separator is the friendlier
 default; JSON is read by programs, so nothing gets special-cased. Path
-keeps its `/` boundary either way — the suppression only concerns
+keeps its `/` boundary either way; the suppression only concerns
 whitespace.

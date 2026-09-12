@@ -41,8 +41,8 @@ distinction).
 `<format>`, if present, is at least 1 of `<named-format>`,
 `<format-transform-pipeline>` (see "Format Transforms" below),
 `<value-transform-pipeline>` (applied to `<named-format>`'s value, or `%v`'s
-if `<named-format>` is absent), & `<template>` (`<placeholder>` /
-`<format-text>`) — always in that order, with no separator of any kind
+if `<named-format>` is absent) & `<template>` (`<placeholder>` /
+`<format-text>`), always in that order, with no separator of any kind
 between adjacent parts, except where "Pipeline Terminator" below requires a
 `<pipeline-terminator>` right before a `<template>`. A `<value-transform-
 pipeline>` alone renders as its own output. Followed by a `<template>`, the
@@ -50,14 +50,14 @@ pipeline>` alone renders as its own output. Followed by a `<template>`, the
 field's original value: a `<placeholder>` inside it (e.g., `%v` / `%V`)
 reads the transformed value, not the raw 1, so nothing is duplicated; write
 `%v` to include the transformed value in the `<template>` (a `<template>`
-needs at least 1 `<placeholder>` regardless — see "Templates Need a
+needs at least 1 `<placeholder>` regardless; see "Templates Need a
 Placeholder" under "Transforms" below).
 
-Unlike every other `<*-transform-pipeline>` site — a placeholder's own
+Unlike every other `<*-transform-pipeline>` site (a placeholder's own
 success / failure sub-format always knows its kind up front from its own
 grammar position (e.g., `%N`'s own success sub-format is always number-kind,
 so it may contain a `<number-transform-pipeline>` but never a
-`<string-transform-pipeline>`) — `<value-transform-pipeline>` infers kind from
+`<string-transform-pipeline>`)), `<value-transform-pipeline>` infers kind from
 its own 1st `<value-transform>` instead, since a field's raw value has no
 fixed type. This is never ambiguous: no 2 kinds define the same
 `<value-transform>` name, so the 1st `<value-transform>`'s name alone
@@ -68,10 +68,10 @@ using any other unrecognized name would be).
 Neither a name nor a transform name stops at `<placeholder-prefix>` on its
 own: `<name-prefix>someFormat%v` is an attempt at a named format literally
 called `someFormat%v` (& fails as one if it doesn't exist), not `someFormat`
-followed by a `%v` placeholder. A `<pipeline-terminator>` — needed even right
+followed by a `%v` placeholder. A `<pipeline-terminator>` (needed even right
 after a bare `<named-format>`, with nothing else in between, since
 `<named-format>` never ends with `:` on its own (see "Pipeline Terminator"
-below) — or `<transform-call-prefix>` (for a `<value-transform-pipeline>`) is
+below)) or `<transform-call-prefix>` (for a `<value-transform-pipeline>`) is
 what actually separates them: `<name-prefix>someFormat<pipeline-terminator>%v`
 is `someFormat` followed by a `%v` placeholder.
 
@@ -88,7 +88,7 @@ date-placeholder-reference   = <named-date-format> [ <date-transform-pipeline> ]
 <!--editorconfig-checker-enable-->
 
 A placeholder's own success / failure sub-format uses these placeholder-level
-references, not `<format>` itself — so a `<format-transform-pipeline>` (only
+references, not `<format>` itself, so a `<format-transform-pipeline>` (only
 ever part of `<format>`) never applies inside one.
 
 ##### Named Formats
@@ -121,10 +121,9 @@ If no named format exists for a referenced name, an error is reported.
 
 - `hidden`: Omits the field from output, allowing sorting by a field without
   displaying it. Unlike any other named format, `hidden` must be the entire
-  `<format>` — no `<format-transform-pipeline>`, `<pipeline-terminator>`,
+  `<format>`; no `<format-transform-pipeline>`, `<pipeline-terminator>`,
   `<value-transform-pipeline>`, or `<template>` may follow it, since a hidden
-  field is never rendered, & anything following it would be dead
-  configuration.
+  field is never rendered; anything following it would be dead configuration.
 
 ##### Transforms
 
@@ -158,7 +157,7 @@ number-transform-pipeline              = <non-terminal-number-transform-pipeline
 non-terminal-number-transform-pipeline = <non-terminal-number-transform-call>+
 
 (* Composes a `<transform-call-prefix>`, an optional `<value-transform-
-   coercion>`, & the transform itself. `<value-transform-call>` is the
+   coercion>` & the transform itself. `<value-transform-call>` is the
    generic form; each other `*-transform-call` below parallels 1 specific
    subset of `<value-transform>`, for use wherever only that subset is
    valid. *)
@@ -245,7 +244,7 @@ A `<value-transform-pipeline>` (`<format>`'s own top-level pipeline, per its
 inferred kind) may coerce its input value first, controlled by a
 `<value-transform-coercion>` (a 2nd `.` right after the pipeline's own 1st
 `<value-transform-call>`'s `<transform-call-prefix>`, i.e., `..` instead of
-`.`) — conceptually the same marker as `<placeholder-coercion>` (see
+`.`), conceptually the same marker as `<placeholder-coercion>` (see
 "Coercion" under "Placeholders" below), & spelled with the same character,
 just in a different position (there's no placeholder-letter syntax slot at
 `<format>`'s own top level to attach `<placeholder-coercion>` to directly).
@@ -259,7 +258,7 @@ representation) always exists, even for `null` (`""`), so it never needs
 coercion; a `<date-transform-pipeline>` accepts anything `%d` would (ISO-8601
 datetime, ISO-8601 date-only, or a Unix epoch numeric timestamp, as a real
 JSON number or a JSON string) unconditionally, the same way `%d` itself
-never supports `<placeholder-coercion>` either — there's no uncoerced form
+never supports `<placeholder-coercion>` either; there's no uncoerced form
 to distinguish it from.
 
 Only the pipeline's own 1st `<value-transform-call>` currently affects
@@ -268,13 +267,13 @@ decided once, up front, from it. A `<value-transform-coercion>` is
 nonetheless syntactically permitted (parsed, with no effect) on a later
 `<value-transform-call>` in the same pipeline too, since a later,
 wrongly-typed `<value-transform>` would already have failed regardless of
-whether it too was marked — so this is reserved for a
+whether it too was marked, so this is reserved for a
 possible future where coercion could apply mid-pipeline, not a currently
 meaningful position.
 
 If coercion fails, the entire `<format>` renders blank, mimicking an
 unhandled placeholder failure (see "Success & Failure" under "Placeholders"
-below) — this applies even when a `<template>` follows the
+below); this applies even when a `<template>` follows the
 `<value-transform-pipeline>` (see "Pipeline Terminator" next): the
 `<template>` is never rendered either.
 
@@ -285,7 +284,7 @@ Whichever of `<named-format>`, `<format-transform-pipeline>`, or
 `<template>` (see "Value Coercion" above for what the `<template>` then
 renders against, & "Templates Need a Placeholder" below for a constraint on
 the `<template>` itself). A `<pipeline-terminator>` (`::`) must separate the
-2 UNLESS that last-present part already ends with `:` on its own — which
+2 UNLESS that last-present part already ends with `:` on its own, which
 only ever happens when it's a `<value-transform-pipeline>` ending in a
 `<parameterized-value-transform>` (`group` / `scale`) called with explicit
 arguments, closing its own `<argument-fence>` (also `:`); ending in an
@@ -294,16 +293,16 @@ arguments, closing its own `<argument-fence>` (also `:`); ending in an
 `<template>` after either always needs the full `<pipeline-terminator>`.
 
 - If the last-present part closed its own `<argument-fence>`: that closing
-  `:` already unambiguously ends things, so nothing extra is needed at all —
+  `:` already unambiguously ends things, so nothing extra is needed at all;
   the `<template>` starts right after it. Any further `:` there is just
   literal `<template>` text (`<format-text>`), not a `<pipeline-terminator>`:
-  e.g., `.group:de_DE:::%v` is `group`, then the `<template>` `::%v` —
+  e.g., `.group:de_DE:::%v` is `group`, then the `<template>` `::%v`:
   literal `::`, then a `%v` placeholder reading `group`'s own output.
 - Otherwise: nothing about the last-present part's own name-scan can tell
   "more pipeline content" apart from "a `<template>` follows" on its own
-  (`group` / `scale` also use `:` for their own `<argument-fence>`, & even a
+  (`group` / `scale` also use `:` for their own `<argument-fence>`, and even a
   `<format-transform>` / bare `<named-format>` name-scan must still stop at
-  `:` for this same reason) — so a `<pipeline-terminator>` is required. A
+  `:` for this same reason), so a `<pipeline-terminator>` is required. A
   single stray `:` there (not doubled) is a parse error, not a lenient no-op.
 
 E.g., all of the following are valid:
@@ -311,7 +310,7 @@ E.g., all of the following are valid:
 - `.round.absoluteValue` (no `<template>`: no `<pipeline-terminator>`
   needed either)
 - `.round.absoluteValue::%v` (`<pipeline-terminator>`, then a `%v`
-  placeholder reading `absoluteValue`'s own output — not the field's original
+  placeholder reading `absoluteValue`'s own output, not the field's original
   value, so this isn't a redundant "the value twice")
 - `.rightJustify::%v` (`<format-transform-pipeline>` never ends with `:` on
   its own, so this needs the full `<pipeline-terminator>` too, unlike a
@@ -321,7 +320,7 @@ E.g., all of the following are valid:
 - `.round.absoluteValue,name` (`<field-spec-separator>` follows: likewise)
 
 Once a `<pipeline-terminator>` (or a closed `<argument-fence>`) ends
-the last-present part, whatever follows is ordinary `<template>` content —
+the last-present part, whatever follows is ordinary `<template>` content,
 even 1 starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
 parses `.absoluteValue` as literal `<format-text>`, not as another
 `<value-transform-call>`. It's still rejected, but for a
@@ -329,15 +328,15 @@ different, more general reason: see "Templates Need a Placeholder" below.
 
 ###### Templates Need a Placeholder
 
-A `<template>` with no `<placeholder>` at all — pure `<format-text>` —
+A `<template>` with no `<placeholder>` at all (pure `<format-text>`)
 renders identically no matter what the field's value is, which is never
 useful, so it's a parse error: whether the `<template>` is `<format>`'s
 entire content (no `<named-format>`, no `<format-transform-pipeline>`, no
 `<value-transform-pipeline>`), follows a `<format-transform-pipeline>`
-(justify — even though justify itself never reads the field's value, its
+(justify; even though justify itself never reads the field's value, its
 `<template>` is still `<format>`'s entire rendering), or follows a
 `<named-format>` and/or a `<value-transform-pipeline>`. E.g.,
-`adamID:some literal text`, `.rightJustify:: MB`, & `.round::.absoluteValue`
+`adamID:some literal text`, `.rightJustify:: MB` & `.round::.absoluteValue`
 (see above) are all errors for this reason.
 
 A `<*-placeholder-reference>` (a bare transform pipeline, e.g., `%V.uppercase+`)
@@ -353,10 +352,10 @@ every value:
 - A `%b` `<branches>` entry is always exempt, fallible or not: reaching it at
   all already depends on every earlier branch having failed, an ordering no
   bare literal placed anywhere else could replicate. E.g.,
-  `%bNnumber+Oboolean+Vother++` — the `V` branch's `other` is exactly the
+  `%bNnumber+Oboolean+Vother++`: the `V` branch's `other` is exactly the
   point (a fixed catch-all for anything not a number or boolean), not an
   oversight, even though `V`, like `v` / `l` / `L`, is infallible.
-- Outside `%b`, a fallible placeholder's (`%n` / `%N`, `%d` / `%D`, & the
+- Outside `%b`, a fallible placeholder's (`%n` / `%N`, `%d` / `%D` & the
   standard placeholders `%u` / `%U` etc.) own success & failure are exempt for
   the same reason: reaching either one already depends on the value, e.g.,
   `%.TYes+No+` (a coerced, verbose `isTrue` placeholder: success `Yes`,
@@ -390,7 +389,7 @@ are left untouched.
   so `<group-separator>` can't itself be `,` / `:` / `.` / `+` / `%`; use a
   `<group-locale-name>` instead if you need 1 of those (e.g., a locale using
   `.` for grouping).
-- E.g., `.group` (system locale; note the absent `<argument-fence>` — bare
+- E.g., `.group` (system locale; note the absent `<argument-fence>`: bare
   `group`, not `group:`, since an empty `<group-arguments>` is invalid),
   `.group:de_DE:` (a named locale's separator & digit count), `.group: ,3:`
   (explicit: a space every 3 digits).
@@ -402,7 +401,7 @@ are left untouched.
 notation, base `radix`, with exactly `fractional-digits` digits after the
 radix point.
 
-- Both roundings (to `significant-digits`, & the final rounding to
+- Both roundings (to `significant-digits` & the final rounding to
   `fractional-digits`) are half-away-from-zero.
 - `fractional-digits` of `0` renders a plain integer, with no radix point.
 - For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
@@ -427,7 +426,7 @@ right-justify        = "rightJustify"
 <!--editorconfig-checker-enable-->
 
 Unlike a `<value-transform>`, a `<format-transform>` doesn't act on any
-value — it sets a property of the field itself, currently just its
+value; it sets a property of the field itself, currently just its
 `table`-output column
 alignment (default: `leftJustify`). So it has no effect on the field's
 rendered value: it's a no-op for `json` / `key-value` output (which have no
@@ -435,7 +434,7 @@ column to align), & doesn't force `%v` / `%V`'s type-preserving `json`
 passthrough into a string, unlike every other transform. For this reason, a
 `<format-transform-pipeline>` may only appear where `<format>` itself allows
 it (right after the field's own optional `<named-format>`, before anything
-else) — never inside a placeholder's own success / failure sub-format, where
+else), never inside a placeholder's own success / failure sub-format, where
 only ordinary `<value-transform>`s are valid.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's
@@ -448,9 +447,9 @@ If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
 A `<format-transform-pipeline>` never ends with `:` on its own (a
 `<format-transform>` never takes arguments, so it has no `<argument-fence>`
 to close), so a `<template>` following 1 always needs the full
-`<pipeline-terminator>` (`::`) first — see "Pipeline Terminator" under
+`<pipeline-terminator>` (`::`) first; see "Pipeline Terminator" under
 "Transforms" above, which states this rule once, for `<named-format>`,
-`<format-transform-pipeline>`, & `<value-transform-pipeline>` alike, rather
+`<format-transform-pipeline>` & `<value-transform-pipeline>` alike, rather
 than 3 separate times.
 
 ###### `iso` & `localTimeZone`
@@ -615,7 +614,7 @@ type, instead of requiring the field value's own JSON type to already match:
 (still the field's verbatim value) or a success format's input (still the
 field's own value; e.g., a `<number-transform-pipeline>` in `%.n`'s success
 format parses & transforms a coerced string exactly as it would a real JSON
-number) — it only widens which raw values count as a match.
+number); it only widens which raw values count as a match.
 
 `<placeholder-coercion>` is valid only on `%n` / `%N` & the boolean-ish
 standard placeholders (`%o` / `%O` / `%t` / `%T` / `%f` / `%F`); using it on
@@ -631,8 +630,8 @@ date-placeholder = <concise-date-placeholder> | <verbose-date-placeholder>
 concise-date-placeholder = <placeholder-header> <concise-date>
 verbose-date-placeholder = <placeholder-header> <verbose-date> [ <date> ] <format-delimiter> [ <failure> ] <format-delimiter>
 
-concise-date = "d" (* matches a specified date format; default: depending on input, ISO date/datetime/time in system time zone; negated default: verbatim field value *)
-verbose-date = "D" (* matches a specified date format; default: depending on input, ISO date/datetime/time in system time zone; negated default: verbatim field value *)
+concise-date = "d" (* matches a specified date format; default: depending on input, ISO date / datetime / time in system time zone; negated default: verbatim field value *)
+verbose-date = "D" (* matches a specified date format; default: depending on input, ISO date / datetime / time in system time zone; negated default: verbatim field value *)
 
 date               = <input-date-format> … <date-input-format-separator> <date-input-output-separator> [ <output-date-format> ] | <output-date-format>
 input-date-format  = <date-format>
@@ -653,9 +652,9 @@ date-only, then a Unix epoch (seconds) numeric timestamp. If
 local time zone. Neither depends on field name, label, output format, or any
 other context.
 
-A custom `<input-date-format>`, & an `<output-date-format>` that isn't a bare
+A custom `<input-date-format>` & an `<output-date-format>` that isn't a bare
 `<date-transform-pipeline>` (i.e., a named-format reference, or literal
-pattern text), aren't implemented yet — using either is a parse error, rather
+pattern text) aren't implemented yet; using either is a parse error, rather
 than silently falling back to the defaults above:
 
 - `<input-date-format>` needs a defined pattern language for

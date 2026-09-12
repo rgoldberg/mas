@@ -108,7 +108,7 @@ extension FieldOrder {
 
 extension BaseIncludesAllFieldsConfig {
 	/// `all`'s own default field order: sorts by label, per `SortSpec.
-	/// textDefault(outputFormat:)` — the same shared Text-row default a
+	/// textDefault(outputFormat:)`, the same shared Text-row default a
 	/// specific field's own default `SortSpec` also uses (`defaultSortSpec(
 	/// forFieldNamed:outputFormat:)`, for any name it doesn't recognize as
 	/// price / version / path), since a field's name / label is itself always
@@ -130,10 +130,10 @@ extension FieldsConfig {
 	/// for `outputFormat` `.json`, resets every field spec's label to its name
 	/// & format to its bare default (`.default(fieldName:)`), so JSON uses each
 	/// field's raw name & value, ignoring whatever label / custom format it was
-	/// curated with for `table` / `keyValue` — fields.md's Labeling section
-	/// otherwise has a label serve as a field's JSON key exactly like it does
-	/// for `table` / `keyValue`, which a built-in default's curation was never
-	/// meant to opt into. Identity for any other `outputFormat`.
+	/// given for `table` / `keyValue`; fields.md's Labeling section otherwise
+	/// has a label serve as a field's JSON key exactly like it does for
+	/// `table` / `keyValue`, which a built-in default's labels & formats were
+	/// never meant to opt into. Identity for any other `outputFormat`.
 	///
 	/// Never applied to a resolved fields config's own fields (e.g., a future
 	/// persisted custom one): a user's own explicit label / format is respected
