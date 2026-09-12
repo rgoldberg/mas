@@ -68,6 +68,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingFieldName
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
+	case singleBranch
 	case templateLacksPlaceholder
 	case terminalNumberTransformFollowedByMore(name: String)
 	case unknownNamedFormat(String)
@@ -110,6 +111,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 				name.isEmpty || name.first?.isWhitespace == true || name.last?.isWhitespace == true ? "'\(name)'" : name
 			)
 			"""
+		case .singleBranch:
+			"<branches> needs at least 2 branches; a single 1 is just an ordinary placeholder, with no need for %b / %B"
 		case .templateLacksPlaceholder:
 			"A template needs at least 1 placeholder (e.g., %v); its output would otherwise never depend on the value"
 		case let .terminalNumberTransformFollowedByMore(name):

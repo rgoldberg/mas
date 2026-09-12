@@ -597,6 +597,16 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a single-branch %b, fallible or not, is a parse error, since it's just an ordinary placeholder`() {
+		#expect(throws: ParsingError.singleBranch) {
+			try parseFieldSpecs("adamID:%bNnum++")
+		}
+		#expect(throws: ParsingError.singleBranch) {
+			try parseFieldSpecs("adamID:%bVconstant++")
+		}
+	}
+
+	@Test
 	func `a top-level justify transform sets justification & is stripped from the rendered format`() throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
 		#expect(fieldSpec.justification == .end)

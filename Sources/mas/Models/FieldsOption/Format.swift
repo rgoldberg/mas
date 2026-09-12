@@ -1239,6 +1239,9 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 		guard !branches.isEmpty else {
 			throw .missingFieldName
 		}
+		guard branches.count > 1 else {
+			throw .singleBranch
+		}
 		return .init(branches: branches)
 	}
 }

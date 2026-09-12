@@ -612,7 +612,10 @@ verbose-branches-placeholder = <placeholder-prefix> <verbose-branches> <branches
 concise-branches = "b" (* matches a branch in `<branches>`; default: matched branch value *)
 verbose-branches = "B" (* matches a branch in `<branches>`; default: matched branch value *)
 
-branches = [ <fallible-branch>+ ] <branch>
+(* At least 2 branches total (a single branch is just an ordinary
+   placeholder, with no need for `%b` / `%B`): 1+ `<fallible-branch>`s,
+   then 1 final `<branch>`, fallible or not. *)
+branches = <fallible-branch>+ <branch>
 branch   = <fallible-branch> | <infallible-branch>
 
 fallible-branch         = <concise-fallible-branch> | <verbose-fallible-branch>
@@ -635,6 +638,9 @@ verbose-infallible-branch = ( <verbose-value> | [ <placeholder-negation> ] <verb
   - If a branch fails, the next branch in `<branches>` is evaluated.
 - Fallible placeholders may be used for any branch, but infallible placeholders
   may be used only as the last branch.
+- `<branches>` needs at least 2 branches: with only 1, `<branches-placeholder>`
+  is exactly as good as just using that 1 branch's own placeholder directly,
+  since there's nothing else to sequentially fall through to.
 - `%b` & `%B` may not themselves be used as branches.
 - `<placeholder-coercion>` on a branch follows the same restriction as on a
   top-level placeholder (see "Coercion" above): valid only on a number or
