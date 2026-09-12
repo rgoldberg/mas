@@ -56,7 +56,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case coercionNotSupported(Character)
 	case danglingEscape
 	case hiddenFormatFollowedByContent
-	case incompleteDoublePipelineTerminator
+	case incompletePipelineTerminator
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
 	case invalidLetter(Character)
@@ -82,8 +82,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected a character to escape after trailing '\\'"
 		case .hiddenFormatFollowedByContent:
 			"'\(hiddenNamedFormatName)' must be the entire format-modifier; nothing may follow it"
-		case .incompleteDoublePipelineTerminator:
-			"Expected another ':' to complete the double pipeline terminator '::'"
+		case .incompletePipelineTerminator:
+			"Expected another ':' to complete the pipeline terminator '::'"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
@@ -660,8 +660,8 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 }
 
 /// Parses `<format>`: `[ <named-format> ] [ <format-transform-pipeline> ]
-/// [ <pipeline-terminator> ] [ <value-transform-pipeline>
-/// [ <double-pipeline-terminator> ] [ <template> ] | <template> ]`.
+/// [ <chain-terminator> ] [ <value-transform-pipeline>
+/// [ <pipeline-terminator> ] [ <template> ] | <template> ]`.
 /// `<format-transform-pipeline>` (currently just `<justify-transform>`) is
 /// recognized only here, right after the optional named format & before
 /// anything else — never inside a placeholder's own success / failure
@@ -669,7 +669,7 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 /// call this). A name / transform name never stops at `<placeholder-prefix>`
 /// on its own: `.uppercase%v` is an attempt at a transform literally named
 /// `uppercase%v` (& fails as one), not `.uppercase` followed by a `%v`
-/// placeholder — `<pipeline-terminator>` (or `.` for another transform) is
+/// placeholder — `<chain-terminator>` (or `.` for another transform) is
 /// what actually separates them.
 private func parseFormat(_ input: inout Substring, fieldName: String)
 throws(ParsingError) -> (format: Format, justification: Justification)? {
@@ -687,7 +687,7 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		input.removeFirst()
 		let name = try parseEscapedText(
 			&input,
-			terminatorSet: terminatorSet.union([transformCallPrefix, pipelineTerminator]),
+			terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]),
 		)
 		guard knownNamedFormatNameSet.contains(name) else {
 			throw .unknownNamedFormat(name)
@@ -702,7 +702,7 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
-	if input.first == pipelineTerminator {
+	if input.first == chainTerminator {
 		input.removeFirst()
 	}
 	let format: Format =
@@ -765,14 +765,14 @@ private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Characte
 /// A trailing template may follow. A last `<transform>` that closed its own
 /// argument fence (`group` / `scale` with explicit arguments) already ends
 /// unambiguously, so — exactly like a `<format-transform-pipeline>`'s own
-/// `<pipeline-terminator>` before a template — nothing extra is needed: the
+/// `<chain-terminator>` before a template — nothing extra is needed: the
 /// template (if any) starts right after the fence's closing `:`. An
 /// argument-less last `<transform>`'s name-scan can't otherwise tell "more
 /// pipeline content" apart from "a template follows" on its own (`group` /
-/// `scale` also use `<pipeline-terminator>` (`:`) as their own argument
-/// fence), so it needs a doubled `<pipeline-terminator>` (`::`) first. Once
-/// that (or a closed fence) unambiguously ends the pipeline, whatever follows
-/// is ordinary `<template>` content — even 1 starting with `.`, since
+/// `scale` also use `:` for their own argument fence), so it needs a
+/// `<pipeline-terminator>` (`::`) first. Once that (or a closed fence)
+/// unambiguously ends the pipeline, whatever follows is ordinary
+/// `<template>` content — even 1 starting with `.`, since
 /// `parseTemplate(_:terminatorSet:)`'s own "needs a `<placeholder>`" check
 /// (not a dedicated ban on a leading `.`) is what rejects a resulting
 /// `<template>` that turns out to carry no actual `<placeholder>`.
@@ -793,18 +793,18 @@ private func parseValueTransformPipelineThenTemplate(
 	}
 	let finalReference =
 		namedFormat == nil ? reference : FormatReference(namedFormat: namedFormat, transforms: reference.transforms)
-	let lastTransformHadArguments = beforePipeline[beforePipeline.index(before: input.startIndex)] == pipelineTerminator
+	let lastTransformHadArguments = beforePipeline[beforePipeline.index(before: input.startIndex)] == chainTerminator
 	if !lastTransformHadArguments {
-		guard input.first == pipelineTerminator else {
+		guard input.first == chainTerminator else {
 			return .valuePipeline(finalReference, kind: kind, template: [])
 		}
 		var afterFirstColon = input
 		afterFirstColon.removeFirst()
-		guard afterFirstColon.first == pipelineTerminator else {
-			throw .incompleteDoublePipelineTerminator
+		guard afterFirstColon.first == chainTerminator else {
+			throw .incompletePipelineTerminator
 		}
 		input = afterFirstColon
-		input.removeFirst() // the double pipeline terminator's 2nd ':'
+		input.removeFirst() // the pipeline terminator's 2nd ':'
 	}
 	guard let next = input.first, !terminatorSet.contains(next) else {
 		return .valuePipeline(finalReference, kind: kind, template: [])
@@ -844,7 +844,7 @@ private extension Justification {
 /// fields-formatting.md, a `<format-transform>` & every other transform share
 /// no names, so there's nothing to disambiguate: this is 1st-match-wins
 /// ordering, not a lookup. The caller (`parseFormat`), not this function,
-/// handles a trailing `<pipeline-terminator>`, since 1 may appear here even with
+/// handles a trailing `<chain-terminator>`, since 1 may appear here even with
 /// 0 matches (e.g., right after a bare named format, before a template).
 private func parseFormatTransformPipeline(_ input: inout Substring, terminatorSet: Set<Character>)
 throws(ParsingError) -> Justification? {
@@ -854,7 +854,7 @@ throws(ParsingError) -> Justification? {
 		input.removeFirst()
 		let name = try parseEscapedText(
 			&input,
-			terminatorSet: terminatorSet.union([transformCallPrefix, pipelineTerminator]),
+			terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]),
 		)
 		guard let matched = Justification(formatTransformSimpleName: name) else {
 			input = beforeTransform
@@ -1068,10 +1068,15 @@ let sortModifierPrefix = Character("/")
 /// Optionally closes a `<format-transform-pipeline>` when its last
 /// `<format-transform>` wouldn't otherwise be followed by something that
 /// unambiguously ends it (e.g., a template's literal text starting with a
-/// letter). Doubled, it's `<format>`'s own `<double-pipeline-terminator>` (see
+/// letter). Doubled, it's `<format>`'s own `<pipeline-terminator>` (see
 /// `Format.swift`'s `parseTransformName(_:terminatorSet:)`), which serves the
-/// same purpose for an argument-less `<value-transform-pipeline>`.
-let pipelineTerminator = Character(":")
+/// same purpose for an argument-less `<value-transform-pipeline>` — but,
+/// unlike this `<chain-terminator>`, is its own dedicated production, not
+/// just this same character doubled up: `group` / `scale`'s own closing
+/// `<argument-fence>` (also `:`) can end that pipeline too, without being a
+/// `<pipeline-terminator>` itself, the same way `<sort-modifier-prefix>`
+/// (`/`) can end a `<format>` without being a `<format-terminator>`.
+let chainTerminator = Character(":")
 
 let indexPrefix = Character("@")
 

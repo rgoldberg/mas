@@ -567,7 +567,8 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`() throws {
+	func `a top-level fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`(
+	) throws {
 		// %cN is fallible (conditional on the value), so a fixed label per
 		// branch is meaningful, unlike a top-level template
 		let fallible = try #require(parseFieldSpecs("adamID:%cNNumber+NotANumber+").first).format
@@ -581,6 +582,18 @@ private extension MASTests {
 		#expect(throws: ParsingError.templateLacksPlaceholder) {
 			try parseFieldSpecs("adamID:%Lconstant+")
 		}
+	}
+
+	@Test
+	func `a %V / %L branch inside %b may be placeholder-less, even though it's infallible`() throws {
+		// A `%b` branch, unlike a standalone top-level placeholder, can't be
+		// replaced by a bare literal without losing "only if every earlier
+		// branch failed" — true even for an infallible %V / %L branch used as
+		// the catch-all last branch
+		let format = try #require(parseFieldSpecs("adamID:%bNnumber+Oboolean+Vother++").first).format
+		#expect(format.rendered(value: .number(42), label: "L", name: "n").stringValue == "number")
+		#expect(format.rendered(value: .bool(true), label: "L", name: "n").stringValue == "boolean")
+		#expect(format.rendered(value: .string("x"), label: "L", name: "n").stringValue == "other")
 	}
 
 	@Test
@@ -620,7 +633,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a pipeline terminator lets a justify transform precede template text, which still needs a placeholder`(
+	func `a chain terminator lets a justify transform precede template text, which still needs a placeholder`(
 	) throws {
 		#expect(throws: ParsingError.templateLacksPlaceholder) {
 			try parseFieldSpecs("adamID:.rightJustify: MB")
@@ -688,7 +701,7 @@ private extension MASTests {
 
 	@Test
 	func `a single stray pipeline terminator (not doubled) after an argument-less last transform is a parse error`() {
-		#expect(throws: ParsingError.incompleteDoublePipelineTerminator) {
+		#expect(throws: ParsingError.incompletePipelineTerminator) {
 			try parseFieldSpecs("adamID:.round.absoluteValue: MB")
 		}
 	}

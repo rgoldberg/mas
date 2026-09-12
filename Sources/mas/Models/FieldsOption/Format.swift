@@ -852,23 +852,23 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 /// already-consumed `<transform-call-prefix>`: its `<group-arguments>` /
 /// `<scale-arguments>` fence, if present, is included verbatim (exactly as
 /// `Transform.parsed(name:kind:)` expects). Unlike a bare `parseEscapedText`
-/// scan, `<pipeline-terminator>` (`:`) always ends the name UNLESS the name
+/// scan, `<chain-terminator>` (`:`) always ends the name UNLESS the name
 /// scanned so far is `group` / `scale` & is immediately followed by `:` (that
 /// transform's own argument fence) — only then does scanning continue through
 /// to the fence's own closing `:`. This keeps a bare (argument-less)
-/// transform's name from swallowing a subsequent `<double-pipeline-
-/// terminator>` (`::`) or stray `<pipeline-terminator>`, both only meaningful
-/// to `<format>`'s own top-level `<value-transform-pipeline>` (every other
+/// transform's name from swallowing a subsequent `<pipeline-terminator>`
+/// (`::`) or stray `<chain-terminator>`, both only meaningful to `<format>`'s
+/// own top-level `<value-transform-pipeline>` (every other
 /// `<*-transform-pipeline>` site's `terminatorSet` never lets a
-/// `<pipeline-terminator>` reach this function in the first place).
+/// `<chain-terminator>` reach this function in the first place).
 func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
-	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, pipelineTerminator]))
+	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
 	var afterOpenFence = input
-	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == pipelineTerminator else {
+	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == chainTerminator else {
 		return name
 	}
 	afterOpenFence.removeFirst() // the candidate fence's opening ':'
-	guard afterOpenFence.first != pipelineTerminator else {
+	guard afterOpenFence.first != chainTerminator else {
 		// An immediately-empty fence is never valid syntax anyway (`group` /
 		// `scale` both require nonempty arguments), so this 2nd ':' can't be a
 		// fence's own closing 1: it's `<format>`'s `<pipeline-terminator>`
@@ -877,8 +877,8 @@ func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>)
 		return name
 	}
 	input = afterOpenFence
-	let arguments = try parseEscapedText(&input, terminatorSet: Set([pipelineTerminator]))
-	guard input.first == pipelineTerminator else {
+	let arguments = try parseEscapedText(&input, terminatorSet: Set([chainTerminator]))
+	guard input.first == chainTerminator else {
 		throw .missingEndFence
 	}
 	input.removeFirst() // the fence's closing ':'
@@ -988,10 +988,15 @@ func formatLacksPlaceholder(_ format: Format?) -> Bool {
 /// `[ <failure> ]` / `[ <number> ]` through & including their closing `+`.
 /// Assumes the leading content (if any) has not yet been consumed.
 /// `requirePlaceholder` rejects empty / placeholder-less content: pass `true`
-/// only for an infallible placeholder's (`%v` / `%V`, `%l` / `%L`) own success
-/// format, which — unlike a fallible placeholder's (e.g., `%n` / `%N`) own
-/// success / failure, reached only conditionally — always applies, so it'd
-/// otherwise render the same output regardless of the field's value.
+/// only for a top-level, standalone infallible placeholder's (`%v` / `%V`,
+/// `%l` / `%L`) own success format, which always applies, unlike a fallible
+/// placeholder's (e.g., `%n` / `%N`) own success / failure, reached only
+/// conditionally — so it'd otherwise render the same output regardless of
+/// the field's value, something a bare literal could already do with no
+/// placeholder wrapping it at all. A `%v` / `%V` / `%l` / `%L` used as 1 of
+/// `%b`'s own `<branches>` is exempt even though it's still infallible: no
+/// bare literal could stand in for it there, since it'd lose the "only if
+/// every earlier branch failed" ordering the branch itself provides.
 func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind, requirePlaceholder: Bool)
 throws(ParsingError) -> Format? {
 	let terminatorSet = Set([placeholderPrefix, formatDelimiter])
@@ -1185,14 +1190,14 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
-				branch = .value(success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true))
+				branch = .value(success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false))
 			case "l", "L":
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
 				branch = .label(
 					negated: negated,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
+					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
 				)
 			case "n", "N":
 				branch = .number(
