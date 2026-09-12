@@ -6,28 +6,11 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-(* At least 1 of <named-format>, <format-transform-pipeline>, <value-
-   transform-pipeline>, <template>, always in this order, never any other
-   combination or ordering; no separator of any kind ever appears between
-   any 2 of these 4, except where a <template> follows another part &
-   "Pipeline Terminator" below requires a <pipeline-terminator> first. The
-   1st 3 branches cover every combination with no <template>; the last 5
-   cover every combination with 1, split by whichever part a <template>
-   directly follows, since that alone decides whether a <pipeline-
-   terminator> is required (a <value-transform-pipeline> ending in a
-   <parameterized-value-transform> called with explicit arguments already
-   ends with ":", so it alone needs no <pipeline-terminator> before a
-   following <template>). *)
 format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipeline> ]
        | <format-transform-pipeline> [ <value-transform-pipeline> ]
        | <value-transform-pipeline>
-       | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline> <template>
-         (* only when <value-transform-pipeline> ends in a
-            <parameterized-value-transform> called with explicit arguments *)
-       | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline> <pipeline-terminator> <template>
-         (* only when <value-transform-pipeline> ends in an
-            <unparameterized-value-transform>, or a <parameterized-value-
-            transform> with no arguments *)
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <transform-call-prefix> <parameterized-value-transform> <template>
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <transform-call-prefix> <unparameterized-value-transform> <pipeline-terminator> <template>
        | [ <named-format> ] <format-transform-pipeline> <pipeline-terminator> <template>
        | <named-format> <pipeline-terminator> <template>
        | <template>
