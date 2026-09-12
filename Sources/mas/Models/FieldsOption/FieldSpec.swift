@@ -254,11 +254,9 @@ func resolveBaseFieldsConfig(
 	case allFieldsConfigName:
 		all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
 	case defaultFieldsConfigName, standardFieldsConfigName:
-		if appliesJSONSubstitution {
-			all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
-		} else {
-			standard.defaultedForJSON(outputFormat: outputFormat)
-		}
+		appliesJSONSubstitution // swiftlint:disable:next void_function_in_ternary
+			? all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
+			: standard.defaultedForJSON(outputFormat: outputFormat)
 	default:
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
@@ -513,10 +511,13 @@ private func isOriginalOrderOptionSet(_ input: Substring) -> Bool {
 		if char == fieldSpecSeparator || itemSortAndFieldSpecsPrefixSet.contains(char) {
 			break
 		}
-		guard char == originalOrderOption || SortSpec.Direction(rawValue: char) != nil else {
-			return false
+		guard char == originalOrderOption else {
+			guard SortSpec.Direction(rawValue: char) != nil else {
+				return false
+			}
+			continue
 		}
-		sawOriginalOrder = sawOriginalOrder || char == originalOrderOption
+		sawOriginalOrder = true
 	}
 	return sawOriginalOrder
 }
@@ -530,7 +531,7 @@ private extension FieldSpecsBuilder {
 	}
 
 	private func parseFieldSpecReference(_ input: inout Substring) throws(ParsingError) -> Reference {
-		if input.first == indexPrefix {
+		guard input.first != indexPrefix else {
 			input.removeFirst()
 			return .init(
 				name: nil,
@@ -709,7 +710,7 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
-	let format: Format =
+	let format =
 		if input.first == transformCallPrefix {
 			// A trailing `<value-transform-pipeline>` (`namedFormat` was already
 			// consumed above, if present), optionally followed by a
@@ -735,7 +736,7 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			try parseTemplate(&input, terminatorSet: terminatorSet)
 		} else {
 			// Nothing at all: implicit `%v`, preserving the value's real JSON type
-			.default(fieldName: fieldName)
+			Format.default(fieldName: fieldName)
 		}
 	return (format, justification ?? .start)
 }
@@ -774,7 +775,7 @@ private func parseTrailingTemplate(
 ) throws(ParsingError) -> [FormatPart] {
 	if !endedWithClosedArgumentFence {
 		guard input.first == colon else {
-			return []
+			return .init()
 		}
 		var afterFirstColon = input
 		afterFirstColon.removeFirst()
@@ -785,7 +786,7 @@ private func parseTrailingTemplate(
 		input.removeFirst() // the pipeline terminator's 2nd ':'
 	}
 	guard let next = input.first, !terminatorSet.contains(next) else {
-		return []
+		return .init()
 	}
 	guard case let .parts(template) = try parseTemplate(&input, terminatorSet: terminatorSet) else {
 		preconditionFailure("parseTemplate always returns .parts")
@@ -811,13 +812,9 @@ private func parseTrailingTemplateOrNamedFormat(
 	terminatorSet: Set<Character>,
 ) throws(ParsingError) -> Format {
 	let template = try parseTrailingTemplate(&input, terminatorSet: terminatorSet, endedWithClosedArgumentFence: false)
-	guard template.isEmpty else {
-		return .parts(template)
-	}
-	guard let namedFormat else {
-		return .default(fieldName: fieldName)
-	}
-	return .reference(.init(namedFormat: namedFormat, transforms: .init()))
+	return template.isEmpty
+		? namedFormat.map { .reference(.init(namedFormat: $0, transforms: .init())) } ?? .default(fieldName: fieldName)
+		: .parts(template)
 }
 
 /// `<format>`'s trailing `<value-transform-pipeline>` (generalizing the old
@@ -862,15 +859,16 @@ private func parseValueTransformPipelineThenTemplate(
 	guard let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) else {
 		preconditionFailure("Just confirmed a leading transform call for \(kind), so this always succeeds")
 	}
-	let finalReference =
-		namedFormat == nil ? reference : FormatReference(namedFormat: namedFormat, transforms: reference.transforms)
-	let endedWithClosedArgumentFence = beforePipeline[beforePipeline.index(before: input.startIndex)] == colon
-	let template = try parseTrailingTemplate(
-		&input,
-		terminatorSet: terminatorSet,
-		endedWithClosedArgumentFence: endedWithClosedArgumentFence,
+	return .valuePipeline(
+		namedFormat == nil ? reference : FormatReference(namedFormat: namedFormat, transforms: reference.transforms),
+		kind: kind,
+		coerced: coerced,
+		template: try parseTrailingTemplate(
+			&input,
+			terminatorSet: terminatorSet,
+			endedWithClosedArgumentFence: beforePipeline[beforePipeline.index(before: input.startIndex)] == colon,
+		),
 	)
-	return .valuePipeline(finalReference, kind: kind, coerced: coerced, template: template)
 }
 
 private extension Justification {
@@ -1116,7 +1114,8 @@ let fieldOrderSectionPrefix = Character("/")
 let itemSortSectionPrefix = "//"
 let fieldSpecsSectionPrefix = Character(".")
 
-private let itemSortAndFieldSpecsPrefixSet = Set([Character("/"), fieldSpecsSectionPrefix])
+private let itemSortAndFieldSpecsPrefixSet =
+	Set([itemSortSectionPrefix[itemSortSectionPrefix.startIndex], fieldSpecsSectionPrefix])
 
 let insertIndicator = Character("+")
 let moveIndicator = Character("%")

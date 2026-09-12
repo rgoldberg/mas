@@ -28,10 +28,7 @@ private extension MASTests {
 	func `an uppercase H shows a header, plain by default, styled with an explicit SGR parameter list`() throws {
 		#expect(try parseTableConfig("H") == .init(header: .init(sgrCodes: ""), separator: nil, columnSpacing: "  "))
 		#expect(try parseTableConfig("H1") == .init(header: .init(sgrCodes: "1"), separator: nil, columnSpacing: "  "))
-		#expect(
-			try parseTableConfig("H1;4:").header
-				== .init(sgrCodes: "1;4"),
-		)
+		#expect(try parseTableConfig("H1;4:").header == .init(sgrCodes: "1;4"))
 	}
 
 	@Test
@@ -40,9 +37,7 @@ private extension MASTests {
 		#expect(try parseTableConfig("H1").header == .init(sgrCodes: "1"))
 		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value & fails
 		// SGR validation, rather than silently treating 'S' as a 2nd option
-		#expect(throws: TableConfigParsingError.invalidHeaderStyle("1S-")) {
-			try parseTableConfig("H1S-")
-		}
+		#expect(throws: TableConfigParsingError.invalidHeaderStyle("1S-")) { try parseTableConfig("H1S-") }
 	}
 
 	@Test
@@ -88,82 +83,88 @@ private extension MASTests {
 
 	@Test
 	func `an invalid header style or unknown option is a parse error`() throws {
-		#expect(throws: TableConfigParsingError.invalidHeaderStyle("bogus")) {
-			try parseTableConfig("Hbogus:")
-		}
-		#expect(throws: TableConfigParsingError.invalidHeaderStyle(";1")) {
-			try parseTableConfig("H;1:")
-		}
-		#expect(throws: TableConfigParsingError.invalidOption("z")) {
-			try parseTableConfig("z")
-		}
+		#expect(throws: TableConfigParsingError.invalidHeaderStyle("bogus")) { try parseTableConfig("Hbogus:") }
+		#expect(throws: TableConfigParsingError.invalidHeaderStyle(";1")) { try parseTableConfig("H;1:") }
+		#expect(throws: TableConfigParsingError.invalidOption("z")) { try parseTableConfig("z") }
 	}
 
 	@Test
 	func `table renders no header or separator by default, matching pre-existing behavior`() {
-		let objects: [JSON.Object] = [["name": .string("Slack")]]
-		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == "Slack")
+		let table = [JSON.Object([("name", .string("Slack"))])]
+			.table(
+				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
+				tableConfig: .default,
+			)
+		#expect(table == "Slack")
 	}
 
 	@Test
-	func `table renders a header row when configured, styled with SGR codes when given`() throws {
-		let objects: [JSON.Object] = [["name": .string("Slack")]]
-		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
-		// A lone column is always padded to the column's own width (matching
-		// every other row), so "Name" (width 4) gets 1 trailing space to match
-		// "Slack" (width 5).
-		#expect(
-			objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H"))
-				== "Name \nSlack",
-		)
-		#expect(
-			objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:"))
-				== "\u{1B}[1mName \u{1B}[0m\nSlack",
-		)
+	func `table renders a header row when configured`() throws {
+		let table = [JSON.Object([("name", .string("Slack"))])]
+			.table(
+				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
+				tableConfig: try parseTableConfig("H"),
+			)
+		#expect(table == "Name \nSlack")
+	}
+
+	@Test
+	func `table renders a header row styled with given SGR codes`() throws {
+		let table = [JSON.Object([("name", .string("Slack"))])]
+			.table(
+				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
+				tableConfig: try parseTableConfig("H1:"),
+			)
+		#expect(table == "\u{1B}[1mName \u{1B}[0m\nSlack")
 	}
 
 	@Test
 	func `table renders a blank separator line as an empty row, distinct from no separator at all`() throws {
-		let objects: [JSON.Object] = [["name": .string("Slack")]]
-		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("S")) == "Name \n\nSlack")
+		let table = [JSON.Object([("name", .string("Slack"))])]
+			.table(
+				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
+				tableConfig: try parseTableConfig("S"),
+			)
+		#expect(table == "Name \n\nSlack")
 	}
 
 	@Test
 	func `table renders an unbroken separator spanning the whole table width, truncating mid-pattern`() throws {
-		let objects: [JSON.Object] = [["name": .string("A"), "version": .string("1.0")]]
-		let fieldSpecs = [
-			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			FieldSpec(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-		]
+		let table = [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				tableConfig: try parseTableConfig("S-+:"),
+			)
 		// Total width: "Name" (4) + "  " (2) + "Version" (7) = 13; "-+" repeated & cut off mid-pair
-		#expect(
-			objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("S-+:"))
-				== "Name  Version\n-+-+-+-+-+-+-\nA     1.0",
-		)
+		#expect(table == "Name  Version\n-+-+-+-+-+-+-\nA     1.0")
 	}
 
 	@Test
 	func `table renders a broken separator as 1 independently-filled segment per column`() throws {
-		let objects: [JSON.Object] = [["name": .string("A"), "version": .string("1.0")]]
-		let fieldSpecs = [
-			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			FieldSpec(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-		]
-		#expect(
-			objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("S-+:b"))
-				== "Name  Version\n-+-+  -+-+-+-\nA     1.0",
-		)
+		let table = [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				tableConfig: try parseTableConfig("S-+:b"),
+			)
+		#expect(table == "Name  Version\n-+-+  -+-+-+-\nA     1.0")
 	}
 
 	@Test
 	func `table uses a custom column-spacing string`() throws {
-		let objects: [JSON.Object] = [["a": .string("1"), "b": .string("2")]]
-		let fieldSpecs = [
-			FieldSpec(name: "a", label: "a", format: .default(fieldName: "a"), sortSpec: nil),
-			FieldSpec(name: "b", label: "b", format: .default(fieldName: "b"), sortSpec: nil),
-		]
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("C....:")) == "1....2")
+		let table = [JSON.Object([("a", .string("1")), ("b", .string("2"))])]
+			.table(
+				fieldSpecs: [
+					.init(name: "a", label: "a", format: .default(fieldName: "a"), sortSpec: nil),
+					.init(name: "b", label: "b", format: .default(fieldName: "b"), sortSpec: nil),
+				],
+				tableConfig: try parseTableConfig("C....:"),
+			)
+		#expect(table == "1....2")
 	}
 }

@@ -115,14 +115,13 @@ extension BaseIncludesAllFieldsConfig {
 	/// plain text. Applied only if a command hasn't already customized `all`'s
 	/// `fieldOrder` (i.e., it's still `.inherited`).
 	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
-		guard fieldOrder == .inherited else {
-			return self
-		}
-		return .init(
-			fieldSpecs: fieldSpecs,
-			fieldOrder: .byLabel(.textDefault(outputFormat: outputFormat)),
-			itemSort: itemSort,
-		)
+		fieldOrder == .inherited
+			? .init(
+				fieldSpecs: fieldSpecs,
+				fieldOrder: .byLabel(.textDefault(outputFormat: outputFormat)),
+				itemSort: itemSort,
+			)
+			: self
 	}
 }
 
@@ -140,22 +139,21 @@ extension FieldsConfig {
 	/// persisted custom one): a user's own explicit label / format is respected
 	/// for every output format, including `.json`.
 	func defaultedForJSON(outputFormat: OutputFormat) -> Self {
-		guard outputFormat == .json else {
-			return self
-		}
-		return .init(
-			fieldSpecs: fieldSpecs.map { fieldSpec in
-				.init(
-					name: fieldSpec.name,
-					label: fieldSpec.name,
-					format: .default(fieldName: fieldSpec.name),
-					sortSpec: fieldSpec.sortSpec,
-					isSynthesized: fieldSpec.isSynthesized,
-					justification: fieldSpec.justification,
-				)
-			},
-			fieldOrder: fieldOrder,
-			itemSort: itemSort,
-		)
+		outputFormat == .json
+			? .init(
+				fieldSpecs: fieldSpecs.map { fieldSpec in
+					.init(
+						name: fieldSpec.name,
+						label: fieldSpec.name,
+						format: .default(fieldName: fieldSpec.name),
+						sortSpec: fieldSpec.sortSpec,
+						isSynthesized: fieldSpec.isSynthesized,
+						justification: fieldSpec.justification,
+					)
+				},
+				fieldOrder: fieldOrder,
+				itemSort: itemSort,
+			)
+			: self
 	}
 }

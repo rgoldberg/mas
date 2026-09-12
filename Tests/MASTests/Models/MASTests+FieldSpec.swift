@@ -124,39 +124,38 @@ private extension MASTests {
 
 	@Test
 	func `fetchFieldNames returns empty for an all-derived base`() throws {
-		#expect(try fetchFieldNames(for: "@all", standard: standardFixture, all: allFixture, outputFormat: .table(.default))
-			.isEmpty)
+		#expect(
+			try fetchFieldNames(for: "@all", standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+				.isEmpty,
+		)
 	}
 
 	@Test
 	func `fetchFieldNames unions base names with insert names`() throws {
-		let nameSet =
-			Set(try fetchFieldNames(
-				for: ".+extra",
-				standard: standardFixture,
-				all: allFixture,
-				outputFormat: .table(.default),
-			))
+		let nameSet = Set(
+			try fetchFieldNames(for: ".+extra", standard: standardFixture, all: allFixture, outputFormat: .table(.default)),
+		)
 		#expect(nameSet == ["adamID", "extra"])
 	}
 
 	@Test
 	func `fetchFieldNames for an absolute config is just its field names`() throws {
-		let nameSet =
-			Set(try fetchFieldNames(
+		let nameSet = Set(
+			try fetchFieldNames(
 				for: "adamID,bundleID",
 				standard: standardFixture,
 				all: allFixture,
 				outputFormat: .table(.default),
-			))
+			),
+		)
 		#expect(nameSet == ["adamID", "bundleID"])
 	}
 
 	@Test
 	func `defaultedForJSON resets a default config's labels & formats to bare defaults, only for JSON`() {
-		let curated = BaseIncludesAllFieldsConfig(fieldSpecs: [
-			.init(name: "fileSizeBytes", label: "Size", format: .parts([.text("custom")]), sortSpec: nil),
-		])
+		let curated = BaseIncludesAllFieldsConfig(
+			fieldSpecs: [.init(name: "fileSizeBytes", label: "Size", format: .parts([.text("custom")]), sortSpec: nil)],
+		)
 		let json = curated.defaultedForJSON(outputFormat: .json)
 		#expect(json.fieldSpecs[0].label == "fileSizeBytes")
 		#expect(json.fieldSpecs[0].format == .default(fieldName: "fileSizeBytes"))
@@ -200,28 +199,26 @@ private extension MASTests {
 
 	@Test
 	func `evaluates standard placeholders %e & %w as string-only, not structural, emptiness checks`() {
-		let emptyFormat = Format.parts(
-			[.placeholder(.standard(.isEmpty, negated: true, coerced: false, success: nil, failure: nil))],
-		)
-		let whitespaceFormat = Format.parts(
-			[.placeholder(.standard(.isWhitespace, negated: true, coerced: false, success: nil, failure: nil))],
-		)
+		let emptyFormat =
+			Format.parts([.placeholder(.standard(.isEmpty, negated: true, coerced: false, success: nil, failure: nil))])
+		let whitespaceFormat =
+			Format.parts([.placeholder(.standard(.isWhitespace, negated: true, coerced: false, success: nil, failure: nil))])
 		// negated %e / %w default to the verbatim field value when NOT matched,
 		// so an empty array / object (structurally empty, but not an empty
 		// string) round-trips unchanged, proving these placeholders test JSON
 		// string values (or null), not arrays / objects.
-		#expect(emptyFormat.rendered(value: .array(.init([])), label: "L", name: "n").stringValue == "[]")
-		#expect(emptyFormat.rendered(value: .object(.init([])), label: "L", name: "n").stringValue == "{}")
-		#expect(whitespaceFormat.rendered(value: .array(.init([])), label: "L", name: "n").stringValue == "[]")
-		#expect(whitespaceFormat.rendered(value: .object(.init([])), label: "L", name: "n").stringValue == "{}")
+		#expect(emptyFormat.rendered(value: .array(.init(.init())), label: "L", name: "n").stringValue == "[]")
+		#expect(emptyFormat.rendered(value: .object(.init(.init())), label: "L", name: "n").stringValue == "{}")
+		#expect(whitespaceFormat.rendered(value: .array(.init(.init())), label: "L", name: "n").stringValue == "[]")
+		#expect(whitespaceFormat.rendered(value: .object(.init(.init())), label: "L", name: "n").stringValue == "{}")
 		#expect(emptyFormat.rendered(value: .string(""), label: "L", name: "n").stringValue?.isEmpty == true)
 		#expect(whitespaceFormat.rendered(value: .string(" "), label: "L", name: "n").stringValue?.isEmpty == true)
 	}
 
 	@Test
 	func `evaluates standard placeholder %u for null & non-null values`() {
-		let placeholder = Placeholder.standard(.isNull, negated: false, coerced: false, success: nil, failure: nil)
-		let format = Format.parts([.placeholder(placeholder)])
+		let format =
+			Format.parts([.placeholder(.standard(.isNull, negated: false, coerced: false, success: nil, failure: nil))])
 		#expect(format.rendered(value: nil, label: "Label", name: "name").stringValue?.isEmpty == true)
 		#expect(format.rendered(value: .string("x"), label: "Label", name: "name").stringValue?.isEmpty == true)
 		#expect(
@@ -392,20 +389,22 @@ private extension MASTests {
 
 	@Test
 	func `evaluates %d as ISO-8601 datetime by default, in the local time zone`() throws {
-		let format = Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
 		let rendered = try #require(
-			format.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n").stringValue,
+			Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
+				.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n")
+				.stringValue,
 		)
 		// Exact text depends on the test machine's local time zone; check it
 		// round-trips to the same instant instead
-		#expect(try Date(rendered, strategy: .iso8601) == Date("2020-03-18T17:39:23Z", strategy: .iso8601))
+		#expect(try Date(rendered, strategy: .iso8601) == .init("2020-03-18T17:39:23Z", strategy: .iso8601))
 	}
 
 	@Test
 	func `evaluates %D dateOnly as just the date`() {
-		let format =
-			Format.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))])
-		let rendered = format.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n").stringValue
+		let rendered = Format
+			.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))])
+			.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n")
+			.stringValue
 		#expect(rendered?.count == "yyyy-MM-dd".count) // Exact day depends on the test machine's local time zone
 	}
 
@@ -419,22 +418,14 @@ private extension MASTests {
 
 	@Test
 	func `a custom input-date-format is a parse error, not a silent no-op`() {
-		#expect(throws: ParsingError.unsupportedDateInputFormat) {
-			try parseFieldSpecs("adamID:%D.iso_++")
-		}
-		#expect(throws: ParsingError.unsupportedDateInputFormat) {
-			try parseFieldSpecs("adamID:%D.iso,.dateOnly_++")
-		}
+		#expect(throws: ParsingError.unsupportedDateInputFormat) { try parseFieldSpecs("adamID:%D.iso_++") }
+		#expect(throws: ParsingError.unsupportedDateInputFormat) { try parseFieldSpecs("adamID:%D.iso,.dateOnly_++") }
 	}
 
 	@Test
 	func `a named or literal output-date-format is a parse error, not a silent fallback to the default`() {
-		#expect(throws: ParsingError.unsupportedDateOutputFormat) {
-			try parseFieldSpecs("adamID:%D:hidden++")
-		}
-		#expect(throws: ParsingError.unsupportedDateOutputFormat) {
-			try parseFieldSpecs("adamID:%DliteralPattern++")
-		}
+		#expect(throws: ParsingError.unsupportedDateOutputFormat) { try parseFieldSpecs("adamID:%D:hidden++") }
+		#expect(throws: ParsingError.unsupportedDateOutputFormat) { try parseFieldSpecs("adamID:%DliteralPattern++") }
 	}
 
 	@Test
@@ -516,16 +507,18 @@ private extension MASTests {
 
 	@Test
 	func `%.n's success format's number-transform-pipeline applies to a coerced string`() {
-		let format = Format.parts([
-			.placeholder(
-				.number(
-					negated: false,
-					coerced: true,
-					success: .reference(.init(namedFormat: nil, transforms: [.absoluteValue])),
-					failure: nil,
+		let format = Format.parts(
+			[
+				.placeholder(
+					.number(
+						negated: false,
+						coerced: true,
+						success: .reference(.init(namedFormat: nil, transforms: [.absoluteValue])),
+						failure: nil,
+					),
 				),
-			),
-		])
+			],
+		)
 		#expect(format.rendered(value: .string("-5"), label: "L", name: "n").stringValue == "5")
 	}
 
@@ -551,9 +544,7 @@ private extension MASTests {
 
 	@Test
 	func `coercion on a placeholder that doesn't support it is a parse error`() {
-		#expect(throws: ParsingError.coercionNotSupported("v")) {
-			try parseFieldSpecs(".adamID:%.v")
-		}
+		#expect(throws: ParsingError.coercionNotSupported("v")) { try parseFieldSpecs(".adamID:%.v") }
 	}
 
 	@Test
@@ -567,8 +558,8 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a top-level fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`(
-	) throws {
+	func `a top-level fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`()
+	throws {
 		// %.N is fallible (conditional on the value), so a fixed label per
 		// branch is meaningful, unlike a top-level template
 		let fallible = try #require(parseFieldSpecs("adamID:%.NNumber+NotANumber+").first).format
@@ -576,12 +567,8 @@ private extension MASTests {
 		#expect(fallible.rendered(value: .string("nope"), label: "L", name: "n").stringValue == "NotANumber")
 		// %V / %L are infallible (their own success always applies), so a
 		// placeholder-less success is just as constant as a bare template
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
-			try parseFieldSpecs("adamID:%Vconstant+")
-		}
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
-			try parseFieldSpecs("adamID:%Lconstant+")
-		}
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:%Vconstant+") }
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:%Lconstant+") }
 	}
 
 	@Test
@@ -598,12 +585,8 @@ private extension MASTests {
 
 	@Test
 	func `a single-branch %b, fallible or not, is a parse error, since it's just an ordinary placeholder`() {
-		#expect(throws: ParsingError.singleBranch) {
-			try parseFieldSpecs("adamID:%bNnum++")
-		}
-		#expect(throws: ParsingError.singleBranch) {
-			try parseFieldSpecs("adamID:%bVconstant++")
-		}
+		#expect(throws: ParsingError.singleBranch) { try parseFieldSpecs("adamID:%bNnum++") }
+		#expect(throws: ParsingError.singleBranch) { try parseFieldSpecs("adamID:%bVconstant++") }
 	}
 
 	@Test
@@ -637,23 +620,17 @@ private extension MASTests {
 		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
 		// Reversed order: `rightJustify` isn't a string transform, so it's a parse
 		// error once it's no longer in leading position.
-		#expect(throws: ParsingError.self) {
-			try parseFieldSpecs("adamID:.uppercase.rightJustify")
-		}
+		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:.uppercase.rightJustify") }
 	}
 
 	@Test
-	func `a pipeline terminator lets a justify transform precede template text, which still needs a placeholder`(
-	) throws {
+	func `a pipeline terminator lets a justify transform precede template text, which still needs a placeholder`()
+	throws {
 		// A single stray ':' is a parse error: justify never ends with a closed
 		// argument fence (it never takes arguments at all), so it's never exempt
 		// from needing the full doubled pipeline terminator
-		#expect(throws: ParsingError.incompletePipelineTerminator) {
-			try parseFieldSpecs("adamID:.rightJustify: MB")
-		}
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
-			try parseFieldSpecs("adamID:.rightJustify:: MB")
-		}
+		#expect(throws: ParsingError.incompletePipelineTerminator) { try parseFieldSpecs("adamID:.rightJustify: MB") }
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.rightJustify:: MB") }
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify::%v MB").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == "7 MB")
@@ -670,14 +647,15 @@ private extension MASTests {
 	func `infers a value-transform-pipeline's kind from its 1st transform`() throws {
 		let numberFormat = try #require(parseFieldSpecs("adamID:.round.absoluteValue").first).format
 		#expect(numberFormat.rendered(value: .number(-5.6), label: "L", name: "n").stringValue == "6")
-		let dateFormat = try #require(parseFieldSpecs("adamID:.dateOnly").first).format
-		let rendered = dateFormat.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n").stringValue
+		let rendered = try #require(parseFieldSpecs("adamID:.dateOnly").first)
+			.format
+			.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n")
+			.stringValue
 		#expect(rendered?.count == "yyyy-MM-dd".count) // Exact day depends on the test machine's local time zone
 	}
 
 	@Test
-	func `an uncoerced value-transform-pipeline's number kind requires a real JSON number, blanking on failure`(
-	) throws {
+	func `an uncoerced value-transform-pipeline's number kind requires a real JSON number, blanking on failure`() throws {
 		let numberFormat = try #require(parseFieldSpecs("adamID:.round").first).format
 		#expect(numberFormat.rendered(value: .number(5.6), label: "L", name: "n").stringValue == "6")
 		#expect(numberFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue?.isEmpty == true)
@@ -685,22 +663,18 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a doubled leading '.' coerces a value-transform-pipeline's number kind, accepting a numeric string too`(
-	) throws {
+	func `a doubled leading '.' coerces a value-transform-pipeline's number kind, accepting a numeric string too`()
+	throws {
 		let coercedFormat = try #require(parseFieldSpecs("adamID:..round").first).format
 		#expect(coercedFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue == "6")
 		#expect(coercedFormat.rendered(value: .string("not a number"), label: "L", name: "n").stringValue?.isEmpty == true)
-		#expect(throws: ParsingError.coercionNotApplicable(kind: "string")) {
-			try parseFieldSpecs("adamID:..uppercase")
-		}
-		#expect(throws: ParsingError.coercionNotApplicable(kind: "date")) {
-			try parseFieldSpecs("adamID:..dateOnly")
-		}
+		#expect(throws: ParsingError.coercionNotApplicable(kind: "string")) { try parseFieldSpecs("adamID:..uppercase") }
+		#expect(throws: ParsingError.coercionNotApplicable(kind: "date")) { try parseFieldSpecs("adamID:..dateOnly") }
 	}
 
 	@Test
-	func `a value-transform-coercion is only meaningful on the pipeline's 1st transform, but is harmless elsewhere`(
-	) throws {
+	func `a value-transform-coercion is only meaningful on the pipeline's 1st transform, but is harmless elsewhere`()
+	throws {
 		// A later transform's own marker has no effect: uncoerced overall, since
 		// the 1st transform (`round`) wasn't marked
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.round..absoluteValue").first)
@@ -721,14 +695,12 @@ private extension MASTests {
 		// A template that never references the pipeline's output (no `%v`) would
 		// render identically for every value, so it's a parse error (see the
 		// next test for the same pipeline terminator, but with a placeholder)
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
-			try parseFieldSpecs("adamID:.round.absoluteValue:: MB")
-		}
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.round.absoluteValue:: MB") }
 	}
 
 	@Test
-	func `a value-transform-pipeline's template renders %v against the pipeline's own output, never doubling it`(
-	) throws {
+	func `a value-transform-pipeline's template renders %v against the pipeline's own output, never doubling it`()
+	throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue::%v MB").first)
 		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == "6 MB")
 	}
@@ -740,8 +712,8 @@ private extension MASTests {
 	}
 
 	@Test
-	func `extra pipeline terminators after a fenced last transform are literal template text, not a 2nd terminator`(
-	) throws {
+	func `extra pipeline terminators after a fenced last transform are literal template text, not a 2nd terminator`()
+	throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:::%v").first)
 		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "::1.234.567")
 	}
@@ -754,14 +726,12 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a transform call right after a pipeline terminator is just literal template text, not specially banned`(
-	) throws {
+	func `a transform call right after a pipeline terminator is just literal template text, not specially banned`()
+	throws {
 		// No placeholder in the resulting template (".absoluteValue" alone): an
 		// error, but from the general "a template needs a placeholder" rule, not
 		// from a dedicated ban on a leading '.'
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
-			try parseFieldSpecs("adamID:.round::.absoluteValue")
-		}
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.round::.absoluteValue") }
 		// With a placeholder present, it parses fine: literal ".absoluteValue",
 		// then %v reading round's own transformed output
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.round::.absoluteValue%v").first)
@@ -777,9 +747,7 @@ private extension MASTests {
 
 	@Test
 	func `a justify transform has no effect inside a placeholder's own success format`() throws {
-		#expect(throws: ParsingError.self) {
-			try parseFieldSpecs("adamID:%V.rightJustify+")
-		}
+		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:%V.rightJustify+") }
 	}
 
 	@Test
@@ -792,25 +760,15 @@ private extension MASTests {
 		// No separator between "hidden" & "%v": the whole run is 1 attempted named
 		// format name, "hidden%v", which doesn't exist — not `hidden` followed by a
 		// `%v` placeholder.
-		#expect(throws: ParsingError.unknownNamedFormat("hidden%v")) {
-			try parseFieldSpecs("adamID::hidden%v")
-		}
+		#expect(throws: ParsingError.unknownNamedFormat("hidden%v")) { try parseFieldSpecs("adamID::hidden%v") }
 	}
 
 	@Test
 	func `hidden must be the entire format-modifier: nothing may follow it, even with a separator`() {
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
-			try parseFieldSpecs("adamID::hidden.rightJustify")
-		}
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
-			try parseFieldSpecs("adamID::hidden.uppercase")
-		}
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
-			try parseFieldSpecs("adamID::hidden:%v")
-		}
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) {
-			try parseFieldSpecs("adamID::hidden:")
-		}
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden.rightJustify") }
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden.uppercase") }
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden:%v") }
+		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden:") }
 	}
 
 	@Test
@@ -827,54 +785,54 @@ private extension MASTests {
 
 	@Test
 	func `table right-justifies a field per its field spec's justification; a left-justified last column isn't padded`() {
-		let objects: [JSON.Object] = [
-			["adamID": .number(7), "name": .string("Slack")],
-			["adamID": .number(1_234_567), "name": .string("A")],
+		let table = [
+			JSON.Object([("adamID", .number(7)), ("name", .string("Slack"))]),
+			.init([("adamID", .number(1_234_567)), ("name", .string("A"))]),
 		]
-		let fieldSpecs = [
-			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
-			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-		]
-		let expected = [
-			.init(repeating: " ", count: 6) + "7" + "  " + "Slack",
-			"1234567" + "  " + "A",
-		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
+			.table(
+				fieldSpecs: [
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+				],
+				tableConfig: .default,
+			)
+		let expected = "      7  Slack\n1234567  A"
+		#expect(table == expected)
 	}
 
 	@Test
 	func `table pads even a right-justified last column`() {
-		let objects: [JSON.Object] = [
-			["name": .string("A"), "adamID": .number(1_234_567)],
-			["name": .string("Slack"), "adamID": .number(7)],
+		let table = [
+			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567))]),
+			.init([("name", .string("Slack")), ("adamID", .number(7))]),
 		]
-		let fieldSpecs = [
-			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
-		]
-		let expected = [
-			"A" + .init(repeating: " ", count: 4 + 2) + "1234567",
-			"Slack" + .init(repeating: " ", count: 0 + 2 + 6) + "7",
-		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+				],
+				tableConfig: .default,
+			)
+		let expected = "A      1234567\nSlack        7"
+		#expect(table == expected)
 	}
 
 	@Test
 	func `table still gaps a right-justified middle column from the column after it`() {
-		let objects: [JSON.Object] = [
-			["name": .string("A"), "adamID": .number(1_234_567), "version": .string("1.0")],
-			["name": .string("Slack"), "adamID": .number(7), "version": .string("2.0")],
+		let table = [
+			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567)), ("version", .string("1.0"))]),
+			.init([("name", .string("Slack")), ("adamID", .number(7)), ("version", .string("2.0"))]),
 		]
-		let fieldSpecs = [
-			FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			FieldSpec(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
-			FieldSpec(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-		]
-		let expected = [
-			"A" + .init(repeating: " ", count: 4 + 2) + "1234567" + .init(repeating: " ", count: 2) + "1.0",
-			"Slack" + .init(repeating: " ", count: 2 + 6) + "7" + .init(repeating: " ", count: 2) + "2.0",
-		].joined(separator: "\n")
-		#expect(objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == expected)
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				tableConfig: .default,
+			)
+		let expected = "A      1234567  1.0\nSlack        7  2.0"
+		#expect(table == expected)
 	}
 }
 
@@ -886,10 +844,8 @@ private func isJSONNumber(_ node: JSON.Node) -> Bool {
 	}
 }
 
-private func underscoreBoundaries(
-	_ whitespacePlacement: SortSpec.WhitespacePlacement,
-	collapseContiguous: Bool = false,
-) -> SortSpec.Boundaries {
+private func underscoreBoundaries(_ whitespacePlacement: SortSpec.WhitespacePlacement, collapseContiguous: Bool = false)
+-> SortSpec.Boundaries {
 	.init(
 		groups: [.init(boundaries: [.character("_")])],
 		collapseContiguous: collapseContiguous,
@@ -913,6 +869,11 @@ private func numericSortSpec(
 	)
 }
 
+private func parseFieldSpecs(_ value: String) throws -> [FieldSpec] {
+	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+		.fieldSpecs
+}
+
 private let adamIDFieldSpec = FieldSpec(
 	name: "adamID",
 	label: "adamID",
@@ -933,8 +894,3 @@ private let bundleIDFieldSpec =
 
 private let standardFixture = SelectedFieldsConfig(fieldSpecs: [adamIDFieldSpec])
 private let allFixture = BaseIncludesAllFieldsConfig(fieldSpecs: [adamIDFieldSpec, bundleIDFieldSpec])
-
-private func parseFieldSpecs(_ value: String) throws -> [FieldSpec] {
-	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: .table(.default))
-		.fieldSpecs
-}
