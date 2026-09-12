@@ -852,23 +852,22 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 /// already-consumed `<transform-call-prefix>`: its `<group-arguments>` /
 /// `<scale-arguments>` fence, if present, is included verbatim (exactly as
 /// `Transform.parsed(name:kind:)` expects). Unlike a bare `parseEscapedText`
-/// scan, `<chain-terminator>` (`:`) always ends the name UNLESS the name
-/// scanned so far is `group` / `scale` & is immediately followed by `:` (that
-/// transform's own argument fence) — only then does scanning continue through
-/// to the fence's own closing `:`. This keeps a bare (argument-less)
-/// transform's name from swallowing a subsequent `<pipeline-terminator>`
-/// (`::`) or stray `<chain-terminator>`, both only meaningful to `<format>`'s
-/// own top-level `<value-transform-pipeline>` (every other
-/// `<*-transform-pipeline>` site's `terminatorSet` never lets a
-/// `<chain-terminator>` reach this function in the first place).
+/// scan, `:` always ends the name UNLESS the name scanned so far is `group` /
+/// `scale` & is immediately followed by `:` (that transform's own argument
+/// fence) — only then does scanning continue through to the fence's own
+/// closing `:`. This keeps a bare (argument-less) transform's name from
+/// swallowing a subsequent `<pipeline-terminator>` (`::`) or stray `:`, both
+/// only meaningful to `<format>`'s own top-level `<value-transform-pipeline>`
+/// (every other `<*-transform-pipeline>` site's `terminatorSet` never lets a
+/// `:` reach this function in the first place).
 func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
-	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, chainTerminator]))
+	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, colon]))
 	var afterOpenFence = input
-	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == chainTerminator else {
+	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == colon else {
 		return name
 	}
 	afterOpenFence.removeFirst() // the candidate fence's opening ':'
-	guard afterOpenFence.first != chainTerminator else {
+	guard afterOpenFence.first != colon else {
 		// An immediately-empty fence is never valid syntax anyway (`group` /
 		// `scale` both require nonempty arguments), so this 2nd ':' can't be a
 		// fence's own closing 1: it's `<format>`'s `<pipeline-terminator>`
@@ -877,8 +876,8 @@ func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>)
 		return name
 	}
 	input = afterOpenFence
-	let arguments = try parseEscapedText(&input, terminatorSet: Set([chainTerminator]))
-	guard input.first == chainTerminator else {
+	let arguments = try parseEscapedText(&input, terminatorSet: Set([colon]))
+	guard input.first == colon else {
 		throw .missingEndFence
 	}
 	input.removeFirst() // the fence's closing ':'

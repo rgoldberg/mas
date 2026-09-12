@@ -643,12 +643,18 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a chain terminator lets a justify transform precede template text, which still needs a placeholder`(
+	func `a pipeline terminator lets a justify transform precede template text, which still needs a placeholder`(
 	) throws {
-		#expect(throws: ParsingError.templateLacksPlaceholder) {
+		// A single stray ':' is a parse error: justify never ends with a closed
+		// argument fence (it never takes arguments at all), so it's never exempt
+		// from needing the full doubled pipeline terminator
+		#expect(throws: ParsingError.incompletePipelineTerminator) {
 			try parseFieldSpecs("adamID:.rightJustify: MB")
 		}
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify:%v MB").first)
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:.rightJustify:: MB")
+		}
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify::%v MB").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == "7 MB")
 	}
