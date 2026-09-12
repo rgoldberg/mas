@@ -186,12 +186,14 @@ non-terminal-number-transform  = <absolute-value> | <round> | <scale>
 terminal-number-transform      = <group>
 date-transform                 = <iso> | <date-only> | <local-time-zone>
 
-(* The only 2 `<value-transform>`s with a `:`-fenced argument list of their
-   own; see "Pipeline Terminator" below. `scale`'s is mandatory, so it always
-   closes 1; `group`'s is optional, so it closes 1 only when given. *)
-parameterized-value-transform = <group> | <scale>
-(* Every other `<value-transform>`: never `:`-fenced, so never closes 1. *)
-unparameterized-value-transform = <string-transform> | <absolute-value> | <round> | <date-transform>
+(* `<scale>` always closes a `:`-fenced argument list of its own; `<parameter-
+   ized-group>` does too, since it's the alternative of `<group>` that
+   requires 1; see "Pipeline Terminator" below. *)
+parameterized-value-transform = <parameterized-group> | <scale>
+(* Every other `<value-transform>`: never closes a `:`-fenced argument list
+   of its own; `<unparameterized-group>` is `<group>`'s other alternative,
+   the 1 with no arguments at all. *)
+unparameterized-value-transform = <string-transform> | <absolute-value> | <round> | <date-transform> | <unparameterized-group>
 
 capitalize      = "initialUppercase"
 lowercase       = "lowercase"
@@ -202,7 +204,10 @@ uppercase       = "uppercase"
 absolute-value = "absoluteValue"
 round          = "round"
 scale          = "scale" <scale-arguments>
-group          = "group" [ <group-arguments> ]
+
+group                 = <parameterized-group> | <unparameterized-group>
+parameterized-group   = "group" <group-arguments>
+unparameterized-group = "group"
 
 iso             = "iso"
 date-only       = "dateOnly"
