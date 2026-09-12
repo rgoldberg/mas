@@ -506,7 +506,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `%cn coerces a numeric JSON string into a number, unlike plain %n`() {
+	func `%.n coerces a numeric JSON string into a number, unlike plain %n`() {
 		let coerced = Format.parts([.placeholder(.number(negated: false, coerced: true, success: nil, failure: nil))])
 		#expect(coerced.rendered(value: .string("42"), label: "L", name: "n").stringValue == "42")
 		#expect(coerced.rendered(value: .string("not a number"), label: "L", name: "n").stringValue?.isEmpty == true)
@@ -515,7 +515,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `%cn's success format's number-transform-pipeline applies to a coerced string`() {
+	func `%.n's success format's number-transform-pipeline applies to a coerced string`() {
 		let format = Format.parts([
 			.placeholder(
 				.number(
@@ -530,7 +530,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `%co, %ct & %cf coerce string "true" / "false" into booleans, unlike their uncoerced forms`() {
+	func `%.o, %.t & %.f coerce string "true" / "false" into booleans, unlike their uncoerced forms`() {
 		let coercedTruePlaceholder = Placeholder.standard(
 			.isTrue,
 			negated: false,
@@ -552,7 +552,7 @@ private extension MASTests {
 	@Test
 	func `coercion on a placeholder that doesn't support it is a parse error`() {
 		#expect(throws: ParsingError.coercionNotSupported("v")) {
-			try parseFieldSpecs(".adamID:%cv")
+			try parseFieldSpecs(".adamID:%.v")
 		}
 	}
 
@@ -561,7 +561,7 @@ private extension MASTests {
 		// Regression: `StandardKind`'s raw values are all lowercase, but a
 		// verbose placeholder's own letter is uppercase (e.g., 'T' for isTrue),
 		// so looking it up case-sensitively always failed
-		let fieldSpec = try #require(parseFieldSpecs("adamID:%cTYes+No+").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:%.TYes+No+").first)
 		#expect(fieldSpec.format.rendered(value: .string("true"), label: "L", name: "n").stringValue == "Yes")
 		#expect(fieldSpec.format.rendered(value: .string("false"), label: "L", name: "n").stringValue == "No")
 	}
@@ -569,9 +569,9 @@ private extension MASTests {
 	@Test
 	func `a top-level fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`(
 	) throws {
-		// %cN is fallible (conditional on the value), so a fixed label per
+		// %.N is fallible (conditional on the value), so a fixed label per
 		// branch is meaningful, unlike a top-level template
-		let fallible = try #require(parseFieldSpecs("adamID:%cNNumber+NotANumber+").first).format
+		let fallible = try #require(parseFieldSpecs("adamID:%.NNumber+NotANumber+").first).format
 		#expect(fallible.rendered(value: .string("42"), label: "L", name: "n").stringValue == "Number")
 		#expect(fallible.rendered(value: .string("nope"), label: "L", name: "n").stringValue == "NotANumber")
 		// %V / %L are infallible (their own success always applies), so a
@@ -611,7 +611,7 @@ private extension MASTests {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
 		#expect(fieldSpec.justification == .end)
 		// Stripped from the format: a real transform would force stringification
-		// (see `%cn coerces...`), but a bare justify-only pipeline leaves a JSON
+		// (see `%.n coerces...`), but a bare justify-only pipeline leaves a JSON
 		// number passed through unchanged.
 		#expect(isJSONNumber(fieldSpec.format.rendered(value: .number(42), label: "L", name: "n")))
 	}
@@ -676,11 +676,42 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a value-transform-pipeline's number / date kind coerces its value, blanking on failure`() throws {
+	func `an uncoerced value-transform-pipeline's number kind requires a real JSON number, blanking on failure`(
+	) throws {
 		let numberFormat = try #require(parseFieldSpecs("adamID:.round").first).format
-		#expect(numberFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue == "6")
-		#expect(numberFormat.rendered(value: .string("not a number"), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(numberFormat.rendered(value: .number(5.6), label: "L", name: "n").stringValue == "6")
+		#expect(numberFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue?.isEmpty == true)
 		#expect(numberFormat.rendered(value: nil, label: "L", name: "n").stringValue?.isEmpty == true)
+	}
+
+	@Test
+	func `a doubled leading '.' coerces a value-transform-pipeline's number kind, accepting a numeric string too`(
+	) throws {
+		let coercedFormat = try #require(parseFieldSpecs("adamID:..round").first).format
+		#expect(coercedFormat.rendered(value: .string("5.6"), label: "L", name: "n").stringValue == "6")
+		#expect(coercedFormat.rendered(value: .string("not a number"), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(throws: ParsingError.coercionNotApplicable(kind: "string")) {
+			try parseFieldSpecs("adamID:..uppercase")
+		}
+		#expect(throws: ParsingError.coercionNotApplicable(kind: "date")) {
+			try parseFieldSpecs("adamID:..dateOnly")
+		}
+	}
+
+	@Test
+	func `a value-transform-coercion is only meaningful on the pipeline's 1st transform, but is harmless elsewhere`(
+	) throws {
+		// A later transform's own marker has no effect: uncoerced overall, since
+		// the 1st transform (`round`) wasn't marked
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round..absoluteValue").first)
+		#expect(fieldSpec.format.rendered(value: .number(-5.6), label: "L", name: "n").stringValue == "6")
+		#expect(fieldSpec.format.rendered(value: .string("-5.6"), label: "L", name: "n").stringValue?.isEmpty == true)
+		// Likewise inside a placeholder's own sub-format
+		#expect(try parseFieldSpecs("adamID:%N..round++").count == 1)
+	}
+
+	@Test
+	func `a value-transform-pipeline's date kind always parses permissively, blanking on failure`() throws {
 		let dateFormat = try #require(parseFieldSpecs("adamID:.dateOnly").first).format
 		#expect(dateFormat.rendered(value: .string("not a date"), label: "L", name: "n").stringValue?.isEmpty == true)
 	}

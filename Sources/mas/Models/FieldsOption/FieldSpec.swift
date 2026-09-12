@@ -53,6 +53,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 // MARK: Errors
 
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	case coercionNotApplicable(kind: String)
 	case coercionNotSupported(Character)
 	case danglingEscape
 	case hiddenFormatFollowedByContent
@@ -77,8 +78,13 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 
 	var description: String {
 		switch self {
+		case let .coercionNotApplicable(kind):
+			"""
+			Coercion (a doubled '.') isn't applicable to \(kind)-kind value transforms: a string value never \
+			needs coercion, & a date value is already parsed permissively (string or numeric) regardless
+			"""
 		case let .coercionNotSupported(letter):
-			"Coercion ('c') isn't supported for placeholder letter: \(letter)"
+			"Coercion ('.') isn't supported for placeholder letter: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
 		case .hiddenFormatFollowedByContent:
@@ -834,9 +840,23 @@ private func parseValueTransformPipelineThenTemplate(
 ) throws(ParsingError) -> Format {
 	var peek = input
 	peek.removeFirst() // '.'
+	var coerced = false
+	if peek.first == transformCallPrefix {
+		coerced = true
+		peek.removeFirst() // the coercion marker's own '.'
+	}
 	let firstName = try parseTransformName(&peek, terminatorSet: terminatorSet)
 	guard let kind = try TransformKind.of(transformName: firstName) else {
 		throw .invalidTransform(name: firstName, expectedKind: "value")
+	}
+	if coerced {
+		guard kind == .number else {
+			throw .coercionNotApplicable(kind: kind.rawValue)
+		}
+		// Drop just the coercion marker's own '.', leaving a single leading
+		// `<transform-call-prefix>` for `FormatReferenceParser.parse` below,
+		// exactly as it already expects for every other transform pipeline.
+		input.remove(at: input.index(after: input.startIndex))
 	}
 	let beforePipeline = input
 	guard let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) else {
@@ -850,7 +870,7 @@ private func parseValueTransformPipelineThenTemplate(
 		terminatorSet: terminatorSet,
 		endedWithClosedArgumentFence: endedWithClosedArgumentFence,
 	)
-	return .valuePipeline(finalReference, kind: kind, template: template)
+	return .valuePipeline(finalReference, kind: kind, coerced: coerced, template: template)
 }
 
 private extension Justification {

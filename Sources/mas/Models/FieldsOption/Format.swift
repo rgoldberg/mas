@@ -20,8 +20,10 @@ enum Format: Equatable {
 	/// PipelineThenTemplate(_:namedFormat:terminatorSet:)`), optionally followed
 	/// by a `<pipeline-terminator>`-separated template: unlike `.reference`
 	/// (used inside a placeholder's own sub-format, where the base value's
-	/// `stringValue` never fails to exist), `.number` / `.date` `kind`s first
-	/// coerce the field's value, mimicking `<placeholder-coercion>` — & mimicking
+	/// `stringValue` never fails to exist), `.number` `kind` first coerces the
+	/// field's value iff `coerced` (a doubled leading `.` on the pipeline's own
+	/// 1st `<transform>`; never valid for `.string` / `.date` `kind`, so always
+	/// `false` for either), mimicking `<placeholder-coercion>` — & mimicking
 	/// unhandled placeholder failure (blank) if that coercion fails. `template`
 	/// empty means no `<pipeline-terminator>` / template followed; non-empty,
 	/// `template` renders against the pipeline's OWN output, not the field's
@@ -30,7 +32,7 @@ enum Format: Equatable {
 	/// template with no placeholder at all (e.g., a literal unit suffix alone)
 	/// simply doesn't include the transformed value at all; write `%v` to
 	/// include it.
-	case valuePipeline(FormatReference, kind: TransformKind, template: [FormatPart])
+	case valuePipeline(FormatReference, kind: TransformKind, coerced: Bool, template: [FormatPart])
 
 	/// The standard default: `%v`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
@@ -64,8 +66,8 @@ extension Format: CustomStringConvertible { // swiftlint:disable:this file_types
 			"parts(\(parts))"
 		case let .reference(reference):
 			"reference(\(reference))"
-		case let .valuePipeline(reference, kind, template):
-			"valuePipeline(\(reference), kind: \(kind), template: \(template))"
+		case let .valuePipeline(reference, kind, coerced, template):
+			"valuePipeline(\(reference), kind: \(kind), coerced: \(coerced), template: \(template))"
 		}
 	}
 }
@@ -89,8 +91,8 @@ extension Format { // swiftlint:disable:this file_types_order
 			}
 		case let .reference(reference):
 			reference.rendered(value: value)
-		case let .valuePipeline(reference, kind, template):
-			if let pipelineString = renderedValuePipeline(reference, kind: kind, value: value) {
+		case let .valuePipeline(reference, kind, coerced, template):
+			if let pipelineString = renderedValuePipeline(reference, kind: kind, coerced: coerced, value: value) {
 				// A trailing `<template>` renders against the pipeline's own output,
 				// not the field's original value: e.g., `%v` inside it means "the
 				// pipeline's result", not "the field's raw value" (see `Format
@@ -126,16 +128,24 @@ private func renderedParts(_ parts: [FormatPart], value: JSON.Node?, label: Stri
 	return result
 }
 
-/// `Format.valuePipeline`'s own reference: `nil` iff coercing `value` to
-/// `kind` fails (`.string` never fails: `stringValue` always exists, `nil`
-/// becoming `""`). `reference.namedFormat` is ignored, same as
-/// `FormatReference.rendered(value:)` below (see its own doc comment).
-private func renderedValuePipeline(_ reference: FormatReference, kind: TransformKind, value: JSON.Node?) -> String? {
+/// `Format.valuePipeline`'s own reference: `nil` iff coercing (`.number`
+/// `kind` only, & only if `coerced`) `value` to `kind` fails (`.string` never
+/// fails: `stringValue` always exists, `nil` becoming `""`; `.date` always
+/// parses permissively, so `coerced` is always `false` there — see
+/// `Format.valuePipeline`'s own doc comment). `reference.namedFormat` is
+/// ignored, same as `FormatReference.rendered(value:)` below (see its own
+/// doc comment).
+private func renderedValuePipeline(
+	_ reference: FormatReference,
+	kind: TransformKind,
+	coerced: Bool,
+	value: JSON.Node?,
+) -> String? {
 	switch kind {
 	case .string:
 		reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
 	case .number:
-		isNumber(value, coerced: true)
+		isNumber(value, coerced: coerced)
 			? reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
 			: nil
 	case .date:
@@ -490,12 +500,12 @@ indirect enum Placeholder: Equatable { // swiftlint:disable:this one_declaration
 	/// label.
 	case label(negated: Bool, success: Format?)
 	/// `%u` / `%U` / `%e` / `%E` / `%w` / `%W` / `%o` / `%O` / `%t` / `%T` / `%f`
-	/// / `%F` / `%s` / `%S`, each optionally negated; `coerced` (`%co` / `%ct` /
-	/// `%cf`, & verbose / negated variants) is valid only for `.isBoolean` /
+	/// / `%F` / `%s` / `%S`, each optionally negated; `coerced` (`%.o` / `%.t` /
+	/// `%.f`, & verbose / negated variants) is valid only for `.isBoolean` /
 	/// `.isTrue` / `.isFalse`, enforced at parse time.
 	// swiftlint:disable:next enum_case_associated_values_count
 	case standard(StandardKind, negated: Bool, coerced: Bool, success: Format?, failure: Format?)
-	/// `%n` / `%N` / `%-n` / `%-N` / `%cn` / `%cN` / etc.
+	/// `%n` / `%N` / `%-n` / `%-N` / `%.n` / `%.N` / etc.
 	case number(negated: Bool, coerced: Bool, success: Format?, failure: Format?)
 	/// `%d` / `%D` / `%-d` / `%-D`.
 	case date(negated: Bool, success: DateSpec?, failure: Format?)
@@ -832,6 +842,17 @@ struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_fil
 		var transforms = [Transform]()
 		while input.first == transformCallPrefix {
 			input.removeFirst()
+			// A doubled `<transform-call-prefix>` (`<value-transform-coercion>`) is
+			// only ever meaningful on `<format>`'s own top-level pipeline's 1st
+			// `<transform>` (see `parseValueTransformPipelineThenTemplate(_:
+			// namedFormat:terminatorSet:)`, which strips it there before this
+			// function ever sees it) — anywhere else (a later `<transform>` in that
+			// same pipeline, or any `<transform>` inside a placeholder's own
+			// sub-format), it's syntactically harmless but has no effect, so it's
+			// simply skipped, not specially recognized or rejected.
+			if input.first == transformCallPrefix {
+				input.removeFirst()
+			}
 			let name = try parseTransformName(&input, terminatorSet: terminatorSet.union(dateSeparatorSet))
 			guard let transform = try Transform.parsed(name: name, kind: kind) else {
 				throw .invalidTransform(name: name, expectedKind: kind.rawValue)
@@ -1263,7 +1284,7 @@ let formatModifierPrefix = Character(":")
 let formatDelimiter = Character("+")
 
 private let placeholderNegation = Character("-")
-private let placeholderCoercion = Character("c")
+private let placeholderCoercion = Character(".")
 let namePrefix = Character(":")
 let transformCallPrefix = Character(".")
 private let dateInputFormatSeparator = Character(",")

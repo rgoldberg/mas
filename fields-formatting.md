@@ -6,15 +6,30 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-(* At least 1 of these 4, always in this order — never any other combination
-   or ordering. See "Pipeline Terminator" below for exactly when a
-   <pipeline-terminator> must separate the last of <named-format> /
-   <format-transform-pipeline> / <value-transform-pipeline> actually present
-   from a following <template>; no other separator ever appears between any
-   2 of these 4. *)
-format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] [ <pipeline-terminator> ] [ <template> ]
-       | <format-transform-pipeline> [ <value-transform-pipeline> ] [ <pipeline-terminator> ] [ <template> ]
-       | <value-transform-pipeline> [ <pipeline-terminator> ] [ <template> ]
+(* At least 1 of <named-format>, <format-transform-pipeline>, <value-
+   transform-pipeline>, <template>, always in this order, never any other
+   combination or ordering; no separator of any kind ever appears between
+   any 2 of these 4, except where a <template> follows another part &
+   "Pipeline Terminator" below requires a <pipeline-terminator> first. The
+   1st 3 branches cover every combination with no <template>; the last 5
+   cover every combination with 1, split by whichever part a <template>
+   directly follows, since that alone decides whether a <pipeline-
+   terminator> is required (a <value-transform-pipeline> ending in a
+   <parameterized-value-transform> called with explicit arguments already
+   ends with ":", so it alone needs no <pipeline-terminator> before a
+   following <template>). *)
+format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipeline> ]
+       | <format-transform-pipeline> [ <value-transform-pipeline> ]
+       | <value-transform-pipeline>
+       | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline> <template>
+         (* only when <value-transform-pipeline> ends in a
+            <parameterized-value-transform> called with explicit arguments *)
+       | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline> <pipeline-terminator> <template>
+         (* only when <value-transform-pipeline> ends in an
+            <unparameterized-value-transform>, or a <parameterized-value-
+            transform> with no arguments *)
+       | [ <named-format> ] <format-transform-pipeline> <pipeline-terminator> <template>
+       | <named-format> <pipeline-terminator> <template>
        | <template>
 
 (* Unrelated to <argument-fence> (also ":"), despite sharing a character: see
@@ -138,6 +153,12 @@ If no named format exists for a referenced name, an error is reported.
    instead. *)
 value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <date-transform-pipeline>
 
+(* A doubled `<transform-call-prefix>` right before a `<value-transform-
+   pipeline>`'s own 1st `<transform>` (e.g., `..round`, not `.round`); see
+   "Value Coercion" above. Meaningful only there; harmless but inert
+   anywhere else a `<transform-call-prefix>` appears. *)
+value-transform-coercion = <transform-call-prefix> <transform-call-prefix>
+
 string-transform-pipeline = ( <transform-call-prefix> <string-transform> )+
 date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
 
@@ -161,7 +182,9 @@ date-transform                = <iso> | <date-only> | <local-time-zone>
 (* The only 2 `<transform>`s with a `:`-fenced argument list of their own; see
    "Pipeline Terminator" below. `scale`'s is mandatory, so it always closes
    1; `group`'s is optional, so it closes 1 only when given. *)
-argument-taking-transform = <group> | <scale>
+parameterized-value-transform = <group> | <scale>
+(* Every other `<transform>`: never `:`-fenced, so never closes 1. *)
+unparameterized-value-transform = <string-transform> | <absolute-value> | <round> | <date-transform>
 
 capitalize      = "initialUppercase"
 lowercase       = "lowercase"
@@ -207,17 +230,34 @@ fractional-digits  = {non-negative integer} (* exactly this many `radix` digits 
 ###### Value Coercion
 
 A `<value-transform-pipeline>` (`<format>`'s own top-level pipeline, per its
-inferred kind) coerces its input value first, the same way `<placeholder-
-coercion>` (see "Coercion" under "Placeholders" below) does for `%cn` /
-`%co` / `%ct` / `%cf`: a `<number-transform-pipeline>` also accepts a JSON
-string that itself parses as a number (not just a real JSON number); a
-`<date-transform-pipeline>` accepts anything `%d` would (ISO-8601 datetime,
-ISO-8601 date-only, or a Unix epoch numeric timestamp, as a real JSON number or
-a JSON string). Unlike `<placeholder-coercion>`, this is always on — there's
-no uncoerced `<value-transform-pipeline>` form to opt out of it with, since
-`<format>` has no placeholder-letter syntax slot for such a flag. A
-`<string-transform-pipeline>` never needs coercion: a field's `stringValue`
-(its rendered representation) always exists, even for `null` (`""`).
+inferred kind) may coerce its input value first, controlled by a
+`<value-transform-coercion>` (a doubled `<transform-call-prefix>`, i.e., `..`
+instead of `.`, right before the pipeline's own 1st `<transform>`) —
+conceptually the same marker as `<placeholder-coercion>` (see "Coercion"
+under "Placeholders" below), & spelled with the same character, just in a
+different position (there's no placeholder-letter syntax slot at `<format>`'s
+own top level to attach `<placeholder-coercion>` to directly). Only
+`<number-transform-pipeline>` may be coerced this way: coerced, it also
+accepts a JSON string that itself parses as a number (not just a real JSON
+number); uncoerced (the default, no `..`), it requires a real JSON number,
+same as plain `%n`. `<value-transform-coercion>` on a `<string-transform-
+pipeline>` or `<date-transform-pipeline>` is a parse error: a
+`<string-transform-pipeline>`'s field's `stringValue` (its rendered
+representation) always exists, even for `null` (`""`), so it never needs
+coercion; a `<date-transform-pipeline>` accepts anything `%d` would (ISO-8601
+datetime, ISO-8601 date-only, or a Unix epoch numeric timestamp, as a real
+JSON number or a JSON string) unconditionally, the same way `%d` itself
+never supports `<placeholder-coercion>` either — there's no uncoerced form
+to distinguish it from.
+
+Only the pipeline's own 1st `<transform>` currently affects rendering, since
+`<value-transform-pipeline>`'s kind & coercion are both decided once, up
+front, from it. A `<value-transform-coercion>` is nonetheless syntactically
+permitted (parsed, with no effect) on a later `<transform>` in the same
+pipeline too, since a later, wrongly-typed `<transform>` would already have
+failed regardless of whether it too was marked — so this is reserved for a
+possible future where coercion could apply mid-pipeline, not a currently
+meaningful position.
 
 If coercion fails, the entire `<format>` renders blank, mimicking an
 unhandled placeholder failure (see "Success & Failure" under "Placeholders"
@@ -233,12 +273,12 @@ Whichever of `<named-format>`, `<format-transform-pipeline>`, or
 renders against, & "Templates Need a Placeholder" below for a constraint on
 the `<template>` itself). A `<pipeline-terminator>` (`::`) must separate the
 2 UNLESS that last-present part already ends with `:` on its own — which
-only ever happens when it's a `<value-transform-pipeline>` whose last
-`<transform>` is an `<argument-taking-transform>` (`group` / `scale`) called
-with explicit arguments, closing its own `<argument-fence>` (also `:`).
-`<named-format>` & `<format-transform-pipeline>` never end with `:` on their
-own, so a `<template>` after either always needs the full
-`<pipeline-terminator>`.
+only ever happens when it's a `<value-transform-pipeline>` ending in a
+`<parameterized-value-transform>` (`group` / `scale`) called with explicit
+arguments, closing its own `<argument-fence>` (also `:`); ending in an
+`<unparameterized-value-transform>` instead never does. `<named-format>` &
+`<format-transform-pipeline>` never end with `:` on their own either, so a
+`<template>` after either always needs the full `<pipeline-terminator>`.
 
 - If the last-present part closed its own `<argument-fence>`: that closing
   `:` already unambiguously ends things, so nothing extra is needed at all —
@@ -306,7 +346,7 @@ every value:
 - Outside `%b`, a fallible placeholder's (`%n` / `%N`, `%d` / `%D`, & the
   standard placeholders `%u` / `%U` etc.) own success & failure are exempt for
   the same reason: reaching either one already depends on the value, e.g.,
-  `%cTYes+No+` (a coerced, verbose `isTrue` placeholder: success `Yes`,
+  `%.TYes+No+` (a coerced, verbose `isTrue` placeholder: success `Yes`,
   failure `No`).
 - Outside `%b`, an infallible placeholder's (`%v` / `%V`, `%l` / `%L`) own
   success is not exempt: it always applies regardless of the value, so
@@ -416,7 +456,7 @@ placeholder-header = <placeholder-prefix> [ <placeholder-negation> ] [ <placehol
 
 placeholder-prefix   = "%"
 placeholder-negation = "-"
-placeholder-coercion = "c"
+placeholder-coercion = "."
 
 format-delimiter = "+"
 ```
@@ -550,16 +590,16 @@ inline-number-format = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<pl
 value stored as a JSON string that itself parses as the placeholder's target
 type, instead of requiring the field value's own JSON type to already match:
 
-- `%cn` / `%cN`: matches a JSON number, or a JSON string containing a valid
+- `%.n` / `%.N`: matches a JSON number, or a JSON string containing a valid
   number.
-- `%co` / `%cO`: matches a JSON boolean, or a JSON string equal to `true` or
+- `%.o` / `%.O`: matches a JSON boolean, or a JSON string equal to `true` or
   `false`.
-- `%ct` / `%cT`: matches JSON `true`, or the JSON string `"true"`.
-- `%cf` / `%cF`: matches JSON `false`, or the JSON string `"false"`.
+- `%.t` / `%.T`: matches JSON `true`, or the JSON string `"true"`.
+- `%.f` / `%.F`: matches JSON `false`, or the JSON string `"false"`.
 
 `<placeholder-coercion>` doesn't change a placeholder's default rendering
 (still the field's verbatim value) or a success format's input (still the
-field's own value; e.g., a `<number-transform-pipeline>` in `%cn`'s success
+field's own value; e.g., a `<number-transform-pipeline>` in `%.n`'s success
 format parses & transforms a coerced string exactly as it would a real JSON
 number) — it only widens which raw values count as a match.
 
