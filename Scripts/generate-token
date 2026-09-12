@@ -22,7 +22,7 @@ response="$(curl\
 	-H "Authorization: Bearer ${header}.${payload}.${${${$(printf %s "${header}.${payload}" |
 		openssl dgst -sha256 -sign <(printf %s "${TOKEN_APP_PRIVATE_KEY}") | base64)//[=$'\n']}//+/-}//\//_}"\
 	-H 'Accept: application/vnd.github+json'\
-	"https://api.github.com/app/installations/${TOKEN_APP_INSTALLATION_ID}/access_tokens"
+	"${GITHUB_API_URL}/app/installations/${TOKEN_APP_INSTALLATION_ID}/access_tokens"
 )" ||
 {
 	printf $'Error: Failed to contact GitHub API\n' >&2
