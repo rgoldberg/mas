@@ -6,7 +6,7 @@
 format-modifier        = <format-modifier-prefix> [ <format> ] (* default: contextual default formatting *)
 format-modifier-prefix = ":"
 
-format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <chain-terminator> ] [ <value-transform-pipeline> [ <pipeline-terminator> ] [ <template> ] | <template> ]
+format      = [ <named-format> ] [ <format-transform-pipeline> ] [ <pipeline-terminator> ] [ <value-transform-pipeline> [ <double-pipeline-terminator> ] [ <template> ] | <template> ]
 template    = ( <placeholder> | <format-text> )+
 format-text = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
 ```
@@ -35,10 +35,11 @@ anything else. What follows is a `<value-transform-pipeline>` (applied to
 `<template>`, the `<template>` renders against the pipeline's own output
 instead of the field's original value: a `<placeholder>` inside it (e.g.,
 `%v` / `%V`) reads the transformed value, not the raw 1, so nothing is
-duplicated — & a `<template>` with no `<placeholder>` at all (e.g., a literal
-unit suffix alone) simply doesn't include the transformed value; write `%v`
-to include it. (See "Value Coercion" & "Pipeline Terminator" below for
-exactly when this combination needs a `<pipeline-terminator>` between the 2.)
+duplicated; write `%v` to include the transformed value in the `<template>`
+(a `<template>` needs at least 1 `<placeholder>` regardless — see "Templates
+Need a Placeholder" under "Transforms" below). (See "Value Coercion" &
+"Double Pipeline Terminator" below for exactly when the pipeline / `<template>`
+combination needs a `<double-pipeline-terminator>` between the 2.)
 
 Unlike every other `<*-transform-pipeline>` site — a placeholder's own
 `<success>` / `<failure>` sub-format always knows its kind up front from its
@@ -53,11 +54,12 @@ using any other unrecognized name would be).
 Neither a name nor a transform name stops at `<placeholder-prefix>` on its
 own: `<name-prefix>someFormat%v` is an attempt at a named format literally
 called `someFormat%v` (& fails as one if it doesn't exist), not `someFormat`
-followed by a `%v` placeholder. A `<chain-terminator>` (see "Format
+followed by a `%v` placeholder. A `<pipeline-terminator>` (see "Format
 Transforms") — needed even with 0 `<format-transform>`s, e.g., right after a
 bare `<named-format>` — or `<transform-call-prefix>` (for another transform)
-is what actually separates them: `<name-prefix>someFormat<chain-terminator>%v`
-is `someFormat` followed by a `%v` placeholder.
+is what actually separates them:
+`<name-prefix>someFormat<pipeline-terminator>%v` is `someFormat` followed by
+a `%v` placeholder.
 
 ##### References
 
@@ -106,7 +108,7 @@ If no named format exists for a referenced name, an error is reported.
 
 - `hidden`: Omits the field from output, allowing sorting by a field without
   displaying it. Unlike any other named format, `hidden` must be the entire
-  `<format>` — no `<format-transform-pipeline>`, `<chain-terminator>`,
+  `<format>` — no `<format-transform-pipeline>`, `<pipeline-terminator>`,
   `<string-transform-pipeline>`, or template may follow it, since a hidden
   field is never rendered, & anything following it would be dead
   configuration.
@@ -201,46 +203,71 @@ no uncoerced `<value-transform-pipeline>` form to opt out of it with, since
 If coercion fails, the entire `<format>` renders blank, mimicking an
 unhandled placeholder failure (see "Success & Failure" under "Placeholders"
 below) — this applies even when a `<template>` follows the
-`<value-transform-pipeline>` (see "Pipeline Terminator" next): the
+`<value-transform-pipeline>` (see "Double Pipeline Terminator" next): the
 `<template>` is never rendered either.
 
-###### Pipeline Terminator
+###### Double Pipeline Terminator
 
 A `<value-transform-pipeline>` may be followed directly by a `<template>`
-(see "Value Coercion" above for what the `<template>` then renders against).
-Whether a `<pipeline-terminator>` (`::`) must separate the 2 depends on how
-the pipeline's own last `<transform>` ends:
+(see "Value Coercion" above for what the `<template>` then renders against,
+& "Templates Need a Placeholder" below for a constraint on the `<template>`
+itself). Whether a `<double-pipeline-terminator>` (`::`) must separate the 2
+depends on how the pipeline's own last `<transform>` ends:
 
 - If it closed its own `<argument-fence>` (`group` / `scale` with explicit
   arguments): that closing `:` already unambiguously ends the pipeline, so
   (exactly like a `<format-transform-pipeline>`'s own single
-  `<chain-terminator>`) nothing extra is needed at all — the `<template>`
+  `<pipeline-terminator>`) nothing extra is needed at all — the `<template>`
   starts right after it. Any further `:` there is just literal `<template>`
-  text (`<format-text>`), not a `<pipeline-terminator>`: e.g.,
+  text (`<format-text>`), not a `<double-pipeline-terminator>`: e.g.,
   `.group:de_DE:::%v` is `group`, then the `<template>` `::%v` — literal `::`,
   then a `%v` placeholder reading `group`'s own output.
 - Otherwise (an argument-less `<transform>`, incl. bare `group` / `scale`):
   the pipeline's own name-scan can't tell "more pipeline content" apart from
   "a `<template>` follows" on its own, since `group` / `scale` also use
-  `<chain-terminator>` as their own `<argument-fence>` — so a
-  `<pipeline-terminator>` is required. A single stray `<chain-terminator>`
-  there (`:` not doubled) is a parse error, not a lenient no-op.
+  `<pipeline-terminator>` as their own `<argument-fence>` — so a
+  `<double-pipeline-terminator>` is required. A single stray
+  `<pipeline-terminator>` there (`:` not doubled) is a parse error, not a
+  lenient no-op.
 
 E.g., all of the following are valid:
 
-- `.round.absoluteValue` (no `<template>`: no `<pipeline-terminator>` needed
-  either)
-- `.round.absoluteValue::%v` (`<pipeline-terminator>`, then a `%v` placeholder
-  reading `absoluteValue`'s own output — not the field's original value, so
-  this isn't a redundant "the value twice")
+- `.round.absoluteValue` (no `<template>`: no `<double-pipeline-terminator>`
+  needed either)
+- `.round.absoluteValue::%v` (`<double-pipeline-terminator>`, then a `%v`
+  placeholder reading `absoluteValue`'s own output — not the field's original
+  value, so this isn't a redundant "the value twice")
 - `.round.absoluteValue/1d` (`<sort-modifier>` follows, not a `<template>`: no
-  `<pipeline-terminator>` needed)
+  `<double-pipeline-terminator>` needed)
 - `.round.absoluteValue,name` (`<field-spec-separator>` follows: likewise)
 
-But `.round::.absoluteValue` is invalid: a `<transform-call-prefix>` (`.`)
-can't immediately follow a `<pipeline-terminator>` (once a
-`<pipeline-terminator>` ends the pipeline, only a `<template>`, or nothing,
-may follow).
+Once a `<double-pipeline-terminator>` (or a closed `<argument-fence>`) ends
+the pipeline, whatever follows is ordinary `<template>` content — even 1
+starting with `.`: `.round::.absoluteValue` parses `.absoluteValue` as literal
+`<format-text>`, not as another `<transform-call>`. It's still rejected, but
+for a different, more general reason: see "Templates Need a Placeholder"
+below.
+
+###### Templates Need a Placeholder
+
+A `<template>` with no `<placeholder>` at all — pure `<format-text>` —
+renders identically no matter what the field's value is, which is never
+useful, so it's a parse error, whether the `<template>` is `<format>`'s
+entire content (no `<named-format>`, no pipeline) or follows a
+`<named-format>` and/or a `<value-transform-pipeline>`. E.g.,
+`adamID:some literal text` &
+`.round::.absoluteValue` (see above) are both errors for this reason.
+
+The 1 exception is a `<template>` that follows a `<format-transform-pipeline>`
+(justify): justify never reads the field's value either (see "Format
+Transforms" below), so its own `<template>` has nothing to lose by being
+constant — `.rightJustify: MB` stays valid.
+
+A placeholder-level `<success>` / `<failure>` sub-format is a different thing
+entirely & isn't subject to this: it's a conditional branch of `<format>`'s
+overall rendering, not `<format>`'s entire rendering, so a fixed label for a
+condition (e.g., `%ct{Yes}` / `%cf{No}` for a boolean field) is exactly the
+point, not an oversight.
 
 ###### `group`
 
@@ -299,12 +326,13 @@ center-start-justify = "centerStartJustify"
 center-end-justify   = "centerEndJustify"
 right-justify        = "rightJustify"
 
-chain-terminator = ":"
+pipeline-terminator = ":"
 
-(* See "Pipeline Terminator" under "Transforms" above; unlike `<chain-
-   terminator>`, this is never part of `<format-transform-pipeline>`'s own
-   context, since a `<format-transform>` never takes arguments. *)
-pipeline-terminator = <chain-terminator> <chain-terminator>
+(* See "Double Pipeline Terminator" under "Transforms" above; unlike
+   `<pipeline-terminator>`, this is never part of
+   `<format-transform-pipeline>`'s own context, since a `<format-transform>`
+   never takes arguments. *)
+double-pipeline-terminator = <pipeline-terminator> <pipeline-terminator>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -327,7 +355,7 @@ puts it before the value (leaving it nearer the column's end).
 
 If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
 
-`<chain-terminator>` (see `<format>` above; it's not part of
+`<pipeline-terminator>` (see `<format>` above; it's not part of
 `<format-transform-pipeline>` itself, since it can appear even with 0
 `<format-transform>`s, e.g., right after a bare `<named-format>`) closes off
 naming / transforms before whatever follows (a `<value-transform-pipeline>` or
@@ -340,7 +368,7 @@ included) is read as (part of) an attempted, likely invalid, name. E.g.,
 a `%v` placeholder; `.rightJustify` alone doesn't need it before a sort
 modifier, since that already unambiguously ends it. (A `<value-transform-
 pipeline>` followed directly by a `<template>` has its own, similar-in-spirit
-but not identical, disambiguation rule; see "Pipeline Terminator" under
+but not identical, disambiguation rule; see "Double Pipeline Terminator" under
 "Transforms" above.)
 
 ###### `iso` & `localTimeZone`

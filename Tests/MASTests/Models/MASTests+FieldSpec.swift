@@ -593,10 +593,20 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a chain terminator lets a justify transform be followed directly by template text`() throws {
+	func `a pipeline terminator lets a justify transform precede template text with no placeholder required`() throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify: MB").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == " MB")
+	}
+
+	@Test
+	func `a template needs at least 1 placeholder, unless a format-transform-pipeline (justify) precedes it`() throws {
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:literal text, no placeholder at all")
+		}
+		// `.rightJustify` precedes this template, so it's exempt (see the test
+		// above): confirms the exemption is specific to justify, not blanket
+		#expect(try parseFieldSpecs("adamID:.rightJustify: MB").count == 1)
 	}
 
 	@Test
@@ -619,13 +629,13 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a pipeline terminator lets an argument-less value-transform-pipeline be followed directly by a template`(
-	) throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue:: MB").first)
-		// The template renders against the pipeline's OWN output, not the field's
-		// original value: with no `%v` in the template, the transformed value
-		// isn't shown at all — only the literal text is
-		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == " MB")
+	func `a pipeline terminator lets an argument-less value-transform-pipeline be followed directly by a template`() {
+		// A template that never references the pipeline's output (no `%v`) would
+		// render identically for every value, so it's a parse error (see the
+		// next test for the same pipeline terminator, but with a placeholder)
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:.round.absoluteValue:: MB")
+		}
 	}
 
 	@Test
@@ -642,24 +652,32 @@ private extension MASTests {
 	}
 
 	@Test
-	func `extra chain terminators after a fenced last transform are literal template text, not a pipeline terminator`(
+	func `extra pipeline terminators after a fenced last transform are literal template text, not a 2nd terminator`(
 	) throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:::%v").first)
 		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "::1.234.567")
 	}
 
 	@Test
-	func `a single stray chain terminator (not doubled) after an argument-less last transform is a parse error`() {
-		#expect(throws: ParsingError.incompletePipelineTerminator) {
+	func `a single stray pipeline terminator (not doubled) after an argument-less last transform is a parse error`() {
+		#expect(throws: ParsingError.incompleteDoublePipelineTerminator) {
 			try parseFieldSpecs("adamID:.round.absoluteValue: MB")
 		}
 	}
 
 	@Test
-	func `a transform call cannot immediately follow a pipeline terminator`() {
-		#expect(throws: ParsingError.transformCallAfterPipelineTerminator) {
+	func `a transform call right after a pipeline terminator is just literal template text, not specially banned`(
+	) throws {
+		// No placeholder in the resulting template (".absoluteValue" alone): an
+		// error, but from the general "a template needs a placeholder" rule, not
+		// from a dedicated ban on a leading '.'
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
 			try parseFieldSpecs("adamID:.round::.absoluteValue")
 		}
+		// With a placeholder present, it parses fine: literal ".absoluteValue",
+		// then %v reading round's own transformed output
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round::.absoluteValue%v").first)
+		#expect(fieldSpec.format.rendered(value: .number(5.6), label: "L", name: "n").stringValue == ".absoluteValue6")
 	}
 
 	@Test
