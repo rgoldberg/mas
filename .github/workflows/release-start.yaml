@@ -170,7 +170,7 @@ jobs:
       run: |
         HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
         export -r HOMEBREW_GITHUB_API_TOKEN
-        brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
+        brew tap "${GITHUB_REPOSITORY_OWNER}/tap" "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY_OWNER}/homebrew-tap"
         unsetopt err_exit
         bump_output="$(
           brew bump-formula-pr\
@@ -192,7 +192,7 @@ jobs:
           printf $'::error::Failed to bump tap formula to version %s\n' "${VERSION}" >&2
           exit 6
         fi
-        if [[ "${bump_output}" != *(#b)(https://github.com/"${GITHUB_REPOSITORY_OWNER}"/homebrew-tap/pull/[0-9]##)* ]]
+        if [[ "${bump_output}" != *(#b)("${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY_OWNER}/homebrew-tap/pull/"[0-9]##)* ]]
         then
           printf $'::error::Failed to parse tap formula bump PR URL for version %s\n' "${VERSION}" >&2
           exit 7

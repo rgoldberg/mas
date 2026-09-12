@@ -115,7 +115,7 @@ jobs:
         fi
         HOMEBREW_GITHUB_API_TOKEN="$(Scripts/generate-token)"
         export -r HOMEBREW_GITHUB_API_TOKEN
-        brew tap "${GITHUB_REPOSITORY_OWNER}/tap"
+        brew tap "${GITHUB_REPOSITORY_OWNER}/tap" "${GITHUB_SERVER_URL}/"${GITHUB_REPOSITORY_OWNER}/homebrew-tap"
         brew bump-formula-pr\
           --tag "${GITHUB_REF_NAME}"\
           --revision "${GITHUB_SHA}"\
