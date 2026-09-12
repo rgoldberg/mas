@@ -149,7 +149,7 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 			if data.isEmpty {
 				return envVars
 			}
-			guard let token = String(data: data, encoding: .utf8) else {
+			guard let token = String(validating: data, as: UTF8.self) else {
 				throw error("Failed to parse input")
 			}
 			let components = token.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
@@ -165,7 +165,7 @@ private func envVars(from fileHandle: FileHandle) throws -> [(name: String, valu
 		byte = nextByte
 	}
 	guard data.isEmpty else {
-		throw error("Unterminated setting in stdin\(String(data: data, encoding: .utf8).map { ": \($0)" } ?? "")")
+		throw error("Unterminated setting in stdin\(String(validating: data, as: UTF8.self).map { ": \($0)" } ?? "")")
 	}
 	return envVars
 }
