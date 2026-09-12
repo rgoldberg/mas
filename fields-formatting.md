@@ -9,8 +9,8 @@ format-modifier-prefix = ":"
 format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipeline> ]
        | <format-transform-pipeline> [ <value-transform-pipeline> ]
        | <value-transform-pipeline>
-       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <parameterized-value-transform-call> <template>
-       | [ <named-format> ] [ <format-transform-pipeline> ] [ <value-transform-pipeline> ] <unparameterized-value-transform-call> <pipeline-terminator> <template>
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <non-terminal-value-transform-pipeline> ] <parameterized-value-transform-call> <template>
+       | [ <named-format> ] [ <format-transform-pipeline> ] [ <non-terminal-value-transform-pipeline> ] <unparameterized-value-transform-call> <pipeline-terminator> <template>
        | [ <named-format> ] <format-transform-pipeline> <pipeline-terminator> <template>
        | <named-format> <pipeline-terminator> <template>
        | <template>
@@ -137,6 +137,13 @@ If no named format exists for a referenced name, an error is reported.
    instead. *)
 value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <date-transform-pipeline>
 
+(* Like `<value-transform-pipeline>`, but excludes a `<number-transform-
+   pipeline>` ending in `<terminal-number-transform-call>`; `<format>` uses
+   this for its own optional leading pipeline right before its own mandatory
+   final transform-call, so that final call can never follow 1 that already
+   ended a `<number-transform-pipeline>` of its own. *)
+non-terminal-value-transform-pipeline = <string-transform-pipeline> | <non-terminal-number-transform-pipeline> | <date-transform-pipeline>
+
 string-transform-pipeline = <string-transform-call>+
 date-transform-pipeline   = <date-transform-call>+
 
@@ -146,8 +153,9 @@ date-transform-pipeline   = <date-transform-call>+
    or after 1+ `<non-terminal-number-transform>`s. This is the 1 exception to
    `<value-transform>` ordering being unconstrained; the grammar enforces it
    directly, rather than leaving it to prose. *)
-number-transform-pipeline = <non-terminal-number-transform-call>+ [ <terminal-number-transform-call> ]
-                          | <terminal-number-transform-call>
+number-transform-pipeline              = <non-terminal-number-transform-pipeline> [ <terminal-number-transform-call> ]
+                                        | <terminal-number-transform-call>
+non-terminal-number-transform-pipeline = <non-terminal-number-transform-call>+
 
 (* Composes a `<transform-call-prefix>`, an optional `<value-transform-
    coercion>`, & the transform itself. `<value-transform-call>` is the
