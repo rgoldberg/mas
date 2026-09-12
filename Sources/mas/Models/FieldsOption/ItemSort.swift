@@ -29,7 +29,7 @@ struct ItemSort: Equatable {
 		guard !keys.isEmpty else {
 			return tiebreakDirection == .ascending ? .init(0..<count) : .init((0..<count).reversed())
 		}
-		let orderedKeys = keys.sorted { $0.sortSpec.priority < $1.sortSpec.priority }
+		let orderedKeys = keys.sorted(using: KeyPathComparator(\.sortSpec.priority))
 		return (0..<count).sorted { lhsIndex, rhsIndex in
 			for key in orderedKeys {
 				switch key.sortSpec.compare(stringValue(lhsIndex, key), stringValue(rhsIndex, key)) {

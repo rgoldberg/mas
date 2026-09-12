@@ -298,9 +298,7 @@ private struct BoundaryRankTable { // swiftlint:disable:this one_declaration_per
 			textRank
 		case .endmost:
 			boundaries.groups.count
-		case .leading:
-			0
-		case .mergedIntoFirst:
+		case .leading, .mergedIntoFirst:
 			0
 		case .mergedIntoLast:
 			boundaries.groups.count - 1
@@ -568,13 +566,7 @@ extension SortSpec {
 				return result
 			}
 		}
-		return if lhsSegments.count == rhsSegments.count {
-			.orderedSame
-		} else if lhsSegments.count < rhsSegments.count {
-			.orderedAscending
-		} else {
-			.orderedDescending
-		}
+		return ComparableComparator().compare(lhsSegments.count, rhsSegments.count)
 	}
 
 	/// Compares 2 prices by their numeric value (see `price(from:)`), falling
@@ -584,7 +576,7 @@ extension SortSpec {
 		guard let lhsPrice = price(from: lhs), let rhsPrice = price(from: rhs) else {
 			return lhs.compare(rhs, options: textCompareOptions, range: nil, locale: localeForComparison)
 		}
-		return lhsPrice == rhsPrice ? .orderedSame : lhsPrice < rhsPrice ? .orderedAscending : .orderedDescending
+		return ComparableComparator().compare(lhsPrice, rhsPrice)
 	}
 
 	/// Compares 2 `.`-delimited version strings component-wise (numerically per
@@ -599,7 +591,7 @@ extension SortSpec {
 			let lhsComponent = index < lhsComponents.count ? lhsComponents[index] : "0"
 			let rhsComponent = index < rhsComponents.count ? rhsComponents[index] : "0"
 			let result = if let lhsInt = Int(lhsComponent), let rhsInt = Int(rhsComponent) {
-				lhsInt == rhsInt ? ComparisonResult.orderedSame : lhsInt < rhsInt ? .orderedAscending : .orderedDescending
+				ComparableComparator().compare(lhsInt, rhsInt)
 			} else {
 				lhsComponent.compare(rhsComponent, options: textCompareOptions, range: nil, locale: localeForComparison)
 			}
@@ -642,15 +634,15 @@ private extension SortSpec.CharacterClass {
 		case .blank:
 			character == " " || character == "\t"
 		case .cntrl:
-			character.isASCII && (character.asciiValue.map { $0 < 0x20 || $0 == 0x7f } ?? false)
+			character.asciiValue.map { $0 < 0x20 || $0 == 0x7f } ?? false
 		case .digit:
 			character.isASCII && character.isNumber
 		case .graph:
-			character.isASCII && (character.asciiValue.map { (0x21...0x7e).contains($0) } ?? false)
+			character.asciiValue.map { (0x21...0x7e).contains($0) } ?? false
 		case .lower:
 			character.isLowercase
 		case .print:
-			character.isASCII && (character.asciiValue.map { (0x20...0x7e).contains($0) } ?? false)
+			character.asciiValue.map { (0x20...0x7e).contains($0) } ?? false
 		case .punct:
 			character.isPunctuation || character.isSymbol
 		case .space:

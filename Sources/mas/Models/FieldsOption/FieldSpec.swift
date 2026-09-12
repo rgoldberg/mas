@@ -314,7 +314,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	init(fieldSpecs: [FieldSpec], outputFormat: OutputFormat) {
 		self.fieldSpecs = fieldSpecs
 		self.outputFormat = outputFormat
-		workingTags = fieldSpecs.indices.map(\.self)
+		workingTags = Array(fieldSpecs.indices)
 		referenceFieldSpecs = fieldSpecs
 	}
 
@@ -1058,10 +1058,7 @@ private func skipFieldOrderAndItemSortSections(_ input: inout Substring, outputF
 		_ = try builder.parseFieldOrderSection(&input)
 	}
 	if input.hasPrefix(itemSortSectionPrefix) {
-		input.removeFirst(itemSortSectionPrefix.count)
-		while let char = input.first, char != fieldSpecsSectionPrefix {
-			input.removeFirst()
-		}
+		input = input.dropFirst(itemSortSectionPrefix.count).drop { $0 != fieldSpecsSectionPrefix }
 	}
 }
 

@@ -263,7 +263,7 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 	func applied(to string: String) -> String {
 		switch self {
 		case .capitalize:
-			string.isEmpty ? string : string.prefix(1).uppercased() + string.dropFirst()
+			string.uppercasingFirst
 		case .lowercase:
 			string.lowercased()
 		case .sentenceCase:

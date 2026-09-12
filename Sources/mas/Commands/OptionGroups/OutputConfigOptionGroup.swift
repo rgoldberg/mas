@@ -31,7 +31,7 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	private var outputFormat: OutputFormat {
 		get throws {
 			let table = try tableOptionValue.map(parseTableConfig)
-			guard [isJSON, isKeyValue, table != nil].filter(\.self).count <= 1 else {
+			guard [isJSON, isKeyValue, table != nil].count(where: \.self) <= 1 else {
 				throw ValidationError("At most 1 of '--json', '--key-value', or '--table' may be given.")
 			}
 			return if isJSON {
