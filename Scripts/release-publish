@@ -19,8 +19,8 @@ print_notice '📢 Publishing release for' "${@}"
 unset MAS_VERSION
 printf $'\n'
 
-gh_repo="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
-readonly gh_repo
+read -r gh_repo gh_repo_url < <(gh repo view --json nameWithOwner,url -q '.nameWithOwner + " " + .url')
+readonly gh_repo gh_repo_url
 
 title="$(gh release view "${tag}" --json name -q .name 2>/dev/null || true)"
 readonly title
@@ -34,4 +34,4 @@ readonly target
 
 git tag -s "${tag}" -m "${title#"${tag}": }" "${target}"
 printf $'Created signed tag %s for reference %s & pushing to %s\n\n' "${tag}" "${target}" "${gh_repo}"
-git push "https://github.com/${gh_repo}.git" tag "${tag}"
+git push "${gh_repo_url}.git" tag "${tag}"

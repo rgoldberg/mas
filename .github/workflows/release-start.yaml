@@ -174,7 +174,7 @@ jobs:
         unsetopt err_exit
         bump_output="$(
           brew bump-formula-pr\
-            --url "https://github.com/${GITHUB_REPOSITORY}/archive/${COMMIT_SHA}.tar.gz"\
+            --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/archive/${COMMIT_SHA}.tar.gz"\
             --version "${VERSION}"\
             --no-fork\
             --no-browse\
