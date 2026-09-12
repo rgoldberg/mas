@@ -557,6 +557,33 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a verbose standard placeholder's uppercase letter resolves to its lowercase StandardKind`() throws {
+		// Regression: `StandardKind`'s raw values are all lowercase, but a
+		// verbose placeholder's own letter is uppercase (e.g., 'T' for isTrue),
+		// so looking it up case-sensitively always failed
+		let fieldSpec = try #require(parseFieldSpecs("adamID:%cTYes+No+").first)
+		#expect(fieldSpec.format.rendered(value: .string("true"), label: "L", name: "n").stringValue == "Yes")
+		#expect(fieldSpec.format.rendered(value: .string("false"), label: "L", name: "n").stringValue == "No")
+	}
+
+	@Test
+	func `a fallible placeholder's success / failure may be placeholder-less; an infallible 1 may not`() throws {
+		// %cN is fallible (conditional on the value), so a fixed label per
+		// branch is meaningful, unlike a top-level template
+		let fallible = try #require(parseFieldSpecs("adamID:%cNNumber+NotANumber+").first).format
+		#expect(fallible.rendered(value: .string("42"), label: "L", name: "n").stringValue == "Number")
+		#expect(fallible.rendered(value: .string("nope"), label: "L", name: "n").stringValue == "NotANumber")
+		// %V / %L are infallible (their own success always applies), so a
+		// placeholder-less success is just as constant as a bare template
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:%Vconstant+")
+		}
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:%Lconstant+")
+		}
+	}
+
+	@Test
 	func `a top-level justify transform sets justification & is stripped from the rendered format`() throws {
 		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
 		#expect(fieldSpec.justification == .end)
@@ -593,20 +620,21 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a pipeline terminator lets a justify transform precede template text with no placeholder required`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify: MB").first)
+	func `a pipeline terminator lets a justify transform precede template text, which still needs a placeholder`(
+	) throws {
+		#expect(throws: ParsingError.templateLacksPlaceholder) {
+			try parseFieldSpecs("adamID:.rightJustify: MB")
+		}
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify:%v MB").first)
 		#expect(fieldSpec.justification == .end)
-		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == " MB")
+		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == "7 MB")
 	}
 
 	@Test
-	func `a template needs at least 1 placeholder, unless a format-transform-pipeline (justify) precedes it`() throws {
+	func `a bare template with no placeholder at all is a parse error`() {
 		#expect(throws: ParsingError.templateLacksPlaceholder) {
 			try parseFieldSpecs("adamID:literal text, no placeholder at all")
 		}
-		// `.rightJustify` precedes this template, so it's exempt (see the test
-		// above): confirms the exemption is specific to justify, not blanket
-		#expect(try parseFieldSpecs("adamID:.rightJustify: MB").count == 1)
 	}
 
 	@Test

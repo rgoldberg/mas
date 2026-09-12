@@ -711,14 +711,14 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			// `<format>`. `namedFormat`, if present, is discarded here (`hidden` can
 			// never reach this branch: it precludes anything else in the
 			// format-modifier, checked above; only a future user-defined named format
-			// could have a template follow it). A `<format-transform-pipeline>`
-			// (justify) never reads the value either way, so its own template is
-			// exempt from needing a `<placeholder>`; a `<named-format>` (or nothing)
-			// preceding 1 isn't, since that template is now the field's entire
-			// rendering.
+			// could have a template follow it). `justification`, if set, is likewise
+			// discarded from this template's own concerns: a `<format-transform-
+			// pipeline>` (justify) never reads the value, but its own template, once
+			// present, is the field's entire rendering all the same, so it still
+			// needs a `<placeholder>` (see `parseTemplate(_:terminatorSet:)`).
 			// TODO: once user-defined named formats exist, splice `namedFormat`'s own
 			//  rendered value in as this template's first part, instead of discarding it.
-			try parseTemplate(&input, terminatorSet: terminatorSet, requirePlaceholder: justification == nil)
+			try parseTemplate(&input, terminatorSet: terminatorSet)
 		} else if input.first == transformCallPrefix {
 			// A trailing `<value-transform-pipeline>` (`namedFormat` was already
 			// consumed above, if present), optionally followed by a
@@ -734,27 +734,15 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	return (format, justification ?? .start)
 }
 
-/// Parses `<template>`. `requirePlaceholder` rejects 1 with no `<placeholder>`
-/// at all: such a `<template>` renders identically regardless of the field's
-/// value, which is never useful (callers pass `false` only for a
-/// `<format-transform-pipeline>`'s own template, which is exempt: justify
-/// never reads the value either, so it has nothing to lose by being constant).
-private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Character>, requirePlaceholder: Bool)
-throws(ParsingError) -> Format {
+/// Parses `<template>`, rejecting 1 with no `<placeholder>` at all: such a
+/// `<template>` would render identically regardless of the field's value,
+/// which is never useful — even for a `<format-transform-pipeline>`'s
+/// (justify's) own template, which is otherwise exempt from everything else
+/// about the field's value (justify never reads it), since the `<template>`
+/// is still the field's entire rendering.
+private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> Format {
 	let format = try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
-	guard requirePlaceholder else {
-		return format
-	}
-	guard
-		case let .parts(parts) = format,
-		parts.contains(where: { part in
-			if case .placeholder = part {
-				true
-			} else {
-				false
-			}
-		})
-	else {
+	guard !formatLacksPlaceholder(format) else {
 		throw .templateLacksPlaceholder
 	}
 	return format
@@ -764,7 +752,7 @@ throws(ParsingError) -> Format {
 /// `<string-transform-pipeline>`-only pipeline to `<number-transform-
 /// pipeline>` / `<date-transform-pipeline>` too): unlike every other
 /// `<*-transform-pipeline>` site, which always knows its kind statically from
-/// its own grammar position (e.g., `%n{...}`'s inner pipeline is always
+/// its own grammar position (e.g., `%N`'s own success sub-format is always
 /// number-kind), `<format>` itself doesn't, since a field's raw value has no
 /// fixed type — so kind is inferred from the pipeline's own 1st `<transform>`
 /// instead. Every `<transform>` name is unique across kinds, so peeking just
@@ -785,8 +773,9 @@ throws(ParsingError) -> Format {
 /// fence), so it needs a doubled `<pipeline-terminator>` (`::`) first. Once
 /// that (or a closed fence) unambiguously ends the pipeline, whatever follows
 /// is ordinary `<template>` content — even 1 starting with `.`, since
-/// `requirePlaceholder` (not a dedicated ban on a leading `.`) is what rejects
-/// a resulting `<template>` that turns out to carry no actual `<placeholder>`.
+/// `parseTemplate(_:terminatorSet:)`'s own "needs a `<placeholder>`" check
+/// (not a dedicated ban on a leading `.`) is what rejects a resulting
+/// `<template>` that turns out to carry no actual `<placeholder>`.
 private func parseValueTransformPipelineThenTemplate(
 	_ input: inout Substring,
 	namedFormat: String?,
@@ -820,8 +809,7 @@ private func parseValueTransformPipelineThenTemplate(
 	guard let next = input.first, !terminatorSet.contains(next) else {
 		return .valuePipeline(finalReference, kind: kind, template: [])
 	}
-	guard case let .parts(template) = try parseTemplate(&input, terminatorSet: terminatorSet, requirePlaceholder: true)
-	else {
+	guard case let .parts(template) = try parseTemplate(&input, terminatorSet: terminatorSet) else {
 		preconditionFailure("parseTemplate always returns .parts")
 	}
 	return .valuePipeline(finalReference, kind: kind, template: template)

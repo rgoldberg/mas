@@ -962,10 +962,38 @@ enum TransformKind: String, CaseIterable { // swiftlint:disable:this one_declara
 	}
 }
 
+/// Whether `format` (`nil` counts as empty) is a `<template>` with no
+/// `<placeholder>` at all, & so would render the same output regardless of
+/// the field's value (see `ParsingError.templateLacksPlaceholder`). A bare
+/// `.reference` (a transform pipeline with no template) is never flagged: its
+/// own output already depends on the field's value.
+func formatLacksPlaceholder(_ format: Format?) -> Bool {
+	switch format {
+	case nil:
+		true
+	case .reference, .valuePipeline:
+		false
+	case let .parts(parts):
+		!parts.contains { part in
+			if case .placeholder = part {
+				true
+			} else {
+				false
+			}
+		}
+	}
+}
+
 /// Parses `<format-delimiter>`-suffixed content, i.e., `[ <standard> ]` /
 /// `[ <failure> ]` / `[ <number> ]` through & including their closing `+`.
 /// Assumes the leading content (if any) has not yet been consumed.
-func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind) throws(ParsingError) -> Format? {
+/// `requirePlaceholder` rejects empty / placeholder-less content: pass `true`
+/// only for an infallible placeholder's (`%v` / `%V`, `%l` / `%L`) own success
+/// format, which — unlike a fallible placeholder's (e.g., `%n` / `%N`) own
+/// success / failure, reached only conditionally — always applies, so it'd
+/// otherwise render the same output regardless of the field's value.
+func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind, requirePlaceholder: Bool)
+throws(ParsingError) -> Format? {
 	let terminatorSet = Set([placeholderPrefix, formatDelimiter])
 	let value = if let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) {
 		Format.reference(reference)
@@ -978,6 +1006,9 @@ func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind) throws(
 		throw .missingEndFence
 	}
 	input.removeFirst()
+	guard !requirePlaceholder || !formatLacksPlaceholder(value) else {
+		throw .templateLacksPlaceholder
+	}
 	return value
 }
 
@@ -1042,19 +1073,24 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 			guard !coerced else {
 				throw .coercionNotSupported(letter)
 			}
-			return .value(success: isVerbose ? try parseDelimitedFormat(&input, kind: .string) : nil)
+			return .value(
+				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
+			)
 		case "l", "L":
 			guard !coerced else {
 				throw .coercionNotSupported(letter)
 			}
-			return .label(negated: negated, success: isVerbose ? try parseDelimitedFormat(&input, kind: .string) : nil)
+			return .label(
+				negated: negated,
+				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
+			)
 		case "n", "N":
 			return isVerbose
 				? .number(
 					negated: negated,
 					coerced: coerced,
-					success: try parseDelimitedFormat(&input, kind: .number),
-					failure: try parseDelimitedFormat(&input, kind: .string),
+					success: try parseDelimitedFormat(&input, kind: .number, requirePlaceholder: false),
+					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
 				)
 				: .number(negated: negated, coerced: coerced, success: nil, failure: nil)
 		case "d", "D":
@@ -1069,7 +1105,11 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				throw .missingEndFence
 			}
 			input.removeFirst()
-			return .date(negated: negated, success: success, failure: try parseDelimitedFormat(&input, kind: .string))
+			return .date(
+				negated: negated,
+				success: success,
+				failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
+			)
 		case "b", "B":
 			guard !negated else {
 				throw .invalidLetter(letter) // `<branches>` has no defined negated meaning
@@ -1082,9 +1122,12 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				throw .missingEndFence
 			}
 			input.removeFirst()
-			return .branches(branches, failure: isVerbose ? try parseDelimitedFormat(&input, kind: .string) : nil)
+			return .branches(
+				branches,
+				failure: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
+			)
 		default:
-			guard let kind = StandardKind(rawValue: letter) else {
+			guard let kind = StandardKind(rawValue: isVerbose ? Character(letter.lowercased()) : letter) else {
 				throw .invalidLetter(letter)
 			}
 			guard !coerced || kind.isCoercible else {
@@ -1095,8 +1138,8 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 					kind,
 					negated: negated,
 					coerced: coerced,
-					success: try parseDelimitedFormat(&input, kind: .string),
-					failure: try parseDelimitedFormat(&input, kind: .string),
+					success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
+					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
 				)
 				: .standard(kind, negated: negated, coerced: coerced, success: nil, failure: nil)
 		}
@@ -1142,17 +1185,20 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
-				branch = .value(success: try parseDelimitedFormat(&input, kind: .string))
+				branch = .value(success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true))
 			case "l", "L":
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
-				branch = .label(negated: negated, success: isVerbose ? try parseDelimitedFormat(&input, kind: .string) : nil)
+				branch = .label(
+					negated: negated,
+					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
+				)
 			case "n", "N":
 				branch = .number(
 					negated: negated,
 					coerced: coerced,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .number) : nil,
+					success: isVerbose ? try parseDelimitedFormat(&input, kind: .number, requirePlaceholder: false) : nil,
 				)
 			case "d", "D":
 				guard !coerced else {
@@ -1167,7 +1213,7 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				}
 				branch = .date(negated: negated, success: success)
 			default:
-				guard let kind = StandardKind(rawValue: letter) else {
+				guard let kind = StandardKind(rawValue: isVerbose ? Character(letter.lowercased()) : letter) else {
 					throw .invalidLetter(letter)
 				}
 				guard !coerced || kind.isCoercible else {
@@ -1177,7 +1223,7 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 					kind,
 					negated: negated,
 					coerced: coerced,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string) : nil,
+					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
 				)
 			}
 			branches.append(branch)

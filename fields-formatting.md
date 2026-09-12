@@ -42,9 +42,10 @@ Need a Placeholder" under "Transforms" below). (See "Value Coercion" &
 combination needs a `<double-pipeline-terminator>` between the 2.)
 
 Unlike every other `<*-transform-pipeline>` site — a placeholder's own
-`<success>` / `<failure>` sub-format always knows its kind up front from its
-own grammar position (e.g., `%n{...}`'s inner pipeline is always
-`<number-transform-pipeline>`) — `<value-transform-pipeline>` infers kind from
+success / failure sub-format always knows its kind up front from its own
+grammar position (e.g., `%N`'s own success sub-format is always number-kind,
+so it may contain a `<number-transform-pipeline>` but never a
+`<string-transform-pipeline>`) — `<value-transform-pipeline>` infers kind from
 its own 1st `<transform>` instead, since a field's raw value has no fixed
 type. This is never ambiguous: no 2 kinds define the same `<transform>` name,
 so the 1st `<transform>`'s name alone determines kind for the rest of the
@@ -73,10 +74,9 @@ date-placeholder-reference   = <named-date-format> [ <date-transform-pipeline> ]
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A placeholder's own `<success>` / `<failure>` sub-format uses these
-placeholder-level references, not `<format>` itself — so a
-`<format-transform-pipeline>` (only ever part of `<format>`) never applies
-inside one.
+A placeholder's own success / failure sub-format uses these placeholder-level
+references, not `<format>` itself — so a `<format-transform-pipeline>` (only
+ever part of `<format>`) never applies inside one.
 
 ##### Named Formats
 
@@ -119,20 +119,20 @@ If no named format exists for a referenced name, an error is reported.
 <!--markdownlint-disable line-length-->
 ```ebnf
 (* Only `<format>` itself uses this directly; every other `<*-transform-
-   pipeline>` site (a placeholder's own `<success>` / `<failure>` sub-format)
-   already knows its kind statically & uses 1 of the 3 alternatives below
-   directly instead. *)
+   pipeline>` site (a placeholder's own success / failure sub-format) already
+   knows its kind statically & uses 1 of the 3 alternatives below directly
+   instead. *)
 value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <date-transform-pipeline>
 
 string-transform-pipeline = ( <transform-call-prefix> <string-transform> )+
 date-transform-pipeline   = ( <transform-call-prefix> <date-transform> )+
 
 (* A `<terminal-number-transform>` (currently just `group`) produces a value
-   no other `<number-transform>` can operate on further (see `group`'s own
-   note below), so it may only ever appear last: either alone, or after 1+
-   `<non-terminal-number-transform>`s. This is the 1 exception to `<transform>`
-   ordering being unconstrained; the grammar enforces it directly, rather than
-   leaving it to prose. *)
+   no other `<non-terminal-number-transform>` can operate on further (see
+   `group`'s own note below), so it may only ever appear last: either alone,
+   or after 1+ `<non-terminal-number-transform>`s. This is the 1 exception to
+   `<transform>` ordering being unconstrained; the grammar enforces it
+   directly, rather than leaving it to prose. *)
 number-transform-pipeline = ( <transform-call-prefix> <non-terminal-number-transform> )+ [ <transform-call-prefix> <terminal-number-transform> ]
                           | <transform-call-prefix> <terminal-number-transform>
 
@@ -243,31 +243,38 @@ E.g., all of the following are valid:
 
 Once a `<double-pipeline-terminator>` (or a closed `<argument-fence>`) ends
 the pipeline, whatever follows is ordinary `<template>` content — even 1
-starting with `.`: `.round::.absoluteValue` parses `.absoluteValue` as literal
-`<format-text>`, not as another `<transform-call>`. It's still rejected, but
-for a different, more general reason: see "Templates Need a Placeholder"
-below.
+starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
+parses `.absoluteValue` as literal `<format-text>`, not as another
+`<transform-call-prefix>`-led `<transform>`. It's still rejected, but for a
+different, more general reason: see "Templates Need a Placeholder" below.
 
 ###### Templates Need a Placeholder
 
 A `<template>` with no `<placeholder>` at all — pure `<format-text>` —
 renders identically no matter what the field's value is, which is never
-useful, so it's a parse error, whether the `<template>` is `<format>`'s
-entire content (no `<named-format>`, no pipeline) or follows a
+useful, so it's a parse error: whether the `<template>` is `<format>`'s
+entire content (no `<named-format>`, no `<format-transform-pipeline>`, no
+`<value-transform-pipeline>`), follows a `<format-transform-pipeline>`
+(justify — even though justify itself never reads the field's value, its
+`<template>` is still `<format>`'s entire rendering), or follows a
 `<named-format>` and/or a `<value-transform-pipeline>`. E.g.,
-`adamID:some literal text` &
-`.round::.absoluteValue` (see above) are both errors for this reason.
+`adamID:some literal text`, `.rightJustify: MB`, & `.round::.absoluteValue`
+(see above) are all errors for this reason.
 
-The 1 exception is a `<template>` that follows a `<format-transform-pipeline>`
-(justify): justify never reads the field's value either (see "Format
-Transforms" below), so its own `<template>` has nothing to lose by being
-constant — `.rightJustify: MB` stays valid.
+A placeholder's own success sub-format (& a fallible placeholder's own
+failure sub-format) is different: it's a value-conditional branch of
+`<format>`'s overall rendering, not `<format>`'s entire rendering, unless the
+placeholder itself is infallible (`%v` / `%V`, `%l` / `%L`: their own success
+always applies, since neither has a defined failure). So:
 
-A placeholder-level `<success>` / `<failure>` sub-format is a different thing
-entirely & isn't subject to this: it's a conditional branch of `<format>`'s
-overall rendering, not `<format>`'s entire rendering, so a fixed label for a
-condition (e.g., `%ct{Yes}` / `%cf{No}` for a boolean field) is exactly the
-point, not an oversight.
+- A fallible placeholder's (`%n` / `%N`, `%d` / `%D`, `%b` / `%B`, & the
+  standard placeholders `%u` / `%U` etc.) own success & failure are exempt: a
+  fixed label per branch is exactly the point, not an oversight, e.g.,
+  `%cTYes+No+` (a coerced, verbose `isTrue` placeholder: success `Yes`,
+  failure `No`).
+- An infallible placeholder's (`%v` / `%V`, `%l` / `%L`) own success is not
+  exempt: `%Vconstant+` is as pointless & is as much an error as a bare
+  `<template>`, for the same reason.
 
 ###### `group`
 
@@ -345,8 +352,8 @@ column to align), & doesn't force `%v` / `%V`'s type-preserving `json`
 passthrough into a string, unlike every other transform. For this reason, a
 `<format-transform-pipeline>` may only appear where `<format>` itself allows
 it (right after the field's own optional `<named-format>`, before anything
-else) — never inside a placeholder's own `<success>` / `<failure>`
-sub-format, where only ordinary `<transform>`s are valid.
+else) — never inside a placeholder's own success / failure sub-format, where
+only ordinary `<transform>`s are valid.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's
 padding is odd-width: `centerStartJustify` puts the extra padding character
