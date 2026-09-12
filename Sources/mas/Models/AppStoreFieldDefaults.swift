@@ -21,15 +21,14 @@
 /// uses, kept as 1 shared definition so the 2 can't drift apart.
 func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
 	if priceFieldNameSet.contains(fieldName) {
-		return .default(interpretation: .price, boundaryCharacter: nil, outputFormat: outputFormat)
+		.default(interpretation: .price, boundaryCharacter: nil, outputFormat: outputFormat)
+	} else if versionFieldNameSet.contains(fieldName) {
+		.default(interpretation: .version, boundaryCharacter: nil, outputFormat: outputFormat)
+	} else if pathFieldNameSet.contains(fieldName) {
+		.default(interpretation: .numeric, boundaryCharacter: "/", outputFormat: outputFormat)
+	} else {
+		.textDefault(outputFormat: outputFormat)
 	}
-	if versionFieldNameSet.contains(fieldName) {
-		return .default(interpretation: .version, boundaryCharacter: nil, outputFormat: outputFormat)
-	}
-	if pathFieldNameSet.contains(fieldName) {
-		return .default(interpretation: .numeric, boundaryCharacter: "/", outputFormat: outputFormat)
-	}
-	return .textDefault(outputFormat: outputFormat)
 }
 
 private let priceFieldNameSet = Set(["price", "formattedPrice"])
