@@ -264,13 +264,10 @@ fields configs.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-absolute-config = <first-absolute-field-spec> [ ( <field-spec-separator> <subsequent-absolute-field-spec> )+ ]
+absolute-config = <absolute-field-spec> … <field-spec-separator>
 
-first-absolute-field-spec = <first-absolute-field-name> <field-modifiers>
-first-absolute-field-name = <subsequent-absolute-field-name\[:<base-fields-config-section-prefix>:][:<field-order-section-prefix>:][:<item-sort-section-prefix>:][:<field-specs-section-prefix>:]>
-
-subsequent-absolute-field-spec = <subsequent-absolute-field-name> <field-modifiers>
-subsequent-absolute-field-name = {text\\[:<label-modifier-prefix>:][:<format-modifier-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
+absolute-field-spec = <absolute-field-name> <field-modifiers>
+absolute-field-name = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -298,7 +295,7 @@ relative-config = [ <base-fields-config-section> ] [ <field-order-section> ] [ <
 base-fields-config-section        = <base-fields-config-section-prefix> <base-fields-config-name>
 base-fields-config-section-prefix = "@"
 
-base-fields-config-name = {text\\[:<field-order-section-prefix>:][:<item-sort-section-prefix>:][:<field-specs-section-prefix>:]} (* default: "default" *)
+base-fields-config-name = {text} (* default: "default" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -311,15 +308,20 @@ base-fields-config-name = {text\\[:<field-order-section-prefix>:][:<item-sort-se
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-field-order-section        = <field-order-section-prefix> [ <field-order-option-set> ] (* default: inherited field order *)
+field-order-section        = <field-order-section-prefix> <field-order-option-set> (* default: inherited field order *)
 field-order-section-prefix = "/"
 
-field-order-option-set = <original-order-option-set> | <sort-option-set>
+field-order-option-set = <original-order-option-set> | <working-order-option-set> | <sort-option-set>
 
 original-order-option-set = [ <original-order-option>+ ] <original-order> [ <original-order-option>+ ]
 original-order-option     = <original-order> | <direction>
 
 original-order = "o" (* supported only for key-value & JSON, not for table *)
+
+working-order-option-set = [ <working-order-option>+ ] <working-order> [ <working-order-option>+ ]
+working-order-option     = <working-order> | <direction>
+
+working-order = "w"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -328,22 +330,31 @@ Fields are ordered:
 
 - If `<field-order-section>` is:
   - **Absent**: per inherited field order.
-  - **Present**: if `<field-order-option-set>` is:
-    - **Absent**: per order in working fields config; i.e., field order from the
-      base fields config as modified by `<field-specs-section>`.
-    - **Present**, if `<original-order-option-set>` is:
-      - **Absent**, `<sort-option-set>` is guaranteed present; if `<source>` is:
-        - `<input>`, by sorting by name.
-        - `<output>`, by sorting by label.
-      - **Present**, per original order, e.g., the ordering of keys in a JSON
-        object.
+  - **Present**, per its `<field-order-option-set>`:
+    - `<original-order-option-set>`: per original order, e.g., the ordering of
+      keys in a JSON object.
+    - `<working-order-option-set>`: per order in working fields config; i.e.,
+      field order from the base fields config as modified by
+      `<field-specs-section>`.
+    - `<sort-option-set>`, if `<source>` is:
+      - `<input>`, by sorting by name.
+      - `<output>`, by sorting by label.
+
+`<original-order>` is not supported for table output because items are
+processed in a streaming manner & may each have different fields, or the same
+fields in different orders, so no single original order exists for all of a
+table's rows; key-value & JSON output can order each item's fields
+independently.
+
+With `<original-order>` or `<working-order>`, `<descending>` reverses the
+order.
 
 #### Item Sorting
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-item-sort-section        = <item-sort-section-prefix> [ <item-sort-option-set> ] (* default: inherited item sorting *)
+item-sort-section        = <item-sort-section-prefix> <item-sort-option-set> (* default: inherited item sorting *)
 item-sort-section-prefix = "//"
 
 item-sort-option-set = <item-sort-option>+
@@ -378,7 +389,7 @@ field-spec-reference         = <named-field-spec-reference> | <indexed-field-spe
 named-field-spec-reference   = <reference-field-name> [ <index-prefix> <index> ] (* default index: "1" *)
 indexed-field-spec-reference = <index-prefix> <index>
 
-reference-field-name = {text\\[:<index-prefix>:][:<label-modifier-prefix>:][:<format-modifier-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
+reference-field-name = {text}
 
 index-prefix = "@"
 index        = {integer}
@@ -423,7 +434,7 @@ insert-field-spec = <insert> <insert-field-name> <field-modifiers>
 
 sourced-field-spec = <overlay-field-spec> | <move-field-spec> | <remove-field-spec>
 
-overlay-field-spec = <field-spec-reference\[:<insert>:][:<move>:][:<remove>:]> <field-modifiers>
+overlay-field-spec = <field-spec-reference> <field-modifiers>
 move-field-spec    = <move> <field-spec-reference> <field-modifiers>
 remove-field-spec  = <remove> <field-spec-reference>
 
@@ -431,7 +442,7 @@ insert = "+"
 move   = "%"
 remove = "-"
 
-insert-field-name = {text\\[:<label-modifier-prefix>:][:<format-modifier-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
+insert-field-name = {text}
 
 field-spec-separator = ","
 ```
@@ -477,7 +488,7 @@ field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 ```ebnf
 label-modifier        = <label-modifier-prefix> [ <label> ] (* transitive default label: {field name from the containing field-spec} *)
 label-modifier-prefix = "="
-label                 = {text\\[:<format-modifier-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]} (* default: "" *)
+label                 = {text} (* default: "" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -582,7 +593,7 @@ localized    = <localized-prefix> [ <locale-name-fence> [ <locale-name> ] <local
 localized-prefix = "l"
 
 locale-name-fence = "+"
-locale-name       = {text\\[:<locale-name-fence>:]} (* default: {system default locale name} *)
+locale-name       = {text} (* default: {system default locale name} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -628,7 +639,7 @@ version        = "v"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] ( <grouped-boundaries> | <ungrouped-boundaries> ) (* default: "b+_+" *)
+boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] ( <grouped-boundaries> | <ungrouped-boundaries> )
 boundaries-prefix = "b"
 
 boundaries-option-set = <boundaries-option>+
@@ -636,26 +647,22 @@ boundaries-option     = <collapse-contiguous>
 
 collapse-contiguous = "%"
 
-whitespace-boundary-modifier = <grouped-whitespace-boundary-modifier> | <ungrouped-whitespace-boundary-modifier>
-
-grouped-boundaries                     = "+" ( ( <grouped-whitespace-boundary-suppressor> | <grouped-whitespace-boundary-modifier> ) [ <grouped-boundaries-list> ] | [ <grouped-whitespace-boundary-modifier> ] <grouped-boundaries-list> [ <grouped-whitespace-boundary-modifier> ] ) "+"
+grouped-boundaries                     = "+" ( <grouped-whitespace-boundary-suppressor> [ <grouped-boundaries-list> ] | <grouped-boundaries-list> ) "+"
 grouped-whitespace-boundary-suppressor = "+"
-grouped-whitespace-boundary-modifier   = "_"
 grouped-boundaries-list                = <boundary-list> … <group-separator>
 group-separator                        = "_"
 
-ungrouped-boundaries                     = "_" ( ( <ungrouped-whitespace-boundary-suppressor> | <ungrouped-whitespace-boundary-modifier> ) [ <ungrouped-boundaries-list> ] | [ <ungrouped-whitespace-boundary-modifier> ] <ungrouped-boundaries-list> [ <ungrouped-whitespace-boundary-modifier> ] ) "_"
+ungrouped-boundaries                     = "_" ( <ungrouped-whitespace-boundary-suppressor> [ <ungrouped-boundaries-list> ] | <ungrouped-boundaries-list> ) "_"
 ungrouped-whitespace-boundary-suppressor = "_"
-ungrouped-whitespace-boundary-modifier   = "+"
 ungrouped-boundaries-list                = <boundary-list> … <group-joiner>
 group-joiner                             = "+"
 
-boundary-list       = <boundary-characters> | <multi-character-boundary> | <character-class>
-boundary-characters = {text\\[:<character-class-fence>:][:<multi-character-boundary-fence>:]+_}
+boundary-list       = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
+boundary-characters = {text}
 
 multi-character-boundary       = <multi-character-boundary-fence> <multi-character-boundary-text> <multi-character-boundary-fence>
 multi-character-boundary-fence = "%"
-multi-character-boundary-text  = {text\\[:<multi-character-boundary-fence>:]}
+multi-character-boundary-text  = {text}
 
 character-class       = <character-class-fence> <character-class-name> <character-class-fence>
 character-class-fence = ":"
@@ -669,7 +676,11 @@ Input is tokenized by **boundaries** assigned to ordered sort precedence
 
 Boundaries & boundary groups are either **explicit** or **implicit**.
 
-Explicit boundaries are defined in `<boundary-list>`s:
+Explicit boundaries are defined in `<boundary-list>`s, each of which may mix
+its 3 kinds of elements (e.g., `a%multi%b` defines the boundaries `a`,
+`multi` & `b`; a bare `%` or `:` always opens a `<multi-character-boundary>`
+or `<character-class>`, so `a%b` is an error, whereas `a\%b` defines the
+boundaries `a`, `%` & `b`):
 
 - Each character in a `<boundary-characters>` is itself an explicit boundary.
 - Each `<multi-character-boundary-text>` is itself an explicit boundary.
@@ -694,19 +705,13 @@ Explicit groups are specified in `<boundaries>`:
   - A `<group-joiner>` merges the immediately succeeding group into the
     immediately preceding group.
 
-By default, all whitespace characters are assigned to an implicit endmost group;
+By default (including when `<boundaries>` is absent), all whitespace
+characters are assigned to an implicit endmost group;
 `<grouped-whitespace-boundary-suppressor>` &
-`<ungrouped-whitespace-boundary-suppressor>` suppress it.
-
-- A **trailing** `<whitespace-boundary-modifier>` (without a leading one)
-  includes in the **last** explicit group all whitespace characters for which no
-  explicit boundaries are present.
-- A **solitary** or a **leading** `<whitespace-boundary-modifier>` (without a
-  trailing one) positions the whitespace implicit group **before** all explicit
-  groups.
-- Both a **leading & trailing** `<whitespace-boundary-modifier>` include in the
-  **first** explicit group all whitespace characters for which no explicit
-  boundaries are present.
+`<ungrouped-whitespace-boundary-suppressor>` suppress it. To position
+whitespace explicitly, list it via a `<character-class>` (e.g., `:space:`),
+which overrides its implicit membership: `b+:space:_-+` positions whitespace
+before `-`; `b+-:space:+` merges whitespace into `-`'s group.
 
 By default, contiguous boundaries in input are preserved as separate characters.
 `<collapse-contiguous>` collapses contiguous boundaries belonging to the same
@@ -716,13 +721,13 @@ boundary group into one.
 
 | Format    | Type    | Default       |
 |:----------|:--------|:--------------|
-| Table     | Text    | `Iailgnb+_+`  |
-| Table     | Price   | `Iailgpb+_+`  |
-| Table     | Version | `Iailuvb+_+`  |
+| Table     | Text    | `Iailgn`      |
+| Table     | Price   | `Iailgp`      |
+| Table     | Version | `Iailuv`      |
 | Table     | Path    | `Iailgnb+/+`  |
-| Key-Value | Text    | `Iailgnb+_+`  |
-| Key-Value | Price   | `Iailgpb+_+`  |
-| Key-Value | Version | `Iailuvb+_+`  |
+| Key-Value | Text    | `Iailgn`      |
+| Key-Value | Price   | `Iailgp`      |
+| Key-Value | Version | `Iailuv`      |
 | Key-Value | Path    | `Iailgnb+/+`  |
 | JSON      | Text    | `Iascgnb+++`  |
 | JSON      | Price   | `Iascgpb+++`  |
@@ -730,10 +735,49 @@ boundary group into one.
 | JSON      | Path    | `Iascgnb++/+` |
 
 JSON suppresses the implicit whitespace boundary entirely (`+++` /
-`++/+`'s leading `+` after the fence) rather than defaulting it (`+_+` /
-`+/+`), matching its already-more-literal case-sensitive / canonical
-choices on the other axes: Table / Key-Value are read by people, so
+`++/+`'s leading `+` after the fence) rather than defaulting it (absent
+`<boundaries>` / `+/+`), matching its already-more-literal case-sensitive /
+canonical choices on the other axes: Table / Key-Value are read by people, so
 whitespace sorting like a low-precedence separator is the friendlier
 default; JSON is read by programs, so nothing gets special-cased. Path
 keeps its `/` boundary either way; the suppression only concerns
 whitespace.
+
+## Appendix: Escaping
+
+Derived from [ebnf.md's token rules](ebnf.md#tokens): within a `{text}`, a bare
+occurrence of any of its candidate text terminators ends it, & a bare
+candidate syntax literal at its first position preempts it entirely. `\` always
+escapes the next character, so a literal `\` is written `\\` everywhere.
+
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
+| `{text}`                                                                                 | Preempted at 1st character by   | Ended anywhere by    |
+|:-----------------------------------------------------------------------------------------|:--------------------------------|:---------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`                               | `@` `/` `.`                     | `=` `:` `/` `,`      |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`                          |                                 | `=` `:` `/` `,`      |
+| `<base-fields-config-name>`                                                              |                                 | `/` `.`              |
+| `<insert-field-name>`                                                                    |                                 | `=` `:` `/` `,`      |
+| `<reference-field-name>` in `<overlay-field-spec>`                                       | `+` `%` `-` `@`                 | `@` `=` `:` `/` `,`  |
+| `<reference-field-name>` in `<move-field-spec>`                                          | `@`                             | `@` `=` `:` `/` `,`  |
+| `<reference-field-name>` in `<remove-field-spec>`                                        | `@`                             | `@` `,`              |
+| `<label>`                                                                                |                                 | `:` `/` `,`          |
+| `<locale-name>`                                                                          |                                 | `+`                  |
+| `<boundary-characters>`                                                                  | `%` `:`                         | `%` `:` `_` `+`      |
+| `<multi-character-boundary-text>`                                                        |                                 | `%`                  |
+| `<format-name>`                                                                          |                                 | `::` `.` `/` `,`     |
+| `<template-text>` beginning a `<format>`                                                 | `:` `.`                         | `%` `/` `,`          |
+| `<template-text>` after `<pipeline-terminator>`                                          |                                 | `%` `/` `,`          |
+| `<template-text>` after a `<parameterized-value-transform>`'s closing `:`                | `.`                             | `%` `/` `,`          |
+| `<template-text>` after a `<placeholder>`                                                |                                 | `%` `/` `,`          |
+| `<placeholder-format-name>`                                                              |                                 | `.` `+`              |
+| `<date-format-name>`                                                                     |                                 | `.` `+` `,` `_`      |
+| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, leading                 | `:` `.`                         | `%` `+`              |
+| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, after a `<placeholder>` |                                 | `%` `+`              |
+| `<inline-date-format>`                                                                   | `:` `.`                         | `+` `,` `_`          |
+| `<group-locale-name>` / `<group-separator>`                                              |                                 | `,` `:`              |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
+
+A single `:` in a `<format-name>` is data (only `::` ends it), & a single `/`
+never ends anything where only `//` is a candidate.

@@ -19,8 +19,8 @@ format = <named-format> [ <format-transform-pipeline> ] [ <value-transform-pipel
    "Pipeline Terminator" under "Transforms" below. *)
 pipeline-terminator = "::"
 
-template    = ( <placeholder> | <format-text> )+
-format-text = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
+template      = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
+template-text = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -42,7 +42,7 @@ distinction).
 `<format-transform-pipeline>` (see "Format Transforms" below),
 `<value-transform-pipeline>` (applied to `<named-format>`'s value, or `%v`'s
 if `<named-format>` is absent) & `<template>` (`<placeholder>` /
-`<format-text>`), always in that order, with no separator of any kind
+`<template-text>`), always in that order, with no separator of any kind
 between adjacent parts, except where "Pipeline Terminator" below requires a
 `<pipeline-terminator>` right before a `<template>`. A `<value-transform-
 pipeline>` alone renders as its own output. Followed by a `<template>`, the
@@ -97,14 +97,14 @@ ever part of `<format>`) never applies inside one.
 <!--markdownlint-disable line-length-->
 ```ebnf
 named-format = <name-prefix> <format-name>
-format-name  = {text\\[:<transform-call-prefix>:][:<sort-modifier-prefix>:][:<field-spec-separator>:]}
+format-name  = {text}
 
 named-string-format     = <name-prefix> <placeholder-format-name>
 named-number-format     = <name-prefix> <placeholder-format-name>
-placeholder-format-name = {text\\[:<transform-call-prefix>:][:<format-delimiter>:]}
+placeholder-format-name = {text}
 
 named-date-format = <name-prefix> <date-format-name>
-date-format-name  = {text\\[:<transform-call-prefix>:][:<format-delimiter>:][:<date-input-format-separator>:][:<date-input-output-separator>:]}
+date-format-name  = {text}
 
 name-prefix = ":"
 ```
@@ -219,8 +219,8 @@ scale-arguments    = <argument-fence> <radix> <argument-separator> <exponent> <a
 argument-fence     = ":" (* fences any transform's argument list; generic, not `scale`-specific *)
 argument-separator = "," (* separates a transform's own arguments; generic, not `scale`-specific *)
 
-group-locale-name = {text} (* must not contain `,` / `:`; default: {system default locale name} *)
-group-separator   = {text} (* must not contain `,` / `:` *)
+group-locale-name = {text} (* default: {system default locale name} *)
+group-separator   = {text}
 group-digit-count = {positive integer}
 
 radix              = {positive integer}     (* 2-36; base for `exponent` & the rendered digits *)
@@ -295,7 +295,7 @@ arguments, closing its own `<argument-fence>` (also `:`); ending in an
 - If the last-present part closed its own `<argument-fence>`: that closing
   `:` already unambiguously ends things, so nothing extra is needed at all;
   the `<template>` starts right after it. Any further `:` there is just
-  literal `<template>` text (`<format-text>`), not a `<pipeline-terminator>`:
+  literal `<template>` text (`<template-text>`), not a `<pipeline-terminator>`:
   e.g., `.group:de_DE:::%v` is `group`, then the `<template>` `::%v`:
   literal `::`, then a `%v` placeholder reading `group`'s own output.
 - Otherwise: nothing about the last-present part's own name-scan can tell
@@ -303,7 +303,10 @@ arguments, closing its own `<argument-fence>` (also `:`); ending in an
   (`group` / `scale` also use `:` for their own `<argument-fence>`, and even a
   `<format-transform>` / bare `<named-format>` name-scan must still stop at
   `:` for this same reason), so a `<pipeline-terminator>` is required. A
-  single stray `:` there (not doubled) is a parse error, not a lenient no-op.
+  single stray `:` there (not doubled) is an error, not a lenient no-op: after
+  a `<format-transform-pipeline>` or `<value-transform-pipeline>`, nothing
+  accepts it; after a `<named-format>`, it's simply part of `<format-name>`
+  (only `::` ends a `<format-name>`), which then doesn't exist.
 
 E.g., all of the following are valid:
 
@@ -322,15 +325,16 @@ E.g., all of the following are valid:
 Once a `<pipeline-terminator>` (or a closed `<argument-fence>`) ends
 the last-present part, whatever follows is ordinary `<template>` content,
 even 1 starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
-parses `.absoluteValue` as literal `<format-text>`, not as another
+parses `.absoluteValue` as literal `<template-text>`, not as another
 `<value-transform-call>`. It's still rejected, but for a
 different, more general reason: see "Templates Need a Placeholder" below.
 
 ###### Templates Need a Placeholder
 
-A `<template>` with no `<placeholder>` at all (pure `<format-text>`)
+A `<template>` with no `<placeholder>` at all (pure `<template-text>`)
 renders identically no matter what the field's value is, which is never
-useful, so it's a parse error: whether the `<template>` is `<format>`'s
+useful, so it's a parse error (`<template>`'s own grammar requires a
+`<placeholder>`): whether the `<template>` is `<format>`'s
 entire content (no `<named-format>`, no `<format-transform-pipeline>`, no
 `<value-transform-pipeline>`), follows a `<format-transform-pipeline>`
 (justify; even though justify itself never reads the field's value, its
@@ -383,12 +387,10 @@ are left untouched.
   `<group-separator>` & `<group-digit-count>` come from the system default
   locale, or the named locale, respectively.
 - `<group-locale-name>` & `<explicit-group-arguments>` are distinguished by
-  content, not position: text with no `<argument-separator>` is a locale
+  content, not position: text with no bare `<argument-separator>` is a locale
   name; text with exactly 1 is `<group-separator>` & `<group-digit-count>`.
-  Neither supports escaping (unlike most other `{text}` values in this spec),
-  so `<group-separator>` can't itself be `,` / `:` / `.` / `+` / `%`; use a
-  `<group-locale-name>` instead if you need 1 of those (e.g., a locale using
-  `.` for grouping).
+  Escape `,` or `:` to use either in a `<group-separator>` (e.g.,
+  `.group:\,,3:`).
 - E.g., `.group` (system locale; note the absent `<argument-fence>`: bare
   `group`, not `group:`, since an empty `<group-arguments>` is invalid),
   `.group:de_DE:` (a named locale's separator & digit count), `.group: ,3:`
@@ -483,11 +485,11 @@ format-delimiter = "+"
 ```ebnf
 standard        = <string-placeholder-reference> | <standard-format>
 standard-format = ( <placeholder> | <standard-text> )+
-standard-text   = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<format-delimiter>:]}
+standard-text   = {text}
 
 failure        = <string-placeholder-reference> | <failure-format>
 failure-format = ( <placeholder> | <failure-text> )+
-failure-text   = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<format-delimiter>:]}
+failure-text   = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -592,7 +594,7 @@ verbose-number = "N" (* is number; default: verbatim field value *)
 
 number               = <number-placeholder-reference> | <number-format>
 number-format        = ( <placeholder> | <inline-number-format> )+
-inline-number-format = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<placeholder-prefix>:][:<format-delimiter>:]}
+inline-number-format = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -638,7 +640,7 @@ input-date-format  = <date-format>
 output-date-format = <date-format> (* default: ISO-8601 datetime in local time zone *)
 
 date-format        = <date-placeholder-reference> | <inline-date-format>
-inline-date-format = {text\[:<name-prefix>:][:<transform-call-prefix>:]\\[:<date-input-format-separator>:][:<date-input-output-separator>:][:<format-delimiter>:]}
+inline-date-format = {text}
 
 date-input-format-separator = ","
 date-input-output-separator = "_"

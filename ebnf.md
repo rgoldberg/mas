@@ -77,35 +77,69 @@ Inherent scalar.
 
 `\ESCAPED` evaluates to `ESCAPED` (e.g., `\n` evaluates to `n`).
 
-### Text Classification
+### Ad Hoc Text
 
-#### Text Character Composition
+**Ad hoc text** functions as data rather than as syntax.
 
-- Text described as bare contains only bare characters.
-- Text described as escaped contains at least one escaped character.
-- Text not described as bare or escaped may contain any mixture of bare &
-  escaped characters.
+### Tokens
 
-The underlying grammar may assign different semantics to bare text & escaped
-text.
+**Tokens** are contiguous characters that are consumed together as a single
+element by the syntax.
 
-#### Text Function
+**Bare tokens** contain only bare characters.
 
-##### Literal Text
+**Text tokens** are ad hoc text.
 
-**Literal text** functions as syntactic operands (i.e., data). Literal text may
-consist of bare and/or escaped characters.
+**Syntax tokens** are bare tokens matching defined syntax literals; escaping
+any character within a token that would otherwise be a syntax token renders it a
+text token.
 
-##### Syntax Text
+#### Candidate Syntax Literals
 
-**Syntax text** functions as syntactic operators. Syntax text consists strictly
-of bare characters.
+The **candidate syntax literals** of a given position in the input are the
+literals that the syntax could consume at that position (regardless of the input
+starting at that position), which includes the literals that:
 
-Escaping any character within a token that (taken in its entirety) would
-otherwise be syntax text renders that token literal text.
+- Begin any choice available at that position.
+- Continue any enclosing sequence or repetition.
+- Close any enclosing construct.
 
-The context of bare text may influence whether it is syntax text or literal
-text.
+#### Consuming Tokens
+
+Input is consumed as a token iff a candidate construct matches the input
+starting at the current position.
+
+Consuming a token commits to the set of constructs that the token begins,
+continues, or closes; each subsequently consumed token narrows the set to the
+constructs that accept it.
+
+The parsed construct is the sole construct contained in, or tiebroken from, the
+set.
+
+If the set is empty, an error is reported.
+
+Input is never reconsidered after it has been consumed.
+
+##### Consuming Syntax Tokens
+
+Input is consumed as a syntax token iff a candidate syntax literal matches the
+input starting at the current position; if several match, the longest is
+consumed.
+
+##### Consuming Text Tokens
+
+Input is consumed as a text token iff a text token is available at the current
+position & no candidate syntax literal matches the input there.
+
+A text token's **candidate text terminators** are the candidate syntax literals
+that may follow it: those that continue or close any enclosing construct, &
+those that follow the text token in any committed-to construct that begins
+with a text token.
+
+A text token is the longest non-empty prefix of the input starting at the
+current position that does not contain any candidate text terminator; it
+terminates immediately before the earliest such terminator, which is then
+consumed as a syntax token.
 
 ### Literal Text
 
@@ -127,7 +161,7 @@ Inherent scalar.
 
 `DESCRIPTION` describes valid literal scalars, e.g., `{non-negative integer}`.
 
-`DESCRIPTION` must not begin with `{`.
+`DESCRIPTION` must not begin with `{` & must not be `text`.
 
 ### Repetition Descriptions
 
@@ -157,110 +191,24 @@ A placeholder's default value, when absent, is its
 
 #### Value Placeholder References
 
-Defined via a modified meta-grammar supporting [optionals](#optionals):
-
 ```ebnf
-<PLACEHOLDER[\INITIAL][\\ANYWHERE][\\\ENTIRE]>
+<PLACEHOLDER>
 ```
 
 Content-dependent multiplicity.
 
-`INITIAL`, `ANYWHERE` & `ENTIRE` restrict values for `PLACEHOLDER` as
-[specified for Escaping Text Placeholders](#escaping-text-placeholders), except
-`\}` is not supported as an escape sequence; the only supported escape sequence
-is `\>`, which evaluates to `>`.
+References the placeholder `PLACEHOLDER`.
 
-`PLACEHOLDER` must not contain any escape sequences or an unescaped `\`;
-consecutive `\` exclusively separate `PLACEHOLDER`, `INITIAL`, `ANYWHERE` &
-`ENTIRE`.
-
-### Token Sets
-
-A **token set** is a set of literal tokens.
-
-#### Token Set Productions
+### Text Placeholders
 
 ```ebnf
-[:NAME:] = EXPRESSION
-```
-
-Context-dependent multiplicity.
-
-#### Token Set References
-
-```ebnf
-[:NAME:]
-```
-
-Context-dependent multiplicity.
-
-References a token set `NAME`.
-
-`NAME` is a bare token that must not contain `:]`.
-
-#### Placeholder Token Sets
-
-```ebnf
-[:<PLACEHOLDER>:]
-```
-
-Context-dependent multiplicity.
-
-A token set containing the tokens permissible as values for placeholder
-`PLACEHOLDER`.
-
-### Escaping Text Placeholders
-
-Defined via a modified meta-grammar supporting [optionals](#optionals):
-
-```ebnf
-{text[\INITIAL][\\ANYWHERE][\\\ENTIRE]}
+{text}
 ```
 
 Inherent scalar.
 
-Non-empty text that supports [escaped characters](#escaped-characters).
-
-`INITIAL`, `ANYWHERE` & `ENTIRE` specify bare tokens that are interpreted as
-syntax text.
-
-`INITIAL`, `ANYWHERE` & `ENTIRE`:
-
-- Must not be empty.
-- Must not contain any `\` except as a member of `\}`.
-
-Tokens in `INITIAL`, `ANYWHERE` & `ENTIRE` are specified via:
-
-- `[:NAME:]` includes all tokens from token set `NAME`. Each `[:` must pair with
-  a `:]`.
-- `\}` includes `}`.
-- Any other character includes itself.
-
-If the entire bare text matches a token in `ENTIRE`, the entire text is a syntax
-token.
-
-Otherwise, syntax tokens are found by iterating over characters from start to
-end:
-
-- On each iteration, the longest bare token starting at the current character
-  that matches any of the following tokens, if any, is a syntax token:
-  - Any token in `ANYWHERE`.
-  - If the current character is the first character: any token in `INITIAL`.
-- If the current character, or the last character of any found syntax token, is
-  the last character, the iteration terminates.
-- Otherwise, the iteration continues with the current character set to:
-  - If a syntax token was found: the character after the syntax token.
-  - Otherwise: the character after the current character.
-
-#### Examples
-
-```ebnf
-{text\@.\\=:/,}
-```
-
-- `\` must always be escaped, as it must be in any `{text...}`.
-- `@` & `.` must be escaped if first (from `INITIAL`).
-- `=`, `:`, `/` & `,` must be escaped throughout (from `ANYWHERE`).
+A [text token](#tokens), which supports
+[escaped characters](#escaped-characters).
 
 ### Groupings
 

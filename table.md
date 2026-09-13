@@ -47,7 +47,7 @@ sgr-parameter-separator = ";"
 separator-option  = <separator-off> | <separator-on>
 separator-off     = "s"
 separator-on      = "S" [ <separator-pattern> ] ( <table-value-terminator> | <end-of-shell-word> )
-separator-pattern = {text\\[:<table-value-terminator>:]}
+separator-pattern = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -82,7 +82,7 @@ happens when 1 isn't otherwise present).
 column-spacing-option  = <column-spacing-default> | <column-spacing-custom>
 column-spacing-default = "c"
 column-spacing-custom  = "C" [ <column-spacing> ] ( <table-value-terminator> | <end-of-shell-word> )
-column-spacing         = {text\\[:<table-value-terminator>:]}
+column-spacing         = {text}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -134,3 +134,9 @@ value it appears.
 - `--table S-+:b`: a header row (implied) & a `-+`-patterned, broken
   separator line.
 - `--table C....`: no header, no separator, `....` between columns.
+
+## Escaping
+
+Per [ebnf.md's token rules](ebnf.md#tokens), a bare `<table-value-terminator>`
+(`:`) ends a `<separator-pattern>` or `<column-spacing>`; escape it (`\:`) to
+include it, & write a literal `\` as `\\`.
