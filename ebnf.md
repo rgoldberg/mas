@@ -302,8 +302,12 @@ Neither `ELEMENT` nor `SEPARATOR` may match empty text.
 
 ### Precedence
 
-From highest to lowest: repetition (`+`), delimited repetition (`…`), sequence
-(juxtaposition), then choice (`|`). Groupings override precedence.
+From highest to lowest precedence within a grouping:
+
+- Repetition (`+`)
+- Delimited repetition (`…`)
+- Sequence (juxtaposition)
+- Choice (`|`)
 
 ### Comments
 
