@@ -648,10 +648,10 @@ boundaries-option     = <collapse-contiguous>
 
 collapse-contiguous = "%"
 
-boundary-groups = <boundary-list> … <group-separator>
+boundary-groups = <boundary-group> … <group-separator>
 group-separator = "_"
 
-boundary-list       = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
+boundary-group      = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
 boundary-characters = {text}
 
 multi-character-boundary       = <multi-character-boundary-fence> <multi-character-boundary-text> <multi-character-boundary-fence>
@@ -666,20 +666,17 @@ character-class-name  = "alnum" | "alpha" | "ascii" | "blank" | "cntrl" | "digit
 <!--editorconfig-checker-enable-->
 
 Input is tokenized by **boundaries** assigned to ordered sort precedence
-**boundary groups**; each group's members share the same sort precedence.
+**boundary groups**, each defined by a `<boundary-group>`; each group's members
+share the same sort precedence.
 
-Each `<boundary-list>` in `<boundary-groups>` defines a boundary group; each
-may mix its 3 kinds of elements (e.g., `a%multi%b` defines the boundaries `a`,
-`multi` & `b`; a bare `%` or `:` always opens a `<multi-character-boundary>`
-or `<character-class>`, so `a%b` is an error, whereas `a\%b` defines the
-boundaries `a`, `%` & `b`):
+Each of the following is itself a boundary:
 
-- Each character in a `<boundary-characters>` is itself a boundary.
-- Each `<multi-character-boundary-text>` is itself a boundary.
+- Each character in a `<boundary-characters>`.
+- Each `<multi-character-boundary-text>`.
 - Each character belonging to a GNU Extended POSIX character class named
-  `<character-class-name>` is itself a boundary.
+  `<character-class-name>`.
 
-The last occurrence of a boundary for a value across all `<boundary-list>`s
+The last occurrence of a boundary for a value across all `<boundary-group>`s
 overrides all other boundaries for the same value.
 
 Boundaries take sort precedence over all boundaries in all groups succeeding
