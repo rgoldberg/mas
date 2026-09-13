@@ -113,11 +113,11 @@ Consuming a token commits to the set of constructs that the token begins,
 continues, or closes; each subsequently consumed token narrows the set to the
 constructs that accept it.
 
-A complete construct is **parsed** once it is the sole element in a set;
-disjoint choices guarantee that at most 1 construct is parsed.
+A complete construct is **parsed** once it is the sole element in its set;
+disjoint choices guarantee that at most 1 construct per set is parsed.
 
-If a set ever becomes empty, or if the input is exhausted before a construct is
-parsed, an error is reported.
+If a set ever becomes empty, or if the input is exhausted before each set's
+construct is parsed, an error is reported.
 
 Input is never reconsidered after it has been consumed.
 
