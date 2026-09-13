@@ -28,8 +28,10 @@ A value's multiplicity is either:
 
 A construct's multiplicity is either:
 
-- **Inherently scalar**: Every occurrence of the construct is a scalar.
-- **Inherently repetition**: Every occurrence of the construct is a repetition.
+- **Inherently scalar**: Every occurrence of an **inherent scalar** construct
+  is a scalar.
+- **Inherently repetition**: Every occurrence of an **inherent repetition**
+  construct is a repetition.
 - **Content-dependent**: The multiplicity of an occurrence of the construct is
   the same as its content.
 - **Context-dependent**: The multiplicity of an occurrence of the construct is
@@ -37,8 +39,8 @@ A construct's multiplicity is either:
 
 Convenience multiplicity categories for values include:
 
-- **Implicit scalars**: Scalars whose construct is not inherently scalar.
-- **Implicit repetitions**: Repetitions whose construct is not inherently
+- **Implicit scalars**: Scalars whose construct is not an inherent scalar.
+- **Implicit repetitions**: Repetitions whose construct is not an inherent
   repetition.
 
 ### Null
