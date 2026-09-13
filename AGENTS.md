@@ -81,6 +81,8 @@ file to reflect it.
   - **Word choice:** Avoid `curate` / `curated` / `curation`; prefer `select`,
     `handle`, etc.
   - **Em dashes:** Do not use em dashes
+  - **Numbers:** Write numbers as digits (e.g., `at most 1`, `3 kinds`, `1st`),
+    except the pronoun `one` (e.g., `the last one wins`)
   - `e.g.` & `i.e.` should always be immediately followed by a punctuation,
      e.g., `,` or `:`
 
