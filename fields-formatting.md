@@ -245,21 +245,20 @@ inferred kind) may coerce its input value first, controlled by a
 `<value-transform-coercion>` (a 2nd `.` right after the pipeline's own 1st
 `<value-transform-call>`'s `<transform-call-prefix>`, i.e., `..` instead of
 `.`), conceptually the same marker as `<placeholder-coercion>` (see
-"Coercion" under "Placeholders" below), & spelled with the same character,
-just in a different position (there's no placeholder-letter syntax slot at
-`<format>`'s own top level to attach `<placeholder-coercion>` to directly).
-Only `<number-transform-pipeline>` may be coerced this way: coerced, it also
-accepts a JSON string that itself parses as a number (not just a real JSON
-number); uncoerced (the default, no `..`), it requires a real JSON number,
-same as plain `%n`. `<value-transform-coercion>` on a `<string-transform-
-pipeline>` or `<date-transform-pipeline>` is a parse error: a
-`<string-transform-pipeline>`'s field's `stringValue` (its rendered
-representation) always exists, even for `null` (`""`), so it never needs
-coercion; a `<date-transform-pipeline>` accepts anything `%d` would (ISO-8601
-datetime, ISO-8601 date-only, or a Unix epoch numeric timestamp, as a real
-JSON number or a JSON string) unconditionally, the same way `%d` itself
-never supports `<placeholder-coercion>` either; there's no uncoerced form
-to distinguish it from.
+"Coercion" under "Placeholders" below), spelled with the same character, just in
+a different position (there's no placeholder-letter syntax slot at `<format>`'s
+own top level to attach `<placeholder-coercion>` to directly). Only
+`<number-transform-pipeline>` may be coerced this way: coerced, it also accepts
+a JSON string that itself parses as a number (not just a real JSON number);
+uncoerced (the default, no `..`), it requires a real JSON number, same as plain
+`%n`. `<value-transform-coercion>` on a `<string-transform-pipeline>` or
+`<date-transform-pipeline>` is a parse error: a `<string-transform-pipeline>`'s
+field's `stringValue` (its rendered representation) always exists, even for
+`null` (`""`), so it never needs coercion; a `<date-transform-pipeline>` accepts
+anything `%d` would (ISO-8601 datetime, ISO-8601 date-only, or a Unix epoch
+numeric timestamp, as a real JSON number or a JSON string) unconditionally, the
+same way `%d` itself never supports `<placeholder-coercion>` either; there's no
+uncoerced form to distinguish it from.
 
 Only the pipeline's own 1st `<value-transform-call>` currently affects
 rendering, since `<value-transform-pipeline>`'s kind & coercion are both
@@ -281,11 +280,11 @@ below); this applies even when a `<template>` follows the
 
 Whichever of `<named-format>`, `<format-transform-pipeline>`, or
 `<value-transform-pipeline>` is last present may be followed directly by a
-`<template>` (see "Value Coercion" above for what the `<template>` then
-renders against, & "Templates Need a Placeholder" below for a constraint on
-the `<template>` itself). A `<pipeline-terminator>` (`::`) must separate the
-2 UNLESS that last-present part already ends with `:` on its own, which
-only ever happens when it's a `<value-transform-pipeline>` ending in a
+`<template>` (see "Value Coercion" above for what the `<template>` then renders
+against; see "Templates Need a Placeholder" below for a constraint on the
+`<template>` itself). A `<pipeline-terminator>` (`::`) must separate the 2
+UNLESS that last-present part already ends with `:` on its own, which only ever
+happens when it's a `<value-transform-pipeline>` ending in a
 `<parameterized-value-transform>` (`group` / `scale`) called with explicit
 arguments, closing its own `<argument-fence>` (also `:`); ending in an
 `<unparameterized-value-transform>` instead never does. `<named-format>` &
@@ -367,7 +366,7 @@ every value:
 - Outside `%b`, an infallible placeholder's (`%v` / `%V`, `%l` / `%L`) own
   success is not exempt: it always applies regardless of the value, so
   `%Vconstant+` is exactly as replaceable by a bare `constant` as a bare
-  `<template>` would be, & is exactly as much an error.
+  `<template>` would be, so is exactly as much an error.
 
 ###### `group`
 
@@ -429,15 +428,14 @@ right-justify        = "rightJustify"
 
 Unlike a `<value-transform>`, a `<format-transform>` doesn't act on any
 value; it sets a property of the field itself, currently just its
-`table`-output column
-alignment (default: `leftJustify`). So it has no effect on the field's
-rendered value: it's a no-op for `json` / `key-value` output (which have no
-column to align), & doesn't force `%v` / `%V`'s type-preserving `json`
-passthrough into a string, unlike every other transform. For this reason, a
-`<format-transform-pipeline>` may only appear where `<format>` itself allows
-it (right after the field's own optional `<named-format>`, before anything
-else), never inside a placeholder's own success / failure sub-format, where
-only ordinary `<value-transform>`s are valid.
+`table`-output column alignment (default: `leftJustify`). It therefore does not
+affect the field's rendered value: it's a no-op for `json` / `key-value` output
+(which have no column to align); it doesn't force `%v` / `%V`'s type-preserving
+`json` passthrough into a string, unlike every other transform. For this reason,
+a `<format-transform-pipeline>` may only appear where `<format>` itself allows
+(right after the field's own optional `<named-format>`, before anything else),
+never inside a placeholder's own success / failure sub-format, where only
+ordinary `<value-transform>`s are valid.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's
 padding is odd-width: `centerStartJustify` puts the extra padding character
