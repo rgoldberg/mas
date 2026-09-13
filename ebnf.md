@@ -300,6 +300,11 @@ e.g.:
 
 Neither `ELEMENT` nor `SEPARATOR` may match empty text.
 
+### Precedence
+
+From highest to lowest: repetition (`+`), delimited repetition (`…`), sequence
+(juxtaposition), then choice (`|`). Groupings override precedence.
+
 ### Comments
 
 ```ebnf
@@ -321,6 +326,9 @@ placeholders.
 
 ###### Self Default Value Comments
 
+Defined via a modified meta-grammar supporting [optionals](#optionals),
+[choices](#choices) & [literal text](#literal-text):
+
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
@@ -341,7 +349,8 @@ is for `"transitive"`.
 
 ###### Descendant Default Value Comments
 
-Defined via the custom EBNF grammar, instead of via the meta-grammar:
+Defined via a modified meta-grammar supporting [optionals](#optionals),
+[choices](#choices) & [literal text](#literal-text):
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
