@@ -134,9 +134,3 @@ value it appears.
 - `--table S-+:b`: a header row (implied) & a `-+`-patterned, broken
   separator line.
 - `--table C....`: no header, no separator, `....` between columns.
-
-## Escaping
-
-Per [ebnf.md's token rules](ebnf.md#tokens), a bare `<table-value-terminator>`
-(`:`) ends a `<separator-pattern>` or `<column-spacing>`; escape it (`\:`) to
-include it, & write a literal `\` as `\\`.
