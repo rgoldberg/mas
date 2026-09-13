@@ -11,7 +11,7 @@ separator line & column spacing.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-table-value  = { <table-option> } (* ad hoc order; last 1 per axis wins *)
+table-value  = [ <table-option>+ ] (* ad hoc order; last 1 per axis wins *)
 table-option = <header-option> | <separator-option> | <broken-option> | <column-spacing-option>
 ```
 <!--markdownlint-enable line-length-->
@@ -26,7 +26,9 @@ header-option = <header-off> | <header-on>
 header-off    = "h"
 header-on     = "H" [ <sgr-parameters> ] ( <table-value-terminator> | <end-of-shell-word> )
 
-sgr-parameters = {positive integer} ( ";" {positive integer} )*
+sgr-parameters          = <sgr-parameter> … <sgr-parameter-separator>
+sgr-parameter           = {non-negative integer}
+sgr-parameter-separator = ";"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -42,9 +44,10 @@ sgr-parameters = {positive integer} ( ";" {positive integer} )*
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-separator-option = <separator-off> | <separator-on>
+separator-option  = <separator-off> | <separator-on>
 separator-off     = "s"
-separator-on      = "S" [ {text} ] ( <table-value-terminator> | <end-of-shell-word> )
+separator-on      = "S" [ <separator-pattern> ] ( <table-value-terminator> | <end-of-shell-word> )
+separator-pattern = {text\\[:<table-value-terminator>:]}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -58,7 +61,9 @@ separator-on      = "S" [ {text} ] ( <table-value-terminator> | <end-of-shell-wo
 ## Broken
 
 ```ebnf
-broken-option = "b" | "u"
+broken-option = <broken> | <unbroken>
+broken        = "b"
+unbroken      = "u"
 ```
 
 Meaningless without a separator line (see "Implied Options" below for what
@@ -76,7 +81,8 @@ happens when 1 isn't otherwise present).
 ```ebnf
 column-spacing-option  = <column-spacing-default> | <column-spacing-custom>
 column-spacing-default = "c"
-column-spacing-custom  = "C" {text} ( <table-value-terminator> | <end-of-shell-word> )
+column-spacing-custom  = "C" [ <column-spacing> ] ( <table-value-terminator> | <end-of-shell-word> )
+column-spacing         = {text\\[:<table-value-terminator>:]}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -85,8 +91,9 @@ column-spacing-custom  = "C" {text} ( <table-value-terminator> | <end-of-shell-w
   tracks the default's own current value, rather than fixing today's value
   literally.
 - `C`: a literal custom spacing string between adjacent columns (e.g., `C:`
-  for no spacing at all, `C\t:` for a tab). Absent both `c` & `C`, the
-  built-in default applies.
+  for no spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a literal tab
+  character, e.g., `$'C\t:'` in zsh). Absent both `c` & `C`, the built-in
+  default applies.
 
 ## Terminator
 
@@ -118,8 +125,7 @@ value it appears.
 
 ## Examples
 
-- `--table`: no header, no separator, 2-space columns (identical to `mas`'s
-  historical, pre-`--table`-configuration output).
+- `--table`: no header, no separator, 2-space columns.
 - `--table H`: a plain header row, no separator.
 - `--table H1:`: a bold header row (SGR `1`), no separator.
 - `--table S`: a header row (implied) & a blank separator line.
