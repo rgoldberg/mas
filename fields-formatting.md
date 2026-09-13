@@ -139,7 +139,7 @@ value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipel
 (* Like `<value-transform-pipeline>`, but excludes a `<number-transform-
    pipeline>` ending in `<terminal-number-transform-call>`; `<format>` uses
    this for its own optional leading pipeline right before its own mandatory
-   final transform-call, so that final call can never follow 1 that already
+   final transform-call, so that final call can never follow one that already
    ended a `<number-transform-pipeline>` of its own. *)
 non-terminal-value-transform-pipeline = <string-transform-pipeline> | <non-terminal-number-transform-pipeline> | <date-transform-pipeline>
 
@@ -191,7 +191,7 @@ date-transform                 = <iso> | <date-only> | <local-time-zone>
 parameterized-value-transform = <parameterized-group> | <scale>
 (* Every other `<value-transform>`: never closes a `:`-fenced argument list
    of its own; `<unparameterized-group>` is `<group>`'s other alternative,
-   the 1 with no arguments at all. *)
+   the one with no arguments at all. *)
 unparameterized-value-transform = <string-transform> | <absolute-value> | <round> | <date-transform> | <unparameterized-group>
 
 capitalize      = "initialUppercase"
@@ -323,7 +323,7 @@ E.g., all of the following are valid:
 
 Once a `<pipeline-terminator>` (or a closed `<argument-fence>`) ends
 the last-present part, whatever follows is ordinary `<template>` content,
-even 1 starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
+even one starting with `<transform-call-prefix>` (`.`): `.round::.absoluteValue`
 parses `.absoluteValue` as literal `<template-text>`, not as another
 `<value-transform-call>`. It's still rejected, but for a
 different, more general reason: see "Templates Need a Placeholder" below.
@@ -442,11 +442,11 @@ padding is odd-width: `centerStartJustify` puts the extra padding character
 after the value (leaving it nearer the column's start); `centerEndJustify`
 puts it before the value (leaving it nearer the column's end).
 
-If more than 1 `<format-transform>` appears in the pipeline, the last 1 wins.
+If more than 1 `<format-transform>` appears in the pipeline, the last one wins.
 
 A `<format-transform-pipeline>` never ends with `:` on its own (a
 `<format-transform>` never takes arguments, so it has no `<argument-fence>`
-to close), so a `<template>` following 1 always needs the full
+to close), so a `<template>` following one always needs the full
 `<pipeline-terminator>` (`::`) first; see "Pipeline Terminator" under
 "Transforms" above, which states this rule once, for `<named-format>`,
 `<format-transform-pipeline>` & `<value-transform-pipeline>` alike, rather

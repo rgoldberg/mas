@@ -11,7 +11,7 @@ separator line & column spacing.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-table-value  = [ <table-option>+ ] (* ad hoc order; last 1 per axis wins *)
+table-value  = [ <table-option>+ ] (* ad hoc order; last one per axis wins *)
 table-option = <header-option> | <separator-option> | <broken-option> | <column-spacing-option>
 ```
 <!--markdownlint-enable line-length-->
@@ -67,7 +67,7 @@ unbroken      = "u"
 ```
 
 Meaningless without a separator line (see "Implied Options" below for what
-happens when 1 isn't otherwise present).
+happens when one isn't otherwise present).
 
 - `b`: the separator line is broken into 1 independently-filled segment per
   column, joined by the same column spacing as every other row.

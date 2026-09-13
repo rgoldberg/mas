@@ -4,7 +4,8 @@ Uses the custom EBNF grammar defined in [ebnf.md](ebnf.md).
 
 ## Commands
 
-A **command** corresponds to a Swift Argument Parser `ParseableCommand`.
+A **command** is a node in a CLI tool's command hierarchy: either the root
+command (the tool itself) or a subcommand of another command.
 
 ## Display Commands
 
@@ -14,7 +15,7 @@ A **display command** is a command whose primary function is to display data.
 
 Display commands support multiple **output format**s:
 
-- **Table**: Row per item (normally an app), column per field.
+- **Table**: Row per item, column per field.
 - **Key-Value**: Key-value pair on its own row per field, blank line between
   items.
 - **JSON**: JSON object per item, key-value pair per field.
@@ -137,15 +138,13 @@ Global:
 For each [leaf context](#context-stacks):
 
 - `all`: Includes all fields. Absent a user-requested field order, fields are
-  sorted by label, per the [Default Sort Options](#default-sort-options)
-  table's `Text` row for the current output format.
+  sorted by label, as per the tool's default sort options for text fields in the
+  current output format.
 - `standard`: Includes a select list of fields.
 
 Output format variants may exist for `all` and/or `standard`. If an output
 format variant does not exist for any built-in field config, it may not be
 defined by a user.
-
-`standard@json` is always a reference to `all`.
 
 #### Custom Named Fields Configs
 
@@ -368,14 +367,13 @@ reset-to-global     = "R"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`<reset-to-contextual>` resets all inherited sort options to the contextual
-defaults for the active output format from
-[Default Sort Options](#default-sort-options) (not to the defaults from the base
+`<reset-to-contextual>` resets all inherited sort options to the tool's default
+sort options for the active output format (not to the defaults from the base
 fields config or global defaults).
 
 `<reset-to-global>` resets all inherited sort options to the global defaults
-(not to the defaults from the base fields config or
-[Default Sort Options](#default-sort-options)).
+(not to the defaults from the base fields config or the tool's default sort
+options).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order.
@@ -521,7 +519,7 @@ sort                 = <sort-priority> [ <sort-option-set> ] | <sort-option-set>
 ##### Sort Priority
 
 ```ebnf
-sort-priority = {non-negative 64-bit integer}
+sort-priority = {non-negative integer}
 ```
 
 A field with an effective `<sort>`:
@@ -685,23 +683,6 @@ their group & over all non-boundary characters.
 By default, contiguous boundaries in input are preserved as separate characters.
 `<collapse-contiguous>` collapses contiguous boundaries belonging to the same
 boundary group into one.
-
-##### Default Sort Options
-
-| Format    | Type    | Default              |
-|:----------|:--------|:---------------------|
-| Table     | Text    | `Iailgn`             |
-| Table     | Price   | `Iailgp`             |
-| Table     | Version | `Iailuv`             |
-| Table     | Path    | `Iailgnb+/_:space:+` |
-| Key-Value | Text    | `Iailgn`             |
-| Key-Value | Price   | `Iailgp`             |
-| Key-Value | Version | `Iailuv`             |
-| Key-Value | Path    | `Iailgnb+/_:space:+` |
-| JSON      | Text    | `Iascgnb++`          |
-| JSON      | Price   | `Iascgpb++`          |
-| JSON      | Version | `Iascuvb++`          |
-| JSON      | Path    | `Iascgnb+/+`         |
 
 ## Appendix: Escaping
 
