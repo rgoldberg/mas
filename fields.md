@@ -10,14 +10,6 @@ A **command** corresponds to a Swift Argument Parser `ParseableCommand`.
 
 A **display command** is a command whose primary function is to display data.
 
-`mas` display commands are:
-
-- `config`
-- `list`
-- `lookup`
-- `outdated`
-- `search`
-
 ## Output Formats
 
 Display commands support multiple **output format**s:
@@ -30,15 +22,7 @@ Display commands support multiple **output format**s:
 Output configuration is universal across output formats unless otherwise
 specified.
 
-The default output format of each display command is:
-
-| Command    | Format    |
-|:-----------|:----------|
-| `config`   | key-value |
-| `list`     | table     |
-| `lookup`   | key-value |
-| `outdated` | table     |
-| `search`   | table     |
+Each display command has a default output format.
 
 ## Command Lists
 
@@ -501,14 +485,6 @@ label                 = {text\\[:<format-modifier-prefix>:][:<sort-modifier-pref
 - A field spec's `<label>` is its:
   - Header for table.
   - Key for key-value & JSON.
-- Exception: for a built-in default fields config (`none` / `standard` / `all`)
-  specifically, JSON ignores every field spec's label (uses its name instead)
-  & any selected `<format>` (uses `%v` instead): JSON is machine-consumed,
-  so a built-in default's human-facing labels & formats (selected for
-  table / key-value) don't apply. A resolved fields config's own field
-  specs (i.e., anything `--fields` itself sets or overlays, including a
-  future persisted custom fields config) keep their label & format for JSON
-  like any other output format.
 
 #### Formatting
 
