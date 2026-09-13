@@ -745,39 +745,47 @@ whitespace.
 
 ## Appendix: Escaping
 
-Derived from [ebnf.md's token rules](ebnf.md#tokens): within a `{text}`, a bare
-occurrence of any of its candidate text terminators ends it, & a bare
-candidate syntax literal at its first position preempts it entirely. `\` always
-escapes the next character, so a literal `\` is written `\\` everywhere.
+As per [ebnf.md's token rules](ebnf.md#tokens):
+
+- A candidate syntax literal at a position precludes a text token there.
+- A `{text}` is terminated immediately before the first occurrence of any of its
+  candidate text terminators.
+
+For a text token to include text that would otherwise match a syntax literal,
+one or more of its characters must be escaped by prefixing it with a `\`.
+
+Throughout all text tokens, a literal `\` is written `\\`, because `\` always
+escapes the next character.
+
+Given their syntactical contexts, text tokens for the following text
+placeholders must escape the given literals either for its initial character or
+for any of its characters:
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                                                 | Preempted at 1st character by   | Ended anywhere by    |
-|:-----------------------------------------------------------------------------------------|:--------------------------------|:---------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`                               | `@` `/` `.`                     | `=` `:` `/` `,`      |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`                          |                                 | `=` `:` `/` `,`      |
-| `<base-fields-config-name>`                                                              |                                 | `/` `.`              |
-| `<insert-field-name>`                                                                    |                                 | `=` `:` `/` `,`      |
-| `<reference-field-name>` in `<overlay-field-spec>`                                       | `+` `%` `-` `@`                 | `@` `=` `:` `/` `,`  |
-| `<reference-field-name>` in `<move-field-spec>`                                          | `@`                             | `@` `=` `:` `/` `,`  |
-| `<reference-field-name>` in `<remove-field-spec>`                                        | `@`                             | `@` `,`              |
-| `<label>`                                                                                |                                 | `:` `/` `,`          |
-| `<locale-name>`                                                                          |                                 | `+`                  |
-| `<boundary-characters>`                                                                  | `%` `:`                         | `%` `:` `_` `+`      |
-| `<multi-character-boundary-text>`                                                        |                                 | `%`                  |
-| `<format-name>`                                                                          |                                 | `::` `.` `/` `,`     |
-| `<template-text>` beginning a `<format>`                                                 | `:` `.`                         | `%` `/` `,`          |
-| `<template-text>` after `<pipeline-terminator>`                                          |                                 | `%` `/` `,`          |
-| `<template-text>` after a `<parameterized-value-transform>`'s closing `:`                | `.`                             | `%` `/` `,`          |
-| `<template-text>` after a `<placeholder>`                                                |                                 | `%` `/` `,`          |
-| `<placeholder-format-name>`                                                              |                                 | `.` `+`              |
-| `<date-format-name>`                                                                     |                                 | `.` `+` `,` `_`      |
-| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, leading                 | `:` `.`                         | `%` `+`              |
-| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, after a `<placeholder>` |                                 | `%` `+`              |
-| `<inline-date-format>`                                                                   | `:` `.`                         | `+` `,` `_`          |
-| `<group-locale-name>` / `<group-separator>`                                              |                                 | `,` `:`              |
+| `{text}`                                                                                 | Initial     | Any                 |
+|:-----------------------------------------------------------------------------------------|:------------|:--------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`                               | `@` `.`     | `=` `:` `/` `,`     |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`                          |             | `=` `:` `/` `,`     |
+| `<base-fields-config-name>`                                                              |             | `/` `.`             |
+| `<insert-field-name>`                                                                    |             | `=` `:` `/` `,`     |
+| `<reference-field-name>` in `<overlay-field-spec>`                                       | `+` `%` `-` | `@` `=` `:` `/` `,` |
+| `<reference-field-name>` in `<move-field-spec>`                                          |             | `@` `=` `:` `/` `,` |
+| `<reference-field-name>` in `<remove-field-spec>`                                        |             | `@` `,`             |
+| `<label>`                                                                                |             | `:` `/` `,`         |
+| `<locale-name>`                                                                          |             | `+`                 |
+| `<boundary-characters>`                                                                  | `%` `:`     | `%` `:` `_` `+`     |
+| `<multi-character-boundary-text>`                                                        |             | `%`                 |
+| `<format-name>`                                                                          |             | `::` `.` `/` `,`    |
+| `<template-text>` beginning a `<format>`                                                 | `:` `.`     | `%` `/` `,`         |
+| `<template-text>` after `<pipeline-terminator>`                                          |             | `%` `/` `,`         |
+| `<template-text>` after a `<parameterized-value-transform>`'s closing `:`                | `.`         | `%` `/` `,`         |
+| `<template-text>` after a `<placeholder>`                                                |             | `%` `/` `,`         |
+| `<placeholder-format-name>`                                                              |             | `.` `+`             |
+| `<date-format-name>`                                                                     |             | `.` `+` `,` `_`     |
+| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, leading                 | `:` `.`     | `%` `+`             |
+| `<standard-text>` / `<failure-text>` / `<inline-number-format>`, after a `<placeholder>` |             | `%` `+`             |
+| `<inline-date-format>`                                                                   | `:` `.`     | `+` `,` `_`         |
+| `<group-locale-name>` / `<group-separator>`                                              |             | `,` `:`             |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
-
-A single `:` in a `<format-name>` is data (only `::` ends it), & a single `/`
-never ends anything where only `//` is a candidate.
