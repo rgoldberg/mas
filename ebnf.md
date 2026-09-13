@@ -113,11 +113,11 @@ Consuming a token commits to the set of constructs that the token begins,
 continues, or closes; each subsequently consumed token narrows the set to the
 constructs that accept it.
 
-If the set becomes empty, an error is reported.
+Disjoint choices guarantee that a set will contain at most 1 complete construct
+(the **parsed construct**) at or before input exhaustion.
 
-When the input is exhausted, the parsed construct is the sole complete
-construct in the set (choices being disjoint guarantees at most 1); if there is
-none, an error is reported.
+If the set ever becomes empty, or if a **parsed construct** is not found, an
+error is reported.
 
 Input is never reconsidered after it has been consumed.
 
@@ -133,11 +133,7 @@ Input is consumed as a text token iff a text token is available at the current
 position & no candidate syntax literal matches the input there.
 
 A text token's **candidate text terminators** are the candidate syntax literals
-of the position immediately following it, i.e., the literals that, for any
-construct in the committed-to set, may follow the text token:
-
-- Those that continue that construct.
-- Those that continue or close any construct enclosing it.
+of the position immediately following it.
 
 A text token is the longest non-empty prefix starting at the current position
 that does not contain any candidate text terminator; it terminates immediately

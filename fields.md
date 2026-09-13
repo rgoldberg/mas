@@ -639,7 +639,7 @@ version        = "v"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] ( <grouped-boundaries> | <ungrouped-boundaries> )
+boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] ( <grouped-boundaries> | <ungrouped-boundaries> ) (* default: "b+:space:+" *)
 boundaries-prefix = "b"
 
 boundaries-option-set = <boundaries-option>+
@@ -703,40 +703,26 @@ Explicit groups are specified in `<boundaries>`:
   - A `<group-joiner>` merges the immediately succeeding group into the
     immediately preceding group.
 
-When `<boundaries>` is absent, all whitespace characters are assigned to an
-implicit endmost group. When `<boundaries>` is present, only its explicit
-boundaries apply (`b++` specifies no boundaries at all); to include whitespace,
-list it via a `<character-class>` (e.g., `:space:`): `b+:space:_-+` positions
-whitespace before `-`; `b+-:space:+` puts whitespace & `-` in the same group.
-
 By default, contiguous boundaries in input are preserved as separate characters.
 `<collapse-contiguous>` collapses contiguous boundaries belonging to the same
 boundary group into one.
 
 ##### Default Sort Options
 
-| Format      | Type      | Default              |
-|:------------|:----------|:---------------------|
-| Table       | Text      | `Iailgn`             |
-| Table       | Price     | `Iailgp`             |
-| Table       | Version   | `Iailuv`             |
-| Table       | Path      | `Iailgnb+/_:space:+` |
-| Key-Value   | Text      | `Iailgn`             |
-| Key-Value   | Price     | `Iailgp`             |
-| Key-Value   | Version   | `Iailuv`             |
-| Key-Value   | Path      | `Iailgnb+/_:space:+` |
-| JSON        | Text      | `Iascgnb++`          |
-| JSON        | Price     | `Iascgpb++`          |
-| JSON        | Version   | `Iascuvb++`          |
-| JSON        | Path      | `Iascgnb+/+`         |
-
-JSON specifies no boundaries at all (`b++`) rather than leaving `<boundaries>`
-absent (an implicit whitespace group), matching its already-more-literal
-case-sensitive / canonical choices on the other axes: Table / Key-Value are
-read by people, so whitespace sorting like a low-precedence separator is the
-friendlier default; JSON is read by programs, so nothing gets special-cased.
-Path's `/` boundary applies either way; Table / Key-Value Path also keeps
-whitespace as a lower-precedence boundary.
+| Format    | Type    | Default              |
+|:----------|:--------|:---------------------|
+| Table     | Text    | `Iailgn`             |
+| Table     | Price   | `Iailgp`             |
+| Table     | Version | `Iailuv`             |
+| Table     | Path    | `Iailgnb+/_:space:+` |
+| Key-Value | Text    | `Iailgn`             |
+| Key-Value | Price   | `Iailgp`             |
+| Key-Value | Version | `Iailuv`             |
+| Key-Value | Path    | `Iailgnb+/_:space:+` |
+| JSON      | Text    | `Iascgnb++`          |
+| JSON      | Price   | `Iascgpb++`          |
+| JSON      | Version | `Iascuvb++`          |
+| JSON      | Path    | `Iascgnb+/+`         |
 
 ## Appendix: Escaping
 
