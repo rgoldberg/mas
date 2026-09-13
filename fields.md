@@ -639,21 +639,17 @@ version        = "v"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] ( <grouped-boundaries> | <ungrouped-boundaries> ) (* default: "b+:space:+" *)
+boundaries        = <boundaries-prefix> [ <boundaries-option-set> ] <boundaries-fence> [ <boundary-groups> ] <boundaries-fence> (* default: "b+:space:+" *)
 boundaries-prefix = "b"
+boundaries-fence  = "+"
 
 boundaries-option-set = <boundaries-option>+
 boundaries-option     = <collapse-contiguous>
 
 collapse-contiguous = "%"
 
-grouped-boundaries      = "+" [ <grouped-boundaries-list> ] "+"
-grouped-boundaries-list = <boundary-list> … <group-separator>
-group-separator         = "_"
-
-ungrouped-boundaries      = "_" [ <ungrouped-boundaries-list> ] "_"
-ungrouped-boundaries-list = <boundary-list> … <group-joiner>
-group-joiner              = "+"
+boundary-groups = <boundary-list> … <group-separator>
+group-separator = "_"
 
 boundary-list       = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
 boundary-characters = {text}
@@ -672,36 +668,22 @@ character-class-name  = "alnum" | "alpha" | "ascii" | "blank" | "cntrl" | "digit
 Input is tokenized by **boundaries** assigned to ordered sort precedence
 **boundary groups**; each group's members share the same sort precedence.
 
-Boundaries & boundary groups are either **explicit** or **implicit**.
-
-Explicit boundaries are defined in `<boundary-list>`s, each of which may mix
-its 3 kinds of elements (e.g., `a%multi%b` defines the boundaries `a`,
+Each `<boundary-list>` in `<boundary-groups>` defines a boundary group; each
+may mix its 3 kinds of elements (e.g., `a%multi%b` defines the boundaries `a`,
 `multi` & `b`; a bare `%` or `:` always opens a `<multi-character-boundary>`
 or `<character-class>`, so `a%b` is an error, whereas `a\%b` defines the
 boundaries `a`, `%` & `b`):
 
-- Each character in a `<boundary-characters>` is itself an explicit boundary.
-- Each `<multi-character-boundary-text>` is itself an explicit boundary.
+- Each character in a `<boundary-characters>` is itself a boundary.
+- Each `<multi-character-boundary-text>` is itself a boundary.
 - Each character belonging to a GNU Extended POSIX character class named
-  `<character-class-name>` is itself an explicit boundary.
+  `<character-class-name>` is itself a boundary.
 
-The last occurrence of an explicit boundary for a value across all
-`<boundary-list>`s overrides all other boundaries (explicit or implicit) for the
-same value.
+The last occurrence of a boundary for a value across all `<boundary-list>`s
+overrides all other boundaries for the same value.
 
 Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
-
-Explicit groups are specified in `<boundaries>`:
-
-- In `<grouped-boundaries>`, all boundaries within a `<boundary-list>` belong to
-  a single group.
-- In `<ungrouped-boundaries>`:
-  - By default:
-    - All boundaries from a single `<character-class>` belong to a single group.
-    - Each other boundary belongs to its own group.
-  - A `<group-joiner>` merges the immediately succeeding group into the
-    immediately preceding group.
 
 By default, contiguous boundaries in input are preserved as separate characters.
 `<collapse-contiguous>` collapses contiguous boundaries belonging to the same
