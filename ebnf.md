@@ -111,12 +111,12 @@ starting at the current position.
 
 Consuming a token commits to the set of constructs that the token begins,
 continues, or closes; each subsequently consumed token narrows the set to the
-constructs that accept it.
+matching constructs.
 
 The parsed construct is the sole construct contained in, or tiebroken from, the
 set.
 
-If the set is empty, an error is reported.
+If the set becomes empty, an error is reported.
 
 Input is never reconsidered after it has been consumed.
 
@@ -132,14 +132,16 @@ Input is consumed as a text token iff a text token is available at the current
 position & no candidate syntax literal matches the input there.
 
 A text token's **candidate text terminators** are the candidate syntax literals
-that may follow it: those that continue or close any enclosing construct, &
-those that follow the text token in any committed-to construct that begins
-with a text token.
+that may follow it: those that:
 
-A text token is the longest non-empty prefix of the input starting at the
-current position that does not contain any candidate text terminator; it
-terminates immediately before the earliest such terminator, which is then
-consumed as a syntax token.
+- Continue any enclosing construct.
+- Close any enclosing construct.
+- Follow the text token in any committed-to construct that begins with a text
+  token.
+
+A text token is the longest non-empty prefix starting at the current position
+that does not contain any candidate text terminator; it terminates immediately
+before the earliest such terminator, which is then consumed as a syntax token.
 
 ### Literal Text
 
