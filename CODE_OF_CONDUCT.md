@@ -24,8 +24,8 @@ Prohibited conduct includes:
 ## Reporting
 
 To report violations privately to moderators (instead of to GitHub Support),
-click the **…** (three dot) menu on the relevant issue, PR, or comment, then
-select **Report content**.
+click the **…** (3-dot) menu on the relevant issue, PR, or comment, then select
+**Report content**.
 
 - If a reporting dialog appears, select **To repository admins**, then follow
   the instructions
