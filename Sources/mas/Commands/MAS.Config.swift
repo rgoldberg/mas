@@ -77,7 +77,7 @@ private func configStringValue(_ name: String) -> String {
 	guard size > 0 else {
 		return unknown
 	}
-	return unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
+	return withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
 		guard let baseAddress = buffer.baseAddress else {
 			return unknown
 		}

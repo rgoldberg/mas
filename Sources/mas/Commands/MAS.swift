@@ -75,6 +75,7 @@ struct MAS: AsyncParsableCommand, RealDropping {
 }
 
 extension MAS {
+	@_disfavoredOverload
 	static func main(_ command: some ParsableCommand) throws {
 		try main(command) { command in
 			var command = command
@@ -89,6 +90,7 @@ extension MAS {
 		}
 	}
 
+	@_disfavoredOverload
 	static func main<Command: ParsableCommand>(_ command: Command, _ body: (Command) throws -> Void) throws {
 		do {
 			try body(command)
