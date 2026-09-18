@@ -5,6 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+private import Foundation
 internal import JSONAST
 internal import JSONDecoding
 
@@ -120,7 +121,9 @@ extension [JSON.Object] {
 		if let header = tableConfig.header {
 			let headerRow =
 				renderedTableRow(cells: columns.map(\.label), columns: columnMetadata, columnSpacing: columnSpacing)
-			rows.append(header.sgrCodes.isEmpty ? headerRow : "\u{1B}[\(header.sgrCodes)m\(headerRow)\u{1B}[0m")
+			let isStyled =
+				!header.sgrCodes.isEmpty && (tableConfig.headerStyling == .always || FileHandle.standardOutput.isTerminal)
+			rows.append(isStyled ? "\u{1B}[\(header.sgrCodes)m\(headerRow)\u{1B}[0m" : headerRow)
 		}
 		if let separator = tableConfig.separator {
 			rows.append(

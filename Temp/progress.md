@@ -179,3 +179,21 @@ config's immutable positions (`referencePositions(forName:)`), so a field spec
 removed earlier in the section keeps its position as `null` (referencing it is
 an error), & a `<field-spec-hide>` of such a field inserts a hidden copy of its
 base field spec, as `<field-spec-insertion>` would.
+
+## Step 4 (partial): Table Config (2026-09-18 10:27 UTC)
+
+`parseTableConfig` now supports `<header-styling-setting>` (`t` terminal-only /
+`a` always, stored as `TableConfig.headerStyling`; table rendering applies
+`<sgr-parameters>` iff `a` or standard output is a terminal), defaults an absent
+`<separator-pattern>` to `-` (a `{text}` token is never empty, so `S` / `S:` are
+dashed), & handles escaping (`\:`, `\\`, dangling `\` is an error) in
+`<sgr-parameters>` / `<separator-pattern>` / `<column-spacing>` text via
+`parseTableSettingText`. Comments now use table.md's vocabulary (setting,
+`<table-config-terminator>`, `<end-of-shell-word>`). Steps 3 (sort options,
+format modifiers) & 5 / 6 (named config contexts, mas defaults) were not
+started.
+
+Revised (2026-09-25): comments & names use table.md's current vocabulary
+(`<table-setting-termination>`, `<table-setting-terminator>`,
+`<end-of-table-config>`, `TableConfigParsingError.invalidSetting`), &
+`<sgr-parameters>` (not a `{text}` token) no longer accepts escape sequences.

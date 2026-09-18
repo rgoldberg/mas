@@ -5,6 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+internal import Foundation
 internal import JSONAST
 @testable private import mas
 internal import Testing
@@ -26,8 +27,14 @@ private extension MASTests {
 
 	@Test
 	func `an uppercase H shows a header, plain by default, styled with an explicit SGR parameter list`() throws {
-		#expect(try parseTableConfig("H") == .init(header: .init(sgrCodes: ""), separator: nil, columnSpacing: "  "))
-		#expect(try parseTableConfig("H1") == .init(header: .init(sgrCodes: "1"), separator: nil, columnSpacing: "  "))
+		#expect(
+			try parseTableConfig("H")
+				== .init(header: .init(sgrCodes: ""), headerStyling: .terminalOnly, separator: nil, columnSpacing: "  "),
+		)
+		#expect(
+			try parseTableConfig("H1")
+				== .init(header: .init(sgrCodes: "1"), headerStyling: .terminalOnly, separator: nil, columnSpacing: "  "),
+		)
 		#expect(try parseTableConfig("H1;4:").header == .init(sgrCodes: "1;4"))
 	}
 
@@ -36,16 +43,35 @@ private extension MASTests {
 		// "H1" (no ':', end of value): fine, value is "1"
 		#expect(try parseTableConfig("H1").header == .init(sgrCodes: "1"))
 		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value &
-		// fails SGR validation, rather than silently treating 'S' as a 2nd option
+		// fails SGR validation, rather than silently treating 'S' as a 2nd setting
 		#expect(throws: TableConfigParsingError.invalidHeaderStyle("1S-")) { try parseTableConfig("H1S-") }
 	}
 
-	@Test(arguments: [("S", ""), ("S-+:", "-+")])
-	func `an uppercase S shows a separator, blank by default, with an explicit pattern otherwise`(
+	@Test(arguments: [("S", "-"), ("S:", "-"), ("S-+:", "-+")])
+	func `an uppercase S shows a separator, dashed by default, with an explicit pattern otherwise`(
 		value: String,
 		pattern: String,
 	) throws {
 		#expect(try parseTableConfig(value).separator == .init(pattern: pattern, broken: false))
+	}
+
+	@Test(
+		arguments: [
+			("H1:", TableConfig.HeaderStyling.terminalOnly),
+			("H1:a", .always),
+			("aH1:t", .terminalOnly),
+		],
+	)
+	func `t & a set header styling, last wins`(value: String, headerStyling: TableConfig.HeaderStyling) throws {
+		#expect(try parseTableConfig(value).headerStyling == headerStyling)
+	}
+
+	@Test
+	func `a backslash escapes the next character in a setting's text`() throws {
+		#expect(try parseTableConfig("S\\::").separator?.pattern == ":")
+		#expect(try parseTableConfig("C\\\\:").columnSpacing == "\\")
+		#expect(try parseTableConfig("C \\: :").columnSpacing == " : ")
+		#expect(throws: TableConfigParsingError.danglingEscape) { try parseTableConfig("S-\\") }
 	}
 
 	@Test
@@ -88,10 +114,11 @@ private extension MASTests {
 		arguments: [
 			("Hbogus:", TableConfigParsingError.invalidHeaderStyle("bogus")),
 			("H;1:", .invalidHeaderStyle(";1")),
-			("z", .invalidOption("z")),
+			("z", .invalidSetting("z")),
+			("H\\1:", .invalidHeaderStyle("\\1")),
 		],
 	)
-	func `an invalid header style or unknown option is a parse error`(value: String, error: TableConfigParsingError)
+	func `an invalid header style or unknown setting is a parse error`(value: String, error: TableConfigParsingError)
 	throws {
 		#expect(throws: error) { try parseTableConfig(value) }
 	}
@@ -121,7 +148,7 @@ private extension MASTests {
 		let table = [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
-				tableConfig: try parseTableConfig("H1:"),
+				tableConfig: try parseTableConfig("H1:a"),
 			)
 		#expect(table == "\u{1B}[1mName \u{1B}[0m\nSlack")
 	}
@@ -131,9 +158,19 @@ private extension MASTests {
 		let table = [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
-				tableConfig: try parseTableConfig("S"),
+				tableConfig: try parseTableConfig("S\\ :"),
 			)
-		#expect(table == "Name \n\nSlack")
+		#expect(table == "Name \n     \nSlack")
+	}
+
+	@Test
+	func `table styles a header row for a non-terminal only with always-styling`() throws {
+		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
+		let objects = [JSON.Object([("name", .string("Slack"))])]
+		let alwaysStyled = objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
+		#expect(alwaysStyled == "\u{1B}[1mName \u{1B}[0m\nSlack")
+		let terminalOnly = objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
+		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name \nSlack"))
 	}
 
 	@Test
