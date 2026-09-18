@@ -506,6 +506,21 @@ private extension MASTests {
 	}
 
 	@Test
+	func `%C timeZone sets the output time zone: IANA identifier, abbreviation, UTC offset, or system`() throws {
+		let value = JSON.Node.string("2020-03-18T17:39:23Z")
+		let utc = try #require(parseFieldSpecs("adamID:%C.timeZone:UTC:++").first).format
+		#expect(utc.rendered(value: value, label: "L", name: "n").stringValue == "2020-03-18T17:39:23Z")
+		let tokyo = try #require(parseFieldSpecs("adamID:%C.timeZone:Asia/Tokyo:++").first).format
+		#expect(tokyo.rendered(value: value, label: "L", name: "n").stringValue == "2020-03-19T02:39:23+0900")
+		let offset = try #require(parseFieldSpecs("adamID:%C.timeZone:-05\\:30:++").first).format
+		#expect(offset.rendered(value: value, label: "L", name: "n").stringValue == "2020-03-18T12:09:23-0530")
+		#expect(try parseFieldSpecs("adamID:%C.timeZone:system:++").count == 1)
+		#expect(throws: ParsingError.invalidTransformArguments(name: "timeZone:Nowhere/Land:")) {
+			try parseFieldSpecs("adamID:%C.timeZone:Nowhere/Land:++")
+		}
+	}
+
+	@Test
 	func `%c fails (& %-c succeeds) for a value that isn't a date`() {
 		let format = Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
 		#expect(format.rendered(value: .string("not a date"), label: "L", name: "n").stringValue?.isEmpty == true)

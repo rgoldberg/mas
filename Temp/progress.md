@@ -226,3 +226,13 @@ locale. The other sort options (`<numbers-in-strings>`, `<boundaries>`,
 placeholders & as `<unconditional-branch>`es, reusing `Placeholder.label`'s
 `negated: true` representation for the field name; `%l` / `%L` / `%k` / `%K`
 may no longer be negated (the old draft's `%-l` meant the field name).
+
+## Step 3 (partial): `timeZone` Transform (2026-09-18 10:41 UTC)
+
+The old-draft `localTimeZone` chronologic transform is replaced by
+`timeZone<time-zone-arguments>` (`.timeZone:Asia/Tokyo:`, `:UTC:`, `:-05\:30:`,
+`:system:`), setting the output time zone (last wins) & reporting
+`invalidTransformArguments` for an unknown code. `.timeZone::` (an absent
+`<time-zone-code>`, defaulting to `system`) is not yet accepted because the
+old-draft parser still treats `::` as a pipeline terminator; rewriting
+`<block-terminator>` handling to `+` alone will fix that.

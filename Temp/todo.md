@@ -187,3 +187,6 @@ stack's `default`.
   copies `x`'s base field spec), not an empty fields config; doing so makes
   `fetchFieldNames` fetch everything for `@none`-based configs unless hidden,
   sort-disabled field specs are excluded from fetching.
+- `.timeZone::` (absent `<time-zone-code>`, default `system`) is rejected by
+  the old-draft `::` pipeline-terminator handling in `parseTransformName`;
+  fix when `<block-terminator>` (`+`) replaces the old `:` terminator.

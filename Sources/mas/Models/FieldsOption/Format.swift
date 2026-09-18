@@ -202,13 +202,14 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 
 	case iso
 	case dateOnly
-	case localTimeZone // swiftlint:enable sorted_enum_cases
+	/// Sets the output time zone; see `<time-zone>` in fields-format.md.
+	case timeZone(TimeZone) // swiftlint:enable sorted_enum_cases
 
 	static let stringTransformSet = Set([Self.capitalize, .lowercase, .sentenceCase, .trimWhitespace, .uppercase])
 	/// `group` & `scale` are parameterized & validated separately; see
 	/// `parsed(name:kind:)`.
 	static let numberTransformSet = Set([Self.absoluteValue, .round])
-	static let dateTransformSet = Set([Self.iso, .dateOnly, .localTimeZone])
+	static let dateTransformSet = Set([Self.iso, .dateOnly])
 
 	/// Parses a bare `<transform>` `name` (its `<group-arguments>` /
 	/// `<scale-arguments>`, for `group` / `scale`, included verbatim) valid for
@@ -220,6 +221,8 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 			kind == .number ? try groupTransform(name: name) : nil
 		} else if name.hasPrefix(scaleNamePrefix), name.hasSuffix(argumentFence) {
 			kind == .number ? try scaleTransform(name: name) : nil
+		} else if name.hasPrefix(timeZoneNamePrefix), name.hasSuffix(argumentFence) {
+			kind == .date ? try timeZoneTransform(name: name) : nil
 		} else {
 			.init(simpleName: name).flatMap { kind.allowedTransformSet.contains($0) ? $0 : nil }
 		}
@@ -270,7 +273,7 @@ enum Transform: Hashable { // swiftlint:disable:this one_declaration_per_file
 				)
 			}
 				?? string
-		case .dateOnly, .iso, .localTimeZone:
+		case .dateOnly, .iso, .timeZone:
 			string // Unreachable here; see doc comment above
 		}
 	}
@@ -334,8 +337,6 @@ private extension Transform { // swiftlint:disable:this file_types_order
 			self = .iso
 		case "dateOnly":
 			self = .dateOnly
-		case "localTimeZone":
-			self = .localTimeZone
 		default:
 			return nil
 		}
@@ -365,6 +366,35 @@ private func groupTransform(name: String) throws(ParsingError) -> Transform {
 	default:
 		throw .invalidTransformArguments(name: name)
 	}
+}
+
+/// Parses `timeZone`'s `<time-zone-arguments>` (`<time-zone-code>`, fenced by
+/// `argumentFence`) from `name`: a case-insensitive IANA identifier,
+/// abbreviation, UTC offset (e.g., `+05:30`), or `system` (also the default
+/// for an empty code).
+private func timeZoneTransform(name: String) throws(ParsingError) -> Transform {
+	let code = String(name.dropFirst(timeZoneNamePrefix.count).dropLast(argumentFence.count))
+	guard !code.isEmpty, code.lowercased() != "system" else {
+		return .timeZone(.current)
+	}
+	guard let timeZone = TimeZone(identifier: code) ?? TimeZone(abbreviation: code) ?? utcOffsetTimeZone(code) else {
+		throw .invalidTransformArguments(name: name)
+	}
+	return .timeZone(timeZone)
+}
+
+/// A `TimeZone` for a UTC offset `code` (`+HH`, `+HHMM`, or `+HH:MM`, with
+/// either sign), else `nil`.
+private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
+	guard let sign = code.first, sign == "+" || sign == "-" else {
+		return nil
+	}
+	let digits = code.dropFirst().filter(\.isNumber)
+	guard digits.count == 2 || digits.count == 4, let hours = Int(digits.prefix(2)) else {
+		return nil
+	}
+	let minutes = Int(digits.dropFirst(2)) ?? 0
+	return TimeZone(secondsFromGMT: (sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60))
 }
 
 /// Parses `scale`'s `<scale-arguments>`
@@ -465,8 +495,8 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"iso"
 		case .dateOnly:
 			"dateOnly"
-		case .localTimeZone:
-			"localTimeZone"
+		case let .timeZone(timeZone):
+			"timeZone:\(timeZone.identifier):"
 		}
 	}
 }
@@ -610,13 +640,21 @@ struct DateSpec: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let outputTransforms: [Transform]
 
 	/// Renders `date` per `outputTransforms`. Default (`outputTransforms`
-	/// empty) is ISO-8601 datetime in the local time zone; `dateOnly` switches
-	/// to just the date; `iso` (absent `localTimeZone`) switches the zone from
-	/// local to UTC.
+	/// empty) is ISO-8601 datetime in the system time zone; `dateOnly` switches
+	/// to just the date; `timeZone` sets the output time zone (the last one
+	/// wins); `iso` (absent `timeZone`) switches the zone from system to UTC.
 	func formatted(_ date: Date) -> String {
-		let style = outputTransforms.contains(.iso) && !outputTransforms.contains(.localTimeZone)
-			? Date.ISO8601FormatStyle()
-			: Date.ISO8601FormatStyle(timeZone: .current)
+		let timeZone = outputTransforms.lazy
+			.reversed()
+			.compactMap { transform in
+				if case let .timeZone(timeZone) = transform {
+					timeZone
+				} else {
+					nil
+				}
+			}
+			.first
+		let style = Date.ISO8601FormatStyle(timeZone: timeZone ?? (outputTransforms.contains(.iso) ? .gmt : .current))
 		return outputTransforms.contains(.dateOnly) ? style.year().month().day().format(date) : style.format(date)
 	}
 }
@@ -1291,8 +1329,10 @@ private let groupSimpleName = "group"
 private let groupNamePrefix = groupSimpleName + argumentFence
 private let scaleSimpleName = "scale"
 private let scaleNamePrefix = scaleSimpleName + argumentFence
+private let timeZoneSimpleName = "timeZone"
+private let timeZoneNamePrefix = timeZoneSimpleName + argumentFence
 private let argumentFence = ":"
 private let argumentSeparator = Character(",")
 /// The only `<transform>`s whose own grammar defines a `:`-fenced argument
 /// list; see `parseTransformName(_:terminatorSet:)`.
-private let fenceTakingSimpleNameSet = Set([groupSimpleName, scaleSimpleName])
+private let fenceTakingSimpleNameSet = Set([groupSimpleName, scaleSimpleName, timeZoneSimpleName])
