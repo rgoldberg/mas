@@ -37,6 +37,7 @@ same `mas` leaf context differ only in which field specs are hidden.
 
 A `mas` built-in fields config has:
 
+- A user-facing unsuffixed variant.
 - A user-facing `@table` variant.
 - A user-facing `@key-value` variant.
 - A machine-facing `@json` variant.

@@ -239,7 +239,7 @@ Counts in parentheses are whole-word, case-insensitive matches in `Specs/` &
       execute / invocation / invoke
 45. - kind (17): config kinds; block kinds; multiplicity kinds
     - type (64): value types
-    - variant (7): output format variants
+    - variant (7): same-stem fields configs
     - form (2): matcher forms
     - REJECTED: category (1) → kind
 46. - enclosing (10)

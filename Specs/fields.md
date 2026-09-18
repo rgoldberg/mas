@@ -68,12 +68,12 @@ regex `@(json|key-value|table)$`; if the current output format matches the
 suffix, the fields config with the suffixed name is substituted for any
 reference to the stem alone.
 
-An additional suffix matching the regex `@none$` may be appended to a reference
-to a fields config name (not to a name itself), which resolves to the fields
-config named by the stem alone, regardless of the current output format.
+Fields configs that share the same stem within the same context are
+**variants**.
 
-Fields configs that share the same stem within the same context, but that have
-different suffixes, are **output format variants**.
+An additional suffix matching the regex `@none$` may be appended to a reference
+to a fields config name (not to a name itself), which resolves to the
+unsuffixed variant, regardless of the current output format.
 
 #### Immutable Built-In Named Fields Configs
 
@@ -85,9 +85,9 @@ For each [leaf context](configs.md#context-stacks):
   defaults for string fields for the current output format.
 - `standard`: Only a select list of field specs is visible.
 
-Output format variants may exist for any built-in fields config. If an output
-format variant does not exist for any built-in fields config, it must not be
-defined by a user.
+Suffixed variants may exist for any built-in fields config. If a suffixed
+variant does not exist for any built-in fields config, it must not be defined by
+a user.
 
 #### Default Fields Configs
 
