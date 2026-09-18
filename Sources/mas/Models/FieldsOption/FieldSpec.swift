@@ -8,10 +8,20 @@
 // MARK: Internal types
 
 struct FieldSpec: Equatable {
+	/// A field spec with default settings for field `name`: labeled by its
+	/// name, default format, no `<sort>`, visible.
+	static func defaultSettings(forName name: String) -> Self {
+		.init(name: name, label: name, format: .default(fieldName: name), sortSpec: nil)
+	}
+
 	let name: String
 	let label: String
 	let format: Format
 	let sortSpec: SortSpec?
+	/// Whether this field spec is hidden (`<field-spec-hide>`): not output, but
+	/// otherwise behaving as a visible one (it has a position, may be referenced
+	/// by a `<field-spec-reference>`, & its `<sort>` sorts items iff enabled).
+	let isHidden: Bool
 	/// Whether this field's value is computed after the display command's own
 	/// fetch (e.g., `outdated`'s `newVersion`, from comparing the installed &
 	/// latest versions), so it's never itself something to fetch.
@@ -29,6 +39,7 @@ struct FieldSpec: Equatable {
 		label: String,
 		format: Format,
 		sortSpec: SortSpec?,
+		isHidden: Bool = false,
 		isSynthesized: Bool = false,
 		justification: Justification = .start,
 	) {
@@ -36,6 +47,7 @@ struct FieldSpec: Equatable {
 		self.label = label
 		self.format = format
 		self.sortSpec = sortSpec
+		self.isHidden = isHidden
 		self.isSynthesized = isSynthesized
 		self.justification = justification
 	}
@@ -45,7 +57,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 	var description: String {
 		"""
 		FieldSpec(name: "\(name)", label: "\(label)", format: \(format), sortSpec: \(sortSpec, default: "nil"), \
-		justification: \(justification))
+		isHidden: \(isHidden), justification: \(justification))
 		"""
 	}
 }
@@ -67,8 +79,10 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidTransformArguments(name: String)
 	case missingEndFence
 	case missingFieldName
+	case missingFieldOrderOptionSet
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
+	case originalInputOrderUnsupportedForTable
 	case singleBranch
 	case templateLacksPlaceholder
 	case terminalNumberTransformFollowedByMore(name: String)
@@ -109,6 +123,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected end fence"
 		case .missingFieldName:
 			"Expected field name"
+		case .missingFieldOrderOptionSet:
+			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
 		case .missingSortPriority:
 			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
 		case let .nonexistentFieldSpec(name):
@@ -117,6 +133,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 				name.isEmpty || name.first?.isWhitespace == true || name.last?.isWhitespace == true ? "'\(name)'" : name
 			)
 			"""
+		case .originalInputOrderUnsupportedForTable:
+			"<original-input-order> 'o' is supported only for JSON or key-value output"
 		case .singleBranch:
 			"<branches> needs at least 2 branches; a single 1 is just an ordinary placeholder, with no need for %b / %B"
 		case .templateLacksPlaceholder:
@@ -198,11 +216,7 @@ func resolvedFieldsConfig(
 		let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 		let tiebreakDirection = try builder.parseItemSortSection(&input)
 		try builder.parseFieldSpecsSection(&input)
-		let itemSort = ItemSort(
-			keys: builder.fieldSpecs
-				.compactMap { fieldSpec in fieldSpec.sortSpec.map { .init(name: fieldSpec.name, sortSpec: $0) } },
-			tiebreakDirection: tiebreakDirection,
-		)
+		let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
 		return base.baseIncludesAllFields
 			? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
 			: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
@@ -212,11 +226,7 @@ func resolvedFieldsConfig(
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
 			fieldOrder: .inherited,
-			itemSort: .init(
-				keys: builder.fieldSpecs
-					.compactMap { fieldSpec in fieldSpec.sortSpec.map { .init(name: fieldSpec.name, sortSpec: $0) } },
-				tiebreakDirection: .ascending,
-			),
+			itemSort: .init(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: .ascending),
 		)
 	}
 }
@@ -282,6 +292,7 @@ private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_f
 	case insert
 	case overlay
 	case move
+	case hide
 	case remove // swiftlint:enable sorted_enum_cases
 }
 
@@ -305,6 +316,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private let outputFormat: OutputFormat
 
 	private var workingTags: [Int?]
+	/// The base fields config's field specs, immutable: the `source` of a
+	/// `<base-sourced-field-spec-edit>` (i.e., a `<field-spec-insertion>`).
+	private let baseFieldSpecs: [FieldSpec]
 	private var referenceFieldSpecs: [FieldSpec?]
 	/// "$previous$": the working index after which the next insert / move's
 	/// direct result lands. `-1` = before the first field spec.
@@ -314,59 +328,67 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		self.fieldSpecs = fieldSpecs
 		self.outputFormat = outputFormat
 		workingTags = Array(fieldSpecs.indices)
+		baseFieldSpecs = fieldSpecs
 		referenceFieldSpecs = fieldSpecs
 	}
 
+	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
+	/// a required `<field-order-option-set>`, either an `<order-option-set>`
+	/// (`[ <direction>+ ] <order> [ <order-option>+ ]`, `<order>` being `w` /
+	/// `o`, last wins per axis) or a `<sort-option-set>` (whose `<source>`
+	/// defaults to `<output>`, i.e., sorted by label). The 2 alternatives are
+	/// disjoint: an `<order-option-set>` contains an `<order>` letter, which is
+	/// no `<sort-option>`.
 	mutating func parseFieldOrderSection(_ input: inout Substring) throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
 			return .inherited
 		}
 		input.removeFirst()
 		guard let first = input.first, first != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(first) else {
-			return .workingOrder
+			throw .missingFieldOrderOptionSet
 		}
-		guard !isOriginalOrderOptionSet(input) else {
-			var direction = SortSpec.Direction?.none
-			while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
-				if let match = SortSpec.Direction(rawValue: char) {
-					direction = match
-				}
-				input.removeFirst()
+		guard let order = orderOptionSetOrder(input) else {
+			let sortSpec = try SortSpec.parsedOptionSet(
+				&input,
+				nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
+				priority: 0,
+				defaults: .textDefault(outputFormat: outputFormat).withSource(.output),
+			)
+			return switch sortSpec.source {
+			case .input:
+				.byName(sortSpec)
+			case .output:
+				.byLabel(sortSpec)
 			}
-			return .original(direction)
 		}
-		let sortSpec = try SortSpec.parsedOptionSet(
-			&input,
-			nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
-			priority: 0,
-			defaults: .textDefault(outputFormat: outputFormat),
-		)
-		return switch sortSpec.source {
-		case .input:
-			.byName(sortSpec)
-		case .output:
-			.byLabel(sortSpec)
+		var direction = SortSpec.Direction?.none
+		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
+			if let match = SortSpec.Direction(rawValue: char) {
+				direction = match
+			}
+			input.removeFirst()
+		}
+		return switch (order, outputFormat) {
+		case (baseFieldsConfigOrderOption, _):
+			.base(direction)
+		case (_, .table): // `<original-input-order>` is `(* only for: json or key-value output *)`
+			throw .originalInputOrderUnsupportedForTable
+		default:
+			.original(direction)
 		}
 	}
 
-	/// Neither reset option resets anything unless explicitly given (per
-	/// fields.md's "default: inherited item sorting" for an absent
-	/// `<item-sort-option-set>`): a bare `//` or `//a` only sets / keeps
-	/// `tiebreakDirection`, leaving every field's inherited `sortSpec` alone.
-	/// When a reset _is_ given, each currently-sorted field's options (not
-	/// priority) are replaced with the contextual "Default Sort Options" row for
-	/// its name & the active output format.
-	// swiftlint:disable:next todo
-	// TODO: distinguish `<reset-to-global>` ("R") from `<reset-to-contextual>`
-	//  ("r") once persisted fields configs exist: absent persistence, there's no
-	//  separate "global" tier to reset to, so both currently apply the same
-	//  built-in contextual defaults.
+	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
+	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
+	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
+	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort
+	/// tiebreak (input order / reverse input order).
 	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortSpec.Direction {
 		guard input.hasPrefix(itemSortSectionPrefix) else {
 			return .ascending
 		}
 		input.removeFirst(itemSortSectionPrefix.count)
-		var shouldReset = false
+		var shouldDisableAllSorts = false
 		var direction = SortSpec.Direction.ascending
 		try parseOptions(
 			&input,
@@ -376,17 +398,17 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				direction = match
 			} else {
 				switch char {
-				case resetToContextual, resetToGlobal:
-					shouldReset = true
+				case disableAllSortsOption:
+					shouldDisableAllSorts = true
 				default:
 					input = input[currentIndex...]
 					throw .invalidSortOption(char)
 				}
 			}
 		}
-		if shouldReset {
-			fieldSpecs = fieldSpecs.map(resetToContextualSortDefaults)
-			referenceFieldSpecs = referenceFieldSpecs.map { $0.map(resetToContextualSortDefaults) }
+		if shouldDisableAllSorts {
+			fieldSpecs = fieldSpecs.map(disablingSort)
+			referenceFieldSpecs = referenceFieldSpecs.map { $0.map(disablingSort) }
 		}
 		return direction
 	}
@@ -399,20 +421,20 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		while !input.isEmpty {
 			switch parseFieldSpecStrategy(&input) {
 			case .insert:
-				let name = try parseName(&input)
+				let source = try parseBaseSourcedFieldSpec(&input)
 				try apply(
-					.insert,
-					name: name,
-					existing: nil,
+					.insert(isHidden: false),
+					name: source.name,
+					existing: source,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: name),
+					format: try parseFormat(&input, fieldName: source.name),
 					sortModifierInput: &input,
 				)
 			case .overlay:
 				let reference = try parseFieldSpecReference(&input)
 				let existing = try resolvedReferenceFieldSpec(reference)
 				try apply(
-					.overlay(reference),
+					.overlay(reference, isHidden: false),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -424,6 +446,19 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				let existing = try resolvedReferenceFieldSpec(reference)
 				try apply(
 					.move(reference),
+					name: existing.name,
+					existing: existing,
+					label: try parseLabel(&input),
+					format: try parseFormat(&input, fieldName: existing.name),
+					sortModifierInput: &input,
+				)
+			case .hide:
+				// A `<named-field-spec-reference>` that resolves to no field spec
+				// inserts a new field spec (as `<field-spec-insertion>` would) as
+				// `source`
+				let (reference, existing) = try parseHideReference(&input)
+				try apply(
+					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -469,26 +504,18 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
-	/// `fieldSpec` unchanged if it has no `sortSpec` (nothing to reset);
-	/// otherwise, its `sortSpec`'s options (not priority) replaced with the
-	/// contextual "Default Sort Options" row for its name & `outputFormat`.
-	private func resetToContextualSortDefaults(_ fieldSpec: FieldSpec) -> FieldSpec {
+	/// `fieldSpec` unchanged if it has no `sortSpec` (nothing to disable);
+	/// otherwise, its `sortSpec`'s `<sort-priority>` set to `0` (disabled),
+	/// retaining its `<sort-option-set>`.
+	private func disablingSort(_ fieldSpec: FieldSpec) -> FieldSpec {
 		fieldSpec.sortSpec.map { sortSpec in
-			let contextualDefault = defaultSortSpec(forFieldNamed: fieldSpec.name, outputFormat: outputFormat)
-			return .init(
+			.init(
 				name: fieldSpec.name,
 				label: fieldSpec.label,
 				format: fieldSpec.format,
-				sortSpec: .init(
-					priority: sortSpec.priority,
-					source: contextualDefault.source,
-					direction: contextualDefault.direction,
-					caseSensitivity: contextualDefault.caseSensitivity,
-					localization: contextualDefault.localization,
-					grouping: contextualDefault.grouping,
-					interpretation: contextualDefault.interpretation,
-					boundaries: contextualDefault.boundaries,
-				),
+				sortSpec: sortSpec.withPriority(0),
+				isHidden: fieldSpec.isHidden,
+				isSynthesized: fieldSpec.isSynthesized,
 				justification: fieldSpec.justification,
 			)
 		}
@@ -496,31 +523,29 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	}
 }
 
-/// Whether `input`'s `<field-order-option-set>` (up to, but not including, its
-/// terminating `<field-spec-separator>` / `<item-sort-section-prefix>` /
-/// `<field-specs-section-prefix>`) is an `<original-order-option-set>`: every
-/// top-level character is in `{"o", "a", "d"}`, with at least 1 `"o"` (its
-/// mandatory `<original-order>`). Any other top-level character (including 1
-/// that introduces a fenced `<sort-option>`, e.g., `"l"` / `"b"`) means it's a
+/// The `<order>` letter (`w` / `o`) of `input`'s `<field-order-option-set>`
+/// (up to, but not including, its terminating `<field-spec-separator>` /
+/// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
+/// is an `<order-option-set>`: every top-level character is a `<direction>` or
+/// an `<order>`, with at least 1 `<order>` (last wins). `nil` means it is a
 /// `<sort-option-set>` instead: the 2 alternatives share no valid text (an
-/// all-`{"a", "d"}` sequence with no `"o"` can only be `<sort-option-set>`,
-/// since `<original-order-option-set>` requires `"o"`), so checking without
-/// consuming `input` is safe: only 1 alternative ever actually gets parsed.
-private func isOriginalOrderOptionSet(_ input: Substring) -> Bool {
-	var sawOriginalOrder = false
+/// all-`<direction>` sequence with no `<order>` can only be
+/// `<sort-option-set>`), so checking without consuming `input` is safe.
+private func orderOptionSetOrder(_ input: Substring) -> Character? {
+	var order = Character?.none
 	for char in input {
 		if char == fieldSpecSeparator || itemSortAndFieldSpecsPrefixSet.contains(char) {
 			break
 		}
-		guard char == originalOrderOption else {
+		guard orderOptionSet.contains(char) else {
 			guard SortSpec.Direction(rawValue: char) != nil else {
-				return false
+				return nil
 			}
 			continue
 		}
-		sawOriginalOrder = true
+		order = char
 	}
-	return sawOriginalOrder
+	return order
 }
 
 // MARK: Private: field-spec-reference resolution
@@ -539,20 +564,70 @@ private extension FieldSpecsBuilder {
 				position: try effectivePosition(forIndex: parseInt(&input) ?? 1, length: referenceFieldSpecs.count),
 			)
 		}
-		let name = try parseName(&input, extraTerminatorSet: [indexPrefix])
-		var index = 1
-		if input.first == indexPrefix {
-			input.removeFirst()
-			index = parseInt(&input) ?? 1
-		}
-		let matchingPositions = referenceFieldSpecs.indices.filter { referenceFieldSpecs[$0]?.name == name }
-		guard !matchingPositions.isEmpty else {
+		let (name, index) = try parseNameAndIndex(&input)
+		let positions = referencePositions(forName: name)
+		guard !positions.isEmpty else {
 			throw .nonexistentFieldSpec(forName: name)
 		}
-		return .init(
-			name: name,
-			position: matchingPositions[try effectivePosition(forIndex: index, length: matchingPositions.count) - 1] + 1,
-		)
+		return .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
+	}
+
+	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>`
+	/// & resolves its `source` from the base fields config (as in the reference
+	/// fields config, except that a `<named-field-spec-reference>` that
+	/// references no field spec selects a field spec with default settings for
+	/// field `<reference-field-name>`).
+	private func parseBaseSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
+		guard input.first != indexPrefix else {
+			input.removeFirst()
+			return baseFieldSpecs[try effectivePosition(forIndex: parseInt(&input) ?? 1, length: baseFieldSpecs.count) - 1]
+		}
+		let (name, index) = try parseNameAndIndex(&input)
+		let positions = referencePositions(forName: name)
+		return positions.isEmpty
+			? .defaultSettings(forName: name)
+			: baseFieldSpecs[positions[try effectivePosition(forIndex: index, length: positions.count) - 1] - 1]
+	}
+
+	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
+	/// reference & its `source` from the reference fields config; or, iff a
+	/// `<named-field-spec-reference>` resolves to no field spec (none for its
+	/// field, or 1 removed earlier in this section), `nil` & the field spec that
+	/// a `<field-spec-insertion>` would copy from the base fields config.
+	private func parseHideReference(_ input: inout Substring)
+	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
+		guard input.first != indexPrefix else {
+			let reference = try parseFieldSpecReference(&input)
+			return (reference, try resolvedReferenceFieldSpec(reference))
+		}
+		let (name, index) = try parseNameAndIndex(&input)
+		let positions = referencePositions(forName: name)
+		guard !positions.isEmpty else {
+			return (nil, .defaultSettings(forName: name))
+		}
+		let reference =
+			Reference(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
+		return referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
+			?? (nil, baseFieldSpecs[reference.position - 1])
+	}
+
+	/// The 1-based positions in the reference fields config of field specs for
+	/// field `name`, including any since replaced by `null`: the reference
+	/// fields config's order & names are immutable, & are those of the base
+	/// fields config.
+	private func referencePositions(forName name: String) -> [Int] {
+		baseFieldSpecs.indices.compactMap { baseFieldSpecs[$0].name == name ? $0 + 1 : nil }
+	}
+
+	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>` &
+	/// optional `<index-prefix>` `<index>` (default `1`).
+	private func parseNameAndIndex(_ input: inout Substring) throws(ParsingError) -> (name: String, index: Int) {
+		let name = try parseName(&input, extraTerminatorSet: [indexPrefix])
+		guard input.first == indexPrefix else {
+			return (name, 1)
+		}
+		input.removeFirst()
+		return (name, parseInt(&input) ?? 1)
 	}
 
 	/// The `source` field spec for a resolved reference: errors if its
@@ -574,9 +649,9 @@ private extension FieldSpecsBuilder {
 
 private extension FieldSpecsBuilder {
 	private enum ResolvedStrategy {
-		case insert
-		case overlay(Reference)
+		case insert(isHidden: Bool)
 		case move(Reference)
+		case overlay(Reference, isHidden: Bool)
 	}
 
 	private mutating func apply(
@@ -587,12 +662,19 @@ private extension FieldSpecsBuilder {
 		format: (format: Format, justification: Justification)?,
 		sortModifierInput input: inout Substring,
 	) throws(ParsingError) {
+		let isHidden = switch strategy {
+		case let .insert(isHidden), let .overlay(_, isHidden):
+			isHidden
+		case .move:
+			false
+		}
 		let merged = FieldSpec(
 			name: name,
 			label: label ?? existing?.label ?? name,
 			format: format?.format ?? existing?.format ?? .default(fieldName: name),
 			sortSpec: // swiftformat:disable:next indent
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
+			isHidden: isHidden,
 			justification: format?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
@@ -601,7 +683,7 @@ private extension FieldSpecsBuilder {
 			fieldSpecs.insert(merged, at: newIndex)
 			workingTags.insert(nil, at: newIndex)
 			previousIndex = newIndex
-		case let .overlay(reference):
+		case let .overlay(reference, _):
 			referenceFieldSpecs[reference.position - 1] = merged
 			let workingIndex = currentWorkingIndex(ofReferencePosition: reference.position)
 			fieldSpecs[workingIndex] = merged
@@ -636,6 +718,8 @@ private func parseFieldSpecStrategy(_ input: inout Substring) -> FieldSpecStrate
 					FieldSpecStrategy.insert
 				case moveIndicator:
 					.move
+				case hideIndicator:
+					.hide
 				case removeIndicator:
 					.remove
 				default:
@@ -1123,6 +1207,7 @@ private let itemSortAndFieldSpecsPrefixSet =
 
 let insertIndicator = Character("+")
 let moveIndicator = Character("%")
+let hideIndicator = Character("_")
 let removeIndicator = Character("-")
 
 let labelModifierPrefix = Character("=")
@@ -1140,9 +1225,10 @@ let colon = Character(":")
 
 let indexPrefix = Character("@")
 
-private let originalOrderOption = Character("o")
-private let resetToContextual = Character("r")
-private let resetToGlobal = Character("R")
+private let baseFieldsConfigOrderOption = Character("w")
+private let originalInputOrderOption = Character("o")
+private let orderOptionSet = Set([baseFieldsConfigOrderOption, originalInputOrderOption])
+private let disableAllSortsOption = Character("r")
 
 private let outputFormatSuffixSet = Set(["json", "key-value", "table"])
 
