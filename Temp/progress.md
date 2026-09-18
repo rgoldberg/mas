@@ -205,3 +205,15 @@ The old built-in `hidden` named format (`::hidden`, `Format.isHidden`,
 `<field-spec-hide>` (`_`) via `FieldSpec.isHidden`. `knownNamedFormatNameSet` is
 empty, so every `<named-format-reference>` reports `unknownNamedFormat` until
 persisted named formats exist, per fields-format.md.
+
+## Step 3 (partial): Placeholder Letters (2026-09-18 10:31 UTC)
+
+Placeholder letters now match fields-format.md: `%i` / `%I` (input; formerly
+`%v` / `%V`), `%c` / `%C` (chronologic; formerly `%d` / `%D`), `%m` / `%M`
+(match; formerly `%b` / `%B`), & `%b` / `%B` (boolean; formerly `%o` / `%O`).
+Not yet done: `%k` / `%K` (name), `%v` / `%V` (version), `<abort-on-success>` /
+`<abort-on-failure>` semantics (the existing `-` prefix still means the old
+negation), `<lenient-coercion>` (`_`), type determinants, the
+`<chronologic-transform>` argument syntax (`timeZone:…:`; the old `,` / `_`
+date-format separators remain), sort options (`n` / `g` / `B` / `C` / `f` / `e`
+/ `t` / `h` / `p` / `q`), & `template-text`'s whitespace treatment.

@@ -54,7 +54,7 @@ private struct KeyValueConfig: OutputConfig {
 			.init(
 				name: "currentVersionReleaseDate",
 				label: "Released",
-				// `%D.dateOnly++`: the release date, date-only, in the local time zone
+				// `%C.dateOnly++`: the release date, date-only, in the local time zone
 				format: // swiftformat:disable:next indent
 					.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))]),
 				sortSpec: nil,

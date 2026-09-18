@@ -133,9 +133,9 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case .originalInputOrderUnsupportedForTable:
 			"<original-input-order> 'o' is supported only for JSON or key-value output"
 		case .singleBranch:
-			"<branches> needs at least 2 branches; a single 1 is just an ordinary placeholder, with no need for %b / %B"
+			"<branches> needs at least 2 branches; a single 1 is just an ordinary placeholder, with no need for %m / %M"
 		case .templateLacksPlaceholder:
-			"A template needs at least 1 placeholder (e.g., %v); its output would otherwise never depend on the value"
+			"A template needs at least 1 placeholder (e.g., %i); its output would otherwise never depend on the value"
 		case let .terminalNumberTransformFollowedByMore(name):
 			"'\(name)' must be the last transform in its number-transform-pipeline; nothing may follow it"
 		case let .unknownNamedFormat(name):
@@ -762,8 +762,8 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 /// anything else, never inside a placeholder's own success / failure
 /// sub-format (`parseDelimitedFormat` / `parseDateSpec` in `Format.swift` don't
 /// call this). A name / transform name never stops at `<placeholder-prefix>`
-/// on its own: `.uppercase%v` is an attempt at a transform literally named
-/// `uppercase%v` (& fails as one), not `.uppercase` followed by a `%v`
+/// on its own: `.uppercase%i` is an attempt at a transform literally named
+/// `uppercase%i` (& fails as one), not `.uppercase` followed by a `%i`
 /// placeholder; a `<pipeline-terminator>` (or `.` for another transform) is
 /// what actually separates them; see `parseTrailingTemplate(_:terminatorSet:
 /// endedWithClosedArgumentFence:)` for exactly when 1 is required.
@@ -814,7 +814,7 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			// need a `<pipeline-terminator>` from
 			try parseTemplate(&input, terminatorSet: terminatorSet)
 		} else {
-			// Nothing at all: implicit `%v`, preserving the value's real JSON type
+			// Nothing at all: implicit `%i`, preserving the value's real JSON type
 			Format.default(fieldName: fieldName)
 		}
 	return (format, justification ?? .start)
@@ -882,7 +882,7 @@ private func parseTrailingTemplate(
 /// has its own reference to fold a `namedFormat` into) precede it: with a
 /// template, that's the whole format (`namedFormat`, if present, is
 /// discarded here); without a template, `namedFormat` (if present) is the
-/// whole format instead; absent both, it's an implicit `%v`.
+/// whole format instead; absent both, it's an implicit `%i`.
 private func parseTrailingTemplateOrNamedFormat(
 	_ input: inout Substring,
 	namedFormat: String?,

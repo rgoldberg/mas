@@ -272,7 +272,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `evaluates bare %v as the verbatim value, preserving its JSON type`() {
+	func `evaluates bare %i as the verbatim value, preserving its JSON type`() {
 		let format = Format.parts([.placeholder(.value(success: nil))])
 		// A number's description has no quotes, unlike a string's, confirms the
 		// type was preserved, not stringified
@@ -280,10 +280,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `evaluates %v as an empty string for a null value`() {
+	func `evaluates %i as an empty string for a null value`() {
 		let format = Format.parts([.placeholder(.value(success: nil))])
 		// `.stringValue` is `nil` for `.null` (by design, callers like table
-		// rendering apply `?? ""`); this confirms %v's _display_ value is empty for
+		// rendering apply `?? ""`); this confirms %i's _display_ value is empty for
 		// null, per fields.md ("empty string if null")
 		#expect(format.rendered(value: .null, label: "Label", name: "name").stringValue?.isEmpty ?? true)
 	}
@@ -508,7 +508,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `evaluates %d as ISO-8601 datetime by default, in the local time zone`() throws {
+	func `evaluates %c as ISO-8601 datetime by default, in the local time zone`() throws {
 		let rendered = try #require(
 			Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
 				.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n")
@@ -520,7 +520,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `evaluates %D dateOnly as just the date`() {
+	func `evaluates %C dateOnly as just the date`() {
 		let rendered = Format
 			.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))])
 			.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n")
@@ -529,22 +529,22 @@ private extension MASTests {
 	}
 
 	@Test
-	func `%d fails (& %-d succeeds) for a value that isn't a date`() {
+	func `%c fails (& %-c succeeds) for a value that isn't a date`() {
 		let format = Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
 		#expect(format.rendered(value: .string("not a date"), label: "L", name: "n").stringValue?.isEmpty == true)
 		let negated = Format.parts([.placeholder(.date(negated: true, success: nil, failure: nil))])
 		#expect(negated.rendered(value: .string("not a date"), label: "L", name: "n").stringValue == "not a date")
 	}
 
-	@Test(arguments: ["adamID:%D.dateOnly_++"])
+	@Test(arguments: ["adamID:%C.dateOnly_++"])
 	func `a custom input-date-format is a parse error, not a silent no-op`(value: String) {
 		#expect(throws: ParsingError.unsupportedDateInputFormat) { try parseFieldSpecs(value) }
 	}
 
 	@Test(
 		arguments: [
-			("adamID:%D:name++", ParsingError.unknownNamedFormat("name")),
-			("adamID:%DliteralPattern++", .unsupportedDateOutputFormat),
+			("adamID:%C:name++", ParsingError.unknownNamedFormat("name")),
+			("adamID:%CliteralPattern++", .unsupportedDateOutputFormat),
 		],
 	)
 	func `a named or literal output-date-format is a parse error, not a silent fallback to the default`(
@@ -656,7 +656,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `%.o, %.t & %.f coerce string "true" / "false" into booleans, unlike their uncoerced forms`() {
+	func `%.b, %.t & %.f coerce string "true" / "false" into booleans, unlike their uncoerced forms`() {
 		let coercedTruePlaceholder = Placeholder.standard(
 			.isTrue,
 			negated: false,
@@ -677,7 +677,7 @@ private extension MASTests {
 
 	@Test
 	func `coercion on a placeholder that doesn't support it is a parse error`() {
-		#expect(throws: ParsingError.coercionNotSupported("v")) { try parseFieldSpecs(".adamID:%.v") }
+		#expect(throws: ParsingError.coercionNotSupported("i")) { try parseFieldSpecs(".adamID:%.i") }
 	}
 
 	@Test
@@ -698,26 +698,26 @@ private extension MASTests {
 		let fallible = try #require(parseFieldSpecs("adamID:%.NNumber+NotANumber+").first).format
 		#expect(fallible.rendered(value: .string("42"), label: "L", name: "n").stringValue == "Number")
 		#expect(fallible.rendered(value: .string("nope"), label: "L", name: "n").stringValue == "NotANumber")
-		// %V / %L are infallible (their own success always applies), so a
+		// %I / %L are infallible (their own success always applies), so a
 		// placeholder-less success is just as constant as a bare template
-		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:%Vconstant+") }
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:%Iconstant+") }
 		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:%Lconstant+") }
 	}
 
 	@Test
-	func `a %V / %L branch inside %b may be placeholder-less, even though it's infallible`() throws {
-		// A `%b` branch, unlike a standalone top-level placeholder, can't be
+	func `a %I / %L branch inside %m may be placeholder-less, even though it's infallible`() throws {
+		// A `%m` branch, unlike a standalone top-level placeholder, can't be
 		// replaced by a bare literal without losing "only if every earlier
-		// branch failed", true even for an infallible %V / %L branch used as
+		// branch failed", true even for an infallible %I / %L branch used as
 		// the catch-all last branch
-		let format = try #require(parseFieldSpecs("adamID:%bNnumber+Oboolean+Vother++").first).format
+		let format = try #require(parseFieldSpecs("adamID:%mNnumber+Bboolean+Iother++").first).format
 		#expect(format.rendered(value: .number(42), label: "L", name: "n").stringValue == "number")
 		#expect(format.rendered(value: .bool(true), label: "L", name: "n").stringValue == "boolean")
 		#expect(format.rendered(value: .string("x"), label: "L", name: "n").stringValue == "other")
 	}
 
-	@Test(arguments: ["adamID:%bNnum++", "adamID:%bVconstant++"])
-	func `a single-branch %b, fallible or not, is a parse error, since it's just an ordinary placeholder`(value: String) {
+	@Test(arguments: ["adamID:%mNnum++", "adamID:%mIconstant++"])
+	func `a single-branch %m, fallible or not, is a parse error, since it's just an ordinary placeholder`(value: String) {
 		#expect(throws: ParsingError.singleBranch) { try parseFieldSpecs(value) }
 	}
 
@@ -764,7 +764,7 @@ private extension MASTests {
 		// from needing the full doubled pipeline terminator
 		#expect(throws: ParsingError.incompletePipelineTerminator) { try parseFieldSpecs("adamID:.rightJustify: MB") }
 		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.rightJustify:: MB") }
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify::%v MB").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify::%i MB").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == "7 MB")
 	}
@@ -825,29 +825,29 @@ private extension MASTests {
 
 	@Test
 	func `a pipeline terminator lets an argument-less value-transform-pipeline be followed directly by a template`() {
-		// A template that never references the pipeline's output (no `%v`) would
+		// A template that never references the pipeline's output (no `%i`) would
 		// render identically for every value, so it's a parse error (see the
 		// next test for the same pipeline terminator, but with a placeholder)
 		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.round.absoluteValue:: MB") }
 	}
 
 	@Test
-	func `a value-transform-pipeline's template renders %v against the pipeline's own output, never doubling it`()
+	func `a value-transform-pipeline's template renders %i against the pipeline's own output, never doubling it`()
 	throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue::%v MB").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round.absoluteValue::%i MB").first)
 		#expect(fieldSpec.format.rendered(value: .number(-6.4), label: "L", name: "n").stringValue == "6 MB")
 	}
 
 	@Test
 	func `a fenced last transform needs no pipeline terminator before a template`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:%v MB").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:%i MB").first)
 		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "1.234.567 MB")
 	}
 
 	@Test
 	func `extra pipeline terminators after a fenced last transform are literal template text, not a 2nd terminator`()
 	throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:::%v").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.group:.,3:::%i").first)
 		#expect(fieldSpec.format.rendered(value: .number(1_234_567), label: "L", name: "n").stringValue == "::1.234.567")
 	}
 
@@ -866,8 +866,8 @@ private extension MASTests {
 		// from a dedicated ban on a leading '.'
 		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.round::.absoluteValue") }
 		// With a placeholder present, it parses fine: literal ".absoluteValue",
-		// then %v reading round's own transformed output
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.round::.absoluteValue%v").first)
+		// then %i reading round's own transformed output
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.round::.absoluteValue%i").first)
 		#expect(fieldSpec.format.rendered(value: .number(5.6), label: "L", name: "n").stringValue == ".absoluteValue6")
 	}
 
@@ -880,7 +880,7 @@ private extension MASTests {
 
 	@Test
 	func `a justify transform has no effect inside a placeholder's own success format`() throws {
-		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:%V.rightJustify+") }
+		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:%I.rightJustify+") }
 	}
 
 	@Test
@@ -890,9 +890,9 @@ private extension MASTests {
 
 	@Test
 	func `a name / transform name swallows a following placeholder prefix absent a separator`() {
-		// No separator between "name" & "%v": the whole run is 1 attempted named
-		// format name, "name%v", not `name` followed by a `%v` placeholder
-		#expect(throws: ParsingError.unknownNamedFormat("name%v")) { try parseFieldSpecs("adamID::name%v") }
+		// No separator between "name" & "%i": the whole run is 1 attempted named
+		// format name, "name%i", not `name` followed by a `%i` placeholder
+		#expect(throws: ParsingError.unknownNamedFormat("name%i")) { try parseFieldSpecs("adamID::name%i") }
 	}
 
 	@Test
