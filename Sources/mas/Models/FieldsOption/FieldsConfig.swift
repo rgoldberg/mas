@@ -155,6 +155,7 @@ extension FieldsConfig {
 						label: fieldSpec.name,
 						format: .default(fieldName: fieldSpec.name),
 						sortSpec: fieldSpec.sortSpec,
+						isHidden: fieldSpec.isHidden,
 						isSynthesized: fieldSpec.isSynthesized,
 						justification: fieldSpec.justification,
 					)

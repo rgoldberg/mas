@@ -154,3 +154,16 @@ with priority `0` are excluded from `ItemSort.keys`
 `.adamID/1` re-enables a sort. Remaining for step 2: `<field-spec-hide>` (`_`),
 unhiding on overlay / move, `+@i` / `+name@i` insertion references, & outer
 bare whitespace treatment per ebnf.md.
+
+## Step 2b: Hide, Unhide & Base-Sourced Insertion (2026-09-18 10:25 UTC)
+
+`FieldSpec` gains a stored `isHidden`; `<field-spec-hide>` (`_`) overlays its
+`<field-modifiers>` onto `source` & hides it, inserting a new hidden field spec
+iff its `<named-field-spec-reference>` resolves to no field spec (e.g.,
+`_size/1d`); `<field-spec-overlay>` & `<field-spec-move>` unhide `source`.
+`<field-spec-insertion>` now takes a full `<field-spec-reference>` (`+name`,
+`+name@i`, `+@i`) resolved against the immutable base fields config
+(`FieldSpecsBuilder.baseFieldSpecs`), selecting default settings iff a named
+reference matches nothing. Output filters hidden field specs. The old-draft
+`:hidden` named format still exists alongside (see Temp/todo.md); `none` is
+still an empty fields config rather than `all` with every field spec hidden.

@@ -12,6 +12,10 @@ struct FieldSpec: Equatable {
 	let label: String
 	let format: Format
 	let sortSpec: SortSpec?
+	/// Whether this field spec is hidden (`<field-spec-hide>`): not output, but
+	/// otherwise behaving as a visible one (it has a position, may be referenced
+	/// by a `<field-spec-reference>`, & its `<sort>` sorts items iff enabled).
+	let isHidden: Bool
 	/// Whether this field's value is computed after the display command's own
 	/// fetch (e.g., `outdated`'s `newVersion`, from comparing the installed &
 	/// latest versions), so it's never itself something to fetch.
@@ -29,6 +33,7 @@ struct FieldSpec: Equatable {
 		label: String,
 		format: Format,
 		sortSpec: SortSpec?,
+		isHidden: Bool = false,
 		isSynthesized: Bool = false,
 		justification: Justification = .start,
 	) {
@@ -36,6 +41,7 @@ struct FieldSpec: Equatable {
 		self.label = label
 		self.format = format
 		self.sortSpec = sortSpec
+		self.isHidden = isHidden
 		self.isSynthesized = isSynthesized
 		self.justification = justification
 	}
@@ -46,7 +52,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 		"""
 		FieldSpec(name: "\(name)", label: "\(label)", format: \(format), sortSpec: \(
 			sortSpec.map(String.init(describing:)) ?? "nil"
-		), justification: \(justification))
+		), isHidden: \(isHidden), justification: \(justification))
 		"""
 	}
 }
@@ -278,6 +284,7 @@ private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_f
 	case insert
 	case overlay
 	case move
+	case hide
 	case remove // swiftlint:enable sorted_enum_cases
 }
 
@@ -301,6 +308,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private let outputFormat: OutputFormat
 
 	private var workingTags: [Int?]
+	/// The base fields config's field specs, immutable: the `source` of a
+	/// `<base-sourced-field-spec-edit>` (i.e., a `<field-spec-insertion>`).
+	private let baseFieldSpecs: [FieldSpec]
 	private var referenceFieldSpecs: [FieldSpec?]
 	/// "$previous$": the working index after which the next insert / move's
 	/// direct result lands. `-1` = before the first field spec.
@@ -310,6 +320,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		self.fieldSpecs = fieldSpecs
 		self.outputFormat = outputFormat
 		workingTags = Array(fieldSpecs.indices)
+		baseFieldSpecs = fieldSpecs
 		referenceFieldSpecs = fieldSpecs
 	}
 
@@ -400,20 +411,20 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		while !input.isEmpty {
 			switch parseFieldSpecStrategy(&input) {
 			case .insert:
-				let name = try parseName(&input)
+				let source = try parseBaseSourcedFieldSpec(&input)
 				try apply(
-					.insert,
-					name: name,
-					existing: nil,
+					.insert(isHidden: false),
+					name: source.name,
+					existing: source,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: name),
+					format: try parseFormat(&input, fieldName: source.name),
 					sortModifierInput: &input,
 				)
 			case .overlay:
 				let reference = try parseFieldSpecReference(&input)
 				let existing = try resolvedReferenceFieldSpec(reference)
 				try apply(
-					.overlay(reference),
+					.overlay(reference, isHidden: false),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -425,6 +436,19 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				let existing = try resolvedReferenceFieldSpec(reference)
 				try apply(
 					.move(reference),
+					name: existing.name,
+					existing: existing,
+					label: try parseLabel(&input),
+					format: try parseFormat(&input, fieldName: existing.name),
+					sortModifierInput: &input,
+				)
+			case .hide:
+				// A `<named-field-spec-reference>` that resolves to no field spec
+				// inserts a new field spec (as `<field-spec-insertion>` would) as
+				// `source`
+				let (reference, existing) = try parseHideReference(&input)
+				try apply(
+					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -480,6 +504,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				label: fieldSpec.label,
 				format: fieldSpec.format,
 				sortSpec: sortSpec.withPriority(0),
+				isHidden: fieldSpec.isHidden,
+				isSynthesized: fieldSpec.isSynthesized,
 				justification: fieldSpec.justification,
 			)
 		}
@@ -528,17 +554,62 @@ private extension FieldSpecsBuilder {
 				position: try effectivePosition(forIndex: parseInt(&input) ?? 1, length: referenceFieldSpecs.count),
 			)
 		}
-		let name = try parseName(&input, extraTerminatorSet: [indexPrefix])
-		var index = 1
-		if input.first == indexPrefix {
-			input.removeFirst()
-			index = parseInt(&input) ?? 1
-		}
+		let (name, index) = try parseNameAndIndex(&input)
 		let matchingPositions = referenceFieldSpecs.indices.filter { referenceFieldSpecs[$0]?.name == name }
 		return .init(
 			name: name,
 			position: matchingPositions[try effectivePosition(forIndex: index, length: matchingPositions.count) - 1] + 1,
 		)
+	}
+
+	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>`
+	/// & resolves its `source` from the base fields config (as in the reference
+	/// fields config, except that a `<named-field-spec-reference>` that
+	/// references no field spec selects a field spec with default settings for
+	/// field `<reference-field-name>`).
+	private func parseBaseSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
+		guard input.first != indexPrefix else {
+			input.removeFirst()
+			return baseFieldSpecs[try effectivePosition(forIndex: parseInt(&input) ?? 1, length: baseFieldSpecs.count) - 1]
+		}
+		let (name, index) = try parseNameAndIndex(&input)
+		let matching = baseFieldSpecs.filter { $0.name == name }
+		return matching.isEmpty
+			? .init(name: name, label: name, format: .default(fieldName: name), sortSpec: nil)
+			: matching[try effectivePosition(forIndex: index, length: matching.count) - 1]
+	}
+
+	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
+	/// reference & its `source` from the reference fields config, or `nil` & a
+	/// default-settings field spec iff a `<named-field-spec-reference>` resolves
+	/// to no field spec.
+	private func parseHideReference(_ input: inout Substring)
+	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
+		guard input.first != indexPrefix else {
+			let reference = try parseFieldSpecReference(&input)
+			return (reference, try resolvedReferenceFieldSpec(reference))
+		}
+		let (name, index) = try parseNameAndIndex(&input)
+		let matchingPositions = referenceFieldSpecs.indices.filter { referenceFieldSpecs[$0]?.name == name }
+		guard !matchingPositions.isEmpty else {
+			return (nil, .init(name: name, label: name, format: .default(fieldName: name), sortSpec: nil))
+		}
+		let reference = Reference(
+			name: name,
+			position: matchingPositions[try effectivePosition(forIndex: index, length: matchingPositions.count) - 1] + 1,
+		)
+		return (reference, try resolvedReferenceFieldSpec(reference))
+	}
+
+	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>` &
+	/// optional `<index-prefix>` `<index>` (default `1`).
+	private func parseNameAndIndex(_ input: inout Substring) throws(ParsingError) -> (name: String, index: Int) {
+		let name = try parseName(&input, extraTerminatorSet: [indexPrefix])
+		guard input.first == indexPrefix else {
+			return (name, 1)
+		}
+		input.removeFirst()
+		return (name, parseInt(&input) ?? 1)
 	}
 
 	/// The `source` field spec for a resolved reference: errors if its
@@ -560,9 +631,9 @@ private extension FieldSpecsBuilder {
 
 private extension FieldSpecsBuilder {
 	private enum ResolvedStrategy {
-		case insert
-		case overlay(Reference)
+		case insert(isHidden: Bool)
 		case move(Reference)
+		case overlay(Reference, isHidden: Bool)
 	}
 
 	private mutating func apply(
@@ -573,12 +644,19 @@ private extension FieldSpecsBuilder {
 		format: (format: Format, justification: Justification)?,
 		sortModifierInput input: inout Substring,
 	) throws {
+		let isHidden = switch strategy {
+		case let .insert(isHidden), let .overlay(_, isHidden):
+			isHidden
+		case .move:
+			false
+		}
 		let merged = FieldSpec(
 			name: name,
 			label: label ?? existing?.label ?? name,
 			format: format?.format ?? existing?.format ?? .default(fieldName: name),
 			sortSpec: // swiftformat:disable:next indent
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
+			isHidden: isHidden,
 			justification: format?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
@@ -587,7 +665,7 @@ private extension FieldSpecsBuilder {
 			fieldSpecs.insert(merged, at: newIndex)
 			workingTags.insert(nil, at: newIndex)
 			previousIndex = newIndex
-		case let .overlay(reference):
+		case let .overlay(reference, _):
 			referenceFieldSpecs[reference.position - 1] = merged
 			let workingIndex = currentWorkingIndex(ofReferencePosition: reference.position)
 			fieldSpecs[workingIndex] = merged
@@ -622,6 +700,8 @@ private func parseFieldSpecStrategy(_ input: inout Substring) -> FieldSpecStrate
 					FieldSpecStrategy.insert
 				case moveIndicator:
 					.move
+				case hideIndicator:
+					.hide
 				case removeIndicator:
 					.remove
 				default:
@@ -1107,6 +1187,7 @@ private let itemSortAndFieldSpecsPrefixSet =
 
 let insertIndicator = Character("+")
 let moveIndicator = Character("%")
+let hideIndicator = Character("_")
 let removeIndicator = Character("-")
 
 let labelModifierPrefix = Character("=")
