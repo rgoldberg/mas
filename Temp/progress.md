@@ -253,3 +253,10 @@ other sort options (`<numbers-in-strings>`, `<boundaries>`,
 
 Revised (2026-09-25): a missing `<sort-option-terminator>` reports
 `missingSortOptionTerminator` instead of `missingEndFence`.
+
+## Step 3 (partial): Name Placeholder (2026-09-18 10:38 UTC)
+
+`%k` / `%K` (`<nullary-name>` / `<non-nullary-name>`) are parsed, as
+placeholders & as `<unconditional-branch>`es, reusing `Placeholder.label`'s
+`negated: true` representation for the field name; `%l` / `%L` / `%k` / `%K` may
+no longer be negated (the old `%-l` meant the field name).

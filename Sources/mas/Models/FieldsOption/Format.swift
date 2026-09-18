@@ -470,8 +470,9 @@ indirect enum Placeholder: Equatable { // swiftlint:disable:this one_declaration
 	/// `%i` / `%I`. Never negated (`<nullary-input>` has no defined negated
 	/// meaning).
 	case value(success: Format?)
-	/// `%l` / `%L` / `%-l` / `%-L`. Negated: field name. Not negated: field
-	/// label.
+	/// `%l` / `%L` (`negated: false`: field label) & `%k` / `%K` (`negated:
+	/// true`: field name); `negated` only distinguishes the 2, as neither
+	/// `<nullary-label>` nor `<nullary-name>` may be negated.
 	case label(negated: Bool, success: Format?)
 	/// `%u` / `%U` / `%e` / `%E` / `%w` / `%W` / `%b` / `%B` / `%t` / `%T` / `%f`
 	/// / `%F` / `%s` / `%S`, each optionally negated; `coerced` (`%.o` / `%.t` /
@@ -1063,12 +1064,15 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 			return .value(
 				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
 			)
-		case "l", "L":
+		case "k", "K", "l", "L":
+			guard !negated else {
+				throw .invalidLetter(letter) // `<nullary-label>` / `<nullary-name>` & non-nullary forms are unconditional
+			}
 			guard !coerced else {
 				throw .coercionNotSupported(letter)
 			}
 			return .label(
-				negated: negated,
+				negated: letter.lowercased() == "k",
 				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
 			)
 		case "n", "N":
@@ -1173,12 +1177,15 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 					throw .coercionNotSupported(letter)
 				}
 				branch = .value(success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false))
-			case "l", "L":
+			case "k", "K", "l", "L":
+				guard !negated else {
+					throw .invalidLetter(letter) // `<unconditional-branch>`es have no `<branch-negation>`
+				}
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
 				branch = .label(
-					negated: negated,
+					negated: letter.lowercased() == "k",
 					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
 				)
 			case "n", "N":
