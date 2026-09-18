@@ -171,3 +171,12 @@ Configurable behavior per output format:
 
 Allow `--table`'s value to select a named table config other than the context
 stack's `default`.
+
+### Implementation Questions (2026-09-18)
+
+- `<sort-priority>` `0` disables a sort: should `ItemSort.keys` exclude
+  priority-`0` field specs at resolution time, or should `ItemSort` filter them
+  when sorting? (Chosen when implemented: exclude at resolution time.)
+- `Format.isHidden` currently models hiding as a format flag; the spec makes
+  hiding a field spec state (`<field-spec-hide>` `_`, unhidden by overlay /
+  move). Rewriting requires a `FieldSpec.isHidden` stored property.
