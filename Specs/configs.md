@@ -65,8 +65,8 @@ A **named config** has been persisted with a case-sensitive name that is unique
 for its kind within a context.
 
 A config name is a stem matching the regex `^[-_0-9A-Za-z]+$`. A kind may extend
-the name syntax, e.g., fields configs'
-[output format suffix](fields.md#output-format-specific-named-fields-configs).
+the name syntax, e.g., fields configs' [output format
+suffix](fields.md#output-format-specific-named-fields-configs).
 
 ### Referencing Named Configs
 

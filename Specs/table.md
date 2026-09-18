@@ -2,8 +2,8 @@
 
 Uses the [custom EBNF grammar](ebnf.md).
 
-`--table` selects table output for a
-[display command](configs.md#display-commands).
+`--table` selects table output for a [display
+command](configs.md#display-commands).
 
 ## Table Config
 

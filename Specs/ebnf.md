@@ -309,8 +309,8 @@ Content-dependent multiplicity.
 
 Binds a nonterminal to its definition.
 
-A nonterminal's default value, when absent, is its
-[implicit or explicit default](#explicit--implicit-defaults).
+A nonterminal's default value, when absent, is its [implicit or explicit
+default](#explicit--implicit-defaults).
 
 #### Nonterminal References
 

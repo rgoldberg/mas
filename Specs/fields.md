@@ -1,7 +1,7 @@
 # Field-Selection Option
 
-`--fields` is an optional option of every
-[display command](configs.md#display-commands).
+`--fields` is an optional option of every [display
+command](configs.md#display-commands).
 
 It selects, orders, labels & formats the output fields.
 
@@ -58,8 +58,8 @@ A fields config may include:
 ### Named Fields Configs
 
 A **named fields config** is a [named config](configs.md#named-configs) of the
-fields kind, whose name may be immediately followed by an
-[output format suffix](#output-format-specific-named-fields-configs).
+fields kind, whose name may be immediately followed by an [output format
+suffix](#output-format-specific-named-fields-configs).
 
 #### Output-Format-Specific Named Fields Configs
 
@@ -115,8 +115,8 @@ The **resolved fields config** is used to render output.
 
 ## Defaults for Absent Expressions
 
-The following is inserted before all other cases in the
-[absent expression value algorithm](ebnf.md#defaults-for-absent-expressions):
+The following is inserted before all other cases in the [absent expression value
+algorithm](ebnf.md#defaults-for-absent-expressions):
 
 - The value for the given expression `EXPRESSION` in the working fields config.
 
