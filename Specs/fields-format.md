@@ -61,8 +61,8 @@ name-prefix = ":"!
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-**Named formats** can be saved in the app configuration; they can be referenced
-via a `<named-format-reference>`.
+**Named formats** may be persisted in the app configuration; they may be
+referenced via a `<named-format-reference>`.
 
 If no named format exists for a referenced name, an error is reported.
 
@@ -160,8 +160,8 @@ input type; otherwise, an error is reported.
 
 A `<strict-coercion>` attempts to coerce an input value into the correct input
 type for the annotated transform. If the coercion is successful, the transform
-is applied to the coerced input; otherwise, the whole format aborts, rendering
-blank output.
+is applied to the coerced input; otherwise, the entire format aborts, rendering
+empty output.
 
 Coercing any value to a string always succeeds (`null` becomes the empty
 string), so an `<unconditional-transform-pipeline>`, which begins with a
@@ -174,8 +174,8 @@ string), so an `<unconditional-transform-pipeline>`, which begins with a
 
 - Absent `<group-arguments>` entirely, or given only
   [`<locale-name>`](fields.md#sort-localization), `<group-separator>` &
-  `<group-digit-count>` are obtained from the system default locale, or the
-  named locale, respectively.
+  `<group-digit-count>` are sourced from the system default locale, or the named
+  locale, respectively.
 
 ###### `scale`
 
@@ -190,7 +190,7 @@ point.
 - For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
 - `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
   any), never spelled out.
-- E.g., a byte count as whole decimal megabytes: `.scale:10,6,,0:`.
+- E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
 
 ##### Format Transforms
 
@@ -213,7 +213,7 @@ Unlike a `<value-transform>`, a `<format-transform>` does not transform any
 value; it sets a property of the field itself, currently just its `table`-output
 column alignment. It therefore does not affect the field's rendered value: it is
 a no-op for `json` / `key-value` output (which have no columns to align); it
-does not force `%i` / `%I`'s type-preserving `json` passthrough into a string,
+does not force `%i` / `%I`'s type-retaining `json` passthrough into a string,
 unlike every other transform.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's padding
@@ -356,7 +356,7 @@ any-block-placeholder =
 
 A **matcher** is a `<placeholder-prefix>` (in a placeholder), its `<modifiers>`
 & its `<predicate>`; a placeholder or branch is a matcher immediately followed
-by its blocks, which make up the matcher's **form**:
+by its blocks, which are the matcher's **form**:
 
 - **Nullary**: no blocks.
 - **Unary**: a `<success-block>`.
@@ -374,7 +374,7 @@ A `<success-block>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
-A `<success-block>`'s kind follows the matched value's type; where that can be
+A `<success-block>`'s kind follows the matched value's type; where that may be
 any type, the block's pipeline must begin by coercing to a string.
 
 `<unconditional-block>` differs from `<any-block>` only by forbidding
@@ -535,7 +535,7 @@ value's type to already match (e.g., `%.n` matches `"4.50"`, but not `"a1a"`).
 
 A coerced matcher's value is the **coerced value**: the target-type value parsed
 from the string. It is what the matcher renders by default (e.g., `%.n` renders
-`"4.50"` as `4.5`) & what its `<success-block>` receives.
+`"4.50"` as `4.5`) & what its `<success-block>` is evaluated against.
 
 ###### Trivia
 

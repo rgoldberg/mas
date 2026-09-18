@@ -45,10 +45,11 @@ existing relative order. What if sorted by label instead of name, so their
 relative order changes because of different labels?
 
 Under any field order other than `<base-fields-config-order>`, a move is an
-order no-op (functionally an overlay); that either needs stating or restricting.
+order no-op (functionally an overlay); that either requires stating or
+restricting.
 
 Under `o` or a sort, `<field-spec-edits-section>` still decides which specs
-exist & their modifiers; the output order is computed for all of them uniformly
+exist & their modifiers; the output order is evaluated for all of them uniformly
 at output time (from input key order, or by sorting names / labels), so
 positions are moot & a move degenerates to an overlay. Only under `w` do
 positions render; `w` is the base's listed order, known before any input is
@@ -132,10 +133,11 @@ not a bare `<chronologic-transform-pipeline>` (i.e., a named-format reference,
 or literal pattern text) are not implemented yet; using either is a parse error,
 rather than silently falling back to the defaults:
 
-- `<input-chronologic-format>` needs a defined pattern syntax for
+- `<input-chronologic-format>` requires a defined pattern syntax for
   `<inline-chronologic-format>`, which does not exist yet.
-- A named `<output-chronologic-format>` needs persisted named formats; a literal
-  one needs the same pattern syntax `<input-chronologic-format>` does.
+- A named `<output-chronologic-format>` requires persisted named formats; a
+  literal one requires the same pattern syntax `<input-chronologic-format>`
+  does.
 
 Escaping appendix rows: `<format-name>` in a `<block>` also ended by `,` & `_`;
 `<inline-chronologic-format>`: initial `:` `.`, any `+` `,` `_`, whitespace
@@ -163,5 +165,5 @@ Configurable behavior per output format:
 
 ### `<base-table-config-name>`
 
-Let `--table`'s value select a named table config other than the context
+Allow `--table`'s value to select a named table config other than the context
 stack's `default`.

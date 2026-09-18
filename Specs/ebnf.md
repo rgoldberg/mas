@@ -56,7 +56,7 @@ An expression's multiplicity is either:
 - **Context-dependent**: The multiplicity of an occurrence of the expression is
   whatever is required by its context.
 
-Convenience multiplicity categories for values include:
+Convenience multiplicity kinds for values include:
 
 - **Implicit scalars**: Scalars whose expression is not an inherent scalar.
 - **Implicit repetitions**: Repetitions whose expression is not an inherent
@@ -94,8 +94,8 @@ renders it a text token.
 #### Candidate Syntax Literals
 
 The **candidate syntax literals** of a given position in the input are the
-literals that the syntax could consume at that position (regardless of the input
-starting at that position), which includes the literals that:
+literals that the syntax may consume at that position (regardless of the input
+beginning at that position), which includes the literals that:
 
 - Begin any choice available at that position.
 - Continue any enclosing sequence or repetition.
@@ -104,7 +104,7 @@ starting at that position), which includes the literals that:
 #### Consuming Tokens
 
 Input is consumed as a token iff a syntax token or a text token, as specified
-below, matches the input starting at the current position.
+below, matches the input beginning at the current position.
 
 Consuming a token commits to the set of expressions that the token begins,
 continues, or closes; each subsequently consumed token narrows the set to the
@@ -121,7 +121,7 @@ Input is never reconsidered after it has been consumed.
 ##### Consuming Syntax Tokens
 
 Input is consumed as a syntax token iff a candidate syntax literal matches the
-input starting at the current position; if several match, the longest is
+input beginning at the current position; if multiple match, the longest is
 consumed.
 
 ##### Consuming Text Tokens
@@ -132,8 +132,8 @@ position & no candidate syntax literal matches the input there.
 A text token's **candidate text terminators** are the candidate syntax literals
 of the position immediately following it.
 
-A text token is the longest non-empty prefix starting at the current position
-that does not contain any candidate text terminator; it terminates immediately
+A text token is the longest non-empty prefix beginning at the current position
+that does not contain any candidate text terminator; it finishes immediately
 before the earliest such terminator, less any insignificant outer bare
 whitespace; the terminator is then consumed as a syntax token.
 
@@ -180,7 +180,7 @@ Defined via a modified meta-grammar supporting [optionals](#optionals) &
 <!--editorconfig-checker-enable-->
 
 Punctuation attaches directly (i.e., with no intervening whitespace) to
-`EXPRESSION`, distinguishing a suffix for one expression from a prefix for the
+`EXPRESSION`, distinguishing a suffix for 1 expression from a prefix for the
 subsequent expression.
 
 Each side is independent.
@@ -195,7 +195,7 @@ Each side of an expression treats adjacent outer bare whitespace as one of:
 `~` **defers**, allowing the side's outer bare whitespace treatment to be
 overridden.
 
-The input's start & end count as deferring insignificant sides.
+The input's start & end are deferring insignificant sides.
 
 Outer bare whitespace is treated as per its 2 adjacent sides: the preceding
 token's end & the following token's start, the following token being the one
@@ -212,15 +212,15 @@ iff a text token begins there). Of those 2 sides:
   that no 2 potentially adjacent non-deferring sides differ.
 
 Consumed outer bare whitespace is included in the adjacent variable token's
-value, if any; otherwise, it is discarded.
+value, if any; otherwise, it is not retained.
 
 A syntax must ensure that no 2 consuming variable tokens are adjacent.
 
 An unannotated side of a compound treats outer bare whitespace as does the same
-side of its 1st (for the left side) or last (for the right side) contained
+side of its 1st (for the left side) or last (for the right side) enclosed
 expression. An annotated side of a compound applies its treatment to the same
-side of that contained expression, transitively down to the token on that side,
-overriding any annotation within; i.e., the outermost annotation wins.
+side of that enclosed expression, transitively down to the token on that side,
+overriding any annotation within; i.e., the outermost annotation overrides.
 
 ### Terminals
 
@@ -392,7 +392,7 @@ empty
 
 Inherent repetition.
 
-A repetition containing zero elements; matches no input. Distinct from `null` &
+A repetition containing 0 elements; matches no input. Distinct from `null` &
 from the empty string (`""`).
 
 ### Repetitions with Separators (1 or More)
@@ -437,7 +437,7 @@ Semantic comments follow specific formats to concisely attach semantic
 information to expressions. They are not formally part of the custom EBNF
 grammar; they are an adjunct custom grammar.
 
-A comment may hold several `;`-separated parts; each part that matches a
+A comment may hold multiple `;`-separated parts; each part that matches a
 semantic comment format is a semantic comment; any other part is ordinary
 commentary.
 

@@ -48,7 +48,7 @@ sgr-parameter-separator = ";"
 - `h`: no header row.
 - `H`: a header row of field labels. `<sgr-parameters>`, if given, are raw ANSI
   SGR parameters (e.g., `1` for bold, `1;4` for bold & underlined) applied to
-  the whole header row; absent, the header row is unstyled.
+  the entire header row; absent, the header row is unstyled.
 
 ## Header Styling
 
@@ -81,8 +81,8 @@ separator-pattern = ^{text}^ (* default: "-" *)
 
 - `s`: no separator line.
 - `S`: a line between the header row & the 1st data row. `<separator-pattern>`
-  is repeated to fill the line, cutting off immediately if it does not evenly
-  divide the line's width.
+  is repeated to fill the line, truncated at the line's width iff it does not
+  evenly divide the width.
 
 ## Broken
 
@@ -96,7 +96,7 @@ unbroken      = "u"
   independently-filled segment per column, joined by the same column spacing as
   every other row.
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
-  whole table's width.
+  entire table's width.
 
 ## Column Spacing
 
@@ -120,7 +120,7 @@ column-spacing         = ^{text}^ (* direct default: ""; transitive default: "  
 
 ```ebnf
 table-value-terminator = ":"
-end-of-shell-word      = {the end of --table's whole value}
+end-of-shell-word      = {the end of --table's entire value}
 ```
 
 E.g., in `--table Hb`, `b` is interpreted as invalid `<sgr-parameters>` text,

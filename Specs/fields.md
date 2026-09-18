@@ -14,7 +14,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 List elements are located at 1-based integer positions.
 
 Positions are referenced via integer indices. Each index has an effective index,
-computed as follows:
+evaluated as follows:
 
 - If non-negative $index$: $index$.
 - If negative $index$: $length + 1 + index$ (where $length$ is the list's
@@ -42,7 +42,7 @@ A **field spec** & its position define the configuration for an output field:
 - Item sorting
 
 Each field spec is either **visible** or **hidden**. A hidden field spec is not
-output, but otherwise behaves as a visible one: it has a position, can be
+output, but otherwise behaves as a visible one: it has a position, may be
 referenced by a `<field-spec-reference>`, & its `<sort>` sorts items iff
 [enabled](#sort-priority).
 
@@ -87,7 +87,7 @@ For each [leaf context](configs.md#context-stacks):
 - `standard`: Only a select list of field specs is visible.
 
 Output format variants may exist for any built-in fields config. If an output
-format variant does not exist for any built-in field config, it may not be
+format variant does not exist for any built-in field config, it must not be
 defined by a user.
 
 #### Default Fields Configs
@@ -97,7 +97,7 @@ output format suffix, that suffix is appended to `standard`.
 
 ### Base Fields Config
 
-The resolved fields config is computed from a **base fields config**: a named
+The resolved fields config is sourced from a **base fields config**: a named
 fields config referenced in, or implicitly selected by, a command line.
 
 ### Baseline Fields Config
@@ -140,8 +140,8 @@ A reference to a nonexistent field is an error.
 - **Key-Value**: A key-value pair is output for the field label & value iff a
   non-`null` value exists.
 - **JSON**: A key-value pair is output for the field label & value iff a value
-  exists (which could be any value; e.g., for JSON input, `null`, `true`,
-  `false`, `0`, `1`, `""`, `"null"`, etc. are all values).
+  exists (which may be any value; e.g., for JSON input, `null`, `true`, `false`,
+  `0`, `1`, `""`, `"null"`, etc. are all values).
 
 ## Fields Option
 
@@ -241,7 +241,7 @@ an `<index>`.
 `<original-input-order>` is not supported for table output because items are
 processed in a streaming manner & may each have different fields, or the same
 fields in different orders, so no single original input order exists for all of
-a table's rows; key-value & JSON output can order each item's fields
+a table's rows; key-value & JSON output may order each item's fields
 independently.
 
 #### Item Sorting
@@ -357,15 +357,15 @@ Field spec edits act as follows:
     $previous$, then overlays its `<field-modifiers>` onto the copy.
   - Sets $previous$ to the new field spec's index in the working fields config.
 - `<field-spec-overlay>`:
-  - Overlays its `<field-modifiers>` onto `source` & makes it visible.
+  - Overlays its `<field-modifiers>` onto `source` & unhides it.
   - Sets $previous$ to `source`'s index in the working fields config.
 - `<field-spec-move>`:
-  - Moves `source` to immediately after $previous$ & makes it visible.
+  - Moves `source` to immediately after $previous$ & unhides it.
   - Sets $previous$ to `source`'s new index in the working fields config.
 - `<field-spec-hide>`:
   - If its `<named-field-spec-reference>` resolves to no field spec, inserts a
     new field spec (as `<field-spec-insertion>` would) as `source`.
-  - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
+  - Overlays its `<field-modifiers>` onto `source` & hides it, so a field may
     sort items without being output (e.g., `_size/1d`).
   - Sets $previous$ to `source`'s index in the working fields config.
 - `<field-spec-removal>`:
@@ -385,7 +385,7 @@ field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-label-modifier        = <label-modifier-prefix> [ <label> ] (* transitive default label: {field name from the containing field-spec} *)
+label-modifier        = <label-modifier-prefix> [ <label> ] (* transitive default label: {field name from the enclosing field-spec} *)
 label-modifier-prefix = "="
 label                 = {text} (* default: "" *)
 ```
@@ -589,7 +589,7 @@ Each of the following is itself a boundary:
 - Each character belonging to a GNU Extended POSIX character class named
   `<character-class-name>`.
 
-The last occurrence of a boundary for a value across all `<boundary-group>`s
+The last occurrence of a boundary for a value throughout all `<boundary-group>`s
 overrides all other boundaries for the same value.
 
 Boundaries take sort precedence over all boundaries in all groups succeeding
@@ -644,16 +644,16 @@ trivia-ignored = "q"
 
 ## Appendix: Escaping
 
-As per [token rules](ebnf.md#tokens), for a text token to consume text that
-would otherwise match a syntax literal, one or more of its characters must be
-escaped by prefixing it with a `\`.
+As per [tokens](ebnf.md#tokens), for a text token to consume text that would
+otherwise match a syntax literal, 1 or more of its characters must be escaped by
+prefixing it with a `\`.
 
 Throughout all text tokens, a literal `\` is written `\\`, because `\` always
 escapes the next character.
 
 Outer bare whitespace is consumed (significant) or ignored (insignificant) as
-per [character significance rules](ebnf.md#character-significance); whitespace
-must be escaped instead of bare to be consumed where bare whitespace is ignored.
+per [character significance](ebnf.md#character-significance); whitespace must be
+escaped instead of bare to be consumed where bare whitespace is ignored.
 
 In each row of the table below, the given characters must be escaped to be
 consumed as either the initial character of, or any character in, a text token

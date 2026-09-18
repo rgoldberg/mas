@@ -33,7 +33,7 @@ leaf; the leaf is the command that actually runs.
 
 ## Contexts
 
-A **context** can contain named configs.
+A **context** may contain named configs.
 
 A context exists for each command in a command list.
 
