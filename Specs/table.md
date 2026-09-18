@@ -1,42 +1,46 @@
 # Table Output Option
 
-Uses the [custom EBNF grammar](ebnf.md).
+`--table` is an optional option of every [display
+command](configs.md#display-commands).
+
+It configures the output table's header row, separator line & column spacing.
 
 `--table` selects table output for a [display
 command](configs.md#display-commands).
 
+Uses the [custom EBNF grammar](ebnf.md).
+
 ## Table Config
-
-A **table config** is a [named config](configs.md#named-configs) of the table
-kind: a `<table-value>` configuring the table's header row, separator line &
-column spacing.
-
-`--table` output sources from the context stack's
-[`default`](configs.md#default-configs) table config; `--table`'s optional value
-is a `<table-value>` overlaid on it for the current command line only, without
-persistently affecting it. Each option's default applies iff neither sets it.
-
-The [built-in](configs.md#immutable-built-in-named-configs) `standard` table
-config has every `<table-option>` at its default (i.e., no header, no
-separator).
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-table-value  = [ <table-option>+ ] (* last wins *)
-table-option = <header-option> | <header-styling-option> | <separator-option> | <broken-option> | <column-spacing-option>
+table-option  = "--table" [ &<table-config> ]
+table-config  = <table-setting>+ (* last wins *)
+table-setting = <header-setting> | <header-styling-setting> | <separator-setting> | <broken-setting> | <column-spacing-setting>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+A **table config** is a [named config](configs.md#named-configs) of the table
+kind.
+
+`--table` output sources from the context stack's
+[`default`](configs.md#default-configs) table config; `<table-config>` is
+overlaid on it for the current command line only, without persistently affecting
+it. Each setting's default applies iff neither sets it.
+
+The [built-in](configs.md#immutable-built-in-named-configs) `standard` table
+config sets every `<table-setting>` to its default.
 
 ## Header
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-option = <header-off> | <header-on> (* default: <header-off> *)
-header-off    = "h"
-header-on     = "H" [ <sgr-parameters> ] ( <table-value-terminator> | <end-of-shell-word> )
+header-setting = <header-off> | <header-on> (* default: <header-off> *)
+header-off     = "h"
+header-on      = "H" [ <sgr-parameters> ] ( <table-config-terminator> | <end-of-shell-word> )
 
 sgr-parameters          = <sgr-parameter> … <sgr-parameter-separator>
 sgr-parameter           = {non-negative integer}
@@ -55,7 +59,7 @@ sgr-parameter-separator = ";"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-styling-option = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling> *)
+header-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling> *)
 terminal-only-styling = "t"
 always-styling        = "a"
 ```
@@ -71,9 +75,9 @@ always-styling        = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-separator-option  = <separator-off> | <separator-on> (* default: <separator-off> *)
+separator-setting = <separator-off> | <separator-on> (* default: <separator-off> *)
 separator-off     = "s"
-separator-on      = "S" [ <separator-pattern> ] ( <table-value-terminator> | <end-of-shell-word> )
+separator-on      = "S" [ <separator-pattern> ] ( <table-config-terminator> | <end-of-shell-word> )
 separator-pattern = ^{text}^ (* default: "-" *)
 ```
 <!--markdownlint-enable line-length-->
@@ -87,12 +91,12 @@ separator-pattern = ^{text}^ (* default: "-" *)
 ## Broken
 
 ```ebnf
-broken-option = <broken> | <unbroken> (* default: <unbroken> *)
-broken        = "b"
-unbroken      = "u"
+broken-setting = <broken> | <unbroken> (* default: <unbroken> *)
+broken         = "b"
+unbroken       = "u"
 ```
 
-- `b`: the [separator line](#implied-options) is broken into 1
+- `b`: the [separator line](#implied-settings) is broken into 1
   independently-filled segment per column, joined by the same column spacing as
   every other row.
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
@@ -103,9 +107,9 @@ unbroken      = "u"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-column-spacing-option  = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default> *)
+column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default> *)
 column-spacing-default = "c"
-column-spacing-custom  = "C" [ <column-spacing> ] ( <table-value-terminator> | <end-of-shell-word> )
+column-spacing-custom  = "C" [ <column-spacing> ] ( <table-config-terminator> | <end-of-shell-word> )
 column-spacing         = ^{text}^ (* direct default: ""; transitive default: "  " *)
 ```
 <!--markdownlint-enable line-length-->
@@ -119,23 +123,25 @@ column-spacing         = ^{text}^ (* direct default: ""; transitive default: "  
 ## Terminator
 
 ```ebnf
-table-value-terminator = ":"
-end-of-shell-word      = {the end of --table's entire value}
+table-config-terminator = ":"
+end-of-shell-word       = {the end of --table's entire value}
 ```
 
 E.g., in `--table Hb`, `b` is interpreted as invalid `<sgr-parameters>` text,
-not as a separate `<broken-option>`.
+not as a separate `<broken-setting>`.
 
-## Implied Options
+## Implied Settings
 
 - `b` / `u` imply a separator line, if none is otherwise set: `S`.
 - Any separator line (explicit or implied) implies a header row, if none is
   otherwise set: `H` (unstyled), because a separator line's sole purpose is to
   separate a header from the data.
 
-An option that explicitly sets an axis, even to "off" (`h` / `s`), always
+A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
 overrides an axis's implied default, regardless of where in `--table`'s value it
 appears.
+
+A setting implied by `<table-config>` overrides inherited settings.
 
 ## Examples
 

@@ -70,7 +70,7 @@ which describes a comment attached to an innermost choice (e.g., `<direction>`),
 but the comments sit on the option _sets_ (`<sort-option-set>` etc.), which
 would make `Iad` collapse to `d`. Either move the comments to the innermost
 choices or restore the per-alternative formulation. Non-choice instances:
-`table-value = [ <table-option>+ ]` ([`table.md`](../Specs/table.md); the
+`table-config = [ <table-setting>+ ]` ([`table.md`](../Specs/table.md); the
 literal reading makes `hS` a header on, contradicting Implied Options) &
 `format-transform-pipeline = ( … )+`
 ([`fields-format.md`](../Specs/fields-format.md)).
