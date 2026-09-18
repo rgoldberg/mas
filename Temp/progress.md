@@ -197,3 +197,11 @@ Revised (2026-09-25): comments & names use table.md's current vocabulary
 (`<table-setting-termination>`, `<table-setting-terminator>`,
 `<end-of-table-config>`, `TableConfigParsingError.invalidSetting`), &
 `<sgr-parameters>` (not a `{text}` token) no longer accepts escape sequences.
+
+## Step 2c: Remove Old-Draft `hidden` Named Format (2026-09-18 10:29 UTC)
+
+The old built-in `hidden` named format (`::hidden`, `Format.isHidden`,
+`ParsingError.hiddenFormatFollowedByContent`) is removed: hiding is now only
+`<field-spec-hide>` (`_`) via `FieldSpec.isHidden`. `knownNamedFormatNameSet` is
+empty, so every `<named-format-reference>` reports `unknownNamedFormat` until
+persisted named formats exist, per fields-format.md.

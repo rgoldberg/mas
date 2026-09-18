@@ -348,11 +348,6 @@ private extension MASTests {
 	}
 
 	@Test
-	func `hidden format hides a field from display`() {
-		#expect(Format.reference(.init(namedFormat: "hidden", transforms: .init())).isHidden)
-	}
-
-	@Test
 	func `item sort orders by ascending priority, then tiebreaks by input order`() {
 		let itemSort = ItemSort(
 			keys: [
@@ -546,9 +541,17 @@ private extension MASTests {
 		#expect(throws: ParsingError.unsupportedDateInputFormat) { try parseFieldSpecs(value) }
 	}
 
-	@Test(arguments: ["adamID:%D:hidden++", "adamID:%DliteralPattern++"])
-	func `a named or literal output-date-format is a parse error, not a silent fallback to the default`(value: String) {
-		#expect(throws: ParsingError.unsupportedDateOutputFormat) { try parseFieldSpecs(value) }
+	@Test(
+		arguments: [
+			("adamID:%D:name++", ParsingError.unknownNamedFormat("name")),
+			("adamID:%DliteralPattern++", .unsupportedDateOutputFormat),
+		],
+	)
+	func `a named or literal output-date-format is a parse error, not a silent fallback to the default`(
+		value: String,
+		error: ParsingError,
+	) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
 	}
 
 	@Test
@@ -881,36 +884,15 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a bare hidden named format parses successfully & hides the field`() throws {
-		#expect(try #require(parseFieldSpecs("adamID::hidden").first).format.isHidden)
+	func `a named-format reference reports an error while no named formats exist`() {
+		#expect(throws: ParsingError.unknownNamedFormat("name")) { try parseFieldSpecs("adamID::name") }
 	}
 
 	@Test
 	func `a name / transform name swallows a following placeholder prefix absent a separator`() {
-		// No separator between "hidden" & "%v": the whole run is 1 attempted named
-		// format name, "hidden%v", which doesn't exist, not `hidden` followed by a
-		// `%v` placeholder
-		#expect(throws: ParsingError.unknownNamedFormat("hidden%v")) { try parseFieldSpecs("adamID::hidden%v") }
-	}
-
-	@Test
-	func `hidden must be the entire format-modifier: nothing may follow it, even with a separator`() {
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden.rightJustify") }
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden.uppercase") }
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden:%v") }
-		#expect(throws: ParsingError.hiddenFormatFollowedByContent) { try parseFieldSpecs("adamID::hidden:") }
-	}
-
-	@Test
-	func `a sort modifier or later field spec may still follow ::hidden`() throws {
-		// Both terminate the format-modifier itself, so they're not "content
-		// following hidden" within it
-		let sorted = try #require(parseFieldSpecs("adamID::hidden/1a").first)
-		#expect(sorted.format.isHidden)
-		#expect(sorted.sortSpec?.priority == 1)
-		let fieldSpecs = try parseFieldSpecs("adamID::hidden,bundleID")
-		#expect(fieldSpecs.map(\.name) == ["adamID", "bundleID"])
-		#expect(fieldSpecs.first?.format.isHidden == true)
+		// No separator between "name" & "%v": the whole run is 1 attempted named
+		// format name, "name%v", not `name` followed by a `%v` placeholder
+		#expect(throws: ParsingError.unknownNamedFormat("name%v")) { try parseFieldSpecs("adamID::name%v") }
 	}
 
 	@Test

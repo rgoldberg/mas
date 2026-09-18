@@ -103,9 +103,6 @@ optional.
   move). Rewriting needs a `FieldSpec.isHidden` stored property.
 - Todo comments:
   - New: `TODO:` per CLAUDE.md with `// swiftlint:disable:next todo`.
-- Remove the old-draft `hidden` named format (`::hidden`, `Format.isHidden`,
-  `ParsingError.hiddenFormatFollowedByContent`) now that `<field-spec-hide>`
-  (`_`) & `FieldSpec.isHidden` exist; the spec has no built-in named formats.
 - Built-in `none` should be:
   - `all` with every field spec hidden (so `@none.+x` copies `x`'s base field
     spec).

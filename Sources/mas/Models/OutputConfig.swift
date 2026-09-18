@@ -49,7 +49,7 @@ extension OutputConfig {
 			}
 		}
 		.map { objects[$0] }
-		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden && !$0.format.isHidden }
+		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden }
 		switch outputFormat {
 		case .json:
 			MAS.printer.info(sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs) as [Any], separator: "\n")
