@@ -1,8 +1,7 @@
 # Standard Terminology
 
 Counts in parentheses are whole-word, case-insensitive matches in `Specs/` &
-`Temp/todo.md` before replacement, excluding `<!--` marker lines. `OPEN:` marks
-a pending decision.
+`Temp/todo.md` before replacement, excluding `<!--` marker lines.
 
 1. - start (5): noun
    - begin (9): verb
@@ -12,8 +11,7 @@ a pending decision.
 3. - finish (0): verb
    - REJECTED: end / terminate (1)
 4. - character (62)
-   - REJECTED: single character (0)
-   - OPEN: a single X (6) → 1 X, as per the digits rule?
+   - REJECTED: single character (0) / a single X (6) → 1 X
 5. - only for (13): restrict scope or target applicability
    - for only (0): restrict numerical quantities or durations
 6. - restrict (0): narrow scope, applicability, or permissible values
@@ -32,8 +30,7 @@ a pending decision.
    - REJECTED: across (3) → throughout / in
 9. - entire (1)
    - its entirety (0)
-   - REJECTED: entirety of / whole (6)
-   - OPEN: `whole point` idiom (table.md) → `sole purpose`?
+   - REJECTED: entirety of / whole (6) / whole point (1) → sole purpose
 10. - via (7): indirect mechanisms, routes, references, or syntactic pathways
       (e.g., "referenced via index", "reached via rule")
     - by (61): operational agents, methods, or sorting criteria (e.g., "sorted
@@ -62,9 +59,8 @@ a pending decision.
     - REJECTED: prior (0) / predefined (1) → inherited
 14. - side (15)
     - REJECTED: end (as synonym for side)
-15. - first (7)
-    - leftmost (0)
-    - OPEN: first → 1st (6), as per the digits rule?
+15. - 1st (6)
+    - REJECTED: first (7; ok in `<trivia-first>`) / leftmost
 16. - sole (1): adjective (the sole element)
     - only (39): adverb / adjective
     - REJECTED: final / last
@@ -75,7 +71,6 @@ a pending decision.
       process
     - REJECTED: terminal: EBNF symbol that cannot be expanded further (pairs
       with nonterminal)
-    - OPEN: "final rounding" (fields-format.md, 1): non-positional; allowed?
 18. - precede (11): positional relation in a sequence where one element comes
       before another
     - leading (2): adjective for characters / elements positioned at the start
@@ -114,11 +109,10 @@ a pending decision.
     - forbid (4): grammar term (`Forbidden` treatment)
     - cannot (2): inability
     - omit (2): leave out
-    - ignore (40): whitespace only
+    - ignore (4): disregard (`<trivia-ignored>`)
     - REJECTED: disallow / prohibit / prevent (1) / not allow / not let / may
-      not (1) → must not / exclude / reject
-    - OPEN: `ignored` (36, escaping table) = ebnf's `insignificant` / "not
-      consumed"; replace, or accept as the prose synonym?
+      not (1) → must not / exclude / reject / ignored (36, whitespace) →
+      insignificant
 24. - disable (6)
     - enable (6)
 25. - disabled
@@ -279,12 +273,10 @@ a pending decision.
     - REJECTED: since (2) / due to (1) / as (causal)
 56. - as per (4): according to
     - per (20): for each
-57. - context (40): only for looking up named fields configs, formats, etc.
+57. - context (40): looking up named fields configs, formats, etc.; grammatical
+      position (`context-dependent` multiplicity, `(* only for: CONTEXT *)`)
     - circumstances (0): situation
     - REJECTED: situation
-    - OPEN: ebnf's `context-dependent` multiplicity, `(* only for: CONTEXT *)` &
-      "syntactic context" (6 non-config uses) → `circumstance-dependent`, or an
-      EBNF exception for grammatical position?
 58. - where (8): static location
     - when (7): runtime condition
 59. - retain / retained (4)

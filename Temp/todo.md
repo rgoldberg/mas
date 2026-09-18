@@ -141,7 +141,7 @@ rather than silently falling back to the defaults:
 
 Escaping appendix rows: `<format-name>` in a `<block>` also ended by `,` & `_`;
 `<inline-chronologic-format>`: initial `:` `.`, any `+` `,` `_`, whitespace
-ignored.
+insignificant.
 
 ### Configurable Boundary Collapsing
 

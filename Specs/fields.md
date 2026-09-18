@@ -240,8 +240,8 @@ an `<index>`.
 
 `<original-input-order>` is not supported for table output because items are
 processed in a streaming manner & may each have different fields, or the same
-fields in different orders, so no single original input order exists for all of
-a table's rows; key-value & JSON output may order each item's fields
+fields in different orders, so no original input order exists for all of a
+table's rows; key-value & JSON output may order each item's fields
 independently.
 
 #### Item Sorting
@@ -347,8 +347,8 @@ references no field spec selects a field spec with default settings for field
 
 The $previous$ index is the index in the working fields config where the direct
 results of the immediately preceding `<field-spec-edit>` were effected. It is
-initially set to `0` (i.e., immediately before the first field spec in the
-working fields config).
+initially set to `0` (i.e., immediately before the 1st field spec in the working
+fields config).
 
 Field spec edits act as follows:
 
@@ -547,8 +547,8 @@ grouped-numeric = "g"
 `<lexical>` compares digits as characters. `<numeric>` compares each run of
 digits as a number. `<grouped-numeric>` does the same after removing the
 [canonical or localized](#sort-localization) numeric grouping separator (e.g.,
-`,` in `1,234`), so a grouped number compares as a single number (e.g., `1,234`
-as `1234`) rather than being broken into smaller ones by the separator.
+`,` in `1,234`), so a grouped number compares as 1 number (e.g., `1,234` as
+`1234`) rather than being broken into smaller ones by the separator.
 
 ##### Sort Boundaries
 
@@ -651,37 +651,38 @@ prefixing it with a `\`.
 Throughout all text tokens, a literal `\` is written `\\`, because `\` always
 escapes the next character.
 
-Outer bare whitespace is consumed (significant) or ignored (insignificant) as
-per [character significance](ebnf.md#character-significance); whitespace must be
-escaped instead of bare to be consumed where bare whitespace is ignored.
+Outer bare whitespace is significant (consumed) or insignificant (not consumed)
+as per [character significance](ebnf.md#character-significance); whitespace must
+be escaped instead of bare to be consumed where bare whitespace is
+insignificant.
 
 In each row of the table below, the given characters must be escaped to be
 consumed as either the initial character of, or any character in, a text token
 consumed by the given text terminal in the given syntactic context. Leading &
-trailing outer bare whitespace is consumed or ignored, as given.
+trailing outer bare whitespace is significant or insignificant, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                             | Initial         | Any                 | Leading Whitespace | Trailing Whitespace     |
-|:---------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:------------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@` `.`         | `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<base-fields-config-name>`                                          |                 | `/` `.`             | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-removal>`                   |                 | `@` `,`             | ignored            | ignored                 |
-| `<label>`                                                            |                 | `:` `/` `,`         | ignored            | ignored                 |
-| `<locale-name>` in `<custom-locale>`                                 |                 | `+`                 | ignored            | ignored                 |
-| `<boundary-characters>`                                              |                 | `%` `:` `_` `+`     | ignored            | ignored                 |
-| `<multi-character-boundary-text>`                                    |                 | `%`                 | ignored            | ignored                 |
-| `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`         | ignored            | ignored                 |
-| `<template-text>` beginning a `<format-block>`                       | `:` `.`         | `%` `/` `,`         | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`         | consumed           | consumed iff before `%` |
-| `<format-name>` in a `<block>`                                       |                 | `.` `+`             | ignored            | ignored                 |
-| `<template-text>` beginning a `<block>`                              | `:` `.`         | `%` `+`             | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`             | consumed           | consumed iff before `%` |
-| `<locale-name>` in `<group-arguments>` / `<group-separator>`         |                 | `,` `:`             | consumed           | consumed                |
-| `<time-zone-code>`                                                   |                 | `:`                 | ignored            | ignored                 |
+| `{text}`                                                             | Initial         | Any                 | Leading Whitespace | Trailing Whitespace        |
+|:---------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:---------------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@` `.`         | `=` `:` `/` `,`     | insignificant      | insignificant              |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `=` `:` `/` `,`     | insignificant      | insignificant              |
+| `<base-fields-config-name>`                                          |                 | `/` `.`             | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-removal>`                   |                 | `@` `,`             | insignificant      | insignificant              |
+| `<label>`                                                            |                 | `:` `/` `,`         | insignificant      | insignificant              |
+| `<locale-name>` in `<custom-locale>`                                 |                 | `+`                 | insignificant      | insignificant              |
+| `<boundary-characters>`                                              |                 | `%` `:` `_` `+`     | insignificant      | insignificant              |
+| `<multi-character-boundary-text>`                                    |                 | `%`                 | insignificant      | insignificant              |
+| `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`         | insignificant      | insignificant              |
+| `<template-text>` beginning a `<format-block>`                       | `:` `.`         | `%` `/` `,`         | insignificant      | significant iff before `%` |
+| `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`         | significant        | significant iff before `%` |
+| `<format-name>` in a `<block>`                                       |                 | `.` `+`             | insignificant      | insignificant              |
+| `<template-text>` beginning a `<block>`                              | `:` `.`         | `%` `+`             | insignificant      | significant iff before `%` |
+| `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`             | significant        | significant iff before `%` |
+| `<locale-name>` in `<group-arguments>` / `<group-separator>`         |                 | `,` `:`             | significant        | significant                |
+| `<time-zone-code>`                                                   |                 | `:`                 | insignificant      | insignificant              |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

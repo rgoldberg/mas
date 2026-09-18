@@ -41,8 +41,8 @@ both evaluating to that same character.
 
 A value's multiplicity is either:
 
-- **Scalar**: a single value (e.g., an integer, a string, etc.).
-- **Repetition**: a sequence of 0 or more elements. Empty or single-element
+- **Scalar**: 1 value (e.g., an integer, a string, etc.).
+- **Repetition**: a sequence of 0 or more elements. Empty or 1-element
   repetitions remain repetitions, not scalars.
 
 An expression's multiplicity is either:
@@ -76,8 +76,8 @@ A **terminal** is an expression that does not contain other expressions.
 
 ### Tokens
 
-**Tokens** are contiguous characters that are consumed together as a single
-element by the syntax.
+**Tokens** are contiguous characters that are consumed together as 1 element by
+the syntax.
 
 **Bare tokens** contain only bare characters.
 

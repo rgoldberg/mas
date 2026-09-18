@@ -17,7 +17,7 @@
 
 ## Items
 
-Items are apps, except for `config`, which has a single item: the running `mas`
+Items are apps, except for `config`, which has 1 item: the running `mas`
 process.
 
 ## Context Stacks
