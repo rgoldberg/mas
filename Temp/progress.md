@@ -219,3 +219,10 @@ begins `<custom-locale>`, whose `<locale-identifier>` runs to a required
 `<sort-option-terminator>` (`+`); an empty identifier is the system default
 locale. The other sort options (`<numbers-in-strings>`, `<boundaries>`,
 `<nonconforming-location>`, `<trivia-order>`) still follow the old draft.
+
+## Step 3 (partial): Name Placeholder (2026-09-18 10:38 UTC)
+
+`%k` / `%K` (`<nullary-name>` / `<non-nullary-name>`) are parsed, as
+placeholders & as `<unconditional-branch>`es, reusing `Placeholder.label`'s
+`negated: true` representation for the field name; `%l` / `%L` / `%k` / `%K`
+may no longer be negated (the old draft's `%-l` meant the field name).

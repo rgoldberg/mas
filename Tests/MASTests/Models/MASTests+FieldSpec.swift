@@ -275,7 +275,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `evaluates %l as the label & negated %l as the field name`() {
+	func `evaluates %l as the label & %k as the field name`() {
 		#expect(
 			Format.parts([.placeholder(.label(negated: false, success: nil))])
 				.rendered(value: nil, label: "Label", name: "name")
@@ -288,6 +288,15 @@ private extension MASTests {
 				.stringValue
 				== "name",
 		)
+	}
+
+	@Test
+	func `parses %l / %k as label / name placeholders, which may not be negated`() throws {
+		#expect(try parseFieldSpecs("adamID:%l")[0].format == .parts([.placeholder(.label(negated: false, success: nil))]))
+		#expect(try parseFieldSpecs("adamID:%k")[0].format == .parts([.placeholder(.label(negated: true, success: nil))]))
+		#expect(try parseFieldSpecs("adamID:%mNn+Kk++").count == 1)
+		#expect(throws: ParsingError.invalidLetter("l")) { try parseFieldSpecs("adamID:%-l") }
+		#expect(throws: ParsingError.invalidLetter("k")) { try parseFieldSpecs("adamID:%-k") }
 	}
 
 	@Test
