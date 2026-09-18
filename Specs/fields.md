@@ -118,7 +118,13 @@ The **resolved fields config** is used to render output.
 The following is inserted before all other cases in the [absent expression value
 algorithm](ebnf.md#defaults-for-absent-expressions):
 
-- The value for the given expression `EXPRESSION` in the working fields config.
+- If transitively absent: the value for the given expression `EXPRESSION` in the
+  working fields config.
+
+So an omitted modifier (e.g., `name`) or an omitted option (e.g., `d` in `/1Ii`)
+retains the working fields config's value, while a modifier whose payload is
+absent (e.g., `name=`, `name:`, `name/`, `L+`, `B+`) resets it to its direct or
+implicit default.
 
 ## Nonexistent Fields
 

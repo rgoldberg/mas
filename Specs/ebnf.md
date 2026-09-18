@@ -376,6 +376,9 @@ An optional's presence state is that of its parent (or present, if it has no
 parent), even if the optional encloses no token, so the child of an optional
 that encloses no token is directly absent iff the optional's parent is present.
 
+An alternative of a present choice, or an element of a present repetition, that
+no consumed token matches is transitively absent, as are its descendants.
+
 An optional expression is **absent** if it is either directly or transitively
 absent.
 
