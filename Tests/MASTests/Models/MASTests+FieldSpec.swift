@@ -99,16 +99,55 @@ private extension MASTests {
 	}
 
 	@Test
-	func `item-sort reset-to-contextual replaces options but keeps priority`() throws {
-		let sortSpec = try #require(try parseFieldSpecs("//r")[0].sortSpec)
-		#expect(sortSpec.priority == 1000) // Unchanged
-		#expect(sortSpec.caseSensitivity == .insensitive) // Table's contextual default; fixture default is `.sensitive`
+	func `item-sort disable-all-sorts sets priority to 0 but retains sort options`() throws {
+		let config = try parseFieldsConfig("//r")
+		let sortSpec = try #require(config.fieldSpecs[0].sortSpec)
+		#expect(sortSpec.priority == 0)
+		#expect(sortSpec.caseSensitivity == .sensitive) // Fixture default, retained
+		#expect(config.itemSort.keys.isEmpty)
 	}
 
 	@Test
-	func `item-sort section without a reset option leaves inherited sorts alone`() throws {
-		let sortSpec = try #require(try parseFieldSpecs("//d")[0].sortSpec)
-		#expect(sortSpec.caseSensitivity == .sensitive) // Fixture default, unchanged: no reset was requested
+	func `field spec edit re-enables a sort disabled by disable-all-sorts`() throws {
+		let config = try parseFieldsConfig("//r.adamID/1")
+		#expect(config.fieldSpecs[0].sortSpec?.priority == 1)
+		#expect(config.itemSort.keys.map(\.name) == ["adamID"])
+	}
+
+	@Test
+	func `item-sort section without disable-all-sorts leaves inherited sorts alone`() throws {
+		let config = try parseFieldsConfig("//d")
+		#expect(config.fieldSpecs[0].sortSpec?.priority == 1000)
+		#expect(config.itemSort.tiebreakDirection == .descending)
+	}
+
+	@Test
+	func `field order section requires a field-order-option-set`() {
+		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig("/") }
+		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig("/.adamID") }
+	}
+
+	@Test
+	func `field order base-fields-config-order & original-input-order`() throws {
+		#expect(try parseFieldsConfig("/w").fieldOrder == .base(nil))
+		#expect(try parseFieldsConfig("/dw").fieldOrder == .base(.descending))
+		#expect(try parseFieldsConfig("/wd").fieldOrder == .base(.descending))
+		#expect(try parseFieldsConfig("/ow").fieldOrder == .base(nil))
+		#expect(try parseFieldsConfig("/o").fieldOrder == .original(nil))
+		#expect(try parseFieldsConfig("/od").fieldOrder == .original(.descending))
+	}
+
+	@Test
+	func `field order sort-option-set defaults source to output`() throws {
+		guard case let .byLabel(sortSpec) = try parseFieldsConfig("/d").fieldOrder else {
+			Issue.record("Expected .byLabel")
+			return
+		}
+		#expect(sortSpec.direction == .descending)
+		guard case .byName = try parseFieldsConfig("/Ia").fieldOrder else {
+			Issue.record("Expected .byName")
+			return
+		}
 	}
 
 	@Test
@@ -870,8 +909,11 @@ private func numericSortSpec(
 }
 
 private func parseFieldSpecs(_ value: String) throws -> [FieldSpec] {
+	try parseFieldsConfig(value).fieldSpecs
+}
+
+private func parseFieldsConfig(_ value: String) throws -> any FieldsConfig {
 	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: .table(.default))
-		.fieldSpecs
 }
 
 private let adamIDFieldSpec = FieldSpec(

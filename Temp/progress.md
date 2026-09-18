@@ -10,6 +10,8 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 
 ### ebnf.md
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 | Production / rule                    | Existing code                                                  | Verdict |
 |:-------------------------------------|:---------------------------------------------------------------|:--------|
 | Escaping (`\` + any character)       | `parseEscapedText` in `FieldSpec.swift`                        | keep    |
@@ -19,9 +21,13 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | Transitive default = working value   | `existing` / `defaults:` parameters                            | keep    |
 | Direct default resets                | `name=` / `name:` / `name/` reset via empty-payload checks     | keep    |
 | `(* last wins *)`                    | Per-axis last-wins in `parseOptions`                           | keep    |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ### fields.md
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 | Production                                | Existing code                                             | Verdict |
 |:------------------------------------------|:----------------------------------------------------------|:--------|
 | Positions & indices                       | `effectivePosition(forIndex:length:)`                     | keep    |
@@ -35,7 +41,7 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | `<field-order-section>` `/`               | `parseFieldOrderSection`                                  | change  |
 | `<order-option-set>`: `w` / `o` + dirs    | Only `o` (`isOriginalOrderOptionSet`); `w` missing        | change  |
 | `<sort-option-set>` field order           | `.byName` / `.byLabel`                                    | keep    |
-| Bare `/` (`.workingOrder`)                | Present; spec has no such state (default source `<output>`) | change |
+| Bare `/` (`.workingOrder`)                | Present; spec has no such state (`/` alone is an error)   | change  |
 | `<item-sort-section>` `//`                | `parseItemSortSection`                                    | change  |
 | `<disable-all-sorts>` `r`                 | `r` / `R` reset options to contextual defaults            | change  |
 | Item sort `<direction>` tiebreak          | `ItemSort.tiebreakDirection`                              | keep    |
@@ -66,9 +72,13 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | Version comparison                        | `Interpretation.version`                                  | change  |
 | Sort by type (chronologic / number / …)   | Sort by `Interpretation`, not by format type              | change  |
 | Appendix: Escaping table                  | Terminator sets roughly match; whitespace rows do not     | change  |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ### fields-format.md
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 | Production                                   | Existing code                                          | Verdict |
 |:---------------------------------------------|:-------------------------------------------------------|:--------|
 | `<format-modifier>` `:` + `<format-block>`   | `parseFormat`                                          | keep    |
@@ -83,7 +93,7 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | `<strict-coercion>` `.` on transforms        | `placeholderCoercion`                                  | keep    |
 | `<format-transform>` justify names           | `Justification`                                        | keep    |
 | `<placeholder>` prefix `%`                   | `PlaceholderParser`                                    | keep    |
-| `<abort-on-success>` `-` / `<abort-on-failure>` `+` | `placeholderNegation` only                      | change  |
+| `<abort-on-success>` `-` / `-failure>` `+`   | `placeholderNegation` only                             | change  |
 | `<lenient-coercion>` `_`                     | none                                                   | missing |
 | Standard predicates `u e w b t f s`          | `StandardKind` uses `o` for boolean; spec uses `b`     | change  |
 | Nullary / non-nullary (case) forms           | present                                                | keep    |
@@ -92,9 +102,13 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | Match placeholders `m` / `M` + branches      | `Branches`, `Branch`                                   | keep    |
 | Type determinant / conformance               | none                                                   | missing |
 | Abort semantics (empty output)               | `renderedParts` returns `nil`                          | keep    |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ### table.md
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 | Production                               | Existing code                                 | Verdict |
 |:-----------------------------------------|:----------------------------------------------|:--------|
 | `<table-config>` (last wins per axis)    | `parseTableConfig`                            | keep    |
@@ -106,9 +120,13 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | Implied settings                         | `TableConfigAxis`                             | keep    |
 | Whitespace significant in `S` / `C` text | handled (no trimming)                         | keep    |
 | Escaping `:` in text                     | check `parseTableOptionValue`                 | change  |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ### configs.md & mas.md
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 | Rule                                      | Existing code                                  | Verdict |
 |:------------------------------------------|:-----------------------------------------------|:--------|
 | Context stack lookup                      | none (only built-ins per command)              | missing |
@@ -118,9 +136,21 @@ throughout (e.g., `<field-specs-section>` → `<field-spec-edits-section>`,
 | Machine-facing `@json` label = name, `%i` | `defaultedForJSON`                             | keep    |
 | Default sort options table                | `AppStoreFieldDefaults.swift` (old letters)    | change  |
 | Per-command default output format         | `OutputConfig.defaultFormat`                   | keep    |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
-## Stopped (2026-09-18 10:18 UTC)
+## Step 2a: Field Order & Item Sort Sections (2026-09-18 10:22 UTC)
 
-Only step 1 was completed before the 11:00 UTC deadline; no code was changed.
-Step 2 should begin with `<field-order-section>` (`w`, drop `.workingOrder`),
-`<item-sort-section>` (`r` → priority `0`), & `<field-spec-hide>` (`_`).
+`<field-order-section>` now follows fields.md: `<field-order-option-set>` is
+required after `/` (a bare `/` reports `missingFieldOrderOptionSet`);
+`<order-option-set>` supports `<base-fields-config-order>` (`w`, new
+`FieldOrder.base`) & `<original-input-order>` (`o`), with `<direction>` last
+wins; a `<sort-option-set>` defaults its `<source>` to `<output>` (sort by
+label). `<item-sort-section>`'s `<disable-all-sorts>` (`r`) now sets each
+field spec's `<sort-priority>` to `0` (retaining its `<sort-option-set>`)
+instead of resetting options to contextual defaults, & `R` is gone; sort keys
+with priority `0` are excluded from `ItemSort.keys`
+(`[FieldSpec].enabledSortKeys`), so a later `<field-spec-edit>` such as
+`.adamID/1` re-enables a sort. Remaining for step 2: `<field-spec-hide>` (`_`),
+unhiding on overlay / move, `+@i` / `+name@i` insertion references, & outer
+bare whitespace treatment per ebnf.md.

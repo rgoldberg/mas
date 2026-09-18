@@ -64,6 +64,17 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 // MARK: - Field ordering (fields.md)
 
 enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `<base-fields-config-order>` (`"w"`): the working fields config's field
+	/// specs in their listed order. `direction`, if `.descending`, reverses that
+	/// order.
+	// swiftlint:disable:next todo
+	// TODO: Temp/todo.md "`<base-fields-config-order>`": decide whether `w`
+	//  orders as the base fields config would render (applying its inherited
+	//  `<original-input-order>` / `<sort-option-set>`), or (as here) uses the
+	//  inherited field specs' listed order, & whether `<descending>` reverses
+	//  only the inherited order, not subsequent `<field-spec-edits-section>`
+	//  results
+	case base(SortSpec.Direction?)
 	/// `<source>` `"O"`: sorts by label, per the full `<sort-option-set>` (any
 	/// axis left unspecified keeps its value from whatever `SortSpec` the
 	/// caller passed as `parsedOptionSet(_:nextSectionPrefixSet:priority:
@@ -76,27 +87,24 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the
 	/// resolved base fields config's own `fieldOrder`.
 	case inherited
-	/// `"o"`: the order fields already have when `applied(to:)` runs, i.e., the
-	/// order their underlying `JSON.Object`s' keys were originally found in
-	/// (`CatalogApp` / `InstalledApp` normalization only renames keys, never
-	/// reorders them). `direction`, if `.descending`, reverses that order.
+	/// `<original-input-order>` (`"o"`): the order fields already have when
+	/// `applied(to:)` runs, i.e., the order their underlying `JSON.Object`s'
+	/// keys were originally found in (`CatalogApp` / `InstalledApp`
+	/// normalization only renames keys, never reorders them). `direction`, if
+	/// `.descending`, reverses that order.
 	case original(SortSpec.Direction?)
-	/// Present, no `<field-order-option-set>`: identity, like `.inherited`, but
-	/// (unlike `.inherited`) never substituted with the base fields config's own
-	/// `fieldOrder`.
-	case workingOrder
 }
 
 extension FieldOrder {
-	/// Reorders `fieldSpecs` per this order. `.inherited` & `.workingOrder` are
-	/// both identity; `.original` is identity, too, unless its direction is
-	/// `.descending`. `.byName` / `.byLabel` sort per their full `SortSpec`
-	/// (direction included: `SortSpec.compare(_:_:)` already accounts for it).
+	/// Reorders `fieldSpecs` per this order. `.inherited` is identity; `.base` &
+	/// `.original` are identity, too, unless their direction is `.descending`.
+	/// `.byName` / `.byLabel` sort per their full `SortSpec` (direction
+	/// included: `SortSpec.compare(_:_:)` already accounts for it).
 	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
 		switch self {
-		case .inherited, .workingOrder:
+		case .inherited:
 			fieldSpecs
-		case let .original(direction):
+		case let .base(direction), let .original(direction):
 			direction == .descending ? .init(fieldSpecs.reversed()) : fieldSpecs
 		case let .byName(sortSpec):
 			fieldSpecs.sorted { sortSpec.compare($0.name, $1.name) == .orderedAscending }

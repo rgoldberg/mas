@@ -469,6 +469,34 @@ extension SortSpec {
 			defaults: sortSpec ?? defaultSortSpec(forFieldNamed: fieldName, outputFormat: outputFormat),
 		)
 	}
+
+	/// A copy with `priority` replaced.
+	func withPriority(_ priority: UInt64) -> Self {
+		.init(
+			priority: priority,
+			source: source,
+			direction: direction,
+			caseSensitivity: caseSensitivity,
+			localization: localization,
+			grouping: grouping,
+			interpretation: interpretation,
+			boundaries: boundaries,
+		)
+	}
+
+	/// A copy with `source` replaced.
+	func withSource(_ source: Source) -> Self {
+		.init(
+			priority: priority,
+			source: source,
+			direction: direction,
+			caseSensitivity: caseSensitivity,
+			localization: localization,
+			grouping: grouping,
+			interpretation: interpretation,
+			boundaries: boundaries,
+		)
+	}
 }
 
 // MARK: - Comparator (applies a `SortSpec` to compare 2 field values)

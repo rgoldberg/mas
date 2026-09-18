@@ -180,3 +180,6 @@ stack's `default`.
 - `Format.isHidden` currently models hiding as a format flag; the spec makes
   hiding a field spec state (`<field-spec-hide>` `_`, unhidden by overlay /
   move). Rewriting requires a `FieldSpec.isHidden` stored property.
+- Existing Swift uses `UPDATE:` comments because SwiftLint's `todo` rule
+  rejects `TODO:`; new open items use `// TODO:` per CLAUDE.md with
+  `// swiftlint:disable:next todo`. Decide which convention to keep.

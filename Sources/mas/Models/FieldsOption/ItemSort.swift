@@ -52,3 +52,14 @@ struct ItemSortKey: Equatable { // swiftlint:disable:this one_declaration_per_fi
 	let name: String
 	let sortSpec: SortSpec
 }
+
+extension [FieldSpec] {
+	/// The sort keys of these field specs' enabled `<sort>`s: a `<sort-priority>`
+	/// of `0` disables a field spec's sort, retaining its `<sort-option-set>`
+	/// without sorting items.
+	var enabledSortKeys: [ItemSortKey] {
+		compactMap { fieldSpec in
+			fieldSpec.sortSpec.flatMap { $0.priority == 0 ? nil : .init(name: fieldSpec.name, sortSpec: $0) }
+		}
+	}
+}

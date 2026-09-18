@@ -68,6 +68,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidTransformArguments(name: String)
 	case missingEndFence
 	case missingFieldName
+	case missingFieldOrderOptionSet
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
 	case singleBranch
@@ -110,6 +111,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected end fence"
 		case .missingFieldName:
 			"Expected field name"
+		case .missingFieldOrderOptionSet:
+			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
 		case .missingSortPriority:
 			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
 		case let .nonexistentFieldSpec(name):
@@ -199,11 +202,7 @@ func resolvedFieldsConfig(
 		let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 		let tiebreakDirection = try builder.parseItemSortSection(&input)
 		try builder.parseFieldSpecsSection(&input)
-		let itemSort = ItemSort(
-			keys: builder.fieldSpecs
-				.compactMap { fieldSpec in fieldSpec.sortSpec.map { .init(name: fieldSpec.name, sortSpec: $0) } },
-			tiebreakDirection: tiebreakDirection,
-		)
+		let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
 		return base.baseIncludesAllFields
 			? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
 			: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
@@ -213,11 +212,7 @@ func resolvedFieldsConfig(
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
 			fieldOrder: .inherited,
-			itemSort: .init(
-				keys: builder.fieldSpecs
-					.compactMap { fieldSpec in fieldSpec.sortSpec.map { .init(name: fieldSpec.name, sortSpec: $0) } },
-				tiebreakDirection: .ascending,
-			),
+			itemSort: .init(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: .ascending),
 		)
 	}
 }
@@ -318,55 +313,61 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		referenceFieldSpecs = fieldSpecs
 	}
 
+	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
+	/// a required `<field-order-option-set>`, either an `<order-option-set>`
+	/// (`[ <direction>+ ] <order> [ <order-option>+ ]`, `<order>` being `w` /
+	/// `o`, last wins per axis) or a `<sort-option-set>` (whose `<source>`
+	/// defaults to `<output>`, i.e., sorted by label). The 2 alternatives are
+	/// disjoint: an `<order-option-set>` contains an `<order>` letter, which is
+	/// no `<sort-option>`.
 	mutating func parseFieldOrderSection(_ input: inout Substring) throws -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
 			return .inherited
 		}
 		input.removeFirst()
 		guard let first = input.first, first != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(first) else {
-			return .workingOrder
+			throw ParsingError.missingFieldOrderOptionSet
 		}
-		guard !isOriginalOrderOptionSet(input) else {
-			var direction = SortSpec.Direction?.none
-			while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
-				if let match = SortSpec.Direction(rawValue: char) {
-					direction = match
-				}
-				input.removeFirst()
+		guard let order = orderOptionSetOrder(input) else {
+			let sortSpec = try SortSpec.parsedOptionSet(
+				&input,
+				nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
+				priority: 0,
+				defaults: .textDefault(outputFormat: outputFormat).withSource(.output),
+			)
+			return switch sortSpec.source {
+			case .input:
+				.byName(sortSpec)
+			case .output:
+				.byLabel(sortSpec)
 			}
-			return .original(direction)
 		}
-		let sortSpec = try SortSpec.parsedOptionSet(
-			&input,
-			nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
-			priority: 0,
-			defaults: .textDefault(outputFormat: outputFormat),
-		)
-		return switch sortSpec.source {
-		case .input:
-			.byName(sortSpec)
-		case .output:
-			.byLabel(sortSpec)
+		var direction = SortSpec.Direction?.none
+		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
+			if let match = SortSpec.Direction(rawValue: char) {
+				direction = match
+			}
+			input.removeFirst()
+		}
+		return switch order {
+		case baseFieldsConfigOrderOption:
+			.base(direction)
+		default:
+			.original(direction)
 		}
 	}
 
-	/// Neither reset option resets anything unless explicitly given (per
-	/// fields.md's "default: inherited item sorting" for an absent
-	/// `<item-sort-option-set>`): a bare `//` or `//a` only sets / keeps
-	/// `tiebreakDirection`, leaving every field's inherited `sortSpec` alone.
-	/// When a reset _is_ given, each currently-sorted field's options (not
-	/// priority) are replaced with the contextual "Default Sort Options" row for
-	/// its name & the active output format.
-	/// UPDATE: distinguish `<reset-to-global>` ("R") from `<reset-to-contextual>`
-	///  ("r") once persisted fields configs exist: absent persistence, there's no
-	///  separate "global" tier to reset to, so both currently apply the same
-	///  built-in contextual defaults.
+	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
+	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
+	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
+	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort
+	/// tiebreak (input order / reverse input order).
 	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortSpec.Direction {
 		guard input.hasPrefix(itemSortSectionPrefix) else {
 			return .ascending
 		}
 		input.removeFirst(itemSortSectionPrefix.count)
-		var shouldReset = false
+		var shouldDisableAllSorts = false
 		var direction = SortSpec.Direction.ascending
 		try parseOptions(
 			&input,
@@ -376,17 +377,17 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				direction = match
 			} else {
 				switch char {
-				case resetToContextual, resetToGlobal:
-					shouldReset = true
+				case disableAllSortsOption:
+					shouldDisableAllSorts = true
 				default:
 					input = input[currentIndex...]
 					throw .invalidSortOption(char)
 				}
 			}
 		}
-		if shouldReset {
-			fieldSpecs = fieldSpecs.map(resetToContextualSortDefaults)
-			referenceFieldSpecs = referenceFieldSpecs.map { $0.map(resetToContextualSortDefaults) }
+		if shouldDisableAllSorts {
+			fieldSpecs = fieldSpecs.map(disablingSort)
+			referenceFieldSpecs = referenceFieldSpecs.map { $0.map(disablingSort) }
 		}
 		return direction
 	}
@@ -469,26 +470,16 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
-	/// `fieldSpec` unchanged if it has no `sortSpec` (nothing to reset);
-	/// otherwise, its `sortSpec`'s options (not priority) replaced with the
-	/// contextual "Default Sort Options" row for its name & `outputFormat`.
-	private func resetToContextualSortDefaults(_ fieldSpec: FieldSpec) -> FieldSpec {
+	/// `fieldSpec` unchanged if it has no `sortSpec` (nothing to disable);
+	/// otherwise, its `sortSpec`'s `<sort-priority>` set to `0` (disabled),
+	/// retaining its `<sort-option-set>`.
+	private func disablingSort(_ fieldSpec: FieldSpec) -> FieldSpec {
 		fieldSpec.sortSpec.map { sortSpec in
-			let contextualDefault = defaultSortSpec(forFieldNamed: fieldSpec.name, outputFormat: outputFormat)
-			return .init(
+			.init(
 				name: fieldSpec.name,
 				label: fieldSpec.label,
 				format: fieldSpec.format,
-				sortSpec: .init(
-					priority: sortSpec.priority,
-					source: contextualDefault.source,
-					direction: contextualDefault.direction,
-					caseSensitivity: contextualDefault.caseSensitivity,
-					localization: contextualDefault.localization,
-					grouping: contextualDefault.grouping,
-					interpretation: contextualDefault.interpretation,
-					boundaries: contextualDefault.boundaries,
-				),
+				sortSpec: sortSpec.withPriority(0),
 				justification: fieldSpec.justification,
 			)
 		}
@@ -496,31 +487,29 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	}
 }
 
-/// Whether `input`'s `<field-order-option-set>` (up to, but not including, its
-/// terminating `<field-spec-separator>` / `<item-sort-section-prefix>` /
-/// `<field-specs-section-prefix>`) is an `<original-order-option-set>`: every
-/// top-level character is in `{"o", "a", "d"}`, with at least 1 `"o"` (its
-/// mandatory `<original-order>`). Any other top-level character (including 1
-/// that introduces a fenced `<sort-option>`, e.g., `"l"` / `"b"`) means it's a
+/// The `<order>` letter (`w` / `o`) of `input`'s `<field-order-option-set>`
+/// (up to, but not including, its terminating `<field-spec-separator>` /
+/// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
+/// is an `<order-option-set>`: every top-level character is a `<direction>` or
+/// an `<order>`, with at least 1 `<order>` (last wins). `nil` means it is a
 /// `<sort-option-set>` instead: the 2 alternatives share no valid text (an
-/// all-`{"a", "d"}` sequence with no `"o"` can only be `<sort-option-set>`,
-/// since `<original-order-option-set>` requires `"o"`), so checking without
-/// consuming `input` is safe: only 1 alternative ever actually gets parsed.
-private func isOriginalOrderOptionSet(_ input: Substring) -> Bool {
-	var sawOriginalOrder = false
+/// all-`<direction>` sequence with no `<order>` can only be
+/// `<sort-option-set>`), so checking without consuming `input` is safe.
+private func orderOptionSetOrder(_ input: Substring) -> Character? {
+	var order = Character?.none
 	for char in input {
 		if char == fieldSpecSeparator || itemSortAndFieldSpecsPrefixSet.contains(char) {
 			break
 		}
-		guard char == originalOrderOption else {
+		guard orderOptionSet.contains(char) else {
 			guard SortSpec.Direction(rawValue: char) != nil else {
-				return false
+				return nil
 			}
 			continue
 		}
-		sawOriginalOrder = true
+		order = char
 	}
-	return sawOriginalOrder
+	return order
 }
 
 // MARK: Private: field-spec-reference resolution
@@ -1135,9 +1124,10 @@ let colon = Character(":")
 
 let indexPrefix = Character("@")
 
-private let originalOrderOption = Character("o")
-private let resetToContextual = Character("r")
-private let resetToGlobal = Character("R")
+private let baseFieldsConfigOrderOption = Character("w")
+private let originalInputOrderOption = Character("o")
+private let orderOptionSet = Set([baseFieldsConfigOrderOption, originalInputOrderOption])
+private let disableAllSortsOption = Character("r")
 
 private let outputFormatSuffixSet = Set(["json", "key-value", "table"])
 
