@@ -32,24 +32,34 @@ process.
 
 ## Built-In Named Fields Configs
 
-`mas`'s built-in fields configs have `@table` & `@key-value` variants whose
-field specs may have human-facing labels & formats. Their `@json` variants'
-field specs use each field's name as its label & `%i` as its format. The 3
-fields configs for the same leaf context differ only in which field specs are
-hidden.
+`none`, `all` & `standard` variants with the same output format suffix for the
+same `mas` leaf context differ only in which field specs are hidden.
+
+A `mas` built-in fields config has:
+
+- A user-facing `@table` variant.
+- A user-facing `@key-value` variant.
+- A machine-facing `@json` variant.
 
 `standard@json` is always a reference to `all`.
+
+Default labels & formats favor:
+
+- If user-facing: readability.
+- If machine-facing: precision & parseability:
+  - Label is the field name.
+  - Format is `%i`.
 
 ## Default Sort Options
 
 Price fields' default formats use `%_n` & version fields' `%v`, so they are
 typed & compare per type; the sort options below apply to string fields:
 
-| Format    | Type | Default            |
-|:----------|:-----|:-------------------|
-| Table     | Text | `Iailg`            |
-| Table     | Path | `IailgB/_:space:+` |
-| Key-Value | Text | `Iailg`            |
-| Key-Value | Path | `IailgB/_:space:+` |
-| JSON      | Text | `Iascgb`           |
-| JSON      | Path | `IascgB/+`         |
+| Format    | Field Kind | Default            |
+|:----------|:-----------|:-------------------|
+| Table     | Non-path   | `Iailg`            |
+| Table     | Path       | `IailgB/_:space:+` |
+| Key-Value | Non-path   | `Iailg`            |
+| Key-Value | Path       | `IailgB/_:space:+` |
+| JSON      | Non-path   | `Iascgb`           |
+| JSON      | Path       | `IascgB/+`         |
