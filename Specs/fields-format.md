@@ -192,6 +192,13 @@ point.
   any), never spelled out.
 - E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
 
+###### `timeZone`
+
+The output time zone is local unless `timeZone` sets it. `<time-zone-code>` is
+matched case-insensitively & is an IANA identifier (e.g., `America/New_York`),
+an abbreviation (e.g., `UTC`, `EST`), a UTC offset (e.g., `+1`, `-05:30`, `0`),
+or `local`.
+
 ##### Format Transforms
 
 <!--editorconfig-checker-disable-->
@@ -220,13 +227,6 @@ unlike every other transform.
 is odd-width: `centerStartJustify` puts the extra padding character after the
 value (leaving it nearer the column's start); `centerEndJustify` puts it before
 the value (leaving it nearer the column's end).
-
-###### `timeZone`
-
-The output time zone is local unless `timeZone` sets it. `<time-zone-code>` is
-matched case-insensitively & is an IANA identifier (e.g., `America/New_York`),
-an abbreviation (e.g., `UTC`, `EST`), a UTC offset (e.g., `+1`, `-05:30`, `0`),
-or `local`.
 
 ##### Placeholders
 
@@ -383,7 +383,7 @@ any type, the block's pipeline must begin by coercing to a string.
 Within a `<success-block>`, a `<block-placeholder>` is evaluated against the
 enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
 / `%I` are evaluated against the original input, at its original type (e.g.,
-`%.N%n (%i)+` renders `4.50` as `4.5 (4.50)`).
+`%.N%n (%i)++` renders `4.50` as `4.5 (4.50)`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
 
@@ -585,7 +585,7 @@ on field name, label, output format, or any other context.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-match-placeholder = <nullary-match-placeholder> | <non-nullary-match-placeholder>
+match-placeholder = <nullary-match-placeholder> | <non-nullary-match-placeholder> (* non-structural *)
 
 nullary-match-placeholder     = <placeholder-prefix> <nullary-match> <branches> <block-terminator>
 non-nullary-match-placeholder = <placeholder-prefix> <non-nullary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
@@ -616,7 +616,8 @@ non-nullary-unconditional-branch =
 - `<branch>`s in `<branches>` are evaluated sequentially against the field
   value, returning as `<match-placeholder>`'s value:
   - If the `<branch>` has `<branch-negation>`:
-    - If it fails: the field value.
+    - If it fails: its `<unconditional-block>`'s evaluated value if present,
+      otherwise the field value.
   - Otherwise:
     - If it succeeds: the `<branch>`'s value.
 - If no `<branch>` returns a value:
@@ -625,7 +626,7 @@ non-nullary-unconditional-branch =
 
 Examples:
 
-- `%mN.absoluteValue+bI.uppercase++`:
+- `%mN.absoluteValue+bI..uppercase++`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs the uppercased value.

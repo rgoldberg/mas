@@ -148,3 +148,21 @@ appears.
 - `--table S-+:b`: a header row (implied) & a `-+`-patterned, broken separator
   line.
 - `--table C....`: no header, no separator, `....` between columns.
+
+## Appendix: Escaping
+
+As per [tokens](ebnf.md#tokens), for a text token to consume text that would
+otherwise match a syntax literal, 1 or more of its characters must be escaped by
+prefixing it with a `\`.
+
+Throughout all text tokens, a literal `\` is written `\\`, because `\` always
+escapes the next character.
+
+In each row of the table below, the given characters must be escaped to be
+consumed as any character in a text token consumed by the given text terminal.
+Leading & trailing outer bare whitespace is significant (consumed).
+
+| `{text}`              | Any |
+|:----------------------|:----|
+| `<separator-pattern>` | `:` |
+| `<column-spacing>`    | `:` |

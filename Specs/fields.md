@@ -86,7 +86,7 @@ For each [leaf context](configs.md#context-stacks):
 - `standard`: Only a select list of field specs is visible.
 
 Output format variants may exist for any built-in fields config. If an output
-format variant does not exist for any built-in field config, it must not be
+format variant does not exist for any built-in fields config, it must not be
 defined by a user.
 
 #### Default Fields Configs
@@ -197,9 +197,6 @@ base-fields-config-name = {text} (* default: "default" *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- If no fields config named `<base-fields-config-name>` exists in any context in
-  the context stack, an error is reported.
-
 #### Field Order
 
 <!--editorconfig-checker-disable-->
@@ -216,7 +213,7 @@ order-option = <order> | <direction>
 order        = <base-fields-config-order> | <original-input-order>
 
 base-fields-config-order = "w"
-original-input-order     = "o" (* only for: @json or @key-value context variants *)
+original-input-order     = "o" (* only for: json or key-value output *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -667,6 +664,7 @@ trailing outer bare whitespace is significant or insignificant, as given.
 | `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@` `.`         | `=` `:` `/` `,`     | insignificant      | insignificant              |
 | `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `=` `:` `/` `,`     | insignificant      | insignificant              |
 | `<base-fields-config-name>`                                          |                 | `/` `.`             | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-insertion>`                 |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
 | `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
 | `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
 | `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |

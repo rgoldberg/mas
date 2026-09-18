@@ -338,7 +338,8 @@ A | B
 
 Content-dependent multiplicity.
 
-`A` or `B`. `A` & `B` must match disjoint sets of text.
+`A` or `B`. `A` & `B` must match disjoint sets of text, unless the enclosing
+definition is [non-structural](#non-structural-comments).
 
 ### Optionals
 
@@ -370,6 +371,10 @@ An optional expression has 3 mutually exclusive possible presence states:
 - **Directly absent**: All the expression's ancestors are present, but the
   expression is itself absent.
 - **Transitively absent**: At least one of the expression's ancestors is absent.
+
+An optional's presence state is that of its parent (or present, if it has no
+parent), even if the optional encloses no token, so the child of an optional
+that encloses no token is directly absent iff the optional's parent is present.
 
 An optional expression is **absent** if it is either directly or transitively
 absent.
@@ -501,6 +506,24 @@ NONTERMINAL = DEFINITION (* only for: CONTEXT *)
 
 `NONTERMINAL` is valid only in the context that `CONTEXT` describes; elsewhere,
 an error is reported.
+
+##### Type Comments
+
+```ebnf
+NONTERMINAL = DEFINITION (* type: TYPE *)
+```
+
+`NONTERMINAL`'s value has the type that `TYPE` describes; a syntax defines the
+types & their use.
+
+##### Value Comments
+
+```ebnf
+NONTERMINAL = DEFINITION (* value: VALUE *)
+```
+
+`NONTERMINAL`, when present, evaluates to the value that `VALUE` describes
+instead of the text it consumes.
 
 ##### Non-Structural Comments
 
