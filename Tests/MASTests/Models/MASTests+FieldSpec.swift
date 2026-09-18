@@ -127,6 +127,17 @@ private extension MASTests {
 	}
 
 	@Test
+	func `parses sort localization: c, l & L…+`() throws {
+		#expect(try parseFieldSpecs(".adamID/1c")[0].sortSpec?.localization == .canonical)
+		#expect(try parseFieldSpecs(".adamID/1l")[0].sortSpec?.localization == .localized(.current))
+		#expect(try parseFieldSpecs(".adamID/1L+")[0].sortSpec?.localization == .localized(.current))
+		#expect(try parseFieldSpecs(".adamID/1Lde_DE+d")[0].sortSpec?
+			.localization == .localized(.init(identifier: "de_DE")))
+		#expect(try parseFieldSpecs(".adamID/1Lde_DE+d")[0].sortSpec?.direction == .descending)
+		#expect(throws: ParsingError.missingEndFence) { try parseFieldSpecs(".adamID/1Lde_DE") }
+	}
+
+	@Test
 	func `parses sort spec without numeric priority`() throws {
 		let specs = try parseFieldSpecs(".adamID/a")
 		let sortSpec = try #require(specs[0].sortSpec)

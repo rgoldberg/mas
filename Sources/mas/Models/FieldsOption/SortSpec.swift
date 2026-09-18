@@ -420,9 +420,11 @@ extension SortSpec {
 				switch char {
 				case canonical:
 					localization = .canonical
-				case localized:
-					let localeName = try input.parseFencedValue(fence: localeNameFence, after: &currentIndex)
-					localization = .localized(localeName.isEmpty ? .current : .init(identifier: localeName))
+				case systemLocale:
+					localization = .localized(.current)
+				case customLocale:
+					let localeIdentifier = try input.parseTerminatedText(terminator: sortOptionTerminator, after: &currentIndex)
+					localization = .localized(localeIdentifier.isEmpty ? .current : .init(identifier: localeIdentifier))
 				case boundariesOptionPrefix:
 					boundaries = try input.parseBoundaries(after: &currentIndex)
 				default:
@@ -724,6 +726,23 @@ private extension Substring {
 		return value
 	}
 
+	/// Parses a `<sort-option-terminator>`-terminated text token (e.g.,
+	/// `<custom-locale>`'s `<locale-identifier>`) beginning immediately after
+	/// `currentIndex`, leaving `currentIndex` at the terminator; a missing
+	/// terminator is an error.
+	mutating func parseTerminatedText(terminator: Character, after currentIndex: inout Index)
+	throws(ParsingError) -> String {
+		var string = self[index(after: currentIndex)...]
+		let (value, terminatorIndex) = try parseEscapedTextAndIndex(&string, terminatorSet: [terminator])
+		guard terminatorIndex < string.endIndex else {
+			currentIndex = endIndex
+			self = self[currentIndex...]
+			throw .missingEndFence
+		}
+		currentIndex = terminatorIndex
+		return value
+	}
+
 	/// Parses a `<boundaries>` value (the content following `b`) into a
 	/// `SortSpec.Boundaries`, per `<boundaries-option-set>` &
 	/// `<grouped-boundaries>` / `<ungrouped-boundaries>`.
@@ -857,10 +876,11 @@ private extension Substring {
 
 // MARK: Constants
 
-private let localeNameFence = Character("+")
+private let sortOptionTerminator = Character("+")
 
 private let canonical = Character("c")
-private let localized = Character("l")
+private let systemLocale = Character("l")
+private let customLocale = Character("L")
 private let boundariesOptionPrefix = Character("b")
 private let collapseContiguousOption = Character("%")
 

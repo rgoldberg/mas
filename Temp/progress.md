@@ -211,3 +211,11 @@ Renamed stale nonterminal names in comments to the current specs' names:
 for still-old-draft syntax (sort boundaries: `<boundaries-option-set>`,
 `<grouped-boundaries>`, etc.; chronologic: `<date>`, `<input-date-format>`,
 etc.) were left until that code is rewritten.
+
+## Step 3 (partial): Sort Localization (2026-09-18 10:37 UTC)
+
+`<localization>` now parses per fields.md: `l` is `<system-locale>` & `L`
+begins `<custom-locale>`, whose `<locale-identifier>` runs to a required
+`<sort-option-terminator>` (`+`); an empty identifier is the system default
+locale. The other sort options (`<numbers-in-strings>`, `<boundaries>`,
+`<nonconforming-location>`, `<trivia-order>`) still follow the old draft.
