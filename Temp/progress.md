@@ -200,3 +200,14 @@ draft's negation), `<lenient-coercion>` (`_`), type determinants, the
 `<chronologic-transform>` argument syntax (`timeZone:…:`; the old `,` / `_`
 date-format separators remain), sort options (`n` / `g` / `B` / `C` / `f` / `e`
 / `t` / `h` / `p` / `q`), & `template-text`'s whitespace treatment.
+
+## Step 7 (partial): Stale Spec References (2026-09-18 10:36 UTC)
+
+Renamed stale nonterminal names in comments to the current specs' names:
+`<field-spec-edits-section>`, `<block-terminator>`, `<format-block>`,
+`<format-template>`, `<justify>`, `<field-spec-insertion>`,
+`<strict-coercion>`, `<failure-block>`, `<string-block>`, `<number-block>`,
+`<nullary-input>`; rewrapped the touched comment blocks to 80 columns. Names
+for still-old-draft syntax (sort boundaries: `<boundaries-option-set>`,
+`<grouped-boundaries>`, etc.; chronologic: `<date>`, `<input-date-format>`,
+etc.) were left until that code is rewritten.

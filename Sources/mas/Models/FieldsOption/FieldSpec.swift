@@ -286,7 +286,7 @@ private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_f
 }
 
 /// Applies `<field-order-section>` / `<item-sort-section>` /
-/// `<field-specs-section>` against a baseline `[FieldSpec]`, producing the
+/// `<field-spec-edits-section>` against a baseline `[FieldSpec]`, producing the
 /// working (final) `[FieldSpec]`.
 ///
 /// `<field-spec-reference>`s resolve against an immutable-_position_ snapshot
@@ -736,18 +736,18 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 	return try parseEscapedText(&input, terminatorSet: [formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator])
 }
 
-/// Parses `<format>`: at least 1 of `<named-format>`,
-/// `<format-transform-pipeline>`, `<value-transform-pipeline>`, `<template>`,
-/// in that order (see fields-format.md for the full 4-branch grammar).
-/// `<format-transform-pipeline>` (currently just `<justify-transform>`) is
-/// recognized only here, right after the optional named format & before
-/// anything else, never inside a placeholder's own success / failure
+/// Parses `<format-block>`: at least 1 of `<named-format>`,
+/// `<format-transform-pipeline>`, `<value-transform-pipeline>`,
+/// `<format-template>`, in that order (see fields-format.md for the full
+/// 4-branch grammar). `<format-transform-pipeline>` (currently just
+/// `<justify>`) is recognized only here, right after the optional named format
+/// & before anything else, never inside a placeholder's own success / failure
 /// sub-format (`parseDelimitedFormat` / `parseDateSpec` in `Format.swift` don't
-/// call this). A name / transform name never stops at `<placeholder-prefix>`
-/// on its own: `.uppercase%i` is an attempt at a transform literally named
+/// call this). A name / transform name never stops at `<placeholder-prefix>` on
+/// its own: `.uppercase%i` is an attempt at a transform literally named
 /// `uppercase%i` (& fails as one), not `.uppercase` followed by a `%i`
-/// placeholder; a `<pipeline-terminator>` (or `.` for another transform) is
-/// what actually separates them; see `parseTrailingTemplate(_:terminatorSet:
+/// placeholder; a `<block-terminator>` (or `.` for another transform) is what
+/// actually separates them; see `parseTrailingTemplate(_:terminatorSet:
 /// endedWithClosedArgumentFence:)` for exactly when 1 is required.
 private func parseFormat(_ input: inout Substring, fieldName: String)
 throws(ParsingError) -> (format: Format, justification: Justification)? {
@@ -757,8 +757,8 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	input.removeFirst()
 	let terminatorSet = Set([sortModifierPrefix, fieldSpecSeparator])
 	guard let first = input.first, !terminatorSet.contains(first) else {
-		// `<format-modifier>` present, `<format>` absent: reset to the contextual
-		// default
+		// `<format-modifier>` present, `<format-block>` absent: reset to the
+		// contextual default
 		return (.default(fieldName: fieldName), .start)
 	}
 	var namedFormat = String?.none
@@ -775,12 +775,12 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		if input.first == transformCallPrefix {
 			// A trailing `<value-transform-pipeline>` (`namedFormat` was already
 			// consumed above, if present), optionally followed by a
-			// `<pipeline-terminator>` & a template
+			// `<block-terminator>` & a template
 			try parseValueTransformPipelineThenTemplate(&input, namedFormat: namedFormat, terminatorSet: terminatorSet)
 		} else if namedFormat != nil || justification != nil {
 			// `<named-format>` and/or `<format-transform-pipeline>` (no
 			// `<value-transform-pipeline>`): a trailing template, if any, is gated by
-			// `<pipeline-terminator>` exactly like a `<value-transform-pipeline>`'s
+			// `<block-terminator>` exactly like a `<value-transform-pipeline>`'s
 			// own; neither of these 2 ever ends with `:` on its own (`group` /
 			// `scale`'s closing `<argument-fence>` is the only way anything here
 			// does), so `endedWithClosedArgumentFence` is always `false`
@@ -792,8 +792,8 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 			)
 		} else if let next = input.first, !terminatorSet.contains(next) {
 			// No named format, no format transform survived (backtracked): a bare
-			// `<template>` is `<format>`'s entire content, with nothing before it to
-			// need a `<pipeline-terminator>` from
+			// `<format-template>` is `<format-block>`'s entire content, with nothing
+			// before it to need a `<block-terminator>` from
 			try parseTemplate(&input, terminatorSet: terminatorSet)
 		} else {
 			// Nothing at all: implicit `%i`, preserving the value's real JSON type
@@ -802,12 +802,12 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 	return (format, justification ?? .start)
 }
 
-/// Parses `<template>`, rejecting 1 with no `<placeholder>` at all: such a
-/// `<template>` would render identically regardless of the field's value,
-/// which is never useful, even for a `<format-transform-pipeline>`'s
+/// Parses `<format-template>`, rejecting 1 with no `<placeholder>` at all: such
+/// a `<format-template>` would render identically regardless of the field's
+/// value, which is never useful, even for a `<format-transform-pipeline>`'s
 /// (justify's) own template, which is otherwise exempt from everything else
-/// about the field's value (justify never reads it), since the `<template>`
-/// is still the field's entire rendering.
+/// about the field's value (justify never reads it), since the
+/// `<format-template>` is still the field's entire rendering.
 private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> Format {
 	let format = try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
 	guard !formatLacksPlaceholder(format) else {
@@ -816,19 +816,19 @@ private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Characte
 	return format
 }
 
-/// Whatever precedes a `<template>` (`<named-format>`, `<format-transform-
-/// pipeline>`, and/or `<value-transform-pipeline>`), a trailing `<template>`
-/// is optional, & a `<pipeline-terminator>` (`::`) is needed to introduce it
-/// UNLESS `endedWithClosedArgumentFence` (only ever true right after a
-/// `<value-transform-pipeline>` whose last `<transform>` is `group` / `scale`
-/// called with explicit arguments): that closing `<argument-fence>` (also `:`)
-/// already unambiguously ends things, so a `<template>` there starts
-/// immediately, with no `<pipeline-terminator>` written or expected; any `:`
-/// there is just literal `<template>` content. Otherwise, a single stray `:`
-/// (not doubled) is a parse error, never a lenient no-op. Returns `[]`
-/// (`parseTemplate(_:terminatorSet:)` never itself returns an empty 1) if no
-/// `<template>` follows (a bare pipeline / named format / format transform, or
-/// nothing further at all).
+/// Whatever precedes a `<format-template>` (`<named-format>`,
+/// `<format-transform- pipeline>`, and/or `<value-transform-pipeline>`), a
+/// trailing `<format-template>` is optional, & a `<block-terminator>` (`::`) is
+/// needed to introduce it UNLESS `endedWithClosedArgumentFence` (only ever true
+/// right after a `<value-transform-pipeline>` whose last `<transform>` is
+/// `group` / `scale` called with explicit arguments): that closing
+/// `<argument-fence>` (also `:`) already unambiguously ends things, so a
+/// `<format-template>` there starts immediately, with no `<block-terminator>`
+/// written or expected; any `:` there is just literal `<format-template>`
+/// content. Otherwise, a single stray `:` (not doubled) is a parse error, never
+/// a lenient no-op. Returns `[]` (`parseTemplate(_:terminatorSet:)` never
+/// itself returns an empty 1) if no `<format-template>` follows (a bare
+/// pipeline / named format / format transform, or nothing further at all).
 private func parseTrailingTemplate(
 	_ input: inout Substring,
 	terminatorSet: Set<Character>,
@@ -855,7 +855,7 @@ private func parseTrailingTemplate(
 	return template
 }
 
-/// `<format>`'s trailing template when only `<named-format>` and/or
+/// `<format-block>`'s trailing template when only `<named-format>` and/or
 /// `<format-transform-pipeline>` (never `<value-transform-pipeline>`, which
 /// has its own reference to fold a `namedFormat` into) precede it: with a
 /// template, that's the whole format (`namedFormat`, if present, is
@@ -876,13 +876,13 @@ private func parseTrailingTemplateOrNamedFormat(
 		: .parts(template)
 }
 
-/// `<format>`'s trailing `<value-transform-pipeline>` (generalizing the old
-/// `<string-transform-pipeline>`-only pipeline to `<number-transform-
+/// `<format-block>`'s trailing `<value-transform-pipeline>` (generalizing the
+/// old `<string-transform-pipeline>`-only pipeline to `<number-transform-
 /// pipeline>` / `<date-transform-pipeline>`, too): unlike every other
 /// `<*-transform-pipeline>` site, which always knows its kind statically from
 /// its own grammar position (e.g., `%N`'s own success sub-format is always
-/// number-kind), `<format>` itself doesn't, since a field's raw value has no
-/// fixed type, so kind is inferred from the pipeline's own 1st `<transform>`
+/// number-kind), `<format-block>` itself doesn't, since a field's raw value has
+/// no fixed type, so kind is inferred from the pipeline's own 1st `<transform>`
 /// instead. Every `<transform>` name is unique across kinds, so peeking just
 /// the 1st 1 unambiguously determines kind for the whole pipeline;
 /// `FormatReferenceParser.parse` then enforces that every later `<transform>`
@@ -959,7 +959,7 @@ private extension Justification {
 /// fields-format.md, a `<format-transform>` & every other transform share no
 /// names, so there's nothing to disambiguate: this is 1st-match-wins ordering,
 /// not a lookup. The caller (`parseFormat`), not this function, handles a
-/// trailing `<pipeline-terminator>`, since 1 may be needed even with 0 matches
+/// trailing `<block-terminator>`, since 1 may be needed even with 0 matches
 /// (e.g., right after a bare named format, before a template); `:` still ends a
 /// name-scan here regardless, so a lone or doubled 1 is never swallowed into an
 /// attempted `<format-transform>` name.
@@ -1101,14 +1101,14 @@ extension Substring {
 
 /// Skips (without interpreting) an optional `<field-order-section>` &
 /// `<item-sort-section>`, leaving `input` positioned at the start of
-/// `<field-specs-section>` (or empty). `<field-order-section>` is skipped via
-/// the real parser (`FieldSpecsBuilder.parseFieldOrderSection(_:)`, result
+/// `<field-spec-edits-section>` (or empty). `<field-order-section>` is skipped
+/// via the real parser (`FieldSpecsBuilder.parseFieldOrderSection(_:)`, result
 /// discarded): unlike `<item-sort-section>`, its `<sort-option-set>`
 /// alternative can carry fenced sub-content (a `<localization>` locale name,
 /// `<boundaries>`) that may itself contain an unescaped `.` / `/`, so a naive
 /// scan for those characters isn't safe here. `<item-sort-section>`'s own
-/// option alphabet (`a` / `d` / `r` / `R`) has no such fencing & never
-/// overlaps with `.`, so it can still be skipped directly.
+/// option alphabet (`a` / `d` / `r` / `R`) has no such fencing & never overlaps
+/// with `.`, so it can still be skipped directly.
 private func skipFieldOrderAndItemSortSections(_ input: inout Substring, outputFormat: OutputFormat) throws {
 	if input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) {
 		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat)
@@ -1119,13 +1119,13 @@ private func skipFieldOrderAndItemSortSections(_ input: inout Substring, outputF
 	}
 }
 
-/// Splits `input` (a `<field-specs-section>`'s content, sans its `.` prefix, or
-/// a whole `<absolute-config>`) on top-level (unescaped) `,`s & extracts each
-/// segment's leading field name, optionally requiring a leading `prefix` (`+`,
-/// for scanning only `<insert-field-spec>`s; `nil` to accept every segment, for
-/// `<absolute-config>`). Needn't understand label / format / sort-modifier
-/// syntax at all, since `,` is reserved (must be escaped if literal) everywhere
-/// within a field spec.
+/// Splits `input` (a `<field-spec-edits-section>`'s content, sans its `.`
+/// prefix, or a whole `<absolute-config>`) on top-level (unescaped) `,`s &
+/// extracts each segment's leading field name, optionally requiring a leading
+/// `prefix` (`+`, for scanning only `<field-spec-insertion>`s; `nil` to accept
+/// every segment, for `<absolute-config>`). Needn't understand label / format /
+/// sort-modifier syntax at all, since `,` is reserved (must be escaped if
+/// literal) everywhere within a field spec.
 private func topLevelFieldSpecNames(in input: Substring, requiringPrefix prefix: Character?)
 throws(ParsingError) -> [String] {
 	var names = [String]()
@@ -1183,11 +1183,11 @@ let sortModifierPrefix = Character("/")
 
 /// This character has no 1 dedicated grammar name of its own; it plays
 /// several distinct roles depending on where it appears, the same way `/`
-/// (`<sort-modifier-prefix>`) can end a `<format>` without being a
-/// `<format-terminator>`: it's `<name-prefix>` / `<format-modifier-prefix>`
+/// (`<sort-modifier-prefix>`) can end a `<format-block>` without being a
+/// `<block-terminator>`: it's `<name-prefix>` / `<format-modifier-prefix>`
 /// (both defined in `Format.swift`), a `<group>` / `<scale>` `<argument-
-/// fence>`, & (checked twice in a row, never on its own) `<format>`'s own
-/// `<pipeline-terminator>`; see `parseTrailingTemplate(_:terminatorSet:
+/// fence>`, & (checked twice in a row, never on its own) `<format-block>`'s own
+/// `<block-terminator>`; see `parseTrailingTemplate(_:terminatorSet:
 /// endedWithClosedArgumentFence:)`.
 let colon = Character(":")
 
