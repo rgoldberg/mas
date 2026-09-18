@@ -190,3 +190,7 @@ stack's `default`.
 - `.timeZone::` (absent `<time-zone-code>`, default `system`) is rejected by
   the old-draft `::` pipeline-terminator handling in `parseTransformName`;
   fix when `<block-terminator>` (`+`) replaces the old `:` terminator.
+- `parseDelimitedFormat` (old draft) stops a `<success-block>` /
+  `<failure-block>` at `%`, so blocks cannot contain `<block-placeholder>`s or
+  `<unconditional-placeholder>`s (e.g., `%.N%n (%i)++`); fix with the
+  `<block-terminator>` rewrite.

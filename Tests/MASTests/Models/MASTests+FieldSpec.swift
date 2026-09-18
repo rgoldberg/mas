@@ -521,6 +521,21 @@ private extension MASTests {
 	}
 
 	@Test
+	func `%v matches versions & %V's blocks render success / failure`() throws {
+		let bare = try #require(parseFieldSpecs("adamID:%v").first).format
+		#expect(bare.rendered(value: .string("1.0b"), label: "L", name: "n").stringValue == "1.0b")
+		#expect(bare.rendered(value: .string("abc"), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(bare.rendered(value: .number(1), label: "L", name: "n").stringValue?.isEmpty == true)
+		let blocks = try #require(parseFieldSpecs("adamID:%Vversion+not a version+").first).format
+		#expect(blocks.rendered(value: .string("2.3.4"), label: "L", name: "n").stringValue == "version")
+		#expect(blocks.rendered(value: .string(".1"), label: "L", name: "n").stringValue == "not a version")
+		let branches = try #require(parseFieldSpecs("adamID:%mVversion+Nnumber+Iother++").first).format
+		#expect(branches.rendered(value: .string("1.2"), label: "L", name: "n").stringValue == "version")
+		#expect(branches.rendered(value: .string("x"), label: "L", name: "n").stringValue == "other")
+		#expect(throws: ParsingError.coercionNotSupported("v")) { try parseFieldSpecs("adamID:%.v") }
+	}
+
+	@Test
 	func `%c fails (& %-c succeeds) for a value that isn't a date`() {
 		let format = Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])
 		#expect(format.rendered(value: .string("not a date"), label: "L", name: "n").stringValue?.isEmpty == true)

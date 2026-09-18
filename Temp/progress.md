@@ -237,7 +237,18 @@ The old-draft `localTimeZone` chronologic transform is replaced by
 old-draft parser still treats `::` as a pipeline terminator; rewriting
 `<block-terminator>` handling to `+` alone will fix that.
 
-## Stopped (2026-09-18 10:42 UTC)
+## Step 3 (partial): Version Placeholders (2026-09-18 10:45 UTC)
+
+`%v` / `%V` (`<nullary-version>` / `<non-nullary-version>`) match a string of
+`.`-separated components each beginning with a digit, as placeholders (with
+success & failure blocks) & as branches; coercion is rejected. `Transform` &
+its helpers moved from `Format.swift` to `Transform.swift` to stay under the
+file-length limit. Found while testing: the old-draft `parseDelimitedFormat`
+stops a success / failure block at `%`, so a block cannot itself contain a
+placeholder (e.g., `%.N%n (%i)++` from fields-format.md); noted in
+Temp/todo.md.
+
+## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,
 `Scripts/lint -AP`, `Scripts/build` & `Scripts/test` all pass; every step
@@ -246,7 +257,7 @@ above is committed). Remaining, in the original order:
 - Step 2: ebnf.md outer bare whitespace treatment per production (only the
   existing trim of outer whitespace around text tokens exists); built-in
   `none` as `all` with every field spec hidden.
-- Step 3: `%v` / `%V` version placeholders; `<abort-on-success>` /
+- Step 3: `<abort-on-success>` /
   `<abort-on-failure>` (the `-` prefix still means the old draft's negation);
   `<lenient-coercion>` (`_`); type determinants & conformance; `+` as the sole
   `<block-terminator>` (the old `:` / `::` pipeline terminator remains);
