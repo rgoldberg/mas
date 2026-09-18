@@ -121,7 +121,7 @@ chronologic-success-block =
   <input-chronologic-format> … <chronologic-input-format-separator> <chronologic-input-output-separator> [ <output-chronologic-format> ]
   | <output-chronologic-format>
 input-chronologic-format  = <chronologic-format>
-output-chronologic-format = <chronologic-format> (* default: ISO-8601 datetime in local time zone *)
+output-chronologic-format = <chronologic-format> (* default: ISO-8601 datetime in system time zone *)
 
 chronologic-format        = <chronologic-pipeline> | <inline-chronologic-format>
 inline-chronologic-format = {text}

@@ -144,7 +144,7 @@ exponent           = {non-negative integer} (* divides the field's value by `rad
 significant-digits = {positive integer}     (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {non-negative integer} (* exactly this many `radix` digits after the point; `0`: integer *)
 
-time-zone-code = {text} (* case-insensitive IANA identifier, abbreviation, UTC offset, or `local` *)
+time-zone-code = {text} (* case-insensitive IANA identifier, abbreviation, UTC offset, or `system` *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -194,10 +194,7 @@ point.
 
 ###### `timeZone`
 
-The output time zone is local unless `timeZone` sets it. `<time-zone-code>` is
-matched case-insensitively & is an IANA identifier (e.g., `America/New_York`),
-an abbreviation (e.g., `UTC`, `EST`), a UTC offset (e.g., `+1`, `-05:30`, `0`),
-or `local`.
+The output time zone is the system time zone unless `timeZone` sets it.
 
 ##### Format Transforms
 
