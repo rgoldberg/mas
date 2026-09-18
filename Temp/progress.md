@@ -242,3 +242,14 @@ Old names are retained for code that hasn't yet been rewritten, e.g.:
 - `<grouped-boundaries>`
 - `<date>`
 - `<input-date-format>`
+
+## Step 3 (partial): Sort Localization (2026-09-18 10:37 UTC)
+
+`<localization>` now parses per fields.md: `l` is `<system-locale>` & `L` starts
+`<custom-locale>`, whose `<locale-identifier>` runs to a required
+`<sort-option-terminator>` (`+`); an empty identifier is the system locale. The
+other sort options (`<numbers-in-strings>`, `<boundaries>`,
+`<nonconforming-location>`, `<trivia-order>`) still follow the old draft.
+
+Revised (2026-09-25): a missing `<sort-option-terminator>` reports
+`missingSortOptionTerminator` instead of `missingEndFence`.

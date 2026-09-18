@@ -140,6 +140,28 @@ private extension MASTests {
 		#expect(!specs[0].isHidden)
 	}
 
+	@Test(
+		arguments: [
+			(".adamID/1c", SortSpec.Localization.canonical),
+			(".adamID/1l", .localized(.current)),
+			(".adamID/1L+", .localized(.current)),
+			(".adamID/1Lde_DE+d", .localized(.init(identifier: "de_DE"))),
+		],
+	)
+	func `parses sort localization: c, l & L…+`(value: String, localization: SortSpec.Localization) throws {
+		#expect(try parseFieldSpecs(value)[0].sortSpec?.localization == localization)
+	}
+
+	@Test
+	func `a sort option after a custom-locale's terminator still applies`() throws {
+		#expect(try parseFieldSpecs(".adamID/1Lde_DE+d")[0].sortSpec?.direction == .descending)
+	}
+
+	@Test
+	func `a custom-locale without a sort-option-terminator is an error`() {
+		#expect(throws: ParsingError.missingSortOptionTerminator) { try parseFieldSpecs(".adamID/1Lde_DE") }
+	}
+
 	@Test
 	func `parses sort spec without numeric priority`() throws {
 		let specs = try parseFieldSpecs(".adamID/a")

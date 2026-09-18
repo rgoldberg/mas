@@ -79,6 +79,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingEndFence
 	case missingFieldName
 	case missingFieldOrderOptionSet
+	case missingSortOptionTerminator
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
 	case originalInputOrderUnsupportedForTable
@@ -122,6 +123,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected field name"
 		case .missingFieldOrderOptionSet:
 			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
+		case .missingSortOptionTerminator:
+			"Expected <sort-option-terminator> '+'"
 		case .missingSortPriority:
 			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
 		case let .nonexistentFieldSpec(name):
