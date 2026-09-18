@@ -27,14 +27,14 @@ enum Format: Equatable {
 	/// unhandled placeholder failure (blank) if that coercion fails. `template`
 	/// empty means no `<pipeline-terminator>` / template followed; non-empty,
 	/// `template` renders against the pipeline's OWN output, not the field's
-	/// original value; a `%v` / `%V` (or any other placeholder) inside it reads
+	/// original value; a `%i` / `%I` (or any other placeholder) inside it reads
 	/// the transformed value, not the raw 1, so nothing is duplicated & a
 	/// template with no placeholder at all (e.g., a literal unit suffix alone)
-	/// simply doesn't include the transformed value at all; write `%v` to
+	/// simply doesn't include the transformed value at all; write `%i` to
 	/// include it.
 	case valuePipeline(FormatReference, kind: TransformKind, coerced: Bool, template: [FormatPart])
 
-	/// The standard default: `%v`. Fields needing a different one are configured
+	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
 	/// UPDATE: a per-field, per-context user-configured default, once persisted
 	///  fields configs exist.
@@ -59,8 +59,8 @@ extension Format: CustomStringConvertible { // swiftlint:disable:this file_types
 extension Format { // swiftlint:disable:this file_types_order
 	/// Renders this format against `value` (`nil` iff the field doesn't exist for
 	/// this item), producing the node to display / embed in output. A lone bare
-	/// `%v` / `%V` (the common case: no explicit `<format-modifier>`, or an
-	/// explicit one that's just `%v`) passes the original node through unchanged
+	/// `%i` / `%I` (the common case: no explicit `<format-modifier>`, or an
+	/// explicit one that's just `%i`) passes the original node through unchanged
 	/// (so JSON output preserves the value's real type); anything else (literal
 	/// text, other placeholders, transforms) necessarily produces a string.
 	func rendered(value: JSON.Node?, label: String, name: String) -> JSON.Node {
@@ -76,7 +76,7 @@ extension Format { // swiftlint:disable:this file_types_order
 		case let .valuePipeline(reference, kind, coerced, template):
 			if let pipelineString = renderedValuePipeline(reference, kind: kind, coerced: coerced, value: value) {
 				// A trailing `<template>` renders against the pipeline's own output,
-				// not the field's original value: e.g., `%v` inside it means "the
+				// not the field's original value: e.g., `%i` inside it means "the
 				// pipeline's result", not "the field's raw value" (see `Format
 				// .valuePipeline`'s own doc comment)
 				if template.isEmpty {
@@ -478,12 +478,12 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 /// semantic weight once parsed.
 indirect enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	// swiftlint:disable sorted_enum_cases
-	/// `%v` / `%V`. Never negated (`<value>` has no defined negated meaning).
+	/// `%i` / `%I`. Never negated (`<value>` has no defined negated meaning).
 	case value(success: Format?)
 	/// `%l` / `%L` / `%-l` / `%-L`. Negated: field name. Not negated: field
 	/// label.
 	case label(negated: Bool, success: Format?)
-	/// `%u` / `%U` / `%e` / `%E` / `%w` / `%W` / `%o` / `%O` / `%t` / `%T` / `%f`
+	/// `%u` / `%U` / `%e` / `%E` / `%w` / `%W` / `%b` / `%B` / `%t` / `%T` / `%f`
 	/// / `%F` / `%s` / `%S`, each optionally negated; `coerced` (`%.o` / `%.t` /
 	/// `%.f`, & verbose / negated variants) is valid only for `.isBoolean` /
 	/// `.isTrue` / `.isFalse`, enforced at parse time.
@@ -491,9 +491,9 @@ indirect enum Placeholder: Equatable { // swiftlint:disable:this one_declaration
 	case standard(StandardKind, negated: Bool, coerced: Bool, success: Format?, failure: Format?)
 	/// `%n` / `%N` / `%-n` / `%-N` / `%.n` / `%.N` / etc.
 	case number(negated: Bool, coerced: Bool, success: Format?, failure: Format?)
-	/// `%d` / `%D` / `%-d` / `%-D`.
+	/// `%c` / `%C` / `%-c` / `%-C`.
 	case date(negated: Bool, success: DateSpec?, failure: Format?)
-	/// `%b` / `%B`. Never negated (`<branches>` has no defined negated meaning).
+	/// `%m` / `%M`. Never negated (`<branches>` has no defined negated meaning).
 	case branches(Branches, failure: Format?) // swiftlint:enable sorted_enum_cases
 }
 
@@ -568,7 +568,7 @@ private func isNumber(_ value: JSON.Node?, coerced: Bool) -> Bool {
 	}
 }
 
-/// `%d` / `%D`'s evaluation: fails (returns `nil`) iff
+/// `%c` / `%C`'s evaluation: fails (returns `nil`) iff
 /// `(parsedDate(from: value) != nil) == negated` & no `failure` is given.
 private func dateRendered(
 	value: JSON.Node?,
@@ -630,7 +630,7 @@ enum StandardKind: Character { // swiftlint:disable:this one_declaration_per_fil
 	case isNull = "u"
 	case isEmpty = "e"
 	case isWhitespace = "w"
-	case isBoolean = "o"
+	case isBoolean = "b"
 	case isFalse = "f"
 	case isTrue = "t"
 	case isString = "s" // swiftlint:enable sorted_enum_cases
@@ -729,7 +729,7 @@ extension Branches: CustomStringConvertible { // swiftlint:disable:this file_typ
 	}
 }
 
-/// A single `<branch>`. `%b` / `%B` may not themselves appear as a branch;
+/// A single `<branch>`. `%m` / `%M` may not themselves appear as a branch;
 /// that's enforced by the parser (there's no `.branches` case here for it to
 /// construct).
 enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
@@ -992,13 +992,13 @@ func formatLacksPlaceholder(_ format: Format?) -> Bool {
 /// `[ <failure> ]` / `[ <number> ]` through & including their closing `+`.
 /// Assumes the leading content (if any) has not yet been consumed.
 /// `requirePlaceholder` rejects empty / placeholder-less content: pass `true`
-/// only for a top-level, standalone infallible placeholder's (`%v` / `%V`,
+/// only for a top-level, standalone infallible placeholder's (`%i` / `%I`,
 /// `%l` / `%L`) own success format, which always applies, unlike a fallible
 /// placeholder's (e.g., `%n` / `%N`) own success / failure, reached only
 /// conditionally, so it'd otherwise render the same output regardless of
 /// the field's value, something a bare literal could already do with no
-/// placeholder wrapping it at all. A `%v` / `%V` / `%l` / `%L` used as 1 of
-/// `%b`'s own `<branches>` is exempt even though it's still infallible: no
+/// placeholder wrapping it at all. A `%i` / `%I` / `%l` / `%L` used as 1 of
+/// `%m`'s own `<branches>` is exempt even though it's still infallible: no
 /// bare literal could stand in for it there, since it'd lose the "only if
 /// every earlier branch failed" ordering the branch itself provides.
 func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind, requirePlaceholder: Bool)
@@ -1075,9 +1075,9 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 		input.removeFirst()
 		let isVerbose = letter.isUppercase
 		switch letter {
-		case "v", "V":
+		case "i", "I":
 			guard !negated else {
-				throw .invalidLetter(letter) // `<value>` has no defined negated meaning
+				throw .invalidLetter(letter) // `<nullary-input>` / `<non-nullary-input>` has no defined negated meaning
 			}
 			guard !coerced else {
 				throw .coercionNotSupported(letter)
@@ -1102,9 +1102,9 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
 				)
 				: .number(negated: negated, coerced: coerced, success: nil, failure: nil)
-		case "d", "D":
+		case "c", "C":
 			guard !coerced else {
-				throw .coercionNotSupported(letter) // Date matching already coerces across string / numeric input
+				throw .coercionNotSupported(letter) // Chronologic matching already coerces across string / numeric input
 			}
 			guard isVerbose else {
 				return .date(negated: negated, success: nil, failure: nil)
@@ -1119,9 +1119,9 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 				success: success,
 				failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
 			)
-		case "b", "B":
+		case "m", "M":
 			guard !negated else {
-				throw .invalidLetter(letter) // `<branches>` has no defined negated meaning
+				throw .invalidLetter(letter) // `<nullary-match>` / `<non-nullary-match>` has no defined negated meaning
 			}
 			guard !coerced else {
 				throw .coercionNotSupported(letter)
@@ -1172,24 +1172,24 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 			guard let letter = input.first else {
 				throw .missingFieldName
 			}
-			guard letter != "b", letter != "B" else {
-				throw .invalidLetter(letter) // `%b` / `%B` may not themselves be used as branches
+			guard letter != "m", letter != "M" else {
+				throw .invalidLetter(letter) // `%m` / `%M` may not themselves be used as branches
 			}
 			input.removeFirst()
 			let isVerbose = letter.isUppercase
 			let branch: Branch
 			switch letter {
-			case "v":
+			case "i":
 				guard !negated else {
-					throw .invalidLetter(letter) // `<value>` has no defined negated meaning
+					throw .invalidLetter(letter) // `<nullary-input>` has no defined negated meaning
 				}
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
 				}
 				branch = .value(success: nil)
-			case "V":
+			case "I":
 				guard !negated else {
-					throw .invalidLetter(letter) // `<value>` has no defined negated meaning
+					throw .invalidLetter(letter) // `<non-nullary-input>` has no defined negated meaning
 				}
 				guard !coerced else {
 					throw .coercionNotSupported(letter)
@@ -1209,9 +1209,9 @@ struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
 					coerced: coerced,
 					success: isVerbose ? try parseDelimitedFormat(&input, kind: .number, requirePlaceholder: false) : nil,
 				)
-			case "d", "D":
+			case "c", "C":
 				guard !coerced else {
-					throw .coercionNotSupported(letter) // Date matching already coerces across string / numeric input
+					throw .coercionNotSupported(letter) // Chronologic matching already coerces across string / numeric input
 				}
 				let success = isVerbose ? try parseDateSpec(&input) : nil
 				if isVerbose {
