@@ -18,7 +18,7 @@ struct TableConfig: Equatable {
 	/// The line between the header row & the 1st data row.
 	struct Separator: Equatable {
 		/// Repeated (truncating mid-repetition if needed, never padded) to fill
-		/// its line; empty means a blank line.
+		/// its line; never empty (`<separator-pattern>` defaults to `-`).
 		let pattern: String
 		/// `true`: 1 segment per column, each independently filled to that
 		/// column's width, joined by `columnSpacing` (matching every other row).
@@ -27,37 +27,53 @@ struct TableConfig: Equatable {
 		let broken: Bool
 	}
 
-	static let `default` = Self(header: nil, separator: nil, columnSpacing: "  ")
+	/// `<header-styling-setting>`: when `Header.sgrCodes` are applied.
+	enum HeaderStyling: Equatable {
+		/// `a`: always, even if standard output is not a terminal.
+		case always
+		/// `t`: iff standard output is a terminal.
+		case terminalOnly
+	}
+
+	static let `default` = Self(header: nil, headerStyling: .terminalOnly, separator: nil, columnSpacing: "  ")
 
 	let header: Header?
+	let headerStyling: HeaderStyling
 	let separator: Separator?
 	let columnSpacing: String
 }
 
-/// Parses `--table`'s value (`table.md`): an ad hoc (order-insensitive)
-/// sequence of options, last 1 wins per axis. A defaulted (i.e., unset) axis
-/// with a prerequisite is filled in per `table.md`'s "Implied Options": `b` /
-/// `u` imply a separator (default pattern: `-`, since a blank 1 would defeat
-/// the point of `broken` / not); any separator implies a header (default:
-/// unstyled). An option that explicitly sets an axis (even to "off") always
-/// wins over an implied default for that axis.
+/// Parses `--table`'s value (`table.md`'s `<table-config>`): `<table-setting>+`,
+/// last wins per axis. A defaulted (i.e., unset) axis with a prerequisite is
+/// filled in per `table.md`'s "Implied Settings": `b` / `u` imply a separator
+/// line (`S`, default `<separator-pattern>` `-`); any separator line implies a
+/// header row (`H`, unstyled). A setting that explicitly sets an axis (even to
+/// "off") always overrides an implied default for that axis.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigAxis<String>.unset
+	var headerStyling = TableConfig.HeaderStyling.terminalOnly
 	var separatorPattern = TableConfigAxis<String>.unset
 	var broken = TableConfigAxis<Bool>.unset
 	var columnSpacing = String?.none
 	var input = value[...]
-	while let option = input.first {
+	while let setting = input.first {
 		input.removeFirst()
-		switch option {
+		switch setting {
 		case "h":
 			header = .off
 		case "H":
-			header = .set(try parseTableOptionValue(&input, option: option))
+			header = .set(try parseTableSettingText(&input, setting: setting))
+		case "t":
+			headerStyling = .terminalOnly
+		case "a":
+			headerStyling = .always
 		case "s":
 			separatorPattern = .off
 		case "S":
-			separatorPattern = .set(try parseTableOptionValue(&input, option: option))
+			// `<separator-pattern>` is a non-empty text token: absent, its default
+			// `-` applies
+			let pattern = try parseTableSettingText(&input, setting: setting)
+			separatorPattern = .set(pattern.isEmpty ? "-" : pattern)
 		case "b":
 			broken = .set(true)
 		case "u":
@@ -65,9 +81,9 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		case "c":
 			columnSpacing = TableConfig.default.columnSpacing
 		case "C":
-			columnSpacing = try parseTableOptionValue(&input, option: option)
+			columnSpacing = try parseTableSettingText(&input, setting: setting)
 		default:
-			throw .invalidOption(option)
+			throw .invalidOption(setting)
 		}
 	}
 	if !broken.isUnset, separatorPattern.isUnset {
@@ -78,6 +94,7 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 	}
 	return .init(
 		header: header.setValue.map { .init(sgrCodes: $0) },
+		headerStyling: headerStyling,
 		separator: separatorPattern.setValue.map { .init(pattern: $0, broken: broken.setValue ?? false) },
 		columnSpacing: columnSpacing ?? TableConfig.default.columnSpacing,
 	)
@@ -85,11 +102,14 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 
 // swiftlint:disable:next one_declaration_per_file
 enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
+	case danglingEscape
 	case invalidHeaderStyle(String)
 	case invalidOption(Character)
 
 	var description: String {
 		switch self {
+		case .danglingEscape:
+			"Escape prefix '\\' at the end of --table's value"
 		case let .invalidHeaderStyle(sgrCodes):
 			"Invalid header style (expected ANSI SGR parameters, e.g., \"1\" or \"1;4\"): \(sgrCodes)"
 		case let .invalidOption(option):
@@ -124,28 +144,42 @@ private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_
 	}
 }
 
-/// Parses a verbose (uppercase) `--table` option's value: text up through (&
-/// excluding) `<table-value-terminator>`, or through the end of `input` if
-/// `<table-value-terminator>` is absent (only valid at the very end, since
-/// omitting it anywhere else would swallow subsequent options into this
-/// value). `option`'s own validation (e.g., `H`'s SGR-parameter syntax)
+/// Parses an uppercase `<table-setting>`'s text (`<sgr-parameters>`,
+/// `<separator-pattern>`, or `<column-spacing>`): text up through (&
+/// excluding) `<table-config-terminator>`, or through `<end-of-shell-word>` if
+/// `<table-config-terminator>` is absent (only valid at the very end, since
+/// omitting it anywhere else would swallow subsequent settings into this
+/// text). Outer bare whitespace is significant (consumed). A `\` escapes the
+/// next character (e.g., `\:`); an escape prefix at the end of the input is an
+/// error. `setting`'s own validation (e.g., `H`'s `<sgr-parameters>` syntax)
 /// happens at the call site.
-private func parseTableOptionValue(_ input: inout Substring, option: Character)
+private func parseTableSettingText(_ input: inout Substring, setting: Character)
 throws(TableConfigParsingError) -> String {
-	let value = input.prefix { $0 != tableValueTerminator }
-	input.removeFirst(value.count)
-	if input.first == tableValueTerminator {
+	var text = ""
+	while let char = input.first, char != tableConfigTerminator {
+		input.removeFirst()
+		guard char == escapePrefix else {
+			text.append(char)
+			continue
+		}
+		guard let escaped = input.first else {
+			throw .danglingEscape
+		}
+		input.removeFirst()
+		text.append(escaped)
+	}
+	if input.first == tableConfigTerminator {
 		input.removeFirst()
 	}
-	if option == "H" {
+	if setting == "H" {
 		guard
-			value.isEmpty || value.allSatisfy({ $0.isASCII && ($0.isNumber || $0 == ";") })
-			&& !value.hasPrefix(";") && !value.hasSuffix(";") && !value.contains(";;")
+			text.isEmpty || text.allSatisfy({ $0.isASCII && ($0.isNumber || $0 == ";") })
+			&& !text.hasPrefix(";") && !text.hasSuffix(";") && !text.contains(";;")
 		else {
-			throw .invalidHeaderStyle(.init(value))
+			throw .invalidHeaderStyle(text)
 		}
 	}
-	return .init(value)
+	return text
 }
 
-private let tableValueTerminator = Character(":")
+private let tableConfigTerminator = Character(":")

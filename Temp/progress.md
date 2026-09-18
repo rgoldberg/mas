@@ -167,3 +167,16 @@ iff its `<named-field-spec-reference>` resolves to no field spec (e.g.,
 reference matches nothing. Output filters hidden field specs. The old-draft
 `:hidden` named format still exists alongside (see Temp/todo.md); `none` is
 still an empty fields config rather than `all` with every field spec hidden.
+
+## Step 4 (partial): Table Config (2026-09-18 10:27 UTC)
+
+`parseTableConfig` now supports `<header-styling-setting>` (`t` terminal-only
+/ `a` always, stored as `TableConfig.headerStyling`; table rendering applies
+`<sgr-parameters>` iff `a` or standard output is a terminal), defaults an
+absent `<separator-pattern>` to `-` (a `{text}` token is never empty, so `S` /
+`S:` are dashed), & handles escaping (`\:`, `\\`, dangling `\` is an error) in
+`<sgr-parameters>` / `<separator-pattern>` / `<column-spacing>` text via
+`parseTableSettingText`. Comments now use table.md's vocabulary (setting,
+`<table-config-terminator>`, `<end-of-shell-word>`). Steps 3 (sort options,
+format modifiers) & 5 / 6 (named config contexts, mas defaults) were not
+started.
