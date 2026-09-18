@@ -559,6 +559,35 @@ private extension MASTests {
 		#expect(rendered?.count == "yyyy-MM-dd".count) // Exact day depends on the test machine's local time zone
 	}
 
+	@Test(
+		arguments: [
+			("UTC", "2020-03-18T17:39:23Z"),
+			("utc", "2020-03-18T17:39:23Z"),
+			("Asia/Tokyo", "2020-03-19T02:39:23+0900"),
+			("asia/tokyo", "2020-03-19T02:39:23+0900"),
+			("-05\\:30", "2020-03-18T12:09:23-0530"),
+		],
+	)
+	func `%C timeZone sets the output time zone: IANA identifier, abbreviation, or UTC offset`(
+		code: String,
+		expected: String,
+	) throws {
+		let format = try #require(parseFieldSpecs("adamID:%C.timeZone:\(code):++").first).format
+		#expect(format.rendered(value: .string("2020-03-18T17:39:23Z"), label: "L", name: "n").stringValue == expected)
+	}
+
+	@Test(arguments: ["system", "System"])
+	func `%C timeZone accepts system, case-insensitively`(code: String) throws {
+		#expect(try parseFieldSpecs("adamID:%C.timeZone:\(code):++").count == 1)
+	}
+
+	@Test
+	func `%C timeZone with an unknown time-zone-code is an error`() {
+		#expect(throws: ParsingError.invalidTransformArguments(name: "timeZone:Nowhere/Land:")) {
+			try parseFieldSpecs("adamID:%C.timeZone:Nowhere/Land:++")
+		}
+	}
+
 	@Test
 	func `%c fails (& %-c succeeds) for a value that isn't a date`() {
 		let format = Format.parts([.placeholder(.date(negated: false, success: nil, failure: nil))])

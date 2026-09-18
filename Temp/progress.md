@@ -260,3 +260,12 @@ Revised (2026-09-25): a missing `<sort-option-terminator>` reports
 placeholders & as `<unconditional-branch>`es, reusing `Placeholder.label`'s
 `negated: true` representation for the field name; `%l` / `%L` / `%k` / `%K` may
 no longer be negated (the old `%-l` meant the field name).
+
+## Step 3 (partial): `timeZone` Transform (2026-09-18 10:41 UTC)
+
+The old `localTimeZone` chronologic transform is replaced by
+`timeZone<time-zone-arguments>` (`.timeZone:Asia/Tokyo:`, `:UTC:`, `:-05\:30:`,
+`:system:`), setting the output time zone (last wins) & reporting
+`invalidTransformArguments` for an unknown code. IANA identifiers,
+abbreviations & `system` match case-insensitively. `<time-zone-arguments>`
+requires a `<time-zone-code>`, so `.timeZone::` is an error.
