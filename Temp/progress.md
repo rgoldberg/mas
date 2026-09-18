@@ -269,3 +269,37 @@ The old `localTimeZone` chronologic transform is replaced by
 `invalidTransformArguments` for an unknown code. IANA identifiers,
 abbreviations & `system` match case-insensitively. `<time-zone-arguments>`
 requires a `<time-zone-code>`, so `.timeZone::` is an error.
+
+## Stopped (2026-09-18 10:45 UTC)
+
+Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,
+`Scripts/lint -A`, `Scripts/build` & `Scripts/test` all pass; every step above
+is committed). Remaining, in the original order:
+
+- Step 2: ebnf.md outer bare whitespace treatment per production (only the
+  existing trim of outer whitespace around text tokens exists); built-in `none`
+  as `all` with every field spec hidden.
+- Step 3:
+  - `%v` / `%V` version placeholders
+  - `<abort-on-success>` / `<abort-on-failure>` (the `-` prefix still means the
+    old negation).
+  - `<lenient-coercion>` (`_`).
+  - Type determinants & conformance.
+  - `+` as the sole `<block-terminator>` (the old `:` / `::` pipeline terminator
+    remains).
+  - `template-text` whitespace.
+  - Sort options:
+    - `<numbers-in-strings>` (`x` / `n` / `g`, replacing `Interpretation` +
+      `Grouping`).
+    - `<boundaries>` (`b` / `B…+` / `C…+` with `<boundary-groups>`, replacing
+      the old `b…` syntax).
+    - `<nonconforming-location>`.
+    - `<trivia-order>`.
+    - Multiple `<sort-option-set>`s per `<sort-modifier>`.
+    - Sorting by the field's type.
+- Step 5: context stacks & persisted named configs (Temp/todo.md: massive
+  effort).
+- Step 6: re-derive `AppStoreFieldDefaults.swift` from mas.md's "Default Sort
+  Options" once the sort option letters match fields.md.
+- Step 7: rename the remaining old-draft nonterminal names in comments (sort
+  boundaries, chronologic input / output formats) as that code is rewritten.
