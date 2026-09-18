@@ -63,7 +63,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case coercionNotApplicable(kind: String)
 	case coercionNotSupported(Character)
 	case danglingEscape
-	case hiddenFormatFollowedByContent
 	case incompletePipelineTerminator
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
@@ -95,8 +94,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Coercion ('.') isn't supported for placeholder letter: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
-		case .hiddenFormatFollowedByContent:
-			"'\(hiddenNamedFormatName)' must be the entire format-modifier; nothing may follow it"
 		case .incompletePipelineTerminator:
 			"Expected another ':' to complete the pipeline terminator '::'"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
@@ -771,13 +768,6 @@ throws(ParsingError) -> (format: Format, justification: Justification)? {
 		guard knownNamedFormatNameSet.contains(name) else {
 			throw .unknownNamedFormat(name)
 		}
-		// `hidden` is special: unlike any other named format (once persisted named
-		// formats exist), it precludes anything else in the format-modifier: a
-		// hidden field is never rendered, so a trailing format-transform-pipeline,
-		// value-transform-pipeline, or template would be dead configuration
-		if name == hiddenNamedFormatName, let next = input.first, !terminatorSet.contains(next) {
-			throw .hiddenFormatFollowedByContent
-		}
 		namedFormat = name
 	}
 	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
@@ -869,10 +859,8 @@ private func parseTrailingTemplate(
 /// `<format-transform-pipeline>` (never `<value-transform-pipeline>`, which
 /// has its own reference to fold a `namedFormat` into) precede it: with a
 /// template, that's the whole format (`namedFormat`, if present, is
-/// discarded here; `hidden` can never reach this function, since it
-/// precludes anything else in the format-modifier, checked by its own
-/// caller); without a template, `namedFormat` (if present) is the whole
-/// format instead; absent both, it's an implicit `%v`.
+/// discarded here); without a template, `namedFormat` (if present) is the
+/// whole format instead; absent both, it's an implicit `%v`.
 /// UPDATE: once user-defined named formats exist, splice `namedFormat`'s own
 ///  rendered value in as a trailing template's first part, instead of
 ///  discarding it.

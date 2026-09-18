@@ -41,22 +41,6 @@ enum Format: Equatable {
 	static func `default`(fieldName _: String) -> Self {
 		.parts([.placeholder(.value(success: nil))])
 	}
-
-	/// Whether this is exactly the built-in `hidden` named format: excludes the
-	/// field spec from display output entirely (its `SortSpec`, if any, still
-	/// participates in item sorting), checked once per field spec, not per
-	/// rendered value.
-	var isHidden: Bool {
-		if
-			case let .reference(reference) = self,
-			reference.namedFormat == hiddenNamedFormatName,
-			reference.transforms.isEmpty
-		{
-			true
-		} else {
-			false
-		}
-	}
 }
 
 extension Format: CustomStringConvertible { // swiftlint:disable:this file_types_order
@@ -79,8 +63,6 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// explicit one that's just `%v`) passes the original node through unchanged
 	/// (so JSON output preserves the value's real type); anything else (literal
 	/// text, other placeholders, transforms) necessarily produces a string.
-	/// `isHidden` fields are filtered out before this is ever called, so `hidden`
-	/// needs no case here.
 	func rendered(value: JSON.Node?, label: String, name: String) -> JSON.Node {
 		switch self {
 		case let .parts(parts):
@@ -183,9 +165,9 @@ extension FormatReference: CustomStringConvertible { // swiftlint:disable:this f
 }
 
 private extension FormatReference { // swiftlint:disable:this file_types_order
-	/// Only the built-in `hidden` named format exists (filtered out before
-	/// reaching here), so this only ever has a bare `<string-transform-pipeline>`
-	/// to apply to the field's own verbatim value.
+	/// No named formats exist yet (`knownNamedFormatNameSet` is empty, so no
+	/// `<named-format-reference>` parses), so this only ever has a bare
+	/// `<string-transform-pipeline>` to apply to the field's own verbatim value.
 	/// UPDATE: once persisted user-defined named formats exist, resolve
 	///  `namedFormat` to its definition & apply `transforms` to that definition's
 	///  rendering of `value` instead of to `value` itself.
@@ -1292,9 +1274,9 @@ let transformCallPrefix = Character(".")
 private let dateInputFormatSeparator = Character(",")
 private let dateInputOutputSeparator = Character("_")
 
-let hiddenNamedFormatName = "hidden"
-// UPDATE: once persisted user-defined named formats exist, union their names in
-let knownNamedFormatNameSet = Set([hiddenNamedFormatName])
+// UPDATE: once persisted named formats exist, union their names in; until then,
+//  every `<named-format-reference>` reports an error, per fields-format.md
+let knownNamedFormatNameSet = Set<String>()
 
 private let groupSimpleName = "group"
 private let groupNamePrefix = groupSimpleName + argumentFence

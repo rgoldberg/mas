@@ -183,9 +183,6 @@ stack's `default`.
 - Existing Swift uses `UPDATE:` comments because SwiftLint's `todo` rule
   rejects `TODO:`; new open items use `// TODO:` per CLAUDE.md with
   `// swiftlint:disable:next todo`. Decide which convention to keep.
-- Remove the old-draft `hidden` named format (`::hidden`, `Format.isHidden`,
-  `ParsingError.hiddenFormatFollowedByContent`) now that `<field-spec-hide>`
-  (`_`) & `FieldSpec.isHidden` exist; the spec has no built-in named formats.
 - Built-in `none` should be `all` with every field spec hidden (so `@none.+x`
   copies `x`'s base field spec), not an empty fields config; doing so makes
   `fetchFieldNames` fetch everything for `@none`-based configs unless hidden,

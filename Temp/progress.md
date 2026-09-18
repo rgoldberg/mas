@@ -180,3 +180,11 @@ absent `<separator-pattern>` to `-` (a `{text}` token is never empty, so `S` /
 `<table-config-terminator>`, `<end-of-shell-word>`). Steps 3 (sort options,
 format modifiers) & 5 / 6 (named config contexts, mas defaults) were not
 started.
+
+## Step 2c: Remove Old-Draft `hidden` Named Format (2026-09-18 10:29 UTC)
+
+The old-draft built-in `hidden` named format (`::hidden`, `Format.isHidden`,
+`ParsingError.hiddenFormatFollowedByContent`) is removed: hiding is now only
+`<field-spec-hide>` (`_`) via `FieldSpec.isHidden`. `knownNamedFormatNameSet`
+is empty, so every `<named-format-reference>` reports `unknownNamedFormat`
+until persisted named formats exist, per fields-format.md.
