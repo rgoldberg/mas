@@ -11,7 +11,7 @@ format-block = <pipeline> | <format-template> (* direct default: {nullary placeh
 
 pipeline = <named-format> | [ <named-format> ] <format-transform-pipeline> | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline>
 
-format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
+format-template = ( <placeholder> | <template-text> )+
 
 template-text = ~^{text}^~
 ```
@@ -125,7 +125,7 @@ date-only = "dateOnly"
 time-zone = "timeZone" <time-zone-arguments>
 
 group-arguments          = <argument-fence> ( <locale-name> | <explicit-group-arguments> ) <argument-fence>
-explicit-group-arguments = <group-separator> <argument-separator> <group-digit-count>
+explicit-group-arguments = <digit-group-separator> <argument-separator> <digit-group-count>
 
 scale-arguments =
   <argument-fence> <radix>
@@ -136,8 +136,8 @@ scale-arguments =
 
 time-zone-arguments = <argument-fence> <time-zone-code> <argument-fence>
 
-group-separator   = ^{text}^
-group-digit-count = {positive integer}
+digit-group-separator = ^{text}^
+digit-group-count     = {positive integer}
 
 radix              = {integer from 2 to 36} (* base for `exponent` & the rendered digits *)
 exponent           = {non-negative integer} (* divides the field's value by `radix^exponent` before rendering *)
@@ -169,12 +169,12 @@ string), so an `<unconditional-transform-pipeline>`, which begins with a
 
 ###### `group`
 
-`group` inserts `<group-separator>` into the field's integer part every
-`<group-digit-count>` digits, counting from the right.
+`group` inserts `<digit-group-separator>` into the field's integer part every
+`<digit-group-count>` digits, counting from the right.
 
 - Absent `<group-arguments>` entirely, or given only
-  [`<locale-name>`](fields.md#sort-localization), `<group-separator>` &
-  `<group-digit-count>` are sourced from the system default locale, or the named
+  [`<locale-name>`](fields.md#sort-localization), `<digit-group-separator>` &
+  `<digit-group-count>` are sourced from the system default locale, or the named
   locale, respectively.
 
 ###### `scale`

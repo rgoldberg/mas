@@ -454,6 +454,16 @@ commentary.
 Default value comments specify explicit defaults applicable to optional
 nonterminals.
 
+`DEFAULT` is one of:
+
+- `null` or `empty`.
+- A [scalar](#scalar-descriptions) or [repetition
+  description](#repetition-descriptions) of the value.
+- A [nonterminal reference](#nonterminal-references), evaluating to the
+  referenced nonterminal's value when parsed from the least text it accepts.
+- [Literal text](#literal-text), parsed & evaluated as the syntax of the
+  nonterminal to which the default applies.
+
 ###### Self Default Value Comments
 
 Defined via a modified meta-grammar supporting [optionals](#optionals),

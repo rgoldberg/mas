@@ -563,8 +563,8 @@ no-boundaries          = "b"
 uncollapsed-boundaries = "B" [ <boundary-groups> ] <sort-option-terminator>
 collapsed-boundaries   = "C" [ <boundary-groups> ] <sort-option-terminator>
 
-boundary-groups = <boundary-group> … <group-separator> (* default: ":space:" *)
-group-separator = "_"
+boundary-groups          = <boundary-group> … <boundary-group-separator> (* default: ":space:" *)
+boundary-group-separator = "_"
 
 boundary-group      = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
 boundary-characters = {text}
@@ -685,7 +685,7 @@ trailing outer bare whitespace is significant or insignificant, as given.
 | `<format-name>` in a `<block>`                                       |                 | `.` `+`             | insignificant      | insignificant              |
 | `<template-text>` beginning a `<block>`                              | `:` `.`         | `%` `+`             | insignificant      | significant iff before `%` |
 | `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`             | significant        | significant iff before `%` |
-| `<locale-name>` in `<group-arguments>` / `<group-separator>`         |                 | `,` `:`             | significant        | significant                |
+| `<locale-name>` in `<group-arguments>` / `<digit-group-separator>`   |                 | `,` `:`             | significant        | significant                |
 | `<time-zone-code>`                                                   |                 | `:`                 | insignificant      | insignificant              |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
