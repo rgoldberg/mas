@@ -110,6 +110,10 @@ optional.
 
   Doing so makes `fetchFieldNames` fetch everything for `@none`-based configs
   unless hidden, sort-disabled field specs are excluded from fetching.
+- `parseDelimitedFormat` (old draft) stops a `<success-block>` /
+  `<failure-block>` at `%`, so blocks cannot contain `<block-placeholder>`s or
+  `<unconditional-placeholder>`s (e.g., `%.N%n (%i)++`); fix with the
+  `<block-terminator>` rewrite.
 
 ## ASAP Version, But Massive Effort
 
