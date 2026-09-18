@@ -60,7 +60,8 @@ Counts in parentheses are whole-word, case-insensitive matches in `Specs/` &
 14. - side (15)
     - REJECTED: end (as synonym for side)
 15. - 1st (6)
-    - REJECTED: first (7; ok in `<trivia-first>`) / leftmost
+    - REJECTED: first (7; ok in `<trivia-first>`) / leftmost / initial (3) /
+      earliest (1)
 16. - sole (1): adjective (the sole element)
     - only (39): adverb / adjective
     - REJECTED: final / last
@@ -302,5 +303,14 @@ Counts in parentheses are whole-word, case-insensitive matches in `Specs/` &
     - remove (11)
 64. - adjacent (6): next to
     - contiguous (3): unbroken run
+    - next (3): the immediately subsequent one
     - neighboring
     - REJECTED: consecutive
+65. - an error is reported (11): consequence clause after a condition
+    - X is an error (3): predicate
+    - REJECTED: causes an error to be reported (1) → is an error
+66. - ensure (3): obligation on a syntax's author
+    - guarantee (3): property that holds
+67. - edit (20): a `<field-spec-edit>`
+    - modify (12): alter a value or config
+    - REJECTED: change (2) → edit / modify / alter

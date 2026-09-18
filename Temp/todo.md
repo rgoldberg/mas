@@ -60,7 +60,7 @@ read, so an insert "after X" is always placeable. No forbidding needed.
 Should `<base-fields-config-order>` allow `<direction>`?
 
 If so, should it reverse only the order from the base fields config, not
-subsequent changes from `<field-spec-edits-section>`?
+subsequent edits from `<field-spec-edits-section>`?
 
 ### `(* last wins *)`
 
@@ -140,7 +140,7 @@ rather than silently falling back to the defaults:
   does.
 
 Escaping appendix rows: `<format-name>` in a `<block>` also ended by `,` & `_`;
-`<inline-chronologic-format>`: initial `:` `.`, any `+` `,` `_`, whitespace
+`<inline-chronologic-format>`: 1st `:` `.`, any `+` `,` `_`, whitespace
 insignificant.
 
 ### Configurable Boundary Collapsing

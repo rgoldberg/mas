@@ -22,8 +22,7 @@ evaluated as follows:
 
 Index `0` represents a pseudo-position that precedes all list elements.
 
-Accessing an invalid position causes an error to be reported. Invalid positions
-are:
+Accessing an invalid position is an error. Invalid positions are:
 
 - Non-positive positions (despite non-positive indices being valid).
 - Positions that are greater than a list's length.
@@ -112,7 +111,7 @@ being modified.
 
 ### Resolved Fields Config
 
-The **resolved fields config** is used to generate output.
+The **resolved fields config** is used to render output.
 
 ## Defaults for Absent Expressions
 
@@ -657,13 +656,13 @@ be escaped instead of bare to be consumed where bare whitespace is
 insignificant.
 
 In each row of the table below, the given characters must be escaped to be
-consumed as either the initial character of, or any character in, a text token
+consumed as either the 1st character of, or any character in, a text token
 consumed by the given text terminal in the given syntactic context. Leading &
 trailing outer bare whitespace is significant or insignificant, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                             | Initial         | Any                 | Leading Whitespace | Trailing Whitespace        |
+| `{text}`                                                             | 1st             | Any                 | Leading Whitespace | Trailing Whitespace        |
 |:---------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:---------------------------|
 | `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@` `.`         | `=` `:` `/` `,`     | insignificant      | insignificant              |
 | `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `=` `:` `/` `,`     | insignificant      | insignificant              |
