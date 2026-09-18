@@ -55,7 +55,7 @@ named-format-reference =
   | <named-unconditional-format>
   (* non-structural *)
 
-format-name = {text}
+format-name = {text: named format name}
 name-prefix = ":"!
 ```
 <!--markdownlint-enable line-length-->
@@ -122,9 +122,9 @@ group = "group" [ <group-arguments> ]
 
 iso       = "iso"
 date-only = "dateOnly"
-time-zone = "timeZone" <time-zone-arguments>
+time-zone = "timeZone" <time-zone-arguments> (* sets the output time zone *)
 
-group-arguments          = <argument-fence> ( <locale-name> | <explicit-group-arguments> ) <argument-fence>
+group-arguments          = <argument-fence> ( <locale-identifier> | <explicit-group-arguments> ) <argument-fence>
 explicit-group-arguments = <digit-group-separator> <argument-separator> <digit-group-count>
 
 scale-arguments =
@@ -144,7 +144,7 @@ exponent           = {non-negative integer} (* divides the field's value by `rad
 significant-digits = {positive integer}     (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {non-negative integer} (* exactly this many `radix` digits after the point; `0`: integer *)
 
-time-zone-code = {text} (* case-insensitive IANA identifier, abbreviation, UTC offset, or `system` *)
+time-zone-code = {text: case-insensitive IANA identifier, abbreviation, UTC offset, or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -173,9 +173,9 @@ string), so an `<unconditional-transform-pipeline>`, which begins with a
 `<digit-group-count>` digits, counting from the right.
 
 - Absent `<group-arguments>` entirely, or given only
-  [`<locale-name>`](fields.md#sort-localization), `<digit-group-separator>` &
-  `<digit-group-count>` are sourced from the system default locale, or the named
-  locale, respectively.
+  [`<locale-identifier>`](fields.md#sort-localization),
+  `<digit-group-separator>` & `<digit-group-count>` are sourced from the system
+  default locale, or the identified locale, respectively.
 
 ###### `scale`
 
@@ -191,10 +191,6 @@ point.
 - `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
   any), never spelled out.
 - E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
-
-###### `timeZone`
-
-The output time zone is the system time zone unless `timeZone` sets it.
 
 ##### Format Transforms
 

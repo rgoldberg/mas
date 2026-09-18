@@ -121,10 +121,10 @@ algorithm](ebnf.md#defaults-for-absent-expressions):
 - If transitively absent: the value for the given expression `EXPRESSION` in the
   working fields config.
 
-So an omitted modifier (e.g., `name`) or an omitted option (e.g., `d` in `/1Ii`)
-retains the working fields config's value, while a modifier whose payload is
-absent (e.g., `name=`, `name:`, `name/`, `L+`, `B+`) resets it to its direct or
-implicit default.
+An omitted modifier (e.g., `<sort-modifier>` from `name`) or an omitted option
+(e.g., `d` from `name/1Ii`) thus retains the working fields config's value,
+while an absent modifier or option payload (e.g., from `name=`, `name:`,
+`name/`, `L+`, `B+`) resets the value to its direct or implicit default.
 
 ## Nonexistent Fields
 
@@ -169,7 +169,7 @@ fields configs.
 absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <absolute-field-name> <field-modifiers>
-absolute-field-name = {text}
+absolute-field-name = {text: field name}
 ```
 
 The resolved fields config is sourced solely from `<absolute-config>`; this is
@@ -198,7 +198,7 @@ The resolved fields config is sourced from the base fields config as modified by
 base-fields-config-section        = <base-fields-config-section-prefix> <base-fields-config-name>
 base-fields-config-section-prefix = "@"
 
-base-fields-config-name = {text} (* default: "default" *)
+base-fields-config-name = {text: fields config name} (* default: "default" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -275,7 +275,7 @@ field-spec-reference         = <named-field-spec-reference> | <indexed-field-spe
 named-field-spec-reference   = <reference-field-name> [ <index-prefix> <index> ] (* default index: "1" *)
 indexed-field-spec-reference = <index-prefix> <index>
 
-reference-field-name = {text}
+reference-field-name = {text: field name}
 
 index-prefix = "@"
 index        = {integer}
@@ -521,9 +521,9 @@ canonical = "c"
 localized = <system-locale> | <custom-locale>
 
 system-locale = "l"
-custom-locale = "L" [ <locale-name> ] <sort-option-terminator>
+custom-locale = "L" [ <locale-identifier> ] <sort-option-terminator>
 
-locale-name = {text} (* default: {system default locale name} *)
+locale-identifier = {text: locale identifier} (* default: {system default locale identifier} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -665,27 +665,27 @@ trailing outer bare whitespace is significant or insignificant, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                             | 1st             | Any                 | Leading Whitespace | Trailing Whitespace        |
-|:---------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:---------------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@` `.`         | `=` `:` `/` `,`     | insignificant      | insignificant              |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `=` `:` `/` `,`     | insignificant      | insignificant              |
-| `<base-fields-config-name>`                                          |                 | `/` `.`             | insignificant      | insignificant              |
-| `<reference-field-name>` in `<field-spec-insertion>`                 |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
-| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
-| `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
-| `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
-| `<reference-field-name>` in `<field-spec-removal>`                   |                 | `@` `,`             | insignificant      | insignificant              |
-| `<label>`                                                            |                 | `:` `/` `,`         | insignificant      | insignificant              |
-| `<locale-name>` in `<custom-locale>`                                 |                 | `+`                 | insignificant      | insignificant              |
-| `<boundary-characters>`                                              |                 | `%` `:` `_` `+`     | insignificant      | insignificant              |
-| `<multi-character-boundary-text>`                                    |                 | `%`                 | insignificant      | insignificant              |
-| `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`         | insignificant      | insignificant              |
-| `<template-text>` beginning a `<format-block>`                       | `:` `.`         | `%` `/` `,`         | insignificant      | significant iff before `%` |
-| `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`         | significant        | significant iff before `%` |
-| `<format-name>` in a `<block>`                                       |                 | `.` `+`             | insignificant      | insignificant              |
-| `<template-text>` beginning a `<block>`                              | `:` `.`         | `%` `+`             | insignificant      | significant iff before `%` |
-| `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`             | significant        | significant iff before `%` |
-| `<locale-name>` in `<group-arguments>` / `<digit-group-separator>`   |                 | `,` `:`             | significant        | significant                |
-| `<time-zone-code>`                                                   |                 | `:`                 | insignificant      | insignificant              |
+| `{text}`                                                                 | 1st             | Any                 | Leading Whitespace | Trailing Whitespace        |
+|:-------------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:---------------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`               | `@` `.`         | `=` `:` `/` `,`     | insignificant      | insignificant              |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`          |                 | `=` `:` `/` `,`     | insignificant      | insignificant              |
+| `<base-fields-config-name>`                                              |                 | `/` `.`             | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-insertion>`                     |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-overlay>`                       | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-move>`                          |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-hide>`                          |                 | `@` `=` `:` `/` `,` | insignificant      | insignificant              |
+| `<reference-field-name>` in `<field-spec-removal>`                       |                 | `@` `,`             | insignificant      | insignificant              |
+| `<label>`                                                                |                 | `:` `/` `,`         | insignificant      | insignificant              |
+| `<locale-identifier>` in `<custom-locale>`                               |                 | `+`                 | insignificant      | insignificant              |
+| `<boundary-characters>`                                                  |                 | `%` `:` `_` `+`     | insignificant      | insignificant              |
+| `<multi-character-boundary-text>`                                        |                 | `%`                 | insignificant      | insignificant              |
+| `<format-name>` in a `<format-block>`                                    |                 | `.` `/` `,`         | insignificant      | insignificant              |
+| `<template-text>` beginning a `<format-block>`                           | `:` `.`         | `%` `/` `,`         | insignificant      | significant iff before `%` |
+| `<template-text>` immediately after a `<placeholder>`                    |                 | `%` `/` `,`         | significant        | significant iff before `%` |
+| `<format-name>` in a `<block>`                                           |                 | `.` `+`             | insignificant      | insignificant              |
+| `<template-text>` beginning a `<block>`                                  | `:` `.`         | `%` `+`             | insignificant      | significant iff before `%` |
+| `<template-text>` immediately after a `<placeholder>` in a `<block>`     |                 | `%` `+`             | significant        | significant iff before `%` |
+| `<locale-identifier>` in `<group-arguments>` / `<digit-group-separator>` |                 | `,` `:`             | significant        | significant                |
+| `<time-zone-code>`                                                       |                 | `:`                 | insignificant      | insignificant              |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

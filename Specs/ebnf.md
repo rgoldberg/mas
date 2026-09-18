@@ -274,17 +274,21 @@ Inherent scalar.
 
 `DESCRIPTION` describes valid literal scalars, e.g., `{non-negative integer}`.
 
-`DESCRIPTION` must not be `text`.
+`DESCRIPTION` must not be `text` & must not begin with `text:`.
 
 #### Text Terminals
 
 ```ebnf
 {text}
+{text: DESCRIPTION}
 ```
 
 Inherent scalar.
 
 A [text token](#tokens), which supports [escape sequences](#escaping).
+
+`DESCRIPTION`, if given, describes the valid values; for any other value, an
+error is reported.
 
 ### Nonterminals
 
