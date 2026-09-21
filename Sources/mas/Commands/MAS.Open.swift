@@ -32,28 +32,23 @@ extension MAS {
 				guard let macAppStoreSchemeURL = URL(string: "\(masScheme):") else {
 					throw MASError.error("Failed to create URL from \(masScheme) scheme")
 				}
-
 				let workspace = NSWorkspace.shared
 				guard let appURL = workspace.urlForApplication(toOpen: macAppStoreSchemeURL) else {
 					throw MASError.error("Failed to find app to open \(masScheme) URLs")
 				}
-
 				try await workspace.openApplication(at: appURL, configuration: .init())
 				return
 			}
-
 			let appStorePageURLString = try await Environment.current
 				.lookupAppFromAppID(.init(from: appIDString, forceBundleID: forceBundleIDOptionGroup.forceBundleID))
 				.appStorePageURLString
 			guard var urlComponents = URLComponents(string: appStorePageURLString) else {
 				throw MASError.invalidURL(appStorePageURLString)
 			}
-
 			urlComponents.scheme = masScheme
 			guard let url = urlComponents.url else {
 				throw MASError.invalidURL(.init(describing: urlComponents))
 			}
-
 			_ = try await url.open()
 		}
 	}
