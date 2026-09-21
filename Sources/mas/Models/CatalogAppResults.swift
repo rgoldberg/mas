@@ -24,20 +24,17 @@ struct CatalogAppResults: JSONDecodable {
 		guard case let .object(object) = json else {
 			throw MASError.invalidJSON(.init(json))
 		}
-
 		resultCount = try object["resultCount"]?.decode() ?? 0
 		resultObjects = if case let .array(array) = object[nodeKey: "results"] {
 			try array.elements.map { element in
 				guard case let .object(object) = element else {
 					throw MASError.invalidJSON(.init(json))
 				}
-
 				return object
 			}
 		} else {
 			.init()
 		}
-
 		let resultObjects = resultObjects
 		lazyResults = .init { .init { try resultObjects.map { try .init(json: .object($0)) } } }
 	}
