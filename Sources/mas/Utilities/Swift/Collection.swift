@@ -65,7 +65,6 @@ extension Collection where Element: Sendable {
 			for _ in 0..<Swift::min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
-
 			return try await taskGroup.reduce(into: Array(repeating: T?.none, count: count)) { results, indexedResult in
 				results[indexedResult.index] = .some(indexedResult.result)
 				addNextTask()
@@ -90,7 +89,6 @@ extension Collection where Element: Sendable {
 			for _ in 0..<Swift::min(count, maxConcurrentTaskCount) {
 				addNextTask()
 			}
-
 			return try await taskGroup.reduce(into: Array(repeating: T?.none, count: count)) { results, indexedResult in
 				results[indexedResult.index] = indexedResult.result
 				addNextTask()

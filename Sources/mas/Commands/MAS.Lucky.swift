@@ -31,7 +31,6 @@ extension MAS {
 			guard let adamID = try await Environment.current.searchForAppsMatchingSearchTerm(searchTerm).first?.adamID else {
 				throw MASError.noCatalogAppsFound(for: searchTerm)
 			}
-
 			await AppStore.install.apps(withADAMIDs: [adamID], force: forceOptionGroup.force)
 		}
 	}

@@ -17,7 +17,6 @@ struct UniversalSemVer: SemVerSyntax, ExpressibleByStringLiteral {
 		guard let match = rawValue.wholeMatch(of: universalSemVerRegex) else {
 			preconditionFailure("Failed to match regex \(universalSemVerRegex)")
 		}
-
 		coreElements = match.1.elements
 		prereleaseElements = match.2.elements
 		buildElements = match.3.elements
@@ -64,13 +63,11 @@ struct UniversalSemVerInt: SemVerSyntaxInteger { // swiftlint:disable:this one_d
 		guard let match = rawValue.wholeMatch(of: universalSemVerRegex) else {
 			preconditionFailure("Failed to match regex \(universalSemVerRegex)")
 		}
-
 		let coreElements = match.1.elements
 		let coreIntegers = coreElements.compactMap(Int.init)
 		guard coreIntegers.count == coreElements.count else {
 			return nil
 		}
-
 		self.init(
 			coreIntegers: coreIntegers,
 			prereleaseElements: match.2.elements,

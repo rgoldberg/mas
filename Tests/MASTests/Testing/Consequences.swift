@@ -90,7 +90,6 @@ private struct StreamRedirector { // swiftlint:disable:this one_declaration_per_
 		guard !alreadyStopped.exchange(true, ordering: .acquiringAndReleasing) else {
 			return
 		}
-
 		switch originalFD {
 		case FileHandle.standardOutput.fileDescriptor:
 			unsafe fflush(unsafe stdout)
