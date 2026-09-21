@@ -26,7 +26,6 @@ extension Data {
 				""",
 			)
 		}
-
 		try self.init(contentsOf: resourceURL, options: .mappedIfSafe)
 	}
 }

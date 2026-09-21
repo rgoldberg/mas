@@ -10,6 +10,7 @@
 --disable hoistTry
 
 # Disabled rules (disabled by default)
+#--enable blankLinesAfterGuardStatements
 #--enable ifExpressions
 #--enable markTypes
 #--enable preferExplicitFalse
@@ -19,7 +20,6 @@
 
 # Enabled rules (disabled by default)
 --enable acronyms
---enable blankLinesAfterGuardStatements
 --enable blankLineAfterSwitchCase
 --enable blockComments
 --enable commonTypos

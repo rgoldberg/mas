@@ -35,6 +35,5 @@ func run<Encoding: Unicode.Encoding>(
 			""",
 		)
 	}
-
 	return (outString, errString)
 }
