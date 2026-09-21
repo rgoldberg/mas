@@ -35,7 +35,6 @@ extension MAS {
 			guard !catalogApps.isEmpty else {
 				throw MASError.noCatalogAppsFound(for: searchTermOptionGroup.searchTerm)
 			}
-
 			outputFormatOptionGroup.info(catalogApps.map(String.init).joined(separator: "\n"))
 		}
 	}

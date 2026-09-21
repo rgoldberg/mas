@@ -56,7 +56,6 @@ enum AppStoreAction: String {
 					guard let installedApp = installedAppByADAMID[adamID] else {
 						return true
 					}
-
 					MAS.printer.warning("Already ", performed, " ", installedApp.name, " (", adamID, ")", separator: "")
 					return false
 				},
@@ -67,7 +66,6 @@ enum AppStoreAction: String {
 		guard !adamIDs.isEmpty else {
 			return
 		}
-
 		await OrderedSet(adamIDs)
 			.forEach(attemptTo: "\(self) app for ADAM ID") { try await app(withADAMID: $0) { _, _ in false } }
 	}
@@ -130,7 +128,6 @@ enum AppStoreAction: String {
 								guard url.pathExtension == "pkg" else {
 									return (url: URL, date: Date)?.none
 								}
-
 								let resourceValues = try url.resourceValues(forKeys: [.contentModificationDateKey, .isRegularFileKey])
 								return
 									resourceValues.isRegularFile == true ? resourceValues.contentModificationDate.map { (url, $0) } : nil
@@ -201,7 +198,6 @@ enum AppStoreAction: String {
 					guard error is Ignorable else {
 						throw error
 					}
-
 					MAS.printer.notice(PhaseType.downloaded, snapshot.appNameAndVersion)
 					MAS.printer.notice(performing.uppercasingFirst, snapshot.appNameAndVersion)
 					MAS.printer.info(rawValue.uppercasingFirst, "progress cannot be displayed", terminator: "")
@@ -221,15 +217,12 @@ enum AppStoreAction: String {
 					guard !snapshot.isCancelled else {
 						throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
 					}
-
 					appFolderURL = snapshot.appFolderPath.map { .init(folderPath: $0) }
 				}
-
 				MAS.printer.notice(
 					[performed.uppercasingFirst, snapshot.appNameAndVersion]
 						+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()),
 				)
-
 				if let appFolderURL {
 					let fileManager = FileManager.default
 					if
@@ -286,7 +279,6 @@ enum AppStoreAction: String {
 		guard let receiptHardLinkURL else {
 			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
 		}
-
 		if
 			(try? await run(.path("/usr/bin/sudo"), arguments: ["-n", "true"], output: .discarded))?
 				.terminationStatus
@@ -304,7 +296,6 @@ enum AppStoreAction: String {
 			"/",
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
-
 		guard
 			let appFolderURLSubstring = standardErrorString
 				.matches(of: appFolderURLRegex)
@@ -322,7 +313,6 @@ enum AppStoreAction: String {
 				cause: standardErrorString,
 			)
 		}
-
 		let receiptURL = appFolderURL.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
 		let receiptPath = receiptURL.filePath
 		let receiptHardLinkPath = receiptHardLinkURL.filePath
@@ -338,15 +328,12 @@ enum AppStoreAction: String {
 			errorMessage: // swiftformat:disable:next indent
 				"Failed to copy receipt for \(appNameAndVersion) from \(receiptHardLinkPath.quoted) to \(receiptPath.quoted)",
 		)
-
 		_ = try await run(
 			.path("/usr/bin/mdimport"),
 			appFolderURL.filePath,
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
-
 		LSRegisterURL(appFolderURL as CFURL, true)
-
 		return appFolderURL
 	}
 }
@@ -398,7 +385,6 @@ private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 			queue.cancelDownload(download, promptToConfirm: false, askToDelete: false)
 			return
 		}
-
 		continuation.yield(.statusChanged(snapshot))
 	}
 
@@ -406,7 +392,6 @@ private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 		guard let snapshot = DownloadSnapshot(to: action, download), snapshot.adamID == adamID else {
 			return
 		}
-
 		continuation.yield(.removed(snapshot))
 	}
 }
@@ -427,7 +412,6 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 		guard let metadata = download.metadata, let status = download.status else {
 			return nil
 		}
-
 		adamID = metadata.itemIdentifier
 		name = metadata.title
 		version = metadata.bundleVersion
@@ -508,7 +492,6 @@ private extension URL {
 		guard let fileID2 = try url.resourceValues(forKeys: [.fileResourceIdentifierKey]).fileResourceIdentifier else {
 			throw MASError.error("Failed to get file resource identifier for \(url.filePath)")
 		}
-
 		return fileID1.isEqual(fileID2)
 	}
 }
@@ -517,7 +500,6 @@ private func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?, adamI
 	guard let url, try !url.linksToSameInode(as: existingHardLinkURL) else {
 		return existingHardLinkURL
 	}
-
 	let fileManager = FileManager.default
 	let hardLinkURL = try fileManager.url(
 		for: .itemReplacementDirectory,
