@@ -61,7 +61,6 @@ private var supportedSliceArchitectures: [String] {
 			guard let arch = Int(exactly: archID) else {
 				return "unknown_\(archID)"
 			}
-
 			return switch arch {
 			case NSBundleExecutableArchitectureARM64:
 				"arm64"
@@ -89,7 +88,6 @@ private func configStringValue(_ name: String) -> String {
 	guard size > 0 else {
 		return unknown
 	}
-
 	return withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
 		guard let baseAddress = buffer.baseAddress else {
 			return unknown
@@ -98,7 +96,6 @@ private func configStringValue(_ name: String) -> String {
 			unsafe perror(sysCtlByName)
 			return unknown
 		}
-
 		return unsafe .init(cString: unsafe baseAddress)
 	}
 }

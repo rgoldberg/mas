@@ -52,7 +52,6 @@ struct MAS: AsyncParsableCommand {
 			} else {
 				try main(command)
 			}
-
 			let errorCount = printer.errorCount
 			if errorCount > 0 {
 				throw ExitCode(errorCount >= .init(Int32.max) ? .max : .init(errorCount))
@@ -104,7 +103,6 @@ private extension Error {
 			guard !MAS.exitCode(for: self).isSuccess else {
 				throw self
 			}
-
 			return self
 		}
 	}

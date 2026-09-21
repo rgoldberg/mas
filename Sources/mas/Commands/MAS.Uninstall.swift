@@ -54,7 +54,6 @@ extension MAS {
 				}
 				return
 			}
-
 			let fileManager = FileManager.default
 			for appPath in uninstallingADAMIDByPathOrdered.keys {
 				do {

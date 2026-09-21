@@ -14,7 +14,6 @@ enum AppID {
 			self = .bundleID(string)
 			return
 		}
-
 		self = .adamID(adamID)
 	}
 }
