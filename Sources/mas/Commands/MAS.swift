@@ -45,7 +45,7 @@ struct MAS: AsyncParsableCommand {
 
 	private static func main(_ arguments: [String]?) async { // swiftlint:disable:this discouraged_optional_collection
 		do {
-			try? ProcessInfo.processInfo.dropRoot()
+			try? ProcessInfo.processInfo.dropEffectiveRootWheel()
 			let command = try await asyncParseAsRoot(arguments)
 			if let command = cast(command, as: (any AsyncParsableCommand & Sendable).self) {
 				try await main(command)
