@@ -65,20 +65,22 @@ extension MAS {
 					)
 					let destinationPath = trashURL.appending(path: appURL.lastPathComponent, directoryHint: .isDirectory).filePath
 					_ = try await mas::run(
-						.path("/usr/bin/sudo"),
-						"/bin/mv",
-						appPath,
-						fileManager.fileExists(atPath: destinationPath)
-							? trashURL.appending(
-								path: """
-									\(appURL.deletingPathExtension().lastPathComponent) \
-									\(Date().formatted(trashCollisionDateFormatStyle))\
-									\(appURL.pathExtension.ifNotEmptyPrepend("."))
-									""",
-								directoryHint: .isDirectory,
-							)
-							.filePath
-							: destinationPath,
+						"/usr/bin/sudo",
+						arguments: [
+							"/bin/mv",
+							appPath,
+							fileManager.fileExists(atPath: destinationPath)
+								? trashURL.appending(
+									path: """
+										\(appURL.deletingPathExtension().lastPathComponent) \
+										\(Date().formatted(trashCollisionDateFormatStyle))\
+										\(appURL.pathExtension.ifNotEmptyPrepend("."))
+										""",
+									directoryHint: .isDirectory,
+								)
+								.filePath
+								: destinationPath,
+						],
 						errorMessage: "Failed to uninstall \(appPath.quoted) to \(destinationPath.quoted)",
 					)
 					printer.info("Uninstalled", appPath.quoted, "to", destinationPath.quoted)
