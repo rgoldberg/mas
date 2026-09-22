@@ -5,33 +5,37 @@
 // Copyright © 2025 mas-cli. All rights reserved.
 //
 
-internal import Foundation
+private import Foundation
 internal import Subprocess
+internal import System
 
 func run<Encoding: Unicode.Encoding>(
-	_ executable: Executable,
-	_ args: String...,
+	_ executableFilePath: FilePath,
+	arguments: Arguments = .init(),
 	platformOptions: PlatformOptions = .init(),
+	input: some InputProtocol = .none,
 	encoding: Encoding.Type = UTF8.self,
-	maxCaptureByteCount: Int = 1024 * 1024,
+	maxCaptureByteCount: Int = .max,
 	errorMessage: @autoclosure () -> String,
 ) async throws -> (outString: String, errString: String) {
-	let executionResult = try await run(
-		executable,
-		arguments: .init(args),
+	let execResult = try await run(
+		.path(executableFilePath),
+		arguments: arguments,
 		platformOptions: platformOptions,
+		input: input,
 		output: .string(limit: maxCaptureByteCount, encoding: encoding),
 		error: .string(limit: maxCaptureByteCount, encoding: encoding),
 	)
-	let outString = executionResult.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-	let errString = executionResult.standardError?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-	guard executionResult.terminationStatus.isSuccess else {
+	let outString = execResult.standardOutput ?? ""
+	let errString = execResult.standardError ?? ""
+	guard execResult.terminationStatus.isSuccess else {
 		throw error(
 			"""
 			\(errorMessage())
-			Exit status: \(executionResult.terminationStatus)\
-			\(outString.ifNotEmptyPrepend("\n\nStandard output:\n"))\
-			\(errString.ifNotEmptyPrepend("\n\nStandard error:\n"))
+
+			Exit status: \(execResult.terminationStatus)\
+			\(outString.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstdout:\n"))\
+			\(errString.trimmingCharacters(in: .whitespacesAndNewlines).ifNotEmptyPrepend("\n\nstderr:\n"))
 			""",
 		)
 	}

@@ -276,13 +276,8 @@ enum AppStoreAction: String {
 			MAS.printer.info()
 		}
 		let (_, stderrString) = try await run(
-			.path("/usr/bin/sudo"),
-			"/usr/sbin/installer",
-			"-dumplog",
-			"-pkg",
-			pkgHardLinkPath,
-			"-target",
-			"/",
+			"/usr/bin/sudo",
+			arguments: ["/usr/sbin/installer", "-dumplog", "-pkg", pkgHardLinkPath, "-target", "/"],
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
 		guard // swiftformat:disable:this wrap wrapArguments
@@ -301,20 +296,22 @@ enum AppStoreAction: String {
 		let receiptPath = receiptURL.filePath
 		let receiptHardLinkPath = receiptHardLinkURL.filePath
 		_ = try await run(
-			.path("/usr/bin/sudo"),
-			"/bin/sh",
-			"-c",
-			#"/bin/mkdir -pm 755 "$1" && /bin/cp -cf "$2" "$3" && /usr/sbin/chown 0:0 "$3" && /bin/chmod 644 "$3""#,
-			"--",
-			receiptURL.deletingLastPathComponent().filePath,
-			receiptHardLinkPath,
-			receiptPath,
+			"/usr/bin/sudo",
+			arguments: [
+				"/bin/sh",
+				"-c",
+				#"/bin/mkdir -pm 755 "$1" && /bin/cp -cf "$2" "$3" && /usr/sbin/chown 0:0 "$3" && /bin/chmod 644 "$3""#,
+				"--",
+				receiptURL.deletingLastPathComponent().filePath,
+				receiptHardLinkPath,
+				receiptPath,
+			],
 			errorMessage: // swiftformat:disable:next indent
 				"Failed to copy receipt for \(appNameAndVersion) from \(receiptHardLinkPath.quoted) to \(receiptPath.quoted)",
 		)
 		_ = try await run(
-			.path("/usr/bin/mdimport"),
-			appFolderURL.filePath,
+			"/usr/bin/mdimport",
+			arguments: [appFolderURL.filePath],
 			errorMessage: "Failed to index Spotlight data for \(appNameAndVersion)",
 		)
 		LSRegisterURL(appFolderURL as CFURL, true)
