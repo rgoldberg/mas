@@ -11,13 +11,13 @@ private import Foundation
 extension ProcessInfo {
 	var sudoUID: uid_t {
 		get throws {
-			try environment["SUDO_UID"].flatMap(uid_t.init) ?? { throw MASError.error("Failed to get sudo uid") }()
+			try environment["SUDO_UID"].flatMap(uid_t.init) ?? { throw error("Failed to get sudo uid") }()
 		}
 	}
 
 	var sudoGID: gid_t {
 		get throws {
-			try environment["SUDO_GID"].flatMap(gid_t.init) ?? { throw MASError.error("Failed to get sudo gid") }()
+			try environment["SUDO_GID"].flatMap(gid_t.init) ?? { throw error("Failed to get sudo gid") }()
 		}
 	}
 

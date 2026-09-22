@@ -26,7 +26,7 @@ func run<Encoding: Unicode.Encoding>(
 	let outString = executionResult.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 	let errString = executionResult.standardError?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 	guard executionResult.terminationStatus.isSuccess else {
-		throw MASError.error(
+		throw error(
 			"""
 			\(errorMessage())
 			Exit status: \(executionResult.terminationStatus)\
