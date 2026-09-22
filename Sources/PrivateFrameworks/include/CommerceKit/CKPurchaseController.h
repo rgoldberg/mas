@@ -5,7 +5,7 @@
 // - LC_SOURCE_VERSION: 716.4.2.0.0
 //
 
-typedef void (^SSPurchaseCompletion)(SSPurchase * _Nonnull purchase, BOOL completed, NSError * _Nullable error, SSPurchaseResponse * _Nullable response);
+typedef void (^SSPurchaseCompletion)(SSPurchase * _Nonnull purchase, BOOL completed, NSError * _Nullable error, SSPurchaseResponse * _Nullable_result response);
 
 @interface CKPurchaseController : CKServiceInterface {
 	NSArray *_adoptionEligibleItems;
