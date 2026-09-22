@@ -11,20 +11,6 @@ enum MASError: Error {
 	case invalidURL(String)
 	case noCatalogAppsFound(for: String)
 	case unknownAppID(AppID)
-
-	static func error(
-		_ message: String,
-		cause: String?,
-		separatorWhenCause: String = ":\n",
-		separatorWhenNoCause: String = "",
-	) -> Self {
-		.error(
-			message,
-			cause: cause.map { Self.error($0) },
-			separatorWhenCause: separatorWhenCause,
-			separatorWhenNoCause: separatorWhenNoCause,
-		)
-	}
 }
 
 extension MASError: CustomStringConvertible {
@@ -42,4 +28,18 @@ extension MASError: CustomStringConvertible {
 			"Failed to find app in the App Store with \(appID)"
 		}
 	}
+}
+
+func error(
+	_ message: String,
+	cause: String? = nil,
+	separatorWhenCause: String = ":\n",
+	separatorWhenNoCause: String = "",
+) -> MASError {
+	.error(
+		message,
+		cause: cause.map { MASError.error($0) },
+		separatorWhenCause: separatorWhenCause,
+		separatorWhenNoCause: separatorWhenNoCause,
+	)
 }

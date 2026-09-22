@@ -30,11 +30,11 @@ extension MAS {
 			guard let appIDString else {
 				// If no App Store Page URL was given, open the App Store
 				guard let macAppStoreSchemeURL = URL(string: "\(masScheme):") else {
-					throw MASError.error("Failed to create URL from \(masScheme) scheme")
+					throw error("Failed to create URL from \(masScheme) scheme")
 				}
 				let workspace = NSWorkspace.shared
 				guard let appURL = workspace.urlForApplication(toOpen: macAppStoreSchemeURL) else {
-					throw MASError.error("Failed to find app to open \(masScheme) URLs")
+					throw error("Failed to find app to open \(masScheme) URLs")
 				}
 				try await workspace.openApplication(at: appURL, configuration: .init())
 				return
