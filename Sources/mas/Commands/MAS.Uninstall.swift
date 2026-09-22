@@ -38,24 +38,23 @@ extension MAS {
 
 		func run() async {
 			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
-			let uninstallingADAMIDByPathOrdered =
+			let appPathOrderedSet =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
-				.reduce(into: OrderedDictionary<String, String>()) { uninstallingADAMIDByPathOrdered, appID in
-					uninstallingADAMIDByPathOrdered
-						.merge(installedApps.compactMap { $0.matches(appID) ? ($0.path, .init($0.adamID)) : nil }) { $1 }
+				.reduce(into: OrderedSet<String>()) { appPathOrderedSet, appID in
+					appPathOrderedSet.formUnion(installedApps.compactMap { $0.matches(appID) ? $0.path : nil })
 				}
-			guard !uninstallingADAMIDByPathOrdered.isEmpty else {
+			guard !appPathOrderedSet.isEmpty else {
 				return
 			}
 			guard !isPerformingDryRun else {
 				printer.notice("Dry run. A wet run would uninstall:\n")
-				for appPath in uninstallingADAMIDByPathOrdered.keys {
+				for appPath in appPathOrderedSet {
 					printer.info(appPath)
 				}
 				return
 			}
 			let fileManager = FileManager.default
-			for appPath in uninstallingADAMIDByPathOrdered.keys {
+			for appPath in appPathOrderedSet {
 				do {
 					let appURL = URL(folderPath: appPath)
 					let trashURL = try fileManager.url(
@@ -80,7 +79,7 @@ extension MAS {
 							)
 							.filePath
 							: destinationPath,
-						errorMessage: "Failed to trash \(appPath.quoted) to \(destinationPath.quoted)",
+						errorMessage: "Failed to uninstall \(appPath.quoted) to \(destinationPath.quoted)",
 					)
 					printer.info("Uninstalled", appPath.quoted, "to", destinationPath.quoted)
 				} catch {
