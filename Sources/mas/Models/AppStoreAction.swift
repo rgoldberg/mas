@@ -79,33 +79,27 @@ enum AppStoreAction: String {
 			continuation: eventContinuation,
 		)
 		.start()
-		eventContinuation.onTermination = { _ in
-			Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) }
-		}
+		eventContinuation.onTermination =
+			{ _ in Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) } }
 		defer { eventContinuation.finish() }
-		try await withCheckedThrowingContinuation { continuation in
-			let purchase = SSPurchase(
-				buyParameters: """
-					productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
-					\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
-					""",
-			)
-			purchase.isRedownload = self != .get // Possibly unnecessary
-			purchase.isUpdate = self == .update // Possibly unnecessary
-			purchase.itemIdentifier = adamID
-			let downloadMetadata = SSDownloadMetadata(kind: "software")
-			downloadMetadata.itemIdentifier = adamID
-			purchase.downloadMetadata = downloadMetadata
-			CKPurchaseController.shared().perform(purchase, withOptions: 0) { _, _, error, response in
-				if let error {
-					continuation.resume(throwing: error)
-				} else if response?.downloads?.isEmpty != false {
-					continuation.resume(throwing: mas::error("Failed to initiate download for ADAM ID \(adamID)"))
-				} else {
-					continuation.resume()
-				}
-			}
-		} as Void
+		let purchase = SSPurchase(
+			buyParameters: """
+				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
+				\(self == .get ? "STDQ&macappinstalledconfirmed=1" : "STDRDL")&salableAdamId=\(adamID)
+				""",
+		)
+		purchase.isRedownload = self != .get // Possibly unnecessary
+		purchase.isUpdate = self == .update // Possibly unnecessary
+		purchase.itemIdentifier = adamID
+		let downloadMetadata = SSDownloadMetadata(kind: "software")
+		downloadMetadata.itemIdentifier = adamID
+		purchase.downloadMetadata = downloadMetadata
+		guard
+			try await CKPurchaseController.shared().perform(purchase, withOptions: 0).2?.downloads?.isEmpty == false
+		else {
+			throw error("Failed to initiate download for ADAM ID \(adamID)")
+		}
+		let fileManager = FileManager.default
 		let downloadFolderURL = URL(folderPath: "\(CKDownloadDirectory(nil))/\(adamID)")
 		var pkgHardLinkURL = URL?.none
 		defer { deleteTempFolder(containing: pkgHardLinkURL, fileType: "pkg") }
@@ -118,7 +112,7 @@ enum AppStoreAction: String {
 			case let .statusChanged(snapshot):
 				// Refresh hard links to latest artifacts in the download folder
 				do {
-					let downloadFolderChildURLs = try FileManager.default.contentsOfDirectory(
+					let downloadFolderChildURLs = try fileManager.contentsOfDirectory(
 						at: downloadFolderURL,
 						includingPropertiesForKeys: [.contentModificationDateKey, .isRegularFileKey],
 					)
@@ -151,10 +145,10 @@ enum AppStoreAction: String {
 					}
 				} catch {
 					MAS.printer.warning(
-						"Failed to read contents of download folder",
-						downloadFolderURL.filePath.quoted,
-						"for",
+						"Failed to read contents of",
 						snapshot.appNameAndVersion,
+						"download folder",
+						downloadFolderURL.filePath,
 						error: error,
 					)
 				}
@@ -201,7 +195,7 @@ enum AppStoreAction: String {
 					MAS.printer.notice(PhaseType.downloaded, snapshot.appNameAndVersion)
 					MAS.printer.notice(performing.uppercasingFirst, snapshot.appNameAndVersion)
 					MAS.printer.info(rawValue.uppercasingFirst, "progress cannot be displayed", terminator: "")
-					appFolderURL = try await install(
+					appFolderURL = try await modify(
 						appNameAndVersion: snapshot.appNameAndVersion,
 						pkgHardLinkURL: pkgHardLinkURL,
 						receiptHardLinkURL: receiptHardLinkURL,
@@ -224,7 +218,6 @@ enum AppStoreAction: String {
 						+ (appFolderURL.map { ["in", $0.filePath] } ?? .init()),
 				)
 				if let appFolderURL {
-					let fileManager = FileManager.default
 					if
 						try applicationsFolderURLs.contains(
 							where: { applicationsFolderURL in
@@ -268,11 +261,7 @@ enum AppStoreAction: String {
 		}
 	}
 
-	private func install(
-		appNameAndVersion: String,
-		pkgHardLinkURL: URL?,
-		receiptHardLinkURL: URL?,
-	) async throws -> URL {
+	private func modify(appNameAndVersion: String, pkgHardLinkURL: URL?, receiptHardLinkURL: URL?) async throws -> URL {
 		guard let pkgHardLinkPath = pkgHardLinkURL?.filePath else {
 			throw error("Failed to find pkg to \(self) \(appNameAndVersion)")
 		}
@@ -286,7 +275,7 @@ enum AppStoreAction: String {
 		{
 			MAS.printer.info()
 		}
-		let (_, standardErrorString) = try await run(
+		let (_, stderrString) = try await run(
 			.path("/usr/bin/sudo"),
 			"/usr/sbin/installer",
 			"-dumplog",
@@ -296,21 +285,16 @@ enum AppStoreAction: String {
 			"/",
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
-		guard
-			let appFolderURLSubstring = standardErrorString
-				.matches(of: appFolderURLRegex)
-				.compactMap(\.1)
-				.min(by: { $0.count < $1.count })
+		guard // swiftformat:disable:this wrap wrapArguments
+			let appFolderURLSubstring = // swiftformat:disable:next indent
+				stderrString.matches(of: appFolderURLRegex).compactMap(\.1).min(by: { $0.count < $1.count })
 		else {
-			throw error(
-				"Failed to find app folder URL in installer output for \(appNameAndVersion)",
-				cause: standardErrorString,
-			)
+			throw error("Failed to find app folder URL in installer output for \(appNameAndVersion)", cause: stderrString)
 		}
 		guard let appFolderURL = URL(string: .init(appFolderURLSubstring)), appFolderURL.isFileURL else {
 			throw error(
 				"Failed to parse app folder URL for \(appNameAndVersion) from \(appFolderURLSubstring)",
-				cause: standardErrorString,
+				cause: stderrString,
 			)
 		}
 		let receiptURL = appFolderURL.appending(path: "Contents/_MASReceipt/receipt", directoryHint: .notDirectory)
@@ -331,7 +315,7 @@ enum AppStoreAction: String {
 		_ = try await run(
 			.path("/usr/bin/mdimport"),
 			appFolderURL.filePath,
-			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
+			errorMessage: "Failed to index Spotlight data for \(appNameAndVersion)",
 		)
 		LSRegisterURL(appFolderURL as CFURL, true)
 		return appFolderURL
