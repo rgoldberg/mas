@@ -292,7 +292,7 @@ func installedApps(
 					_ = try await run(
 						.path("/usr/bin/mdimport"),
 						installedAppPath,
-						errorMessage: "Failed to index the Spotlight data for \(installedAppPath)",
+						errorMessage: "Failed to index Spotlight data for \(installedAppPath)",
 					)
 				} catch {
 					MAS.printer.error(error: error)
