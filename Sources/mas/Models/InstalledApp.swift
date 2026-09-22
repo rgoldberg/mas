@@ -290,8 +290,8 @@ func installedApps(
 			Task {
 				do {
 					_ = try await run(
-						.path("/usr/bin/mdimport"),
-						installedAppPath,
+						"/usr/bin/mdimport",
+						arguments: [installedAppPath],
 						errorMessage: "Failed to index Spotlight data for \(installedAppPath)",
 					)
 				} catch {
