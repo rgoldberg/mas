@@ -45,40 +45,6 @@ extension MAS {
 	}
 }
 
-private let runningSliceArchitecture = {
-	#if arch(arm64)
-	"arm64"
-	#elseif arch(x86_64)
-	"x86_64"
-	#else
-	"unknown"
-	#endif
-}()
-
-private var supportedSliceArchitectures: [String] {
-	Bundle.main.executableArchitectures.map { archIDs in
-		archIDs.map { archID in
-			guard let arch = Int(exactly: archID) else {
-				return "unknown_\(archID)"
-			}
-			return switch arch {
-			case NSBundleExecutableArchitectureARM64:
-				"arm64"
-			case NSBundleExecutableArchitectureX86_64:
-				"x86_64"
-			default:
-				"unknown_0x\(String(arch, radix: 16))"
-			}
-		}
-	}
-		?? .init()
-}
-
-private var macOSVersion: String {
-	let version = ProcessInfo.processInfo.operatingSystemVersion
-	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
-}
-
 private func configStringValue(_ name: String) -> String {
 	var size = 0
 	guard unsafe sysctlbyname(name, nil, &size, nil, 0) == 0 else {
@@ -99,6 +65,38 @@ private func configStringValue(_ name: String) -> String {
 		return unsafe .init(cString: unsafe baseAddress)
 	}
 }
+
+private let runningSliceArchitecture = {
+	#if arch(arm64)
+	"arm64"
+	#elseif arch(x86_64)
+	"x86_64"
+	#else
+	"unknown"
+	#endif
+}()
+
+private let supportedSliceArchitectures = Bundle.main.executableArchitectures.map { archIDs in
+	archIDs.map { archID in
+		guard let arch = Int(exactly: archID) else {
+			return "unknown_\(archID)"
+		}
+		return switch arch {
+		case NSBundleExecutableArchitectureARM64:
+			"arm64"
+		case NSBundleExecutableArchitectureX86_64:
+			"x86_64"
+		default:
+			"unknown_0x\(String(arch, radix: 16))"
+		}
+	}
+}
+	?? .init()
+
+private let macOSVersion = {
+	let version = ProcessInfo.processInfo.operatingSystemVersion
+	return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+}()
 
 private let unknown = "unknown"
 private let sysCtlByName = "sysctlbyname"
