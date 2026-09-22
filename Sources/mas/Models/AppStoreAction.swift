@@ -100,7 +100,7 @@ enum AppStoreAction: String {
 				if let error {
 					continuation.resume(throwing: error)
 				} else if response?.downloads?.isEmpty != false {
-					continuation.resume(throwing: MASError.error("Failed to initiate download for ADAM ID \(adamID)"))
+					continuation.resume(throwing: mas::error("Failed to initiate download for ADAM ID \(adamID)"))
 				} else {
 					continuation.resume()
 				}
@@ -209,13 +209,13 @@ enum AppStoreAction: String {
 					MAS.printer.clearCurrentLine(of: .standardOutput)
 				} else {
 					guard !snapshot.isFailed else {
-						throw MASError.error("Failed to download \(snapshot.appNameAndVersion)")
+						throw error("Failed to download \(snapshot.appNameAndVersion)")
 					}
 					guard !shouldCancel(snapshot.version, false) else {
 						return
 					}
 					guard !snapshot.isCancelled else {
-						throw MASError.error("Download cancelled for \(snapshot.appNameAndVersion)")
+						throw error("Download cancelled for \(snapshot.appNameAndVersion)")
 					}
 					appFolderURL = snapshot.appFolderPath.map { .init(folderPath: $0) }
 				}
@@ -274,10 +274,10 @@ enum AppStoreAction: String {
 		receiptHardLinkURL: URL?,
 	) async throws -> URL {
 		guard let pkgHardLinkPath = pkgHardLinkURL?.filePath else {
-			throw MASError.error("Failed to find pkg to \(self) \(appNameAndVersion)")
+			throw error("Failed to find pkg to \(self) \(appNameAndVersion)")
 		}
 		guard let receiptHardLinkURL else {
-			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
+			throw error("Failed to find receipt to import for \(appNameAndVersion)")
 		}
 		if
 			(try? await run(.path("/usr/bin/sudo"), arguments: ["-n", "true"], output: .discarded))?
@@ -302,13 +302,13 @@ enum AppStoreAction: String {
 				.compactMap(\.1)
 				.min(by: { $0.count < $1.count })
 		else {
-			throw MASError.error(
+			throw error(
 				"Failed to find app folder URL in installer output for \(appNameAndVersion)",
 				cause: standardErrorString,
 			)
 		}
 		guard let appFolderURL = URL(string: .init(appFolderURLSubstring)), appFolderURL.isFileURL else {
-			throw MASError.error(
+			throw error(
 				"Failed to parse app folder URL for \(appNameAndVersion) from \(appFolderURLSubstring)",
 				cause: standardErrorString,
 			)
@@ -487,10 +487,10 @@ private extension URL {
 			return false
 		}
 		guard let fileID1 = try resourceValues(forKeys: [.fileResourceIdentifierKey]).fileResourceIdentifier else {
-			throw MASError.error("Failed to get file resource identifier for \(filePath)")
+			throw error("Failed to get file resource identifier for \(filePath)")
 		}
 		guard let fileID2 = try url.resourceValues(forKeys: [.fileResourceIdentifierKey]).fileResourceIdentifier else {
-			throw MASError.error("Failed to get file resource identifier for \(url.filePath)")
+			throw error("Failed to get file resource identifier for \(url.filePath)")
 		}
 		return fileID1.isEqual(fileID2)
 	}
