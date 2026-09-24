@@ -119,10 +119,7 @@ final class Printer: Sendable {
 	}
 
 	private func print(_ items: [String], separator: String, terminator: String, to fileHandle: FileHandle) {
-		try? unsafe items.joined(separator: separator)
-			.appending(terminator)
-			.utf8
-			.withContiguousStorageIfAvailable(fileHandle.write)
+		try? fileHandle.write(contentsOf: Data(items.joined(separator: separator).appending(terminator).utf8))
 	}
 
 	private func print(
