@@ -36,18 +36,6 @@ extension Version {
 	}
 }
 
-private extension BigUInt {
-	func compare(to that: Self) -> ComparisonResult {
-		self < that ? .orderedAscending : self == that ? .orderedSame : .orderedDescending
-	}
-}
-
-private extension FixedWidthInteger {
-	func compare(to that: Self) -> ComparisonResult {
-		self < that ? .orderedAscending : self == that ? .orderedSame : .orderedDescending
-	}
-}
-
 private extension String {
 	func compareSemVerElement(
 		to that: Self,
@@ -56,7 +44,9 @@ private extension String {
 		locale: Locale? = nil,
 	) -> ComparisonResult {
 		let thatInteger = BigUInt(that)
-		return BigUInt(self).map { thatInteger.map($0.compare) ?? .orderedAscending }
+		return BigUInt(self).map { thisInteger in
+			thatInteger.map { ComparableComparator().compare(thisInteger, $0) } ?? .orderedAscending
+		}
 			?? thatInteger.map { _ in .orderedDescending }
 			?? compare(that, options: mask, range: range, locale: locale)
 	}
@@ -65,6 +55,6 @@ private extension String {
 private extension [String] {
 	func compareSemVerElements(to that: Self) -> ComparisonResult {
 		zip(self, that).first { $0 != $1 }.map { $0.compareSemVerElement(to: $1) }
-			?? dropLast { $0 == "0" }.count.compare(to: that.dropLast { $0 == "0" }.count)
+			?? ComparableComparator().compare(dropLast { $0 == "0" }.count, that.dropLast { $0 == "0" }.count)
 	}
 }
