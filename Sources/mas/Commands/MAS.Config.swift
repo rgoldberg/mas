@@ -9,6 +9,7 @@ internal import ArgumentParser
 private import Darwin
 private import Foundation
 private import JSONAST
+private import System
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs mas config & related system info.
@@ -71,22 +72,22 @@ private struct KeyValueConfig: OutputConfig, Keyed {
 private func configStringValue(_ name: String) -> String {
 	var size = 0
 	guard unsafe sysctlbyname(name, nil, &size, nil, 0) == 0 else {
-		unsafe perror(sysCtlByName)
+		printSysCtlByNameError()
 		return unknown
 	}
 	guard size > 0 else {
 		return unknown
 	}
-	return withUnsafeTemporaryAllocation(of: CChar.self, capacity: size) { buffer in
-		guard let baseAddress = buffer.baseAddress else {
-			return unknown
-		}
-		guard unsafe sysctlbyname(name, unsafe baseAddress, &size, nil, 0) == 0 else {
-			unsafe perror(sysCtlByName)
-			return unknown
-		}
-		return unsafe .init(cString: unsafe baseAddress)
+	var buffer = Array(repeating: UInt8(0), count: size)
+	guard unsafe sysctlbyname(name, &buffer, &size, nil, 0) == 0 else {
+		printSysCtlByNameError()
+		return unknown
 	}
+	return .init(validating: buffer.prefix { $0 != 0 }, as: UTF8.self) ?? unknown
+}
+
+private func printSysCtlByNameError() {
+	try? FileHandle.standardError.write(contentsOf: Data("\(sysCtlByName): \(Errno(rawValue: errno))\n".utf8))
 }
 
 private let runningSliceArchitecture = {
