@@ -220,7 +220,7 @@ private extension JSON.Key {
 			"version"
 		default:
 			.init(
-				rawValue: rawValue.replacing(keyRegex) { match in
+				rawValue: rawValue.replacing(unsafe keyRegex) { match in
 					let output = match.output
 					return output.1?.isEmpty == false ? "fileSystem" : output.2?.lowercased() ?? ""
 				},
@@ -353,6 +353,5 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 	}
 }
 
-// swiftformat:disable:next docComments
-// editorconfig-checker-disable-next-line
-private let keyRegex = /^_?kMDItem(?:(FS)|(?:AppStore)?(\p{Upper}(?=\p{Lower})|\p{Upper}+(?=$|\p{Upper}\p{Lower}))?)?/
+private nonisolated(unsafe) let keyRegex =
+	/^_?kMDItem(?:(FS)|(?:AppStore)?(\p{Upper}(?=\p{Lower})|\p{Upper}+(?=$|\p{Upper}\p{Lower}))?)?/
