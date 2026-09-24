@@ -14,13 +14,14 @@ print_notice '📦 Packaging installer for' "${@}"
 
 readonly build_folder=.build
 readonly destination_folder="${build_folder}/destination"
+readonly sbom_folder="${build_folder}/sboms"
 
-if [[ -e "${destination_folder}" ]]; then
-	trash "${destination_folder}"
-fi
+for folder in "${destination_folder}" "${sbom_folder}"; do
+	[[ -e "${folder}" ]] && trash "${folder}"
+done
 
 export MAS_DO_NOT_PRINT_NOTICE=
-Scripts/build "${1:-}" -c release "${@:2}"
+Scripts/build "${1:-}" -c release --sbom-spec cyclonedx --sbom-spec spdx --sbom-output-dir "${sbom_folder}" "${@:2}"
 unset MAS_DO_NOT_PRINT_NOTICE
 
 readonly installation_folder=/usr/local/opt/mas
@@ -49,6 +50,8 @@ ln -fs "${installation_folder}/bin/mas" "${usr_local_bin_staging_folder}/mas"
 archs=("${(s: :n)$(lipo -archs "${installation_staging_folder}/bin/mas")}")
 # shellcheck disable=SC2034
 readonly -a archs
+# shellcheck disable=SC2034,SC2124
+readonly package_path_prefix="${build_folder}/mas-${version//\//_}-${(j:-:)archs[@]}"
 
 xattr -crs "${destination_folder}"
 
@@ -82,4 +85,7 @@ productbuild\
 </installer-gui-script>'
 	)\
 	--package-path "${build_folder}"\
-	"${build_folder}/mas-${version//\//_}-${(j:-:)archs[@]}.pkg"
+	"${package_path_prefix}.pkg"
+
+mv "${sbom_folder}"/cyclonedx*.json "${package_path_prefix}.cdx.json"
+mv "${sbom_folder}"/spdx*.json "${package_path_prefix}.spdx.json"
