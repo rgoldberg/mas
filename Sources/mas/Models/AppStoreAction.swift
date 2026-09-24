@@ -282,7 +282,7 @@ enum AppStoreAction: String {
 		)
 		guard // swiftformat:disable:this wrap wrapArguments
 			let appFolderURLSubstring = // swiftformat:disable:next indent
-				stderrString.matches(of: appFolderURLRegex).compactMap(\.1).min(by: { $0.count < $1.count })
+				stderrString.matches(of: unsafe appFolderURLRegex).compactMap(\.1).min(by: { $0.count < $1.count })
 		else {
 			throw error("Failed to find app folder URL in installer output for \(appNameAndVersion)", cause: stderrString)
 		}
@@ -503,4 +503,4 @@ private func deleteTempFolder(containing url: URL?, fileType: String) {
 	}
 }
 
-private let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/
+private nonisolated(unsafe) let appFolderURLRegex = /PackageKit: Registered bundle (\S+) for uid 0/

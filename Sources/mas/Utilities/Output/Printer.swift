@@ -160,7 +160,7 @@ extension String {
 }
 
 private func indent(_ item: Any, with indentation: String) -> String {
-	.init(describing: item).replacing(nonEmptyLineStartRegex, with: indentation)
+	.init(describing: item).replacing(unsafe nonEmptyLineStartRegex, with: indentation)
 }
 
 let errorPrefix = "Error:"
@@ -168,4 +168,4 @@ let errorFormat = "4;31"
 
 private let csi = "\u{001B}["
 private let clearLineData = Data("\(csi)2K\(csi)0G".utf8)
-private let nonEmptyLineStartRegex = /\n(?!\n)/
+private nonisolated(unsafe) let nonEmptyLineStartRegex = /\n(?!\n)/
