@@ -22,7 +22,7 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 		.path("/usr/bin/sudo"),
 		arguments: .init(
 			(
-				(try? unsafe FileDescriptor.open("/dev/tty", .readWrite)).map { ttyFD in
+				(try? FileDescriptor.open(.init("/dev/tty"), .readWrite)).map { ttyFD in
 					try? ttyFD.close()
 					return ["--"]
 				}

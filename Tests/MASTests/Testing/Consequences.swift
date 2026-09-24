@@ -92,14 +92,7 @@ private final class StreamRedirector<Encoding: Unicode.Encoding>: Sendable where
 		guard !alreadyStopped.exchange(true, ordering: .acquiringAndReleasing) else {
 			return
 		}
-		switch originalFD {
-		case FileHandle.standardOutput.fileDescriptor:
-			unsafe fflush(unsafe stdout)
-		case FileHandle.standardError.fileDescriptor:
-			unsafe fflush(unsafe stderr)
-		default:
-			fflush(nil)
-		}
+		fflush(nil)
 		dup2(duplicateFD, originalFD)
 		try? pipe.fileHandleForWriting.close()
 		close(duplicateFD)
