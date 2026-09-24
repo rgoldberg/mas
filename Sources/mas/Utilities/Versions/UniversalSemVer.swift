@@ -14,8 +14,8 @@ struct UniversalSemVer: SemVerSyntax, ExpressibleByStringLiteral {
 	let rawValue: String
 
 	init(rawValue: String) {
-		guard let match = rawValue.wholeMatch(of: universalSemVerRegex) else {
-			preconditionFailure("Failed to match regex \(universalSemVerRegex)")
+		guard let match = rawValue.wholeMatch(of: unsafe universalSemVerRegex) else {
+			preconditionFailure("Failed to match regex \(unsafe universalSemVerRegex)")
 		}
 		coreElements = match.1.elements
 		prereleaseElements = match.2.elements
@@ -60,8 +60,8 @@ struct UniversalSemVerInt: SemVerSyntaxInteger { // swiftlint:disable:this one_d
 	}
 
 	init?(rawValue: String) {
-		guard let match = rawValue.wholeMatch(of: universalSemVerRegex) else {
-			preconditionFailure("Failed to match regex \(universalSemVerRegex)")
+		guard let match = rawValue.wholeMatch(of: unsafe universalSemVerRegex) else {
+			preconditionFailure("Failed to match regex \(unsafe universalSemVerRegex)")
 		}
 		let coreElements = match.1.elements
 		let coreIntegers = coreElements.compactMap(Int.init)
@@ -95,4 +95,4 @@ private extension Substring? {
 	}
 }
 
-private let universalSemVerRegex = /([^-+]*+)?+(?:-([^+]*+))?+(?:\+(.*+))?+/
+private nonisolated(unsafe) let universalSemVerRegex = /([^-+]*+)?+(?:-([^+]*+))?+(?:\+(.*+))?+/
