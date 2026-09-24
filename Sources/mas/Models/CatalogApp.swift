@@ -82,7 +82,7 @@ extension CatalogApp: JSONDecodable {
 									$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')].items[?(@.heading == 'Mac')].text
 									""",
 							)?
-							.firstMatch(of: minimumOSVersionRegex)
+							.firstMatch(of: unsafe minimumOSVersionRegex)
 							.map { String($0.version) }
 					},
 				)
@@ -213,11 +213,11 @@ private extension JSON.Key {
 			self
 		default:
 			.init(
-				rawValue: rawValue.replacing(artworkURLRegex) { match in
+				rawValue: rawValue.replacing(unsafe artworkURLRegex) { match in
 					let output = match.output
 					return output.0.first.map { $0.isLowercase ? "icon\(output.1)URL" : "Icon\(output.1)URL" } ?? ""
 				}
-					.replacing(trackRegex) { match in // swiftformat:disable indent
+					.replacing(unsafe trackRegex) { match in // swiftformat:disable indent
 						func track(_ prefix: String) -> String {
 							output.3.first.map { $0.isUppercase ? $0.lowercased() : "\(prefix)\(output.2)\($0)" }
 								?? "\(prefix)\(output.2)"
@@ -237,7 +237,7 @@ private extension JSON.Key {
 							String(output.0)
 						}
 					}
-					.replacing(manyRegex) { match in
+					.replacing(unsafe manyRegex) { match in
 						let output = match.output
 						return switch output.1 {
 						case "appletv":
@@ -338,8 +338,9 @@ private func catalogAppJSONObjects(from url: URL, in region: Region) async throw
 }
 
 private let minimumOSVersionKey = JSON.Key("minimumOsVersion")
-private let artworkURLRegex = /(?:^artworkUrl|ArtworkUrl)(\d+)/
-private let trackRegex = /((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/ // editorconfig-checker-disable-next-line
-private let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
-private let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
+private nonisolated(unsafe) let artworkURLRegex = /(?:^artworkUrl|ArtworkUrl)(\d+)/
+private nonisolated(unsafe) let trackRegex =
+	/((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/ // editorconfig-checker-disable-next-line
+private nonisolated(unsafe) let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
+private nonisolated(unsafe) let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
 private let macAppsURLQueryItem = [URLQueryItem(name: "entity", value: "desktopSoftware")]
