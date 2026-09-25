@@ -428,3 +428,24 @@ is committed). Remaining, in the original order:
   Options" once the sort option letters match fields.md.
 - Step 7: rename the remaining old-draft nonterminal names in comments (sort
   boundaries, chronologic input / output formats) as that code is rewritten.
+
+## Session 2 Status (2026-09-25)
+
+The tree is clean: `Scripts/format`, `Scripts/lint` (full), `Scripts/build`
+(debug & release) & `Scripts/test` pass, & every change above is committed.
+Implemented since the 2026-09-18 stop: the format grammar rewrite (abort
+modifiers, lenient coercion, type determinants, `+` block terminators,
+template-text whitespace), the sort option rewrite (`x` / `n` / `g`, `b` /
+`B…+` / `C…+`, `f` / `e`, `t` / `h` / `p` / `q`, succeeding option sets,
+type-based comparison), mas.md's default sort options & typed default formats,
+built-in variants (`none` / `all` / `standard`, `@json` machine-facing), &
+per-item `<original-input-order>`.
+
+Remaining:
+
+- Context stacks & persisted custom named configs / formats (Temp/todo.md "ASAP
+  Version, But Massive Effort"; a `// TODO:` in `resolveBaseFieldsConfig`
+  describes the lookup).
+- The open questions appended to Temp/todo.md "Current Version".
+- The gap-list & hide commits were merged into 1 commit during the rebase;
+  splitting them needs a branch reset, which wasn't permitted.
