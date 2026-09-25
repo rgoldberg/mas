@@ -300,8 +300,8 @@ which was not permitted, so it is left for review.
 ### Transform Names
 
 `Transform.capitalize` is now `initialUppercase`, & `group`'s associated values
-are `digitGroupSeparator` / `digitGroupDigitCount`, matching fields-format.md's
-`<initial-uppercase>`, `<digit-group-separator>` & `<digit-group-digit-count>`.
+are `digitGroupSeparator` / `digitGroupSize`, matching fields-format.md's
+`<initial-uppercase>`, `<digit-group-separator>` & `<digit-group-size>`.
 
 ### Format Rewrite
 

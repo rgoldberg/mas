@@ -125,7 +125,7 @@ date-only = "dateOnly"
 time-zone = "timeZone" <time-zone-arguments> (* sets the output time zone *)
 
 group-arguments          = <argument-fence> ( <locale-identifier> | <explicit-group-arguments> ) <argument-fence>
-explicit-group-arguments = <digit-group-separator> <argument-separator> <digit-group-digit-count>
+explicit-group-arguments = <digit-group-separator> <argument-separator> <digit-group-size>
 
 scale-arguments =
   <argument-fence> <radix>
@@ -136,8 +136,8 @@ scale-arguments =
 
 time-zone-arguments = <argument-fence> <time-zone-code> <argument-fence>
 
-digit-group-separator   = ^{text}^
-digit-group-digit-count = {positive integer}
+digit-group-separator = ^{text}^
+digit-group-size      = {positive integer}
 
 radix              = {integer from 2 to 36} (* base for `exponent` & the rendered digits *)
 exponent           = {non-negative integer} (* divides the field's value by `radix^exponent` before rendering *)
@@ -170,10 +170,10 @@ string), so an `<unconditional-transform-pipeline>`, which starts with a
 ###### `group`
 
 `group` inserts `<digit-group-separator>` into the field's integer part every
-`<digit-group-digit-count>` digits, counting from its least significant digit.
+`<digit-group-size>` digits, counting from its least significant digit.
 
-If `<digit-group-separator>` & `<digit-group-digit-count>` are absent, they are
-sourced from:
+If `<digit-group-separator>` & `<digit-group-size>` are absent, they are sourced
+from:
 
 - If [`<locale-identifier>`](fields.md#sort-localization) is present: the
   identified locale.

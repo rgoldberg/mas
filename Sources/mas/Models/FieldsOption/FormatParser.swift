@@ -174,12 +174,12 @@ private struct FormatParser {
 			skipWhitespace()
 			guard
 				!text.isEmpty,
-				let digitGroupDigitCount = parseUInt64(&input).flatMap(Int.init(exactly:)),
-				digitGroupDigitCount >= 1
+				let digitGroupSize = parseUInt64(&input).flatMap(Int.init(exactly:)),
+				digitGroupSize >= 1
 			else {
 				throw .invalidTransformArguments(name: groupName)
 			}
-			transform = .group(digitGroupSeparator: text, digitGroupDigitCount: digitGroupDigitCount)
+			transform = .group(digitGroupSeparator: text, digitGroupSize: digitGroupSize)
 		} else {
 			guard Locale.availableIdentifiers.contains(text) else {
 				throw .invalidTransformArguments(name: groupName)

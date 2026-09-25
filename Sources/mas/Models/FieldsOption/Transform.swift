@@ -27,10 +27,10 @@ enum Transform: Hashable {
 	case scale(radix: Int, exponent: Int, significantDigits: Int?, fractionalDigits: Int)
 
 	/// Inserts `digitGroupSeparator` into the field's integer part every
-	/// `digitGroupDigitCount` digits, counting from its least significant digit;
-	/// a fractional part & leading `-` sign are left untouched. See `<group>` in
+	/// `digitGroupSize` digits, counting from its least significant digit; a
+	/// fractional part & leading `-` sign are left untouched. See `<group>` in
 	/// fields-format.md for full semantics.
-	case group(digitGroupSeparator: String, digitGroupDigitCount: Int)
+	case group(digitGroupSeparator: String, digitGroupSize: Int)
 
 	case dateOnly
 	/// Sets the output time zone; see `<time-zone>` in fields-format.md.
@@ -65,8 +65,8 @@ enum Transform: Hashable {
 			string.uppercased()
 		case .absoluteValue:
 			Double(string).map { numberString(abs($0), matchingIntegerStyleOf: string) } ?? string
-		case let .group(digitGroupSeparator, digitGroupDigitCount):
-			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupDigitCount: digitGroupDigitCount)
+		case let .group(digitGroupSeparator, digitGroupSize):
+			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupSize: digitGroupSize)
 		case .round:
 			Double(string).map { numberString($0.rounded(), matchingIntegerStyleOf: "") } ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
@@ -87,7 +87,7 @@ enum Transform: Hashable {
 }
 
 extension Transform { // swiftlint:disable:this file_types_order
-	/// Resolves `locale`'s grouping separator & digit count into a `.group`
+	/// Resolves `locale`'s grouping separator & digit group size into a `.group`
 	/// transform (absent either, per `NumberFormatter`, which shouldn't happen
 	/// for a real locale: `,` & `3`, matching the system locale's own usual
 	/// values).
@@ -97,16 +97,16 @@ extension Transform { // swiftlint:disable:this file_types_order
 		formatter.numberStyle = .decimal
 		return .group(
 			digitGroupSeparator: formatter.groupingSeparator ?? ",",
-			digitGroupDigitCount: max(formatter.groupingSize, 1),
+			digitGroupSize: max(formatter.groupingSize, 1),
 		)
 	}
 }
 
 /// Applies `<group>`'s grouping to `string`'s integer part (i.e., up to, but
 /// not including, a literal `.`, if any): inserts `digitGroupSeparator` every
-/// `digitGroupDigitCount` digits, counting from its least significant digit. A
+/// `digitGroupSize` digits, counting from its least significant digit. A
 /// leading `-` sign & any fractional part are left untouched.
-private func grouped(_ string: String, digitGroupSeparator: String, digitGroupDigitCount: Int) -> String {
+private func grouped(_ string: String, digitGroupSeparator: String, digitGroupSize: Int) -> String {
 	let sign = string.hasPrefix("-") ? "-" : ""
 	let unsigned = string.dropFirst(sign.count)
 	let integerPart = unsigned.prefix { $0 != "." }
@@ -114,9 +114,9 @@ private func grouped(_ string: String, digitGroupSeparator: String, digitGroupDi
 	guard integerPart.allSatisfy(\.isNumber), !integerPart.isEmpty else {
 		return string
 	}
-	let grouped = stride(from: integerPart.count, to: 0, by: -digitGroupDigitCount)
+	let grouped = stride(from: integerPart.count, to: 0, by: -digitGroupSize)
 		.map { end in
-			let start = max(0, end - digitGroupDigitCount)
+			let start = max(0, end - digitGroupSize)
 			return integerPart[integerPart.index(integerPart.startIndex, offsetBy: start)..<integerPart
 				.index(integerPart.startIndex, offsetBy: end)]
 		}
@@ -205,8 +205,8 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"uppercase"
 		case .absoluteValue:
 			"absoluteValue"
-		case let .group(digitGroupSeparator, digitGroupDigitCount):
-			"group(digitGroupSeparator: \"\(digitGroupSeparator)\", digitGroupDigitCount: \(digitGroupDigitCount))"
+		case let .group(digitGroupSeparator, digitGroupSize):
+			"group(digitGroupSeparator: \"\(digitGroupSeparator)\", digitGroupSize: \(digitGroupSize))"
 		case .round:
 			"round"
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
