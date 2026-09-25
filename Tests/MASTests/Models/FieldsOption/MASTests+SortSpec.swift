@@ -161,8 +161,8 @@ private extension MASTests {
 			("%s", "1B/+", .string("a/b"), .string("a!b"), .orderedAscending),
 			("%s", "1B/_:space:+", .string("a/b"), .string("a b"), .orderedAscending),
 			("%s", "1B:space:_/+", .string("a/b"), .string("a b"), .orderedDescending),
-			("%s", "1B\\_+", .string("a__b"), .string("a_c"), .orderedDescending),
-			("%s", "1C\\_+", .string("a__b"), .string("a_c"), .orderedAscending),
+			("%s", "1B\\_+", .string("a__c"), .string("a_b"), .orderedAscending),
+			("%s", "1C\\_+", .string("a__c"), .string("a_b"), .orderedDescending),
 			("%s", "1B%ab%+", .string("xab"), .string("xa"), .orderedAscending),
 			// Any values compare by their JSON types
 			("%i", "1", .number(10), .number(9), .orderedDescending),

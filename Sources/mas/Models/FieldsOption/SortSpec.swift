@@ -513,13 +513,17 @@ extension SortOptionSet {
 	/// Compares 2 strings per `boundaries`, `caseSensitivity`, `localization` &
 	/// `numbersInStrings`: segment by segment, a segment of an earlier
 	/// boundary group preceding a segment of a later group, which precedes
-	/// non-boundary text.
+	/// non-boundary text; boundaries of the same group share the same sort
+	/// precedence.
 	private func compareStrings(_ lhs: String, _ rhs: String) -> ComparisonResult {
 		let lhsSegments = boundaries.segments(of: lhs)
 		let rhsSegments = boundaries.segments(of: rhs)
 		for (lhsSegment, rhsSegment) in zip(lhsSegments, rhsSegments) {
 			guard lhsSegment.rank == rhsSegment.rank else {
 				return ComparableComparator().compare(lhsSegment.rank, rhsSegment.rank)
+			}
+			guard lhsSegment.rank == boundaries.groups.count else {
+				continue
 			}
 			let result = compareText(.init(lhsSegment.text), .init(rhsSegment.text))
 			guard result == .orderedSame else {
@@ -621,8 +625,8 @@ private extension Character {
 // MARK: - Boundaries
 
 private extension SortOptionSet.Boundaries {
-	/// A maximal run of characters of the same rank: a boundary group's index,
-	/// or the group count for non-boundary text.
+	/// A segment of a string, of a rank: a boundary group's index, or the group
+	/// count for non-boundary text.
 	struct Segment {
 		let rank: Int
 		let text: Substring
@@ -637,23 +641,23 @@ private extension SortOptionSet.Boundaries {
 		}
 	}
 
-	/// `string`'s segments; a collapsed segment of contiguous boundaries of the
-	/// same group retains only its 1st boundary.
+	/// `string`'s segments: each maximal run of non-boundary text & each
+	/// boundary (iff collapsed, each maximal run of contiguous boundaries of the
+	/// same group).
 	func segments(of string: String) -> [Segment] {
 		let textRank = groups.count
+		let isCollapsed = if case .collapsed = self {
+			true
+		} else {
+			false
+		}
 		var segments = [Segment]()
 		var index = string.startIndex
 		while index < string.endIndex {
 			let (rank, length) = rankAndLength(in: string, at: index)
 			let end = string.index(index, offsetBy: length)
-			if let last = segments.last, last.rank == rank {
-				let isCollapsed = if case .collapsed = self {
-					true
-				} else {
-					false
-				}
-				segments[segments.count - 1] =
-					.init(rank: rank, text: rank != textRank && isCollapsed ? last.text : string[last.text.startIndex..<end])
+			if let last = segments.last, last.rank == rank, rank == textRank || isCollapsed {
+				segments[segments.count - 1] = .init(rank: rank, text: string[last.text.startIndex..<end])
 			} else {
 				segments.append(.init(rank: rank, text: string[index..<end]))
 			}
