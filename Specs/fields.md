@@ -133,11 +133,11 @@ algorithm](ebnf.md#defaults-for-absent-expressions):
   working fields config.
 
 An omitted modifier (e.g., `/1Idi` from `name`) or an option omitted from a
-present payload without any mutually exclusive options (e.g., `d` from
-`name/1Ii`, but not from `name/1Iia`) thus retains the working fields config's
-value, while an absent modifier payload or option payload (e.g., from `name=`,
-`name:`, `name/`, `L+`, `B+`) resets the value to its direct or implicit
-default.
+present [payload](#payloads) without any mutually exclusive options (e.g., `d`
+from `name/1Ii`, but not from `name/1Iia`) thus retains the working fields
+config's value, while an absent modifier payload or option payload (e.g., from
+`name=`, `name:`, `name/`, `L+`, `B+`) resets the value to its direct or
+implicit default.
 
 ## Nonexistent Fields
 
@@ -393,6 +393,13 @@ Field spec edits act as follows:
 ```ebnf
 field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 ```
+
+#### Payloads
+
+A modifier's **payload** is the expression after its prefix (e.g., `<label>` in
+`<label-modifier>`); an option's **payload** is the expression between its
+letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
+`<custom-locale>`).
 
 #### Labeling
 
