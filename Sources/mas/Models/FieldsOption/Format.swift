@@ -11,11 +11,11 @@ internal import JSONAST
 // MARK: - Format (fields-format.md)
 
 /// A parsed `<format-block>`, `<success-block>`, or `<failure-block>`: either a
-/// pipeline of `<transform-call>`s or a template. A `<format-block>`'s
+/// pipeline of `<*-transform-call>`s or a template. A `<format-block>`'s
 /// `<format-transform-pipeline>` isn't part of it: it's extracted into
 /// `FieldSpec.justification` at parse time.
 indirect enum Format: Equatable {
-	/// A `<*-pipeline>`'s value `<transform-call>`s, applied in order to the
+	/// A `<*-pipeline>`'s value `<*-transform-call>`s, applied in order to the
 	/// value the pipeline formats. Empty iff the pipeline consists solely of a
 	/// `<format-transform-pipeline>`.
 	case pipeline([TransformCall])
@@ -49,7 +49,7 @@ indirect enum Format: Equatable {
 	}
 }
 
-/// A `<transform-call>`: its `<value-transform>`, & whether it has
+/// A `<*-transform-call>`: its `<value-transform>`, & whether it has
 /// `<strict-coercion>`.
 struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let transform: Transform
@@ -148,7 +148,7 @@ enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
 
 // MARK: - Types
 
-/// A `<predicate>`'s or `<transform>`'s type, in ascending specificity.
+/// A `<predicate>`'s or `<value-transform>`'s type, in ascending specificity.
 enum FieldType: Comparable { // swiftlint:disable:this one_declaration_per_file
 	case any // swiftlint:disable sorted_enum_cases
 	case string

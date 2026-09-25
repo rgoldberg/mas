@@ -216,7 +216,7 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 	}
 }
 
-/// A `<transform>`'s kind.
+/// A `<value-transform>`'s kind.
 enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 	case chronologic
 	case number

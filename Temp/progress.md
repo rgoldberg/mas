@@ -373,6 +373,15 @@ values aren't completed. `mas.bash` only completes commands, so it's unchanged.
 key order (`FieldOrder.itemFieldSpecs(_:for:)`), for JSON & key-value output,
 per fields.md.
 
+### Compliance & Dead Code Pass
+
+Full `Scripts/lint` (incl. SwiftLint Analyze) is clean. Removed the unthrown
+`missingEndFence` error & the single-use `parseOptions` (inlined into
+`<item-sort-section>` parsing, which now requires a non-empty
+`<item-sort-option-set>`), used spec nonterminal names in the remaining
+comments (`<*-transform-call>`, `<value-transform>`), & rewrapped an over-long
+comment.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

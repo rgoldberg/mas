@@ -80,10 +80,10 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidSortOption(Character)
 	case invalidTransformArguments(name: String)
 	case missingBlockTerminator
-	case missingEndFence
 	case missingFieldName
 	case missingFieldOrderOptionSet
 	case missingIndex
+	case missingItemSortOptionSet
 	case missingPredicate
 	case missingSortOptionSet
 	case missingSortOptionTerminator
@@ -130,14 +130,14 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid arguments for transform: \(name)"
 		case .missingBlockTerminator:
 			"Expected <block-terminator> '+'"
-		case .missingEndFence:
-			"Expected end fence"
 		case .missingFieldName:
 			"Expected field name"
 		case .missingFieldOrderOptionSet:
 			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
 		case .missingIndex:
 			"Expected <index> after <index-prefix> '@'"
+		case .missingItemSortOptionSet:
+			"Expected <item-sort-option-set> after <item-sort-section-prefix> '//'"
 		case .missingPredicate:
 			"Expected <predicate>"
 		case .missingSortOptionSet:
@@ -441,28 +441,25 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 		input.removeFirst(itemSortSectionPrefix.count)
 		var shouldDisableAllSorts = false
-		var direction = SortOptionSet.Direction.ascending
-		try parseOptions(
-			&input,
-			nextSectionPrefixSet: [fieldSpecsSectionPrefix],
-		) { input, currentIndex, char throws(ParsingError) in
-			if let match = SortOptionSet.Direction(rawValue: char) {
+		var direction = SortOptionSet.Direction?.none
+		while let option = input.first, option != fieldSpecsSectionPrefix {
+			input.removeFirst()
+			if let match = SortOptionSet.Direction(rawValue: option) {
 				direction = match
-			} else {
-				switch char {
-				case disableAllSortsOption:
-					shouldDisableAllSorts = true
-				default:
-					input = input[currentIndex...]
-					throw .invalidSortOption(char)
-				}
+			} else if option == disableAllSortsOption {
+				shouldDisableAllSorts = true
+			} else if !option.isWhitespace {
+				throw .invalidSortOption(option)
 			}
+		}
+		guard direction != nil || shouldDisableAllSorts else {
+			throw .missingItemSortOptionSet
 		}
 		if shouldDisableAllSorts {
 			fieldSpecs = fieldSpecs.map(disablingSort)
 			referenceFieldSpecs = referenceFieldSpecs.map { $0.map(disablingSort) }
 		}
-		return direction
+		return direction ?? .ascending
 	}
 
 	mutating func parseFieldSpecsSection(_ input: inout Substring) throws(ParsingError) {
@@ -862,30 +859,6 @@ private func parseSortSpecModifier(
 }
 
 // MARK: - Shared parsing primitives
-
-func parseOptions<E: Error>(
-	_ input: inout Substring,
-	nextSectionPrefixSet: Set<Character>,
-	body: (inout Substring, inout Substring.Index, Character) throws(E) -> Void,
-) throws(E) {
-	var currentIndex = input.startIndex
-	while currentIndex < input.endIndex {
-		let char = input[currentIndex]
-		guard char != fieldSpecSeparator, !nextSectionPrefixSet.contains(char) else {
-			break
-		}
-		defer {
-			if currentIndex < input.endIndex {
-				currentIndex = input.index(after: currentIndex)
-			}
-		}
-		if char.isWhitespace {
-			continue
-		}
-		try body(&input, &currentIndex, char)
-	}
-	input = input[currentIndex...]
-}
 
 func parseUInt64(_ input: inout Substring) -> UInt64? {
 	let digits = input.prefix { $0.isASCII && $0.isNumber }

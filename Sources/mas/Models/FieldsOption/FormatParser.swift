@@ -31,7 +31,7 @@ throws(ParsingError) -> (format: Format, justification: Justification?) {
 
 /// A recursive-descent parser for fields-format.md's syntax.
 private struct FormatParser {
-	/// A `<transform-call>`'s transform: a `<value-transform>` or a
+	/// A `<*-transform-call>`'s transform: a `<value-transform>` or a
 	/// `<format-transform>`.
 	private enum ParsedTransformCall {
 		case format(Justification)
@@ -122,7 +122,7 @@ private struct FormatParser {
 		throw .unknownNamedFormat(try parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored))
 	}
 
-	/// Parses a `<transform-call>`, including its `<transform-call-prefix>`.
+	/// Parses a `<*-transform-call>`, including its `<transform-call-prefix>`.
 	private mutating func parseTransformCall() throws(ParsingError) -> ParsedTransformCall {
 		input.removeFirst()
 		try forbidWhitespace(after: transformCallPrefix)
@@ -639,7 +639,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		}
 	}
 
-	/// The shapes of this kind's pipeline's `<transform-call>`s.
+	/// The shapes of this kind's pipeline's `<*-transform-call>`s.
 	var pipelineShapeSet: Set<PipelineShape> {
 		switch self {
 		case .any, .boolean, .unconditional: // swiftformat:disable:this sortSwitchCases
@@ -671,7 +671,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	}
 }
 
-/// The shape of a `<*-transform-pipeline>`'s `<transform-call>`s.
+/// The shape of a `<*-transform-pipeline>`'s `<*-transform-call>`s.
 private enum PipelineShape { // swiftlint:disable:this one_declaration_per_file
 	/// A `<chronologic-transform-pipeline>`.
 	case chronologic
@@ -777,5 +777,5 @@ private let justificationByName = [
 private let transformNames =
 	Set(valueTransformByName.keys).union(justificationByName.keys).union([groupName, scaleName, timeZoneName])
 
-/// The shapes of a `<value-transform-pipeline>`'s `<transform-call>`s.
+/// The shapes of a `<value-transform-pipeline>`'s `<*-transform-call>`s.
 private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .chronologic])

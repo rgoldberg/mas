@@ -179,6 +179,15 @@ private extension MASTests {
 		#expect(config.itemSort.tiebreakDirection == .descending)
 	}
 
+	@Test(arguments: [
+		("//", ParsingError.missingItemSortOptionSet),
+		("//.adamID", .missingItemSortOptionSet),
+		("//x", .invalidSortOption("x")),
+	])
+	func `reports an item-sort-section error`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldsConfig(value) }
+	}
+
 	@Test
 	func `field order section requires a field-order-option-set`() {
 		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig("/") }
