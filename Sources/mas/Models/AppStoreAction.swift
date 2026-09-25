@@ -89,9 +89,10 @@ enum AppStoreAction: String {
 			continuation: eventContinuation,
 		)
 		.start()
-		eventContinuation.onTermination =
-			{ _ in Task { @MainActor in CKDownloadQueue.shared().removeObserver(observerUUID) } }
-		defer { eventContinuation.finish() }
+		defer {
+			eventContinuation.finish()
+			await MainActor.run { CKDownloadQueue.shared().removeObserver(observerUUID) }
+		}
 		let purchase = SSPurchase(
 			buyParameters: """
 				productType=C&price=0&pg=default&appExtVrsId=0&pricingParameters=\
