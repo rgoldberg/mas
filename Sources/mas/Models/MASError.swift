@@ -6,7 +6,7 @@
 //
 
 enum MASError: Error {
-	case error(String, cause: (any Error)? = nil, separatorWhenCause: String = ":\n", separatorWhenNoCause: String = "")
+	case error(String, cause: any Error? = nil, separatorWhenCause: String = ":\n", separatorWhenNoCause: String = "")
 	case invalidJSON(String)
 	case invalidURL(String)
 	case noCatalogAppsFound(for: String)
