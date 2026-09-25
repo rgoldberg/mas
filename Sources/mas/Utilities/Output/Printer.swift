@@ -63,26 +63,26 @@ final class Printer: Sendable {
 	/// Prints to `stderr`, prefixed with "Warning: "; if connected to a terminal,
 	/// the prefix is yellow & underlined.
 	@_disfavoredOverload
-	func warning(_ items: Any..., error: (any Error)? = nil, separator: String = " ", terminator: String = "\n") {
+	func warning(_ items: Any..., error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		warning(items, error: error, separator: separator, terminator: terminator)
 	}
 
 	/// Prints to `stderr`, prefixed with "Warning: "; if connected to a terminal,
 	/// the prefix is yellow & underlined.
-	func warning(_ items: [Any], error: (any Error)? = nil, separator: String = " ", terminator: String = "\n") {
+	func warning(_ items: [Any], error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		problem(items, prefix: "Warning:", format: "4;33", error: error, separator: separator, terminator: terminator)
 	}
 
 	/// Prints to `stderr`, prefixed with "Error: "; if connected to a terminal,
 	/// the prefix is red & underlined.
 	@_disfavoredOverload
-	func error(_ items: Any..., error: (any Error)? = nil, separator: String = " ", terminator: String = "\n") {
+	func error(_ items: Any..., error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		self.error(items, error: error, separator: separator, terminator: terminator)
 	}
 
 	/// Prints to `stderr`, prefixed with "Error: "; if connected to a terminal,
 	/// the prefix is red & underlined.
-	func error(_ items: [Any], error: (any Error)? = nil, separator: String = " ", terminator: String = "\n") {
+	func error(_ items: [Any], error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		errorCounter.wrappingAdd(1, ordering: .relaxed)
 		problem(items, prefix: errorPrefix, format: errorFormat, error: error, separator: separator, terminator: terminator)
 	}
@@ -97,7 +97,7 @@ final class Printer: Sendable {
 		_ items: [Any],
 		prefix: String,
 		format: String,
-		error: (any Error)?,
+		error: any Error?,
 		separator: String,
 		terminator: String,
 	) {
