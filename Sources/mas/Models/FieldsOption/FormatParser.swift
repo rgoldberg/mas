@@ -172,10 +172,14 @@ private struct FormatParser {
 		if input.first == argumentSeparator {
 			input.removeFirst()
 			skipWhitespace()
-			guard !text.isEmpty, let digitGroupDigitCount = parseUInt64(&input), digitGroupDigitCount >= 1 else {
+			guard
+				!text.isEmpty,
+				let digitGroupDigitCount = parseUInt64(&input).flatMap(Int.init(exactly:)),
+				digitGroupDigitCount >= 1
+			else {
 				throw .invalidTransformArguments(name: groupName)
 			}
-			transform = .group(digitGroupSeparator: text, digitGroupDigitCount: .init(digitGroupDigitCount))
+			transform = .group(digitGroupSeparator: text, digitGroupDigitCount: digitGroupDigitCount)
 		} else {
 			guard Locale.availableIdentifiers.contains(text) else {
 				throw .invalidTransformArguments(name: groupName)
@@ -189,13 +193,19 @@ private struct FormatParser {
 	/// Parses `scale`'s `<scale-arguments>`.
 	private mutating func parseScaleArguments() throws(ParsingError) -> Transform {
 		try parseArgumentFence(for: scaleName)
-		func parseArgument(isOptional: Bool = false) throws(ParsingError) -> UInt64? {
+		func parseArgument(isOptional: Bool = false) throws(ParsingError) -> Int? {
 			skipWhitespace()
-			let argument = parseUInt64(&input)
-			guard argument != nil || isOptional else {
+			let digits = parseUInt64(&input)
+			skipWhitespace()
+			guard let digits else {
+				guard isOptional else {
+					throw .invalidTransformArguments(name: scaleName)
+				}
+				return nil
+			}
+			guard let argument = Int(exactly: digits) else {
 				throw .invalidTransformArguments(name: scaleName)
 			}
-			skipWhitespace()
 			return argument
 		}
 		func parseArgumentSeparator() throws(ParsingError) {
@@ -221,10 +231,10 @@ private struct FormatParser {
 			throw .invalidTransformArguments(name: scaleName)
 		}
 		return .scale(
-			radix: .init(radix),
-			exponent: .init(exponent),
-			significantDigits: significantDigits.map(Int.init),
-			fractionalDigits: .init(fractionalDigits),
+			radix: radix,
+			exponent: exponent,
+			significantDigits: significantDigits,
+			fractionalDigits: fractionalDigits,
 		)
 	}
 
