@@ -83,6 +83,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingEndFence
 	case missingFieldName
 	case missingFieldOrderOptionSet
+	case missingIndex
 	case missingPredicate
 	case missingSortOptionSet
 	case missingSortOptionTerminator
@@ -135,6 +136,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected field name"
 		case .missingFieldOrderOptionSet:
 			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
+		case .missingIndex:
+			"Expected <index> after <index-prefix> '@'"
 		case .missingPredicate:
 			"Expected <predicate>"
 		case .missingSortOptionSet:
@@ -515,17 +518,20 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .remove:
-				let reference = try parseFieldSpecReference(&input)
+				// A `<field-spec-removal>`'s `<reference-field-name>` has no modifiers
+				// to terminate it
+				let reference = try parseFieldSpecReference(&input, nameTerminatorSet: [indexPrefix, fieldSpecSeparator])
 				_ = try resolvedReferenceFieldSpec(reference) // Validates existence
 				remove(reference)
 			}
+			input = input.drop(while: \.isWhitespace)
 			guard input.first == fieldSpecSeparator else {
 				break
 			}
 			input.removeFirst()
 		}
 		guard input.isEmpty else {
-			throw .missingFieldName
+			throw .unexpectedCharacter(input.first ?? " ")
 		}
 	}
 
@@ -543,11 +549,12 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					justification: parsed?.justification ?? .start,
 				),
 			)
+			input = input.drop(while: \.isWhitespace)
 			guard !input.isEmpty else {
 				return
 			}
 			guard input.first == fieldSpecSeparator else {
-				throw .missingFieldName
+				throw .unexpectedCharacter(input.first ?? " ")
 			}
 			input.removeFirst()
 		}
@@ -605,15 +612,17 @@ private extension FieldSpecsBuilder {
 		let position: Int
 	}
 
-	private func parseFieldSpecReference(_ input: inout Substring) throws(ParsingError) -> Reference {
+	private func parseFieldSpecReference(
+		_ input: inout Substring,
+		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
+	) throws(ParsingError) -> Reference {
 		guard input.first != indexPrefix else {
-			input.removeFirst()
 			return .init(
 				name: nil,
-				position: try effectivePosition(forIndex: parseInt(&input) ?? 1, length: referenceFieldSpecs.count),
+				position: try effectivePosition(forIndex: parseIndex(&input), length: referenceFieldSpecs.count),
 			)
 		}
-		let (name, index) = try parseNameAndIndex(&input)
+		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
 		let positions = referencePositions(forName: name)
 		guard !positions.isEmpty else {
 			throw .nonexistentFieldSpec(forName: name)
@@ -628,8 +637,7 @@ private extension FieldSpecsBuilder {
 	/// field `<reference-field-name>`).
 	private func parseBaseSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != indexPrefix else {
-			input.removeFirst()
-			return baseFieldSpecs[try effectivePosition(forIndex: parseInt(&input) ?? 1, length: baseFieldSpecs.count) - 1]
+			return baseFieldSpecs[try effectivePosition(forIndex: parseIndex(&input), length: baseFieldSpecs.count) - 1]
 		}
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
@@ -668,15 +676,28 @@ private extension FieldSpecsBuilder {
 		baseFieldSpecs.indices.compactMap { baseFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
-	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>` &
-	/// optional `<index-prefix>` `<index>` (default `1`).
-	private func parseNameAndIndex(_ input: inout Substring) throws(ParsingError) -> (name: String, index: Int) {
-		let name = try parseName(&input, extraTerminatorSet: [indexPrefix])
-		guard input.first == indexPrefix else {
-			return (name, 1)
+	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
+	/// a character in `nameTerminatorSet`, & optional `<index-prefix>`
+	/// `<index>` (default `1`).
+	private func parseNameAndIndex(
+		_ input: inout Substring,
+		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
+	) throws(ParsingError) -> (name: String, index: Int) {
+		let name = try parseEscapedText(&input, terminatorSet: nameTerminatorSet)
+		guard !name.isEmpty else {
+			throw .missingFieldName
 		}
+		return (name, input.first == indexPrefix ? try parseIndex(&input) : 1)
+	}
+
+	/// Parses an `<index-prefix>` & its required `<index>`.
+	private func parseIndex(_ input: inout Substring) throws(ParsingError) -> Int {
 		input.removeFirst()
-		return (name, parseInt(&input) ?? 1)
+		input = input.drop(while: \.isWhitespace)
+		guard let index = parseInt(&input) else {
+			throw .missingIndex
+		}
+		return index
 	}
 
 	/// The `source` field spec for a resolved reference: errors if its
@@ -760,6 +781,7 @@ private extension FieldSpecsBuilder {
 }
 
 private func parseFieldSpecStrategy(_ input: inout Substring) -> FieldSpecStrategy {
+	input = input.drop(while: \.isWhitespace)
 	guard
 		let strategy = input.first.flatMap(
 			{ char in
@@ -800,6 +822,7 @@ throws(ParsingError) -> String {
 }
 
 private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String? {
+	input = input.drop(while: \.isWhitespace)
 	guard input.first == labelModifierPrefix else {
 		return nil
 	}
@@ -812,6 +835,7 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 /// retained). `existing` is the working fields config's format, if any.
 private func parseFormat(_ input: inout Substring, existing: Format?)
 throws(ParsingError) -> (format: Format, justification: Justification?)? {
+	input = input.drop(while: \.isWhitespace)
 	guard input.first == formatModifierPrefix else {
 		return nil
 	}
@@ -825,6 +849,7 @@ private func parseSortSpecModifier(
 	fieldName: String,
 	outputFormat: OutputFormat,
 ) throws(ParsingError) -> SortSpec? {
+	input = input.drop(while: \.isWhitespace)
 	guard input.first == sortModifierPrefix else {
 		return existing
 	}
@@ -872,7 +897,8 @@ func parseUInt64(_ input: inout Substring) -> UInt64? {
 }
 
 func parseInt(_ input: inout Substring) -> Int? {
-	let digits = input.prefix { $0 == "-" || ($0.isASCII && $0.isNumber) }
+	let sign = input.first == "-" ? "-" : ""
+	let digits = sign + input.dropFirst(sign.count).prefix { $0.isASCII && $0.isNumber }
 	guard !digits.isEmpty, let value = Int(digits) else {
 		return nil
 	}
@@ -943,6 +969,11 @@ let labelModifierPrefix = Character("=")
 let sortModifierPrefix = Character("/")
 
 let indexPrefix = Character("@")
+
+/// The characters that terminate a `<reference-field-name>` that may be
+/// followed by `<field-modifiers>`.
+private let modifiedFieldNameTerminatorSet =
+	Set([indexPrefix, labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator])
 
 private let baseFieldsConfigOrderOption = Character("w")
 private let originalInputOrderOption = Character("o")

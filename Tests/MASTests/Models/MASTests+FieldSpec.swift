@@ -223,6 +223,24 @@ private extension MASTests {
 		#expect(sortSpec == nil)
 	}
 
+	@Test(
+		arguments: [
+			(".adamID@", ParsingError.missingIndex),
+			(".@", .missingIndex),
+			(".+adamID@x", .missingIndex),
+			(".-adamID=x", .nonexistentFieldSpec(forName: "adamID=x")),
+			("@all.adamID@3", .invalidPosition(3)),
+		],
+	)
+	func `reports a field-spec-reference error`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
+	}
+
+	@Test(arguments: ["@all . bundleID @ 1 = Bundle , adamID", "@all.bundleID@-1=Bundle"])
+	func `ignores whitespace around field-spec-edits' syntax tokens`(value: String) throws {
+		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
+	}
+
 	@Test
 	func `throws error for nonexistent field edit`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "nonexistentField")) {

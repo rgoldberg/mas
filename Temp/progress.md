@@ -353,6 +353,14 @@ static base (fetching every field for an `all`-derived base) instead of scanning
 text, excluding hidden field specs that don't sort items; the old scanning
 helpers are removed.
 
+### Field Spec References & Whitespace
+
+An `<index-prefix>` requires an `<index>` (`missingIndex`); a
+`<field-spec-removal>`'s `<reference-field-name>` is terminated only by `@` &
+`,`, per the escaping appendix; outer bare whitespace around field spec edits'
+syntax tokens (modifier prefixes, separators, index prefixes) is ignored; &
+trailing junk after a field spec reports `unexpectedCharacter`.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,
