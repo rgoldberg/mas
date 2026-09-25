@@ -198,9 +198,20 @@ func fetchFieldNames(
 			return .init()
 		}
 	}
+	let resolved: any FieldsConfig
+	do {
+		resolved = try resolvedFieldsConfig(
+			from: fieldsOptionValue,
+			standard: standard,
+			all: all,
+			outputFormat: outputFormat,
+		)
+	} catch .nonexistentFieldSpec {
+		return .init() // It may reference a field that's only discovered once every field is fetched
+	}
 	return .init(
 		Set(
-			try resolvedFieldsConfig(from: fieldsOptionValue, standard: standard, all: all, outputFormat: outputFormat)
+			resolved
 				.fieldSpecs
 				.compactMap { fieldSpec in
 					fieldSpec.isSynthesized || fieldSpec.isHidden && (fieldSpec.sortSpec?.priority ?? 0) == 0
@@ -265,6 +276,14 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 
 // MARK: - Base fields config resolution
 
+// swiftlint:disable:next todo
+// TODO: Temp/todo.md "Persisted Named Formats & Custom Named Configs": once
+//  custom named fields configs are persisted, look a name up through the
+//  command's context stack (most to least specific context), resolving a
+//  config whose base config name is its own name from the context above its
+//  own, reporting any other reference cycle, & substituting `standard` for a
+//  nonexistent `default` (appending any output format suffix)
+
 /// Resolves a `<base-fields-config-name>` (already stripped of its
 /// `<base-fields-config-section-prefix>`, empty if absent) against the
 /// built-in named fields configs, whose variants are selected by an output
@@ -273,8 +292,9 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 ///
 /// - `none`: `all` with every field spec hidden.
 /// - `all`: every field spec visible.
-/// - `standard`: `standard`'s field specs; `standard@json` is a reference to
-///   `all`.
+/// - `standard`: `standard`'s field specs, then `all`'s other field specs,
+///   hidden, so `none`, `all` & `standard` differ only in which field specs are
+///   hidden; `standard@json` is a reference to `all`.
 /// - `default`: `standard`, absent a persisted custom `default`.
 ///
 /// The `@json` variant is machine-facing (see `machineFacingVariant()`); the
@@ -309,7 +329,7 @@ func resolveBaseFieldsConfig(
 		case allFieldsConfigName:
 			allVariant
 		case defaultFieldsConfigName, standardFieldsConfigName:
-			isMachineFacing ? allVariant : standard
+			isMachineFacing ? allVariant : standard.including(hidden: allVariant.fieldSpecs)
 		case noneFieldsConfigName:
 			allVariant.hidingAll()
 		default:

@@ -382,6 +382,15 @@ Full `Scripts/lint` (incl. SwiftLint Analyze) is clean. Removed the unthrown
 comments (`<*-transform-call>`, `<value-transform>`), & rewrapped an over-long
 comment.
 
+### Standard As All With Hidden Field Specs
+
+Per mas.md, built-in `none`, `all` & `standard` variants differ only in which
+field specs are hidden: user-facing `standard` is now its own field specs
+followed by `all`'s other field specs, hidden, so an overlay may unhide any
+field (e.g., `.bundleID`). Pre-fetch, a reference to a field not yet discovered
+fetches every field. A `// TODO:` in `resolveBaseFieldsConfig` describes the
+context-stack lookup to implement once custom named configs are persisted.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

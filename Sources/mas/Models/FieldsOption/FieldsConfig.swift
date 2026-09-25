@@ -169,6 +169,20 @@ extension FieldsConfig {
 		)
 	}
 
+	/// This fields config followed by hidden copies of `fieldSpecs`' field
+	/// specs for fields not already in it.
+	func including(hidden fieldSpecs: [FieldSpec]) -> Self {
+		let nameSet = Set(self.fieldSpecs.map(\.name))
+		return .init(
+			fieldSpecs: self.fieldSpecs
+				+ Self(fieldSpecs: fieldSpecs.filter { !nameSet.contains($0.name) }, fieldOrder: fieldOrder, itemSort: itemSort)
+				.hidingAll()
+				.fieldSpecs,
+			fieldOrder: fieldOrder,
+			itemSort: itemSort,
+		)
+	}
+
 	/// This fields config with every field spec hidden.
 	func hidingAll() -> Self {
 		.init(

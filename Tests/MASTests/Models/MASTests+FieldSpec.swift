@@ -53,7 +53,7 @@ private extension MASTests {
 
 	@Test
 	func `parses field specs section insertion & overlay`() throws {
-		let specs = try parseFieldSpecs(".+bundleID,adamID=SecondaryID")
+		let specs = try parseFieldSpecs(".+bundleID,adamID=SecondaryID").filter { !$0.isHidden }
 		#expect(specs.count == 2)
 		#expect(specs[0].name == "bundleID")
 		let secondary = try #require(specs.last)
@@ -77,11 +77,11 @@ private extension MASTests {
 
 	@Test
 	func `insert lands immediately after the previous field spec, not always at the end`() throws {
-		// Base is [adamID]; overlay adamID (no-op-ish, just to set $previous$),
-		// then insert 2 more fields, both should land after adamID, in order, not
-		// accumulate before / after each other incorrectly
+		// Base is [adamID, hidden bundleID]; overlay adamID (no-op-ish, just to set
+		// $previous$), then insert 2 more fields, both should land after adamID,
+		// in order, not accumulate before / after each other incorrectly
 		let specs = try parseFieldSpecs(".adamID,+one,+two")
-		#expect(specs.map(\.name) == ["adamID", "one", "two"])
+		#expect(specs.map(\.name) == ["adamID", "one", "two", "bundleID"])
 	}
 
 	@Test
@@ -341,8 +341,29 @@ private extension MASTests {
 			all: allFixture,
 			outputFormat: outputFormat,
 		)
-		#expect(config.fieldSpecs.map(\.name).sorted() == names)
+		#expect(config.fieldSpecs.filter { !$0.isHidden }.map(\.name).sorted() == names)
 		#expect(config.fieldSpecs.first { $0.name == "adamID" }?.label == adamIDLabel)
+	}
+
+	@Test
+	func `standard differs from all only in which field specs are hidden`() throws {
+		let specs = try parseFieldSpecs("@standard")
+		#expect(specs.map(\.name) == ["adamID", "bundleID"])
+		#expect(specs.map(\.isHidden) == [false, true])
+		#expect(try parseFieldSpecs("@standard.bundleID").map(\.isHidden) == [false, false])
+	}
+
+	@Test
+	func `fetchFieldNames fetches every field for a reference to a field not yet discovered`() throws {
+		#expect(
+			try fetchFieldNames(
+				for: ".undiscovered",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			)
+			.isEmpty,
+		)
 	}
 
 	@Test(
