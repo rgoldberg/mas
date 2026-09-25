@@ -26,7 +26,8 @@ private extension MASTests {
 			         mdimport /Applications/Xcode.app
 
 			         # All apps:
-			         vol="$(/usr/libexec/PlistBuddy -c "Print :PreferredVolume:name" ~/Library/Preferences/com.apple.appstored.plist 2>/dev/null)"
+			         \
+			vol="$(/usr/libexec/PlistBuddy -c "Print :PreferredVolume:name" ~/Library/Preferences/com.apple.appstored.plist)"
 			         mdimport /Applications ${vol:+"/Volumes/${vol}/Applications"}
 
 			         # All volumes:

@@ -28,7 +28,7 @@ extension MAS {
 
 		func run(installedApps: [InstalledApp]) {
 			guard !installedApps.isEmpty else {
-				printer.warning( // editorconfig-checker-disable
+				printer.warning(
 					"""
 					No installed apps found
 
@@ -38,12 +38,13 @@ extension MAS {
 					mdimport /Applications/Xcode.app
 
 					# All apps:
-					vol="$(/usr/libexec/PlistBuddy -c "Print :PreferredVolume:name" ~/Library/Preferences/com.apple.appstored.plist 2>/dev/null)"
+					vol=\
+					"$(/usr/libexec/PlistBuddy -c "Print :PreferredVolume:name" ~/Library/Preferences/com.apple.appstored.plist)"
 					mdimport /Applications ${vol:+"/Volumes/${vol}/Applications"}
 
 					# All volumes:
 					sudo mdutil -Eai on
-					""", // editorconfig-checker-enable
+					""",
 				)
 				return
 			}
