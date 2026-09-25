@@ -144,7 +144,7 @@ exponent           = {non-negative integer} (* divides the field's value by `rad
 significant-digits = {positive integer}     (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {non-negative integer} (* exactly this many `radix` digits after the point; `0`: integer *)
 
-time-zone-code = {text: case-insensitive IANA identifier, abbreviation, UTC offset, or "system"} (* default: "system" *)
+time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation `TimeZone.abbreviationDictionary` key, ISO-8601 UTC offset, or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
