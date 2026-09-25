@@ -144,7 +144,7 @@ exponent           = {non-negative integer} (* divides the field's value by `rad
 significant-digits = {positive integer}     (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {non-negative integer} (* exactly this many `radix` digits after the point; `0`: integer *)
 
-time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation `TimeZone.abbreviationDictionary` key, ISO-8601 UTC offset, or "system"} (* default: "system" *)
+time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation `TimeZone.abbreviationDictionary` key, UTC offset, or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -193,6 +193,24 @@ point.
 - `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
   any), never spelled out.
 - E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
+
+###### `timeZone`
+
+A `<time-zone-code>` that is both an IANA Time Zone Database identifier & a
+`TimeZone.abbreviationDictionary` key (e.g., `EST`) identifies the latter.
+
+A **UTC offset** is either:
+
+- `Z`, for UTC.
+- An optional `UTC` or `GMT` prefix, then `+` or `-`, then a 1- or 2-digit hour,
+  then, optionally, `:` followed by a 2-digit minute from `00` to `59`.
+
+A UTC offset of more than 18 hours from UTC is an error.
+
+A `GMT`-prefixed UTC offset is ahead of UTC for `+` & behind UTC for `-`, but
+the IANA Time Zone Database's signed `Etc/GMT` identifiers are the reverse, per
+POSIX (e.g., `GMT+5` is 5 hours ahead of UTC, while `Etc/GMT+5` is 5 hours
+behind).
 
 ##### Format Transforms
 

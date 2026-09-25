@@ -100,6 +100,12 @@ file to reflect it.
 - **Tables:** Align pipes; pad each column to its longest cell (excluding the
   delimiter row) plus 1 space on each side
 
+## Specs
+
+`Specs/*.md` define mas's option syntaxes & semantics. Whenever a spec changes,
+make every other file (code, tests, docs, completions, `Temp/`, etc.)
+consistent with it.
+
 ## Refactoring Rules
 
 Unless absolutely necessary for functionality or fixes, or unless violations of

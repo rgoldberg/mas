@@ -125,32 +125,35 @@ private func grouped(_ string: String, digitGroupSeparator: String, digitGroupSi
 	return sign + grouped + fractionalPart
 }
 
-/// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA
-/// identifier, abbreviation, UTC offset (e.g., `+05:30`), or `system`; else
-/// `nil`.
+/// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA Time
+/// Zone Database identifier, `TimeZone.abbreviationDictionary` key, UTC offset,
+/// or `system`; else `nil`.
 func timeZone(forCode code: String) -> TimeZone? {
 	code.caseInsensitiveCompare("system") == .orderedSame
 		? .current
-		: TimeZone.knownTimeZoneIdentifiers
+		: TimeZone.abbreviationDictionary[code.uppercased()].flatMap(TimeZone.init(identifier:))
+			?? (FileManager.default.subpaths(atPath: "/usr/share/zoneinfo") ?? [])
 			.first { $0.caseInsensitiveCompare(code) == .orderedSame }
 			.flatMap(TimeZone.init(identifier:))
-			?? .init(abbreviation: code.uppercased())
 			?? utcOffsetTimeZone(code)
 }
 
-/// A `TimeZone` for a UTC offset `code` (`+HH`, `+HHMM`, or `+HH:MM`, with
-/// either sign), else `nil`.
+/// A `TimeZone` for a UTC offset `code` (`Z`, or an optional `UTC` / `GMT`
+/// prefix, a sign, a 1- or 2-digit hour & an optional `:`-prefixed 2-digit
+/// minute; case-insensitive), else `nil`.
 private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
-	guard let sign = code.first, sign == "+" || sign == "-" else {
+	guard
+		let match = code.wholeMatch(of: unsafe utcOffsetRegex),
+		let hours = Int(match.2 ?? "0"),
+		let minutes = Int(match.3 ?? "00"),
+		minutes < 60
+	else {
 		return nil
 	}
-	let digits = code.dropFirst().filter(\.isNumber)
-	guard digits.count == 2 || digits.count == 4, let hours = Int(digits.prefix(2)) else {
-		return nil
-	}
-	let minutes = Int(digits.dropFirst(2)) ?? 0
-	return TimeZone(secondsFromGMT: (sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60))
+	return TimeZone(secondsFromGMT: (match.1 == "-" ? -1 : 1) * (hours * 3600 + minutes * 60))
 }
+
+private nonisolated(unsafe) let utcOffsetRegex = /(?i)z|(?:utc|gmt)?([+-])([0-9]{1,2})(?::([0-9]{2}))?/
 
 /// Renders `rawValue` per `scale`'s semantics (see its doc comment on
 /// `Transform.scale`).
