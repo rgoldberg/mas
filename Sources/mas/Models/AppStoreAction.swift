@@ -393,7 +393,7 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 	let appFolderPath: String?
 	let isCancelled: Bool
 	let isFailed: Bool
-	let error: (any Error)?
+	let error: any Error?
 
 	init?(to action: AppStoreAction, _ download: SSDownload) {
 		guard let metadata = download.metadata, let status = download.status else {
