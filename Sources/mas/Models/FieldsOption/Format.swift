@@ -728,7 +728,7 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	}
 
 	func formatted(_ date: Date) -> String {
-		let style = Date.ISO8601FormatStyle(timeZone: timeZone ?? .current)
+		let style = Date.ISO8601FormatStyle(timeZoneSeparator: .colon, timeZone: timeZone ?? .current)
 		return isDateOnly ? style.year().month().day().format(date) : style.format(date)
 	}
 }
