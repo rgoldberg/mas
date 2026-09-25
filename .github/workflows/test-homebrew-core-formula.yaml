@@ -84,6 +84,7 @@ jobs:
       run: |
         swiftly init -ny
         git reset --hard HEAD
+        swiftly install --assume-yes
         swiftly link latest
         printf %s ~/.swiftly/bin >>"${GITHUB_PATH}"
 
