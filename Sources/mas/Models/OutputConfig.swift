@@ -21,18 +21,32 @@ protocol OutputConfig {
 	static var allFieldsConfig: BaseIncludesAllFieldsConfig { get }
 }
 
-extension OutputConfig {
+extension OutputConfig { // swiftlint:disable:this file_types_order
 	static func output(_ objects: [JSON.Object], outputFormat: OutputFormat, fieldsOptionValue: String)
-	throws(ParsingError) {
+	throws(OutputError) {
 		guard !objects.isEmpty else {
 			return
 		}
-		let resolved = try resolvedFieldsConfig(
-			from: fieldsOptionValue,
-			standard: standardFieldsConfig,
-			all: allFieldsConfig.mergingDynamicFields(from: objects),
-			outputFormat: outputFormat,
-		)
+		let resolved: any FieldsConfig
+		do {
+			resolved = try resolvedFieldsConfig(
+				from: fieldsOptionValue,
+				standard: standardFieldsConfig,
+				all: allFieldsConfig.mergingDynamicFields(from: objects),
+				outputFormat: outputFormat,
+			)
+		} catch {
+			throw .parsing(error)
+		}
+		do {
+			try output(objects, resolved: resolved, outputFormat: outputFormat)
+		} catch {
+			throw .formatting(error)
+		}
+	}
+
+	private static func output(_ objects: [JSON.Object], resolved: any FieldsConfig, outputFormat: OutputFormat)
+	throws(FormattingError) {
 		let orderedFieldSpecs = resolved.fieldOrder.applied(to: resolved.fieldSpecs)
 		// Duplicate field names (e.g., the same field inserted twice with different
 		// formats) share 1 entry here; a sort key on such a name uses whichever of
@@ -40,23 +54,49 @@ extension OutputConfig {
 		// it isn't worth carrying a format alongside each `ItemSortKey` to
 		// disambiguate
 		let fieldSpecByName = Dictionary(orderedFieldSpecs.map { ($0.name, $0) }) { first, _ in first }
-		let sortedObjects = resolved.itemSort.sortedIndices(count: objects.count) { index, key in
-			let rawValue = objects[index][nodeKey: .init(rawValue: key.name)]
-			return if key.sortSpec.source == .output, let fieldSpec = fieldSpecByName[key.name] {
-				fieldSpec.format.rendered(value: rawValue, label: fieldSpec.label, name: fieldSpec.name).stringValue
-			} else {
-				rawValue?.stringValue
-			}
-		}
-		.map { objects[$0] }
+		let sortValuesByName = try Dictionary(
+			resolved.itemSort.keys.map { key throws(FormattingError) in
+				(
+					key.name,
+					try objects.map { object throws(FormattingError) in
+						let rawValue = object[nodeKey: .init(rawValue: key.name)]
+						return if key.sortSpec.source == .output, let fieldSpec = fieldSpecByName[key.name] {
+							try fieldSpec.format
+								.rendered(value: rawValue, label: fieldSpec.label, name: fieldSpec.name)
+								.stringValue
+						} else {
+							rawValue?.stringValue
+						}
+					},
+				)
+			},
+		) { first, _ in first }
+		let sortedObjects = resolved.itemSort
+			.sortedIndices(count: objects.count) { index, key in sortValuesByName[key.name]?[index] }
+			.map { objects[$0] }
 		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden }
 		switch outputFormat {
 		case .json:
-			MAS.printer.info(sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs) as [Any], separator: "\n")
+			MAS.printer.info(try sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs) as [Any], separator: "\n")
 		case .keyValue:
-			MAS.printer.info(sortedObjects.keyValue(fieldSpecs: displayFieldSpecs))
+			MAS.printer.info(try sortedObjects.keyValue(fieldSpecs: displayFieldSpecs))
 		case let .table(tableConfig):
-			MAS.printer.info(sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
+			MAS.printer.info(try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
+		}
+	}
+}
+
+/// An error reported while outputting items per `--fields`.
+enum OutputError: Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	case formatting(FormattingError)
+	case parsing(ParsingError)
+
+	var description: String {
+		switch self {
+		case let .formatting(error):
+			error.description
+		case let .parsing(error):
+			error.description
 		}
 	}
 }

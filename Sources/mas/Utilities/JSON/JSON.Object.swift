@@ -38,21 +38,21 @@ extension JSON.Object {
 	/// A field spec's row for key-value output: `(label, rendered value)`, or
 	/// `nil` if the field's raw value is absent or `null` (per fields.md's
 	/// "Absent Values": key-value omits both).
-	func keyValueRow(for fieldSpec: FieldSpec) -> (label: String, value: String)? {
-		self[nodeKey: .init(rawValue: fieldSpec.name)].flatMap { node in
-			node.isNull
-				? nil
-				: (
-					fieldSpec.label,
-					fieldSpec.format.rendered(value: node, label: fieldSpec.label, name: fieldSpec.name).stringValue ?? "",
-				)
+	func keyValueRow(for fieldSpec: FieldSpec) throws(FormattingError) -> (label: String, value: String)? {
+		guard let node = self[nodeKey: .init(rawValue: fieldSpec.name)], !node.isNull else {
+			return nil
 		}
+		return (
+			fieldSpec.label,
+			try fieldSpec.format.rendered(value: node, label: fieldSpec.label, name: fieldSpec.name).stringValue ?? "",
+		)
 	}
 
 	/// `keyValue`, but driven by `--fields`-resolved field specs (label &
 	/// rendered value per field) instead of a static key list.
-	func keyValue(fieldSpecs: some Sequence<FieldSpec>) -> String {
-		let rows = fieldSpecs.compactMap(keyValueRow(for:))
+	func keyValue(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> String {
+		let rows = try fieldSpecs.map { fieldSpec throws(FormattingError) in try keyValueRow(for: fieldSpec) }
+			.compactMap(\.self)
 		guard !rows.isEmpty else {
 			return ""
 		}
@@ -65,16 +65,18 @@ extension JSON.Object {
 	/// This item's JSON output object, per `--fields`-resolved field specs: keyed
 	/// by each field's label, omitting a field entirely iff its raw value is
 	/// absent (a `null` value, unlike key-value output, is still included).
-	func jsonObject(fieldSpecs: some Sequence<FieldSpec>) -> Self {
+	func jsonObject(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> Self {
 		.init(
-			fieldSpecs.compactMap { fieldSpec in
-				self[nodeKey: .init(rawValue: fieldSpec.name)].map { raw in
-					(
-						.init(rawValue: fieldSpec.label),
-						fieldSpec.format.rendered(value: raw, label: fieldSpec.label, name: fieldSpec.name),
-					)
+			try fieldSpecs
+				.map { fieldSpec throws(FormattingError) in
+					try self[nodeKey: .init(rawValue: fieldSpec.name)].map { raw throws(FormattingError) in
+						(
+							JSON.Key(rawValue: fieldSpec.label),
+							try fieldSpec.format.rendered(value: raw, label: fieldSpec.label, name: fieldSpec.name),
+						)
+					}
 				}
-			},
+				.compactMap(\.self),
 		)
 	}
 }
@@ -86,21 +88,14 @@ extension [JSON.Object] {
 	/// "Header for table"). Every item gets a cell for every field, per
 	/// fields.md's "Absent Values" (absent ⇒ empty string, via
 	/// `Format.rendered`'s null-passthrough).
-	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) -> String {
+	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String {
 		guard !isEmpty else {
 			return ""
 		}
 		let showsHeader = tableConfig.header != nil
-		let columns = fieldSpecs.map { fieldSpec in
-			reduce(
-				into: (
-					label: fieldSpec.label,
-					cells: [String](),
-					maxWidth: showsHeader ? fieldSpec.label.terminalWidth : 0,
-					justification: fieldSpec.justification,
-				),
-			) { column, object in
-				let cell = fieldSpec.format
+		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
+			let cells = try map { object throws(FormattingError) in
+				try fieldSpec.format
 					.rendered(
 						value: object[nodeKey: .init(rawValue: fieldSpec.name)],
 						label: fieldSpec.label,
@@ -108,9 +103,13 @@ extension [JSON.Object] {
 					)
 					.stringValue
 					?? ""
-				column.maxWidth = Swift::max(column.maxWidth, cell.terminalWidth)
-				column.cells.append(cell)
 			}
+			return (
+				label: fieldSpec.label,
+				cells: cells,
+				maxWidth: cells.map(\.terminalWidth).reduce(showsHeader ? fieldSpec.label.terminalWidth : 0, Swift::max),
+				justification: fieldSpec.justification,
+			)
 		}
 		guard !columns.isEmpty else {
 			return ""
@@ -154,14 +153,14 @@ extension [JSON.Object] {
 	}
 
 	/// `keyValue`, but driven by `--fields`-resolved field specs.
-	func keyValue(fieldSpecs: some Sequence<FieldSpec>) -> String {
-		map { $0.keyValue(fieldSpecs: fieldSpecs) }.joined(separator: "\n\n")
+	func keyValue(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> String {
+		try map { object throws(FormattingError) in try object.keyValue(fieldSpecs: fieldSpecs) }.joined(separator: "\n\n")
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
 	/// `--fields`-resolved field specs.
-	func jsonObjects(fieldSpecs: some Sequence<FieldSpec>) -> [JSON.Object] {
-		map { $0.jsonObject(fieldSpecs: fieldSpecs) }
+	func jsonObjects(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> [JSON.Object] {
+		try map { object throws(FormattingError) in try object.jsonObject(fieldSpecs: fieldSpecs) }
 	}
 }
 

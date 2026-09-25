@@ -31,7 +31,7 @@ struct FieldSpec: Equatable {
 	/// `standard` / `all` fields config (see
 	/// `defaultJustification(forFieldNamed:)` in `AppStoreFieldDefaults.swift`),
 	/// or by a `--fields`
-	/// `<format-transform-pipeline>` (see `parseFormat(_:fieldName:)` below).
+	/// `<format-transform-pipeline>` (see `parseFormat(_:existing:)` below).
 	let justification: Justification
 
 	init(
@@ -65,64 +65,67 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 // MARK: Errors
 
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
-	case coercionNotApplicable(kind: String)
 	case coercionNotSupported(Character)
 	case danglingEscape
-	case incompletePipelineTerminator
+	case forbiddenWhitespace(after: Character)
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
 	case invalidLetter(Character)
+	case invalidModifier(Character)
+	case invalidPipeline(String)
 	case invalidPosition(Int)
 	case invalidSortOption(Character)
-	case invalidTransform(name: String, expectedKind: String)
 	case invalidTransformArguments(name: String)
+	case missingBlockTerminator
 	case missingEndFence
 	case missingFieldName
 	case missingFieldOrderOptionSet
+	case missingPredicate
 	case missingSortOptionTerminator
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
 	case originalInputOrderUnsupportedForTable
 	case singleBranch
 	case templateLacksPlaceholder
-	case terminalNumberTransformFollowedByMore(name: String)
+	case unconditionalBranchNotLast
+	case unexpectedCharacter(Character)
 	case unknownNamedFormat(String)
-	case unsupportedDateInputFormat
-	case unsupportedDateOutputFormat
+	case unknownTransform(String)
 
 	var description: String {
 		switch self {
-		case let .coercionNotApplicable(kind):
-			"""
-			Coercion (a doubled '.') isn't applicable to \(kind)-kind value transforms: a string value never \
-			needs coercion, & a date value is already parsed permissively (string or numeric) regardless
-			"""
 		case let .coercionNotSupported(letter):
-			"Coercion ('.') isn't supported for placeholder letter: \(letter)"
+			"<coercion> isn't supported for: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
-		case .incompletePipelineTerminator:
-			"Expected another ':' to complete the pipeline terminator '::'"
+		case let .forbiddenWhitespace(token):
+			"Whitespace is forbidden after: \(token)"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
 			"Invalid character class: \(name)"
 		case let .invalidLetter(letter):
-			"Invalid placeholder letter: \(letter)"
+			"Invalid <predicate>: \(letter)"
+		case let .invalidModifier(letter):
+			"Invalid <modifiers> for <predicate>: \(letter)"
+		case let .invalidPipeline(nonterminal):
+			"Invalid \(nonterminal)"
 		case let .invalidPosition(index):
 			"Invalid position for index: \(index)"
 		case let .invalidSortOption(sortOption):
 			"Invalid sort option: \(sortOption)"
-		case let .invalidTransform(name, expectedKind):
-			"Invalid \(expectedKind) transform: \(name)"
 		case let .invalidTransformArguments(name):
 			"Invalid arguments for transform: \(name)"
+		case .missingBlockTerminator:
+			"Expected <block-terminator> '+'"
 		case .missingEndFence:
 			"Expected end fence"
 		case .missingFieldName:
 			"Expected field name"
 		case .missingFieldOrderOptionSet:
 			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
+		case .missingPredicate:
+			"Expected <predicate>"
 		case .missingSortOptionTerminator:
 			"Expected <sort-option-terminator> '+'"
 		case .missingSortPriority:
@@ -136,20 +139,17 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case .originalInputOrderUnsupportedForTable:
 			"<original-input-order> 'o' is supported only for JSON or key-value output"
 		case .singleBranch:
-			"<branches> needs at least 2 branches; a single 1 is just an ordinary placeholder, with no need for %m / %M"
+			"<branches> requires at least 2 branches"
 		case .templateLacksPlaceholder:
-			"A template needs at least 1 placeholder (e.g., %i); its output would otherwise never depend on the value"
-		case let .terminalNumberTransformFollowedByMore(name):
-			"'\(name)' must be the last transform in its number-transform-pipeline; nothing may follow it"
+			"<format-template> requires at least 1 <placeholder>"
+		case .unconditionalBranchNotLast:
+			"An <unconditional-branch> may only be the last <branch>, which must be preceded by a <conditional-branch>"
+		case let .unexpectedCharacter(character):
+			"Unexpected character: \(character)"
 		case let .unknownNamedFormat(name):
 			"Unknown named format: \(name)"
-		case .unsupportedDateInputFormat:
-			"A custom <input-date-format> isn't supported yet; omit it (input is always auto-detected)"
-		case .unsupportedDateOutputFormat:
-			"""
-			A named format or literal pattern isn't supported yet for a date's output format; \
-			use a bare date-transform-pipeline (e.g., .dateOnly) instead
-			"""
+		case let .unknownTransform(name):
+			"Unknown transform: \(name)"
 		}
 	}
 }
@@ -427,7 +427,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					name: source.name,
 					existing: source,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: source.name),
+					format: try parseFormat(&input, existing: source.format),
 					sortModifierInput: &input,
 				)
 			case .overlay:
@@ -438,7 +438,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: existing.name),
+					format: try parseFormat(&input, existing: existing.format),
 					sortModifierInput: &input,
 				)
 			case .move:
@@ -449,7 +449,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: existing.name),
+					format: try parseFormat(&input, existing: existing.format),
 					sortModifierInput: &input,
 				)
 			case .hide:
@@ -462,7 +462,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
-					format: try parseFormat(&input, fieldName: existing.name),
+					format: try parseFormat(&input, existing: existing.format),
 					sortModifierInput: &input,
 				)
 			case .remove:
@@ -484,7 +484,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		while true {
 			let name = try parseName(&input)
 			let label = try parseLabel(&input) ?? name
-			let parsed = try parseFormat(&input, fieldName: name)
+			let parsed = try parseFormat(&input, existing: nil)
 			fieldSpecs.append(
 				.init(
 					name: name,
@@ -659,7 +659,7 @@ private extension FieldSpecsBuilder {
 		name: String,
 		existing: FieldSpec?,
 		label: String?,
-		format: (format: Format, justification: Justification)?,
+		format: (format: Format, justification: Justification?)?,
 		sortModifierInput input: inout Substring,
 	) throws(ParsingError) {
 		let isHidden = switch strategy {
@@ -675,6 +675,7 @@ private extension FieldSpecsBuilder {
 			sortSpec: // swiftformat:disable:next indent
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
 			isHidden: isHidden,
+			isSynthesized: existing?.isSynthesized ?? false,
 			justification: format?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
@@ -757,251 +758,16 @@ private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String
 	return try parseEscapedText(&input, terminatorSet: [formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator])
 }
 
-/// Parses `<format-block>`: at least 1 of `<named-format>`,
-/// `<format-transform-pipeline>`, `<value-transform-pipeline>`,
-/// `<format-template>`, in that order (see fields-format.md for the full
-/// 4-branch grammar). `<format-transform-pipeline>` (currently just
-/// `<justify>`) is recognized only here, right after the optional named format
-/// & before anything else, never inside a placeholder's own success / failure
-/// sub-format (`parseDelimitedFormat` / `parseDateSpec` in `Format.swift` don't
-/// call this). A name / transform name never stops at `<placeholder-prefix>` on
-/// its own: `.uppercase%i` is an attempt at a transform literally named
-/// `uppercase%i` (& fails as one), not `.uppercase` followed by a `%i`
-/// placeholder; a `<block-terminator>` (or `.` for another transform) is what
-/// actually separates them; see `parseTrailingTemplate(_:terminatorSet:
-/// endedWithClosedArgumentFence:)` for exactly when 1 is required.
-private func parseFormat(_ input: inout Substring, fieldName: String)
-throws(ParsingError) -> (format: Format, justification: Justification)? {
+/// Parses an optional `<format-modifier>`: `nil` iff absent; otherwise, the
+/// format & the justification (`nil` iff the working fields config's is
+/// retained). `existing` is the working fields config's format, if any.
+private func parseFormat(_ input: inout Substring, existing: Format?)
+throws(ParsingError) -> (format: Format, justification: Justification?)? {
 	guard input.first == formatModifierPrefix else {
 		return nil
 	}
 	input.removeFirst()
-	let terminatorSet = Set([sortModifierPrefix, fieldSpecSeparator])
-	guard let first = input.first, !terminatorSet.contains(first) else {
-		// `<format-modifier>` present, `<format-block>` absent: reset to the
-		// contextual default
-		return (.default(fieldName: fieldName), .start)
-	}
-	var namedFormat = String?.none
-	if first == namePrefix {
-		input.removeFirst()
-		let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, colon]))
-		guard knownNamedFormatNameSet.contains(name) else {
-			throw .unknownNamedFormat(name)
-		}
-		namedFormat = name
-	}
-	let justification = try parseFormatTransformPipeline(&input, terminatorSet: terminatorSet)
-	let format =
-		if input.first == transformCallPrefix {
-			// A trailing `<value-transform-pipeline>` (`namedFormat` was already
-			// consumed above, if present), optionally followed by a
-			// `<block-terminator>` & a template
-			try parseValueTransformPipelineThenTemplate(&input, namedFormat: namedFormat, terminatorSet: terminatorSet)
-		} else if namedFormat != nil || justification != nil {
-			// `<named-format>` and/or `<format-transform-pipeline>` (no
-			// `<value-transform-pipeline>`): a trailing template, if any, is gated by
-			// `<block-terminator>` exactly like a `<value-transform-pipeline>`'s
-			// own; neither of these 2 ever ends with `:` on its own (`group` /
-			// `scale`'s closing `<argument-fence>` is the only way anything here
-			// does), so `endedWithClosedArgumentFence` is always `false`
-			try parseTrailingTemplateOrNamedFormat(
-				&input,
-				namedFormat: namedFormat,
-				fieldName: fieldName,
-				terminatorSet: terminatorSet,
-			)
-		} else if let next = input.first, !terminatorSet.contains(next) {
-			// No named format, no format transform survived (backtracked): a bare
-			// `<format-template>` is `<format-block>`'s entire content, with nothing
-			// before it to need a `<block-terminator>` from
-			try parseTemplate(&input, terminatorSet: terminatorSet)
-		} else {
-			// Nothing at all: implicit `%i`, preserving the value's real JSON type
-			Format.default(fieldName: fieldName)
-		}
-	return (format, justification ?? .start)
-}
-
-/// Parses `<format-template>`, rejecting 1 with no `<placeholder>` at all: such
-/// a `<format-template>` would render identically regardless of the field's
-/// value, which is never useful, even for a `<format-transform-pipeline>`'s
-/// (justify's) own template, which is otherwise exempt from everything else
-/// about the field's value (justify never reads it), since the
-/// `<format-template>` is still the field's entire rendering.
-private func parseTemplate(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> Format {
-	let format = try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
-	guard !formatLacksPlaceholder(format) else {
-		throw .templateLacksPlaceholder
-	}
-	return format
-}
-
-/// Whatever precedes a `<format-template>` (`<named-format>`,
-/// `<format-transform-pipeline>`, and/or `<value-transform-pipeline>`), a
-/// trailing `<format-template>` is optional, & a `<block-terminator>` (`::`) is
-/// needed to introduce it UNLESS `endedWithClosedArgumentFence` (only ever true
-/// right after a `<value-transform-pipeline>` whose last `<transform>` is
-/// `group` / `scale` called with explicit arguments): that closing
-/// `<argument-fence>` (also `:`) already unambiguously ends things, so a
-/// `<format-template>` there starts immediately, with no `<block-terminator>`
-/// written or expected; any `:` there is just literal `<format-template>`
-/// content. Otherwise, a single stray `:` (not doubled) is a parse error, never
-/// a lenient no-op. Returns `[]` (`parseTemplate(_:terminatorSet:)` never
-/// itself returns an empty 1) if no `<format-template>` follows (a bare
-/// pipeline / named format / format transform, or nothing further at all).
-private func parseTrailingTemplate(
-	_ input: inout Substring,
-	terminatorSet: Set<Character>,
-	endedWithClosedArgumentFence: Bool,
-) throws(ParsingError) -> [FormatPart] {
-	if !endedWithClosedArgumentFence {
-		guard input.first == colon else {
-			return .init()
-		}
-		var afterFirstColon = input
-		afterFirstColon.removeFirst()
-		guard afterFirstColon.first == colon else {
-			throw .incompletePipelineTerminator
-		}
-		input = afterFirstColon
-		input.removeFirst() // the pipeline terminator's 2nd ':'
-	}
-	guard let next = input.first, !terminatorSet.contains(next) else {
-		return .init()
-	}
-	guard case let .parts(template) = try parseTemplate(&input, terminatorSet: terminatorSet) else {
-		preconditionFailure("parseTemplate always returns .parts")
-	}
-	return template
-}
-
-// swiftlint:disable:next todo
-// TODO: once user-defined named formats exist, splice `namedFormat`'s own
-//  rendered value in as a trailing template's first part, instead of discarding
-//  it.
-/// `<format-block>`'s trailing template when only `<named-format>` and/or
-/// `<format-transform-pipeline>` (never `<value-transform-pipeline>`, which
-/// has its own reference to fold a `namedFormat` into) precede it: with a
-/// template, that's the whole format (`namedFormat`, if present, is
-/// discarded here); without a template, `namedFormat` (if present) is the
-/// whole format instead; absent both, it's an implicit `%i`.
-private func parseTrailingTemplateOrNamedFormat(
-	_ input: inout Substring,
-	namedFormat: String?,
-	fieldName: String,
-	terminatorSet: Set<Character>,
-) throws(ParsingError) -> Format {
-	let template = try parseTrailingTemplate(&input, terminatorSet: terminatorSet, endedWithClosedArgumentFence: false)
-	return template.isEmpty
-		? namedFormat.map { .reference(.init(namedFormat: $0, transforms: .init())) } ?? .default(fieldName: fieldName)
-		: .parts(template)
-}
-
-/// `<format-block>`'s trailing `<value-transform-pipeline>` (generalizing the
-/// old `<string-transform-pipeline>`-only pipeline to `<number-transform-
-/// pipeline>` / `<date-transform-pipeline>`, too): unlike every other
-/// `<*-transform-pipeline>` site, which always knows its kind statically from
-/// its own grammar position (e.g., `%N`'s own success sub-format is always
-/// number-kind), `<format-block>` itself doesn't, since a field's raw value has
-/// no fixed type, so kind is inferred from the pipeline's own 1st `<transform>`
-/// instead. Every `<transform>` name is unique across kinds, so peeking just
-/// the 1st 1 unambiguously determines kind for the whole pipeline;
-/// `FormatReferenceParser.parse` then enforces that every later `<transform>`
-/// shares it (a mismatched name throws `.invalidTransform`, same as it always
-/// has). `namedFormat`, if present, folds into the returned reference,
-/// mirroring the old bare `<string-transform-pipeline>` case this replaces.
-private func parseValueTransformPipelineThenTemplate(
-	_ input: inout Substring,
-	namedFormat: String?,
-	terminatorSet: Set<Character>,
-) throws(ParsingError) -> Format {
-	var peek = input
-	peek.removeFirst() // '.'
-	var coerced = false
-	if peek.first == transformCallPrefix {
-		coerced = true
-		peek.removeFirst() // the coercion marker's own '.'
-	}
-	let firstName = try parseTransformName(&peek, terminatorSet: terminatorSet)
-	guard let kind = try TransformKind.of(transformName: firstName) else {
-		throw .invalidTransform(name: firstName, expectedKind: "value")
-	}
-	if coerced {
-		guard kind == .number else {
-			throw .coercionNotApplicable(kind: kind.rawValue)
-		}
-		// Drop just the coercion marker's own '.', leaving a single leading
-		// `<transform-call-prefix>` for `FormatReferenceParser.parse` below,
-		// exactly as it already expects for every other transform pipeline
-		input.remove(at: input.index(after: input.startIndex))
-	}
-	let beforePipeline = input
-	guard let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) else {
-		preconditionFailure("Just confirmed a leading transform call for \(kind), so this always succeeds")
-	}
-	return .valuePipeline(
-		namedFormat == nil ? reference : FormatReference(namedFormat: namedFormat, transforms: reference.transforms),
-		kind: kind,
-		coerced: coerced,
-		template: try parseTrailingTemplate(
-			&input,
-			terminatorSet: terminatorSet,
-			endedWithClosedArgumentFence: beforePipeline[beforePipeline.index(before: input.startIndex)] == colon,
-		),
-	)
-}
-
-private extension Justification {
-	/// A `<format-transform>` (currently only a `<justify>`): table-output column
-	/// alignment. Consumed entirely at parse time into `FieldSpec.justification`,
-	/// never part of a rendered `Format` (unlike `Transform`, never valid
-	/// inside a placeholder's own success / failure sub-format).
-	init?(formatTransformSimpleName name: String) {
-		switch name {
-		case "centerEndJustify":
-			self = .centerEnd
-		case "centerStartJustify":
-			self = .centerStart
-		case "endJustify":
-			self = .end
-		case "startJustify":
-			self = .start
-		default:
-			return nil
-		}
-	}
-}
-
-/// Parses `<format-transform-pipeline>` (`( <transform-call-prefix>
-/// <format-transform> )+`): as many leading `<format-transform>`s as match
-/// (last 1 wins). Backtracks (consuming nothing) as soon as a `.`-prefixed
-/// name doesn't match a known `<format-transform>`, leaving it for the caller
-/// to try as something else (e.g., a `<string-transform>`); per
-/// fields-format.md, a `<format-transform>` & every other transform share no
-/// names, so there's nothing to disambiguate: this is 1st-match-wins ordering,
-/// not a lookup. The caller (`parseFormat`), not this function, handles a
-/// trailing `<block-terminator>`, since 1 may be needed even with 0 matches
-/// (e.g., right after a bare named format, before a template); `:` still ends a
-/// name-scan here regardless, so a lone or doubled 1 is never swallowed into an
-/// attempted `<format-transform>` name.
-private func parseFormatTransformPipeline(_ input: inout Substring, terminatorSet: Set<Character>)
-throws(ParsingError) -> Justification? {
-	var justification = Justification?.none
-	while input.first == transformCallPrefix {
-		let beforeTransform = input
-		input.removeFirst()
-		let name = try parseEscapedText(
-			&input,
-			terminatorSet: terminatorSet.union([transformCallPrefix, colon]),
-		)
-		guard let matched = Justification(formatTransformSimpleName: name) else {
-			input = beforeTransform
-			break
-		}
-		justification = matched
-	}
-	return justification
+	return try parseFormatBlock(&input, existing: existing ?? .default(fieldName: ""))
 }
 
 private func parseSortSpecModifier(
@@ -1203,16 +969,6 @@ let removeIndicator = Character("-")
 
 let labelModifierPrefix = Character("=")
 let sortModifierPrefix = Character("/")
-
-/// This character has no 1 dedicated grammar name of its own; it plays
-/// several distinct roles depending on where it appears, the same way `/`
-/// (`<sort-modifier-prefix>`) can end a `<format-block>` without being a
-/// `<block-terminator>`: it's `<name-prefix>` / `<format-modifier-prefix>`
-/// (both defined in `Format.swift`), a `<group>` / `<scale>` `<argument-
-/// fence>`, & (checked twice in a row, never on its own) `<format-block>`'s own
-/// `<block-terminator>`; see `parseTrailingTemplate(_:terminatorSet:
-/// endedWithClosedArgumentFence:)`.
-let colon = Character(":")
 
 let indexPrefix = Character("@")
 

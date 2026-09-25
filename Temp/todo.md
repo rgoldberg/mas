@@ -115,6 +115,11 @@ optional.
   `<unconditional-placeholder>`s (e.g., `%.N%n (%i)++`); fix with the
   `<block-terminator>` rewrite.
 
+- `<output>` sort source compares values by "the rendered value type": is that
+  the type of the rendered JSON node (only `%i` passthrough retains a non-string
+  type), or the output type of the format's final pipeline / placeholder (e.g.,
+  chronologic for `%C.dateOnly++`)?
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Named Formats & Custom Named Configs

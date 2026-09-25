@@ -9,10 +9,8 @@ internal import Foundation
 
 // MARK: - Transforms (fields-format.md)
 
-/// A single `<transform-call>`'s `<transform>`. Whether a given case is valid
-/// in a particular pipeline (`<string-transform-pipeline>`,
-/// `<number-transform-pipeline>`, or `<date-transform-pipeline>`) is enforced
-/// at parse time, not by this type.
+/// A `<value-transform>`. Whether a given case is valid in a particular
+/// pipeline is enforced at parse time, not by this type.
 enum Transform: Hashable {
 	// swiftlint:disable sorted_enum_cases
 	case initialUppercase
@@ -21,11 +19,6 @@ enum Transform: Hashable {
 	case uppercase
 
 	case absoluteValue
-	/// Inserts `digitGroupSeparator` into the field's integer part every
-	/// `digitGroupDigitCount` digits, counting from its least significant digit;
-	/// a fractional part & leading `-` sign are left untouched. See `<group>` in
-	/// fields-format.md for full semantics.
-	case group(digitGroupSeparator: String, digitGroupDigitCount: Int)
 	case round
 	/// Divides the field's value by `radix^exponent`, optionally rounds it to
 	/// `significantDigits` total `radix` digits, then renders it in positional
@@ -33,49 +26,33 @@ enum Transform: Hashable {
 	/// radix point. See `<scale>` in fields-format.md for full semantics.
 	case scale(radix: Int, exponent: Int, significantDigits: Int?, fractionalDigits: Int)
 
+	/// Inserts `digitGroupSeparator` into the field's integer part every
+	/// `digitGroupDigitCount` digits, counting from its least significant digit;
+	/// a fractional part & leading `-` sign are left untouched. See `<group>` in
+	/// fields-format.md for full semantics.
+	case group(digitGroupSeparator: String, digitGroupDigitCount: Int)
+
 	case dateOnly
 	/// Sets the output time zone; see `<time-zone>` in fields-format.md.
 	case timeZone(TimeZone) // swiftlint:enable sorted_enum_cases
 
-	static let stringTransformSet = Set([Self.initialUppercase, .lowercase, .trimWhitespace, .uppercase])
-	/// `group` & `scale` are parameterized & validated separately; see
-	/// `parsed(name:kind:)`.
-	static let numberTransformSet = Set([Self.absoluteValue, .round])
-	static let dateTransformSet = Set([Self.dateOnly])
-
-	/// Parses a bare `<transform>` `name` (its `<group-arguments>` /
-	/// `<scale-arguments>`, for `group` / `scale`, included verbatim) valid for
-	/// `kind`. Returns `nil` if `name` isn't a known transform for `kind`.
-	static func parsed(name: String, kind: TransformKind) throws(ParsingError) -> Self? {
-		if name == groupSimpleName {
-			kind == .number ? .group(locale: .current) : nil
-		} else if name.hasPrefix(groupNamePrefix), name.hasSuffix(argumentFence) {
-			kind == .number ? try groupTransform(name: name) : nil
-		} else if name.hasPrefix(scaleNamePrefix), name.hasSuffix(argumentFence) {
-			kind == .number ? try scaleTransform(name: name) : nil
-		} else if name.hasPrefix(timeZoneNamePrefix), name.hasSuffix(argumentFence) {
-			kind == .date ? try timeZoneTransform(name: name) : nil
-		} else {
-			.init(simpleName: name).flatMap { kind.allowedTransformSet.contains($0) ? $0 : nil }
+	/// This transform's kind, per its `<value-transform>` alternative.
+	var kind: TransformKind {
+		switch self {
+		case .initialUppercase, .lowercase, .trimWhitespace, .uppercase:
+			.string
+		case .absoluteValue, .round, .scale: // swiftformat:disable:this sortSwitchCases
+			.number
+		case .group:
+			.numberToString
+		case .dateOnly, .timeZone:
+			.chronologic
 		}
 	}
 
-	/// Whether this is a `<terminal-number-transform>` (currently just `group`):
-	/// its own output isn't itself a value another `<non-terminal-number-
-	/// transform>` could meaningfully operate on, so the parser (`Format
-	/// ReferenceParser.parse(_:)`) rejects anything following it in the same
-	/// `<number-transform-pipeline>`.
-	var isTerminalNumberTransform: Bool {
-		if case .group = self {
-			true
-		} else {
-			false
-		}
-	}
-
-	/// Applies this transform to a string. `dateOnly` / `timeZone` are applied
-	/// separately, by `DateSpec.formatted(_:)`, since they need the field's
-	/// parsed `Date`, not just its rendered string.
+	/// Applies this transform to a string. Chronologic transforms are applied
+	/// separately, by `ChronologicStyle.applying(_:)`, since they need the
+	/// field's parsed `Date`, not just its rendered string.
 	func applied(to string: String) -> String {
 		switch self {
 		case .initialUppercase:
@@ -109,7 +86,7 @@ enum Transform: Hashable {
 	}
 }
 
-extension Transform {
+extension Transform { // swiftlint:disable:this file_types_order
 	/// Resolves `locale`'s grouping separator & digit count into a `.group`
 	/// transform (absent either, per `NumberFormatter`, which shouldn't happen
 	/// for a real locale: `,` & `3`, matching the system locale's own usual
@@ -148,68 +125,17 @@ private func grouped(_ string: String, digitGroupSeparator: String, digitGroupDi
 	return sign + grouped + fractionalPart
 }
 
-private extension Transform {
-	/// The bare (parameter-less) transform names, per fields-format.md.
-	init?(simpleName name: String) {
-		switch name {
-		case "initialUppercase":
-			self = .initialUppercase
-		case "lowercase":
-			self = .lowercase
-		case "trimWhitespace":
-			self = .trimWhitespace
-		case "uppercase":
-			self = .uppercase
-		case "absoluteValue":
-			self = .absoluteValue
-		case "round":
-			self = .round
-		case "dateOnly":
-			self = .dateOnly
-		default:
-			return nil
-		}
-	}
-}
-
-/// Parses `group`'s `<group-arguments>` (fenced by `argumentFence`) from
-/// `name`, which must already carry both: either a bare locale name (no
-/// `argumentSeparator`), or `digitGroupSeparator,digitGroupDigitCount`
-/// (exactly 1). Neither `<locale-identifier>` nor `<digit-group-separator>`
-/// supports escaping `argumentSeparator` / `argumentFence` yet: by the time a
-/// `<transform-call>`'s name reaches here, any backslash escapes in it have
-/// already been resolved by the caller's `parseEscapedText`, so there's no way
-/// to tell an escaped `,` from a literal 1 this far downstream.
-private func groupTransform(name: String) throws(ParsingError) -> Transform {
-	let arguments = name.dropFirst(groupNamePrefix.count).dropLast(argumentFence.count)
-	let parts = arguments.split(separator: argumentSeparator, omittingEmptySubsequences: false)
-	switch parts.count {
-	case 1 where !parts[0].isEmpty:
-		return .group(locale: .init(identifier: .init(parts[0])))
-	case 2:
-		guard let digitGroupDigitCount = Int(parts[1]), digitGroupDigitCount >= 1 else {
-			throw .invalidTransformArguments(name: name)
-		}
-		return .group(digitGroupSeparator: .init(parts[0]), digitGroupDigitCount: digitGroupDigitCount)
-	default:
-		throw .invalidTransformArguments(name: name)
-	}
-}
-
-/// Parses `timeZone`'s `<time-zone-arguments>` (`<time-zone-code>`, fenced by
-/// `argumentFence`) from `name`: a case-insensitive IANA identifier,
-/// abbreviation, UTC offset (e.g., `+05:30`), or `system`.
-private func timeZoneTransform(name: String) throws(ParsingError) -> Transform {
-	let code = String(name.dropFirst(timeZoneNamePrefix.count).dropLast(argumentFence.count))
-	let identifier = TimeZone.knownTimeZoneIdentifiers.first { $0.caseInsensitiveCompare(code) == .orderedSame }
-	let timeZone = code.caseInsensitiveCompare("system") == .orderedSame
+/// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA
+/// identifier, abbreviation, UTC offset (e.g., `+05:30`), or `system`; else
+/// `nil`.
+func timeZone(forCode code: String) -> TimeZone? {
+	code.caseInsensitiveCompare("system") == .orderedSame
 		? .current
-		: identifier
-			.flatMap(TimeZone.init(identifier:)) ?? .init(abbreviation: code.uppercased()) ?? utcOffsetTimeZone(code)
-	guard let timeZone else {
-		throw .invalidTransformArguments(name: name)
-	}
-	return .timeZone(timeZone)
+		: TimeZone.knownTimeZoneIdentifiers
+			.first { $0.caseInsensitiveCompare(code) == .orderedSame }
+			.flatMap(TimeZone.init(identifier:))
+			?? .init(abbreviation: code.uppercased())
+			?? utcOffsetTimeZone(code)
 }
 
 /// A `TimeZone` for a UTC offset `code` (`+HH`, `+HHMM`, or `+HH:MM`, with
@@ -224,41 +150,6 @@ private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
 	}
 	let minutes = Int(digits.dropFirst(2)) ?? 0
 	return TimeZone(secondsFromGMT: (sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60))
-}
-
-/// Parses `scale`'s `<scale-arguments>`
-/// (`radix,exponent,[significantDigits],fractionalDigits`, fenced by
-/// `argumentFence`) from `name`, which must already carry both.
-private func scaleTransform(name: String) throws(ParsingError) -> Transform {
-	let arguments = name.dropFirst(scaleNamePrefix.count)
-		.dropLast(argumentFence.count)
-		.split(separator: argumentSeparator, omittingEmptySubsequences: false)
-	guard
-		arguments.count == 4,
-		let radix = Int(arguments[0]), (2...36).contains(radix),
-		let exponent = Int(arguments[1]), exponent >= 0,
-		let fractionalDigits = Int(arguments[3]), fractionalDigits >= 0
-	else {
-		throw .invalidTransformArguments(name: name)
-	}
-	return .scale(
-		radix: radix,
-		exponent: exponent,
-		significantDigits: try parsedSignificantDigits(from: arguments[2], transformName: name),
-		fractionalDigits: fractionalDigits,
-	)
-}
-
-/// Parses `scale`'s optional `significantDigits` argument: `nil` for an empty
-/// `text` (no cap), else a validated positive integer.
-private func parsedSignificantDigits(from text: Substring, transformName: String) throws(ParsingError) -> Int? {
-	if text.isEmpty {
-		nil
-	} else if let significantDigits = Int(text), significantDigits >= 1 {
-		significantDigits
-	} else {
-		throw .invalidTransformArguments(name: transformName)
-	}
 }
 
 /// Renders `rawValue` per `scale`'s semantics (see its doc comment on
@@ -295,7 +186,7 @@ private func numberString(_ value: Double, matchingIntegerStyleOf original: Stri
 	!original.contains(".") && value == value.rounded() ? .init(Int(value)) : .init(value)
 }
 
-extension Transform: CustomStringConvertible {
+extension Transform: CustomStringConvertible { // swiftlint:disable:this file_types_order
 	var description: String {
 		switch self {
 		case .initialUppercase:
@@ -325,14 +216,10 @@ extension Transform: CustomStringConvertible {
 	}
 }
 
-let groupSimpleName = "group"
-let groupNamePrefix = groupSimpleName + argumentFence
-let scaleSimpleName = "scale"
-let scaleNamePrefix = scaleSimpleName + argumentFence
-let timeZoneSimpleName = "timeZone"
-let timeZoneNamePrefix = timeZoneSimpleName + argumentFence
-let argumentFence = ":"
-let argumentSeparator = Character(",")
-/// The only `<transform>`s whose own grammar defines a `:`-fenced argument
-/// list; see `parseTransformName(_:terminatorSet:)`.
-let fenceTakingSimpleNameSet = Set([groupSimpleName, scaleSimpleName, timeZoneSimpleName])
+/// A `<transform>`'s kind.
+enum TransformKind { // swiftlint:disable:this one_declaration_per_file
+	case chronologic
+	case number
+	case numberToString
+	case string
+}

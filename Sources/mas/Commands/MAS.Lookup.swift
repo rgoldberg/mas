@@ -54,9 +54,17 @@ private struct KeyValueConfig: OutputConfig {
 			.init(
 				name: "currentVersionReleaseDate",
 				label: "Released",
-				// `%C.dateOnly++`: the release date, date-only, in the local time zone
-				format: // swiftformat:disable:next indent
-					.parts([.placeholder(.date(negated: false, success: .init(outputTransforms: [.dateOnly]), failure: nil))]),
+				// `%C.dateOnly++`: the release date, date-only, in the system time zone
+				format: .template(
+					[
+						.placeholder(
+							.conditional(
+								.init(predicate: .chronologic, coercion: nil),
+								.binary(success: .pipeline([.init(transform: .dateOnly, isCoerced: false)]), failure: nil),
+							),
+						),
+					],
+				),
 				sortSpec: nil,
 			),
 			.init(
@@ -73,22 +81,23 @@ private struct KeyValueConfig: OutputConfig {
 				// resolves through `defaultedForJSON(outputFormat:)`, which discards
 				// this format (& the label above) for a built-in default fields
 				// config, per fields.md's Labeling section
-				format: .parts(
+				// `%+.N.scale:10,6,,0:.group+ MB`
+				format: .template(
 					[
 						.placeholder(
-							.number(
-								negated: false,
-								coerced: true,
-								success: .reference(
-									.init(
-										namedFormat: nil,
-										transforms: [
-											.scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
-											.group(locale: .current),
+							.conditional(
+								.init(predicate: .number, coercion: .strict),
+								.abortOnFailure(
+									success: .pipeline(
+										[
+											.init(
+												transform: .scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
+												isCoerced: false,
+											),
+											.init(transform: .group(locale: .current), isCoerced: false),
 										],
 									),
 								),
-								failure: nil,
 							),
 						),
 						.text(" MB"),

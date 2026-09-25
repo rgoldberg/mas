@@ -10,29 +10,17 @@ internal import JSONAST
 
 // MARK: - Format (fields-format.md)
 
-/// A parsed `<format-block>`: either a mix of literal text & `<placeholder>`s
-/// or a bare `<format-reference>`.
-enum Format: Equatable {
-	case parts([FormatPart])
-	case reference(FormatReference)
-	/// `<format-block>`'s own top-level `<value-transform-pipeline>` (`kind`
-	/// inferred at parse time from its 1st `<transform>`; see
-	/// `parseValueTransformPipelineThenTemplate(_:namedFormat:terminatorSet:)`),
-	/// optionally followed by a `<block-terminator>`-separated template: unlike
-	/// `.reference` (used inside a placeholder's own sub-format, where the base
-	/// value's `stringValue` never fails to exist), `.number` `kind` first
-	/// coerces the field's value iff `coerced` (a doubled leading `.` on the
-	/// pipeline's own 1st `<transform>`; never valid for `.string` / `.date`
-	/// `kind`, so always `false` for either), mimicking `<strict-coercion>` &
-	/// mimicking unhandled placeholder failure (blank) if that coercion fails.
-	/// `template` empty means no `<block-terminator>` / template followed;
-	/// non-empty, `template` renders against the pipeline's OWN output, not the
-	/// field's original value; a `%i` / `%I` (or any other placeholder) inside it
-	/// reads the transformed value, not the raw 1, so nothing is duplicated & a
-	/// template with no placeholder at all (e.g., a literal unit suffix alone)
-	/// simply doesn't include the transformed value at all; write `%i` to include
-	/// it.
-	case valuePipeline(FormatReference, kind: TransformKind, coerced: Bool, template: [FormatPart])
+/// A parsed `<format-block>`, `<success-block>`, or `<failure-block>`: either a
+/// pipeline of `<transform-call>`s or a template. A `<format-block>`'s
+/// `<format-transform-pipeline>` isn't part of it: it's extracted into
+/// `FieldSpec.justification` at parse time.
+indirect enum Format: Equatable {
+	/// A `<*-pipeline>`'s value `<transform-call>`s, applied in order to the
+	/// value the pipeline formats. Empty iff the pipeline consists solely of a
+	/// `<format-transform-pipeline>`.
+	case pipeline([TransformCall])
+	/// A `<*-template>`'s elements.
+	case template([TemplateElement])
 
 	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
@@ -40,974 +28,671 @@ enum Format: Equatable {
 	// TODO: a per-field, per-context user-configured default, once persisted
 	//  fields configs exist.
 	static func `default`(fieldName _: String) -> Self {
-		.parts([.placeholder(.value(success: nil))])
+		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
+	}
+
+	/// A `<format-block>`'s direct default: the nullary placeholder for
+	/// `typeDeterminant`'s type & coercion.
+	static func nullaryPlaceholder(for typeDeterminant: TypeDeterminant) -> Self {
+		.template(
+			[
+				.placeholder(
+					typeDeterminant.type == .any
+						? .unconditional(.input, pipeline: .init())
+						: .conditional(
+							.init(predicate: typeDeterminant.type.nullaryPredicate, coercion: typeDeterminant.coercion),
+							.abortOnFailure(success: nil),
+						),
+				),
+			],
+		)
 	}
 }
 
-extension Format: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		switch self {
-		case let .parts(parts):
-			"parts(\(parts))"
-		case let .reference(reference):
-			"reference(\(reference))"
-		case let .valuePipeline(reference, kind, coerced, template):
-			"valuePipeline(\(reference), kind: \(kind), coerced: \(coerced), template: \(template))"
-		}
-	}
+/// A `<transform-call>`: its `<value-transform>`, & whether it has
+/// `<strict-coercion>`.
+struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
+	let transform: Transform
+	let isCoerced: Bool
+}
+
+/// An element of a `<*-template>`.
+enum TemplateElement: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<block-placeholder>`: the enclosing matcher's value, through
+	/// `pipeline`.
+	case blockPlaceholder(pipeline: [TransformCall])
+	/// A `<placeholder>`.
+	case placeholder(Placeholder)
+	/// A `<template-text>`'s value.
+	case text(String)
+}
+
+/// A `<placeholder>`.
+enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<nullary-scalar-conditional-placeholder>` or
+	/// `<non-nullary-scalar-conditional-placeholder>`.
+	case conditional(Matcher, ConditionalForm)
+	/// A `<match-placeholder>`.
+	case match([Branch], MatchForm)
+	/// An `<unconditional-placeholder>`; `pipeline` is empty for a nullary one.
+	case unconditional(UnconditionalPredicate, pipeline: [TransformCall])
+}
+
+/// An `<unconditional-placeholder>`'s or `<unconditional-branch>`'s predicate,
+/// by its nullary letter.
+enum UnconditionalPredicate: Character { // swiftlint:disable:this one_declaration_per_file
+	case input = "i"
+	case label = "l"
+	case name = "k"
+}
+
+/// A scalar conditional matcher's `<coercion>` & `<predicate>`.
+struct Matcher: Equatable { // swiftlint:disable:this one_declaration_per_file
+	let predicate: Predicate
+	let coercion: Coercion?
+}
+
+/// A scalar conditional `<predicate>`, by its nullary letter.
+enum Predicate: Character { // swiftlint:disable:this one_declaration_per_file
+	// swiftlint:disable sorted_enum_cases
+	case boolean = "b"
+	case chronologic = "c"
+	case empty = "e"
+	case `false` = "f"
+	case null = "u"
+	case number = "n"
+	case string = "s"
+	case `true` = "t"
+	case version = "v"
+	case whitespace = "w" // swiftlint:enable sorted_enum_cases
+}
+
+/// A `<coercion>`.
+enum Coercion: Equatable { // swiftlint:disable:this one_declaration_per_file
+	case lenient
+	case strict
+}
+
+/// What a scalar conditional placeholder evaluates to on success & on
+/// failure.
+enum ConditionalForm: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// Nullary (`%n`) or `<abort-on-failure>` (`%+N…+`): on success, `success`
+	/// (the matcher's value iff `nil`); on failure, formatting aborts.
+	case abortOnFailure(success: Format?)
+	/// `<abort-on-success>` (`%-n` / `%-N…+`): on success, formatting aborts;
+	/// on failure, `failure` (`""` iff `nil`).
+	case abortOnSuccess(failure: Format?)
+	/// Binary (`%N…+…+`): on success, `success` (the matcher's value iff
+	/// `nil`); on failure, `failure` (`""` iff `nil`).
+	case binary(success: Format?, failure: Format?)
+}
+
+/// What a `<match-placeholder>` evaluates to iff no branch returns a value.
+enum MatchForm: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `%m`: formatting aborts.
+	case abortOnNoMatch
+	/// `%M`: `failure` (`""` iff `nil`).
+	case binary(failure: Format?)
+}
+
+/// A `<branch>`.
+enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<conditional-branch>`: iff `isNegated`, returns `block` (the field
+	/// value iff `nil`) iff the matcher fails; otherwise, returns `block` (the
+	/// matcher's value iff `nil`) iff the matcher succeeds.
+	case conditional(Matcher, isNegated: Bool, block: Format?)
+	/// An `<unconditional-branch>`, which always returns `block` (its
+	/// predicate's value iff `nil`).
+	case unconditional(UnconditionalPredicate, block: Format?)
+}
+
+// MARK: - Types
+
+/// A `<predicate>`'s or `<transform>`'s type, in ascending specificity.
+enum FieldType: Comparable { // swiftlint:disable:this one_declaration_per_file
+	case any // swiftlint:disable sorted_enum_cases
+	case string
+	case boolean
+	case number
+	case version
+	case chronologic // swiftlint:enable sorted_enum_cases
+}
+
+/// A field's type determinant's type & coercion.
+struct TypeDeterminant: Equatable { // swiftlint:disable:this one_declaration_per_file
+	static let any = Self(type: .any, coercion: nil)
+
+	let type: FieldType
+	let coercion: Coercion?
 }
 
 extension Format { // swiftlint:disable:this file_types_order
-	/// Renders this format against `value` (`nil` iff the field doesn't exist for
-	/// this item), producing the node to display / embed in output. A lone bare
-	/// `%i` / `%I` (the common case: no explicit `<format-modifier>`, or an
-	/// explicit one that's just `%i`) passes the original node through unchanged
-	/// (so JSON output preserves the value's real type); anything else (literal
-	/// text, other placeholders, transforms) necessarily produces a string.
-	func rendered(value: JSON.Node?, label: String, name: String) -> JSON.Node {
+	/// This format's type determinant: the 1st matcher or transform of the most
+	/// specific type (including every branch), or `.any` iff there's none.
+	var typeDeterminant: TypeDeterminant {
+		typeDeterminants.reduce(TypeDeterminant.any) { $1.type > $0.type ? $1 : $0 }
+	}
+
+	/// Every matcher's & transform's type determinant, in order.
+	fileprivate var typeDeterminants: [TypeDeterminant] {
 		switch self {
-		case let .parts(parts):
-			if parts.count == 1, case .placeholder(.value(success: nil)) = parts[0] {
-				value ?? .null
-			} else {
-				.string(renderedParts(parts, value: value, label: label, name: name) ?? "")
-			}
-		case let .reference(reference):
-			reference.rendered(value: value)
-		case let .valuePipeline(reference, kind, coerced, template):
-			if let pipelineString = renderedValuePipeline(reference, kind: kind, coerced: coerced, value: value) {
-				// A trailing `<format-template>` renders against the pipeline's own
-				// output, not the field's original value: e.g., `%i` inside it means
-				// "the pipeline's result", not "the field's raw value" (see `Format
-				// .valuePipeline`'s own doc comment)
-				if template.isEmpty {
-					.string(pipelineString)
-				} else {
-					.string(renderedParts(template, value: .string(pipelineString), label: label, name: name) ?? "")
+		case let .pipeline(calls):
+			calls.map(\.typeDeterminant)
+		case let .template(elements):
+			elements.flatMap { element in
+				switch element {
+				case let .blockPlaceholder(pipeline):
+					pipeline.map(\.typeDeterminant)
+				case let .placeholder(placeholder):
+					placeholder.typeDeterminants
+				case .text:
+					[TypeDeterminant]()
 				}
-			} else {
-				.string("")
 			}
-		}
-	}
-}
-
-/// Renders `parts` against `value` / `label` / `name`. `nil` iff an unhandled
-/// placeholder failure aborts the whole format (formatting then renders
-/// blank; see callers).
-private func renderedParts(_ parts: [FormatPart], value: JSON.Node?, label: String, name: String) -> String? {
-	var result = ""
-	for part in parts {
-		switch part {
-		case let .text(text):
-			result += text
-		case let .placeholder(placeholder):
-			guard let rendered = placeholder.rendered(value: value, label: label, name: name) else {
-				return nil
-			}
-			result += rendered
-		}
-	}
-	return result
-}
-
-/// `Format.valuePipeline`'s own reference: `nil` iff coercing (`.number`
-/// `kind` only, & only if `coerced`) `value` to `kind` fails (`.string` never
-/// fails: `stringValue` always exists, `nil` becoming `""`; `.date` always
-/// parses permissively, so `coerced` is always `false` there; see
-/// `Format.valuePipeline`'s own doc comment). `reference.namedFormat` is
-/// ignored, same as `FormatReference.rendered(value:)` below (see its own
-/// doc comment).
-private func renderedValuePipeline(
-	_ reference: FormatReference,
-	kind: TransformKind,
-	coerced: Bool,
-	value: JSON.Node?,
-) -> String? {
-	switch kind {
-	case .string:
-		reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
-	case .number:
-		isNumber(value, coerced: coerced)
-			? reference.transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) }
-			: nil
-	case .date:
-		parsedDate(from: value).map { DateSpec(outputTransforms: reference.transforms).formatted($0) }
-	}
-}
-
-/// One element of a mixed literal / placeholder format: either a
-/// `<placeholder>` or literal (already-unescaped) text.
-enum FormatPart: Equatable, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
-	case placeholder(Placeholder)
-	case text(String)
-
-	var description: String {
-		switch self {
-		case let .text(text):
-			"text(\"\(text)\")"
-		case let .placeholder(placeholder):
-			"placeholder(\(placeholder))"
-		}
-	}
-}
-
-/// A `<format-reference>` / `<*-placeholder-reference>`: an optional named
-/// format, optionally followed by a transform pipeline.
-struct FormatReference: Equatable { // swiftlint:disable:this one_declaration_per_file
-	let namedFormat: String?
-	let transforms: [Transform]
-}
-
-extension FormatReference: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		"FormatReference(namedFormat: \(namedFormat.map { "\"\($0)\"" } ?? "nil"), transforms: \(transforms))"
-	}
-}
-
-private extension FormatReference { // swiftlint:disable:this file_types_order
-	/// No named formats exist yet (`knownNamedFormatNameSet` is empty, so no
-	/// `<named-format-reference>` parses), so this only ever has a bare
-	/// `<string-transform-pipeline>` to apply to the field's own verbatim value.
-	// swiftlint:disable:next todo
-	// TODO: once persisted user-defined named formats exist, resolve
-	//  `namedFormat` to its definition & apply `transforms` to that definition's
-	//  rendering of `value` instead of to `value` itself.
-	func rendered(value: JSON.Node?) -> JSON.Node {
-		.string(transforms.reduce(value?.stringValue ?? "") { string, transform in transform.applied(to: string) })
-	}
-}
-
-/// A `<placeholder>`. Concise vs. verbose isn't tracked separately: a `nil`
-/// success / failure format means either "concise" (no format slot at all) or
-/// "verbose with an absent format" (`[ <standard> ]` omitted), both resolve to
-/// the placeholder's default identically, so the distinction carries no
-/// semantic weight once parsed.
-indirect enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
-	// swiftlint:disable sorted_enum_cases
-	/// `%i` / `%I`. Never negated (`<nullary-input>` has no defined negated
-	/// meaning).
-	case value(success: Format?)
-	/// `%l` / `%L` (`negated: false`: field label) & `%k` / `%K` (`negated:
-	/// true`: field name); `negated` only distinguishes the 2, as neither
-	/// `<nullary-label>` nor `<nullary-name>` may be negated.
-	case label(negated: Bool, success: Format?)
-	/// `%u` / `%U` / `%e` / `%E` / `%w` / `%W` / `%b` / `%B` / `%t` / `%T` / `%f`
-	/// / `%F` / `%s` / `%S`, each optionally negated; `coerced` (`%.o` / `%.t` /
-	/// `%.f`, & verbose / negated variants) is valid only for `.isBoolean` /
-	/// `.isTrue` / `.isFalse`, enforced at parse time.
-	// swiftlint:disable:next enum_case_associated_values_count
-	case standard(StandardKind, negated: Bool, coerced: Bool, success: Format?, failure: Format?)
-	/// `%n` / `%N` / `%-n` / `%-N` / `%.n` / `%.N` / etc.
-	case number(negated: Bool, coerced: Bool, success: Format?, failure: Format?)
-	/// `%v` / `%V` / `%-v` / `%-V`: `<nullary-version>` / `<non-nullary-version>`.
-	case version(negated: Bool, success: Format?, failure: Format?)
-	/// `%c` / `%C` / `%-c` / `%-C`.
-	case date(negated: Bool, success: DateSpec?, failure: Format?)
-	/// `%m` / `%M`. Never negated (`<branches>` has no defined negated meaning).
-	case branches(Branches, failure: Format?) // swiftlint:enable sorted_enum_cases
-}
-
-extension Placeholder: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		switch self {
-		case let .value(success):
-			"value(success: \(success, default: "nil"))"
-		case let .label(negated, success):
-			"label(negated: \(negated), success: \(success, default: "nil"))"
-		case let .standard(kind, negated, coerced, success, failure):
-			"""
-			standard(\(kind), negated: \(negated), coerced: \(coerced), success: \(success, default: "nil"), \
-			failure: \(failure, default: "nil"))
-			"""
-		case let .number(negated, coerced, success, failure):
-			"""
-			number(negated: \(negated), coerced: \(coerced), success: \(success, default: "nil"), \
-			failure: \(failure, default: "nil"))
-			"""
-		case let .version(negated, success, failure):
-			"version(negated: \(negated), success: \(success, default: "nil"), failure: \(failure, default: "nil"))"
-		case let .date(negated, success, failure):
-			"date(negated: \(negated), success: \(success, default: "nil"), failure: \(failure, default: "nil"))"
-		case let .branches(branches, failure):
-			"branches(\(branches), failure: \(failure, default: "nil"))"
 		}
 	}
 }
 
 private extension Placeholder { // swiftlint:disable:this file_types_order
-	/// Returns the evaluated string, or `nil` if this placeholder fails with no
-	/// `<failure-block>` (formatting aborts).
-	func rendered(value: JSON.Node?, label: String, name: String) -> String? {
+	var typeDeterminants: [TypeDeterminant] {
 		switch self {
-		case let .value(success):
-			success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-		case let .label(negated, success):
-			success?.rendered(value: value, label: label, name: name).stringValue ?? (negated ? name : label)
-		case let .standard(kind, negated, coerced, success, failure):
-			(kind.matches(value, coerced: coerced) != negated)
-				? success?.rendered(value: value, label: label, name: name).stringValue
-					?? kind.defaultValue(value: value, negated: negated)
-				: failure?.rendered(value: value, label: label, name: name).stringValue
-		case let .number(negated, coerced, success, failure):
-			(isNumber(value, coerced: coerced) != negated)
-				? success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-				: failure?.rendered(value: value, label: label, name: name).stringValue
-		case let .version(negated, success, failure):
-			(isVersion(value) != negated)
-				? success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-				: failure?.rendered(value: value, label: label, name: name).stringValue
-		case let .date(negated, success, failure):
-			dateRendered(value: value, negated: negated, success: success, failure: failure, label: label, name: name)
-		case let .branches(branches, failure):
-			branches.branches.lazy.compactMap { $0.rendered(value: value, label: label, name: name) }.first
-				?? failure?.rendered(value: value, label: label, name: name).stringValue
+		case let .conditional(matcher, form):
+			[matcher.typeDeterminant] + form.blocks.flatMap(\.typeDeterminants)
+		case let .match(branches, form):
+			branches.flatMap(\.typeDeterminants) + form.blocks.flatMap(\.typeDeterminants)
+		case let .unconditional(_, pipeline):
+			pipeline.map(\.typeDeterminant)
 		}
 	}
 }
 
-/// Whether `value` is a version (fields-format.md): a string of 1 or more
-/// `.`-separated components, each a non-negative integer optionally followed by
-/// non-`.` characters.
-private func isVersion(_ value: JSON.Node?) -> Bool {
-	guard case let .string(literal) = value else {
-		return false
-	}
-	return literal.value.split(separator: ".", omittingEmptySubsequences: false).allSatisfy { component in
-		component.first.map { $0.isASCII && $0.isWholeNumber } ?? false
-	}
-}
-
-/// `coerced`: also matches a JSON string that itself parses as a number (see
-/// `<strict-coercion>` in fields-format.md).
-private func isNumber(_ value: JSON.Node?, coerced: Bool) -> Bool {
-	switch value {
-	case .number:
-		true
-	case let .string(literal):
-		coerced && Double(literal.value) != nil
-	default:
-		false
-	}
-}
-
-/// `%c` / `%C`'s evaluation: fails (returns `nil`) iff
-/// `(parsedDate(from: value) != nil) == negated` & no `failure` is given.
-private func dateRendered(
-	value: JSON.Node?,
-	negated: Bool,
-	success: DateSpec?,
-	failure: Format?,
-	label: String,
-	name: String,
-) -> String? {
-	let date = parsedDate(from: value)
-	return (date != nil) != negated
-		? date.map { (success ?? .default).formatted($0) } ?? (value?.stringValue ?? "")
-		: failure?.rendered(value: value, label: label, name: name).stringValue
-}
-
-/// Parses a field's raw value as a date: ISO-8601 datetime, then ISO-8601
-/// date-only, then a Unix epoch (seconds) numeric timestamp, in that order.
-/// Custom `<input-date-format>`s aren't supported (fields.md defines no
-/// pattern language for `<inline-date-format>`), so this is the only input
-/// detection `<date>` ever uses.
-private func parsedDate(from value: JSON.Node?) -> Date? {
-	guard let raw = value?.stringValue else {
-		return nil
-	}
-	return (try? Date(raw, strategy: .iso8601))
-		?? (try? Date(raw, strategy: .iso8601.year().month().day()))
-		?? Double(raw).map { Date(timeIntervalSince1970: $0) }
-}
-
-/// A parsed `<date>`'s output side: `<output-date-format>`, restricted to a
-/// bare `<date-transform-pipeline>` (no named-format prefix): a named-format
-/// reference needs persistence, & a literal `<inline-date-format>` pattern has
-/// no defined syntax in fields.md, so both fall back to `.default` instead.
-struct DateSpec: Equatable { // swiftlint:disable:this one_declaration_per_file
-	static let `default` = Self(outputTransforms: .init())
-
-	let outputTransforms: [Transform]
-
-	/// Renders `date` per `outputTransforms`. Default (`outputTransforms`
-	/// empty) is ISO-8601 datetime in the system time zone; `dateOnly` switches
-	/// to just the date; `timeZone` sets the output time zone (the last one
-	/// wins).
-	func formatted(_ date: Date) -> String {
-		let timeZone = outputTransforms.lazy
-			.reversed()
-			.compactMap { transform in
-				if case let .timeZone(timeZone) = transform {
-					timeZone
-				} else {
-					nil
-				}
-			}
-			.first
-		let style = Date.ISO8601FormatStyle(timeZone: timeZone ?? .current)
-		return outputTransforms.contains(.dateOnly) ? style.year().month().day().format(date) : style.format(date)
-	}
-}
-
-extension DateSpec: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		"DateSpec(outputTransforms: \(outputTransforms))"
-	}
-}
-
-enum StandardKind: Character { // swiftlint:disable:this one_declaration_per_file
-	// swiftlint:disable sorted_enum_cases
-	case isNull = "u"
-	case isEmpty = "e"
-	case isWhitespace = "w"
-	case isBoolean = "b"
-	case isFalse = "f"
-	case isTrue = "t"
-	case isString = "s" // swiftlint:enable sorted_enum_cases
-
-	/// Whether `<strict-coercion>` is valid on this kind: only the
-	/// boolean-ish kinds (fields-format.md's "Coercion").
-	var isCoercible: Bool {
+private extension ConditionalForm { // swiftlint:disable:this file_types_order
+	var blocks: [Format] {
 		switch self {
-		case .isBoolean, .isFalse, .isTrue:
-			true
-		case .isEmpty, .isNull, .isString, .isWhitespace:
-			false
-		}
-	}
-
-	/// `coerced`: for a boolean-ish kind, also matches a JSON string equal to
-	/// `"true"` / `"false"` (see `<strict-coercion>` in
-	/// fields-format.md); a no-op for a non-`isCoercible` kind.
-	func matches(_ value: JSON.Node?, coerced: Bool) -> Bool {
-		switch self {
-		case .isNull:
-			value.isNullish
-		case .isEmpty:
-			value.isNullish || value?.as(String.self)?.isEmpty == true
-		case .isWhitespace:
-			value.isNullish || value?.as(String.self)?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true
-		case .isBoolean:
-			if case .bool = value {
-				true
-			} else {
-				coerced && (value?.stringValue == "true" || value?.stringValue == "false")
-			}
-		case .isFalse:
-			if case .bool(false) = value {
-				true
-			} else {
-				coerced && value?.stringValue == "false"
-			}
-		case .isTrue:
-			if case .bool(true) = value {
-				true
-			} else {
-				coerced && value?.stringValue == "true"
-			}
-		case .isString:
-			if case .string = value {
-				true
-			} else {
-				false
-			}
-		}
-	}
-
-	/// The placeholder's un-formatted default output, given whether it succeeded
-	/// (`matches`, XOR `negated`).
-	func defaultValue(value: JSON.Node?, negated: Bool) -> String {
-		switch self {
-		case .isNull, .isEmpty, .isWhitespace: // swiftformat:disable:this sortSwitchCases
-			negated ? (value?.stringValue ?? "") : ""
-		case .isBoolean, .isFalse, .isTrue, .isString: // swiftformat:disable:this sortSwitchCases
-			value?.stringValue ?? ""
+		case let .abortOnFailure(success):
+			[success].compactMap(\.self)
+		case let .abortOnSuccess(failure):
+			[failure].compactMap(\.self)
+		case let .binary(success, failure):
+			[success, failure].compactMap(\.self)
 		}
 	}
 }
 
-extension StandardKind: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
+private extension MatchForm { // swiftlint:disable:this file_types_order
+	var blocks: [Format] {
 		switch self {
-		case .isNull:
-			"isNull"
-		case .isEmpty:
-			"isEmpty"
-		case .isWhitespace:
-			"isWhitespace"
-		case .isBoolean:
-			"isBoolean"
-		case .isFalse:
-			"isFalse"
-		case .isTrue:
-			"isTrue"
-		case .isString:
-			"isString"
-		}
-	}
-}
-
-/// `<branches>`: 0 or more non-infallible branches followed by exactly 1 final
-/// branch (which may be infallible).
-struct Branches: Equatable { // swiftlint:disable:this one_declaration_per_file
-	let branches: [Branch]
-}
-
-extension Branches: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		"Branches(\(branches))"
-	}
-}
-
-/// A single `<branch>`. `%m` / `%M` may not themselves appear as a branch;
-/// that's enforced by the parser (there's no `.branches` case here for it to
-/// construct).
-enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
-	case date(negated: Bool, success: DateSpec?)
-	case label(negated: Bool, success: Format?)
-	case number(negated: Bool, coerced: Bool, success: Format?)
-	case standard(StandardKind, negated: Bool, coerced: Bool, success: Format?)
-	case value(success: Format?)
-	case version(negated: Bool, success: Format?)
-
-	var isInfallible: Bool {
-		switch self {
-		case .label, .value:
-			true
-		case .date, .number, .standard, .version:
-			false
-		}
-	}
-}
-
-extension Branch: CustomStringConvertible { // swiftlint:disable:this file_types_order
-	var description: String {
-		switch self {
-		case let .date(negated, success):
-			"date(negated: \(negated), success: \(success, default: "nil"))"
-		case let .label(negated, success):
-			"label(negated: \(negated), success: \(success, default: "nil"))"
-		case let .number(negated, coerced, success):
-			"number(negated: \(negated), coerced: \(coerced), success: \(success, default: "nil"))"
-		case let .version(negated, success):
-			"version(negated: \(negated), success: \(success, default: "nil"))"
-		case let .standard(kind, negated, coerced, success):
-			"standard(\(kind), negated: \(negated), coerced: \(coerced), success: \(success, default: "nil"))"
-		case let .value(success):
-			"value(success: \(success, default: "nil"))"
+		case .abortOnNoMatch:
+			.init()
+		case let .binary(failure):
+			[failure].compactMap(\.self)
 		}
 	}
 }
 
 private extension Branch { // swiftlint:disable:this file_types_order
-	/// Returns the evaluated string, or `nil` if this branch fails (the next
-	/// branch should be tried).
-	func rendered(value: JSON.Node?, label: String, name: String) -> String? {
+	var typeDeterminants: [TypeDeterminant] {
 		switch self {
-		case let .value(success):
-			success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-		case let .label(negated, success):
-			success?.rendered(value: value, label: label, name: name).stringValue ?? (negated ? name : label)
-		case let .standard(kind, negated, coerced, success):
-			kind.matches(value, coerced: coerced) == negated
-				? nil
-				: success?.rendered(value: value, label: label, name: name).stringValue
-					?? kind.defaultValue(value: value, negated: negated)
-		case let .number(negated, coerced, success):
-			isNumber(value, coerced: coerced) == negated
-				? nil
-				: success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-		case let .version(negated, success):
-			isVersion(value) == negated
-				? nil
-				: success?.rendered(value: value, label: label, name: name).stringValue ?? value?.stringValue ?? ""
-		case let .date(negated, success):
-			dateBranchRendered(value: value, negated: negated, success: success)
+		case let .conditional(matcher, _, block):
+			[matcher.typeDeterminant] + (block?.typeDeterminants ?? .init())
+		case let .unconditional(_, block):
+			block?.typeDeterminants ?? .init()
 		}
 	}
 }
 
-private func dateBranchRendered(value: JSON.Node?, negated: Bool, success: DateSpec?) -> String? {
-	let date = parsedDate(from: value)
-	return (date != nil) == negated
-		? nil
-		: date.map { (success ?? .default).formatted($0) } ?? (value?.stringValue ?? "")
-}
-
-// MARK: - Format parsers (fields-format.md)
-
-/// Parses a `<*-placeholder-reference>` / `<format-reference>`:
-/// `[ <named-*-format> ] [ <*-transform-pipeline> ]`, requiring at least 1 of
-/// the 2 to be present. Returns `nil` (consuming nothing) if the input doesn't
-/// begin with `<name-prefix>` or `<transform-call-prefix>`.
-struct FormatReferenceParser { // swiftlint:disable:this one_declaration_per_file
-	let kind: TransformKind
-	let terminatorSet: Set<Character>
-
-	func parse(_ input: inout Substring) throws(ParsingError) -> FormatReference? {
-		let dateSeparatorSet = kind == .date ? Set([dateInputFormatSeparator, dateInputOutputSeparator]) : .init()
-		var namedFormat = String?.none
-		if input.first == namePrefix {
-			input.removeFirst()
-			let name =
-				try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix]).union(dateSeparatorSet))
-			guard knownNamedFormatNameSet.contains(name) else {
-				throw .unknownNamedFormat(name)
-			}
-			namedFormat = name
-		}
-		var transforms = [Transform]()
-		while input.first == transformCallPrefix {
-			input.removeFirst()
-			// A doubled `<transform-call-prefix>` (`<strict-coercion>`) is
-			// only ever meaningful on `<format-block>`'s own top-level pipeline's 1st
-			// `<transform>` (see `parseValueTransformPipelineThenTemplate(_:
-			// namedFormat:terminatorSet:)`, which strips it there before this
-			// function ever sees it); anywhere else (a later `<transform>` in that
-			// same pipeline, or any `<transform>` inside a placeholder's own
-			// sub-format), it's syntactically harmless but has no effect, so it's
-			// simply skipped, not specially recognized or rejected
-			if input.first == transformCallPrefix {
-				input.removeFirst()
-			}
-			let name = try parseTransformName(&input, terminatorSet: terminatorSet.union(dateSeparatorSet))
-			guard let transform = try Transform.parsed(name: name, kind: kind) else {
-				throw .invalidTransform(name: name, expectedKind: kind.rawValue)
-			}
-			transforms.append(transform)
-			// A `<terminal-number-transform>` may only ever be last in its
-			// `<number-transform-pipeline>`; `input.first == transformCallPrefix`
-			// here means the loop is about to try parsing another 1
-			guard !transform.isTerminalNumberTransform || input.first != transformCallPrefix else {
-				throw .terminalNumberTransformFollowedByMore(name: name)
-			}
-		}
-		return namedFormat != nil || !transforms.isEmpty ? .init(namedFormat: namedFormat, transforms: transforms) : nil
+private extension Matcher { // swiftlint:disable:this file_types_order
+	var typeDeterminant: TypeDeterminant {
+		.init(type: predicate.type, coercion: coercion)
 	}
 }
 
-/// Parses 1 `<transform-call>`'s `<transform>` name, right after its
-/// already-consumed `<transform-call-prefix>`: its `<group-arguments>` /
-/// `<scale-arguments>` fence, if present, is included verbatim (exactly as
-/// `Transform.parsed(name:kind:)` expects). Unlike a bare `parseEscapedText`
-/// scan, `:` always ends the name UNLESS the name scanned so far is `group` /
-/// `scale` & is immediately followed by `:` (that transform's own argument
-/// fence); only then does scanning continue through to the fence's own closing
-/// `:`. This keeps a bare (argument-less) transform's name from swallowing a
-/// subsequent `<block-terminator>` (`::`) or stray `:`, both only meaningful to
-/// `<format-block>`'s own top-level `<value-transform-pipeline>` (every other
-/// `<*-transform-pipeline>` site's `terminatorSet` never lets a `:` reach this
-/// function in the first place).
-func parseTransformName(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
-	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([transformCallPrefix, colon]))
-	var afterOpenFence = input
-	guard fenceTakingSimpleNameSet.contains(name), afterOpenFence.first == colon else {
-		return name
-	}
-	afterOpenFence.removeFirst() // the candidate fence's opening ':'
-	guard afterOpenFence.first != colon else {
-		// An immediately-empty fence is never valid syntax anyway (`group` /
-		// `scale` both require nonempty arguments), so this 2nd ':' can't be a
-		// fence's own closing 1: it's `<format-block>`'s `<block-terminator>`
-		// (`::`) instead, & the 1st ':' isn't part of this (argument-less)
-		// name at all
-		return name
-	}
-	input = afterOpenFence
-	let arguments = try parseEscapedText(&input, terminatorSet: Set([colon]))
-	guard input.first == colon else {
-		throw .missingEndFence
-	}
-	input.removeFirst() // the fence's closing ':'
-	return name + argumentFence + arguments + argumentFence
-}
-
-/// Parses `<string-block>` / `<failure-block>` / `<number-block>`-shaped
-/// content: a mix of literal text & `<placeholder>`s, up to (but not including)
-/// 1 of `terminatorSet`.
-struct FormatContentParser { // swiftlint:disable:this one_declaration_per_file
-	let terminatorSet: Set<Character>
-
-	func parse(_ input: inout Substring) throws(ParsingError) -> Format {
-		var parts = [FormatPart]()
-		var text = ""
-		func flushText() {
-			if !text.isEmpty {
-				parts.append(.text(text))
-				text = ""
-			}
-		}
-		while let char = input.first, !terminatorSet.contains(char) {
-			if char == placeholderPrefix {
-				flushText()
-				parts.append(.placeholder(try PlaceholderParser().parse(&input)))
-			} else if char == escapePrefix {
-				input.removeFirst()
-				if let escaped = input.first {
-					text.append(escaped)
-					input.removeFirst()
-				}
-			} else {
-				text.append(char)
-				input.removeFirst()
-			}
-		}
-		flushText()
-		return .parts(parts)
-	}
-}
-
-/// The kind of transform pipeline expected at a given parse site, per
-/// `<date-transform-pipeline>` / `<number-transform-pipeline>` /
-/// `<string-transform-pipeline>`.
-enum TransformKind: String, CaseIterable { // swiftlint:disable:this one_declaration_per_file
-	case date
-	case number
-	case string
-
-	/// Which kind `name` (a `<transform>`'s own name, `<group-arguments>` /
-	/// `<scale-arguments>` included verbatim if present) belongs to: tried by
-	/// actually attempting to parse it as each kind in turn (rather than a
-	/// separate, duplicated name-shape check), keeping the 1st success. Every
-	/// `<transform>` name is unique across kinds, so this is never ambiguous:
-	/// trying a "wrong" kind for a given name always fails cleanly (`nil`, not a
-	/// thrown error, since `Transform.parsed(name:kind:)` only ever attempts
-	/// argument parsing (which is what can throw) once it's already matched
-	/// `name`'s own shape to `kind`), so a thrown error (e.g., invalid
-	/// `<group-arguments>`) can only come from the kind `name`'s shape actually
-	/// belongs to; propagating it immediately, without trying the remaining
-	/// kinds, is therefore correct. Used only by `<format-block>`'s own top-level
-	/// `<value-transform-pipeline>`, the 1 site that can't know its kind up
-	/// front (see `parseValueTransformPipelineThenTemplate(_:namedFormat:
-	/// terminatorSet:)` in `FieldSpec.swift`).
-	static func of(transformName name: String) throws(ParsingError) -> Self? {
-		for kind in allCases where try Transform.parsed(name: name, kind: kind) != nil {
-			return kind
-		}
-		return nil
-	}
-
-	var allowedTransformSet: Set<Transform> {
+extension Predicate { // swiftlint:disable:this file_types_order
+	/// This predicate's `type:` comment part.
+	var type: FieldType {
 		switch self {
-		case .date:
-			Transform.dateTransformSet
+		case .boolean, .false, .true: // swiftformat:disable:this sortSwitchCases
+			.boolean
+		case .chronologic:
+			.chronologic
+		case .empty, .null, .whitespace: // swiftformat:disable:this sortSwitchCases
+			.any
 		case .number:
-			Transform.numberTransformSet
+			.number
 		case .string:
-			Transform.stringTransformSet
+			.string
+		case .version:
+			.version
 		}
 	}
 }
 
-/// Whether `format` (`nil` counts as empty) is a `<format-template>` with no
-/// `<placeholder>` at all, & so would render the same output regardless of
-/// the field's value (see `ParsingError.templateLacksPlaceholder`). A bare
-/// `.reference` (a transform pipeline with no template) is never flagged: its
-/// own output already depends on the field's value.
-func formatLacksPlaceholder(_ format: Format?) -> Bool {
-	switch format {
-	case nil:
-		true
-	case .reference, .valuePipeline:
-		false
-	case let .parts(parts):
-		!parts.contains { part in
-			if case .placeholder = part {
-				true
+private extension FieldType { // swiftlint:disable:this file_types_order
+	/// The nullary predicate whose type this is; `.any` has none (its nullary
+	/// placeholder is `%i`, which is unconditional).
+	var nullaryPredicate: Predicate {
+		switch self {
+		case .any, .string: // swiftformat:disable:this sortSwitchCases
+			.string
+		case .boolean:
+			.boolean
+		case .chronologic:
+			.chronologic
+		case .number:
+			.number
+		case .version:
+			.version
+		}
+	}
+}
+
+private extension TransformCall { // swiftlint:disable:this file_types_order
+	/// This call's transform's `type:` comment part, except that a coerced
+	/// `<string-transform>` is "any".
+	var typeDeterminant: TypeDeterminant {
+		switch transform.kind {
+		case .chronologic:
+			.init(type: .chronologic, coercion: isCoerced ? .strict : nil)
+		case .number, .numberToString: // swiftformat:disable:this sortSwitchCases
+			.init(type: .number, coercion: isCoerced ? .strict : nil)
+		case .string:
+			isCoerced ? .any : .init(type: .string, coercion: nil)
+		}
+	}
+}
+
+// MARK: - Formatting errors
+
+/// An error reported while formatting a value.
+enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	/// A transform without `<strict-coercion>` was applied to an input that
+	/// isn't already of its input type.
+	case transformInputTypeMismatch(transform: Transform, input: String)
+
+	var description: String {
+		switch self {
+		case let .transformInputTypeMismatch(transform, input):
+			"Transform \(transform) requires an input of its input type (<strict-coercion> '.' coerces it): \(input)"
+		}
+	}
+}
+
+// MARK: - Evaluation
+
+extension Format { // swiftlint:disable:this file_types_order
+	private var isPassthrough: Bool {
+		switch self {
+		case let .pipeline(calls):
+			calls.isEmpty
+		case let .template(elements):
+			elements == [.placeholder(.unconditional(.input, pipeline: .init()))]
+		}
+	}
+
+	/// Renders this format against `value` (`nil` iff the field doesn't exist
+	/// for this item), producing the node to display / embed in output. A
+	/// format that is solely `%i` (or `%I` without a pipeline), or a pipeline
+	/// without any value transforms, passes the original node through unchanged
+	/// (so JSON output preserves the value's type); anything else produces a
+	/// string, which is empty iff formatting aborts.
+	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
+		isPassthrough
+			? value ?? .null
+			: .string(try evaluated(in: .init(input: value, label: label, name: name, matched: nil)) ?? "")
+	}
+
+	/// The evaluated string, or `nil` iff formatting aborts.
+	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .pipeline(calls):
+			// A block's pipeline formats the enclosing matcher's value; a
+			// `<format-block>`'s, the field value
+			return try (context.matched ?? .input(context.input)).applying(calls)?.string
+		case let .template(elements):
+			var result = ""
+			for element in elements {
+				guard let evaluated = try element.evaluated(in: context) else {
+					return nil
+				}
+				result += evaluated
+			}
+			return result
+		}
+	}
+}
+
+/// The context a format is evaluated in.
+private struct FormatContext { // swiftlint:disable:this one_declaration_per_file
+	let input: JSON.Node?
+	let label: String
+	let name: String
+	/// The enclosing matcher's value, for a `<block-placeholder>`.
+	let matched: FormatValue?
+
+	func matching(_ matched: FormatValue) -> Self {
+		.init(input: input, label: label, name: name, matched: matched)
+	}
+}
+
+private extension TemplateElement { // swiftlint:disable:this file_types_order
+	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .blockPlaceholder(pipeline):
+			try (context.matched ?? .input(context.input)).applying(pipeline)?.string
+		case let .placeholder(placeholder):
+			try placeholder.evaluated(in: context)
+		case let .text(text):
+			text
+		}
+	}
+}
+
+private extension Placeholder { // swiftlint:disable:this file_types_order
+	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .conditional(matcher, form):
+			let matched = matcher.matched(context.input)
+			return switch form {
+			case let .abortOnFailure(success):
+				if let matched {
+					try success?.evaluated(in: context.matching(matched)) ?? matched.string
+				} else {
+					nil
+				}
+			case let .abortOnSuccess(failure):
+				if matched == nil {
+					try failure?.evaluated(in: context) ?? ""
+				} else {
+					nil
+				}
+			case let .binary(success, failure):
+				if let matched {
+					try success?.evaluated(in: context.matching(matched)) ?? matched.string
+				} else {
+					try failure?.evaluated(in: context) ?? ""
+				}
+			}
+		case let .match(branches, form):
+			for branch in branches {
+				if let evaluated = try branch.evaluated(in: context) {
+					return evaluated
+				}
+			}
+			return switch form {
+			case .abortOnNoMatch:
+				nil
+			case let .binary(failure):
+				try failure?.evaluated(in: context) ?? ""
+			}
+		case let .unconditional(predicate, pipeline):
+			return try predicate.value(in: context).applying(pipeline)?.string
+		}
+	}
+}
+
+private extension Branch { // swiftlint:disable:this file_types_order
+	/// The branch's value, or `nil` iff it returns none (the next branch is
+	/// tried); a branch's block aborting is indistinguishable from no value.
+	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .conditional(matcher, isNegated, block):
+			let matched = matcher.matched(context.input)
+			return if isNegated {
+				matched == nil ? try block?.evaluated(in: context) ?? FormatValue.input(context.input).string : nil
+			} else if let matched {
+				try block?.evaluated(in: context.matching(matched)) ?? matched.string
 			} else {
-				false
+				nil
 			}
+		case let .unconditional(predicate, block):
+			let value = predicate.value(in: context)
+			return try block?.evaluated(in: context.matching(value)) ?? value.string
 		}
 	}
 }
 
-/// Parses `<block-terminator>`-suffixed content, i.e., `[ <standard> ]` / `[
-/// <failure-block> ]` / `[ <number> ]` through & including their closing `+`.
-/// Assumes the leading content (if any) has not yet been consumed.
-/// `requirePlaceholder` rejects empty / placeholder-less content: pass `true`
-/// only for a top-level, standalone infallible placeholder's (`%i` / `%I`, `%l`
-/// / `%L`) own success format, which always applies, unlike a fallible
-/// placeholder's (e.g., `%n` / `%N`) own success / failure, reached only
-/// conditionally, so it'd otherwise render the same output regardless of the
-/// field's value, something a bare literal could already do with no placeholder
-/// wrapping it at all. A `%i` / `%I` / `%l` / `%L` used as 1 of `%m`'s own
-/// `<branches>` is exempt even though it's still infallible: no bare literal
-/// could stand in for it there, since it'd lose the "only if every earlier
-/// branch failed" ordering the branch itself provides.
-func parseDelimitedFormat(_ input: inout Substring, kind: TransformKind, requirePlaceholder: Bool)
-throws(ParsingError) -> Format? {
-	let terminatorSet = Set([placeholderPrefix, formatDelimiter])
-	let value = if let reference = try FormatReferenceParser(kind: kind, terminatorSet: terminatorSet).parse(&input) {
-		Format.reference(reference)
-	} else if input.first != formatDelimiter {
-		try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
-	} else {
-		Format?.none
+private extension UnconditionalPredicate { // swiftlint:disable:this file_types_order
+	func value(in context: FormatContext) -> FormatValue {
+		switch self {
+		case .input:
+			.input(context.input)
+		case .label:
+			.string(context.label)
+		case .name:
+			.string(context.name)
+		}
 	}
-	guard input.first == formatDelimiter else {
-		throw .missingEndFence
-	}
-	input.removeFirst()
-	guard !requirePlaceholder || !formatLacksPlaceholder(value) else {
-		throw .templateLacksPlaceholder
-	}
-	return value
 }
 
-/// Parses `<date>` up to, but not including, its closing `<block-terminator>`.
-/// A custom `<input-date-format>` & a non-bare `<output-date-format>` (a
-/// named-format reference or literal pattern text) aren't implemented yet
-/// (fields.md defines no pattern language for `<inline-date-format>`, & a
-/// named reference needs persistence); since fields.md's own grammar makes
-/// both look like they should do something, using either is a parse error
-/// here, rather than silently falling back to `DateSpec.default`.
-func parseDateSpec(_ input: inout Substring) throws(ParsingError) -> DateSpec? {
-	let terminatorSet = Set([placeholderPrefix, formatDelimiter, dateInputFormatSeparator, dateInputOutputSeparator])
-	func parseOneDateFormat() throws(ParsingError) -> Format {
-		if let reference = try FormatReferenceParser(kind: .date, terminatorSet: terminatorSet).parse(&input) {
-			return .reference(reference)
-		}
-		return try FormatContentParser(terminatorSet: terminatorSet).parse(&input)
+extension Matcher { // swiftlint:disable:this file_types_order
+	/// Whether `value` conforms to this matcher's predicate with its coercion.
+	func conforms(_ value: JSON.Node?) -> Bool {
+		matched(value) != nil
 	}
 
-	guard input.first != formatDelimiter else {
-		return nil
+	/// This matcher's value iff it matches `value`, else `nil`.
+	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
+		switch predicate {
+		case .boolean:
+			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
+		case .chronologic:
+			.chronologic(from: value)
+		case .empty:
+			value.isNullish || value.jsonString?.isEmpty == true ? .string("") : nil
+		case .false:
+			value.boolean(isCoerced: coercion != nil) == false ? .input(.bool(false)) : nil
+		case .null:
+			value.isNullish ? .string("") : nil
+		case .number:
+			.number(from: value, coercion: coercion)
+		case .string:
+			value.jsonString.map(FormatValue.string)
+		case .true:
+			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
+		case .version:
+			value.jsonString.flatMap { isVersion($0) ? .string($0) : nil }
+		case .whitespace:
+			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .string("") : nil
+		}
 	}
-	let format = try parseOneDateFormat()
-	guard input.first != dateInputFormatSeparator, input.first != dateInputOutputSeparator else {
-		throw .unsupportedDateInputFormat
-	}
-	guard case let .reference(reference) = format, reference.namedFormat == nil else {
-		throw .unsupportedDateOutputFormat
-	}
-	return .init(outputTransforms: reference.transforms)
 }
 
-/// Parses a single `<placeholder>`, including any `<standard>` /
-/// `<failure-block>` / `<number>` / `<date>` / `<branches>` & nested
-/// placeholders within it. Assumes `<placeholder-prefix>` has not yet been
-/// consumed.
-struct PlaceholderParser { // swiftlint:disable:this one_declaration_per_file
-	func parse(_ input: inout Substring) throws(ParsingError) -> Placeholder {
-		guard input.first == placeholderPrefix else {
-			throw .missingFieldName // Unreachable given the call sites, but keeps this parser self-contained
-		}
-		input.removeFirst()
-		var negated = false
-		if input.first == placeholderNegation {
-			negated = true
-			input.removeFirst()
-		}
-		var coerced = false
-		if input.first == placeholderCoercion {
-			coerced = true
-			input.removeFirst()
-		}
-		guard let letter = input.first else {
-			throw .missingFieldName
-		}
-		input.removeFirst()
-		let isVerbose = letter.isUppercase
-		switch letter {
-		case "i", "I":
-			guard !negated else {
-				throw .invalidLetter(letter) // `<nullary-input>` / `<non-nullary-input>` has no defined negated meaning
-			}
-			guard !coerced else {
-				throw .coercionNotSupported(letter)
-			}
-			return .value(
-				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
-			)
-		case "k", "K", "l", "L":
-			guard !negated else {
-				throw .invalidLetter(letter) // `<nullary-label>` / `<nullary-name>` & non-nullary forms are unconditional
-			}
-			guard !coerced else {
-				throw .coercionNotSupported(letter)
-			}
-			return .label(
-				negated: letter.lowercased() == "k",
-				success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: true) : nil,
-			)
-		case "n", "N":
-			return isVerbose
-				? .number(
-					negated: negated,
-					coerced: coerced,
-					success: try parseDelimitedFormat(&input, kind: .number, requirePlaceholder: false),
-					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-				)
-				: .number(negated: negated, coerced: coerced, success: nil, failure: nil)
-		case "v", "V":
-			guard !coerced else {
-				throw .coercionNotSupported(letter)
-			}
-			return isVerbose
-				? .version(
-					negated: negated,
-					success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-				)
-				: .version(negated: negated, success: nil, failure: nil)
-		case "c", "C":
-			guard !coerced else {
-				throw .coercionNotSupported(letter) // Chronologic matching already coerces across string / numeric input
-			}
-			guard isVerbose else {
-				return .date(negated: negated, success: nil, failure: nil)
-			}
-			let success = try parseDateSpec(&input)
-			guard input.first == formatDelimiter else {
-				throw .missingEndFence
-			}
-			input.removeFirst()
-			return .date(
-				negated: negated,
-				success: success,
-				failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-			)
-		case "m", "M":
-			guard !negated else {
-				throw .invalidLetter(letter) // `<nullary-match>` / `<non-nullary-match>` has no defined negated meaning
-			}
-			guard !coerced else {
-				throw .coercionNotSupported(letter)
-			}
-			let branches = try parseBranches(&input)
-			guard input.first == formatDelimiter else {
-				throw .missingEndFence
-			}
-			input.removeFirst()
-			return .branches(
-				branches,
-				failure: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
-			)
+/// Whether `string` is a version: 1 or more `.`-separated components, each a
+/// non-negative integer optionally followed by non-`.` characters.
+func isVersion(_ string: String) -> Bool {
+	string.split(separator: ".", omittingEmptySubsequences: false).allSatisfy { component in
+		component.first.map { $0.isASCII && $0.isWholeNumber } ?? false
+	}
+}
+
+// MARK: - Values
+
+/// A value being formatted.
+private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
+	/// A chronologic value, rendered per `style`.
+	case chronologic(Date, style: ChronologicStyle)
+	/// The field value, at its original type.
+	case input(JSON.Node?)
+	/// A number, between its trivia (both empty unless leniently coerced).
+	case number(String, triviaPrefix: Substring, triviaSuffix: Substring)
+	/// A string.
+	case string(String)
+
+	/// The value parsed as chronologic: an ISO-8601 datetime, then an ISO-8601
+	/// date-only, then a Unix epoch (seconds) numeric timestamp; else `nil`.
+	static func chronologic(from value: JSON.Node?) -> Self? {
+		switch value {
+		case let .number(number):
+			Double("\(number)").map { .chronologic(.init(timeIntervalSince1970: $0), style: .init(isDateOnly: false)) }
+		case let .string(literal):
+			(try? Date(literal.value, strategy: .iso8601)).map { .chronologic($0, style: .init(isDateOnly: false)) }
+				?? (try? Date(literal.value, strategy: Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
+				.map { .chronologic($0, style: .init(isDateOnly: true)) }
+				?? Double(literal.value)
+				.map { .chronologic(.init(timeIntervalSince1970: $0), style: .init(isDateOnly: false)) }
 		default:
-			guard let kind = StandardKind(rawValue: isVerbose ? Character(letter.lowercased()) : letter) else {
-				throw .invalidLetter(letter)
-			}
-			guard !coerced || kind.isCoercible else {
-				throw .coercionNotSupported(letter)
-			}
-			return isVerbose
-				? .standard(
-					kind,
-					negated: negated,
-					coerced: coerced,
-					success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-					failure: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false),
-				)
-				: .standard(kind, negated: negated, coerced: coerced, success: nil, failure: nil)
+			nil
 		}
 	}
 
-	/// Parses `<branches>` up to, but not including, its closing
-	/// `<block-terminator>`.
-	private func parseBranches(_ input: inout Substring) throws(ParsingError) -> Branches {
-		var branches = [Branch]()
-		while let first = input.first, first != formatDelimiter {
-			var negated = false
-			if input.first == placeholderNegation {
-				negated = true
-				input.removeFirst()
-			}
-			var coerced = false
-			if input.first == placeholderCoercion {
-				coerced = true
-				input.removeFirst()
-			}
-			guard let letter = input.first else {
-				throw .missingFieldName
-			}
-			guard letter != "m", letter != "M" else {
-				throw .invalidLetter(letter) // `%m` / `%M` may not themselves be used as branches
-			}
-			input.removeFirst()
-			let isVerbose = letter.isUppercase
-			let branch: Branch
-			switch letter {
-			case "i":
-				guard !negated else {
-					throw .invalidLetter(letter) // `<nullary-input>` has no defined negated meaning
-				}
-				guard !coerced else {
-					throw .coercionNotSupported(letter)
-				}
-				branch = .value(success: nil)
-			case "I":
-				guard !negated else {
-					throw .invalidLetter(letter) // `<non-nullary-input>` has no defined negated meaning
-				}
-				guard !coerced else {
-					throw .coercionNotSupported(letter)
-				}
-				branch = .value(success: try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false))
-			case "k", "K", "l", "L":
-				guard !negated else {
-					throw .invalidLetter(letter) // `<unconditional-branch>`es have no `<branch-negation>`
-				}
-				guard !coerced else {
-					throw .coercionNotSupported(letter)
-				}
-				branch = .label(
-					negated: letter.lowercased() == "k",
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
-				)
-			case "n", "N":
-				branch = .number(
-					negated: negated,
-					coerced: coerced,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .number, requirePlaceholder: false) : nil,
-				)
-			case "v", "V":
-				guard !coerced else {
-					throw .coercionNotSupported(letter)
-				}
-				branch = .version(
-					negated: negated,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
-				)
-			case "c", "C":
-				guard !coerced else {
-					throw .coercionNotSupported(letter) // Chronologic matching already coerces across string / numeric input
-				}
-				let success = isVerbose ? try parseDateSpec(&input) : nil
-				if isVerbose {
-					guard input.first == formatDelimiter else {
-						throw .missingEndFence
-					}
-					input.removeFirst()
-				}
-				branch = .date(negated: negated, success: success)
-			default:
-				guard let kind = StandardKind(rawValue: isVerbose ? Character(letter.lowercased()) : letter) else {
-					throw .invalidLetter(letter)
-				}
-				guard !coerced || kind.isCoercible else {
-					throw .coercionNotSupported(letter)
-				}
-				branch = .standard(
-					kind,
-					negated: negated,
-					coerced: coerced,
-					success: isVerbose ? try parseDelimitedFormat(&input, kind: .string, requirePlaceholder: false) : nil,
-				)
-			}
-			branches.append(branch)
-			guard !branch.isInfallible else {
-				break // An infallible branch, if present, must be the last one
-			}
+	/// The value as a number, per `coercion`: a JSON number; with
+	/// `<strict-coercion>`, also a string whose entire content parses as a
+	/// number (whose value is the parsed number); with `<lenient-coercion>`,
+	/// also a string containing exactly 1 number, between trivia.
+	static func number(from value: JSON.Node?, coercion: Coercion?) -> Self? {
+		switch (value, coercion) {
+		case let (.number(number), _):
+			.number("\(number)", triviaPrefix: "", triviaSuffix: "")
+		case let (.string(literal), .lenient):
+			lenientNumber(in: literal.value)
+		case let (.string(literal), .strict):
+			Double(literal.value).map { .number(numberString($0), triviaPrefix: "", triviaSuffix: "") }
+		default:
+			nil
 		}
-		guard !branches.isEmpty else {
-			throw .missingFieldName
-		}
-		guard branches.count > 1 else {
-			throw .singleBranch
-		}
-		return .init(branches: branches)
 	}
+
+	/// `string`'s sole number, between its trivia, or `nil` iff `string`
+	/// doesn't contain exactly 1 number.
+	private static func lenientNumber(in string: String) -> Self? {
+		let matches = string.matches(of: /[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?|[-+]?\.\d+/)
+		guard matches.count == 1, let range = matches.first?.range else {
+			return nil
+		}
+		return .number(
+			.init(string[range]),
+			triviaPrefix: string[..<range.lowerBound],
+			triviaSuffix: string[range.upperBound...],
+		)
+	}
+
+	/// The rendered value.
+	var string: String {
+		switch self {
+		case let .chronologic(date, style):
+			style.formatted(date)
+		case let .input(node):
+			node?.stringValue ?? ""
+		case let .number(number, triviaPrefix, triviaSuffix):
+			triviaPrefix + number + triviaSuffix
+		case let .string(string):
+			string
+		}
+	}
+
+	private var isString: Bool {
+		switch self {
+		case .chronologic, .number:
+			false
+		case let .input(node):
+			node.jsonString != nil
+		case .string:
+			true
+		}
+	}
+
+	/// This value transformed by `calls`, or `nil` iff a coercion fails
+	/// (formatting aborts).
+	func applying(_ calls: [TransformCall]) throws(FormattingError) -> Self? {
+		var value = self
+		for call in calls {
+			guard let transformed = try value.applying(call) else {
+				return nil
+			}
+			value = transformed
+		}
+		return value
+	}
+
+	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
+		switch call.transform.kind {
+		case .chronologic:
+			guard case let .chronologic(date, style)? = try coercedChronologic(for: call) else {
+				return nil
+			}
+			return .chronologic(date, style: style.applying(call.transform))
+		case .number, .numberToString: // swiftformat:disable:this sortSwitchCases
+			guard case let .number(number, triviaPrefix, triviaSuffix)? = try coercedNumber(for: call) else {
+				return nil
+			}
+			// A number's grouping separators are removed, so it may be transformed
+			return .number(
+				call.transform.applied(to: number.filter { $0 != "," }),
+				triviaPrefix: triviaPrefix,
+				triviaSuffix: triviaSuffix,
+			)
+		case .string:
+			guard call.isCoerced || isString else {
+				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			}
+			return .string(call.transform.applied(to: string))
+		}
+	}
+
+	/// This value as chronologic, coerced iff `call` has `<strict-coercion>`
+	/// (`nil` iff that coercion fails).
+	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
+		if case .chronologic = self {
+			return self
+		}
+		guard call.isCoerced else {
+			throw .transformInputTypeMismatch(transform: call.transform, input: string)
+		}
+		return if case let .input(node) = self {
+			.chronologic(from: node)
+		} else {
+			.chronologic(from: .string(string))
+		}
+	}
+
+	/// This value as a number, coerced iff `call` has `<strict-coercion>`
+	/// (`nil` iff that coercion fails).
+	private func coercedNumber(for call: TransformCall) throws(FormattingError) -> Self? {
+		switch self {
+		case let .input(.number(number)):
+			return .number("\(number)", triviaPrefix: "", triviaSuffix: "")
+		case .number:
+			return self
+		default:
+			guard call.isCoerced else {
+				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			}
+			return .number(from: .string(string), coercion: .strict)
+		}
+	}
+}
+
+/// How a chronologic value is rendered: ISO-8601, per input (date-only or
+/// datetime), in the system time zone, unless modified by chronologic
+/// transforms.
+private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_declaration_per_file
+	var isDateOnly: Bool
+	var timeZone = TimeZone?.none
+
+	/// This style modified by a chronologic `transform`: `dateOnly` renders
+	/// only the date; `timeZone` sets the output time zone (the last one wins).
+	func applying(_ transform: Transform) -> Self {
+		var style = self
+		switch transform {
+		case .dateOnly:
+			style.isDateOnly = true
+		case let .timeZone(timeZone):
+			style.timeZone = timeZone
+		default:
+			break
+		}
+		return style
+	}
+
+	func formatted(_ date: Date) -> String {
+		let style = Date.ISO8601FormatStyle(timeZone: timeZone ?? .current)
+		return isDateOnly ? style.year().month().day().format(date) : style.format(date)
+	}
+}
+
+/// `value`, printed as a plain integer iff it is integral.
+private func numberString(_ value: Double) -> String {
+	value == value.rounded() && abs(value) < 1e15 ? .init(Int(value)) : .init(value)
 }
 
 private extension JSON.Node? {
@@ -1019,22 +704,26 @@ private extension JSON.Node? {
 			false
 		}
 	}
+
+	/// The string iff this is a JSON string.
+	var jsonString: String? {
+		if case let .string(literal) = self {
+			literal.value
+		} else {
+			nil
+		}
+	}
+
+	/// The boolean iff this is a JSON boolean or, iff `isCoerced`, a string
+	/// that is `true` or `false`.
+	func boolean(isCoerced: Bool) -> Bool? { // swiftlint:disable:this discouraged_optional_boolean
+		switch self {
+		case let .bool(bool):
+			bool
+		case let .string(literal) where isCoerced:
+			["false": false, "true": true][literal.value]
+		default:
+			nil
+		}
+	}
 }
-
-// MARK: Constants
-
-let placeholderPrefix = Character("%")
-let formatModifierPrefix = Character(":")
-let formatDelimiter = Character("+")
-
-private let placeholderNegation = Character("-")
-private let placeholderCoercion = Character(".")
-let namePrefix = Character(":")
-let transformCallPrefix = Character(".")
-private let dateInputFormatSeparator = Character(",")
-private let dateInputOutputSeparator = Character("_")
-
-// swiftlint:disable:next todo
-// TODO: once persisted named formats exist, union their names in; until then,
-//  every `<named-format-reference>` reports an error, per fields-format.md
-let knownNamedFormatNameSet = Set<String>()

@@ -303,6 +303,25 @@ which was not permitted, so it is left for review.
 are `digitGroupSeparator` / `digitGroupDigitCount`, matching fields-format.md's
 `<initial-uppercase>`, `<digit-group-separator>` & `<digit-group-digit-count>`.
 
+### Format Rewrite
+
+`Format.swift` (AST, evaluation, type determinants) & the new
+`FormatParser.swift` implement fields-format.md: a `<format-block>` is a
+`<pipeline>` (whose `<format-transform-pipeline>` becomes
+`FieldSpec.justification`, retained iff transitively absent) or a
+`<format-template>` (at least 1 placeholder); blocks are `+`-terminated with
+kinds per matcher (string, boolean, number, chronologic, any, unconditional);
+placeholders support `<abort-on-success>`, `<abort-on-failure>`, strict &
+lenient coercion (trivia retained), block placeholders, & match placeholders
+with negated & unconditional branches; template-text whitespace follows the
+escaping appendix; forbidden whitespace after `%`, modifiers, `.` & `:` is an
+error. An uncoerced transform on an input not of its input type throws
+`FormattingError` at render time (surfaced via `OutputError`). An absent
+`<format-block>` defaults to the nullary placeholder for the working format's
+type determinant. This resolves the `parseDelimitedFormat` item in Temp/todo.md
+(blocks may now contain placeholders). Old-draft format tests were replaced by
+`Tests/MASTests/Models/FieldsOption/MASTests+Format*.swift`.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

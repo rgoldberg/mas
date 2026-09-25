@@ -124,8 +124,8 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table renders no header or separator by default, matching pre-existing behavior`() {
-		let table = [JSON.Object([("name", .string("Slack"))])]
+	func `table renders no header or separator by default, matching pre-existing behavior`() throws {
+		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: .default,
@@ -135,7 +135,7 @@ private extension MASTests {
 
 	@Test
 	func `table renders a header row when configured`() throws {
-		let table = [JSON.Object([("name", .string("Slack"))])]
+		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("H"),
@@ -145,7 +145,7 @@ private extension MASTests {
 
 	@Test
 	func `table renders a header row styled with given SGR codes`() throws {
-		let table = [JSON.Object([("name", .string("Slack"))])]
+		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("H1:a"),
@@ -155,7 +155,7 @@ private extension MASTests {
 
 	@Test
 	func `table renders a blank separator line as an empty row, distinct from no separator at all`() throws {
-		let table = [JSON.Object([("name", .string("Slack"))])]
+		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("S\\ :"),
@@ -167,15 +167,15 @@ private extension MASTests {
 	func `table styles a header row for a non-terminal only with always-styling`() throws {
 		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
 		let objects = [JSON.Object([("name", .string("Slack"))])]
-		let alwaysStyled = objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
+		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
 		#expect(alwaysStyled == "\u{1B}[1mName \u{1B}[0m\nSlack")
-		let terminalOnly = objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
+		let terminalOnly = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
 		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name \nSlack"))
 	}
 
 	@Test
 	func `table renders an unbroken separator spanning the whole table width, truncating mid-pattern`() throws {
-		let table = [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
+		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(
 				fieldSpecs: [
 					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
@@ -190,7 +190,7 @@ private extension MASTests {
 
 	@Test
 	func `table renders a broken separator as 1 independently-filled segment per column`() throws {
-		let table = [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
+		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(
 				fieldSpecs: [
 					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
@@ -203,7 +203,7 @@ private extension MASTests {
 
 	@Test
 	func `table uses a custom column-spacing string`() throws {
-		let table = [JSON.Object([("a", .string("1")), ("b", .string("2"))])]
+		let table = try [JSON.Object([("a", .string("1")), ("b", .string("2"))])]
 			.table(
 				fieldSpecs: [
 					.init(name: "a", label: "a", format: .default(fieldName: "a"), sortSpec: nil),
