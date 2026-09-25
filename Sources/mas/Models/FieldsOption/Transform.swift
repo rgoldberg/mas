@@ -15,17 +15,17 @@ internal import Foundation
 /// at parse time, not by this type.
 enum Transform: Hashable {
 	// swiftlint:disable sorted_enum_cases
-	case capitalize
+	case initialUppercase
 	case lowercase
 	case trimWhitespace
 	case uppercase
 
 	case absoluteValue
-	/// Inserts `separator` into the field's integer part every `digitCount`
-	/// digits, counting from the right; a fractional part & leading `-` sign
-	/// are left untouched. See `<group>` in fields-format.md for full
-	/// semantics.
-	case group(separator: String, digitCount: Int)
+	/// Inserts `digitGroupSeparator` into the field's integer part every
+	/// `digitGroupDigitCount` digits, counting from its least significant digit;
+	/// a fractional part & leading `-` sign are left untouched. See `<group>` in
+	/// fields-format.md for full semantics.
+	case group(digitGroupSeparator: String, digitGroupDigitCount: Int)
 	case round
 	/// Divides the field's value by `radix^exponent`, optionally rounds it to
 	/// `significantDigits` total `radix` digits, then renders it in positional
@@ -37,7 +37,7 @@ enum Transform: Hashable {
 	/// Sets the output time zone; see `<time-zone>` in fields-format.md.
 	case timeZone(TimeZone) // swiftlint:enable sorted_enum_cases
 
-	static let stringTransformSet = Set([Self.capitalize, .lowercase, .trimWhitespace, .uppercase])
+	static let stringTransformSet = Set([Self.initialUppercase, .lowercase, .trimWhitespace, .uppercase])
 	/// `group` & `scale` are parameterized & validated separately; see
 	/// `parsed(name:kind:)`.
 	static let numberTransformSet = Set([Self.absoluteValue, .round])
@@ -78,7 +78,7 @@ enum Transform: Hashable {
 	/// parsed `Date`, not just its rendered string.
 	func applied(to string: String) -> String {
 		switch self {
-		case .capitalize:
+		case .initialUppercase:
 			string.uppercasingFirst
 		case .lowercase:
 			string.lowercased()
@@ -88,8 +88,8 @@ enum Transform: Hashable {
 			string.uppercased()
 		case .absoluteValue:
 			Double(string).map { numberString(abs($0), matchingIntegerStyleOf: string) } ?? string
-		case let .group(separator, digitCount):
-			grouped(string, separator: separator, digitCount: digitCount)
+		case let .group(digitGroupSeparator, digitGroupDigitCount):
+			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupDigitCount: digitGroupDigitCount)
 		case .round:
 			Double(string).map { .init(Int($0.rounded())) } ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
@@ -118,15 +118,18 @@ extension Transform {
 		let formatter = NumberFormatter()
 		formatter.locale = locale
 		formatter.numberStyle = .decimal
-		return .group(separator: formatter.groupingSeparator ?? ",", digitCount: max(formatter.groupingSize, 1))
+		return .group(
+			digitGroupSeparator: formatter.groupingSeparator ?? ",",
+			digitGroupDigitCount: max(formatter.groupingSize, 1),
+		)
 	}
 }
 
 /// Applies `<group>`'s grouping to `string`'s integer part (i.e., up to, but
-/// not including, a literal `.`, if any): inserts `separator` every
-/// `digitCount` digits, counting from the right. A leading `-` sign & any
-/// fractional part are left untouched.
-private func grouped(_ string: String, separator: String, digitCount: Int) -> String {
+/// not including, a literal `.`, if any): inserts `digitGroupSeparator` every
+/// `digitGroupDigitCount` digits, counting from its least significant digit. A
+/// leading `-` sign & any fractional part are left untouched.
+private func grouped(_ string: String, digitGroupSeparator: String, digitGroupDigitCount: Int) -> String {
 	let sign = string.hasPrefix("-") ? "-" : ""
 	let unsigned = string.dropFirst(sign.count)
 	let integerPart = unsigned.prefix { $0 != "." }
@@ -134,14 +137,14 @@ private func grouped(_ string: String, separator: String, digitCount: Int) -> St
 	guard integerPart.allSatisfy(\.isNumber), !integerPart.isEmpty else {
 		return string
 	}
-	let grouped = stride(from: integerPart.count, to: 0, by: -digitCount)
+	let grouped = stride(from: integerPart.count, to: 0, by: -digitGroupDigitCount)
 		.map { end in
-			let start = max(0, end - digitCount)
+			let start = max(0, end - digitGroupDigitCount)
 			return integerPart[integerPart.index(integerPart.startIndex, offsetBy: start)..<integerPart
 				.index(integerPart.startIndex, offsetBy: end)]
 		}
 		.reversed()
-		.joined(separator: separator)
+		.joined(separator: digitGroupSeparator)
 	return sign + grouped + fractionalPart
 }
 
@@ -150,7 +153,7 @@ private extension Transform {
 	init?(simpleName name: String) {
 		switch name {
 		case "initialUppercase":
-			self = .capitalize
+			self = .initialUppercase
 		case "lowercase":
 			self = .lowercase
 		case "trimWhitespace":
@@ -171,13 +174,12 @@ private extension Transform {
 
 /// Parses `group`'s `<group-arguments>` (fenced by `argumentFence`) from
 /// `name`, which must already carry both: either a bare locale name (no
-/// `argumentSeparator`), or `groupSeparator,groupDigitCount` (exactly 1).
-/// Neither `<group-locale-name>` nor `<group-separator>` support escaping
-/// `argumentSeparator` / `argumentFence` (unlike most other `{text}` values in
-/// this file): by the time a `<transform-call>`'s name reaches here, any
-/// backslash escapes in it have already been resolved by the caller's
-/// `parseEscapedText`, so there's no way to tell an escaped `,` from a literal
-/// 1 this far downstream.
+/// `argumentSeparator`), or `digitGroupSeparator,digitGroupDigitCount`
+/// (exactly 1). Neither `<locale-identifier>` nor `<digit-group-separator>`
+/// supports escaping `argumentSeparator` / `argumentFence` yet: by the time a
+/// `<transform-call>`'s name reaches here, any backslash escapes in it have
+/// already been resolved by the caller's `parseEscapedText`, so there's no way
+/// to tell an escaped `,` from a literal 1 this far downstream.
 private func groupTransform(name: String) throws(ParsingError) -> Transform {
 	let arguments = name.dropFirst(groupNamePrefix.count).dropLast(argumentFence.count)
 	let parts = arguments.split(separator: argumentSeparator, omittingEmptySubsequences: false)
@@ -185,10 +187,10 @@ private func groupTransform(name: String) throws(ParsingError) -> Transform {
 	case 1 where !parts[0].isEmpty:
 		return .group(locale: .init(identifier: .init(parts[0])))
 	case 2:
-		guard let digitCount = Int(parts[1]), digitCount >= 1 else {
+		guard let digitGroupDigitCount = Int(parts[1]), digitGroupDigitCount >= 1 else {
 			throw .invalidTransformArguments(name: name)
 		}
-		return .group(separator: .init(parts[0]), digitCount: digitCount)
+		return .group(digitGroupSeparator: .init(parts[0]), digitGroupDigitCount: digitGroupDigitCount)
 	default:
 		throw .invalidTransformArguments(name: name)
 	}
@@ -296,7 +298,7 @@ private func numberString(_ value: Double, matchingIntegerStyleOf original: Stri
 extension Transform: CustomStringConvertible {
 	var description: String {
 		switch self {
-		case .capitalize:
+		case .initialUppercase:
 			"initialUppercase"
 		case .lowercase:
 			"lowercase"
@@ -306,8 +308,8 @@ extension Transform: CustomStringConvertible {
 			"uppercase"
 		case .absoluteValue:
 			"absoluteValue"
-		case let .group(separator, digitCount):
-			"group(separator: \"\(separator)\", digitCount: \(digitCount))"
+		case let .group(digitGroupSeparator, digitGroupDigitCount):
+			"group(digitGroupSeparator: \"\(digitGroupSeparator)\", digitGroupDigitCount: \(digitGroupDigitCount))"
 		case .round:
 			"round"
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):

@@ -297,6 +297,12 @@ which was not permitted, so it is left for review.
 `<justify>` names are now `startJustify` / `endJustify` (were `leftJustify` /
 `rightJustify`), per fields-format.md.
 
+### Transform Names
+
+`Transform.capitalize` is now `initialUppercase`, & `group`'s associated values
+are `digitGroupSeparator` / `digitGroupDigitCount`, matching fields-format.md's
+`<initial-uppercase>`, `<digit-group-separator>` & `<digit-group-digit-count>`.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

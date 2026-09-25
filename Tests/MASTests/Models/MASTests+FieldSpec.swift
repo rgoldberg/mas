@@ -662,12 +662,13 @@ private extension MASTests {
 
 	@Test
 	func `applies group, grouping only the integer part, from the right, leaving sign & fraction alone`() {
-		let commaEvery3 = Transform.group(separator: ",", digitCount: 3)
+		let commaEvery3 = Transform.group(digitGroupSeparator: ",", digitGroupDigitCount: 3)
 		#expect(commaEvery3.applied(to: "1234567") == "1,234,567")
 		#expect(commaEvery3.applied(to: "123") == "123")
 		#expect(commaEvery3.applied(to: "-1234567") == "-1,234,567")
 		#expect(commaEvery3.applied(to: "1234567.89") == "1,234,567.89")
-		#expect(Transform.group(separator: "'", digitCount: 2).applied(to: "1462715242") == "14'62'71'52'42")
+		#expect(Transform.group(digitGroupSeparator: "'", digitGroupDigitCount: 2)
+			.applied(to: "1462715242") == "14'62'71'52'42")
 		#expect(commaEvery3.applied(to: "not a number") == "not a number")
 	}
 
@@ -683,7 +684,7 @@ private extension MASTests {
 		arguments: [
 			("group", TransformKind.number, Transform?.some(.group(locale: .current))),
 			("group:de_DE:", .number, .group(locale: .init(identifier: "de_DE"))),
-			("group:.,3:", .number, .group(separator: ".", digitCount: 3)),
+			("group:.,3:", .number, .group(digitGroupSeparator: ".", digitGroupDigitCount: 3)),
 			("group", .string, nil),
 		],
 	)
