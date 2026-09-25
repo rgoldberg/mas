@@ -97,7 +97,7 @@ jobs:
         HOMEBREW_NO_INSTALL_FROM_API: 1
         VERSION: ${{inputs.version}}
       run: |
-        git tag "v${VERSION}" "${COMMIT_SHA}"
+        git tag "v${VERSION:?}" "${COMMIT_SHA}"
         formula_path="$(brew edit --print-path mas)"
         readonly formula_path
         if [[ -n "${FORMULA}" ]]; then
