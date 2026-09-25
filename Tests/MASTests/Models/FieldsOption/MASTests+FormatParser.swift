@@ -183,7 +183,7 @@ private extension MASTests {
 		arguments: [
 			(".uppercase", JSON.Node.number(5)),
 			(".round", .string("5.6")),
-			(".dateOnly", .string("2020-03-18")),
+			(".dateOnly", .string("not a date")),
 		],
 	)
 	func `an uncoerced transform on an input not of its input type is an error`(format: String, value: JSON.Node)

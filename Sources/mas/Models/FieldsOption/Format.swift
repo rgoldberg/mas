@@ -671,20 +671,21 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// This value as chronologic, coerced iff `call` has `<strict-coercion>`
-	/// (`nil` iff that coercion fails).
+	/// This value as chronologic iff it conforms to the chronologic predicate,
+	/// else `nil` iff `call` has `<strict-coercion>` (formatting aborts).
 	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
 		if case .chronologic = self {
 			return self
 		}
-		guard call.isCoerced else {
+		let chronologic = if case let .input(node) = self {
+			Self.chronologic(from: node)
+		} else {
+			Self.chronologic(from: .string(string))
+		}
+		guard chronologic != nil || call.isCoerced else {
 			throw .transformInputTypeMismatch(transform: call.transform, input: string)
 		}
-		return if case let .input(node) = self {
-			.chronologic(from: node)
-		} else {
-			.chronologic(from: .string(string))
-		}
+		return chronologic
 	}
 
 	/// This value as a number, coerced iff `call` has `<strict-coercion>`
