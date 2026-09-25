@@ -99,6 +99,10 @@ file to reflect it.
   Swift source, not just `.md` files
 - **Tables:** Align pipes; pad each column to its longest cell (excluding the
   delimiter row) plus 1 space on each side
+- **Links:** Fill link text like other prose. If a URL doesn't fit on a line,
+  end the line with `](`, put the URL on its own line, indented 2 spaces deeper
+  than the text's continuation lines, then put `)` on the next line at the
+  continuation lines' indentation
 
 ## Specs
 
