@@ -457,3 +457,23 @@ known up front (`config`, via `OutputConfig.fieldNameSet`) reports a reference
 to any other field (an absolute field name, an insertion, or a hide of an
 unmatched name) as `nonexistentField`; other commands' fields can't be known
 up front, so aren't checked.
+
+### Spec Compliance Audit (2026-09-25)
+
+Probed every fields-format.md, fields.md & table.md grammar construct & prose
+example (~300 cases, via a throwaway test) against the parser & renderer; the
+only divergences, each fixed in its own commit:
+
+- An uncoerced chronologic transform reported a type mismatch for a value `%c`
+  matches (an ISO-8601 string or a Unix epoch number).
+- UTC offsets rendered in ISO-8601's basic format (`+0900`) beside an extended
+  date & time; now `+09:00`.
+- Contiguous uncollapsed boundaries formed 1 segment & same-group boundaries
+  compared by character; each boundary is now its own segment, compared by
+  group precedence alone.
+- A trailing `,` in a `<field-spec-edits-section>` was accepted.
+- An explicit `s` with `b` / `u` still implied a table header row.
+
+3 spec questions were appended to Temp/todo.md "Implementation Questions".
+Still unimplemented: persisted custom named configs / named formats & context
+stack lookup (Temp/todo.md "ASAP Version, But Massive Effort").
