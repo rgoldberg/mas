@@ -33,6 +33,7 @@ jobs:
       with:
         # Include all history & tags for Scripts/version
         fetch-depth: 0
+        persist-credentials: false
 
     - name: 🔧 Setup repo
       run: Scripts/setup_workflow_repo
@@ -52,8 +53,8 @@ jobs:
     - name: 🕊 Use Swiftly Swift
       if: ${{matrix.runner != 'xcode-27'}}
       run: |
-        swiftly init -ny
-        git reset --hard HEAD
+        swiftly init -ny --skip-install
+        swiftly install -y
         swiftly link latest
         printf %s ~/.swiftly/bin >>"${GITHUB_PATH}"
 
