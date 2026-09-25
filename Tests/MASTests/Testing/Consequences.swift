@@ -11,15 +11,15 @@ private import Synchronization
 
 struct Consequences<Value> {
 	let value: Value?
-	let error: (any Error)?
+	let error: any Error?
 	let stdout: String
 	let stderr: String
 
-	init(_ error: (any Error)? = nil, _ stdout: String = "", _ stderr: String = "") where Value == Void {
+	init(_ error: any Error? = nil, _ stdout: String = "", _ stderr: String = "") where Value == Void {
 		self.init(nil, error, stdout, stderr)
 	}
 
-	init(_ value: Value?, _ error: (any Error)? = nil, _ stdout: String = "", _ stderr: String = "") {
+	init(_ value: Value?, _ error: any Error? = nil, _ stdout: String = "", _ stderr: String = "") {
 		self.value = value
 		self.error = error
 		self.stdout = stdout
@@ -54,7 +54,7 @@ private struct StandardStreamCapture<Encoding: Unicode.Encoding> where Encoding.
 		errRedirector = .init(from: FileHandle.standardError.fileDescriptor, encoding: encoding)
 	}
 
-	func consequences<Value>(value: Value? = nil, error: (any Error)? = nil) async throws -> Consequences<Value> {
+	func consequences<Value>(value: Value? = nil, error: any Error? = nil) async throws -> Consequences<Value> {
 		outRedirector.stop()
 		errRedirector.stop()
 		async let outString = outRedirector.string
