@@ -322,6 +322,23 @@ type determinant. This resolves the `parseDelimitedFormat` item in Temp/todo.md
 (blocks may now contain placeholders). Old-draft format tests were replaced by
 `Tests/MASTests/Models/FieldsOption/MASTests+Format*.swift`.
 
+### Sort Rewrite & mas Defaults
+
+`SortSpec` is now a `<sort-priority>` & its `<sort-option-set>`s
+(`SortOptionSet`: `<source>`, `<direction>`, `<case-sensitivity>`,
+`<localization>` incl. `L…+`, `<numbers-in-strings>` `x` / `n` / `g`,
+`<boundaries>` `b` / `B…+` / `C…+` with `<boundary-groups>` (default
+`:space:`), `<nonconforming-location>` `f` / `e`, `<trivia-order>` `t` / `h` /
+`p` / `q`), replacing the old draft's interpretations, grouping & whitespace
+placements. A `<sort-modifier>` accepts succeeding `/`-prefixed
+`<sort-option-set>`s. Values compare per the field's type determinant
+(chronologic, version, number with trivia, boolean, string, any), each value
+belonging to the 1st `<sort-option-set>` whose type it conforms to. mas.md's
+default sort options (`Iailg`, `IailgB/_:space:+`, `Iascgb`, `IascgB/+`) are in
+`defaultSortOptionSet(forFieldNamed:outputFormat:)`, & price / version fields'
+default formats are typed (`%_N+%i+` / `%V+%i+`, via
+`defaultFieldFormat(forFieldNamed:)`) so they compare per type.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

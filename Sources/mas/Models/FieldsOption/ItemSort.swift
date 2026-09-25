@@ -17,22 +17,23 @@ struct ItemSort: Equatable {
 	/// `<item-sort-option-set>`'s `<direction>`: tiebreaks items with no
 	/// distinguishing sort key by input order (`.ascending`) or reverse input
 	/// order (`.descending`).
-	let tiebreakDirection: SortSpec.Direction
+	let tiebreakDirection: SortOptionSet.Direction
 
-	/// Sorts `objects`' indices per `keys` (highest-priority first), falling
-	/// back to `tiebreakDirection` for objects left unordered by every key.
-	/// `stringValue(index:key:)` reads a field's rendered value for a given
-	/// object & sort key, letting the caller decide, e.g., how absent values are
-	/// treated, & which of the field's input / output values to read for
-	/// `key.sortSpec.source`.
-	func sortedIndices(count: Int, stringValue: (_ index: Int, _ key: ItemSortKey) -> String?) -> [Int] {
+	/// Sorts `count` items' indices per `keys` (highest-priority first), falling
+	/// back to `tiebreakDirection` for items left unordered by every key.
+	/// `values(index:key:)` provides an item's values for a sort key.
+	func sortedIndices(count: Int, values: (_ index: Int, _ key: ItemSortKey) -> SortValues) -> [Int] {
 		guard !keys.isEmpty else {
 			return tiebreakDirection == .ascending ? .init(0..<count) : .init((0..<count).reversed())
 		}
 		let orderedKeys = keys.sorted(using: KeyPathComparator(\.sortSpec.priority))
 		return (0..<count).sorted { lhsIndex, rhsIndex in
 			for key in orderedKeys {
-				switch key.sortSpec.compare(stringValue(lhsIndex, key), stringValue(rhsIndex, key)) {
+				switch key.sortSpec.compare(
+					values(lhsIndex, key),
+					values(rhsIndex, key),
+					typeDeterminant: key.typeDeterminant,
+				) {
 				case .orderedAscending:
 					return true
 				case .orderedDescending:
@@ -47,10 +48,11 @@ struct ItemSort: Equatable {
 }
 
 /// 1 member of `ItemSort.keys`: a field name paired with the `SortSpec` that
-/// applies its sort.
+/// applies its sort, & its field's type determinant.
 struct ItemSortKey: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let name: String
 	let sortSpec: SortSpec
+	let typeDeterminant: TypeDeterminant
 }
 
 extension [FieldSpec] {
@@ -59,7 +61,11 @@ extension [FieldSpec] {
 	/// without sorting items.
 	var enabledSortKeys: [ItemSortKey] {
 		compactMap { fieldSpec in
-			fieldSpec.sortSpec.flatMap { $0.priority == 0 ? nil : .init(name: fieldSpec.name, sortSpec: $0) }
+			fieldSpec.sortSpec.flatMap { sortSpec in
+				sortSpec.priority == 0
+					? nil
+					: .init(name: fieldSpec.name, sortSpec: sortSpec, typeDeterminant: fieldSpec.format.typeDeterminant)
+			}
 		}
 	}
 }

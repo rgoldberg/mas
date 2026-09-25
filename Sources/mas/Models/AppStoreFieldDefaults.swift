@@ -5,6 +5,8 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+private import Foundation
+
 // MARK: - mas's own field-name defaults
 
 // The generic `--fields` engine (`Models/FieldsOption/`) has no concept of
@@ -14,25 +16,59 @@
 // here, rather than in `Models/FieldsOption/`, keeps the generic engine
 // reusable independent of mas
 
-/// Maps a field name to the fields.md "Default Sort Options" row used to fill
-/// in an otherwise-incomplete explicit `<sort>`. A field name this doesn't
-/// recognize as price / version / path gets `SortSpec.textDefault(
-/// outputFormat:)`, the same Text-row default `<field-order-option-set>`
-/// uses, kept as 1 shared definition so the 2 can't drift apart.
-func defaultSortSpec(forFieldNamed fieldName: String, outputFormat: OutputFormat) -> SortSpec {
-	if priceFieldNameSet.contains(fieldName) {
-		.default(interpretation: .price, boundaryCharacter: nil, outputFormat: outputFormat)
-	} else if versionFieldNameSet.contains(fieldName) {
-		.default(interpretation: .version, boundaryCharacter: nil, outputFormat: outputFormat)
-	} else if pathFieldNameSet.contains(fieldName) {
-		.default(interpretation: .numeric, boundaryCharacter: "/", outputFormat: outputFormat)
-	} else {
-		.textDefault(outputFormat: outputFormat)
+/// A field's default format: per mas.md, typed for price fields (`%_N+%i+`) &
+/// version fields (`%V+%i+`), so they compare per type, while rendering an
+/// untyped value (e.g., `Free`) as is; `%i` for any other field.
+func defaultFieldFormat(forFieldNamed fieldName: String) -> Format {
+	let predicate: Predicate? =
+		if priceFieldNameSet.contains(fieldName) {
+			.number
+		} else if versionFieldNameSet.contains(fieldName) {
+			.version
+		} else {
+			nil
+		}
+	return predicate.map { predicate in
+		.template(
+			[
+				.placeholder(
+					.conditional(
+						.init(predicate: predicate, coercion: predicate == .number ? .lenient : nil),
+						.binary(success: nil, failure: .default(fieldName: fieldName)),
+					),
+				),
+			],
+		)
 	}
+		?? .default(fieldName: fieldName)
 }
 
-private let priceFieldNameSet = Set(["price", "formattedPrice"])
-private let versionFieldNameSet = Set(["version", "newVersion", "minimumOSVersion"])
+private let priceFieldNameSet = Set(["formattedPrice", "price"])
+private let versionFieldNameSet = Set(["minimumOSVersion", "newVersion", "version"])
+
+/// mas.md's "Default Sort Options" for string fields, for `outputFormat`: the
+/// path row iff `fieldName` is a path field's name, else the non-path row
+/// (also used for sorting field names & labels, for which `fieldName` is
+/// `nil`).
+func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: OutputFormat) -> SortOptionSet {
+	let isPath = fieldName.map(pathFieldNameSet.contains) ?? false
+	var optionSet = SortOptionSet.default
+	optionSet.numbersInStrings = .groupedNumeric
+	if outputFormat == .json {
+		// `Iascgb` / `IascgB/+`
+		optionSet.boundaries = isPath ? .uncollapsed([.init(boundaries: [.character("/")])]) : .noBoundaries
+	} else {
+		// `Iailg` / `IailgB/_:space:+`
+		optionSet.caseSensitivity = .insensitive
+		optionSet.localization = .localized(.current)
+		if isPath {
+			optionSet.boundaries =
+				.uncollapsed([.init(boundaries: [.character("/")])] + SortOptionSet.defaultBoundaryGroups)
+		}
+	}
+	return optionSet
+}
+
 private let pathFieldNameSet = Set(["path"])
 
 /// Maps a field name directly to its default table-column justification (mas's

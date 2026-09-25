@@ -505,6 +505,66 @@ func isVersion(_ string: String) -> Bool {
 	}
 }
 
+/// A number & its trivia (both empty unless leniently coerced).
+struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file
+	let number: Double
+	let triviaPrefix: Substring
+	let triviaSuffix: Substring
+}
+
+/// `value` as a number, per `coercion`: a JSON number; with
+/// `<strict-coercion>`, also a string whose entire content parses as a number;
+/// with `<lenient-coercion>`, also a string containing exactly 1 number,
+/// between trivia; else `nil`.
+func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTrivia? {
+	switch (value, coercion) {
+	case let (.number(number), _):
+		Double("\(number)").map { .init(number: $0, triviaPrefix: "", triviaSuffix: "") }
+	case let (.string(literal), .lenient):
+		lenientNumberRange(in: literal.value).flatMap { range in
+			Double(literal.value[range].filter { $0 != "," }).map { number in
+				.init(
+					number: number,
+					triviaPrefix: literal.value[..<range.lowerBound],
+					triviaSuffix: literal.value[range.upperBound...],
+				)
+			}
+		}
+	case let (.string(literal), .strict):
+		Double(literal.value).map { .init(number: $0, triviaPrefix: "", triviaSuffix: "") }
+	default:
+		nil
+	}
+}
+
+/// `value` parsed as chronologic: an ISO-8601 datetime, then an ISO-8601
+/// date-only (in the system time zone), then a Unix epoch (seconds) numeric
+/// timestamp; else `nil`.
+func chronologicDate(from value: JSON.Node?) -> Date? {
+	chronologicDateAndIsDateOnly(from: value)?.date
+}
+
+private func chronologicDateAndIsDateOnly(from value: JSON.Node?) -> (date: Date, isDateOnly: Bool)? {
+	switch value {
+	case let .number(number):
+		Double("\(number)").map { (.init(timeIntervalSince1970: $0), false) }
+	case let .string(literal):
+		(try? Date(literal.value, strategy: .iso8601)).map { ($0, false) }
+			?? (try? Date(literal.value, strategy: Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
+			.map { ($0, true) }
+			?? Double(literal.value).map { (.init(timeIntervalSince1970: $0), false) }
+	default:
+		nil
+	}
+}
+
+/// The range of `string`'s sole number, or `nil` iff `string` doesn't contain
+/// exactly 1 number.
+private func lenientNumberRange(in string: String) -> Range<String.Index>? {
+	let matches = string.matches(of: /[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?|[-+]?\.\d+/)
+	return matches.count == 1 ? matches.first?.range : nil
+}
+
 // MARK: - Values
 
 /// A value being formatted.
@@ -518,52 +578,29 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	/// A string.
 	case string(String)
 
-	/// The value parsed as chronologic: an ISO-8601 datetime, then an ISO-8601
-	/// date-only, then a Unix epoch (seconds) numeric timestamp; else `nil`.
+	/// The value parsed as chronologic; else `nil`.
 	static func chronologic(from value: JSON.Node?) -> Self? {
-		switch value {
-		case let .number(number):
-			Double("\(number)").map { .chronologic(.init(timeIntervalSince1970: $0), style: .init(isDateOnly: false)) }
-		case let .string(literal):
-			(try? Date(literal.value, strategy: .iso8601)).map { .chronologic($0, style: .init(isDateOnly: false)) }
-				?? (try? Date(literal.value, strategy: Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
-				.map { .chronologic($0, style: .init(isDateOnly: true)) }
-				?? Double(literal.value)
-				.map { .chronologic(.init(timeIntervalSince1970: $0), style: .init(isDateOnly: false)) }
-		default:
-			nil
-		}
+		chronologicDateAndIsDateOnly(from: value).map { .chronologic($0.date, style: .init(isDateOnly: $0.isDateOnly)) }
 	}
 
-	/// The value as a number, per `coercion`: a JSON number; with
-	/// `<strict-coercion>`, also a string whose entire content parses as a
-	/// number (whose value is the parsed number); with `<lenient-coercion>`,
-	/// also a string containing exactly 1 number, between trivia.
+	/// The value as a number, per `coercion`; else `nil`.
 	static func number(from value: JSON.Node?, coercion: Coercion?) -> Self? {
 		switch (value, coercion) {
 		case let (.number(number), _):
 			.number("\(number)", triviaPrefix: "", triviaSuffix: "")
 		case let (.string(literal), .lenient):
-			lenientNumber(in: literal.value)
+			lenientNumberRange(in: literal.value).map { range in
+				.number(
+					.init(literal.value[range]),
+					triviaPrefix: literal.value[..<range.lowerBound],
+					triviaSuffix: literal.value[range.upperBound...],
+				)
+			}
 		case let (.string(literal), .strict):
 			Double(literal.value).map { .number(numberString($0), triviaPrefix: "", triviaSuffix: "") }
 		default:
 			nil
 		}
-	}
-
-	/// `string`'s sole number, between its trivia, or `nil` iff `string`
-	/// doesn't contain exactly 1 number.
-	private static func lenientNumber(in string: String) -> Self? {
-		let matches = string.matches(of: /[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?|[-+]?\.\d+/)
-		guard matches.count == 1, let range = matches.first?.range else {
-			return nil
-		}
-		return .number(
-			.init(string[range]),
-			triviaPrefix: string[..<range.lowerBound],
-			triviaSuffix: string[range.upperBound...],
-		)
 	}
 
 	/// The rendered value.

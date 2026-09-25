@@ -36,16 +36,16 @@ private struct TableOutputConfig: OutputConfig {
 			.init(
 				name: "adamID",
 				label: "ADAM ID",
-				format: .default(fieldName: "adamID"),
+				format: defaultFieldFormat(forFieldNamed: "adamID"),
 				sortSpec: nil, // no default item sort: preserve today's natural (unsorted) output order unless requested
 				justification: defaultJustification(forFieldNamed: "adamID"),
 			),
-			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+			.init(name: "name", label: "Name", format: defaultFieldFormat(forFieldNamed: "name"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: defaultFieldFormat(forFieldNamed: "version"), sortSpec: nil),
 			.init(
 				name: "newVersion",
 				label: "New Version",
-				format: .default(fieldName: "newVersion"),
+				format: defaultFieldFormat(forFieldNamed: "newVersion"),
 				sortSpec: nil,
 				isSynthesized: true,
 			),

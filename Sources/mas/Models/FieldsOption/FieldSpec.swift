@@ -67,11 +67,14 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
 	case coercionNotSupported(Character)
 	case danglingEscape
+	case emptyBoundaryGroup
 	case forbiddenWhitespace(after: Character)
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
 	case invalidLetter(Character)
+	case invalidLocaleIdentifier(String)
 	case invalidModifier(Character)
+	case invalidMultiCharacterBoundary
 	case invalidPipeline(String)
 	case invalidPosition(Int)
 	case invalidSortOption(Character)
@@ -81,6 +84,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingFieldName
 	case missingFieldOrderOptionSet
 	case missingPredicate
+	case missingSortOptionSet
 	case missingSortOptionTerminator
 	case missingSortPriority
 	case nonexistentFieldSpec(forName: String)
@@ -98,6 +102,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<coercion> isn't supported for: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
+		case .emptyBoundaryGroup:
+			"<boundary-group> requires at least 1 boundary"
 		case let .forbiddenWhitespace(token):
 			"Whitespace is forbidden after: \(token)"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):
@@ -106,8 +112,12 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid character class: \(name)"
 		case let .invalidLetter(letter):
 			"Invalid <predicate>: \(letter)"
+		case let .invalidLocaleIdentifier(identifier):
+			"Invalid <locale-identifier>: \(identifier)"
 		case let .invalidModifier(letter):
 			"Invalid <modifiers> for <predicate>: \(letter)"
+		case .invalidMultiCharacterBoundary:
+			"<multi-character-boundary> requires non-empty text between its '%' fences"
 		case let .invalidPipeline(nonterminal):
 			"Invalid \(nonterminal)"
 		case let .invalidPosition(index):
@@ -126,6 +136,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
 		case .missingPredicate:
 			"Expected <predicate>"
+		case .missingSortOptionSet:
+			"Expected <sort-option-set>"
 		case .missingSortOptionTerminator:
 			"Expected <sort-option-terminator> '+'"
 		case .missingSortPriority:
@@ -348,22 +360,20 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			throw .missingFieldOrderOptionSet
 		}
 		guard let order = orderOptionSetOrder(input) else {
-			let sortSpec = try SortSpec.parsedOptionSet(
-				&input,
-				nextSectionPrefixSet: itemSortAndFieldSpecsPrefixSet,
-				priority: 0,
-				defaults: .textDefault(outputFormat: outputFormat).withSource(.output),
-			)
-			return switch sortSpec.source {
+			var defaults = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
+			defaults.source = .output // `<field-order-option-set>`'s `default source: <output>`
+			let optionSet =
+				try SortOptionSet.parsed(&input, terminatorSet: itemSortAndFieldSpecsPrefixSet, defaults: defaults)
+			return switch optionSet.source {
 			case .input:
-				.byName(sortSpec)
+				.byName(optionSet)
 			case .output:
-				.byLabel(sortSpec)
+				.byLabel(optionSet)
 			}
 		}
-		var direction = SortSpec.Direction?.none
+		var direction = SortOptionSet.Direction?.none
 		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
-			if let match = SortSpec.Direction(rawValue: char) {
+			if let match = SortOptionSet.Direction(rawValue: char) {
 				direction = match
 			}
 			input.removeFirst()
@@ -383,18 +393,18 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
 	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort
 	/// tiebreak (input order / reverse input order).
-	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortSpec.Direction {
+	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortOptionSet.Direction {
 		guard input.hasPrefix(itemSortSectionPrefix) else {
 			return .ascending
 		}
 		input.removeFirst(itemSortSectionPrefix.count)
 		var shouldDisableAllSorts = false
-		var direction = SortSpec.Direction.ascending
+		var direction = SortOptionSet.Direction.ascending
 		try parseOptions(
 			&input,
 			nextSectionPrefixSet: [fieldSpecsSectionPrefix],
 		) { input, currentIndex, char throws(ParsingError) in
-			if let match = SortSpec.Direction(rawValue: char) {
+			if let match = SortOptionSet.Direction(rawValue: char) {
 				direction = match
 			} else {
 				switch char {
@@ -538,7 +548,7 @@ private func orderOptionSetOrder(_ input: Substring) -> Character? {
 			break
 		}
 		guard orderOptionSet.contains(char) else {
-			guard SortSpec.Direction(rawValue: char) != nil else {
+			guard char.isWhitespace || SortOptionSet.Direction(rawValue: char) != nil else {
 				return nil
 			}
 			continue
@@ -780,12 +790,10 @@ private func parseSortSpecModifier(
 		return existing
 	}
 	input.removeFirst()
-	return try .init(
-		from: &input,
-		nextSectionPrefixSet: .init(),
+	return try .parsed(
+		&input,
 		existing: existing,
-		fieldName: fieldName,
-		outputFormat: outputFormat,
+		defaultOptionSet: defaultSortOptionSet(forFieldNamed: fieldName, outputFormat: outputFormat),
 	)
 }
 

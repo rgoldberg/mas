@@ -120,6 +120,15 @@ optional.
   type), or the output type of the format's final pipeline / placeholder (e.g.,
   chronologic for `%C.dateOnly++`)?
 
+- Values that conform to no `<sort-option-set>` "retain their input order":
+  implemented as comparing equal for that sort key, so a lower-priority sort key
+  may still order them; should they instead be ordered by input order
+  immediately?
+- mas.md says price fields' default formats "use `%_n`" & version fields'
+  "`%v`": implemented as `%_N+%i+` / `%V+%i+`, so a nonconforming value (e.g.,
+  `Free`) still renders as is instead of aborting to an empty string. Is that
+  intended?
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Named Formats & Custom Named Configs

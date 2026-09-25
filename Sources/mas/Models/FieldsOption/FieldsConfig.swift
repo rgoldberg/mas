@@ -74,15 +74,11 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	//  inherited field specs' listed order, & whether `<descending>` reverses
 	//  only the inherited order, not subsequent `<field-spec-edits-section>`
 	//  results
-	case base(SortSpec.Direction?)
-	/// `<source>` `"O"`: sorts by label, per the full `<sort-option-set>` (any
-	/// axis left unspecified keeps its value from whatever `SortSpec` the
-	/// caller passed as `parsedOptionSet(_:nextSectionPrefixSet:priority:
-	/// defaults:)`'s `defaults`).
-	case byLabel(SortSpec)
-	/// `<source>` `"I"`: sorts by name, per the full `<sort-option-set>` (see
-	/// `byLabel`'s note on unspecified axes).
-	case byName(SortSpec)
+	case base(SortOptionSet.Direction?)
+	/// `<source>` `"O"`: sorts by label, per the `<sort-option-set>`.
+	case byLabel(SortOptionSet)
+	/// `<source>` `"I"`: sorts by name, per the `<sort-option-set>`.
+	case byName(SortOptionSet)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the
 	/// resolved base fields config's own `fieldOrder`.
@@ -92,43 +88,39 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// keys were originally found in (`CatalogApp` / `InstalledApp`
 	/// normalization only renames keys, never reorders them). `direction`, if
 	/// `.descending`, reverses that order.
-	case original(SortSpec.Direction?)
+	case original(SortOptionSet.Direction?)
 }
 
 extension FieldOrder {
 	/// Reorders `fieldSpecs` per this order. `.inherited` is identity; `.base` &
 	/// `.original` are identity, too, unless their direction is `.descending`.
-	/// `.byName` / `.byLabel` sort per their full `SortSpec` (direction
-	/// included: `SortSpec.compare(_:_:)` already accounts for it).
+	/// `.byName` / `.byLabel` sort per their `<sort-option-set>` (direction
+	/// included: `SortOptionSet.compare(_:_:)` already accounts for it).
 	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
 		switch self {
 		case .inherited:
 			fieldSpecs
 		case let .base(direction), let .original(direction):
 			direction == .descending ? .init(fieldSpecs.reversed()) : fieldSpecs
-		case let .byName(sortSpec):
-			fieldSpecs.sorted { sortSpec.compare($0.name, $1.name) == .orderedAscending }
-		case let .byLabel(sortSpec):
-			fieldSpecs.sorted { sortSpec.compare($0.label, $1.label) == .orderedAscending }
+		case let .byName(optionSet):
+			fieldSpecs.sorted { optionSet.compare($0.name, $1.name) == .orderedAscending }
+		case let .byLabel(optionSet):
+			fieldSpecs.sorted { optionSet.compare($0.label, $1.label) == .orderedAscending }
 		}
 	}
 }
 
 extension BaseIncludesAllFieldsConfig {
-	/// `all`'s own default field order: sorts by label, per `SortSpec.
-	/// textDefault(outputFormat:)`, the same shared Text-row default a
-	/// specific field's own default `SortSpec` also uses (`defaultSortSpec(
-	/// forFieldNamed:outputFormat:)`, for any name it doesn't recognize as
-	/// price / version / path), since a field's name / label is itself always
-	/// plain text. Applied only if a command hasn't already customized `all`'s
-	/// `fieldOrder` (i.e., it's still `.inherited`).
+	/// `all`'s own default field order, absent a built-in field order: sorted
+	/// by label (`<output>`), while other `<sort-option>`s are as per the
+	/// defaults for string fields for `outputFormat`. Applied only if a command
+	/// hasn't already customized `all`'s `fieldOrder` (i.e., it's still
+	/// `.inherited`).
 	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
-		fieldOrder == .inherited
-			? .init(
-				fieldSpecs: fieldSpecs,
-				fieldOrder: .byLabel(.textDefault(outputFormat: outputFormat)),
-				itemSort: itemSort,
-			)
+		var optionSet = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
+		optionSet.source = .output
+		return fieldOrder == .inherited
+			? .init(fieldSpecs: fieldSpecs, fieldOrder: .byLabel(optionSet), itemSort: itemSort)
 			: self
 	}
 }

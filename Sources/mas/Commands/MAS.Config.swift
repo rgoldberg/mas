@@ -72,7 +72,7 @@ private struct KeyValueConfig: OutputConfig {
 			"cpu",
 			"arch",
 		]
-			.map { .init(name: $0, label: $0, format: .default(fieldName: $0), sortSpec: nil) },
+			.map { .init(name: $0, label: $0, format: defaultFieldFormat(forFieldNamed: $0), sortSpec: nil) },
 	)
 }
 

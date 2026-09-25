@@ -59,20 +59,22 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 				(
 					key.name,
 					try objects.map { object throws(FormattingError) in
-						let rawValue = object[nodeKey: .init(rawValue: key.name)]
-						return if key.sortSpec.source == .output, let fieldSpec = fieldSpecByName[key.name] {
-							try fieldSpec.format
-								.rendered(value: rawValue, label: fieldSpec.label, name: fieldSpec.name)
-								.stringValue
-						} else {
-							rawValue?.stringValue
-						}
+						let input = object[nodeKey: .init(rawValue: key.name)]
+						let fieldSpec = fieldSpecByName[key.name]
+						return SortValues(
+							input: input,
+							output: SortOptionSet.anyHasOutputSource(key.sortSpec.optionSets)
+								? try fieldSpec?.format.rendered(value: input, label: fieldSpec?.label ?? "", name: key.name)
+								: nil,
+						)
 					},
 				)
 			},
 		) { first, _ in first }
 		let sortedObjects = resolved.itemSort
-			.sortedIndices(count: objects.count) { index, key in sortValuesByName[key.name]?[index] }
+			.sortedIndices(count: objects.count) { index, key in
+				sortValuesByName[key.name]?[index] ?? .init(input: nil, output: nil)
+			}
 			.map { objects[$0] }
 		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden }
 		switch outputFormat {
@@ -117,7 +119,7 @@ extension BaseIncludesAllFieldsConfig {
 					.init(
 						name: field.key.rawValue,
 						label: field.key.rawValue,
-						format: .default(fieldName: field.key.rawValue),
+						format: defaultFieldFormat(forFieldNamed: field.key.rawValue),
 						sortSpec: nil,
 					),
 				)

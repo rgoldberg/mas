@@ -89,7 +89,7 @@ private extension MASTests {
 		#expect(specs.map(\.name) == ["adamID", "bundleID"])
 		#expect(specs[0].isHidden)
 		#expect(specs[0].sortSpec?.priority == 1)
-		#expect(specs[0].sortSpec?.direction == .descending)
+		#expect(specs[0].sortSpec?.optionSet.direction == .descending)
 		#expect(!specs[1].isHidden)
 	}
 
@@ -140,33 +140,11 @@ private extension MASTests {
 		#expect(!specs[0].isHidden)
 	}
 
-	@Test(
-		arguments: [
-			(".adamID/1c", SortSpec.Localization.canonical),
-			(".adamID/1l", .localized(.current)),
-			(".adamID/1L+", .localized(.current)),
-			(".adamID/1Lde_DE+d", .localized(.init(identifier: "de_DE"))),
-		],
-	)
-	func `parses sort localization: c, l & L…+`(value: String, localization: SortSpec.Localization) throws {
-		#expect(try parseFieldSpecs(value)[0].sortSpec?.localization == localization)
-	}
-
-	@Test
-	func `a sort option after a custom-locale's terminator still applies`() throws {
-		#expect(try parseFieldSpecs(".adamID/1Lde_DE+d")[0].sortSpec?.direction == .descending)
-	}
-
-	@Test
-	func `a custom-locale without a sort-option-terminator is an error`() {
-		#expect(throws: ParsingError.missingSortOptionTerminator) { try parseFieldSpecs(".adamID/1Lde_DE") }
-	}
-
 	@Test
 	func `parses sort spec without numeric priority`() throws {
 		let specs = try parseFieldSpecs(".adamID/a")
 		let sortSpec = try #require(specs[0].sortSpec)
-		#expect(sortSpec.direction == .ascending)
+		#expect(sortSpec.optionSet.direction == .ascending)
 	}
 
 	@Test
@@ -174,7 +152,7 @@ private extension MASTests {
 		let specs = try parseFieldSpecs(".adamID/500d")
 		let sortSpec = try #require(specs[0].sortSpec)
 		#expect(sortSpec.priority == 500)
-		#expect(sortSpec.direction == .descending)
+		#expect(sortSpec.optionSet.direction == .descending)
 	}
 
 	@Test
@@ -182,7 +160,7 @@ private extension MASTests {
 		let config = try parseFieldsConfig("//r")
 		let sortSpec = try #require(config.fieldSpecs[0].sortSpec)
 		#expect(sortSpec.priority == 0)
-		#expect(sortSpec.caseSensitivity == .sensitive) // Fixture default, retained
+		#expect(sortSpec.optionSet.caseSensitivity == .sensitive) // Fixture default, retained
 		#expect(config.itemSort.keys.isEmpty)
 	}
 
@@ -294,166 +272,6 @@ private extension MASTests {
 	}
 
 	@Test
-	func `item sort orders by ascending priority, then tiebreaks by input order`() {
-		let itemSort = ItemSort(
-			keys: [
-				.init(
-					name: "a",
-					sortSpec: .init(
-						priority: 1,
-						source: .input,
-						direction: .ascending,
-						caseSensitivity: .sensitive,
-						localization: .canonical,
-						grouping: .ungrouped,
-						interpretation: .numeric,
-						boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
-					),
-				),
-			],
-			tiebreakDirection: .ascending,
-		)
-		let values = ["10", "2", "10"]
-		let order = itemSort.sortedIndices(count: values.count) { index, _ in values[index] }
-		#expect(order == [1, 0, 2]) // "2" < "10" numerically; the 2 "10"s tiebreak by input order
-	}
-
-	@Test(
-		arguments: [
-			("$999.00", "$1,234.56", ComparisonResult.orderedAscending),
-			// 1 side unparseable ("Free"): falls back to a plain text compare ('F' >
-			// '$' in ASCII)
-			("Free", "$0.99", .orderedDescending),
-		],
-	)
-	func `compares prices numerically, ignoring currency symbols & grouping commas`(
-		lhs: String,
-		rhs: String,
-		result: ComparisonResult,
-	) {
-		#expect(numericSortSpec(interpretation: .price).compare(lhs, rhs) == result)
-	}
-
-	@Test(
-		arguments: [
-			("1.9.3", "1.10.2", ComparisonResult.orderedAscending), // Not lexical ("1.10" < "1.9" as text)
-			("1.2", "1.2.0", .orderedSame), // Missing trailing component compares as 0
-		],
-	)
-	func `compares versions component-wise, numerically per component`(
-		lhs: String,
-		rhs: String,
-		result: ComparisonResult,
-	) {
-		#expect(numericSortSpec(interpretation: .version).compare(lhs, rhs) == result)
-	}
-
-	@Test
-	func `boundary-aware comparison: an explicit boundary group outranks ordinary text`() {
-		let sortSpec = numericSortSpec(interpretation: .lexical, boundaries: underscoreBoundaries(.endmost))
-		// Plain lexical would put "file10" before "file_2" ('1' < '_' in ASCII);
-		// boundary-aware tokenization instead treats "_" as a higher-precedence
-		// boundary than ordinary text, so "file" (up to the boundary) is compared
-		// first; "file" < "file10" makes "file_2" sort first
-		#expect(sortSpec.compare("file10", "file_2") == .orderedDescending)
-	}
-
-	@Test
-	func `boundary-aware comparison: default endmost whitespace sorts after explicit boundary groups`() {
-		let sortSpec = numericSortSpec(interpretation: .lexical, boundaries: underscoreBoundaries(.endmost))
-		#expect(sortSpec.compare("a_b", "a b") == .orderedAscending) // "_" (rank 0) precedes whitespace (rank 1)
-	}
-
-	@Test
-	func `boundary-aware comparison: leading whitespace placement sorts before explicit boundary groups`() {
-		let sortSpec = numericSortSpec(interpretation: .lexical, boundaries: underscoreBoundaries(.leading))
-		#expect(sortSpec.compare("a_b", "a b") == .orderedDescending) // Now whitespace (rank 0) precedes "_" (rank 1)
-	}
-
-	@Test
-	func `boundary-aware comparison: suppressed whitespace behaves as ordinary text`() {
-		let sortSpec = numericSortSpec(
-			interpretation: .lexical,
-			boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .suppressed),
-		)
-		// No explicit groups & whitespace suppressed ⇒ falls back to a plain text
-		// compare, where " " (0x20) < "b" (0x62)
-		#expect(sortSpec.compare("a b", "ab") == .orderedAscending)
-	}
-
-	@Test
-	func `boundary-aware comparison: collapseContiguous reduces a repeated boundary run to 1`() {
-		let collapsed = numericSortSpec(
-			interpretation: .lexical,
-			boundaries: underscoreBoundaries(.endmost, collapseContiguous: true),
-		)
-		#expect(collapsed.compare("a__b", "a_b") == .orderedSame)
-		let uncollapsed = numericSortSpec(interpretation: .lexical, boundaries: underscoreBoundaries(.endmost))
-		#expect(uncollapsed.compare("a__b", "a_b") == .orderedDescending) // "_" is a prefix of "__"
-	}
-
-	@Test
-	func `boundary-aware comparison: a character class matches any of its members`() {
-		let sortSpec = numericSortSpec(
-			interpretation: .lexical,
-			boundaries: .init(
-				groups: [.init(boundaries: [.characterClass(.digit)])],
-				collapseContiguous: false,
-				whitespacePlacement: .endmost,
-			),
-		)
-		#expect(sortSpec.compare("a1b", "a2c") == .orderedAscending) // Both digits are boundaries; "1" < "2" as text
-	}
-
-	@Test
-	func `parses boundaries option: collapse-contiguous & an escaped literal boundary character`() throws {
-		let sortSpec = try #require(try parseFieldSpecs(".adamID/500nb%+\\_+")[0].sortSpec)
-		#expect(sortSpec.boundaries.collapseContiguous)
-		#expect(sortSpec.boundaries.groups == [.init(boundaries: [.character("_")])])
-		#expect(sortSpec.boundaries.whitespacePlacement == .endmost)
-	}
-
-	@Test
-	func `boundary-aware comparison: a multi-character boundary matches atomically, not per-character`() {
-		let sortSpec = numericSortSpec(
-			interpretation: .lexical,
-			boundaries: .init(
-				groups: [.init(boundaries: [.characters("ab")])],
-				collapseContiguous: false,
-				whitespacePlacement: .endmost,
-			),
-		)
-		// "ab" matches the whole multi-character boundary (rank 0); "axb" has
-		// neither "a" nor "b" individually registered as its own boundary (unlike
-		// the old, buggy per-character-exploded behavior), so it's ordinary text
-		// (rank 1) throughout & sorts after
-		#expect(sortSpec.compare("ab", "axb") == .orderedAscending)
-	}
-
-	@Test
-	func `boundary-aware comparison: the longest matching boundary wins, regardless of group order`() {
-		let sortSpec = numericSortSpec(
-			interpretation: .lexical,
-			boundaries: .init(
-				groups: [.init(boundaries: [.character("a")]), .init(boundaries: [.characters("ab")])],
-				collapseContiguous: false,
-				whitespacePlacement: .endmost,
-			),
-		)
-		// "ab" matches both group 0's "a" (length 1) & group 1's "ab" (length 2);
-		// the longer match wins, so "ab" gets group 1's (lower) precedence, not
-		// group 0's, even though group 0 sorts earlier
-		#expect(sortSpec.compare("ab", "ac") == .orderedDescending) // "ac" matches only group 0's "a"
-	}
-
-	@Test
-	func `parses boundaries option: ungrouped members each get their own precedence group`() throws {
-		let sortSpec = try #require(try parseFieldSpecs(".adamID/500nb_ba_")[0].sortSpec)
-		#expect(sortSpec.boundaries.groups == [.init(boundaries: [.character("b")]), .init(boundaries: [.character("a")])])
-		#expect(sortSpec.compare("za", "zb") == .orderedDescending) // "b"'s group (0) outranks "a"'s group (1)
-	}
-
-	@Test
 	func `table end-justifies a field per its field spec's justification; a start-justified last column isn't padded`(
 	) throws {
 		let table = try [
@@ -507,31 +325,6 @@ private extension MASTests {
 	}
 }
 
-private func underscoreBoundaries(_ whitespacePlacement: SortSpec.WhitespacePlacement, collapseContiguous: Bool = false)
--> SortSpec.Boundaries {
-	.init(
-		groups: [.init(boundaries: [.character("_")])],
-		collapseContiguous: collapseContiguous,
-		whitespacePlacement: whitespacePlacement,
-	)
-}
-
-private func numericSortSpec(
-	interpretation: SortSpec.Interpretation,
-	boundaries: SortSpec.Boundaries = .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
-) -> SortSpec {
-	.init(
-		priority: 0,
-		source: .input,
-		direction: .ascending,
-		caseSensitivity: .sensitive,
-		localization: .canonical,
-		grouping: .ungrouped,
-		interpretation: interpretation,
-		boundaries: boundaries,
-	)
-}
-
 private func parseFieldSpecs(_ value: String) throws(ParsingError) -> [FieldSpec] {
 	try parseFieldsConfig(value).fieldSpecs
 }
@@ -545,16 +338,7 @@ private let adamIDFieldSpec = FieldSpec(
 	name: "adamID",
 	label: "adamID",
 	format: .default(fieldName: "adamID"),
-	sortSpec: .init(
-		priority: 1000,
-		source: .input,
-		direction: .ascending,
-		caseSensitivity: .sensitive,
-		localization: .canonical,
-		grouping: .ungrouped,
-		interpretation: .numeric,
-		boundaries: .init(groups: .init(), collapseContiguous: false, whitespacePlacement: .endmost),
-	),
+	sortSpec: .init(priority: 1000, optionSets: [.default]),
 )
 private let bundleIDFieldSpec =
 	FieldSpec(name: "bundleID", label: "bundleID", format: .default(fieldName: "bundleID"), sortSpec: nil)

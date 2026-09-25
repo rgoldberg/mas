@@ -39,18 +39,23 @@ private struct KeyValueConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.keyValue
 	static let standardFieldsConfig = SelectedFieldsConfig(
 		fieldSpecs: [
-			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+			.init(name: "name", label: "Name", format: defaultFieldFormat(forFieldNamed: "name"), sortSpec: nil),
 			.init(
 				name: "adamID",
 				label: "ADAM ID",
-				format: .default(fieldName: "adamID"),
+				format: defaultFieldFormat(forFieldNamed: "adamID"),
 				sortSpec: nil,
 				justification: defaultJustification(forFieldNamed: "adamID"),
 			),
-			.init(name: "bundleID", label: "Bundle ID", format: .default(fieldName: "bundleID"), sortSpec: nil),
-			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-			.init(name: "formattedPrice", label: "Price", format: .default(fieldName: "formattedPrice"), sortSpec: nil),
-			.init(name: "sellerName", label: "By", format: .default(fieldName: "sellerName"), sortSpec: nil),
+			.init(name: "bundleID", label: "Bundle ID", format: defaultFieldFormat(forFieldNamed: "bundleID"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: defaultFieldFormat(forFieldNamed: "version"), sortSpec: nil),
+			.init(
+				name: "formattedPrice",
+				label: "Price",
+				format: defaultFieldFormat(forFieldNamed: "formattedPrice"),
+				sortSpec: nil,
+			),
+			.init(name: "sellerName", label: "By", format: defaultFieldFormat(forFieldNamed: "sellerName"), sortSpec: nil),
 			.init(
 				name: "currentVersionReleaseDate",
 				label: "Released",
@@ -70,7 +75,7 @@ private struct KeyValueConfig: OutputConfig {
 			.init(
 				name: "minimumOSVersion",
 				label: "Minimum OS",
-				format: .default(fieldName: "minimumOSVersion"),
+				format: defaultFieldFormat(forFieldNamed: "minimumOSVersion"),
 				sortSpec: nil,
 			),
 			.init(
@@ -106,7 +111,12 @@ private struct KeyValueConfig: OutputConfig {
 				sortSpec: nil,
 				justification: defaultJustification(forFieldNamed: "fileSizeBytes"),
 			),
-			.init(name: "appStorePageURL", label: "From", format: .default(fieldName: "appStorePageURL"), sortSpec: nil),
+			.init(
+				name: "appStorePageURL",
+				label: "From",
+				format: defaultFieldFormat(forFieldNamed: "appStorePageURL"),
+				sortSpec: nil,
+			),
 		],
 	)
 	/// The field set is open-ended (dynamically-discovered API fields);
