@@ -87,6 +87,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingSortOptionSet
 	case missingSortOptionTerminator
 	case missingSortPriority
+	case nonexistentFieldsConfig(String)
 	case nonexistentFieldSpec(forName: String)
 	case originalInputOrderUnsupportedForTable
 	case singleBranch
@@ -148,6 +149,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 				name.isEmpty || name.first?.isWhitespace == true || name.last?.isWhitespace == true ? "'\(name)'" : name
 			)
 			"""
+		case let .nonexistentFieldsConfig(name):
+			"Nonexistent fields config: \(name)"
 		case .originalInputOrderUnsupportedForTable:
 			"<original-input-order> 'o' is supported only for JSON or key-value output"
 		case .singleBranch:
@@ -171,9 +174,11 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 /// Phase 1 (pre-fetch): the field names a display command needs to fetch for
 /// `fieldsOptionValue` to be fully resolvable, given `standard`'s & `all`'s
 /// _selected_ field specs (not yet merged with any dynamically-discovered
-/// data). Never includes a synthesized field's name (see
-/// `FieldSpec.isSynthesized`), since fetching it would be meaningless.
-/// Empty means "fetch everything".
+/// data): every field spec's that is visible or sorts items. Never includes a
+/// synthesized field's name (see `FieldSpec.isSynthesized`), since fetching it
+/// would be meaningless. Empty means "fetch everything", as for a base fields
+/// config derived from `all`, whose dynamically-discovered fields are unknown
+/// until fetched.
 func fetchFieldNames(
 	for fieldsOptionValue: String,
 	standard: some FieldsConfig,
@@ -181,25 +186,26 @@ func fetchFieldNames(
 	outputFormat: OutputFormat,
 ) throws(ParsingError) -> [String] {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
-	switch input.first {
-	case baseFieldsConfigSectionPrefix, fieldOrderSectionPrefix, fieldSpecsSectionPrefix, nil:
-		var baseName = ""
-		if input.first == baseFieldsConfigSectionPrefix {
-			input.removeFirst()
-			baseName = try parseEscapedText(&input, terminatorSet: [fieldOrderSectionPrefix, fieldSpecsSectionPrefix])
-		}
-		let base = try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat)
-		guard !base.baseIncludesAllFields else {
+	if isRelativeConfig(input) {
+		let baseName = try parseBaseFieldsConfigSection(&input)
+		guard
+			!(try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat))
+				.baseIncludesAllFields
+		else {
 			return .init()
 		}
-		try skipFieldOrderAndItemSortSections(&input, outputFormat: outputFormat)
-		return .init(
-			Set(base.fieldSpecs.compactMap { $0.isSynthesized ? nil : $0.name })
-				.union(try topLevelFieldSpecNames(in: input, requiringPrefix: insertIndicator)),
-		)
-	default:
-		return try topLevelFieldSpecNames(in: input, requiringPrefix: nil)
 	}
+	return .init(
+		Set(
+			try resolvedFieldsConfig(from: fieldsOptionValue, standard: standard, all: all, outputFormat: outputFormat)
+				.fieldSpecs
+				.compactMap { fieldSpec in
+					fieldSpec.isSynthesized || fieldSpec.isHidden && (fieldSpec.sortSpec?.priority ?? 0) == 0
+						? nil
+						: fieldSpec.name
+				},
+		),
+	)
 }
 
 /// Phase 2 (post-fetch): the fully-resolved `FieldsConfig` for
@@ -215,24 +221,7 @@ func resolvedFieldsConfig(
 	outputFormat: OutputFormat,
 ) throws(ParsingError) -> any FieldsConfig {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
-	switch input.first {
-	case baseFieldsConfigSectionPrefix, fieldOrderSectionPrefix, fieldSpecsSectionPrefix, nil:
-		var baseName = ""
-		if input.first == baseFieldsConfigSectionPrefix {
-			input.removeFirst()
-			baseName = try parseEscapedText(&input, terminatorSet: [fieldOrderSectionPrefix, fieldSpecsSectionPrefix])
-		}
-		let base = try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat)
-		var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat)
-		let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
-		let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
-		let tiebreakDirection = try builder.parseItemSortSection(&input)
-		try builder.parseFieldSpecsSection(&input)
-		let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
-		return base.baseIncludesAllFields
-			? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
-			: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
-	default:
+	guard isRelativeConfig(input) else {
 		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat)
 		try builder.parseAbsoluteConfig(&input)
 		return SelectedFieldsConfig(
@@ -241,46 +230,96 @@ func resolvedFieldsConfig(
 			itemSort: .init(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: .ascending),
 		)
 	}
+	let baseName = try parseBaseFieldsConfigSection(&input)
+	let base = try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat)
+	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat)
+	let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
+	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
+	let tiebreakDirection = try builder.parseItemSortSection(&input)
+	try builder.parseFieldSpecsSection(&input)
+	let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
+	return base.baseIncludesAllFields
+		? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
+		: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
+}
+
+/// Whether `input` (sans leading whitespace) is a `<relative-config>`, which
+/// starts with a section prefix or is empty, rather than an
+/// `<absolute-config>`.
+private func isRelativeConfig(_ input: Substring) -> Bool {
+	input.first.map(relativeConfigStartSet.contains) ?? true
+}
+
+/// Parses an optional `<base-fields-config-section>`: its
+/// `<base-fields-config-name>`, or `""` iff absent.
+private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(ParsingError) -> String {
+	guard input.first == baseFieldsConfigSectionPrefix else {
+		return ""
+	}
+	input.removeFirst()
+	return try parseEscapedText(&input, terminatorSet: [fieldOrderSectionPrefix, fieldSpecsSectionPrefix])
 }
 
 // MARK: - Base fields config resolution
 
 /// Resolves a `<base-fields-config-name>` (already stripped of its
-/// `<base-fields-config-section-prefix>`, empty if absent) against `standard`
-/// & `all`, applying the universal built-in rules: `none`, `all`, `default` (⇒
-/// `standard`, absent a persisted custom `default`, which doesn't exist yet),
-/// the `@none` / `@<format>` suffixes, & the `standard@json` ⇒ `all`
-/// substitution. Any other name is an error: no other named fields configs are
-/// persisted yet.
+/// `<base-fields-config-section-prefix>`, empty if absent) against the
+/// built-in named fields configs, whose variants are selected by an output
+/// format suffix (`@json` / `@key-value` / `@table`), the `@none` reference
+/// suffix (the unsuffixed variant), or, absent both, `outputFormat`:
+///
+/// - `none`: `all` with every field spec hidden.
+/// - `all`: every field spec visible.
+/// - `standard`: `standard`'s field specs; `standard@json` is a reference to
+///   `all`.
+/// - `default`: `standard`, absent a persisted custom `default`.
+///
+/// The `@json` variant is machine-facing (see `machineFacingVariant()`); the
+/// others are user-facing. Any other name is an error: no custom named fields
+/// configs are persisted yet.
 func resolveBaseFieldsConfig(
 	named rawName: String,
 	standard: some FieldsConfig,
 	all: BaseIncludesAllFieldsConfig,
 	outputFormat: OutputFormat,
 ) throws(ParsingError) -> any FieldsConfig {
-	var name = rawName.isEmpty ? defaultFieldsConfigName : rawName
-	var appliesJSONSubstitution = outputFormat == .json
-	if let atIndex = name.lastIndex(of: "@") {
-		let suffix = String(name[name.index(after: atIndex)...])
-		if suffix == "none" {
-			name = .init(name[..<atIndex])
-			appliesJSONSubstitution = false
-		} else if outputFormatSuffixSet.contains(suffix) {
-			name = .init(name[..<atIndex])
-			appliesJSONSubstitution = suffix == "json" && outputFormat == .json
+	var stem = (rawName.isEmpty ? defaultFieldsConfigName : rawName)[...]
+	let isUnsuffixedVariant = stem.hasSuffix(unsuffixedVariantReferenceSuffix)
+	if isUnsuffixedVariant {
+		stem.removeLast(unsuffixedVariantReferenceSuffix.count)
+	}
+	var outputFormatSuffix = Substring?.none
+	if let atIndex = stem.lastIndex(of: outputFormatSuffixPrefix) {
+		outputFormatSuffix = stem[stem.index(after: atIndex)...]
+		stem = stem[..<atIndex]
+		guard outputFormatSuffix.map(outputFormatSuffixSet.contains) == true else {
+			throw .invalidBaseFieldsConfigName(rawName)
 		}
 	}
-	return switch name {
-	case noneFieldsConfigName:
-		SelectedFieldsConfig()
-	case allFieldsConfigName:
-		all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
-	case defaultFieldsConfigName, standardFieldsConfigName:
-		appliesJSONSubstitution // swiftlint:disable:next void_function_in_ternary
-			? all.withDefaultFieldOrder(outputFormat: outputFormat).defaultedForJSON(outputFormat: outputFormat)
-			: standard.defaultedForJSON(outputFormat: outputFormat)
-	default:
+	guard !stem.isEmpty, stem.allSatisfy(\.isConfigNameCharacter) else {
 		throw .invalidBaseFieldsConfigName(rawName)
+	}
+	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? (outputFormat == .json))
+	let allVariant = all.withDefaultFieldOrder(outputFormat: outputFormat)
+	let config: any FieldsConfig =
+		switch stem {
+		case allFieldsConfigName:
+			allVariant
+		case defaultFieldsConfigName, standardFieldsConfigName:
+			isMachineFacing ? allVariant : standard
+		case noneFieldsConfigName:
+			allVariant.hidingAll()
+		default:
+			throw .nonexistentFieldsConfig(.init(stem))
+		}
+	return isMachineFacing ? config.machineFacingVariant() : config
+}
+
+private extension Character { // swiftlint:disable:this file_types_order
+	/// Whether this character may be in a config name's stem, per configs.md's
+	/// `^[-_0-9A-Za-z]+$`.
+	var isConfigNameCharacter: Bool {
+		isASCII && (isLetter || isNumber || self == "-" || self == "_")
 	}
 }
 
@@ -875,87 +914,6 @@ throws(ParsingError) -> (unescapedText: String, index: String.Index) {
 	return (unescapedText, currentIndex)
 }
 
-extension Substring {
-	/// Like `firstIndex(of:)`, but skips a match immediately preceded by an odd
-	/// number of `\`s (i.e., an escaped occurrence).
-	func firstUnescapedIndex(of target: Character) -> Index? {
-		var index = startIndex
-		var escaped = false
-		while index < endIndex {
-			let char = self[index]
-			if char == target, !escaped {
-				return index
-			}
-			escaped = char == escapePrefix ? !escaped : false
-			index = self.index(after: index)
-		}
-		return nil
-	}
-}
-
-// MARK: - Lightweight pre-fetch scanning helpers
-
-/// Skips (without interpreting) an optional `<field-order-section>` &
-/// `<item-sort-section>`, leaving `input` positioned at the start of
-/// `<field-spec-edits-section>` (or empty). `<field-order-section>` is skipped
-/// via the real parser (`FieldSpecsBuilder.parseFieldOrderSection(_:)`, result
-/// discarded): unlike `<item-sort-section>`, its `<sort-option-set>`
-/// alternative can carry fenced sub-content (a `<localization>` locale name,
-/// `<boundaries>`) that may itself contain an unescaped `.` / `/`, so a naive
-/// scan for those characters isn't safe here. `<item-sort-section>`'s own
-/// option alphabet (`a` / `d` / `r` / `R`) has no such fencing & never overlaps
-/// with `.`, so it can still be skipped directly.
-private func skipFieldOrderAndItemSortSections(_ input: inout Substring, outputFormat: OutputFormat)
-throws(ParsingError) {
-	if input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) {
-		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat)
-		_ = try builder.parseFieldOrderSection(&input)
-	}
-	if input.hasPrefix(itemSortSectionPrefix) {
-		input = input.dropFirst(itemSortSectionPrefix.count).drop { $0 != fieldSpecsSectionPrefix }
-	}
-}
-
-/// Splits `input` (a `<field-spec-edits-section>`'s content, sans its `.`
-/// prefix, or a whole `<absolute-config>`) on top-level (unescaped) `,`s &
-/// extracts each segment's leading field name, optionally requiring a leading
-/// `prefix` (`+`, for scanning only `<field-spec-insertion>`s; `nil` to accept
-/// every segment, for `<absolute-config>`). Needn't understand label / format /
-/// sort-modifier syntax at all, since `,` is reserved (must be escaped if
-/// literal) everywhere within a field spec.
-private func topLevelFieldSpecNames(in input: Substring, requiringPrefix prefix: Character?)
-throws(ParsingError) -> [String] {
-	var names = [String]()
-	var remaining = input
-	if remaining.first == fieldSpecsSectionPrefix {
-		remaining.removeFirst()
-	}
-	while !remaining.isEmpty {
-		let segmentEnd = remaining.firstUnescapedIndex(of: fieldSpecSeparator) ?? remaining.endIndex
-		var segment = remaining[..<segmentEnd]
-		remaining =
-			segmentEnd < remaining.endIndex ? remaining[remaining.index(after: segmentEnd)...] : remaining[segmentEnd...]
-		if let prefix {
-			guard segment.first == prefix else {
-				continue
-			}
-			segment.removeFirst()
-		} else if segment.first == moveIndicator || segment.first == removeIndicator {
-			continue // Absolute-config has no move / remove, but be defensive rather than mis-parse
-		} else if segment.first == insertIndicator {
-			segment.removeFirst()
-		}
-		let name = try parseEscapedText(
-			&segment,
-			terminatorSet: [labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator],
-		)
-		if !name.isEmpty {
-			names.append(name)
-		}
-	}
-	return names
-}
-
 // MARK: Constants
 
 let escapePrefix = Character("\\")
@@ -966,6 +924,12 @@ let baseFieldsConfigSectionPrefix = Character("@")
 let fieldOrderSectionPrefix = Character("/")
 let itemSortSectionPrefix = "//"
 let fieldSpecsSectionPrefix = Character(".")
+
+private let relativeConfigStartSet = Set([
+	baseFieldsConfigSectionPrefix,
+	fieldOrderSectionPrefix,
+	fieldSpecsSectionPrefix,
+])
 
 private let itemSortAndFieldSpecsPrefixSet =
 	Set([itemSortSectionPrefix[itemSortSectionPrefix.startIndex], fieldSpecsSectionPrefix])
@@ -985,7 +949,9 @@ private let originalInputOrderOption = Character("o")
 private let orderOptionSet = Set([baseFieldsConfigOrderOption, originalInputOrderOption])
 private let disableAllSortsOption = Character("r")
 
-private let outputFormatSuffixSet = Set(["json", "key-value", "table"])
+private let outputFormatSuffixSet = Set(["json", "key-value", "table"] as [Substring])
+private let outputFormatSuffixPrefix = Character("@")
+private let unsuffixedVariantReferenceSuffix = "@none"
 
 let defaultFieldsConfigName = "default"
 let noneFieldsConfigName = "none"

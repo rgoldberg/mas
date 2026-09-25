@@ -126,35 +126,43 @@ extension BaseIncludesAllFieldsConfig {
 }
 
 extension FieldsConfig {
-	/// For a built-in default fields config (`none` / `standard` / `all`) only:
-	/// for `outputFormat` `.json`, resets every field spec's label to its name
-	/// & format to its bare default (`.default(fieldName:)`), so JSON uses each
-	/// field's raw name & value, ignoring whatever label / custom format it was
-	/// given for `table` / `keyValue`; fields.md's Labeling section otherwise
-	/// has a label serve as a field's JSON key exactly like it does for
-	/// `table` / `keyValue`, which a built-in default's labels & formats were
-	/// never meant to opt into. Identity for any other `outputFormat`.
-	///
-	/// Never applied to a resolved fields config's own fields (e.g., a future
-	/// persisted custom one): a user's own explicit label / format is respected
-	/// for every output format, including `.json`.
-	func defaultedForJSON(outputFormat: OutputFormat) -> Self {
-		outputFormat == .json
-			? .init(
-				fieldSpecs: fieldSpecs.map { fieldSpec in
-					.init(
-						name: fieldSpec.name,
-						label: fieldSpec.name,
-						format: .default(fieldName: fieldSpec.name),
-						sortSpec: fieldSpec.sortSpec,
-						isHidden: fieldSpec.isHidden,
-						isSynthesized: fieldSpec.isSynthesized,
-						justification: fieldSpec.justification,
-					)
-				},
-				fieldOrder: fieldOrder,
-				itemSort: itemSort,
-			)
-			: self
+	/// A built-in fields config's machine-facing `@json` variant: favoring
+	/// precision & parsability, each field spec's label is its field name &
+	/// its format is `%i`.
+	func machineFacingVariant() -> Self {
+		.init(
+			fieldSpecs: fieldSpecs.map { fieldSpec in
+				.init(
+					name: fieldSpec.name,
+					label: fieldSpec.name,
+					format: .default(fieldName: fieldSpec.name),
+					sortSpec: fieldSpec.sortSpec,
+					isHidden: fieldSpec.isHidden,
+					isSynthesized: fieldSpec.isSynthesized,
+					justification: fieldSpec.justification,
+				)
+			},
+			fieldOrder: fieldOrder,
+			itemSort: itemSort,
+		)
+	}
+
+	/// This fields config with every field spec hidden.
+	func hidingAll() -> Self {
+		.init(
+			fieldSpecs: fieldSpecs.map { fieldSpec in
+				.init(
+					name: fieldSpec.name,
+					label: fieldSpec.label,
+					format: fieldSpec.format,
+					sortSpec: fieldSpec.sortSpec,
+					isHidden: true,
+					isSynthesized: fieldSpec.isSynthesized,
+					justification: fieldSpec.justification,
+				)
+			},
+			fieldOrder: fieldOrder,
+			itemSort: itemSort,
+		)
 	}
 }

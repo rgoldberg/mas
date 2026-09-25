@@ -27,9 +27,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `parses none field specs`() throws {
-		let specs = try parseFieldSpecs("@none")
-		#expect(specs.isEmpty)
+	func `parses none as all with every field spec hidden, which an overlay unhides`() throws {
+		#expect(try parseFieldSpecs("@none").map(\.isHidden) == [true, true])
+		let specs = try parseFieldSpecs("@none.bundleID")
+		#expect(specs.filter { !$0.isHidden }.map(\.name) == ["bundleID"])
 	}
 
 	@Test
@@ -246,6 +247,19 @@ private extension MASTests {
 	}
 
 	@Test
+	func `fetchFieldNames excludes hidden field specs that don't sort items`() throws {
+		let nameSet = Set(
+			try fetchFieldNames(
+				for: "._adamID/0,_extra/1",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			),
+		)
+		#expect(nameSet == ["extra"])
+	}
+
+	@Test
 	func `fetchFieldNames for an absolute config is just its field names`() throws {
 		let nameSet = Set(
 			try fetchFieldNames(
@@ -259,16 +273,53 @@ private extension MASTests {
 	}
 
 	@Test
-	func `defaultedForJSON resets a default config's labels & formats to bare defaults, only for JSON`() {
+	func `a built-in fields config's machine-facing variant labels & formats each field spec by its name`() {
 		let builtIn = BaseIncludesAllFieldsConfig(
 			fieldSpecs: [.init(name: "fileSizeBytes", label: "Size", format: .template([.text("custom")]), sortSpec: nil)],
 		)
-		let json = builtIn.defaultedForJSON(outputFormat: .json)
+		let json = builtIn.machineFacingVariant()
 		#expect(json.fieldSpecs[0].label == "fileSizeBytes")
 		#expect(json.fieldSpecs[0].format == .default(fieldName: "fileSizeBytes"))
-		let table = builtIn.defaultedForJSON(outputFormat: .table(.default))
-		#expect(table.fieldSpecs[0].label == "Size")
-		#expect(table.fieldSpecs[0].format == .template([.text("custom")]))
+	}
+
+	@Test(
+		arguments: [
+			("@standard", OutputFormat.json, ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
+			("@standard@none", .json, ["adamID"], "Adam"),
+			("@standard@table", .json, ["adamID"], "Adam"),
+			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
+			("@default@key-value", .json, ["adamID"], "Adam"),
+			("@standard", .keyValue, ["adamID"], "Adam"),
+		],
+	)
+	func `resolves a built-in fields config's variant by suffix or output format`(
+		value: String,
+		outputFormat: OutputFormat,
+		names: [String],
+		adamIDLabel: String,
+	) throws {
+		let config = try resolvedFieldsConfig(
+			from: value,
+			standard: SelectedFieldsConfig(
+				fieldSpecs: [.init(name: "adamID", label: "Adam", format: .default(fieldName: "adamID"), sortSpec: nil)],
+			),
+			all: allFixture,
+			outputFormat: outputFormat,
+		)
+		#expect(config.fieldSpecs.map(\.name).sorted() == names)
+		#expect(config.fieldSpecs.first { $0.name == "adamID" }?.label == adamIDLabel)
+	}
+
+	@Test(
+		arguments: [
+			("@bogus", ParsingError.nonexistentFieldsConfig("bogus")),
+			("@all@xml", .invalidBaseFieldsConfigName("all@xml")),
+			("@a b", .invalidBaseFieldsConfigName("a b")),
+			("@@json", .invalidBaseFieldsConfigName("@json")),
+		],
+	)
+	func `reports an invalid or nonexistent base fields config name`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
 	}
 
 	@Test

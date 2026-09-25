@@ -339,6 +339,20 @@ default sort options (`Iailg`, `IailgB/_:space:+`, `Iascgb`, `IascgB/+`) are in
 default formats are typed (`%_N+%i+` / `%V+%i+`, via
 `defaultFieldFormat(forFieldNamed:)`) so they compare per type.
 
+### Built-In Fields Config Variants
+
+`resolveBaseFieldsConfig` now validates config names per configs.md
+(`^[-_0-9A-Za-z]+$` plus an optional output format suffix & an optional `@none`
+reference suffix), reports a nonexistent name, & selects variants per suffix or,
+absent one, the output format: `@json` is machine-facing
+(`machineFacingVariant()`: label = name, format `%i`), `@none` / `@table` /
+`@key-value` user-facing, & `standard@json` is `all`. Built-in `none` is `all`
+with every field spec hidden, so overlays select fields (e.g.,
+`@none.name,version`). `fetchFieldNames` now fully parses the value against the
+static base (fetching every field for an `all`-derived base) instead of scanning
+text, excluding hidden field specs that don't sort items; the old scanning
+helpers are removed.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,
