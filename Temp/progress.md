@@ -280,6 +280,23 @@ file-length limit. Found while testing: the old `parseDelimitedFormat` stops a
 success / failure block at `%`, so a block cannot itself contain a placeholder
 (e.g., `%.N%n (%i)++` from fields-format.md); noted in Temp/todo.md.
 
+## Session 2 (2026-09-25)
+
+Rebased my step commits onto the updated specs, fixing each in place:
+`<original-input-order>` is rejected for table output; named references resolve
+against immutable reference-config positions (a removed field spec stays a
+`null`), & hiding such a field inserts a hidden copy of its base field spec;
+table.md's renamed termination nonterminals, & no escapes in `<sgr-parameters>`;
+`missingSortOptionTerminator`; case-insensitive `<time-zone-code>`; ASCII digits
+for versions. The gap-list & hide commits were accidentally merged into 1 commit
+(`Add --fields / --table spec gap list.`); splitting them needs a branch reset,
+which was not permitted, so it is left for review.
+
+### Justify Names
+
+`<justify>` names are now `startJustify` / `endJustify` (were `leftJustify` /
+`rightJustify`), per fields-format.md.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

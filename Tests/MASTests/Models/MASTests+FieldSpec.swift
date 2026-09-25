@@ -810,7 +810,7 @@ private extension MASTests {
 
 	@Test
 	func `a top-level justify transform sets justification & is stripped from the rendered format`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.endJustify").first)
 		#expect(fieldSpec.justification == .end)
 		// Stripped from the format: a real transform would force stringification
 		// (see `%.n coerces...`), but a bare justify-only pipeline leaves a JSON
@@ -820,8 +820,8 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("adamID:.rightJustify.leftJustify", Justification.start),
-			("adamID:.leftJustify.rightJustify", .end),
+			("adamID:.endJustify.startJustify", Justification.start),
+			("adamID:.startJustify.endJustify", .end),
 		],
 	)
 	func `the last justify transform in a pipeline wins`(value: String, justification: Justification) throws {
@@ -835,12 +835,12 @@ private extension MASTests {
 
 	@Test
 	func `a justify transform composes with a trailing string transform, in that order only`() throws {
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify.uppercase").first)
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.endJustify.uppercase").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .string("ab"), label: "L", name: "n").stringValue == "AB")
-		// Reversed order: `rightJustify` isn't a string transform, so it's a parse
+		// Reversed order: `endJustify` isn't a string transform, so it's a parse
 		// error once it's no longer in leading position
-		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:.uppercase.rightJustify") }
+		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:.uppercase.endJustify") }
 	}
 
 	@Test
@@ -849,9 +849,9 @@ private extension MASTests {
 		// A single stray ':' is a parse error: justify never ends with a closed
 		// argument fence (it never takes arguments at all), so it's never exempt
 		// from needing the full doubled pipeline terminator
-		#expect(throws: ParsingError.incompletePipelineTerminator) { try parseFieldSpecs("adamID:.rightJustify: MB") }
-		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.rightJustify:: MB") }
-		let fieldSpec = try #require(parseFieldSpecs("adamID:.rightJustify::%i MB").first)
+		#expect(throws: ParsingError.incompletePipelineTerminator) { try parseFieldSpecs("adamID:.endJustify: MB") }
+		#expect(throws: ParsingError.templateLacksPlaceholder) { try parseFieldSpecs("adamID:.endJustify:: MB") }
+		let fieldSpec = try #require(parseFieldSpecs("adamID:.endJustify::%i MB").first)
 		#expect(fieldSpec.justification == .end)
 		#expect(fieldSpec.format.rendered(value: .number(7), label: "L", name: "n").stringValue == "7 MB")
 	}
@@ -967,7 +967,7 @@ private extension MASTests {
 
 	@Test
 	func `a justify transform has no effect inside a placeholder's own success format`() throws {
-		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:%I.rightJustify+") }
+		#expect(throws: ParsingError.self) { try parseFieldSpecs("adamID:%I.endJustify+") }
 	}
 
 	@Test
@@ -983,7 +983,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table right-justifies a field per its field spec's justification; a left-justified last column isn't padded`() {
+	func `table end-justifies a field per its field spec's justification; a start-justified last column isn't padded`() {
 		let table = [
 			JSON.Object([("adamID", .number(7)), ("name", .string("Slack"))]),
 			.init([("adamID", .number(1_234_567)), ("name", .string("A"))]),
@@ -1000,7 +1000,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table pads even a right-justified last column`() {
+	func `table pads even a end-justified last column`() {
 		let table = [
 			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567))]),
 			.init([("name", .string("Slack")), ("adamID", .number(7))]),
@@ -1017,7 +1017,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table still gaps a right-justified middle column from the column after it`() {
+	func `table still gaps a end-justified middle column from the column after it`() {
 		let table = [
 			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567)), ("version", .string("1.0"))]),
 			.init([("name", .string("Slack")), ("adamID", .number(7)), ("version", .string("2.0"))]),

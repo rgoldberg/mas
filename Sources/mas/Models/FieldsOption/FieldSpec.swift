@@ -953,7 +953,7 @@ private func parseValueTransformPipelineThenTemplate(
 }
 
 private extension Justification {
-	/// A `<format-transform>`'s `<format-transform-name>`: table-output column
+	/// A `<format-transform>` (currently only a `<justify>`): table-output column
 	/// alignment. Consumed entirely at parse time into `FieldSpec.justification`,
 	/// never part of a rendered `Format` (unlike `Transform`, never valid
 	/// inside a placeholder's own success / failure sub-format).
@@ -963,10 +963,10 @@ private extension Justification {
 			self = .centerEnd
 		case "centerStartJustify":
 			self = .centerStart
-		case "leftJustify":
-			self = .start
-		case "rightJustify":
+		case "endJustify":
 			self = .end
+		case "startJustify":
+			self = .start
 		default:
 			return nil
 		}
