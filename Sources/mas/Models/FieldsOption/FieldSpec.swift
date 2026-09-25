@@ -256,7 +256,7 @@ func resolvedFieldsConfig(
 	let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 	let tiebreakDirection = try builder.parseItemSortSection(&input)
-	try builder.parseFieldSpecsSection(&input)
+	try builder.parseFieldSpecEditsSection(&input)
 	let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
 	return base.baseIncludesAllFields
 		? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
@@ -277,7 +277,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 		return ""
 	}
 	input.removeFirst()
-	return try parseEscapedText(&input, terminatorSet: [fieldOrderSectionPrefix, fieldSpecsSectionPrefix])
+	return try parseEscapedText(&input, terminatorSet: [fieldOrderSectionPrefix, fieldSpecEditsSectionPrefix])
 }
 
 // MARK: - Base fields config resolution
@@ -365,15 +365,16 @@ func effectivePosition(forIndex index: Int, length: Int) throws(ParsingError) ->
 	return position
 }
 
-// MARK: - Field specs builder (field-order / item-sort / field-specs sections)
+// MARK: - Field specs builder (field-order / item-sort / field-spec-edits sections)
 
-private enum FieldSpecStrategy { // swiftlint:disable:this one_declaration_per_file
+/// A `<field-spec-edit>`'s kind.
+private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_file
 	// swiftlint:disable sorted_enum_cases
-	case insert
+	case insertion
 	case overlay
 	case move
 	case hide
-	case remove // swiftlint:enable sorted_enum_cases
+	case removal // swiftlint:enable sorted_enum_cases
 }
 
 /// Applies `<field-order-section>` / `<item-sort-section>` /
@@ -429,14 +430,17 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			return .inherited
 		}
 		input.removeFirst()
-		guard let first = input.first, first != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(first) else {
+		guard
+			let first = input.first, first != fieldSpecSeparator,
+			!itemSortAndFieldSpecEditsPrefixSet.contains(first)
+		else {
 			throw .missingFieldOrderOptionSet
 		}
 		guard let order = orderOptionSetOrder(input) else {
 			var defaults = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
 			defaults.source = .output // `<field-order-option-set>`'s `default source: <output>`
 			let optionSet =
-				try SortOptionSet.parsed(&input, terminatorSet: itemSortAndFieldSpecsPrefixSet, defaults: defaults)
+				try SortOptionSet.parsed(&input, terminatorSet: itemSortAndFieldSpecEditsPrefixSet, defaults: defaults)
 			return switch optionSet.source {
 			case .input:
 				.byName(optionSet)
@@ -445,7 +449,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			}
 		}
 		var direction = SortOptionSet.Direction?.none
-		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecsPrefixSet.contains(char) {
+		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			if let match = SortOptionSet.Direction(rawValue: char) {
 				direction = match
 			}
@@ -473,7 +477,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		input.removeFirst(itemSortSectionPrefix.count)
 		var shouldDisableAllSorts = false
 		var direction = SortOptionSet.Direction?.none
-		while let option = input.first, option != fieldSpecsSectionPrefix {
+		while let option = input.first, option != fieldSpecEditsSectionPrefix {
 			input.removeFirst()
 			if let match = SortOptionSet.Direction(rawValue: option) {
 				direction = match
@@ -493,14 +497,14 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		return direction ?? .ascending
 	}
 
-	mutating func parseFieldSpecsSection(_ input: inout Substring) throws(ParsingError) {
-		guard input.first == fieldSpecsSectionPrefix else {
+	mutating func parseFieldSpecEditsSection(_ input: inout Substring) throws(ParsingError) {
+		guard input.first == fieldSpecEditsSectionPrefix else {
 			return
 		}
 		input.removeFirst()
 		while !input.isEmpty {
-			switch parseFieldSpecStrategy(&input) {
-			case .insert:
+			switch parseFieldSpecEditKind(&input) {
+			case .insertion:
 				let source = try parseBaseSourcedFieldSpec(&input)
 				try apply(
 					.insert(isHidden: false),
@@ -545,7 +549,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					format: try parseFormat(&input, existing: existing.format),
 					sortModifierInput: &input,
 				)
-			case .remove:
+			case .removal:
 				// A `<field-spec-removal>`'s `<reference-field-name>` has no modifiers
 				// to terminate it
 				let reference = try parseFieldSpecReference(&input, nameTerminatorSet: [indexPrefix, fieldSpecSeparator])
@@ -621,7 +625,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 private func orderOptionSetOrder(_ input: Substring) -> Character? {
 	var order = Character?.none
 	for char in input {
-		if char == fieldSpecSeparator || itemSortAndFieldSpecsPrefixSet.contains(char) {
+		if char == fieldSpecSeparator || itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			break
 		}
 		guard orderOptionSet.contains(char) else {
@@ -820,20 +824,20 @@ private extension FieldSpecsBuilder {
 	}
 }
 
-private func parseFieldSpecStrategy(_ input: inout Substring) -> FieldSpecStrategy {
+private func parseFieldSpecEditKind(_ input: inout Substring) -> FieldSpecEditKind {
 	input = input.drop(while: \.isWhitespace)
 	guard
 		let strategy = input.first.flatMap(
 			{ char in
 				switch char {
-				case insertIndicator:
-					FieldSpecStrategy.insert
-				case moveIndicator:
+				case insertLiteral:
+					FieldSpecEditKind.insertion
+				case moveLiteral:
 					.move
-				case hideIndicator:
+				case hideLiteral:
 					.hide
-				case removeIndicator:
-					.remove
+				case removeLiteral:
+					.removal
 				default:
 					nil
 				}
@@ -965,21 +969,21 @@ let fieldSpecSeparator = Character(",")
 let baseFieldsConfigSectionPrefix = Character("@")
 let fieldOrderSectionPrefix = Character("/")
 let itemSortSectionPrefix = "//"
-let fieldSpecsSectionPrefix = Character(".")
+let fieldSpecEditsSectionPrefix = Character(".")
 
 private let relativeConfigStartSet = Set([
 	baseFieldsConfigSectionPrefix,
 	fieldOrderSectionPrefix,
-	fieldSpecsSectionPrefix,
+	fieldSpecEditsSectionPrefix,
 ])
 
-private let itemSortAndFieldSpecsPrefixSet =
-	Set([itemSortSectionPrefix[itemSortSectionPrefix.startIndex], fieldSpecsSectionPrefix])
+private let itemSortAndFieldSpecEditsPrefixSet =
+	Set([itemSortSectionPrefix[itemSortSectionPrefix.startIndex], fieldSpecEditsSectionPrefix])
 
-let insertIndicator = Character("+")
-let moveIndicator = Character("%")
-let hideIndicator = Character("_")
-let removeIndicator = Character("-")
+let insertLiteral = Character("+")
+let moveLiteral = Character("%")
+let hideLiteral = Character("_")
+let removeLiteral = Character("-")
 
 let labelModifierPrefix = Character("=")
 let sortModifierPrefix = Character("/")
