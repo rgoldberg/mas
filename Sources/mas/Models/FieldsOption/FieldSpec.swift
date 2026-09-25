@@ -502,7 +502,11 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			return
 		}
 		input.removeFirst()
-		while !input.isEmpty {
+		input = input.drop(while: \.isWhitespace)
+		guard !input.isEmpty else {
+			return
+		}
+		while true {
 			switch parseFieldSpecEditKind(&input) {
 			case .insertion:
 				let source = try parseBaseSourcedFieldSpec(&input)
