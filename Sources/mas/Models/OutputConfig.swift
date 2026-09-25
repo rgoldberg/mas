@@ -79,9 +79,12 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden }
 		switch outputFormat {
 		case .json:
-			MAS.printer.info(try sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs) as [Any], separator: "\n")
+			MAS.printer.info(
+				try sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder) as [Any],
+				separator: "\n",
+			)
 		case .keyValue:
-			MAS.printer.info(try sortedObjects.keyValue(fieldSpecs: displayFieldSpecs))
+			MAS.printer.info(try sortedObjects.keyValue(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder))
 		case let .table(tableConfig):
 			MAS.printer.info(try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
 		}

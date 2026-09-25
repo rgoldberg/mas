@@ -6,6 +6,7 @@
 //
 
 private import Foundation
+internal import JSONAST
 
 // MARK: - Fields configs (fields.md)
 
@@ -92,21 +93,42 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 }
 
 extension FieldOrder {
-	/// Reorders `fieldSpecs` per this order. `.inherited` is identity; `.base` &
-	/// `.original` are identity, too, unless their direction is `.descending`.
+	/// Reorders `fieldSpecs` per this order. `.inherited` & `.original` (which
+	/// orders each item's fields independently; see `itemFieldSpecs(_:for:)`)
+	/// are identity; `.base` is identity, too, unless its direction is
+	/// `.descending`.
 	/// `.byName` / `.byLabel` sort per their `<sort-option-set>` (direction
 	/// included: `SortOptionSet.compare(_:_:)` already accounts for it).
 	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
 		switch self {
-		case .inherited:
+		case .inherited, .original:
 			fieldSpecs
-		case let .base(direction), let .original(direction):
+		case let .base(direction):
 			direction == .descending ? .init(fieldSpecs.reversed()) : fieldSpecs
 		case let .byName(optionSet):
 			fieldSpecs.sorted { optionSet.compare($0.name, $1.name) == .orderedAscending }
 		case let .byLabel(optionSet):
 			fieldSpecs.sorted { optionSet.compare($0.label, $1.label) == .orderedAscending }
 		}
+	}
+}
+
+extension FieldOrder {
+	/// `fieldSpecs` ordered for `object`: for `<original-input-order>`, in the
+	/// order of `object`'s keys (field specs for absent fields last), reversed
+	/// iff `.descending`; otherwise, unchanged.
+	func itemFieldSpecs(_ fieldSpecs: [FieldSpec], for object: JSON.Object) -> [FieldSpec] {
+		guard case let .original(direction) = self else {
+			return fieldSpecs
+		}
+		let positionByName =
+			Dictionary(object.fields.enumerated().map { ($1.key.rawValue, $0) }) { first, _ in first }
+		let ordered = fieldSpecs.enumerated()
+			.sorted { lhs, rhs in
+				(positionByName[lhs.element.name] ?? .max, lhs.offset) < (positionByName[rhs.element.name] ?? .max, rhs.offset)
+			}
+			.map(\.element)
+		return direction == .descending ? ordered.reversed() : ordered
 	}
 }
 

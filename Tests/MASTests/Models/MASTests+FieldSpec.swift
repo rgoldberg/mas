@@ -199,6 +199,14 @@ private extension MASTests {
 		#expect(try parseFieldsConfig(value, outputFormat: .json).fieldOrder == fieldOrder)
 	}
 
+	@Test(arguments: [("o", ["b", "a", "c"]), ("od", ["c", "a", "b"])])
+	func `original-input-order orders each item's fields by its own key order`(order: String, expected: [String]) throws {
+		let fieldSpecs = ["a", "b", "c"].map(FieldSpec.defaultSettings(forName:))
+		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
+		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json).fieldOrder
+		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.name) == expected)
+	}
+
 	@Test(arguments: ["/o", "/do"])
 	func `original-input-order is unsupported for table output`(value: String) {
 		#expect(throws: ParsingError.originalInputOrderUnsupportedForTable) { try parseFieldsConfig(value) }

@@ -367,6 +367,12 @@ trailing junk after a field spec reports `unexpectedCharacter`.
 alongside `--json`, each output format option excluding the others. Option
 values aren't completed. `mas.bash` only completes commands, so it's unchanged.
 
+### Per-Item Original Input Order
+
+`<original-input-order>` now orders each item's fields independently by its own
+key order (`FieldOrder.itemFieldSpecs(_:for:)`), for JSON & key-value output,
+per fields.md.
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,

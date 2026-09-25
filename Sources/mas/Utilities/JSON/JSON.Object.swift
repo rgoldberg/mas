@@ -152,15 +152,21 @@ extension [JSON.Object] {
 		return rows.joined(separator: "\n")
 	}
 
-	/// `keyValue`, but driven by `--fields`-resolved field specs.
-	func keyValue(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> String {
-		try map { object throws(FormattingError) in try object.keyValue(fieldSpecs: fieldSpecs) }.joined(separator: "\n\n")
+	/// `keyValue`, but driven by `--fields`-resolved field specs, ordered per
+	/// item by `fieldOrder`.
+	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder) throws(FormattingError) -> String {
+		try map { object throws(FormattingError) in
+			try object.keyValue(fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object))
+		}
+		.joined(separator: "\n\n")
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
-	/// `--fields`-resolved field specs.
-	func jsonObjects(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> [JSON.Object] {
-		try map { object throws(FormattingError) in try object.jsonObject(fieldSpecs: fieldSpecs) }
+	/// `--fields`-resolved field specs, ordered per item by `fieldOrder`.
+	func jsonObjects(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder) throws(FormattingError) -> [JSON.Object] {
+		try map { object throws(FormattingError) in
+			try object.jsonObject(fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object))
+		}
 	}
 }
 
