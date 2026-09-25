@@ -20,7 +20,7 @@ struct FieldSpec: Equatable {
 	let sortSpec: SortSpec?
 	/// Whether this field spec is hidden (`<field-spec-hide>`): not output, but
 	/// otherwise behaving as a visible one (it has a position, may be referenced
-	/// by a `<field-spec-reference>`, & its `<sort>` sorts items iff enabled).
+	/// by a `<field-spec-reference>` & its `<sort>` sorts items iff enabled).
 	let isHidden: Bool
 	/// Whether this field's value is computed after the display command's own
 	/// fetch (e.g., `outdated`'s `newVersion`, from comparing the installed &
@@ -281,7 +281,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 //  custom named fields configs are persisted, look a name up through the
 //  command's context stack (most to least specific context), resolving a
 //  config whose base config name is its own name from the context above its
-//  own, reporting any other reference cycle, & substituting `standard` for a
+//  own, reporting any other reference cycle & substituting `standard` for a
 //  nonexistent `default` (appending any output format suffix)
 
 /// Resolves a `<base-fields-config-name>` (already stripped of its
@@ -687,14 +687,14 @@ private extension FieldSpecsBuilder {
 
 	/// The 1-based positions in the reference fields config of field specs for
 	/// field `name`, including any since replaced by `null`: the reference
-	/// fields config's order & names are immutable, & are those of the base
+	/// fields config's order & names are immutable & are those of the base
 	/// fields config.
 	private func referencePositions(forName name: String) -> [Int] {
 		baseFieldSpecs.indices.compactMap { baseFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
 	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
-	/// a character in `nameTerminatorSet`, & optional `<index-prefix>`
+	/// a character in `nameTerminatorSet` & optional `<index-prefix>`
 	/// `<index>` (default `1`).
 	private func parseNameAndIndex(
 		_ input: inout Substring,

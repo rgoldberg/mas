@@ -16,7 +16,7 @@ internal import Foundation
 ///
 /// - Parameter existing: The working fields config's format, whose type
 ///   determinant selects the direct default for an absent `<format-block>`.
-/// - Returns: The format, & the justification from its
+/// - Returns: The format & the justification from its
 ///   `<format-transform-pipeline>`, which is `nil` iff the working fields
 ///   config's justification is retained (i.e., the
 ///   `<format-transform-pipeline>` is transitively absent).

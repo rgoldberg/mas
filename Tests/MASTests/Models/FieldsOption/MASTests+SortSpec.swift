@@ -104,7 +104,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an omitted option retains the working value, & an omitted sort-option-set its whole working value`()
+	func `an omitted option retains the working value, and an omitted sort-option-set its whole working value`()
 	throws {
 		let existing = SortSpec(priority: 1, optionSets: [
 			try #require(.init(optionSetFrom: "id")),

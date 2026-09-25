@@ -49,7 +49,7 @@ indirect enum Format: Equatable {
 	}
 }
 
-/// A `<*-transform-call>`: its `<value-transform>`, & whether it has
+/// A `<*-transform-call>`: its `<value-transform>` & whether it has
 /// `<strict-coercion>`.
 struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let transform: Transform

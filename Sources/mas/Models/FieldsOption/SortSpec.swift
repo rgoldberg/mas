@@ -446,7 +446,7 @@ extension SortOptionSet {
 	}
 
 	/// Compares 2 values of any type: numbers numerically, booleans `false`
-	/// before `true`, & anything else as strings.
+	/// before `true` & anything else as strings.
 	private func compareAny(_ lhs: JSON.Node?, _ rhs: JSON.Node?) -> ComparisonResult {
 		switch (lhs, rhs) {
 		case let (.bool(lhs), .bool(rhs)):
@@ -463,7 +463,7 @@ extension SortOptionSet {
 		lhs == rhs ? .orderedSame : lhs ? .orderedDescending : .orderedAscending
 	}
 
-	/// Compares 2 numbers, & their trivia per `triviaOrder`.
+	/// Compares 2 numbers & their trivia per `triviaOrder`.
 	private func compareNumbers(_ lhs: NumberWithTrivia?, _ rhs: NumberWithTrivia?) -> ComparisonResult {
 		let lhs = lhs ?? .init(number: 0, triviaPrefix: "", triviaSuffix: "")
 		let rhs = rhs ?? .init(number: 0, triviaPrefix: "", triviaSuffix: "")

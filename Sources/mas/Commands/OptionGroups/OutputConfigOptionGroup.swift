@@ -17,10 +17,10 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 		name: .customLong("table"),
 		defaultAsFlag: "",
 		parsing: .next,
-		help: "Output format: table, optionally configuring headers, a separator line, & column spacing (table.md)",
+		help: "Output format: table, optionally configuring headers, a separator line & column spacing (table.md)",
 	)
 	private var tableOptionValue: String?
-	@Option(name: .customLong("fields"), help: "Select, order, label, format, & sort output fields")
+	@Option(name: .customLong("fields"), help: "Select, order, label, format & sort output fields")
 	private var fieldsOptionValue = ""
 
 	/// Resolves `isJSON` / `isKeyValue` / `tableOptionValue` into a single

@@ -46,7 +46,7 @@ struct SelectedFieldsConfig: FieldsConfig { // swiftlint:disable:this one_declar
 	}
 }
 
-/// `all`, & any `--fields` result derived from it. `fieldSpecs` still carries
+/// `all` & any `--fields` result derived from it. `fieldSpecs` still carries
 /// selected entries (e.g., `adamID`'s default sort priority) even though the
 /// actual field _set_ is open-ended / dynamic, see `OutputConfig`.
 struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one_declaration_per_file
@@ -72,7 +72,7 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	// TODO: Temp/todo.md "`<base-fields-config-order>`": decide whether `w`
 	//  orders as the base fields config would render (applying its inherited
 	//  `<original-input-order>` / `<sort-option-set>`), or (as here) uses the
-	//  inherited field specs' listed order, & whether `<descending>` reverses
+	//  inherited field specs' listed order & whether `<descending>` reverses
 	//  only the inherited order, not subsequent `<field-spec-edits-section>`
 	//  results
 	case base(SortOptionSet.Direction?)

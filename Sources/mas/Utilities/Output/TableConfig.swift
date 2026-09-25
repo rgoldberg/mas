@@ -152,7 +152,7 @@ private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_
 /// omitting the terminator anywhere but at the end swallows subsequent settings
 /// into this payload). Outer bare whitespace is consumed. In a `{text}` token
 /// (`<separator-pattern>` / `<column-spacing>`), a `\` escapes the next
-/// character (e.g., `\:`), & an escape prefix at the end of the input is an
+/// character (e.g., `\:`), and an escape prefix at the end of the input is an
 /// error; `<sgr-parameters>` is not a `{text}` token, so it supports no escape
 /// sequences (a `\` is invalid there).
 private func parseTableSettingText(_ input: inout Substring, setting: Character)

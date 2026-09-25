@@ -84,7 +84,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `b & u each imply a dashed separator (not blank) iff none was already set, & set broken-ness`() throws {
+	func `b & u each imply a dashed separator (not blank) iff none was already set & set broken-ness`() throws {
 		let broken = try parseTableConfig("b")
 		#expect(broken.separator == .init(pattern: "-", broken: true))
 		#expect(broken.header == .init(sgrCodes: "")) // transitively implied, via the implied separator

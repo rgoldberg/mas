@@ -48,7 +48,7 @@ struct ItemSort: Equatable {
 }
 
 /// 1 member of `ItemSort.keys`: a field name paired with the `SortSpec` that
-/// applies its sort, & its field's type determinant.
+/// applies its sort & its field's type determinant.
 struct ItemSortKey: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let name: String
 	let sortSpec: SortSpec
