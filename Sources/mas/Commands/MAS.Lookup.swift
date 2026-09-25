@@ -81,12 +81,11 @@ private struct KeyValueConfig: OutputConfig {
 			.init(
 				name: "fileSizeBytes",
 				label: "Size",
-				// A byte count as whole, comma-grouped decimal megabytes, with an
-				// appended " MB". JSON gets the raw byte count instead: `--json`
-				// resolves through `defaultedForJSON(outputFormat:)`, which discards
-				// this format (& the label above) for a built-in default fields
-				// config, per fields.md's Labeling section
-				// `%+.N.scale:10,6,,0:.group+ MB`
+				// `%+.N.scale:10,6,,0:.group+ MB`: a byte count as whole, grouped
+				// decimal megabytes, with an appended " MB". JSON gets the raw byte
+				// count instead: `--json` resolves to the machine-facing `@json`
+				// variant (see `machineFacingVariant()`), which labels & formats each
+				// field spec by its name, per mas.md
 				format: .template(
 					[
 						.placeholder(

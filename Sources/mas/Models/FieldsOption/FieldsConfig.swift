@@ -27,8 +27,8 @@ protocol FieldsConfig {
 	var fieldOrder: FieldOrder { get }
 	var itemSort: ItemSort { get }
 
-	/// Needed so `defaultedForJSON()` can rebuild `Self` generically, over
-	/// `some FieldsConfig` as well as `any FieldsConfig`.
+	/// Needed so `machineFacingVariant()` & `hidingAll()` can rebuild `Self`
+	/// generically, over `some FieldsConfig` as well as `any FieldsConfig`.
 	init(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, itemSort: ItemSort)
 }
 
