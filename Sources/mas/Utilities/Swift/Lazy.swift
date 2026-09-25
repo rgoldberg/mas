@@ -7,7 +7,7 @@
 
 private import Synchronization
 
-final class Lazy<Value>: Sendable {
+final class Lazy<Value: Sendable>: Sendable {
 	private enum State {
 		case uninitialized(@Sendable () -> Value)
 		case initialized(Value)
