@@ -162,6 +162,20 @@ output formats, each selectable via a flag (note: an item is normally an app):
   their relative input order preserved in the output). Key-value pairs are
   sorted by key.
 
+`--fields` selects, orders, labels, formats & sorts output fields, as specified
+in [`Specs/fields.md`](Specs/fields.md) &
+[`Specs/fields-format.md`](Specs/fields-format.md); `--table` configures table
+output's header row, separator line & column spacing, as specified in
+[`Specs/table.md`](Specs/table.md). mas-specific defaults are specified in
+[`Specs/mas.md`](Specs/mas.md). e.g.:
+
+- `mas list --fields 'name=App,version/1d' --table S`: only the name (labeled
+  `App`) & version fields, sorted by descending version, with a header row & a
+  separator line
+- `mas list --fields '.name:.uppercase,+path'`: the standard fields, with
+  uppercased names, followed by paths
+- `mas list --fields '@none.name,version'`: only the name & version fields
+
 Many fields provided by Apple are poorly named, so they are renamed by an
 algorithm. If Apple renames or adds fields, suboptimal field names might be
 output until the algorithm is updated.

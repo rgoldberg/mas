@@ -391,6 +391,11 @@ field (e.g., `.bundleID`). Pre-fetch, a reference to a field not yet discovered
 fetches every field. A `// TODO:` in `resolveBaseFieldsConfig` describes the
 context-stack lookup to implement once custom named configs are persisted.
 
+### README
+
+`README.md`'s Output Formats section links the specs & gives verified
+`--fields` / `--table` examples (Temp/todo.md "Documentation" item 1).
+
 ## Stopped (2026-09-18 10:45 UTC)
 
 Stopped ahead of the 11:00 UTC deadline with a clean tree (`Scripts/format`,
