@@ -531,7 +531,7 @@ func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTr
 			}
 		}
 	case let (.string(literal), .strict):
-		Double(literal.value).map { .init(number: $0, triviaPrefix: "", triviaSuffix: "") }
+		decimalNumber(in: literal.value).map { .init(number: $0, triviaPrefix: "", triviaSuffix: "") }
 	default:
 		nil
 	}
@@ -552,10 +552,15 @@ private func chronologicDateAndIsDateOnly(from value: JSON.Node?) -> (date: Date
 		(try? Date(literal.value, strategy: .iso8601)).map { ($0, false) }
 			?? (try? Date(literal.value, strategy: Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
 			.map { ($0, true) }
-			?? Double(literal.value).map { (.init(timeIntervalSince1970: $0), false) }
+			?? decimalNumber(in: literal.value).map { (.init(timeIntervalSince1970: $0), false) }
 	default:
 		nil
 	}
+}
+
+/// `string`'s number iff its entire content is a decimal number, else `nil`.
+private func decimalNumber(in string: String) -> Double? {
+	(try? /[-+]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?/.wholeMatch(in: string)) != nil ? Double(string) : nil
 }
 
 /// The range of `string`'s sole number, or `nil` iff `string` doesn't contain
@@ -597,7 +602,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 				)
 			}
 		case let (.string(literal), .strict):
-			Double(literal.value).map { .number(numberString($0), triviaPrefix: "", triviaSuffix: "") }
+			decimalNumber(in: literal.value).map { .number(numberString($0), triviaPrefix: "", triviaSuffix: "") }
 		default:
 			nil
 		}

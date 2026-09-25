@@ -69,6 +69,9 @@ private extension MASTests {
 			("[%_n]", .string("none"), ""),
 			("%.n", .string("4.50"), "4.5"),
 			("[%.n]", .string("4.5a"), ""),
+			("[%.n]", .string("nan"), ""),
+			("[%.n]", .string("0x10"), ""),
+			("%.n", .string("-1e3"), "-1000"),
 			("%n", .number(4.5), "4.5"),
 		],
 	)
