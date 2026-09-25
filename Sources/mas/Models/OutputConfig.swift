@@ -19,6 +19,15 @@ protocol OutputConfig {
 	static var defaultFormat: OutputFormat { get }
 	static var standardFieldsConfig: Standard { get }
 	static var allFieldsConfig: BaseIncludesAllFieldsConfig { get }
+	/// Every field that may exist in any item, iff determinable up front (see
+	/// fields.md's "Nonexistent Fields"), else `nil`.
+	static var fieldNameSet: Set<String>? { get } // swiftlint:disable:this discouraged_optional_collection
+}
+
+extension OutputConfig { // swiftlint:disable:this file_types_order
+	static var fieldNameSet: Set<String>? { // swiftlint:disable:this discouraged_optional_collection
+		nil
+	}
 }
 
 extension OutputConfig { // swiftlint:disable:this file_types_order
@@ -34,6 +43,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 				standard: standardFieldsConfig,
 				all: allFieldsConfig.mergingDynamicFields(from: objects),
 				outputFormat: outputFormat,
+				fieldNameSet: fieldNameSet,
 			)
 		} catch {
 			throw .parsing(error)

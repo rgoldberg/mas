@@ -88,6 +88,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingSortOptionSet
 	case missingSortOptionTerminator
 	case missingSortPriority
+	case nonexistentField(String)
 	case nonexistentFieldsConfig(String)
 	case nonexistentFieldSpec(forName: String)
 	case originalInputOrderUnsupportedForTable
@@ -152,6 +153,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 				name.isEmpty || name.first?.isWhitespace == true || name.last?.isWhitespace == true ? "'\(name)'" : name
 			)
 			"""
+		case let .nonexistentField(name):
+			"Nonexistent field: \(name)"
 		case let .nonexistentFieldsConfig(name):
 			"Nonexistent fields config: \(name)"
 		case .originalInputOrderUnsupportedForTable:
@@ -187,6 +190,7 @@ func fetchFieldNames(
 	standard: some FieldsConfig,
 	all: BaseIncludesAllFieldsConfig,
 	outputFormat: OutputFormat,
+	fieldNameSet: Set<String>? = nil, // swiftlint:disable:this discouraged_optional_collection
 ) throws(ParsingError) -> [String] {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
 	if isRelativeConfig(input) {
@@ -205,6 +209,7 @@ func fetchFieldNames(
 			standard: standard,
 			all: all,
 			outputFormat: outputFormat,
+			fieldNameSet: fieldNameSet,
 		)
 	} catch .nonexistentFieldSpec {
 		return .init() // It may reference a field that's only discovered once every field is fetched
@@ -233,10 +238,11 @@ func resolvedFieldsConfig(
 	standard: some FieldsConfig,
 	all: BaseIncludesAllFieldsConfig,
 	outputFormat: OutputFormat,
+	fieldNameSet: Set<String>? = nil, // swiftlint:disable:this discouraged_optional_collection
 ) throws(ParsingError) -> any FieldsConfig {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
 	guard isRelativeConfig(input) else {
-		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat)
+		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat, fieldNameSet: fieldNameSet)
 		try builder.parseAbsoluteConfig(&input)
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
@@ -246,7 +252,7 @@ func resolvedFieldsConfig(
 	}
 	let baseName = try parseBaseFieldsConfigSection(&input)
 	let base = try resolveBaseFieldsConfig(named: baseName, standard: standard, all: all, outputFormat: outputFormat)
-	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat)
+	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
 	let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 	let tiebreakDirection = try builder.parseItemSortSection(&input)
@@ -388,6 +394,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private(set) var fieldSpecs: [FieldSpec]
 
 	private let outputFormat: OutputFormat
+	/// Every field that may exist in any input, iff determinable up front (see
+	/// fields.md's "Nonexistent Fields"); `nil` iff not.
+	private let fieldNameSet: Set<String>? // swiftlint:disable:this discouraged_optional_collection
 
 	private var workingTags: [Int?]
 	/// The base fields config's field specs, immutable: the `source` of a
@@ -398,9 +407,11 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// direct result lands. `-1` = before the first field spec.
 	private var previousIndex = -1
 
-	init(fieldSpecs: [FieldSpec], outputFormat: OutputFormat) {
+	// swiftlint:disable:next discouraged_optional_collection
+	init(fieldSpecs: [FieldSpec], outputFormat: OutputFormat, fieldNameSet: Set<String>?) {
 		self.fieldSpecs = fieldSpecs
 		self.outputFormat = outputFormat
+		self.fieldNameSet = fieldNameSet
 		workingTags = Array(fieldSpecs.indices)
 		baseFieldSpecs = fieldSpecs
 		referenceFieldSpecs = fieldSpecs
@@ -555,6 +566,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	mutating func parseAbsoluteConfig(_ input: inout Substring) throws(ParsingError) {
 		while true {
 			let name = try parseName(&input)
+			guard fieldNameSet?.contains(name) != false else {
+				throw .nonexistentField(name)
+			}
 			let label = try parseLabel(&input) ?? name
 			let parsed = try parseFormat(&input, existing: nil)
 			fieldSpecs.append(
@@ -659,7 +673,7 @@ private extension FieldSpecsBuilder {
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
 		return positions.isEmpty
-			? .defaultSettings(forName: name)
+			? try defaultSettingsFieldSpec(forName: name)
 			: baseFieldSpecs[positions[try effectivePosition(forIndex: index, length: positions.count) - 1] - 1]
 	}
 
@@ -677,12 +691,21 @@ private extension FieldSpecsBuilder {
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
 		guard !positions.isEmpty else {
-			return (nil, .defaultSettings(forName: name))
+			return (nil, try defaultSettingsFieldSpec(forName: name))
 		}
 		let reference =
 			Reference(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
 		return referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
 			?? (nil, baseFieldSpecs[reference.position - 1])
+	}
+
+	/// A field spec with default settings for field `name`, which must not be a
+	/// nonexistent field.
+	private func defaultSettingsFieldSpec(forName name: String) throws(ParsingError) -> FieldSpec {
+		guard fieldNameSet?.contains(name) != false else {
+			throw .nonexistentField(name)
+		}
+		return .defaultSettings(forName: name)
 	}
 
 	/// The 1-based positions in the reference fields config of field specs for

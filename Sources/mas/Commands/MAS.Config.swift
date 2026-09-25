@@ -74,6 +74,8 @@ private struct KeyValueConfig: OutputConfig {
 		]
 			.map { .init(name: $0, label: $0, format: defaultFieldFormat(forFieldNamed: $0), sortSpec: nil) },
 	)
+	/// `config`'s field set is fully static & fully known.
+	static let fieldNameSet = Set<String>?.some(.init(allFieldsConfig.fieldSpecs.map(\.name)))
 }
 
 private func configStringValue(_ name: String) -> String {

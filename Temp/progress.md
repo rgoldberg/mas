@@ -449,3 +449,11 @@ Remaining:
 - The open questions appended to Temp/todo.md "Current Version".
 - The gap-list & hide commits were merged into 1 commit during the rebase;
   splitting them needs a branch reset, which wasn't permitted.
+
+### Nonexistent Fields
+
+Per fields.md's "Nonexistent Fields", a display command whose fields are all
+known up front (`config`, via `OutputConfig.fieldNameSet`) reports a reference
+to any other field (an absolute field name, an insertion, or a hide of an
+unmatched name) as `nonexistentField`; other commands' fields can't be known
+up front, so aren't checked.

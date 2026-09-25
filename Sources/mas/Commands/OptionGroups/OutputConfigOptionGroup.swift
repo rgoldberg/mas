@@ -56,6 +56,7 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 			standard: Config.standardFieldsConfig,
 			all: Config.allFieldsConfig,
 			outputFormat: try outputFormat,
+			fieldNameSet: Config.fieldNameSet,
 		)
 	}
 

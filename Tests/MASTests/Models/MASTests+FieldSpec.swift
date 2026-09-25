@@ -258,6 +258,20 @@ private extension MASTests {
 		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
 	}
 
+	@Test(arguments: ["bogus", ".+bogus", "._bogus", "adamID,bogus=B"])
+	func `a reference to a nonexistent field is an error iff every field is known up front`(value: String) throws {
+		#expect(throws: ParsingError.nonexistentField("bogus")) {
+			try resolvedFieldsConfig(
+				from: value,
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .keyValue,
+				fieldNameSet: ["adamID", "bundleID"],
+			)
+		}
+		_ = try parseFieldSpecs(value)
+	}
+
 	@Test
 	func `throws error for nonexistent field edit`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "nonexistentField")) {
