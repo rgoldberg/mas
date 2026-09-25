@@ -90,7 +90,7 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 	if !broken.isUnset, separatorPattern.isUnset {
 		separatorPattern = .set("-")
 	}
-	if !separatorPattern.isUnset, header.isUnset {
+	if separatorPattern.setValue != nil, header.isUnset {
 		header = .set("")
 	}
 	return .init(
