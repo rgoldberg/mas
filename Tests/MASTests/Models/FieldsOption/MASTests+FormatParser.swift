@@ -169,6 +169,9 @@ private extension MASTests {
 			(".trimWhitespace", .string("  x  "), "x"),
 			(".lowercase", .string("ABC"), "abc"),
 			(".absoluteValue", .number(-5.5), "5.5"),
+			(".round", .number(1e30), "1e+30"),
+			(".absoluteValue", .number(-1e30), "1e+30"),
+			(".scale:10,0,,0:", .number(1e30), "1e+30"),
 		],
 	)
 	func `applies a format-block's value-transform-pipeline`(format: String, value: JSON.Node, expected: String)

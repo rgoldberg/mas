@@ -68,7 +68,7 @@ enum Transform: Hashable {
 		case let .group(digitGroupSeparator, digitGroupDigitCount):
 			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupDigitCount: digitGroupDigitCount)
 		case .round:
-			Double(string).map { .init(Int($0.rounded())) } ?? string
+			Double(string).map { numberString($0.rounded(), matchingIntegerStyleOf: "") } ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
 			Double(string).map { rawValue in
 				radixScaled(
@@ -168,6 +168,9 @@ private func radixScaled(
 		value = (value / unit).rounded() * unit
 	}
 	let fractionalScale = pow(radixDouble, Double(fractionalDigits))
+	guard abs(value) * fractionalScale < maxExactInteger else {
+		return .init(value) // Too large to render in positional notation via `Int`
+	}
 	let scaledMagnitude = Int((abs(value) * fractionalScale).rounded())
 	let divisor = Int(fractionalScale.rounded())
 	let integerPart = String(scaledMagnitude / divisor, radix: radix)
@@ -183,8 +186,11 @@ private func radixScaled(
 /// point & `value` is integral, e.g., `absoluteValue` on `"-5"` yields `"5"`,
 /// not `"5.0"`, but on `"-5.0"` yields `"5.0"`.
 private func numberString(_ value: Double, matchingIntegerStyleOf original: String) -> String {
-	!original.contains(".") && value == value.rounded() ? .init(Int(value)) : .init(value)
+	!original.contains(".") && value == value.rounded() && abs(value) < maxExactInteger ? .init(Int(value)) : .init(value)
 }
+
+/// The magnitude below which every integral `Double` is exactly an `Int`.
+private let maxExactInteger = 9_007_199_254_740_992.0
 
 extension Transform: CustomStringConvertible { // swiftlint:disable:this file_types_order
 	var description: String {
