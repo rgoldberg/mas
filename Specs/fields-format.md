@@ -250,8 +250,13 @@ affect it.
 
 ###### `timeZone`
 
-A `<time-zone-code>` that is both an IANA Time Zone Database identifier & a
-`TimeZone.abbreviationDictionary` key (e.g., `EST`) identifies the latter.
+<!--editorconfig-checker-disable-->
+A `<time-zone-code>` that is both [an IANA Time Zone Database
+identifier](https://www.iana.org/time-zones) & a
+[`TimeZone.abbreviationDictionary` key](
+  https://developer.apple.com/documentation/foundation/timezone/abbreviationdictionary
+) (e.g., `EST`) identifies the latter.
+<!--editorconfig-checker-enable-->
 
 A **UTC offset** is either:
 
