@@ -5,12 +5,13 @@
 #
 # Copyright © 2026 mas-cli. All rights reserved.
 #
-# Reports prose paragraphs in Markdown files & Swift comments whose lines aren't
-# filled up to the 80-character limit before wrapping.
+# Reports lines wider than their .editorconfig max_line_length (counting each tab
+# as 2 characters), & prose paragraphs in Markdown files & Swift comments whose
+# lines aren't filled up to the 80-character limit before wrapping.
 #
 # Usage: layout [-f]
 #
-# -f: rewrap reported paragraphs instead of reporting them
+# -f: rewrap reported paragraphs instead of reporting them & wide lines
 #
 
 . "${0:A:h}/_setup-script"
@@ -30,12 +31,29 @@ readonly link_url_start_regex='\]\( *$'
 readonly swift_comment_regex=$'^(\t*)(///?) (.*)$'
 readonly swift_list_regex='^([-*+]|[0-9]+\.) '
 readonly swift_marker_regex='^(swiftlint|swiftformat|periphery|MARK|TODO|FIXME|sourcery|```)'
+readonly editorconfig_section_regex='^\[(.*)\]$'
+readonly editorconfig_max_line_length_regex='^max_line_length *= *([^ ]+)'
+readonly integer_regex='^[0-9]+$'
 
 # shellcheck disable=SC2034
 typeset -a tokens filled source_lines result_lines match mbegin mend
 # shellcheck disable=SC2034
 typeset MATCH MBEGIN MEND
 integer exit_status=0
+
+# Each .editorconfig section's max_line_length, keyed by the section's glob
+# converted to a zsh pattern (the last matching section wins)
+typeset -a max_line_length_patterns=() max_line_lengths=()
+section=''
+# shellcheck disable=SC2066
+for line in "${(@f)"$(<.editorconfig)"}"; do
+	if [[ "${line}" =~ ${editorconfig_section_regex} ]]; then
+		section="${match[1]}"
+	elif [[ -n "${section}" && "${line}" =~ ${editorconfig_max_line_length_regex} ]]; then
+		max_line_length_patterns+=("${${${section//\{/(}//,/|}//\}/)}")
+		max_line_lengths+=("${match[1]}")
+	fi
+done
 
 # Splits ${1} at spaces into tokens, keeping each code span whole
 tokenize() {
@@ -84,7 +102,8 @@ fill() {
 	while ((moved)); do
 		moved=0
 		for ((index = 2; index <= ${#lines}; ++index)); do
-			if [[ "${lines[index]%%${separator}*}" =~ ${start_danger_regex} && "${lines[index - 1]}" == *${separator}* ]]; then
+			if [[ "${lines[index]%%${separator}*}" =~ ${start_danger_regex} ]]\
+			&& [[ "${lines[index - 1]}" == *${separator}* ]]; then
 				lines[index]="${lines[index - 1]##*${separator}}${separator}${lines[index]}"
 				lines[index - 1]="${lines[index - 1]%${separator}*}"
 				moved=1
@@ -157,7 +176,8 @@ layout_markdown() {
 			line="${source_lines[end]}"
 			indentation="${(M)line##[ ]#}"
 			if is_markdown_special "${line}"\
-			|| [[ "${line}" =~ ${markdown_list_regex} || "${line}" == [[:space:]]#')'* || ${#indentation} -ne ${#rest} ]]; then
+			|| [[ "${line}" =~ ${markdown_list_regex} || "${line}" == [[:space:]]#')'* ]]\
+			|| ((${#indentation} != ${#rest})); then
 				break
 			fi
 			body+=("${line#"${indentation}"}")
@@ -237,14 +257,52 @@ layout_swift() {
 	done
 }
 
-for file in ${(0)"$(git ls-files -z -- '*.md' '*.swift')"}; do
+# Reports each line of file ${1} wider than its max_line_length, except lines
+# disabled via editorconfig-checker comments
+check_line_lengths() {
+	local max_line_length='' line
+	local -i index is_disabled=0 is_next_disabled=0
+	for ((index = 1; index <= ${#max_line_length_patterns}; ++index)); do
+		# shellcheck disable=SC2053
+		if [[ "${1:t}" == ${~max_line_length_patterns[index]} ]]; then
+			max_line_length="${max_line_lengths[index]}"
+		fi
+	done
+	if ! [[ "${max_line_length}" =~ ${integer_regex} ]] || [[ "${(pj:\n:)source_lines}" == *editorconfig-checker-disable-file* ]]; then
+		return
+	fi
+	for ((index = 1; index <= ${#source_lines}; ++index)); do
+		line="${source_lines[index]}"
+		if [[ "${line}" == *editorconfig-checker-enable* ]]; then
+			is_disabled=0
+		elif [[ "${line}" == *editorconfig-checker-disable* && "${line}" != *editorconfig-checker-disable-line* ]]\
+		&& [[ "${line}" != *editorconfig-checker-disable-next-line* ]]; then
+			is_disabled=1
+		elif ! ((is_disabled || is_next_disabled)) && [[ "${line}" != *editorconfig-checker-disable-line* ]]\
+		&& ((${#${line//$'\t'/  }} > max_line_length)); then
+			printf $'%s:%d: Line is %d characters wide (the limit is %d)\n' "${1}" "${index}" "${#${line//$'\t'/  }}" "${max_line_length}"
+			exit_status=1
+		fi
+		is_next_disabled=0
+		if [[ "${line}" == *editorconfig-checker-disable-next-line* ]]; then
+			is_next_disabled=1
+		fi
+	done
+}
+
+for file in ${(0)"$(git grep -Ilz '')"}; do
 	[[ -L "${file}" ]] && continue
 	source_lines=("${(@f)"$(<"${file}")"}")
 	result_lines=()
+	if ! [[ -v 'received_flag[-f]' ]]; then
+		check_line_lengths "${file}"
+	fi
 	if [[ "${file}" == *.md ]]; then
 		layout_markdown "${file}"
-	else
+	elif [[ "${file}" == *.swift ]]; then
 		layout_swift "${file}"
+	else
+		continue
 	fi
 	if [[ -v 'received_flag[-f]' && "${(pj:\n:)result_lines}" != "${(pj:\n:)source_lines}" ]]; then
 		print -r -- "${(pj:\n:)result_lines}" >"${file}"

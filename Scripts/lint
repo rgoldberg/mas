@@ -98,7 +98,7 @@ shellcheck -s bash -o all -e SC1009,SC1088,SC2296,SC2298,SC2299,SC2300,SC2301,SC
 ((exit_status |= ${?}))
 
 printf -- $'--> 🐭 EditorConfig\n'
-editorconfig-checker
+editorconfig-checker -disable-max-line-length # Scripts/layout checks line lengths, counting tabs as 2
 ((exit_status |= ${?}))
 
 printf -- $'--> 🚷 Non-Executables\n'
