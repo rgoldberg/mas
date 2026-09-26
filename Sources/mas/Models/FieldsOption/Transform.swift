@@ -206,7 +206,7 @@ private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]
 /// or `system`; else `nil`.
 func timeZone(forCode code: String) -> TimeZone? {
 	code.caseInsensitiveCompare("system") == .orderedSame
-		? .current
+		? Environment.current.systemTimeZone
 		: TimeZone.abbreviationDictionary[code.uppercased()].flatMap(TimeZone.init(identifier:))
 			?? (FileManager.default.subpaths(atPath: "/usr/share/zoneinfo") ?? [])
 			.first { $0.caseInsensitiveCompare(code) == .orderedSame }

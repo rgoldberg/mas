@@ -550,7 +550,10 @@ private func chronologicDateAndIsDateOnly(from value: JSON.Node?) -> (date: Date
 		Double("\(number)").map { (.init(timeIntervalSince1970: $0), false) }
 	case let .string(literal):
 		(try? Date(literal.value, strategy: .iso8601)).map { ($0, false) }
-			?? (try? Date(literal.value, strategy: Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
+			?? (try? Date(
+				literal.value,
+				strategy: Date.ISO8601FormatStyle(timeZone: Environment.current.systemTimeZone).year().month().day(),
+			))
 			.map { ($0, true) }
 			?? decimalNumber(in: literal.value).map { (.init(timeIntervalSince1970: $0), false) }
 	default:
@@ -733,9 +736,10 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	}
 
 	func formatted(_ date: Date) -> String {
+		let systemTimeZone = Environment.current.systemTimeZone
 		let style = Date.ISO8601FormatStyle(
 			timeZoneSeparator: .colon,
-			timeZone: isInputDateOnly ? .current : timeZone ?? .current,
+			timeZone: isInputDateOnly ? systemTimeZone : timeZone ?? systemTimeZone,
 		)
 		return isDateOnly ? style.year().month().day().format(date) : style.format(date)
 	}

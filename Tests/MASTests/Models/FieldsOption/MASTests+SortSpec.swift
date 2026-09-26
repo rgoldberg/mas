@@ -179,11 +179,13 @@ private extension MASTests {
 		let fieldSpec = try parsedFieldSpec(format: format, sort: sort)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
-			sortSpec.compare(
-				try sortValues(lhs, fieldSpec: fieldSpec),
-				try sortValues(rhs, fieldSpec: fieldSpec),
-				typeDeterminant: fieldSpec.format.typeDeterminant,
-			)
+			try inSystemTimeZone("America/New_York") {
+				sortSpec.compare(
+					try sortValues(lhs, fieldSpec: fieldSpec),
+					try sortValues(rhs, fieldSpec: fieldSpec),
+					typeDeterminant: fieldSpec.format.typeDeterminant,
+				)
+			}
 				== result,
 		)
 	}

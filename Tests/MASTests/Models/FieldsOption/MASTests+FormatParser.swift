@@ -133,7 +133,7 @@ private extension MASTests {
 		value: JSON.Node,
 		expected: String,
 	) throws {
-		#expect(try rendered(format, value) == expected)
+		#expect(try inSystemTimeZone("America/New_York") { try rendered(format, value) } == expected)
 	}
 
 	@Test(
