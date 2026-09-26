@@ -167,6 +167,29 @@ Coercing any value to a string always succeeds (`null` becomes the empty
 string), so an `<unconditional-transform-pipeline>`, which starts with a
 `<coerced-string-transform-call>`, cannot fail.
 
+###### String Transforms
+
+Case transforms use Unicode's full, locale-independent case mappings, which can
+modify a string's length (e.g., `ß` uppercases to `SS`).
+
+- `initialUppercase`: uppercases the string's 1st character, retaining the rest.
+- `lowercase`: lowercases every character.
+- `trimWhitespace`: removes leading & trailing whitespace (Unicode general
+  category `Z` characters, `U+0009` to `U+000D` & `U+0085`).
+- `uppercase`: uppercases every character.
+
+###### Number Transforms
+
+- `absoluteValue`: the value's absolute value.
+- `round`: the value rounded to the nearest integer, with halves rounded away
+  from 0.
+- `scale`: see [`scale`](#scale).
+
+`round` renders its result as an integer (i.e., without a `.`) iff its magnitude
+is less than 2^53. `absoluteValue` does so iff its result is integral, its
+magnitude is less than 2^53 & its input contains no `.`. Otherwise, each renders
+its result as Swift's `Double` description (e.g., `1.5`, `1e+16`).
+
 ###### `group`
 
 `group` inserts `<digit-group-separator>` into the field's integer part every
@@ -193,6 +216,18 @@ point.
 - `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
   any), never spelled out.
 - E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
+
+###### Chronologic Transforms
+
+A `<chronologic-transform-pipeline>`'s transforms jointly set how its value is
+rendered, regardless of their order:
+
+- `dateOnly`: renders only the date, in the output time zone.
+- `timeZone`: sets the output time zone to the one that its `<time-zone-code>`
+  identifies; if the pipeline contains multiple `timeZone`s, the last one takes
+  precedence.
+
+Absent `timeZone`, the output time zone is the system time zone.
 
 ###### `timeZone`
 
