@@ -225,8 +225,8 @@ from:
 notation, base `radix`, with exactly `fractional-digits` digits after the radix
 point.
 
-- Both roundings (to `significant-digits`, then to `fractional-digits`) are
-  half-away-from-zero.
+- Both roundings (to `significant-digits`, then to `fractional-digits`) round
+  halves away from 0.
 - `fractional-digits` of `0` renders a plain integer, with no radix point.
 - For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
 - `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
