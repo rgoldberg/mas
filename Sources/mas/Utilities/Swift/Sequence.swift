@@ -25,8 +25,7 @@ extension Sequence {
 }
 
 extension Sequence {
-	/// Merge two sequences by greedily selecting the element with the higher
-	/// score.
+	/// Merge 2 sequences by greedily selecting the element with the higher score.
 	///
 	/// Preserves the relative order of elements within their original sequences.
 	func priorityMerge(_ secondary: some Sequence<Element>, score: (Element) -> Double) -> [Element] {

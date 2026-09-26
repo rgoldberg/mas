@@ -8,8 +8,8 @@
 // MARK: Internal types
 
 struct FieldSpec: Equatable {
-	/// A field spec with default settings for field `name`: labeled by its
-	/// name, default format, no `<sort>`, visible.
+	/// A field spec with default settings for field `name`: labeled by its name,
+	/// default format, no `<sort>`, visible.
 	static func defaultSettings(forName name: String) -> Self {
 		.init(name: name, label: name, format: .default(fieldName: name), sortSpec: nil)
 	}
@@ -30,8 +30,8 @@ struct FieldSpec: Equatable {
 	/// have no column to align). Set directly by a display command's own
 	/// `standard` / `all` fields config (see
 	/// `defaultJustification(forFieldNamed:)` in `AppStoreFieldDefaults.swift`),
-	/// or by a `--fields`
-	/// `<format-transform-pipeline>` (see `parseFormat(_:existing:)` below).
+	/// or by a `--fields` `<format-transform-pipeline>` (see
+	/// `parseFormat(_:existing:)` below).
 	let justification: Justification
 
 	init(
@@ -291,10 +291,10 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 //  nonexistent `default` (appending any output format suffix)
 
 /// Resolves a `<base-fields-config-name>` (already stripped of its
-/// `<base-fields-config-section-prefix>`, empty if absent) against the
-/// built-in named fields configs, whose variants are selected by an output
-/// format suffix (`@json` / `@key-value` / `@table`), the `@none` reference
-/// suffix (the unsuffixed variant), or, absent both, `outputFormat`:
+/// `<base-fields-config-section-prefix>`, empty if absent) against the built-in
+/// named fields configs, whose variants are selected by an output format suffix
+/// (`@json` / `@key-value` / `@table`), the `@none` reference suffix (the
+/// unsuffixed variant), or, absent both, `outputFormat`:
 ///
 /// - `none`: `all` with every field spec hidden.
 /// - `all`: every field spec visible.
@@ -405,7 +405,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private let baseFieldSpecs: [FieldSpec]
 	private var referenceFieldSpecs: [FieldSpec?]
 	/// "$previous$": the working index after which the next insert / move's
-	/// direct result lands. `-1` = before the first field spec.
+	/// direct result lands. `-1` = before the 1st field spec.
 	private var previousIndex = -1
 
 	// swiftlint:disable:next discouraged_optional_collection
@@ -468,8 +468,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
 	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
 	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
-	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort
-	/// tiebreak (input order / reverse input order).
+	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort tiebreak
+	/// (input order / reverse input order).
 	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortOptionSet.Direction {
 		guard input.hasPrefix(itemSortSectionPrefix) else {
 			return .ascending
@@ -618,8 +618,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	}
 }
 
-/// The `<order>` letter (`w` / `o`) of `input`'s `<field-order-option-set>`
-/// (up to, but not including, its terminating `<field-spec-separator>` /
+/// The `<order>` letter (`w` / `o`) of `input`'s `<field-order-option-set>` (up
+/// to, but not including, its terminating `<field-spec-separator>` /
 /// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
 /// is an `<order-option-set>`: every top-level character is a `<direction>` or
 /// an `<order>`, with at least 1 `<order>` (last wins). `nil` means it is a
@@ -669,8 +669,8 @@ private extension FieldSpecsBuilder {
 		return .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
 	}
 
-	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>`
-	/// & resolves its `source` from the base fields config (as in the reference
+	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>` &
+	/// resolves its `source` from the base fields config (as in the reference
 	/// fields config, except that a `<named-field-spec-reference>` that
 	/// references no field spec selects a field spec with default settings for
 	/// field `<reference-field-name>`).
@@ -717,16 +717,16 @@ private extension FieldSpecsBuilder {
 	}
 
 	/// The 1-based positions in the reference fields config of field specs for
-	/// field `name`, including any since replaced by `null`: the reference
-	/// fields config's order & names are immutable & are those of the base
-	/// fields config.
+	/// field `name`, including any since replaced by `null`: the reference fields
+	/// config's order & names are immutable & are those of the base fields
+	/// config.
 	private func referencePositions(forName name: String) -> [Int] {
 		baseFieldSpecs.indices.compactMap { baseFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
 	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
-	/// a character in `nameTerminatorSet` & optional `<index-prefix>`
-	/// `<index>` (default `1`).
+	/// a character in `nameTerminatorSet` & optional `<index-prefix>` `<index>`
+	/// (default `1`).
 	private func parseNameAndIndex(
 		_ input: inout Substring,
 		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,

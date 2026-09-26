@@ -40,8 +40,8 @@ struct InstalledApp {
 		version = valueByAttribute[NSMetadataItemVersionKey].map(String.init(describing:)) ?? ""
 
 		// `valueByAttribute` is a `Dictionary`, whose iteration order is
-		// unspecified, so there's no meaningful "original" field order to
-		// preserve here, unlike `CatalogApp`'s ordered API response
+		// unspecified, so there's no meaningful "original" field order to preserve
+		// here, unlike `CatalogApp`'s ordered API response
 		let jsonObject = JSON.Object(valueByAttribute.map { (.init(rawValue: $0.key), .init(for: $0.value)) })
 		let name = name
 		lazyJSONObject = .init(.init(jsonObject.normalized.fields + [("name", .string(name))]))

@@ -88,7 +88,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - trailing: adjective for characters / elements positioned at the end of a
       token or line (e.g., "trailing whitespace")
     - later: subsequent in execution, evaluation, index, or priority
-    - latter: second of 2 explicitly mentioned items
+    - latter: 2nd of 2 explicitly mentioned items
     - follow: prose sequence ("as follows", "the following", "immediately
       followed by")
     - immediately: adjacency
@@ -312,8 +312,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - modify: applied to a value or config
     - REJECTED: change / alter
 66. - payload: a modifier's expression after its prefix, or an option's
-      expression between its letter & its `<sort-option-terminator>` (defined
-      in fields.md)
+      expression between its letter & its `<sort-option-terminator>` (defined in
+      fields.md)
     - argument: a transform call's argument
     - REJECTED: body / argument (for modifiers & options)
 67. - titlecase: verb & adjective

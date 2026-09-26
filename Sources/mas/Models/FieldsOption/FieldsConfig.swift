@@ -81,22 +81,21 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// `<source>` `"I"`: sorts by name, per the `<sort-option-set>`.
 	case byName(SortOptionSet)
 	/// `<field-order-section>` absent: substituted, by
-	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the
-	/// resolved base fields config's own `fieldOrder`.
+	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the resolved
+	/// base fields config's own `fieldOrder`.
 	case inherited
 	/// `<original-input-order>` (`"o"`): the order fields already have when
-	/// `applied(to:)` runs, i.e., the order their underlying `JSON.Object`s'
-	/// keys were originally found in (`CatalogApp` / `InstalledApp`
-	/// normalization only renames keys, never reorders them). `direction`, if
-	/// `.descending`, reverses that order.
+	/// `applied(to:)` runs, i.e., the order their underlying `JSON.Object`s' keys
+	/// were originally found in (`CatalogApp` / `InstalledApp` normalization only
+	/// renames keys, never reorders them). `direction`, if `.descending`,
+	/// reverses that order.
 	case original(SortOptionSet.Direction?)
 }
 
 extension FieldOrder {
 	/// Reorders `fieldSpecs` per this order. `.inherited` & `.original` (which
-	/// orders each item's fields independently; see `itemFieldSpecs(_:for:)`)
-	/// are identity; `.base` is identity, too, unless its direction is
-	/// `.descending`.
+	/// orders each item's fields independently; see `itemFieldSpecs(_:for:)`) are
+	/// identity; `.base` is identity, too, unless its direction is `.descending`.
 	/// `.byName` / `.byLabel` sort per their `<sort-option-set>` (direction
 	/// included: `SortOptionSet.compare(_:_:)` already accounts for it).
 	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
@@ -133,11 +132,10 @@ extension FieldOrder {
 }
 
 extension BaseIncludesAllFieldsConfig {
-	/// `all`'s own default field order, absent a built-in field order: sorted
-	/// by label (`<output>`), while other `<sort-option>`s are as per the
-	/// defaults for string fields for `outputFormat`. Applied only if a command
-	/// hasn't already customized `all`'s `fieldOrder` (i.e., it's still
-	/// `.inherited`).
+	/// `all`'s own default field order, absent a built-in field order: sorted by
+	/// label (`<output>`), while other `<sort-option>`s are as per the defaults
+	/// for string fields for `outputFormat`. Applied only if a command hasn't
+	/// already customized `all`'s `fieldOrder` (i.e., it's still `.inherited`).
 	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
 		var optionSet = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
 		optionSet.source = .output
@@ -149,8 +147,8 @@ extension BaseIncludesAllFieldsConfig {
 
 extension FieldsConfig {
 	/// A built-in fields config's machine-facing `@json` variant: favoring
-	/// precision & parsability, each field spec's label is its field name &
-	/// its format is `%i`.
+	/// precision & parsability, each field spec's label is its field name & its
+	/// format is `%i`.
 	func machineFacingVariant() -> Self {
 		.init(
 			fieldSpecs: fieldSpecs.map { fieldSpec in
@@ -169,8 +167,8 @@ extension FieldsConfig {
 		)
 	}
 
-	/// This fields config followed by hidden copies of `fieldSpecs`' field
-	/// specs for fields not already in it.
+	/// This fields config followed by hidden copies of `fieldSpecs`' field specs
+	/// for fields not already in it.
 	func including(hidden fieldSpecs: [FieldSpec]) -> Self {
 		let nameSet = Set(self.fieldSpecs.map(\.name))
 		return .init(

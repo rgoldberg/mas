@@ -24,10 +24,10 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	private var fieldsOptionValue = ""
 
 	/// Resolves `isJSON` / `isKeyValue` / `tableOptionValue` into a single
-	/// `OutputFormat`, falling back to `Config.defaultFormat` iff none was
-	/// given. Re-derived (cheaply: `tableOptionValue` is tiny) on every access,
-	/// same as `fieldsOptionValue`, rather than stored, so there's only 1
-	/// source of truth to validate.
+	/// `OutputFormat`, falling back to `Config.defaultFormat` iff none was given.
+	/// Re-derived (cheaply: `tableOptionValue` is tiny) on every access, same as
+	/// `fieldsOptionValue`, rather than stored, so there's only 1 source of truth
+	/// to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
 			let table = try tableOptionValue.map(parseTableConfig)

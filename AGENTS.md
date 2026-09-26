@@ -37,8 +37,8 @@ file to reflect it.
      `Scripts/lint -A` instead)
 - **Commit messages:** Follow [commit message conventions](
     https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-  ), except end each subject line with a period (or with a colon iff the
-  subject introduces a list)
+  ), except end each subject line with a period (or with a colon iff the subject
+  introduces a list)
 - Tag releases as `vX.Y.Z`
 
 ## Content Formatting
@@ -47,13 +47,12 @@ file to reflect it.
 - **Indentation:** Tabs (2 characters wide) for all files unless otherwise
   specified; 2 spaces for YAML; 1 space for Markdown
 - **Max line length:** 120 characters for all files unless otherwise specified;
-  unlimited for header, JSON & swiftformat. Tabs count as 2 characters each;
-  the trailing newline doesn't count. Fill each line up to the limit before
-  wrapping
+  unlimited for header, JSON & swiftformat. Tabs count as 2 characters each; the
+  trailing newline doesn't count. Fill each line up to the limit before wrapping
   - **Markdown:** 80 characters
   - **Swift comments:** 80 characters for a comment-only line (`///` DocC or
-    `//`) of prose. Code always sets its line's max to 120, even with a
-    trailing comment (i.e., any non-whitespace before the comment overrides the
+    `//`) of prose. Code always sets its line's max to 120, even with a trailing
+    comment (i.e., any non-whitespace before the comment overrides the
     80-character limit). A comment-only line that's a linter / formatter marker
     (e.g., `// swiftformat:disable:next indent`, `// periphery:ignore`) rather
     than prose also wraps at 120
@@ -82,7 +81,7 @@ file to reflect it.
     characters
   - **Word choice:** Avoid `curate` / `curated` / `curation`; prefer `select`,
     `handle`, etc.
-  - **Em dashes:** Do not use em dashes
+  - **Em dashes:** Do not use em dashes, except in `CODE_OF_CONDUCT.md`
   - **Numbers:** Write numbers as digits (e.g., `at most 1`, `3 kinds`, `1st`),
     except the pronoun `one` (e.g., `the last one wins`)
   - `e.g.` & `i.e.` should always be immediately followed by a punctuation,
@@ -95,8 +94,8 @@ file to reflect it.
   bullets
 - **HTML:** Limit to HTML supported by GFM that doesn't have a native GFM
   equivalent
-- **Scope:** Also governs Markdown written inside DocC (`///`) comments in
-  Swift source, not just `.md` files
+- **Scope:** Also governs Markdown written inside DocC (`///`) comments in Swift
+  source, not just `.md` files
 - **Tables:** Align pipes; pad each column to its longest cell (excluding the
   delimiter row) plus 1 space on each side
 - **Links:** Fill link text like other prose. If a URL doesn't fit on a line,
@@ -107,8 +106,8 @@ file to reflect it.
 ## Specs
 
 `Specs/*.md` define mas's option syntaxes & semantics. Whenever a spec changes,
-make every other file (code, tests, docs, completions, `Temp/`, etc.)
-consistent with it.
+make every other file (code, tests, docs, completions, `Temp/`, etc.) consistent
+with it.
 
 ## Refactoring Rules
 
@@ -188,8 +187,8 @@ Swift source is organized in subfolders of `Sources/mas`:
 Commands follow a consistent structure:
 
 - Commands are nested structs within the `MAS` main command
-- Use `@OptionGroup` to compose reusable argument sets from dedicated types
-  that conform to `ParsableArguments`
+- Use `@OptionGroup` to compose reusable argument sets from dedicated types that
+  conform to `ParsableArguments`
 - Implement `func run() async { … }` as the main command entry point
 - Use the static `MAS.printer` for all output to ensure consistent formatting
 - Call methods on `AppStoreAction` enum cases (accessible via the `AppStore`
@@ -199,8 +198,8 @@ Commands follow a consistent structure:
 
 - Name most function parameters
 - Omit a type annotation anywhere it adds nothing beyond what inference could
-  determine: binding declarations (`let x = f()`, not `let x: T = f()`),
-  closure parameters & closure return types (`{ fieldSpec in … }`, not
+  determine: binding declarations (`let x = f()`, not `let x: T = f()`), closure
+  parameters & closure return types (`{ fieldSpec in … }`, not
   `{ fieldSpec -> (key: JSON.Key, value: JSON.Node)? in … }`)
 - Capitalize acronym & initialism characters consistently (e.g., `ADAM`, `API`,
   `HTTPRequest`, `JSON`)
@@ -216,18 +215,18 @@ Commands follow a consistent structure:
   alphabetically unless grouped by shared behavior, in which case disable the
   applicable rule inline (e.g., `// swiftformat:disable:this sortSwitchCases`)
 - Avoid extra / redundant comparisons or operations whose result is already
-  known statically; substitute the known result directly rather than
-  re-deriving it via an unnecessary runtime operation
+  known statically; substitute the known result directly rather than re-deriving
+  it via an unnecessary runtime operation
 - Prefer 1 `return` per function / closure over multiple; condense multiple
   `return`s into a single trailing expression (e.g., an `if` / `switch`
   **expression**) wherever feasible
 - Give each protocol conformance that requires explicit implementation (e.g.,
   `CustomStringConvertible`) its own `extension X: Protocol { … }`, separate
-  from `X`'s primary declaration (which lists only protocols needing no
-  explicit implementation, e.g., `Equatable`); similarly, split a large type's
-  members into separate `extension X { … }` blocks by logical grouping, each
-  labeled by a `// MARK: …` comment above the extension, rather than by
-  sub-`MARK`s inside 1 big type body
+  from `X`'s primary declaration (which lists only protocols needing no explicit
+  implementation, e.g., `Equatable`); similarly, split a large type's members
+  into separate `extension X { … }` blocks by logical grouping, each labeled by
+  a `// MARK: …` comment above the extension, rather than by sub-`MARK`s inside
+  1 big type body
 - Avoid optional collections (`[X]?`); use an empty collection unless `nil`
   carries meaning distinct from empty, in which case silence
   `discouraged_optional_collection` locally with a comment explaining why
@@ -245,14 +244,14 @@ Commands follow a consistent structure:
   2. Appending it to an existing line of code rather than inserting a
      comment-only line, iff that doesn't itself cause a new violation (e.g., a
      line-length violation)
-  3. Using as few ignore comments as possible: ignore individual lines
-     (subject to 1 & 2 above) iff only 1 or 2 contiguous lines need the same
-     ignore; use a `disable` / `enable` block instead once 3 or more
-     contiguous lines need it
+  3. Using as few ignore comments as possible: ignore individual lines (subject
+     to 1 & 2 above) iff only 1 or 2 contiguous lines need the same ignore; use
+     a `disable` / `enable` block instead once 3 or more contiguous lines need
+     it
   4. Preferring a `:this` ignore comment; if it doesn't fit, prefer `:next`,
-     then `:previous`. If a SwiftLint comment & a SwiftFormat comment must
-     both apply to the same line, put SwiftLint's comment on the earlier line
-     & SwiftFormat's on the later line unless fitting both without a line-length
+     then `:previous`. If a SwiftLint comment & a SwiftFormat comment must both
+     apply to the same line, put SwiftLint's comment on the earlier line &
+     SwiftFormat's on the later line unless fitting both without a line-length
      violation or a comment-only line requires reversing that order
 - Don't dismiss unimplemented / incomplete work with a bare comment (e.g., "out
   of scope", "not implemented"); write a `// TODO:` comment with actual
@@ -382,8 +381,8 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 #### Generics
 
 1. `some X` (a parameter used only once, with no need to name its type)
-2. `<T: X>` (a named generic parameter, e.g., reused across multiple
-   parameters, or referenced in the return type)
+2. `<T: X>` (a named generic parameter, e.g., reused across multiple parameters,
+   or referenced in the return type)
 3. `where T: X`
 
 #### Void Types
@@ -397,7 +396,7 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 
 #### Closure Arguments
 
-1. Shorthand argument names (e.g., `$0`) iff one-line closure
+1. Shorthand argument names (e.g., `$0`) iff 1-line closure
 2. Explicit argument names for multi-line closure
 
 #### Functional Arguments
@@ -415,9 +414,8 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 
 #### Line Wrapping
 
-1. Move an over-long value onto a new line as a whole (disabling the
-   formatter's indent adjustment locally if needed), keeping the value itself
-   intact
+1. Move an over-long value onto a new line as a whole (disabling the formatter's
+   indent adjustment locally if needed), keeping the value itself intact
 2. Split the value's own internal structure (e.g., a collection literal's
    brackets & elements) across multiple lines
 

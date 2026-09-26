@@ -156,8 +156,8 @@ private struct FormatParser {
 		return .value(.init(transform: transform, isCoerced: isCoerced))
 	}
 
-	/// Parses `group`'s optional `<group-arguments>`, which default to the
-	/// system locale's.
+	/// Parses `group`'s optional `<group-arguments>`, which default to the system
+	/// locale's.
 	private mutating func parseGroupArgumentsIfPresent() throws(ParsingError) -> Transform {
 		var afterWhitespace = input.drop(while: \.isWhitespace)
 		guard afterWhitespace.first == argumentFence else {
@@ -433,8 +433,7 @@ private struct FormatParser {
 		}
 	}
 
-	/// Parses `matcher`'s optional `<success-block>` & its
-	/// `<block-terminator>`.
+	/// Parses `matcher`'s optional `<success-block>` & its `<block-terminator>`.
 	private mutating func parseSuccessBlock(for matcher: Matcher) throws(ParsingError) -> Format? {
 		try parseBlock(kind: .init(successBlockFor: matcher.predicate), enclosingPredicate: matcher.predicate)
 	}
@@ -474,8 +473,7 @@ private struct FormatParser {
 		return modifier
 	}
 
-	/// Parses a `<match-placeholder>`'s `<branches>` & its
-	/// `<block-terminator>`.
+	/// Parses a `<match-placeholder>`'s `<branches>` & its `<block-terminator>`.
 	private mutating func parseBranches() throws(ParsingError) -> [Branch] {
 		var branches = [Branch]()
 		while skipWhitespace(), let first = input.first, first != blockTerminator {
@@ -530,9 +528,9 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses a text token, consuming or ignoring its outer bare whitespace
-	/// per `leading` & `trailing`, up to (but not including) an unescaped
-	/// character in `terminatorSet`, or the end of the input.
+	/// Parses a text token, consuming or ignoring its outer bare whitespace per
+	/// `leading` & `trailing`, up to (but not including) an unescaped character
+	/// in `terminatorSet`, or the end of the input.
 	private mutating func parseText(
 		terminatorSet: Set<Character>,
 		leading: WhitespaceTreatment,
@@ -572,8 +570,8 @@ private struct FormatParser {
 		return text
 	}
 
-	/// Skips ignored bare whitespace; always returns `true`, so it may precede
-	/// a loop condition.
+	/// Skips ignored bare whitespace; always returns `true`, so it may precede a
+	/// loop condition.
 	@discardableResult
 	private mutating func skipWhitespace() -> Bool {
 		input = input.drop(while: \.isWhitespace)
@@ -605,8 +603,7 @@ private enum TrailingWhitespaceTreatment { // swiftlint:disable:this one_declara
 
 // MARK: - Block kinds
 
-/// A block's kind, which selects its valid pipelines &
-/// `<block-placeholder>`s.
+/// A block's kind, which selects its valid pipelines & `<block-placeholder>`s.
 private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case any
 	case boolean

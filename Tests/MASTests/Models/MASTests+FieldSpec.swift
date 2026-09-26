@@ -78,8 +78,8 @@ private extension MASTests {
 	@Test
 	func `insert lands immediately after the previous field spec, not always at the end`() throws {
 		// Base is [adamID, hidden bundleID]; overlay adamID (no-op-ish, just to set
-		// $previous$), then insert 2 more fields, both should land after adamID,
-		// in order, not accumulate before / after each other incorrectly
+		// $previous$), then insert 2 more fields, both should land after adamID, in
+		// order, not accumulate before / after each other incorrectly
 		let specs = try parseFieldSpecs(".adamID,+one,+two")
 		#expect(specs.map(\.name) == ["adamID", "one", "two", "bundleID"])
 	}

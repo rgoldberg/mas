@@ -53,7 +53,7 @@ Homebrew or MacPorts.
 | `outdated --accurate [<id>…]` | Output outdated apps                      | [spotlight](#spotlight), [account](#app-store-apple-account-requirements), [formats](#output-formats)       |            |
 | `get <id>…`                   | [Get free apps](#paid-apps), install apps | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements-for-get) | `purchase` |
 | `install <id>…`               | Install already owned apps                | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
-| `lucky <term>…`               | Install first matching app                | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
+| `lucky <term>…`               | Install 1st matching app                  | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         |            |
 | `update [<id>…]`              | Update outdated apps                      | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
 | `update --accurate [<id>…]`   | Update outdated apps                      | [spotlight](#spotlight), [root](#root-privileges), [account](#app-store-apple-account-requirements)         | `upgrade`  |
 | `uninstall (<id>…\|--all)`    | Uninstall apps                            | [spotlight](#spotlight), [root](#root-privileges)                                                           |            |
@@ -252,8 +252,8 @@ Even when an Apple Account is already signed in to the App Store, the system
 security settings might require authenticating the Apple Account for each app
 being gotten.
 
-If `System Settings` > `Touch ID & Password` > `Use Touch ID for purchases in
-iTunes Store, App Store and Apple Books` is:
+If `System Settings` > `Touch ID & Password` >
+`Use Touch ID for purchases in iTunes Store, App Store and Apple Books` is:
 
 - `Enabled`: You must authenticate (via Touch ID or Apple Account password) for
   each app being gotten.
@@ -289,9 +289,9 @@ available from the App Store.
 ### Minimum macOS Check
 
 - `--check-min-os` (default): Filters outdated apps to include only those for
-  which the release reported by the
-  [iTunes Search API](https://performance-partners.apple.com/search-api) is
-  compatible with your current macOS.
+  which the release reported by the [iTunes Search
+  API](https://performance-partners.apple.com/search-api) is compatible with
+  your current macOS.
 - `--no-check-min-os`: Does not filter outdated apps. This is useful only when
   multiple newer releases are available, with some compatible with your current
   macOS, but the latest incompatible. With this setting, an app whose latest
@@ -331,9 +331,9 @@ The inaccurate mode is optimized to:
   Account signed in to the App Store (apps can be updated, however, only for an
   Apple Account signed in to the App Store).
 
-It compares an installed app's version with the version reported by the
-[iTunes Search API](https://performance-partners.apple.com/search-api) as
-[Semantic Versions](https://semver.org), with build metadata adjudicating ties.
+It compares an installed app's version with the version reported by the [iTunes
+Search API](https://performance-partners.apple.com/search-api) as [Semantic
+Versions](https://semver.org), with build metadata adjudicating ties.
 
 This mode suffers from potential false positives & negatives:
 
@@ -360,8 +360,8 @@ behavior depends on the command:
 
 This mode:
 
-- Connects to the
-  [iTunes Search API](https://performance-partners.apple.com/search-api) iff
+- Connects to the [iTunes Search
+  API](https://performance-partners.apple.com/search-api) iff
   `--no-check-min-os` is not supplied.
 - Requires an Apple Account signed in to the App Store.
 - Opens a dialog:
@@ -379,6 +379,5 @@ This mode:
 
 Licensed under the [MIT license](LICENSE).
 
-Originally created by Andrew Naylor
-([@argon on GitHub](https://github.com/argon) |
-[@argon on X](https://x.com/argon)).
+Originally created by Andrew Naylor ([@argon on
+GitHub](https://github.com/argon) | [@argon on X](https://x.com/argon)).

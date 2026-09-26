@@ -31,7 +31,7 @@ extension MAS {
 				throw .init(
 					isUninstallingAll
 						? "Cannot specify both --all & app IDs"
-						: "Must specify either --all or at least one app ID",
+						: "Must specify either --all or at least 1 app ID",
 				)
 			}
 		}

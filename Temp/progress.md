@@ -151,10 +151,10 @@ required after `/` (a bare `/` reports `missingFieldOrderOptionSet`);
 wins; a `<sort-option-set>` defaults its `<source>` to `<output>` (sort by
 label). `<item-sort-section>`'s `<disable-all-sorts>` (`r`) now sets each field
 spec's `<sort-priority>` to `0` (retaining its `<sort-option-set>`) instead of
-resetting options to contextual defaults, & `R` is gone; sort keys with priority
-`0` are excluded from `ItemSort.keys` (`[FieldSpec].enabledSortKeys`), so a
-later `<field-spec-edit>` such as `.adamID/1` re-enables a sort. Remaining for
-step 2:
+resetting options to contextual defaults, and `R` is gone; sort keys with
+priority `0` are excluded from `ItemSort.keys` (`[FieldSpec].enabledSortKeys`),
+so a later `<field-spec-edit>` such as `.adamID/1` re-enables a sort. Remaining
+for step 2:
 
 - `<field-spec-hide>` (`_`).
 - Unhiding on overlay / move.
@@ -177,8 +177,8 @@ fields config rather than `all` with every field spec hidden.
 Revised (2026-09-25): named references now resolve against the reference fields
 config's immutable positions (`referencePositions(forName:)`), so a field spec
 removed earlier in the section keeps its position as `null` (referencing it is
-an error), & a `<field-spec-hide>` of such a field inserts a hidden copy of its
-base field spec, as `<field-spec-insertion>` would.
+an error), and a `<field-spec-hide>` of such a field inserts a hidden copy of
+its base field spec, as `<field-spec-insertion>` would.
 
 ## Step 4 (partial): Table Config (2026-09-18 10:27 UTC)
 
@@ -186,7 +186,7 @@ base field spec, as `<field-spec-insertion>` would.
 `a` always, stored as `TableConfig.headerStyling`; table rendering applies
 `<sgr-parameters>` iff `a` or standard output is a terminal), defaults an absent
 `<separator-pattern>` to `-` (a `{text}` token is never empty, so `S` / `S:` are
-dashed), & handles escaping (`\:`, `\\`, dangling `\` is an error) in
+dashed) & handles escaping (`\:`, `\\`, dangling `\` is an error) in
 `<sgr-parameters>` / `<separator-pattern>` / `<column-spacing>` text via
 `parseTableSettingText`. Comments now use table.md's vocabulary (setting,
 `<table-config-terminator>`, `<end-of-shell-word>`). Steps 3 (sort options,
@@ -195,7 +195,7 @@ started.
 
 Revised (2026-09-25): comments & names use table.md's current vocabulary
 (`<table-setting-termination>`, `<table-setting-terminator>`,
-`<end-of-table-config>`, `TableConfigParsingError.invalidSetting`), &
+`<end-of-table-config>`, `TableConfigParsingError.invalidSetting`), and
 `<sgr-parameters>` (not a `{text}` token) no longer accepts escape sequences.
 
 ## Step 2c: Remove Old-Draft `hidden` Named Format (2026-09-18 10:29 UTC)
@@ -210,13 +210,13 @@ persisted named formats exist, per fields-format.md.
 
 Placeholder letters now match fields-format.md: `%i` / `%I` (input; formerly
 `%v` / `%V`), `%c` / `%C` (chronologic; formerly `%d` / `%D`), `%m` / `%M`
-(match; formerly `%b` / `%B`), & `%b` / `%B` (boolean; formerly `%o` / `%O`).
-Not yet done: `%k` / `%K` (name), `%v` / `%V` (version), `<abort-on-success>` /
+(match; formerly `%b` / `%B`) & `%b` / `%B` (boolean; formerly `%o` / `%O`). Not
+yet done: `%k` / `%K` (name), `%v` / `%V` (version), `<abort-on-success>` /
 `<abort-on-failure>` semantics (the existing `-` prefix still means the old
 negation), `<lenient-coercion>` (`_`), type determinants, the
 `<chronologic-transform>` argument syntax (`timeZone:…:`; the old `,` / `_`
 date-format separators remain), sort options (`n` / `g` / `B` / `C` / `f` / `e`
-/ `t` / `h` / `p` / `q`), & `template-text`'s whitespace treatment.
+/ `t` / `h` / `p` / `q`) & `template-text`'s whitespace treatment.
 
 ## Step 7 (partial): Stale Spec References (2026-09-18 10:36 UTC)
 
@@ -286,8 +286,8 @@ success / failure block at `%`, so a block cannot itself contain a placeholder
 Rebased my step commits onto the updated specs, fixing each in place:
 `<original-input-order>` is rejected for table output; named references resolve
 against immutable reference-config positions (a removed field spec stays a
-`null`), & hiding such a field inserts a hidden copy of its base field spec;
-table.md's renamed termination nonterminals, & no escapes in `<sgr-parameters>`;
+`null`), and hiding such a field inserts a hidden copy of its base field spec;
+table.md's renamed termination nonterminals & no escapes in `<sgr-parameters>`;
 `missingSortOptionTerminator`; case-insensitive `<time-zone-code>`; ASCII digits
 for versions. The gap-list & hide commits were accidentally merged into 1 commit
 (`Add --fields / --table spec gap list.`); splitting them needs a branch reset,
@@ -300,8 +300,8 @@ which was not permitted, so it is left for review.
 
 ### Transform Names
 
-`Transform.capitalize` is now `initialTitlecase`, & `group`'s associated values
-are `digitGroupSeparator` / `digitGroupSize`, matching fields-format.md's
+`Transform.capitalize` is now `initialTitlecase`, and `group`'s associated
+values are `digitGroupSeparator` / `digitGroupSize`, matching fields-format.md's
 `<initial-titlecase>`, `<digit-group-separator>` & `<digit-group-size>`.
 
 ### Format Rewrite
@@ -313,14 +313,14 @@ are `digitGroupSeparator` / `digitGroupSize`, matching fields-format.md's
 `<format-template>` (at least 1 placeholder); blocks are `+`-terminated with
 kinds per matcher (string, boolean, number, chronologic, any, unconditional);
 placeholders support `<abort-on-success>`, `<abort-on-failure>`, strict &
-lenient coercion (trivia retained), block placeholders, & match placeholders
-with negated & unconditional branches; template-text whitespace follows the
-escaping appendix; forbidden whitespace after `%`, modifiers, `.` & `:` is an
-error. An uncoerced transform on an input not of its input type throws
-`FormattingError` at render time (surfaced via `OutputError`). An absent
-`<format-block>` defaults to the nullary placeholder for the working format's
-type determinant. This resolves the `parseDelimitedFormat` item in Temp/todo.md
-(blocks may now contain placeholders). Old-draft format tests were replaced by
+lenient coercion (trivia retained), block placeholders & match placeholders with
+negated & unconditional branches; template-text whitespace follows the escaping
+appendix; forbidden whitespace after `%`, modifiers, `.` & `:` is an error. An
+uncoerced transform on an input not of its input type throws `FormattingError`
+at render time (surfaced via `OutputError`). An absent `<format-block>` defaults
+to the nullary placeholder for the working format's type determinant. This
+resolves the `parseDelimitedFormat` item in Temp/todo.md (blocks may now contain
+placeholders). Old-draft format tests were replaced by
 `Tests/MASTests/Models/FieldsOption/MASTests+Format*.swift`.
 
 ### Sort Rewrite & mas Defaults
@@ -328,15 +328,15 @@ type determinant. This resolves the `parseDelimitedFormat` item in Temp/todo.md
 `SortSpec` is now a `<sort-priority>` & its `<sort-option-set>`s
 (`SortOptionSet`: `<source>`, `<direction>`, `<case-sensitivity>`,
 `<localization>` incl. `L…+`, `<numbers-in-strings>` `x` / `n` / `g`,
-`<boundaries>` `b` / `B…+` / `C…+` with `<boundary-groups>` (default
-`:space:`), `<nonconforming-location>` `f` / `e`, `<trivia-order>` `t` / `h` /
-`p` / `q`), replacing the old draft's interpretations, grouping & whitespace
-placements. A `<sort-modifier>` accepts succeeding `/`-prefixed
-`<sort-option-set>`s. Values compare per the field's type determinant
-(chronologic, version, number with trivia, boolean, string, any), each value
-belonging to the 1st `<sort-option-set>` whose type it conforms to. mas.md's
-default sort options (`Iailg`, `IailgB/_:space:+`, `Iascgb`, `IascgB/+`) are in
-`defaultSortOptionSet(forFieldNamed:outputFormat:)`, & price / version fields'
+`<boundaries>` `b` / `B…+` / `C…+` with `<boundary-groups>` (default `:space:`),
+`<nonconforming-location>` `f` / `e`, `<trivia-order>` `t` / `h` / `p` / `q`),
+replacing the old draft's interpretations, grouping & whitespace placements. A
+`<sort-modifier>` accepts succeeding `/`-prefixed `<sort-option-set>`s. Values
+compare per the field's type determinant (chronologic, version, number with
+trivia, boolean, string, any), each value belonging to the 1st
+`<sort-option-set>` whose type it conforms to. mas.md's default sort options
+(`Iailg`, `IailgB/_:space:+`, `Iascgb`, `IascgB/+`) are in
+`defaultSortOptionSet(forFieldNamed:outputFormat:)`, and price / version fields'
 default formats are typed (`%_N+%i+` / `%V+%i+`, via
 `defaultFieldFormat(forFieldNamed:)`) so they compare per type.
 
@@ -344,10 +344,10 @@ default formats are typed (`%_N+%i+` / `%V+%i+`, via
 
 `resolveBaseFieldsConfig` now validates config names per configs.md
 (`^[-_0-9A-Za-z]+$` plus an optional output format suffix & an optional `@none`
-reference suffix), reports a nonexistent name, & selects variants per suffix or,
+reference suffix), reports a nonexistent name & selects variants per suffix or,
 absent one, the output format: `@json` is machine-facing
 (`machineFacingVariant()`: label = name, format `%i`), `@none` / `@table` /
-`@key-value` user-facing, & `standard@json` is `all`. Built-in `none` is `all`
+`@key-value` user-facing & `standard@json` is `all`. Built-in `none` is `all`
 with every field spec hidden, so overlays select fields (e.g.,
 `@none.name,version`). `fetchFieldNames` now fully parses the value against the
 static base (fetching every field for an `all`-derived base) instead of scanning
@@ -379,9 +379,8 @@ per fields.md.
 Full `Scripts/lint` (incl. SwiftLint Analyze) is clean. Removed the unthrown
 `missingEndFence` error & the single-use `parseOptions` (inlined into
 `<item-sort-section>` parsing, which now requires a non-empty
-`<item-sort-option-set>`), used spec nonterminal names in the remaining
-comments (`<*-transform-call>`, `<value-transform>`), & rewrapped an over-long
-comment.
+`<item-sort-option-set>`), used spec nonterminal names in the remaining comments
+(`<*-transform-call>`, `<value-transform>`) & rewrapped an over-long comment.
 
 ### Standard As All With Hidden Field Specs
 
@@ -394,8 +393,8 @@ context-stack lookup to implement once custom named configs are persisted.
 
 ### README
 
-`README.md`'s Output Formats section links the specs & gives verified
-`--fields` / `--table` examples (Temp/todo.md "Documentation" item 1).
+`README.md`'s Output Formats section links the specs & gives verified `--fields`
+/ `--table` examples (Temp/todo.md "Documentation" item 1).
 
 ## Stopped (2026-09-18 10:45 UTC)
 
@@ -433,14 +432,14 @@ is committed). Remaining, in the original order:
 ## Session 2 Status (2026-09-25)
 
 The tree is clean: `Scripts/format`, `Scripts/lint` (full), `Scripts/build`
-(debug & release) & `Scripts/test` pass, & every change above is committed.
+(debug & release) & `Scripts/test` pass, and every change above is committed.
 Implemented since the 2026-09-18 stop: the format grammar rewrite (abort
 modifiers, lenient coercion, type determinants, `+` block terminators,
-template-text whitespace), the sort option rewrite (`x` / `n` / `g`, `b` /
-`B…+` / `C…+`, `f` / `e`, `t` / `h` / `p` / `q`, succeeding option sets,
-type-based comparison), mas.md's default sort options & typed default formats,
-built-in variants (`none` / `all` / `standard`, `@json` machine-facing), &
-per-item `<original-input-order>`.
+template-text whitespace), the sort option rewrite (`x` / `n` / `g`, `b` / `B…+`
+/ `C…+`, `f` / `e`, `t` / `h` / `p` / `q`, succeeding option sets, type-based
+comparison), mas.md's default sort options & typed default formats, built-in
+variants (`none` / `all` / `standard`, `@json` machine-facing) & per-item
+`<original-input-order>`.
 
 Remaining:
 
@@ -456,8 +455,8 @@ Remaining:
 Per fields.md's "Nonexistent Fields", a display command whose fields are all
 known up front (`config`, via `OutputConfig.fieldNameSet`) reports a reference
 to any other field (an absolute field name, an insertion, or a hide of an
-unmatched name) as `nonexistentField`; other commands' fields can't be known
-up front, so aren't checked.
+unmatched name) as `nonexistentField`; other commands' fields can't be known up
+front, so aren't checked.
 
 ### Spec Compliance Audit (2026-09-25)
 
@@ -470,11 +469,11 @@ only divergences, each fixed in its own commit:
 - UTC offsets rendered in ISO-8601's basic format (`+0900`) beside an extended
   date & time; now `+09:00`.
 - Contiguous uncollapsed boundaries formed 1 segment & same-group boundaries
-  compared by character; each boundary is now its own segment, compared by
-  group precedence alone.
+  compared by character; each boundary is now its own segment, compared by group
+  precedence alone.
 - A trailing `,` in a `<field-spec-edits-section>` was accepted.
 - An explicit `s` with `b` / `u` still implied a table header row.
 
-3 spec questions were appended to Temp/todo.md "Implementation Questions".
-Still unimplemented: persisted custom named configs / named formats & context
-stack lookup (Temp/todo.md "ASAP Version, But Massive Effort").
+3 spec questions were appended to Temp/todo.md "Implementation Questions". Still
+unimplemented: persisted custom named configs / named formats & context stack
+lookup (Temp/todo.md "ASAP Version, But Massive Effort").

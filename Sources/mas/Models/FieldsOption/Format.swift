@@ -26,7 +26,7 @@ indirect enum Format: Equatable {
 	/// by their display command, at the `FieldSpec` level, instead.
 	// swiftlint:disable:next todo
 	// TODO: a per-field, per-context user-configured default, once persisted
-	//  fields configs exist.
+	//  fields configs exist
 	static func `default`(fieldName _: String) -> Self {
 		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
 	}
@@ -113,17 +113,16 @@ enum Coercion: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case strict
 }
 
-/// What a scalar conditional placeholder evaluates to on success & on
-/// failure.
+/// What a scalar conditional placeholder evaluates to on success & on failure.
 enum ConditionalForm: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// Nullary (`%n`) or `<abort-on-failure>` (`%+N…+`): on success, `success`
 	/// (the matcher's value iff `nil`); on failure, formatting aborts.
 	case abortOnFailure(success: Format?)
-	/// `<abort-on-success>` (`%-n` / `%-N…+`): on success, formatting aborts;
-	/// on failure, `failure` (`""` iff `nil`).
+	/// `<abort-on-success>` (`%-n` / `%-N…+`): on success, formatting aborts; on
+	/// failure, `failure` (`""` iff `nil`).
 	case abortOnSuccess(failure: Format?)
-	/// Binary (`%N…+…+`): on success, `success` (the matcher's value iff
-	/// `nil`); on failure, `failure` (`""` iff `nil`).
+	/// Binary (`%N…+…+`): on success, `success` (the matcher's value iff `nil`);
+	/// on failure, `failure` (`""` iff `nil`).
 	case binary(success: Format?, failure: Format?)
 }
 
@@ -141,8 +140,8 @@ enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// value iff `nil`) iff the matcher fails; otherwise, returns `block` (the
 	/// matcher's value iff `nil`) iff the matcher succeeds.
 	case conditional(Matcher, isNegated: Bool, block: Format?)
-	/// An `<unconditional-branch>`, which always returns `block` (its
-	/// predicate's value iff `nil`).
+	/// An `<unconditional-branch>`, which always returns `block` (its predicate's
+	/// value iff `nil`).
 	case unconditional(UnconditionalPredicate, block: Format?)
 }
 
@@ -305,8 +304,8 @@ private extension TransformCall { // swiftlint:disable:this file_types_order
 
 /// An error reported while formatting a value.
 enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
-	/// A transform without `<strict-coercion>` was applied to an input that
-	/// isn't already of its input type.
+	/// A transform without `<strict-coercion>` was applied to an input that isn't
+	/// already of its input type.
 	case transformInputTypeMismatch(transform: Transform, input: String)
 
 	var description: String {
@@ -329,12 +328,12 @@ extension Format { // swiftlint:disable:this file_types_order
 		}
 	}
 
-	/// Renders this format against `value` (`nil` iff the field doesn't exist
-	/// for this item), producing the node to display / embed in output. A
-	/// format that is solely `%i` (or `%I` without a pipeline), or a pipeline
-	/// without any value transforms, passes the original node through unchanged
-	/// (so JSON output preserves the value's type); anything else produces a
-	/// string, which is empty iff formatting aborts.
+	/// Renders this format against `value` (`nil` iff the field doesn't exist for
+	/// this item), producing the node to display / embed in output. A format that
+	/// is solely `%i` (or `%I` without a pipeline), or a pipeline without any
+	/// value transforms, passes the original node through unchanged (so JSON
+	/// output preserves the value's type); anything else produces a string, which
+	/// is empty iff formatting aborts.
 	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
 		isPassthrough
 			? value ?? .null
@@ -693,8 +692,8 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		return chronologic
 	}
 
-	/// This value as a number, coerced iff `call` has `<strict-coercion>`
-	/// (`nil` iff that coercion fails).
+	/// This value as a number, coerced iff `call` has `<strict-coercion>` (`nil`
+	/// iff that coercion fails).
 	private func coercedNumber(for call: TransformCall) throws(FormattingError) -> Self? {
 		switch self {
 		case let .input(.number(number)):
@@ -720,8 +719,8 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	var isDateOnly: Bool
 	var timeZone = TimeZone?.none
 
-	/// This style modified by a chronologic `transform`: `dateOnly` renders
-	/// only the date; `timeZone` sets the output time zone (the last one wins).
+	/// This style modified by a chronologic `transform`: `dateOnly` renders only
+	/// the date; `timeZone` sets the output time zone (the last one wins).
 	func applying(_ transform: Transform) -> Self {
 		var style = self
 		switch transform {
@@ -773,8 +772,8 @@ private extension JSON.Node? {
 		}
 	}
 
-	/// The boolean iff this is a JSON boolean or, iff `isCoerced`, a string
-	/// that is `true` or `false`.
+	/// The boolean iff this is a JSON boolean or, iff `isCoerced`, a string that
+	/// is `true` or `false`.
 	func boolean(isCoerced: Bool) -> Bool? { // swiftlint:disable:this discouraged_optional_boolean
 		switch self {
 		case let .bool(bool):

@@ -47,9 +47,8 @@ private let priceFieldNameSet = Set(["formattedPrice", "price"])
 private let versionFieldNameSet = Set(["minimumOSVersion", "newVersion", "version"])
 
 /// mas.md's "Default Sort Options" for string fields, for `outputFormat`: the
-/// path row iff `fieldName` is a path field's name, else the non-path row
-/// (also used for sorting field names & labels, for which `fieldName` is
-/// `nil`).
+/// path row iff `fieldName` is a path field's name, else the non-path row (also
+/// used for sorting field names & labels, for which `fieldName` is `nil`).
 func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: OutputFormat) -> SortOptionSet {
 	let isPath = fieldName.map(pathFieldNameSet.contains) ?? false
 	var optionSet = SortOptionSet.default

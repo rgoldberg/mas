@@ -149,10 +149,10 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 // MARK: - Parsing
 
 extension SortSpec { // swiftlint:disable:this file_types_order
-	/// Parses a `<sort-modifier>`'s payload (after its
-	/// `<sort-modifier-prefix>`): `nil` iff `<sort>` is absent (its direct
-	/// default). An option omitted from a present `<sort-option-set>` retains
-	/// `existing`'s value, or `defaultOptionSet`'s absent `existing`.
+	/// Parses a `<sort-modifier>`'s payload (after its `<sort-modifier-prefix>`):
+	/// `nil` iff `<sort>` is absent (its direct default). An option omitted from
+	/// a present `<sort-option-set>` retains `existing`'s value, or
+	/// `defaultOptionSet`'s absent `existing`.
 	static func parsed(_ input: inout Substring, existing: Self?, defaultOptionSet: SortOptionSet)
 	throws(ParsingError) -> Self? {
 		skipWhitespace(&input)
@@ -194,8 +194,8 @@ extension SortSpec { // swiftlint:disable:this file_types_order
 
 extension SortOptionSet { // swiftlint:disable:this file_types_order
 	/// Parses a `<sort-option-set>` (last wins per option), each omitted option
-	/// retaining its value from `defaults`, up to (but not including) a
-	/// character in `terminatorSet`, or the end of the input.
+	/// retaining its value from `defaults`, up to (but not including) a character
+	/// in `terminatorSet`, or the end of the input.
 	static func parsed(_ input: inout Substring, terminatorSet: Set<Character>, defaults: Self)
 	throws(ParsingError) -> Self {
 		var optionSet = defaults
@@ -487,9 +487,9 @@ extension SortOptionSet {
 	}
 
 	/// Compares 2 versions component by component: numerically, then by the
-	/// non-`.` characters (a component with non-`.` characters precedes the
-	/// same integer without them); a version with fewer components precedes 1
-	/// that extends it.
+	/// non-`.` characters (a component with non-`.` characters precedes the same
+	/// integer without them); a version with fewer components precedes 1 that
+	/// extends it.
 	private func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
 		let lhsComponents = lhs.split(separator: ".", omittingEmptySubsequences: false)
 		let rhsComponents = rhs.split(separator: ".", omittingEmptySubsequences: false)
@@ -511,10 +511,9 @@ extension SortOptionSet {
 	}
 
 	/// Compares 2 strings per `boundaries`, `caseSensitivity`, `localization` &
-	/// `numbersInStrings`: segment by segment, a segment of an earlier
-	/// boundary group preceding a segment of a later group, which precedes
-	/// non-boundary text; boundaries of the same group share the same sort
-	/// precedence.
+	/// `numbersInStrings`: segment by segment, a segment of an earlier boundary
+	/// group preceding a segment of a later group, which precedes non-boundary
+	/// text; boundaries of the same group share the same sort precedence.
 	private func compareStrings(_ lhs: String, _ rhs: String) -> ComparisonResult {
 		let lhsSegments = boundaries.segments(of: lhs)
 		let rhsSegments = boundaries.segments(of: rhs)
@@ -641,9 +640,9 @@ private extension SortOptionSet.Boundaries {
 		}
 	}
 
-	/// `string`'s segments: each maximal run of non-boundary text & each
-	/// boundary (iff collapsed, each maximal run of contiguous boundaries of the
-	/// same group).
+	/// `string`'s segments: each maximal run of non-boundary text & each boundary
+	/// (iff collapsed, each maximal run of contiguous boundaries of the same
+	/// group).
 	func segments(of string: String) -> [Segment] {
 		let textRank = groups.count
 		let isCollapsed = if case .collapsed = self {
@@ -667,8 +666,8 @@ private extension SortOptionSet.Boundaries {
 	}
 
 	/// The rank & length of the longest boundary at `index` (a boundary defined
-	/// by multiple groups belongs to the last one), else non-boundary text's
-	/// rank & a length of 1.
+	/// by multiple groups belongs to the last one), else non-boundary text's rank
+	/// & a length of 1.
 	private func rankAndLength(in string: String, at index: String.Index) -> (rank: Int, length: Int) {
 		var best = (rank: groups.count, length: 1)
 		var matchedLength = 0
@@ -686,8 +685,8 @@ private extension SortOptionSet.Boundaries {
 }
 
 private extension SortOptionSet.Boundary {
-	/// The number of characters this boundary matches at `index` in `string`,
-	/// or `nil` iff it doesn't match there.
+	/// The number of characters this boundary matches at `index` in `string`, or
+	/// `nil` iff it doesn't match there.
 	func matchLength(in string: String, at index: String.Index) -> Int? {
 		switch self {
 		case let .character(match):

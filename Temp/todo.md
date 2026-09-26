@@ -132,11 +132,11 @@ optional.
 - fields-format.md's nullary-form example `%._N` → `%._n` is invalid per its
   grammar (`<number-modifiers>` allows at most 1 `<coercion>`, so `%._N` is
   rejected); should it be `%_N` → `%_n`?
-- `<nullary-chronologic>`'s value is an "ISO date / datetime / time, per
-  input", but "Chronologic Formatting"'s auto-detection tries only ISO-8601
-  datetime, ISO-8601 date-only & Unix epoch, so time-only input (e.g.,
-  `12:30:00`) isn't chronologic (implemented as such). Should time-only input
-  be detected, or should "/ time" be removed?
+- `<nullary-chronologic>`'s value is an "ISO date / datetime / time, per input",
+  but "Chronologic Formatting"'s auto-detection tries only ISO-8601 datetime,
+  ISO-8601 date-only & Unix epoch, so time-only input (e.g., `12:30:00`) isn't
+  chronologic (implemented as such). Should time-only input be detected, or
+  should "/ time" be removed?
 - Chronologic auto-detection accepts a string of a decimal number (e.g., `"0"`)
   as a Unix epoch timestamp, unlike `%n`, which requires a JSON number absent
   `<coercion>`. Should only a JSON number be a "numeric timestamp"?

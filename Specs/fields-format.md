@@ -198,9 +198,9 @@ except `scale`, whose arguments define its rendering.
   away from 0, rendered in the value's notation:
   - Positional: as an integer (e.g., `-2.5` becomes `-3`).
   - Scientific: in normalized scientific notation, retaining the value's
-    exponent indicator (`e` or `E`) & whether a nonnegative exponent has a
-    `+` (e.g., `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2` & `1.5e3`
-    remains `1.5e3`).
+    exponent indicator (`e` or `E`) & whether a nonnegative exponent has a `+`
+    (e.g., `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2` & `1.5e3` remains
+    `1.5e3`).
 
   A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `+2.4` becomes `+2`, and `-0.4` becomes `0`).
@@ -642,8 +642,8 @@ Input is always auto-detected, trying, in order: ISO-8601 datetime, ISO-8601
 date-only, then a Unix epoch (seconds) numeric timestamp; this does not depend
 on field name, label, output format, or any other context.
 
-A datetime is rendered with its fractional seconds truncated to 3 digits iff
-its milliseconds are nonzero (e.g., `2020-03-18T17:39:23.1234Z` renders as
+A datetime is rendered with its fractional seconds truncated to 3 digits iff its
+milliseconds are nonzero (e.g., `2020-03-18T17:39:23.1234Z` renders as
 `2020-03-18T17:39:23.123Z`, but `2020-03-18T17:39:23.0004Z` renders as
 `2020-03-18T17:39:23Z`).
 

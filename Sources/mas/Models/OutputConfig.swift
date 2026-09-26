@@ -60,8 +60,8 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		let orderedFieldSpecs = resolved.fieldOrder.applied(to: resolved.fieldSpecs)
 		// Duplicate field names (e.g., the same field inserted twice with different
 		// formats) share 1 entry here; a sort key on such a name uses whichever of
-		// those field specs' formats happens to win, a rare enough scenario that
-		// it isn't worth carrying a format alongside each `ItemSortKey` to
+		// those field specs' formats happens to win, a rare enough scenario that it
+		// isn't worth carrying a format alongside each `ItemSortKey` to
 		// disambiguate
 		let fieldSpecByName = Dictionary(orderedFieldSpecs.map { ($0.name, $0) }) { first, _ in first }
 		let sortValuesByName = try Dictionary(
@@ -119,7 +119,7 @@ enum OutputError: Error, CustomStringConvertible { // swiftlint:disable:this one
 extension BaseIncludesAllFieldsConfig {
 	/// Finishes what `all` means for a schemaless data source: appends a
 	/// bare-default `FieldSpec` (label = name, no sort) for every real JSON key
-	/// across `objects` not already named in `fieldSpecs`, in first-seen order
+	/// across `objects` not already named in `fieldSpecs`, in 1st-seen order
 	/// (each item's own `JSON.Object` is normalized, i.e., renamed, but not
 	/// reordered, so this is each object's own original key order).
 	func mergingDynamicFields(from objects: [JSON.Object]) -> Self {

@@ -83,11 +83,11 @@ extension JSON.Object {
 
 extension [JSON.Object] {
 	/// `table`, but driven by `--fields`-resolved field specs & `tableConfig`
-	/// (table.md): an optional header row of labels, an optional separator
-	/// line, then a cell per field per item (fields.md: label is a field spec's
-	/// "Header for table"). Every item gets a cell for every field, per
-	/// fields.md's "Absent Values" (absent ⇒ empty string, via
-	/// `Format.rendered`'s null-passthrough).
+	/// (table.md): an optional header row of labels, an optional separator line,
+	/// then a cell per field per item (fields.md: label is a field spec's "Header
+	/// for table"). Every item gets a cell for every field, per fields.md's
+	/// "Absent Values" (absent ⇒ empty string, via `Format.rendered`'s
+	/// null-passthrough).
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String {
 		guard !isEmpty else {
 			return ""
@@ -171,13 +171,13 @@ extension [JSON.Object] {
 }
 
 /// Justifies & joins 1 `table` row (header, separator, or data): each column's
-/// cell to its own width, gapped by `columnSpacing` applied as a literal
-/// suffix after each non-last column, never baked into a column's own
-/// justify width, since that only produces a real trailing gap for `.start`
-/// justification (`.end` / `.centerStart` / `.centerEnd` would place some or
-/// all of it as leading / split padding instead, eliminating or shrinking the
-/// visible gap). The last column is padded only if it isn't `.start`-justified
-/// (matching every other column), since nothing follows it to gap from.
+/// cell to its own width, gapped by `columnSpacing` applied as a literal suffix
+/// after each non-last column, never baked into a column's own justify width,
+/// since that only produces a real trailing gap for `.start` justification
+/// (`.end` / `.centerStart` / `.centerEnd` would place some or all of it as
+/// leading / split padding instead, eliminating or shrinking the visible gap).
+/// The last column is padded only if it isn't `.start`-justified (matching
+/// every other column), since nothing follows it to gap from.
 private func renderedTableRow(
 	cells: [String],
 	columns: [(maxWidth: Int, justification: Justification)],

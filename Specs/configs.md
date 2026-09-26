@@ -51,7 +51,7 @@ context, e.g., [`mas`'s context stacks](mas.md#context-stacks).
 Each **config kind** has its own hierarchy: a config is only ever looked up,
 referenced, or extended among configs of its own kind. The kinds are:
 
-- [**Fields config**](fields.md#fields-configs): which fields are output, & how.
+- [**Fields config**](fields.md#fields-configs): which fields are output & how.
 - [**Table config**](table.md#table-config): table output settings.
 - **Key-value config**: key-value output settings, of which there are currently
   none.
