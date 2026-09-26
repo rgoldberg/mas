@@ -24,6 +24,9 @@ swiftformat --strict --color always --symlinks follow . |& filter_swiftformat_ou
 printf -- $'--> 🦅 SwiftLint\n'
 swiftlint --fix --quiet --reporter relative-path
 
+printf -- $'--> 📏 Layout\n'
+Scripts/layout -f
+
 printf -- $'--> 〽️ Markdown\n'
 # shellcheck disable=SC1036
 markdownlint-cli2 --fix -- ***/*.md(.)

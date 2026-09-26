@@ -22,7 +22,7 @@ complete -c mas -n __fish_use_subcommand -fa home -d 'Open App Store app pages i
 complete -c mas -n __fish_use_subcommand -fa install -d 'Install already owned apps from the App Store'
 complete -c mas -n __fish_use_subcommand -fa list -d 'Output apps already installed from the App Store'
 complete -c mas -n __fish_use_subcommand -fa lookup -d 'Output app info from the App Store'
-complete -c mas -n __fish_use_subcommand -fa lucky -d 'Install the first app returned from searching the App Store'
+complete -c mas -n __fish_use_subcommand -fa lucky -d 'Install the 1st app returned from searching the App Store'
 complete -c mas -n __fish_use_subcommand -fa open -d 'Open app page in \'App Store.app\''
 complete -c mas -n __fish_use_subcommand -fa outdated -d 'Output pending app updates from the App Store'
 complete -c mas -n __fish_use_subcommand -fa reset -d 'Reset App Store processes & clear cached App Store downloads'

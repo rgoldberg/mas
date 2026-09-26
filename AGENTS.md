@@ -21,6 +21,8 @@ this file to reflect it.
 - `Scripts/format`
 - `Scripts/lint`, with flags:
   - `-A`: skip SwiftLint Analyzer rules.
+  - `-L`: skip Layout linting.
+  - `-V`: skip Vale prose linting.
 - `Scripts/build` (debug)
 - `Scripts/build '' -c release` (release)
 - `Scripts/test`
