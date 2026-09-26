@@ -735,10 +735,14 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 		return style
 	}
 
+	/// `date` rendered per this style; a datetime includes 3-digit fractional
+	/// seconds iff its milliseconds are nonzero.
 	func formatted(_ date: Date) -> String {
 		let systemTimeZone = Environment.current.systemTimeZone
 		let style = Date.ISO8601FormatStyle(
 			timeZoneSeparator: .colon,
+			includingFractionalSeconds: // swiftformat:disable:next indent
+				(date.timeIntervalSince1970 * 1000).rounded(.down).truncatingRemainder(dividingBy: 1000) != 0,
 			timeZone: isInputDateOnly ? systemTimeZone : timeZone ?? systemTimeZone,
 		)
 		return isDateOnly ? style.year().month().day().format(date) : style.format(date)

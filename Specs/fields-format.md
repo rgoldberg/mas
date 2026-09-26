@@ -637,6 +637,11 @@ Input is always auto-detected, trying, in order: ISO-8601 datetime, ISO-8601
 date-only, then a Unix epoch (seconds) numeric timestamp; this does not depend
 on field name, label, output format, or any other context.
 
+A datetime is rendered with its fractional seconds truncated to 3 digits iff
+its milliseconds are nonzero (e.g., `2020-03-18T17:39:23.1234Z` renders as
+`2020-03-18T17:39:23.123Z`, but `2020-03-18T17:39:23.0004Z` renders as
+`2020-03-18T17:39:23Z`).
+
 ###### Branched Formatting
 
 <!--editorconfig-checker-disable-->
