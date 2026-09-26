@@ -51,3 +51,16 @@ ensure_command_available() {
 	done
 	return "${return_status}"
 }
+
+# Removes SwiftFormat's progress & summary lines from stdin, plus each line fully
+# matching an extended regex in ${@}
+filter_swiftformat_output() {
+	# shellcheck disable=SC2034
+	local -ar patterns=(
+		'(?:\^D\x08{2})?Running SwiftFormat\.{3}\r'
+		'Reading (?:config|swift-version) file at .*'
+		'\x1b\[32mSwiftFormat completed in \d+(?:\.\d+)?s\.\x1b\[0m\r'
+		"${@}"
+	)
+	grep -vxE "${(j:|:)patterns}" || true
+}

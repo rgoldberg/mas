@@ -20,8 +20,7 @@ export -r MAS_DISTRIBUTION=format
 
 printf -- $'--> 🕊​ SwiftFormat\n'
 script -q /dev/null swiftformat --strict --markdown-files format-strict . --symlinks follow </dev/null |
-	# editorconfig-checker-disable-next-line
-	(grep -vxE '(?:\^D\x08{2})?Running SwiftFormat\.{3}\r|Reading (?:config|swift-version) file at .*|\x1b\[32mSwiftFormat completed in \d+(?:\.\d+)?s\.\x1b\[0m\r|0/\d+ files formatted\.\r' || true)
+	filter_swiftformat_output '0/\d+ files formatted\.\r'
 
 printf -- $'--> 🦅 SwiftLint\n'
 swiftlint --fix --quiet --reporter relative-path
