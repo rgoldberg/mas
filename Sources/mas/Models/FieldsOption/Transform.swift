@@ -64,11 +64,11 @@ enum Transform: Hashable {
 		case .uppercase:
 			string.uppercased()
 		case .absoluteValue:
-			Double(string).map { numberString(abs($0), matchingIntegerStyleOf: string) } ?? string
+			string.hasPrefix("-") || string.hasPrefix("+") ? .init(string.dropFirst()) : string
 		case let .group(digitGroupSeparator, digitGroupSize):
 			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupSize: digitGroupSize)
 		case .round:
-			Double(string).map { numberString($0.rounded(), matchingIntegerStyleOf: "") } ?? string
+			Double(string).map { $0.rounded() }.map { abs($0) < maxExactInteger ? .init(Int($0)) : .init($0) } ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
 			Double(string).map { rawValue in
 				radixScaled(
@@ -221,14 +221,6 @@ private func radixScaled(
 	return fractionalDigits > 0
 		? "\(sign)\(integerPart).\(String(repeating: "0", count: fractionalDigits - fractionalText.count))\(fractionalText)"
 		: sign + integerPart
-}
-
-/// Formats `value`, printing it as a plain integer (no decimal point) iff
-/// `original` (the un-transformed input string) didn't itself have a decimal
-/// point & `value` is integral, e.g., `absoluteValue` on `"-5"` yields `"5"`,
-/// not `"5.0"`, but on `"-5.0"` yields `"5.0"`.
-private func numberString(_ value: Double, matchingIntegerStyleOf original: String) -> String {
-	!original.contains(".") && value == value.rounded() && abs(value) < maxExactInteger ? .init(Int(value)) : .init(value)
 }
 
 /// The magnitude below which every integral `Double` is exactly an `Int`.

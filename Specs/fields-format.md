@@ -188,15 +188,16 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 
 ###### Number Transforms
 
-- `absoluteValue`: the value's absolute value.
+- `absoluteValue`: removes the value's leading sign (`-` or `+`), if any,
+  retaining the rest of its representation (e.g., `-1.50` becomes `1.50`, and
+  `-1.5e-3` becomes `1.5e-3`).
 - `round`: the value rounded to the nearest integer, with halves rounded away
   from 0.
 - `scale`: see [`scale`](#scale).
 
 `round` renders its result as an integer (i.e., without a `.`) iff its magnitude
-is less than 2^53. `absoluteValue` does so iff its result is integral, its
-magnitude is less than 2^53 & its input contains no `.`. Otherwise, each renders
-its result as Swift's `Double` description (e.g., `1.5`, `1e+16`).
+is less than 2^53; otherwise, it renders its result as Swift's `Double`
+description (e.g., `1e+16`).
 
 ###### `group`
 
