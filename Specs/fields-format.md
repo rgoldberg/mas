@@ -198,9 +198,9 @@ except `scale`, whose arguments define its rendering.
   away from 0, rendered in the value's notation:
   - Positional: as an integer (e.g., `-2.5` becomes `-3`).
   - Scientific: in normalized scientific notation, retaining the value's
-    exponent marker (`e` or `E`) & whether a nonnegative exponent has a `+`
-    (e.g., `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2` & `1.5e3` remains
-    `1.5e3`).
+    exponent indicator (`e` or `E`) & whether a nonnegative exponent has a
+    `+` (e.g., `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2` & `1.5e3`
+    remains `1.5e3`).
 
   A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `+2.4` becomes `+2`, and `-0.4` becomes `0`).

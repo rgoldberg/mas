@@ -198,9 +198,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - fence: syntactic token surrounding an expression or list element (e.g.,
       `<argument-fence>`)
     - boundary: sort tokenization term (defined in fields.md)
-    - exponent marker: `e` or `E` in scientific notation
-    - REJECTED: delimiter / encloser / marker (except exponent marker) /
-      signifier
+    - exponent indicator: `e` or `E` in scientific notation
+    - REJECTED: delimiter / encloser / marker / signifier
 36. - evaluate / evaluation / evaluated: perform the process that returns the
       value of an expression
     - evaluate against: the value a matcher or block is evaluated on

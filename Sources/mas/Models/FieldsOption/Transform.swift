@@ -167,9 +167,9 @@ private let initialTitlecaseCandidateCategorySet = Set([
 
 /// `string`, a finite decimal number, rounded exactly to the nearest integer
 /// (halves away from 0), in `string`'s notation: positional, or normalized
-/// scientific with `string`'s exponent marker & positive exponent sign style.
-/// A leading `+` is retained; `-` is retained iff the result is nonzero. Else
-/// `nil`.
+/// scientific with `string`'s exponent indicator & positive exponent sign
+/// style. A leading `+` is retained; `-` is retained iff the result is nonzero.
+/// Else `nil`.
 private func rounded(_ string: String) -> String? {
 	guard
 		Double(string)?.isFinite == true,
@@ -183,20 +183,20 @@ private func rounded(_ string: String) -> String? {
 	let divisor = BigInt(10).power(max(-scale, 0))
 	let (quotient, remainder) = significand.quotientAndRemainder(dividingBy: divisor)
 	let digits = (quotient * BigInt(10).power(max(scale, 0)) + (2 * remainder >= divisor ? 1 : 0)).description
-	return (match.1 == "-" && digits != "0" ? "-" : match.1 == "+" ? "+" : "")
-		+ (match.4.map { marker in
-			scientificNotation(of: digits, marker: marker, isExponentPlusSigned: match.5?.first == "+")
-		}
-			?? digits)
+	return (match.1 == "-" && digits != "0" ? "-" : match.1 == "+" ? "+" : "") + (
+		match.4.map { scientificNotation(of: digits, exponentIndicator: $0, isExponentPlusSigned: match.5?.first == "+") }
+			?? digits
+	)
 }
 
 /// The nonnegative decimal integer `digits` in normalized scientific notation
-/// (e.g., `1500` as `1.5e3`), with `marker` before the exponent, which is
-/// preceded by `+` iff `isExponentPlusSigned`.
-private func scientificNotation(of digits: String, marker: Substring, isExponentPlusSigned: Bool) -> String {
+/// (e.g., `1500` as `1.5e3`), with `exponentIndicator` before the exponent,
+/// which is preceded by `+` iff `isExponentPlusSigned`.
+private func scientificNotation(of digits: String, exponentIndicator: Substring, isExponentPlusSigned: Bool) -> String {
 	let significandDigits = digits.prefix(1) + digits.dropFirst().reversed().drop { $0 == "0" }.reversed()
 	let fraction = significandDigits.count > 1 ? "." + significandDigits.dropFirst() : ""
-	return "\(significandDigits.prefix(1))\(fraction)\(marker)\(isExponentPlusSigned ? "+" : "")\(digits.count - 1)"
+	return
+		"\(significandDigits.prefix(1))\(fraction)\(exponentIndicator)\(isExponentPlusSigned ? "+" : "")\(digits.count - 1)"
 }
 
 private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:([eE])([+-]?[0-9]+))?/
