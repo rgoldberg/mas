@@ -8,7 +8,7 @@
 internal import ArgumentParser
 
 extension MAS {
-	/// Installs the first app returned from searching the App Store (app must
+	/// Installs the 1st app returned from searching the App Store (app must
 	/// already be owned).
 	///
 	/// Uses the iTunes Search API:
@@ -16,7 +16,7 @@ extension MAS {
 	/// https://performance-partners.apple.com/search-api
 	struct Lucky: AsyncParsableCommand, EffectiveDropping {
 		static let configuration = CommandConfiguration(
-			abstract: "Install the first app returned from searching the App Store",
+			abstract: "Install the 1st app returned from searching the App Store",
 			discussion: // swiftformat:disable:next indent
 				"App will install only if it is already owned\n\n\(requiresRootPrivilegesMessage(to: "install"))",
 		)

@@ -35,7 +35,7 @@ body:
       Format commands & output as follows (where `…` is a placeholder):
 
       - Use a console block: start with ```` ```console ````, end with ```` ``` ````, each on its own line
-      - Prefix each non-console step (or comment) with two hashes & a space: `## …`
+      - Prefix each non-console step (or comment) with 2 hashes & a space: `## …`
       - Remove shell prompts; instead, prefix each console command with a dollar sign & a space: `$ …`
       - Prefix each output line beginning with `#`, `$`, `%`, or `>` with an additional instance of that <!--
         --> character: `##…`, `$$…`, `%%…`, or `>>…`

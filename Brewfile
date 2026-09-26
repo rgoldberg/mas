@@ -8,4 +8,5 @@ brew "shellcheck"           # 0.11.0
 brew "swiftformat"          # 0.64.6
 brew "swiftlint"            # 0.65.1
 brew "swiftly"              # 1.2.0
+brew "vale"                 # 3.26.0
 brew "yamllint"             # 1.38.0
