@@ -245,6 +245,9 @@ rendered, regardless of their order:
 
 Absent `timeZone`, the output time zone is the system time zone.
 
+A date-only value's date is independent of time zones, so `timeZone` doesn't
+affect it.
+
 ###### `timeZone`
 
 A `<time-zone-code>` that is both an IANA Time Zone Database identifier & a

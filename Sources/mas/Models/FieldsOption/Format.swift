@@ -585,7 +585,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	/// The value parsed as chronologic; else `nil`.
 	static func chronologic(from value: JSON.Node?) -> Self? {
-		chronologicDateAndIsDateOnly(from: value).map { .chronologic($0.date, style: .init(isDateOnly: $0.isDateOnly)) }
+		chronologicDateAndIsDateOnly(from: value).map { date, isDateOnly in
+			.chronologic(date, style: .init(isInputDateOnly: isDateOnly, isDateOnly: isDateOnly))
+		}
 	}
 
 	/// The value as a number, per `coercion`; else `nil`.
@@ -707,8 +709,11 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 /// How a chronologic value is rendered: ISO-8601, per input (date-only or
 /// datetime), in the system time zone, unless modified by chronologic
-/// transforms.
+/// transforms. A date-only input's date ignores time zones.
 private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// Whether the input is date-only (parsed as midnight in the system time
+	/// zone), so it's always rendered in the system time zone.
+	let isInputDateOnly: Bool
 	var isDateOnly: Bool
 	var timeZone = TimeZone?.none
 
@@ -728,7 +733,10 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	}
 
 	func formatted(_ date: Date) -> String {
-		let style = Date.ISO8601FormatStyle(timeZoneSeparator: .colon, timeZone: timeZone ?? .current)
+		let style = Date.ISO8601FormatStyle(
+			timeZoneSeparator: .colon,
+			timeZone: isInputDateOnly ? .current : timeZone ?? .current,
+		)
 		return isDateOnly ? style.year().month().day().format(date) : style.format(date)
 	}
 }
