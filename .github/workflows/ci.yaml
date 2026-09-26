@@ -13,14 +13,14 @@ concurrency:
   cancel-in-progress: true
 permissions: {}
 jobs:
-  ci:
-    name: CI
+  build-test:
+    name: Build & Test
     strategy:
       matrix:
         runner: [macos-15, macos-15-intel, macos-26, macos-26-intel, xcode-27]
       fail-fast: false
     runs-on: ${{matrix.runner}}
-    defaults:
+    defaults: &defaults
       run:
         # Force all run commands to not use Rosetta 2 on arm64
         shell: >-
@@ -30,7 +30,8 @@ jobs:
             || 'arch -arm64 /bin/zsh -efux --extended-glob --pipe-fail --warn-create-global {0}'
           }}
     steps:
-    - name: 🛒 Checkout repo
+    - &checkout
+      name: 🛒 Checkout repo
       env:
         GIT_CONFIG_COUNT: 1
         GIT_CONFIG_KEY_0: init.defaultBranch
@@ -40,17 +41,20 @@ jobs:
         # Include all history & tags for Scripts/version
         fetch-depth: 0
 
-    - name: 🔧 Setup repo
+    - &setup-repo
+      name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo
 
-    - name: 🛠 Select latest stable Xcode
+    - &select-xcode
+      name: 🛠 Select latest stable Xcode
       run: |
         setopt glob_assign
         readonly xcode_path=/Applications/Xcode_[0-9.]##.app(/On[1])
         sudo xcode-select -s "${xcode_path}"
         printf $'DEVELOPER_DIR=%s/Contents/Developer\n' "${xcode_path}" >>"${GITHUB_ENV}"
 
-    - name: 👢 Bootstrap
+    - &bootstrap
+      name: 👢 Bootstrap
       run: |
         brew untap -fq aws/tap 2>/dev/null || true
         Scripts/bootstrap
@@ -69,6 +73,22 @@ jobs:
 
     - name: 🧪 Test
       run: Scripts/test
+
+  lint:
+    name: Lint
+    strategy:
+      matrix:
+        runner: [xcode-27]
+    runs-on: ${{matrix.runner}}
+    defaults: *defaults
+    steps:
+    - *checkout
+
+    - *setup-repo
+
+    - *select-xcode
+
+    - *bootstrap
 
     - name: 🚨 Lint
       run: Scripts/lint
