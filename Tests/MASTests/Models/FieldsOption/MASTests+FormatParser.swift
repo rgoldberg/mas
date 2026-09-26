@@ -226,6 +226,26 @@ private extension MASTests {
 		#expect(try rendered(format, value) == expected)
 	}
 
+	@Test(
+		arguments: [
+			("%c", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
+			("%C.timeZone:system:++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
+			("%C.timeZone:GMT+5:++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-18T22:39:23+05:00"),
+			("%C.dateOnly.timeZone:Asia/Tokyo:++", "America/New_York", "2020-03-18T17:39:23Z", "2020-03-19"),
+			// A date-only value's date is independent of time zones
+			("%C.timeZone:Pacific/Honolulu:++", "America/New_York", "2020-03-18", "2020-03-18"),
+			("%C.timeZone:Pacific/Kiritimati:++", "Pacific/Honolulu", "2020-03-18", "2020-03-18"),
+		],
+	)
+	func `renders chronologic values per the system & output time zones`(
+		format: String,
+		systemTimeZone: String,
+		value: String,
+		expected: String,
+	) throws {
+		#expect(try inSystemTimeZone(systemTimeZone) { try rendered(format, .string(value)) } == expected)
+	}
+
 	@Test(arguments: ["1", "1.0b", "10.2.3-beta"])
 	func `%v matches a version`(version: String) throws {
 		#expect(try rendered("%v", .string(version)) == version)
@@ -254,6 +274,8 @@ private extension MASTests {
 			("%", .missingPredicate),
 			(":name", .unknownNamedFormat("name")),
 			(".bogus", .unknownTransform("bogus")),
+			(".initialUppercase", .unknownTransform("initialUppercase")),
+			(".sentenceCase", .unknownTransform("sentenceCase")),
 			(".group.round", .invalidPipeline("<value-transform-pipeline>")),
 			(".uppercase.round", .invalidPipeline("<value-transform-pipeline>")),
 			(".uppercase.endJustify", .invalidPipeline("<pipeline>")),
@@ -282,6 +304,8 @@ private extension MASTests {
 			(".group:.,18446744073709551615:", .invalidTransformArguments(name: "group")),
 			(".timeZone::", .invalidTransformArguments(name: "timeZone")),
 			(".timeZone:Nowhere/Land:", .invalidTransformArguments(name: "timeZone")),
+			(".timeZone:+0530:", .invalidTransformArguments(name: "timeZone")),
+			(".timeZone:EST+5:", .invalidTransformArguments(name: "timeZone")),
 			("%S\\", .danglingEscape),
 		],
 	)
