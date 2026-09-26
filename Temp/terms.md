@@ -15,7 +15,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      "as a single element", "compares as a single number")
    - REJECTED: single character / single (as a count)
 5. - only for: restrict scope or target applicability
-   - for only: restrict numerical quantities or durations
+   - for only: restrict numeric quantities or durations
 6. - restrict: narrow scope or applicability
    - constrain: narrow permissible values (`{text: CONSTRAINTS}`)
    - REJECTED: limit
@@ -78,7 +78,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - leading: adjective for characters / elements positioned at the start of a
       token or line (e.g., "leading whitespace")
     - before
-    - earlier: relative ordering by index, time, or priority
+    - earlier: relative order by index, time, or priority
     - former: 1st of 2 explicitly mentioned items
     - immediately: adjacency
 19. - succeed: positional relation in a sequence where one element comes after
@@ -177,9 +177,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       or evaluation
 33. - overlay: merging specific modifiers or fields onto an existing base while
       retaining unspecified attributes
-    - override: priority precedence where a higher-level rule supersedes a
+    - override: priority precedence where a higher-level rule prevails over a
       lower-level rule
-    - precedence: ordering among peers
+    - precedence: order among peers
     - priority: `<sort-priority>`
     - wins: only in the `(* last wins *)` idiom
     - replace: "replace Y with X" = "substitute X for Y"
@@ -273,10 +273,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: since / due to / as (causal)
 54. - as per: according to
     - per: for each
-55. - resolve: look up a name to its referent (resolved fields config)
+55. - resolve: map a name to its referent (resolved fields config)
     - find: search outcome ("if no match is found")
     - REJECTED: look up
-56. - context: looking up named fields configs, formats, etc.; grammatical
+56. - context: resolving named fields configs, formats, etc.; grammatical
       position (`context-dependent` multiplicity, `(* only for: CONTEXT *)`)
     - circumstances: situation
     - REJECTED: situation
