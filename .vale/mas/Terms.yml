@@ -1,0 +1,73 @@
+#
+# .vale/mas/Terms.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: substitution
+message: Use '%s' instead of '%s' (see Temp/terms.md)
+level: error
+ignorecase: true
+swap:
+  one or more: 1 or more
+  (?:two|2) or more: multiple
+  alter(?:s|ed|ing)?: modify
+  apply for: apply to
+  act on: apply to
+  capitaliz(?:e|es|ed|ing|ation): titlecase / uppercase
+  causes an error to be reported: an error is reported
+  consecutive: adjacent / contiguous
+  convert(?:s|ed|ing)?: coerce
+  counts as: is / interpreted as / treated as
+  cut off: truncate / remove
+  date[- ]time: datetime
+  decimal notation: positional notation
+  delimiter(?:s)?: separator / terminator / fence
+  disallow(?:s|ed|ing)?: must not
+  due to: because
+  E notation: scientific notation
+  encloser(?:s)?: fence
+  entirety of: entire
+  escape character(?:s)?: escape prefix / escaped character
+  execut(?:e|es|ed|ing|ion|ions): run / call
+  exponential notation: scientific notation
+  fixed-point notation: positional notation
+  functions as: is / interpreted as / treated as
+  GMT offset: UTC offset
+  happen(?:s|ed|ing)?: occur
+  hardcoded: built-in
+  illegal: invalid
+  indexes: indices
+  inoperative: disabled
+  interpolat(?:e|es|ed|ing|ion|ions): evaluate / evaluation
+  invo(?:ke|kes|ked|king|cation|cations): call
+  leftmost: 1st
+  local time zone: system time zone
+  lower case: lowercase
+  maintain(?:s|ed|ing)?: retain
+  make visible: unhide
+  neighboring: adjacent
+  nil: null
+  not escaped: bare
+  numerical: numeric
+  operate on: apply to
+  ordering: order
+  overwrit(?:e|es|ing|ten): override / replace
+  predefined: built-in / inherited
+  processed as: is / interpreted as / treated as
+  prohibit(?:s|ed|ing)?: must not
+  rightmost: last
+  sentence case: titlecase
+  several: multiple
+  signifier(?:s)?: separator / terminator / fence
+  situation(?:s)?: circumstances
+  specification(?:s)?: spec
+  subformat(?:s)?: block
+  supersed(?:e|es|ed|ing): override
+  timezone(?:s)?: time zone
+  title case: titlecase
+  unescaped: bare
+  upper case: uppercase
+  user-configurable: custom
+  user-defined: custom
