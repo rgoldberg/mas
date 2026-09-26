@@ -1,0 +1,52 @@
+#
+# .vale/mas/Numbers.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Write '%s' as digits
+level: error
+ignorecase: true
+tokens:
+- zero
+- two
+- three
+- four
+- five
+- six
+- seven
+- eight
+- nine
+- ten
+- eleven
+- twelve
+- thirteen
+- fourteen
+- fifteen
+- sixteen
+- seventeen
+- eighteen
+- nineteen
+- twenty
+- thirty
+- forty
+- fifty
+- sixty
+- seventy
+- eighty
+- ninety
+- hundred
+- thousand
+- million
+- billion
+- first
+- third
+- fourth
+- fifth
+- sixth
+- seventh
+- eighth
+- ninth
+- tenth

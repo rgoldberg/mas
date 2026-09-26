@@ -1,0 +1,13 @@
+#
+# .vale/mas/CommaAmpersands.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Omit the Oxford comma before '&'
+level: error
+nonword: true
+tokens:
+- ',\s+&'

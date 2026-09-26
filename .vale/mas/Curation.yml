@@ -1,0 +1,13 @@
+#
+# .vale/mas/Curation.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Avoid '%s'; prefer 'select', 'handle', etc.
+level: error
+ignorecase: true
+tokens:
+- curat(?:e|ed|es|ing|ion|ions|or|ors)

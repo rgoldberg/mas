@@ -37,6 +37,17 @@ disabled_rules:
 - strict_fileprivate
 - type_body_length
 - variable_shadowing
+custom_rules:
+  comment_period:
+    name: Comment Period
+    regex: //(?!/)[^\n]*[^.\n](?<!etc|All rights reserved)\.$(?!\n[ \t]*//(?!/))
+    match_kinds: [comment, comment.url]
+    message: Omit the period from the end of an ordinary (`//`) comment
+  doc_comment_period:
+    name: DocC Comment Period
+    regex: ///(?![ \t]*(?:https?://|[-*+] |```))[^\n]*[^.:!?\s\n]$(?!\n[ \t]*///)
+    match_kinds: [doccomment, doccomment.field, comment.url]
+    message: End each sentence of a DocC (`///`) comment with a period
 attributes:
   always_on_line_above: ['@Flag', '@MainActor', '@OptionGroup', '@TaskLocal']
 deployment_target:

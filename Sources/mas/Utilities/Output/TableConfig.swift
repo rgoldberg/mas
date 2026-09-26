@@ -20,10 +20,10 @@ struct TableConfig: Equatable {
 		/// Repeated (truncating mid-repetition if needed, never padded) to fill its
 		/// line; never empty (`<separator-pattern>` defaults to `-`).
 		let pattern: String
-		/// `true`: 1 segment per column, each independently filled to that column's
-		/// width, joined by `columnSpacing` (matching every other row).
-		/// `false`: 1 continuous, column-unaware line spanning the whole table's
-		/// width.
+		/// - `true`: 1 segment per column, each independently filled to that
+		///   column's width, joined by `columnSpacing` (matching every other row).
+		/// - `false`: 1 continuous, column-unaware line spanning the whole table's
+		///   width.
 		let broken: Bool
 	}
 

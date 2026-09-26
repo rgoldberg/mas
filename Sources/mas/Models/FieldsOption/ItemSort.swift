@@ -19,7 +19,7 @@ struct ItemSort: Equatable {
 	/// order (`.descending`).
 	let tiebreakDirection: SortOptionSet.Direction
 
-	/// Sorts `count` items' indices per `keys` (highest-priority first), falling
+	/// Sorts `count` items' indices per `keys` (highest-priority 1st), falling
 	/// back to `tiebreakDirection` for items left unordered by every key.
 	/// `values(index:key:)` provides an item's values for a sort key.
 	func sortedIndices(count: Int, values: (_ index: Int, _ key: ItemSortKey) -> SortValues) -> [Int] {

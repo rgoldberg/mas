@@ -1,0 +1,13 @@
+#
+# .vale/mas/LatinAbbreviations.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Immediately follow '%s' with a punctuation mark (e.g., ',' or ':')
+level: error
+nonword: true
+tokens:
+- \b(?:e\.g|i\.e)\.(?![,:;!?])

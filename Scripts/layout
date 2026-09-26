@@ -1,0 +1,255 @@
+#!/bin/zsh -f
+#
+# Scripts/layout
+# mas
+#
+# Copyright © 2026 mas-cli. All rights reserved.
+#
+# Reports prose paragraphs in Markdown files & Swift comments whose lines aren't
+# filled up to the 80-character limit before wrapping.
+#
+# Usage: layout [-f]
+#
+# -f: rewrap reported paragraphs instead of reporting them
+#
+
+. "${0:A:h}/_setup-script"
+
+zmodload zsh/zutil
+zparseopts -D -F -A received_flag f
+readonly -A received_flag
+
+export LC_CTYPE=en_US.UTF-8
+
+readonly -i limit=80
+readonly separator=$'\x1f'
+readonly start_danger_regex='^([-*+]|#{1,6}|=+|[0-9]+[.)])$|^>'
+readonly markdown_list_regex='^( *)([-*+]|[0-9]+\.)( +)'
+readonly markdown_special_regex='^(```|[|#<>]|http|\[[^]]+\]:)'
+readonly link_url_start_regex='\]\( *$'
+readonly swift_comment_regex=$'^(\t*)(///?) (.*)$'
+readonly swift_list_regex='^([-*+]|[0-9]+\.) '
+readonly swift_marker_regex='^(swiftlint|swiftformat|periphery|MARK|TODO|FIXME|sourcery|```)'
+
+# shellcheck disable=SC2034
+typeset -a tokens filled source_lines result_lines match mbegin mend
+# shellcheck disable=SC2034
+typeset MATCH MBEGIN MEND
+integer exit_status=0
+
+# Splits ${1} at spaces into tokens, keeping each code span whole
+tokenize() {
+	tokens=()
+	local token span='' ticks
+	local -i in_span=0
+	# shellcheck disable=SC2066
+	for token in "${(@s: :)1}"; do
+		ticks="${token//[^\`]}"
+		if ((in_span)); then
+			span+=" ${token}"
+			if ((${#ticks} % 2)); then
+				tokens+=("${span}")
+				in_span=0
+			fi
+		elif ((${#ticks} % 2)); then
+			span="${token}"
+			in_span=1
+		else
+			tokens+=("${token}")
+		fi
+	done
+	if ((in_span)); then
+		tokens+=("${span}")
+	fi
+}
+
+# Greedily fills tokens ${@:3} into lines prefixed by ${1} (1st line) or ${2}
+fill() {
+	local -a prefixes=() lines=()
+	local prefix="${1}" line='' token
+	for token in "${@:3}"; do
+		if [[ -n "${line}" ]] && ((${#${prefix//$'\t'/  }} + ${#${line//${separator}/ }} + 1 + ${#token} > limit)); then
+			prefixes+=("${prefix}")
+			lines+=("${line}")
+			prefix="${2}"
+			line="${token}"
+		else
+			line+="${line:+${separator}}${token}"
+		fi
+	done
+	prefixes+=("${prefix}")
+	lines+=("${line}")
+	# Never start a line with a token that Markdown would interpret as a block marker
+	local -i index moved=1
+	while ((moved)); do
+		moved=0
+		for ((index = 2; index <= ${#lines}; ++index)); do
+			if [[ "${lines[index]%%${separator}*}" =~ ${start_danger_regex} && "${lines[index - 1]}" == *${separator}* ]]; then
+				lines[index]="${lines[index - 1]##*${separator}}${separator}${lines[index]}"
+				lines[index - 1]="${lines[index - 1]%${separator}*}"
+				moved=1
+			fi
+		done
+	done
+	filled=()
+	for ((index = 1; index <= ${#lines}; ++index)); do
+		filled+=("${prefixes[index]}${lines[index]//${separator}/ }")
+	done
+}
+
+# Replaces source lines ${2}–${3} of file ${1} with the filled lines iff they
+# differ & fit within the limit
+apply_filled() {
+	local -a old_lines=("${(@)source_lines[${2},${3}]}")
+	local filled_line
+	for filled_line in "${filled[@]}"; do
+		if ((${#${filled_line//$'\t'/  }} > limit)); then
+			result_lines+=("${old_lines[@]}")
+			return
+		fi
+	done
+	if [[ "${(pj:\n:)filled}" == "${(pj:\n:)old_lines}" ]]; then
+		result_lines+=("${old_lines[@]}")
+	else
+		result_lines+=("${filled[@]}")
+		if ! [[ -v 'received_flag[-f]' ]]; then
+			printf $'%s:%d: Paragraph not filled to %d characters\n' "${1}" "${2}" "${limit}"
+			exit_status=1
+		fi
+	fi
+}
+
+is_markdown_special() {
+	local -r stripped="${${1##[[:space:]]#}%%[[:space:]]#}"
+	[[ -z "${stripped}" || "${stripped}" =~ ${markdown_special_regex} ]]\
+	|| [[ "${1}" =~ ${link_url_start_regex} || "${1}" == *$'\t'* ]]
+}
+
+is_hard_break() {
+	[[ "${1}" == *'  ' || "${1}" == *\\ ]]
+}
+
+layout_markdown() {
+	local line first rest indentation
+	local -a body
+	local -i index=1 end in_fence=0
+	while ((index <= ${#source_lines})); do
+		line="${source_lines[index]}"
+		if [[ "${line}" == [[:space:]]#'```'* ]]; then
+			in_fence=$((!in_fence))
+		fi
+		if ((in_fence)) || [[ "${line}" == [[:space:]]#'```'* ]] || is_markdown_special "${line}"; then
+			result_lines+=("${line}")
+			index+=1
+			continue
+		fi
+		if [[ "${line}" =~ ${markdown_list_regex} ]]; then
+			first="${MATCH}"
+			rest="${MATCH//?/ }"
+			body=("${line:${#MATCH}}")
+		else
+			first="${(M)line##[ ]#}"
+			rest="${first}"
+			body=("${line#"${first}"}")
+		fi
+		end=$((index + 1))
+		while ((end <= ${#source_lines})) && ! is_hard_break "${source_lines[end - 1]}"; do
+			line="${source_lines[end]}"
+			indentation="${(M)line##[ ]#}"
+			if is_markdown_special "${line}"\
+			|| [[ "${line}" =~ ${markdown_list_regex} || "${line}" == [[:space:]]#')'* || ${#indentation} -ne ${#rest} ]]; then
+				break
+			fi
+			body+=("${line#"${indentation}"}")
+			end+=1
+		done
+		if is_hard_break "${source_lines[end - 1]}" || [[ "${(j: :)body}" == *'  '* ]]; then
+			result_lines+=("${(@)source_lines[index,end - 1]}")
+		else
+			tokenize "${(j: :)body}"
+			fill "${first}" "${rest}" "${tokens[@]}"
+			apply_filled "${1}" "${index}" "$((end - 1))"
+		fi
+		index="${end}"
+	done
+}
+
+layout_swift() {
+	local line indentation slashes body hang first
+	local -a bodies
+	local -i index=1 end is_list
+	while ((index <= ${#source_lines})); do
+		line="${source_lines[index]}"
+		if ((index <= 7)) || ! [[ "${line}" =~ ${swift_comment_regex} ]]; then
+			result_lines+=("${line}")
+			index+=1
+			continue
+		fi
+		indentation="${match[1]}"
+		slashes="${match[2]}"
+		body="${match[3]}"
+		if [[ -z "${body// }" || "${body}" =~ ${swift_marker_regex} ]]\
+		|| { [[ "${body}" == ' '* ]] && ! [[ "${body}" =~ ${swift_list_regex} ]]; }; then
+			result_lines+=("${line}")
+			index+=1
+			continue
+		fi
+		if [[ "${body}" =~ ${swift_list_regex} ]]; then
+			is_list=1
+			hang="${MATCH//?/ }"
+		else
+			is_list=0
+			hang=''
+		fi
+		bodies=("${body}")
+		end=$((index + 1))
+		while ((end <= ${#source_lines})); do
+			if ! [[ "${source_lines[end]}" =~ ${swift_comment_regex} ]]\
+			|| [[ "${match[1]}" != "${indentation}" || "${match[2]}" != "${slashes}" ]]; then
+				break
+			fi
+			body="${match[3]}"
+			if [[ -z "${body// }" || "${body}" =~ ${swift_marker_regex} ]]; then
+				break
+			fi
+			if ((is_list)); then
+				if [[ "${body}" != "${hang}"* || "${body}" == "${hang} "* ]]; then
+					break
+				fi
+				bodies+=("${body#"${hang}"}")
+			else
+				if [[ "${body}" == ' '* || "${body}" =~ ${swift_list_regex} ]]; then
+					break
+				fi
+				bodies+=("${body}")
+			fi
+			end+=1
+		done
+		if [[ "${(j: :)bodies}" == *'  '* ]]; then
+			result_lines+=("${(@)source_lines[index,end - 1]}")
+		else
+			first="${indentation}${slashes} "
+			tokenize "${(j: :)bodies}"
+			fill "${first}" "${first}${hang}" "${tokens[@]}"
+			apply_filled "${1}" "${index}" "$((end - 1))"
+		fi
+		index="${end}"
+	done
+}
+
+for file in ${(0)"$(git ls-files -z -- '*.md' '*.swift')"}; do
+	[[ -L "${file}" ]] && continue
+	source_lines=("${(@f)"$(<"${file}")"}")
+	result_lines=()
+	if [[ "${file}" == *.md ]]; then
+		layout_markdown "${file}"
+	else
+		layout_swift "${file}"
+	fi
+	if [[ -v 'received_flag[-f]' && "${(pj:\n:)result_lines}" != "${(pj:\n:)source_lines}" ]]; then
+		print -r -- "${(pj:\n:)result_lines}" >"${file}"
+		printf $'Rewrapped %s\n' "${file}"
+	fi
+done
+
+exit "${exit_status}"

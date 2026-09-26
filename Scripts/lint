@@ -15,6 +15,10 @@ unsetopt err_exit
 
 print_notice '🚨 Linting' "${@}"
 
+zmodload zsh/zutil
+zparseopts -D -F -A received_flag A L V
+readonly -A received_flag
+
 ensure_command_available\
 	actionlint\
 	editorconfig-checker\
@@ -23,12 +27,9 @@ ensure_command_available\
 	shellcheck\
 	swiftformat\
 	swiftlint\
+	${received_flag[-V]-vale}\
 	yamllint ||
 	exit
-
-zmodload zsh/zutil
-zparseopts -D -F -A received_flag A
-readonly -A received_flag
 
 export -r MAS_DISTRIBUTION=lint
 
@@ -61,6 +62,18 @@ fi
 printf -- $'--> 〽️ Markdown\n'
 markdownlint-cli2 -- ***/*.md(.)
 ((exit_status |= ${?}))
+
+if ! [[ -v 'received_flag[-L]' ]]; then
+	printf -- $'--> 📏 Layout\n'
+	Scripts/layout
+	((exit_status |= ${?}))
+fi
+
+if ! [[ -v 'received_flag[-V]' ]]; then
+	printf -- $'--> 📖 Vale\n'
+	vale --output=line -- ${^${(0)"$(git ls-files -z -- '*.md' '*.swift')"}}(N.)
+	((exit_status |= ${?}))
+fi
 
 printf -- $'--> 📝 YAML\n'
 yamllint -s .

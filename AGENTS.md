@@ -19,7 +19,8 @@ file to reflect it.
 
 - `Scripts/bootstrap`
 - `Scripts/format`
-- `Scripts/lint -A` (quick) / `Scripts/lint` (includes unused code checks)
+- `Scripts/lint -A` (quick) / `Scripts/lint` (includes unused code checks); `-L`
+  / `-V` skip the Layout / Vale steps
 - `Scripts/build` (debug) / `Scripts/build '' -c release` (release)
 - `Scripts/test`
 - `Scripts/package`
@@ -40,6 +41,13 @@ file to reflect it.
   ), except end each subject line with a period (or with a colon iff the subject
   introduces a list)
 - Tag releases as `vX.Y.Z`
+
+## File Naming
+
+Give each file the longest standard extension for its file type that works for
+its purpose (e.g., `.swiftlint.yml` works but `.swiftlint.yaml` doesn't, so the
+former is chosen, while `build-test.yaml` & `build-test.yml` both work, so the
+former is chosen), except always use `.md` for Markdown.
 
 ## Content Formatting
 

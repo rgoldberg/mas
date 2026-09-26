@@ -1,0 +1,13 @@
+#
+# .vale/mas/Slashes.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Pad a '/' joining 2 words / terms with spaces on both sides (except in 'and/or')
+level: error
+nonword: true
+tokens:
+- (?<![\w./@:~-])(?!and/or\b)[A-Za-z]+/[A-Za-z]+(?![\w./-])

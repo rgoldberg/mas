@@ -1,0 +1,13 @@
+#
+# .vale/mas/EmDashes.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Do not use em dashes
+level: error
+nonword: true
+tokens:
+- —

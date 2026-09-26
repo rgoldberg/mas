@@ -1,0 +1,13 @@
+#
+# .vale/mas/Ampersands.yml
+# mas
+#
+# Vale 3.23.0
+#
+---
+extends: existence
+message: Prefer '&' to 'and' (except in 'and/or' & after a comma that separates distinct clauses)
+level: error
+nonword: true
+tokens:
+- (?<!,)\s\band\b(?!/)

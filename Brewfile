@@ -8,4 +8,5 @@ brew "shellcheck"           # 0.11.0
 brew "swiftformat"          # 0.63.0
 brew "swiftlint"            # 0.65.1
 brew "swiftly"              if MacOS.version < :tahoe # 1.1.4
+brew "vale"                 # 3.23.0
 brew "yamllint"             # 1.38.0
