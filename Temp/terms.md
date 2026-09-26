@@ -60,8 +60,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 14. - side
     - REJECTED: end (as a synonym for side)
 15. - 1st
-    - REJECTED: first (except in `<trivia-first>`) / leftmost / initial /
-      earliest
+    - initial: only in `initialTitlecase` & its **initial character**
+    - REJECTED: first (except in `<trivia-first>`) / leftmost / initial (in
+      other senses) / earliest
 16. - sole: adjective (the sole element, its sole purpose)
     - only: adverb / adjective
     - REJECTED: final / last (as a synonym for sole)
@@ -197,7 +198,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - fence: syntactic token surrounding an expression or list element (e.g.,
       `<argument-fence>`)
     - boundary: sort tokenization term (defined in fields.md)
-    - REJECTED: delimiter / encloser / marker / signifier
+    - exponent marker: `e` or `E` in scientific notation
+    - REJECTED: delimiter / encloser / marker (except exponent marker) /
+      signifier
 36. - evaluate / evaluation / evaluated: perform the process that returns the
       value of an expression
     - evaluate against: the value a matcher or block is evaluated on
@@ -226,7 +229,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: numerical
 41. - digits: all numeric uses ("0 or 1 elements", "1st")
     - one: only as a pronoun
-    - REJECTED: zero / one (as an adjective) / two
+    - REJECTED: zero / one (as an adjective) / two / half-away-from-zero
 42. - transform
     - call: noun & verb, for transforms
     - run: noun & verb, for commands
@@ -236,7 +239,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - type: value types
     - variant: same-stem fields configs
     - form: matcher forms
-    - REJECTED: category
+    - Unicode general category: Unicode's character classification
+    - REJECTED: category (except Unicode general category)
 44. - enclosing: adjective, nearest ancestor of a kind ("enclosing matcher")
     - contain: verb, for membership, including throughout a subtree ("contains
       other expressions", "contains no token")
@@ -308,3 +312,30 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 65. - edit: a `<field-spec-edit>`
     - modify: applied to a value or config
     - REJECTED: change / alter
+66. - payload: a modifier's expression after its prefix, or an option's
+      expression between its letter & its `<sort-option-terminator>` (defined
+      in fields.md)
+    - argument: a transform call's argument
+    - REJECTED: body / argument (for modifiers & options)
+67. - titlecase: verb & adjective
+    - uppercase: verb & adjective
+    - lowercase: verb & adjective
+    - case transform: `initialTitlecase`, `lowercase`, or `uppercase`
+    - REJECTED: capitalize / title case / upper case / lower case / sentence
+      case
+68. - notation: positional or scientific
+    - normalized scientific notation: exactly 1 digit before the point, nonzero
+      unless the value is 0
+    - sign: a leading `-` or `+`
+    - halves rounded away from 0: the rounding mode of `round` & `scale`
+    - REJECTED: exponential / E notation / fixed-point notation / decimal
+      notation (for positional notation)
+69. - time zone: noun
+    - time-zone: compound adjective (`time-zone-dependent`)
+    - system time zone: the time zone of the system running mas
+    - output time zone: the time zone a chronologic value is rendered in
+    - UTC offset: defined in fields-format.md
+    - REJECTED: timezone / zone / TZ / GMT offset / local time zone
+70. - date-only: adjective
+    - datetime: noun
+    - REJECTED: date-time / date time
