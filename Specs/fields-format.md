@@ -188,16 +188,23 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 
 ###### Number Transforms
 
+A number transform retains its value's notation (positional or scientific),
+except `scale`, whose arguments define its rendering.
+
 - `absoluteValue`: removes the value's leading sign (`-` or `+`), if any,
   retaining the rest of its representation (e.g., `-1.50` becomes `1.50`, and
   `-1.5e-3` becomes `1.5e-3`).
-- `round`: the value rounded to the nearest integer, with halves rounded away
-  from 0.
-- `scale`: see [`scale`](#scale).
+- `round`: the value rounded exactly to the nearest integer, with halves rounded
+  away from 0, rendered in the value's notation:
+  - Positional: as an integer (e.g., `-2.5` becomes `-3`).
+  - Scientific: in normalized scientific notation, retaining the value's
+    exponent marker (`e` or `E`) & whether a nonnegative exponent has a `+`
+    (e.g., `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2` & `1.5e3` remains
+    `1.5e3`).
 
-`round` renders its result as an integer (i.e., without a `.`) iff its magnitude
-is less than 2^53; otherwise, it renders its result as Swift's `Double`
-description (e.g., `1e+16`).
+  A leading `+` is retained, while a leading `-` is retained iff the result is
+  nonzero (e.g., `+2.4` becomes `+2`, and `-0.4` becomes `0`).
+- `scale`: see [`scale`](#scale).
 
 ###### `group`
 

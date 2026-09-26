@@ -5,6 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+private import BigInt
 internal import Foundation
 
 // MARK: - Transforms (fields-format.md)
@@ -68,7 +69,7 @@ enum Transform: Hashable {
 		case let .group(digitGroupSeparator, digitGroupSize):
 			grouped(string, digitGroupSeparator: digitGroupSeparator, digitGroupSize: digitGroupSize)
 		case .round:
-			Double(string).map { $0.rounded() }.map { abs($0) < maxExactInteger ? .init(Int($0)) : .init($0) } ?? string
+			rounded(string) ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
 			Double(string).map { rawValue in
 				radixScaled(
@@ -163,6 +164,42 @@ private let initialTitlecaseCandidateCategorySet = Set([
 	.titlecaseLetter,
 	.uppercaseLetter,
 ])
+
+/// `string`, a finite decimal number, rounded exactly to the nearest integer
+/// (halves away from 0), in `string`'s notation: positional, or normalized
+/// scientific with `string`'s exponent marker & positive exponent sign style.
+/// A leading `+` is retained; `-` is retained iff the result is nonzero. Else
+/// `nil`.
+private func rounded(_ string: String) -> String? {
+	guard
+		Double(string)?.isFinite == true,
+		let match = string.wholeMatch(of: unsafe decimalNumberRegex),
+		let significand = BigInt(match.2 + (match.3 ?? "")),
+		let exponent = Int(match.5 ?? "0")
+	else {
+		return nil
+	}
+	let scale = exponent - (match.3?.count ?? 0) // |value| = significand × 10^scale
+	let divisor = BigInt(10).power(max(-scale, 0))
+	let (quotient, remainder) = significand.quotientAndRemainder(dividingBy: divisor)
+	let digits = (quotient * BigInt(10).power(max(scale, 0)) + (2 * remainder >= divisor ? 1 : 0)).description
+	return (match.1 == "-" && digits != "0" ? "-" : match.1 == "+" ? "+" : "")
+		+ (match.4.map { marker in
+			scientificNotation(of: digits, marker: marker, isExponentPlusSigned: match.5?.first == "+")
+		}
+			?? digits)
+}
+
+/// The nonnegative decimal integer `digits` in normalized scientific notation
+/// (e.g., `1500` as `1.5e3`), with `marker` before the exponent, which is
+/// preceded by `+` iff `isExponentPlusSigned`.
+private func scientificNotation(of digits: String, marker: Substring, isExponentPlusSigned: Bool) -> String {
+	let significandDigits = digits.prefix(1) + digits.dropFirst().reversed().drop { $0 == "0" }.reversed()
+	let fraction = significandDigits.count > 1 ? "." + significandDigits.dropFirst() : ""
+	return "\(significandDigits.prefix(1))\(fraction)\(marker)\(isExponentPlusSigned ? "+" : "")\(digits.count - 1)"
+}
+
+private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:([eE])([+-]?[0-9]+))?/
 
 /// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA Time
 /// Zone Database identifier, `TimeZone.abbreviationDictionary` key, UTC offset,
