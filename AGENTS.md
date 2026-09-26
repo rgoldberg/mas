@@ -36,6 +36,9 @@ file to reflect it.
   3. Repeatedly run `Scripts/lint` & fix all violations until no violations are
      reported (to preserve tokens & to save time, agents should run
      `Scripts/lint -A` instead)
+  4. Manually check rules that linters don't enforce: Oxford commas; `second` &
+     adjective `one` written as digits; & judgment-based rules (e.g., 1 `return`
+     per function, `if` / `switch` expressions)
 - **Commit messages:** Follow [commit message conventions](
     https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
   ), except end each subject line with a period (or with a colon iff the subject
