@@ -202,8 +202,8 @@ private func scientificNotation(of digits: String, exponentIndicator: Substring,
 private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:([eE])([+-]?[0-9]+))?/
 
 /// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA Time
-/// Zone Database identifier, `TimeZone.abbreviationDictionary` key, UTC offset,
-/// or `system`; else `nil`.
+/// Zone Database identifier, Foundation time zone abbreviation, UTC offset, or
+/// `system`; else `nil`.
 func timeZone(forCode code: String) -> TimeZone? {
 	code.caseInsensitiveCompare("system") == .orderedSame
 		? Environment.current.systemTimeZone

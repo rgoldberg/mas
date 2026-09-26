@@ -267,7 +267,7 @@ The old `localTimeZone` chronologic transform is replaced by
 `timeZone<time-zone-arguments>` (`.timeZone:Asia/Tokyo:`, `:UTC:`, `:-05\:30:`,
 `:system:`), setting the output time zone (last wins) & reporting
 `invalidTransformArguments` for an unknown code. IANA Time Zone Database
-identifiers, `TimeZone.abbreviationDictionary` keys & `system` match
+identifiers, Foundation time zone abbreviations & `system` match
 case-insensitively. `<time-zone-arguments>` requires a `<time-zone-code>`, so
 `.timeZone::` is an error.
 

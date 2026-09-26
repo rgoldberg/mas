@@ -144,7 +144,7 @@ exponent           = {non-negative integer} (* divides the field's value by `rad
 significant-digits = {positive integer}     (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {non-negative integer} (* exactly this many `radix` digits after the point; `0`: integer *)
 
-time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation `TimeZone.abbreviationDictionary` key, UTC offset, or "system"} (* default: "system" *)
+time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -252,8 +252,8 @@ affect it.
 
 <!--editorconfig-checker-disable-->
 A `<time-zone-code>` that is both [an IANA Time Zone Database
-identifier](https://www.iana.org/time-zones) & a
-[`TimeZone.abbreviationDictionary` key](
+identifier](https://www.iana.org/time-zones) & [a Foundation time zone
+abbreviation](
   https://developer.apple.com/documentation/foundation/timezone/abbreviationdictionary
 ) (e.g., `EST`) identifies the latter.
 <!--editorconfig-checker-enable-->

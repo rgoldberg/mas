@@ -334,6 +334,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - system time zone: the time zone of the system running mas
     - output time zone: the time zone a chronologic value is rendered in
     - UTC offset: defined in fields-format.md
+    - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
 70. - date-only: adjective
     - datetime: noun
