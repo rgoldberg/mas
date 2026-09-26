@@ -339,8 +339,11 @@ private func catalogAppJSONObjects(from url: URL, in region: Region) async throw
 
 private let minimumOSVersionKey = JSON.Key("minimumOsVersion")
 private nonisolated(unsafe) let artworkURLRegex = /(?:^artworkUrl|ArtworkUrl)(\d+)/
-private nonisolated(unsafe) let trackRegex =
-	/((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/ // editorconfig-checker-disable-next-line
-private nonisolated(unsafe) let manyRegex = /(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)(s?)(?=$|[\d\p{Upper}])/
+private nonisolated(unsafe) let trackRegex = /((?:^track|Track)(?:Id)?)(s?)($|[\d\p{Upper}])/
+private nonisolated(unsafe) let manyRegex = #/
+	(^appletv|Appletv|^artist|Artist|^artwork|Artwork|^genre|Genre|Id|^ipad|Ipad|Os|^releaseDate|Url|^view|View|Vpp)
+	(s?)
+	(?=$|[\d\p{Upper}])
+/#
 private nonisolated(unsafe) let minimumOSVersionRegex = /macOS\s*(?<version>\S+)/
 private let macAppsURLQueryItem = [URLQueryItem(name: "entity", value: "desktopSoftware")]
