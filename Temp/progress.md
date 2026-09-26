@@ -89,7 +89,7 @@ throughout, e.g.:
 | `<format-template>` / `<template-text>`               | `parseTemplate`, `FormatPart.text`                 | keep    |
 | `template-text = ~^{text}^~` whitespace               | not implemented                                    | change  |
 | `<named-format>` `:name`                              | `FormatReference`; no persisted formats            | keep    |
-| `<string-transform>` names                            | `Transform` (check `initialUppercase`)             | change  |
+| `<string-transform>` names                            | `Transform` (check `initialTitlecase`)             | change  |
 | `<number-transform>`, `absoluteValue`, etc.           | `Transform`                                        | keep    |
 | `group` / `scale` arguments `:…:`                     | `groupTransform`, `scaleTransform`                 | keep    |
 | `<chronologic-transform>` `dateOnly` etc.             | `DateSpec` (old draft with `,` / `_` separators)   | change  |
@@ -300,9 +300,9 @@ which was not permitted, so it is left for review.
 
 ### Transform Names
 
-`Transform.capitalize` is now `initialUppercase`, & `group`'s associated values
+`Transform.capitalize` is now `initialTitlecase`, & `group`'s associated values
 are `digitGroupSeparator` / `digitGroupSize`, matching fields-format.md's
-`<initial-uppercase>`, `<digit-group-separator>` & `<digit-group-size>`.
+`<initial-titlecase>`, `<digit-group-separator>` & `<digit-group-size>`.
 
 ### Format Rewrite
 

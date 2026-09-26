@@ -772,7 +772,7 @@ private let timeZoneName = "timeZone"
 private let valueTransformByName = [
 	"absoluteValue": Transform.absoluteValue,
 	"dateOnly": .dateOnly,
-	"initialUppercase": .initialUppercase,
+	"initialTitlecase": .initialTitlecase,
 	"lowercase": .lowercase,
 	"round": .round,
 	"trimWhitespace": .trimWhitespace,

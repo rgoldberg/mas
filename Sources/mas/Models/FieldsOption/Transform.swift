@@ -13,7 +13,7 @@ internal import Foundation
 /// pipeline is enforced at parse time, not by this type.
 enum Transform: Hashable {
 	// swiftlint:disable sorted_enum_cases
-	case initialUppercase
+	case initialTitlecase
 	case lowercase
 	case trimWhitespace
 	case uppercase
@@ -39,7 +39,7 @@ enum Transform: Hashable {
 	/// This transform's kind, per its `<value-transform>` alternative.
 	var kind: TransformKind {
 		switch self {
-		case .initialUppercase, .lowercase, .trimWhitespace, .uppercase:
+		case .initialTitlecase, .lowercase, .trimWhitespace, .uppercase:
 			.string
 		case .absoluteValue, .round, .scale: // swiftformat:disable:this sortSwitchCases
 			.number
@@ -55,8 +55,8 @@ enum Transform: Hashable {
 	/// field's parsed `Date`, not just its rendered string.
 	func applied(to string: String) -> String {
 		switch self {
-		case .initialUppercase:
-			string.uppercasingFirst
+		case .initialTitlecase:
+			initialTitlecased(string)
 		case .lowercase:
 			string.lowercased()
 		case .trimWhitespace:
@@ -124,6 +124,45 @@ private func grouped(_ string: String, digitGroupSeparator: String, digitGroupSi
 		.joined(separator: digitGroupSeparator)
 	return sign + grouped + fractionalPart
 }
+
+/// `string` with its initial character titlecased: its 1st letter (excluding
+/// uncased modifier letters), number, symbol, or private-use character, per
+/// ICU's default titlecasing index adjustment. See `<initial-titlecase>` in
+/// fields-format.md.
+private func initialTitlecased(_ string: String) -> String {
+	string.unicodeScalars.firstIndex(where: \.isInitialTitlecaseCandidate).map { index in
+		var scalars = string.unicodeScalars
+		scalars.replaceSubrange(index...index, with: scalars[index].properties.titlecaseMapping.unicodeScalars)
+		return String(scalars)
+	}
+		?? string
+}
+
+private extension Unicode.Scalar { // swiftlint:disable:this file_types_order
+	/// Whether ICU's default titlecasing index adjustment stops at this scalar.
+	var isInitialTitlecaseCandidate: Bool {
+		properties.generalCategory == .modifierLetter
+			? properties.isCased
+			: initialTitlecaseCandidateCategorySet.contains(properties.generalCategory)
+	}
+}
+
+/// The general categories, other than modifier letter, at which ICU's default
+/// titlecasing index adjustment stops: letters, numbers, symbols & private use.
+private let initialTitlecaseCandidateCategorySet = Set([
+	Unicode.GeneralCategory.currencySymbol,
+	.decimalNumber,
+	.letterNumber,
+	.lowercaseLetter,
+	.mathSymbol,
+	.modifierSymbol,
+	.otherLetter,
+	.otherNumber,
+	.otherSymbol,
+	.privateUse,
+	.titlecaseLetter,
+	.uppercaseLetter,
+])
 
 /// The time zone a `<time-zone-code>` identifies: a case-insensitive IANA Time
 /// Zone Database identifier, `TimeZone.abbreviationDictionary` key, UTC offset,
@@ -198,8 +237,8 @@ private let maxExactInteger = 9_007_199_254_740_992.0
 extension Transform: CustomStringConvertible { // swiftlint:disable:this file_types_order
 	var description: String {
 		switch self {
-		case .initialUppercase:
-			"initialUppercase"
+		case .initialTitlecase:
+			"initialTitlecase"
 		case .lowercase:
 			"lowercase"
 		case .trimWhitespace:

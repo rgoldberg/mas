@@ -165,7 +165,7 @@ private extension MASTests {
 			(".group: ,3:", .number(1234), "1 234"),
 			(".group:de_DE:", .number(1_234_567), "1.234.567"),
 			("..dateOnly", .string("2020-03-18"), "2020-03-18"),
-			(".initialUppercase", .string("abc def"), "Abc def"),
+			(".initialTitlecase", .string("abc def"), "Abc def"),
 			(".trimWhitespace", .string("  x  "), "x"),
 			(".lowercase", .string("ABC"), "abc"),
 			(".absoluteValue", .number(-5.5), "5.5"),

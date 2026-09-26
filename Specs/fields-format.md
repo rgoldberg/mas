@@ -105,12 +105,12 @@ argument-fence     = ":" (* fences a transform's argument list *)
 argument-separator = "," (* separates a transform's arguments *)
 
 value-transform            = <string-transform> | <number-transform> | <number-to-string-transform> | <chronologic-transform> (* non-structural *)
-string-transform           = <initial-uppercase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
+string-transform           = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <group> (* type: number *)
 chronologic-transform      = <date-only> | <time-zone> (* type: chronologic *)
 
-initial-uppercase = "initialUppercase"
+initial-titlecase = "initialTitlecase"
 lowercase         = "lowercase"
 trim-whitespace   = "trimWhitespace"
 uppercase         = "uppercase"
@@ -172,11 +172,19 @@ string), so an `<unconditional-transform-pipeline>`, which starts with a
 Case transforms use Unicode's full, locale-independent case mappings, which can
 modify a string's length (e.g., `ß` uppercases to `SS`).
 
-- `initialUppercase`: uppercases the string's 1st character, retaining the rest.
+<!--editorconfig-checker-disable-->
+- `initialTitlecase`: titlecases the string's **initial character**, retaining
+  the rest. The initial character is the 1st letter (excluding uncased modifier
+  letters), number, symbol (Unicode general category `S`), or private-use
+  character, per [ICU's default titlecasing index adjustment](
+    https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/stringoptions_8h.html#a4975f537b9960f0330b233061ef0608d
+  ). Titlecasing leaves a number, symbol, or private-use character unchanged
+  (e.g., `"hello"` becomes `"Hello"`, but `1st` & `$abc` are unaffected).
 - `lowercase`: lowercases every character.
 - `trimWhitespace`: removes leading & trailing whitespace (Unicode general
   category `Z` characters, `U+0009` to `U+000D` & `U+0085`).
 - `uppercase`: uppercases every character.
+<!--editorconfig-checker-enable-->
 
 ###### Number Transforms
 
