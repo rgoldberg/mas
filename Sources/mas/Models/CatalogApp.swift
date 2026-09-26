@@ -77,7 +77,8 @@ extension CatalogApp: JSONDecodable {
 							.data()
 							.query(
 								string: """
-									$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')].items[?(@.heading == 'Mac')].text
+									$.data[0].data.shelfMapping.information.items[?(@.title == 'Compatibility')]\
+									.items[?(@.heading == 'Mac')].text
 									""",
 							)?
 							.firstMatch(of: unsafe minimumOSVersionRegex)
