@@ -56,8 +56,8 @@ this file to reflect it.
 
 Give each file the longest standard extension for its file type that works for
 its purpose (e.g., `.swiftlint.yml` works but `.swiftlint.yaml` does not, so the
-former is chosen, while `build-test.yaml` & `build-test.yml` both work, so the
-former is chosen), except always use `.md` for Markdown.
+former is chosen, while `ci.yaml` & `ci.yml` both work, so the former is
+chosen), except always use `.md` for Markdown.
 
 ## Content Formatting
 
