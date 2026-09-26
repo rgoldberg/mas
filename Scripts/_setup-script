@@ -52,8 +52,7 @@ ensure_command_available() {
 	return "${return_status}"
 }
 
-# Removes SwiftFormat's progress & summary lines from stdin, plus each line fully
-# matching an extended regex in ${@}
+# Removes SwiftFormat's progress & summary lines from stdin, plus each line fully matching an extended regex in ${@}
 filter_swiftformat_output() {
 	# shellcheck disable=SC2034
 	local -ar patterns=(

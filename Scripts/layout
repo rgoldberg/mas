@@ -5,9 +5,9 @@
 #
 # Copyright © 2026 mas-cli. All rights reserved.
 #
-# Reports lines wider than their .editorconfig max_line_length (counting each tab
-# as 2 characters), & prose paragraphs in Markdown files & Swift comments whose
-# lines aren't filled up to the 80-character limit before wrapping.
+# Reports lines wider than their .editorconfig max_line_length (counting each tab as 2 characters), & prose paragraphs
+# in Markdown files & in comments whose lines aren't filled up to their limit before wrapping (80 characters for
+# Markdown & Swift comments; the file's max_line_length for `#` comments).
 #
 # Usage: layout [-f]
 #
@@ -22,15 +22,18 @@ readonly -A received_flag
 
 export LC_CTYPE=en_US.UTF-8
 
-readonly -i limit=80
 readonly separator=$'\x1f'
 readonly start_danger_regex='^([-*+]|#{1,6}|=+|[0-9]+[.)])$|^>'
 readonly markdown_list_regex='^( *)([-*+]|[0-9]+\.)( +)'
 readonly markdown_special_regex='^(```|[|#<>]|http|\[[^]]+\]:)'
 readonly link_url_start_regex='\]\( *$'
 readonly swift_comment_regex=$'^(\t*)(///?) (.*)$'
-readonly swift_list_regex='^([-*+]|[0-9]+\.) '
 readonly swift_marker_regex='^(swiftlint|swiftformat|periphery|MARK|TODO|FIXME|sourcery|```)'
+readonly hash_comment_regex=$'^([ \t]*)(#) (.*)$'
+readonly hash_marker_regex='^(shellcheck|yamllint|editorconfig-checker|yaml-language-server|TODO|FIXME)'
+readonly hash_comment_file_regex='^(.*\.(bash|fish|ini|yaml|yml|zsh)|\.editorconfig|\.gitattributes|\.gitignore|Brewfile|CODEOWNERS)$'
+readonly comment_list_regex='^([-*+]|[0-9]+\.) '
+readonly header_end_regex='^(//|#) mas$'
 readonly editorconfig_section_regex='^\[(.*)\]$'
 readonly editorconfig_max_line_length_regex='^max_line_length *= *([^ ]+)'
 readonly integer_regex='^[0-9]+$'
@@ -39,10 +42,11 @@ readonly integer_regex='^[0-9]+$'
 typeset -a tokens filled source_lines result_lines match mbegin mend
 # shellcheck disable=SC2034
 typeset MATCH MBEGIN MEND
-integer exit_status=0
+integer exit_status=0 limit
+max_line_length=''
 
-# Each .editorconfig section's max_line_length, keyed by the section's glob
-# converted to a zsh pattern (the last matching section wins)
+# Each .editorconfig section's max_line_length, keyed by the section's glob converted to a zsh pattern (the last
+# matching section wins)
 typeset -a max_line_length_patterns=() max_line_lengths=()
 section=''
 # shellcheck disable=SC2066
@@ -116,8 +120,7 @@ fill() {
 	done
 }
 
-# Replaces source lines ${2}–${3} of file ${1} with the filled lines iff they
-# differ & fit within the limit
+# Replaces source lines ${2}–${3} of file ${1} with the filled lines iff they differ & fit within the limit
 apply_filled() {
 	local -a old_lines=("${(@)source_lines[${2},${3}]}")
 	local filled_line
@@ -194,13 +197,22 @@ layout_markdown() {
 	done
 }
 
-layout_swift() {
+# Fills the comment paragraphs of file ${1}, whose comment lines match regex ${2} & whose linter / formatter markers
+# match regex ${3}
+layout_comments() {
 	local line indentation slashes body hang first
 	local -a bodies
-	local -i index=1 end is_list
+	local -i index end is_list header_end=0
+	for ((index = 1; index <= ${#source_lines} && index <= 10; ++index)); do
+		if [[ "${source_lines[index]}" =~ ${header_end_regex} ]]; then
+			header_end="${index}"
+			break
+		fi
+	done
+	index=1
 	while ((index <= ${#source_lines})); do
 		line="${source_lines[index]}"
-		if ((index <= 7)) || ! [[ "${line}" =~ ${swift_comment_regex} ]]; then
+		if ((index <= header_end)) || ! [[ "${line}" =~ ${2} ]]; then
 			result_lines+=("${line}")
 			index+=1
 			continue
@@ -208,13 +220,13 @@ layout_swift() {
 		indentation="${match[1]}"
 		slashes="${match[2]}"
 		body="${match[3]}"
-		if [[ -z "${body// }" || "${body}" =~ ${swift_marker_regex} ]]\
-		|| { [[ "${body}" == ' '* ]] && ! [[ "${body}" =~ ${swift_list_regex} ]]; }; then
+		if [[ -z "${body// }" || "${body}" =~ ${3} ]]\
+		|| { [[ "${body}" == ' '* ]] && ! [[ "${body}" =~ ${comment_list_regex} ]]; }; then
 			result_lines+=("${line}")
 			index+=1
 			continue
 		fi
-		if [[ "${body}" =~ ${swift_list_regex} ]]; then
+		if [[ "${body}" =~ ${comment_list_regex} ]]; then
 			is_list=1
 			hang="${MATCH//?/ }"
 		else
@@ -224,12 +236,12 @@ layout_swift() {
 		bodies=("${body}")
 		end=$((index + 1))
 		while ((end <= ${#source_lines})); do
-			if ! [[ "${source_lines[end]}" =~ ${swift_comment_regex} ]]\
+			if ! [[ "${source_lines[end]}" =~ ${2} ]]\
 			|| [[ "${match[1]}" != "${indentation}" || "${match[2]}" != "${slashes}" ]]; then
 				break
 			fi
 			body="${match[3]}"
-			if [[ -z "${body// }" || "${body}" =~ ${swift_marker_regex} ]]; then
+			if [[ -z "${body// }" || "${body}" =~ ${3} ]]; then
 				break
 			fi
 			if ((is_list)); then
@@ -238,7 +250,7 @@ layout_swift() {
 				fi
 				bodies+=("${body#"${hang}"}")
 			else
-				if [[ "${body}" == ' '* || "${body}" =~ ${swift_list_regex} ]]; then
+				if [[ "${body}" == ' '* || "${body}" =~ ${comment_list_regex} ]]; then
 					break
 				fi
 				bodies+=("${body}")
@@ -257,17 +269,22 @@ layout_swift() {
 	done
 }
 
-# Reports each line of file ${1} wider than its max_line_length, except lines
-# disabled via editorconfig-checker comments
-check_line_lengths() {
-	local max_line_length='' line
-	local -i index is_disabled=0 is_next_disabled=0
+# Sets max_line_length to that of file ${1}
+set_max_line_length() {
+	local -i index
+	max_line_length=''
 	for ((index = 1; index <= ${#max_line_length_patterns}; ++index)); do
 		# shellcheck disable=SC2053
 		if [[ "${1:t}" == ${~max_line_length_patterns[index]} ]]; then
 			max_line_length="${max_line_lengths[index]}"
 		fi
 	done
+}
+
+# Reports each line of file ${1} wider than its max_line_length, except lines disabled via editorconfig-checker comments
+check_line_lengths() {
+	local line
+	local -i index is_disabled=0 is_next_disabled=0
 	if ! [[ "${max_line_length}" =~ ${integer_regex} ]] || [[ "${(pj:\n:)source_lines}" == *editorconfig-checker-disable-file* ]]; then
 		return
 	fi
@@ -294,13 +311,19 @@ for file in ${(0)"$(git grep -Ilz '')"}; do
 	[[ -L "${file}" ]] && continue
 	source_lines=("${(@f)"$(<"${file}")"}")
 	result_lines=()
+	set_max_line_length "${file}"
 	if ! [[ -v 'received_flag[-f]' ]]; then
 		check_line_lengths "${file}"
 	fi
+	limit=80
 	if [[ "${file}" == *.md ]]; then
 		layout_markdown "${file}"
 	elif [[ "${file}" == *.swift ]]; then
-		layout_swift "${file}"
+		layout_comments "${file}" "${swift_comment_regex}" "${swift_marker_regex}"
+	elif [[ "${file:t}" =~ ${hash_comment_file_regex} || "${source_lines[1]}" == '#!'* ]]\
+	&& [[ "${max_line_length}" =~ ${integer_regex} ]]; then
+		limit="${max_line_length}"
+		layout_comments "${file}" "${hash_comment_regex}" "${hash_marker_regex}"
 	else
 		continue
 	fi
