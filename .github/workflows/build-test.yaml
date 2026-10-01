@@ -17,12 +17,7 @@ jobs:
     name: Build, Test, and Lint
     strategy:
       matrix:
-        include:
-        - runner: macos-14
-        - runner: macos-15
-        - runner: macos-15-intel
-        - runner: macos-26
-        - runner: macos-26-intel
+        runner: [macos-14, macos-15, macos-15-intel, macos-26, macos-26-intel, xcode-27]
     runs-on: ${{matrix.runner}}
     defaults:
       run:
@@ -55,7 +50,7 @@ jobs:
         Scripts/bootstrap
 
     - name: 🕊 Use Swiftly Swift
-      if: ${{!startsWith(matrix.runner, 'macos-26')}}
+      if: ${{matrix.runner != 'xcode-27'}}
       run: |
         swiftly init -ny
         git reset --hard HEAD

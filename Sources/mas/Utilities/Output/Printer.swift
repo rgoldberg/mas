@@ -2,7 +2,7 @@
 // Printer.swift
 // mas
 //
-// Copyright © 2016 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import ArgumentParser
@@ -18,8 +18,8 @@ struct Printer {
 		errorCounter.load(ordering: .acquiring)
 	}
 
-	func resetErrorCount() { // periphery:ignore
-		errorCounter.store(0, ordering: .releasing) // swiftlint:disable:previous unused_declaration
+	func resetErrorCount() { // swiftlint:disable:this unused_declaration
+		errorCounter.store(0, ordering: .releasing)
 	}
 
 	/// Prints to `fileHandle`.

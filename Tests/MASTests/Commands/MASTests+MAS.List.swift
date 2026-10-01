@@ -2,7 +2,7 @@
 // MASTests+MAS.List.swift
 // mas
 //
-// Copyright © 2018 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import ArgumentParser
@@ -12,7 +12,8 @@ internal import Testing
 private extension MASTests {
 	@Test
 	func `lists apps`() async throws {
-		let actual = try await consequencesOf(try MAS.main(try MAS.List.parse(.init())) { $0.run(installedApps: .init()) })
+		let actual =
+			try await consequencesOf(try await MAS.main(try MAS.List.parse(.init())) { $0.run(installedApps: .init()) })
 		let expected = Consequences(
 			nil,
 			"", // editorconfig-checker-disable

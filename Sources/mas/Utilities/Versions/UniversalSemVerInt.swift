@@ -23,12 +23,8 @@ struct UniversalSemVerInt: SemVerSyntaxInteger {
 		coreIntegers[2]
 	}
 
-	init(
-		coreIntegers: [Int],
-		prereleaseElements: [String] = .init(),
-		buildElements: [String] = .init(),
-	) { // periphery:ignore
-		self.init(
+	init(coreIntegers: [Int], prereleaseElements: [String] = .init(), buildElements: [String] = .init()) {
+		self.init( // swiftlint:disable:previous unused_declaration
 			coreIntegers: coreIntegers,
 			prereleaseElements: prereleaseElements,
 			buildElements: buildElements,

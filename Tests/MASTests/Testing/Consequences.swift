@@ -106,7 +106,7 @@ private struct StreamRedirector { // swiftlint:disable:this one_declaration_per_
 }
 
 func consequencesOf(encoding: String.Encoding = .utf8, _ body: @autoclosure () async throws -> Void)
-async throws -> Consequences<Void> { // swiftformat:disable:this indent
+async throws -> Consequences<Void> {
 	let capture = StandardStreamCapture(encoding: encoding)
 	do {
 		try await body()
@@ -117,7 +117,7 @@ async throws -> Consequences<Void> { // swiftformat:disable:this indent
 }
 
 func consequencesOf<Value>(encoding: String.Encoding = .utf8, _ body: @autoclosure () async throws -> Value?)
-async throws -> Consequences<Value> { // swiftformat:disable:this indent
+async throws -> Consequences<Value> {
 	let capture = StandardStreamCapture(encoding: encoding)
 	let value: Value?
 	do {
