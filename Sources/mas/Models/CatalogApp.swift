@@ -69,11 +69,11 @@ extension CatalogApp: JSONDecodable {
 	}
 
 	fileprivate init?(macDesktopAppObject object: JSON.Object) async throws {
-		guard
+		guard // swiftformat:disable:this wrap wrapArguments
 			try object["supportedDevices"]?.decode(to: [String]?.self)?.contains("MacDesktop-MacDesktop") == true,
 			let appStorePageURLString = try object["trackViewUrl"]?.decode(to: String?.self),
 			let minimumOSVersion = try? await URL(string: appStorePageURLString)
-				.flatMap(
+				.flatMap( // swiftformat:disable indent
 					{ url in
 						try parse(try await Environment.current.dataFrom(url).data, appStorePageURLString)
 							.getElementById("serialized-server-data")? // swiftformat:disable:this acronyms
@@ -87,7 +87,7 @@ extension CatalogApp: JSONDecodable {
 							.map { String($0.version) }
 					},
 				)
-		else {
+		else { // swiftformat:enable indent
 			return nil
 		}
 

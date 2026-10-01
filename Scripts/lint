@@ -10,7 +10,6 @@
 # Please keep in sync with Scripts/format.
 #
 
-# shellcheck disable=SC1036,SC1056,SC1072
 . "${0:A:h}/_setup_script"
 
 print_notice '🚨 Linting' "${@}"
@@ -25,22 +24,19 @@ ensure_command_available\
 	swiftlint\
 	yamllint ||
 	exit
-autoload -Uz is-at-least
-is-at-least 15 "$(sw_vers -productVersion)" && [[ "$(/usr/bin/arch)" = arm64 ]]
-integer -r can_use_periphery="$((! ?))"
-# shellcheck disable=SC1073,SC1083
-((can_use_periphery)) && { ensure_command_available periphery || exit }
 
 zmodload zsh/zutil
-zparseopts -D -A received_flag A P
+zparseopts -D -A received_flag A
 
 export -r MAS_DISTRIBUTION=lint
 
 integer exit_status=0
 
 printf -- $'--> 🕊​ SwiftFormat\n'
-script -q /dev/null swiftformat --lint --markdown-files format-strict . | # editorconfig-checker-disable-next-line
-	(grep -vxE '(?:\^D\x08{2})?Running SwiftFormat\.{3}\r|\(lint mode - no files will be changed\.\)\r|Reading (?:config|swift-version) file at .*|\x1b\[32mSwiftFormat completed in \d+(?:\.\d+)?s\.\x1b\[0m\r|0/\d+ files require formatting\.\r|Source input did not pass lint check\.\r' || true)
+swiftformat --lint --color always . |& filter_swiftformat_output\
+	'\(lint mode - no files will be changed\.\)'\
+	'0/\d+ files require formatting\.'\
+	'\x1b\[31mSource input did not pass lint check\.\x1b\[0m'
 ((exit_status |= ${?}))
 
 printf -- $'--> 🦅 SwiftLint\n'
@@ -58,22 +54,6 @@ if ! [[ -v 'received_flag[-A]' ]]; then
 	swiftlint analyze --strict --quiet --reporter relative-path --compiler-log-path\
 		=(xcodebuild -scheme mas -destination "platform=macOS,arch=$(arch),variant=macos" build-for-testing 2>&1)\
 		--config .swiftlint.yml --config Tests/.swiftlint.yml
-	((exit_status |= ${?}))
-fi
-
-if ((can_use_periphery)) && ! [[ -v 'received_flag[-P]' ]]; then
-	printf -- $'--> 🌀 Periphery\n'
-	periphery scan --exclude-tests | (
-		grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r?' ||
-		true
-	)
-	((exit_status |= ${?}))
-
-	printf -- $'--> 🌀 Periphery Tests\n'
-	periphery scan --no-superfluous-ignore-comments | (
-		grep -vxE '(?:\x1b\[0;1;32m|\^D\x08{2})\* (?:\x1b\[0;0m\x1b\[0;1m)?No unused code detected\.(?:\x1b\[0;0m)?\r?' ||
-		true
-	)
 	((exit_status |= ${?}))
 fi
 

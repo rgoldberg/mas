@@ -15,7 +15,7 @@ Read it before making repository changes.
 
 - `Scripts/bootstrap`
 - `Scripts/format`
-- `Scripts/lint -AP` (quick) / `Scripts/lint` (includes unused code checks)
+- `Scripts/lint -A` (quick) / `Scripts/lint` (includes unused code checks)
 - `Scripts/build` (debug) / `Scripts/build '' -c release` (release)
 - `Scripts/test`
 - `Scripts/package`

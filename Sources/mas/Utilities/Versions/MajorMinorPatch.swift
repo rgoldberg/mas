@@ -6,7 +6,7 @@
 //
 
 protocol MajorMinorPatch { // swiftlint:disable unused_declaration
-	var major: String { get } // periphery:ignore
-	var minor: String { get } // periphery:ignore
-	var patch: String { get } // periphery:ignore
-} // swiftlint:enable unused_declaration
+	var major: String { get }
+	var minor: String { get }
+	var patch: String { get } // swiftlint:enable unused_declaration
+}
