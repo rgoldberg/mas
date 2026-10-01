@@ -13,9 +13,9 @@ extension JSON.Object {
 		fields.first { $0.key == key }?.value
 	}
 
-	subscript(key: JSON.Key) -> JSON.OptionalDecoder<JSON.Key> {
+	subscript(key: JSON.Key) -> JSON.OptionalDecoder<JSON.Key> { // swiftlint:disable:this unused_declaration
 		.init(key: key, value: self[nodeKey: key])
-	} // periphery:ignore
+	}
 
 	subscript(key: JSON.Key) -> JSON.FieldDecoder<JSON.Key>? {
 		self[nodeKey: key].map { .init(key: key, value: $0) }

@@ -2,7 +2,7 @@
 // MASTests+MAS.Seller.swift
 // mas
 //
-// Copyright © 2019 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import ArgumentParser

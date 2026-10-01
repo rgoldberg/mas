@@ -5,7 +5,7 @@
 // Copyright © 2020 mas-cli. All rights reserved.
 //
 
-private import Foundation // swiftlint:disable:this unused_import
+private import Foundation
 @testable private import mas
 private import ObjectiveC
 internal import Testing

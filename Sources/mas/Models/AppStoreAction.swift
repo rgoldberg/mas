@@ -2,7 +2,7 @@
 // AppStoreAction.swift
 // mas
 //
-// Copyright © 2015 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import CommerceKit
@@ -13,7 +13,7 @@ private import ObjectiveC
 private import OrderedCollections
 private import StoreFoundation
 private import Subprocess
-private import System // swiftlint:disable:this unused_import
+private import System
 
 enum AppStoreAction: String {
 	case get

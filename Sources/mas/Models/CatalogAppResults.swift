@@ -9,13 +9,13 @@ internal import JSONAST
 private import JSONDecoding
 
 struct CatalogAppResults: JSONDecodable {
-	let resultCount: Int // periphery:ignore
+	let resultCount: Int // swiftlint:disable:this unused_declaration
 	let resultObjects: [JSON.Object]
 
 	private let lazyResults: Lazy<Result<[CatalogApp], any Error>>
 
-	var results: [CatalogApp] { // periphery:ignore
-		get throws { // swiftlint:disable:previous unused_declaration
+	var results: [CatalogApp] { // swiftlint:disable:this unused_declaration
+		get throws {
 			try lazyResults.value.get()
 		}
 	}
