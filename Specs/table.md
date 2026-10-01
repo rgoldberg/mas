@@ -13,7 +13,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 ```ebnf
 table-option = "--table" [ &<table-config> ]
 
-table-config  = [ <table-setting>+ ] (* last wins; default: "" *)
+table-config  = <table-setting>+ (* last wins *)
 table-setting =
   <header-setting>
   | <header-styling-setting>

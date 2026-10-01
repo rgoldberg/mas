@@ -106,7 +106,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
   - Otherwise: the field's value.
 
 An **argument** is an element of an argument list: a transform's, a [number
-coercion's](#coercion), or [`G`'s](fields.md#sort-numbers-in-strings).
+coercion's](#coercion), [`N`'s](fields.md#sort-number-segments), or
+[`C`'s](fields.md#sort-chronologic-segments).
 
 An argument ignores its outer bare whitespace, which must be escaped to be
 consumed (e.g., `.numberFormat:,\ ,3:` separates digit groups with a space).
@@ -114,9 +115,6 @@ consumed (e.g., `.numberFormat:,\ ,3:` separates digit groups with a space).
 An argument that is empty after ignoring its outer bare whitespace is absent,
 which is an error iff the argument is required (e.g., `.scale:,6,,0:` is an
 error, but `.scale:10,6, ,0:` omits `<significant-digits>`).
-
-An argument list may omit its trailing `<argument-separator>`s whose succeeding
-arguments are all absent (e.g., `.numberFormat:de:` is `.numberFormat:de,,,,:`).
 
 ###### Value Coercion
 
@@ -222,10 +220,10 @@ nonzero (e.g., `+2.4` becomes `+2`, and `-0.4` becomes `0`).
 ```ebnf
 number-format-arguments =
   [ <locale-identifier> ]
-  <argument-separator> [ <digit-group-separator> ]
-  <argument-separator> [ <digit-group-size> ]
-  <argument-separator> [ <secondary-digit-group-size> ]
-  <argument-separator> [ <decimal-separator> ]
+  <argument-separator>? [ <digit-group-separator> ]
+  <argument-separator>? [ <digit-group-size> ]
+  <argument-separator>? [ <secondary-digit-group-size> ]
+  <argument-separator>? [ <decimal-separator> ]
 
 digit-group-separator      = {text}                 (* default: {base conventions' digit group separator} *)
 digit-group-size           = {non-negative integer} (* default: {base conventions' digit group size} *)
@@ -234,6 +232,10 @@ decimal-separator          = {text}                 (* default: {base convention
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+The **number format arguments** are those of `<number-format-arguments>`, which
+[number coercion's](#coercion) & [`N`'s](fields.md#sort-number-segments)
+argument lists start with.
 
 `numberFormat` inserts `<digit-group-separator>` between the **digit groups** of
 the field's integer part, counting from its least significant digit: the least
@@ -252,17 +254,18 @@ If `<digit-group-separator>` equals `<decimal-separator>`, an error is reported.
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.
 
-The **base conventions** are those of the locale that
-[`<locale-identifier>`](fields.md#sort-localization) identifies, or, if
-`<locale-identifier>` is absent (even if other `<number-format-arguments>` are
+The **base conventions** are those that
+[`<locale-identifier>`](fields.md#sort-locale) identifies, or, if
+`<locale-identifier>` is absent (even if other number format arguments are
 present):
 
 - For `numberFormat`: the system locale's, because rendered output is for
   people.
-- For a [number coercion](#coercion): the
-  [canonical](fields.md#sort-localization) conventions, because parsed input is
-  data, which, like sorting's default `<canonical>`, must not depend on the
-  system.
+- For a [number coercion](#coercion): the [canonical](fields.md#sort-locale)
+  conventions, because parsed input is data, which, like sorting's default
+  canonical conventions, must not depend on the system.
+- For [`<grouped-numeric>`](fields.md#sort-number-segments): those that
+  `<locale>`'s `<locale-identifier>` identifies.
 
 ###### `scale`
 
@@ -329,14 +332,22 @@ Absent `timeZone`, the output time zone is the system time zone.
 A date-only value's date is independent of time zones, so `timeZone` does not
 affect it.
 
+A time-only value is rendered in the output time zone as if on the last
+`timeZone`'s `<reference-date>`, because a time zone's UTC offset can vary by
+date (e.g., for daylight saving time), or, absent `timeZone`, on the current
+date in the system time zone. Only a UTC offset is a fixed UTC offset: a
+Foundation time zone abbreviation identifies a time zone that can vary (e.g.,
+`EST` identifies `America/New_York`).
+
 ###### `timeZone`
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-fence>
+time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
 time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system"} (* default: "system" *)
+reference-date = {text: ISO-8601 extended-format date} (* default: {current date in the system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -620,15 +631,15 @@ non-nullary-scalar-conditional-predicate = <non-nullary-standard-predicate> | <n
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | <coercible-modifiers> <nullary-coercible-standard-predicate>
-non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | <coercible-modifiers> <non-nullary-coercible-standard-predicate>
+nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | [ <coercible-modifiers> ] <nullary-coercible-standard-predicate>
+non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | [ <coercible-modifiers> ] <non-nullary-coercible-standard-predicate>
 
 non-nullary-standard-success =
   <non-nullary-string> -[ <string-block> ]
-  | <coercible-modifiers> <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
+  | [ <coercible-modifiers> ] <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
   | <non-nullary-blank-predicate> -[ <any-block> ]
 
-coercible-modifiers = [ <coercion> ]
+coercible-modifiers = <coercion>
 
 nullary-standard-predicate     = <nullary-incoercible-standard-predicate> | <nullary-coercible-standard-predicate>
 non-nullary-standard-predicate = <non-nullary-incoercible-standard-predicate> | <non-nullary-coercible-standard-predicate>
@@ -662,11 +673,11 @@ non-nullary-string     = "S" (* is string;                                      
 ###### Number Formatting
 
 ```ebnf
-nullary-number-matcher     = <number-modifiers> <nullary-number>
-non-nullary-number-matcher = <number-modifiers> <non-nullary-number>
+nullary-number-matcher     = [ <number-modifiers> ] <nullary-number>
+non-nullary-number-matcher = [ <number-modifiers> ] <non-nullary-number>
 non-nullary-number-success = <non-nullary-number-matcher> -[ <number-block> ]
 
-number-modifiers = [ <number-coercion> ]
+number-modifiers = <number-coercion>
 
 nullary-number     = "n" (* is number; type: number; value: {field value} *)
 non-nullary-number = "N" (* is number; type: number; value: {field value} *)
@@ -690,13 +701,13 @@ non-negative integer optionally followed by non-`.` characters.
 <!--markdownlint-disable line-length-->
 ```ebnf
 coercion        = "."!
-number-coercion = <coercion> [ <number-coercion-arguments> ] (* default locale-identifier: {canonical conventions} *)
+number-coercion = <coercion> [ <number-coercion-arguments> ] (* default locale-identifier: "canonical" *)
 
 number-coercion-arguments =
   <argument-fence>
   <number-format-arguments>
-  <argument-separator> [ <trivia-prefix-regex> ]
-  <argument-separator> [ <trivia-suffix-regex> ]
+  <argument-separator>? [ <trivia-prefix-regex> ]
+  <argument-separator>? [ <trivia-suffix-regex> ]
   <argument-fence>
 
 trivia-prefix-regex = {text: Swift Regex} (* default: "" *)
@@ -713,7 +724,7 @@ as the matcher's type, instead of requiring the input's type to match (e.g.,
 A boolean coercion parses only `true` & `false`, verbatim.
 
 A number coercion parses a number's separators & digit group sizes per its
-`<number-format-arguments>`, with defaults from the [base
+number format arguments, with defaults from the [base
 conventions](#numberformat) (e.g., `%.:de:n` matches `"1.234,56"`, coercing it
 to `1234.56`). A digit group separator is accepted only between digit groups of
 the given sizes; a `<digit-group-size>` of `0` accepts groups of any size. A
@@ -747,24 +758,6 @@ Because `\` escapes the next character in every text token, a regex's own `\` is
 written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and a regex's
 `,` & `:` must be escaped.
 
-###### Types
-
-A field's **type** is that of its **type determinant**: the 1st matcher or
-transform of the most specific type in its `<format-block>` (including every
-branch). A predicate's or transform's type is given by its `type:` comment part,
-except that a coerced `<string-transform>` is "any". In descending specificity:
-
-- Chronologic
-- Version
-- Number
-- Boolean
-- String
-- Any (which is also the type of a `<format-block>` with no type determinant)
-
-A value [**conforms**](fields.md#sort-nonconforming-values) to a type iff the
-type's predicate, with the type determinant's coercion, matches it; all values
-conform to "any".
-
 ###### Chronologic Formatting
 
 <!--editorconfig-checker-disable-->
@@ -779,15 +772,32 @@ non-nullary-chronologic = "C" (* is chronologic; type: chronologic; value: {ISO 
 <!--editorconfig-checker-enable-->
 
 Input is always auto-detected, trying, in order: ISO-8601 datetime, ISO-8601
-date-only, then a Unix epoch (seconds) numeric timestamp; this does not depend
-on field name, label, output format, or any other context.
+date-only, ISO-8601 time-only, then a Unix epoch (seconds) numeric timestamp;
+this does not depend on field name, label, output format, or any other context.
+
+An ISO-8601:
+
+- Date-only is an extended-format date (e.g., `2020-03-18`).
+- Time-only is an extended-format complete time (e.g., `17:39:23`), with
+  optional fractional seconds (after `.` or `,`) & an optional UTC offset (`Z`,
+  `±hh`, `±hhmm`, or `±hh:mm`).
+- Datetime is a date-only, `T`, then a time-only (e.g., `2020-03-18T17:39:23Z`).
+
+Each of their fields must be in range.
+
+A datetime or time-only without a UTC offset is in the system time zone.
+
+A time-only value has no date, so it fails a chronologic predicate (`c` or `C`)
+whose block applies `dateOnly` to it (e.g., `%C.dateOnly+-+` outputs `-` for
+`17:39:23`); elsewhere, it does not conform to `dateOnly`'s input type, so
+[value coercion](#value-coercion) applies.
 
 A Unix epoch timestamp is chronologic iff it is at least `-9223372036854775.808`
 & less than `9223372036854775.808` (i.e., its whole milliseconds, rounded down,
 fit in a signed 64-bit integer).
 
-A datetime's fractional seconds are truncated to 3 digits, which are omitted iff
-all are `0` (e.g., `2020-03-18T17:39:23.1234Z` renders as
+A datetime's or time-only's fractional seconds are truncated to 3 digits, which
+are omitted iff all are `0` (e.g., `2020-03-18T17:39:23.1234Z` renders as
 `2020-03-18T17:39:23.123Z`, but `2020-03-18T17:39:23.0004Z` renders as
 `2020-03-18T17:39:23Z`).
 

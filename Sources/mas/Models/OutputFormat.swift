@@ -5,10 +5,16 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import ArgumentParser
+enum OutputFormat: Equatable {
+	case json(JSONConfig)
+	case keyValue(KeyValueConfig)
+	case table(TableConfig)
 
-enum OutputFormat: EnumerableFlag {
-	case json
-	case keyValue
-	case table
+	var isJSON: Bool {
+		if case .json = self {
+			true
+		} else {
+			false
+		}
+	}
 }

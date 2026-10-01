@@ -63,8 +63,8 @@ possible occurrences, determined from the grammar instead of the input:
 - Inherent scalar, repetition, or tuple: that multiplicity.
 - [Nonterminal reference](#nonterminal-references): its definition's static
   multiplicity.
-- [Grouping](#groupings) or [optional](#optionals): its child's static
-  multiplicity.
+- [Grouping](#groupings), [optional](#optionals), or
+  [trailing-omissible](#trailing-omissibles): its child's static multiplicity.
 - [Sequence](#sequences) with exactly 1 variable child: that child's static
   multiplicity.
 - [Choice](#choices): its alternatives' static multiplicity, if they all share
@@ -456,6 +456,26 @@ that contains no token is directly absent iff the optional's parent is present.
 
 An expression is **absent** if it is either directly or transitively absent.
 
+### Trailing-Omissibles
+
+```ebnf
+EXPRESSION?
+```
+
+Content-dependent multiplicity.
+
+An expression's **trailing run** is the longest run of adjacent expressions
+containing it that are each an optional or a trailing-omissible, treating each
+nonterminal reference whose definition is a sequence as that sequence's children
+written in place.
+
+A trailing-omissible consumes `EXPRESSION`, but may instead consume nothing &
+still match iff no expression after it in its trailing run consumes a token
+(e.g., `[ "a" ] ","? [ "b" ] ","? [ "c" ]` matches `a,b`, `a,b,`, `,,c` & `a`,
+but neither `ac` nor `a,c`).
+
+A trailing-omissible is otherwise an optional.
+
 ### Repetitions (1 or More)
 
 ```ebnf
@@ -500,7 +520,7 @@ Neither `ELEMENT` nor `SEPARATOR` may match empty text.
 
 From highest to lowest precedence within a grouping:
 
-- Repetition (`+`)
+- Repetition (`+`) & trailing-omissible (`?`)
 - Repetition with separator (`…`)
 - Sequence (juxtaposition)
 - Choice (`|`)
@@ -662,8 +682,9 @@ the choice's alternatives.
   - For a constant expression: its constant value.
   - For a nonterminal reference: its definition's value evaluated in the
     reference's presence state.
-  - For a grouping, optional, or sequence with exactly 1 variable child: its
-    variable child's value evaluated in the expression's presence state.
+  - For a grouping, optional, trailing-omissible, or sequence with exactly 1
+    variable child: its variable child's value evaluated in the expression's
+    presence state.
   - For any other variable expression whose [static multiplicity](#multiplicity)
     is repetition:
     - If transitively absent: `null`.

@@ -37,7 +37,7 @@ extension MAS {
 		}
 
 		func run() async throws {
-			let installedApps = await installedAppsOptionGroup.installedApps(withFullJSON: false)
+			let installedApps = await installedAppsOptionGroup.installedApps(fields: ["adamID", "bundleID", "path"])
 			let appPathOrderedSet =
 				(isUninstallingAll ? installedApps.map { .bundleID($0.bundleID) } : installedAppsOptionGroup.appIDs)
 				.reduce(into: OrderedSet<String>()) { appPathOrderedSet, appID in

@@ -36,12 +36,6 @@ extension Version {
 	}
 }
 
-private extension Character {
-	var isASCIIDigit: Bool {
-		isASCII && isWholeNumber
-	}
-}
-
 private extension String {
 	/// This element's integer value iff it is all digits (`BigUInt(_:)` also
 	/// accepts a sign, but SemVer deems, e.g., `-0` alphanumeric).
