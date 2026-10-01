@@ -19,7 +19,7 @@ ensure_command_available markdownlint-cli2 swiftformat swiftlint
 export -r MAS_DISTRIBUTION=format
 
 printf -- $'--> 🕊​ SwiftFormat\n'
-swiftformat --strict --color always . |& filter_swiftformat_output '0/\d+ files formatted\.'
+swiftformat --strict --color always --symlinks follow . |& filter_swiftformat_output '0/\d+ files formatted\.'
 
 printf -- $'--> 🦅 SwiftLint\n'
 swiftlint --fix --quiet --reporter relative-path

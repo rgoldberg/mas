@@ -33,7 +33,7 @@ export -r MAS_DISTRIBUTION=lint
 integer exit_status=0
 
 printf -- $'--> 🕊​ SwiftFormat\n'
-swiftformat --lint --color always . |& filter_swiftformat_output\
+swiftformat --lint --color always --symlinks follow . |& filter_swiftformat_output\
 	'\(lint mode - no files will be changed\.\)'\
 	'0/\d+ files require formatting\.'\
 	'\x1b\[31mSource input did not pass lint check\.\x1b\[0m'
