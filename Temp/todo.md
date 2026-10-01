@@ -32,30 +32,16 @@
    ([`<sort-option-set>`](../Specs/fields.md#sort-options), etc.), which would
    make `I+-` collapse to `-`. Either move the comments to the innermost choices
    or restore the per-alternative formulation. Non-choice instances:
-   1. [`table-config = [ <table-setting>+ ]`](../Specs/table.md#table-config):
-      the literal reading makes `hS` a header on, contradicting the [implied
+   1. [`table-config = <table-setting>+`](../Specs/table.md#table-config): the
+      literal reading makes `hS` a header on, contradicting the [implied
       settings](../Specs/table.md#implied-settings).
-   2. [`key-value-config = [ <key-value-setting>+ ]`](
+   2. [`key-value-config = <key-value-setting>+`](
         ../Specs/key-value.md#key-value-config
       ).
-   3. [`json-config = [ <json-setting>+ ]`](../Specs/json.md#json-config).
+   3. [`json-config = <json-setting>+`](../Specs/json.md#json-config).
    4. [`format-transform-pipeline = ( … )+`](
         ../Specs/fields-format.md#format-transforms
       ).
-2. These definitions are optionals, contrary to making a nonterminal's
-   references optional, never its definition; make each one's references
-   optional instead:
-   1. [`coercible-modifiers = [ <coercion> ]`](
-        ../Specs/fields-format.md#standard-placeholders
-      ).
-   2. [`number-modifiers = [ <number-coercion> ]`](
-        ../Specs/fields-format.md#number-formatting
-      ).
-   3. [`json-config = [ <json-setting>+ ]`](../Specs/json.md#json-config).
-   4. [`key-value-config = [ <key-value-setting>+ ]`](
-        ../Specs/key-value.md#key-value-config
-      ).
-   5. [`table-config = [ <table-setting>+ ]`](../Specs/table.md#table-config).
 
 ### Fields
 
@@ -71,25 +57,29 @@
 
 1. [Chronologic
    auto-detection](../Specs/fields-format.md#chronologic-formatting):
-   1. `<nullary-chronologic>`'s value is an "ISO date / datetime / time, per
-      input", but auto-detection tries only ISO-8601 datetime, ISO-8601
-      date-only & Unix epoch, so time-only input (e.g., `12:30:00`) is not
-      chronologic. Should time-only input be detected, or should "/ time" be
-      removed?
+   1. It accepts a string of a decimal number (e.g., `"0"`) as a Unix epoch
+      timestamp, unlike `%n`, which requires a JSON number absent `<coercion>`.
+      Should only a JSON number be a "numeric timestamp"?
    2. Which ISO-8601 representations should be detected?
-
-### Sorting
-
-1. [`<output>` sort source](../Specs/fields.md#sort-source) compares values by
-   "the rendered value type": is that the type of the rendered JSON node (only
-   `%i` passthrough retains a non-string type), or the output type of the
-   format's final pipeline / placeholder (e.g., chronologic for
-   `%C.dateOnly++`)?
-   1. JSON output types are undefined: the [type-preserving passthrough for
-      `%i`](../Specs/fields-format.md#format-transforms) is mentioned but not
-      defined, and it conflicts with
-      [`"" if null`](../Specs/fields-format.md#unconditional-placeholders)
-      (e.g., whether `%i` on `null` outputs `null` or `""`).
+      1. Implemented:
+         1. Extended-format date.
+         2. Extended-format complete time, with optional fractional seconds
+            (after `.` or `,`) & an optional UTC offset (`Z`, `±hh`, `±hhmm`, or
+            `±hh:mm`).
+         3. Extended-format date, `T` & complete time, as above.
+      2. Undetected:
+         1. Basic format (e.g., `20200318`, currently read as a Unix epoch).
+         2. Reduced precision (e.g., `2020-03-18T17:39`).
+         3. Ordinal dates.
+         4. Week dates.
+         5. RFC 3339 variants:
+            1. Space separator.
+            2. Lowercase `t` or `z`.
+2. JSON output types are undefined: the [type-preserving passthrough for
+   `%i`](../Specs/fields-format.md#format-transforms) is mentioned but not
+   defined, and it conflicts with
+   [`"" if null`](../Specs/fields-format.md#unconditional-placeholders) (e.g.,
+   whether `%i` on `null` outputs `null` or `""`).
 
 ### Documentation
 
@@ -159,6 +149,10 @@ input format (e.g., `%.:yyyy-MM-dd:c`, `..:yyyy-MM-dd:timeZone:UTC:`), with
 A named or literal output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax & persisted named
 formats.
+
+[`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) could
+then take custom formats (e.g., Unix epoch timestamps, which a bare number
+cannot otherwise be told apart from).
 
 ### Boolean Coercion Options
 

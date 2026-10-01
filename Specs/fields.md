@@ -444,7 +444,7 @@ field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 A modifier's **payload** is the expression after its prefix (e.g., `<label>` in
 `<label-modifier>`); an option's **payload** is the expression between its
 letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
-`<custom-locale>`).
+`<locale>`).
 
 #### Labeling
 
@@ -470,30 +470,16 @@ label = {text} (* direct default: ""; transitive default: {field name from the e
 
 #### Sorting
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
 sort-modifier        = <sort-modifier-prefix> [ <sort> ]
 sort-modifier-prefix = "/"
 
-sort = <sort-priority> | [ <sort-priority> ] <primary-sort-option-set> | [ <sort-priority> ] [ <primary-sort-option-set> ] <fallback-sort>
-
-primary-sort-option-set  = <sort-option-set>
-fallback-sort            = <fallback-sort-prefix> <fallback-sort-option-set>
-fallback-sort-prefix     = "/"
-fallback-sort-option-set = <sort-option-set>
+sort = <sort-priority> | [ <sort-priority> ] <sort-option-set>
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
 
 - A **sort key** is a field spec with an enabled `<sort>`, which affects item
   sorting.
 - Other field specs do not affect item sorting.
-
-`<fallback-sort-option-set>` sorts, among themselves, the [values nonconforming
-to `<primary-sort-option-set>`](#sort-nonconforming-values), comparing them as
-[any](#sort-source); `null` is nonconforming to `<fallback-sort-option-set>`.
-The field remains 1 sort key, at `<sort>`'s priority.
 
 ##### Sort Priority
 
@@ -524,11 +510,12 @@ sort-option     =
   <source>
   | <direction>
   | <case-sensitivity>
-  | <localization>
-  | <numbers-in-strings>
+  | <locale>
+  | <number-segments>
+  | <chronologic-segments>
   | <boundaries>
   | <nonconforming-comparison>
-  | <trivia-order>
+  | <text-order>
 
 sort-option-terminator = ":"
 ```
@@ -545,26 +532,43 @@ output = "O"
 If an input value is modified by a format for output, `<input>` sorts based on
 the input, not the output. `<output>` is the opposite.
 
-Values are compared not as characters, but as:
-
-- If `<input>`: the field's [type](fields-format.md#types).
-- Otherwise (i.e., `<output>`): the rendered value type.
-
-Values of a type are compared:
-
-- If chronologic: chronologically.
-- If number: numerically.
-- If version: as [specified](#version-comparison).
-- If boolean: sorting `false` before `true`.
-- If string: as per `<case-sensitivity>`, `<localization>`,
-  `<numbers-in-strings>` & `<boundaries>`.
-- If any: as strings (`null` as `""`).
+A value is compared as a string: a string as is, `null` as an empty string & any
+other value as its canonical string representation (e.g., `false`), except that,
+unless `<number-segments>` is `<lexical>`, a number is a single [number
+segment](#sort-segments).
 
 E.g., for an input timestamp being output as an ISO date (without time):
 
 - `<input>` sorts by the input timestamp.
 - `<output>` sorts by the output ISO date (without time), so rows on the same
   date tie & fall through to the next sort key.
+
+##### Sort Segments
+
+Within each maximal run of [non-boundary](#sort-boundaries) text, never across a
+boundary, a value is split into **segments**, in descending precedence:
+
+1. **Chronologic segments**, per `<chronologic-segments>`.
+2. **Number segments**, per `<number-segments>`.
+3. **Text segments**: each maximal run of the remaining text.
+
+A chronologic or number segment is a **typed segment**.
+
+2 runs of non-boundary text compare their segments as 1 or 2 lists, per
+`<text-order>`. Lists compare element by element: the 1st unequal pair of
+elements decides, else a list that is a prefix of the other precedes it.
+
+Segments of different kinds compare by kind, in ascending order: time-only
+chronologic, other chronologic, number, then text. Segments of the same kind
+compare:
+
+- If time-only chronologic: by time of day, normalized to UTC per its UTC
+  offset, or as UTC if it has none.
+- If other chronologic: chronologically, a date-only at its start in the system
+  time zone.
+- If a version: as [specified](#version-comparison).
+- If another number: numerically.
+- If text: per `<case-sensitivity>` & `<locale>`.
 
 ###### Version Comparison
 
@@ -591,95 +595,127 @@ sensitive   = "s"
 insensitive = "i"
 ```
 
-##### Sort Localization
+##### Sort Locale
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-localization = <canonical> | <localized> (* default: <canonical> *)
+locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* default: "Lcanonical:" *)
 
-canonical = "c"
-localized = <system-locale> | <custom-locale>
-
-system-locale = "l" (* default locale-identifier: "system" *)
-custom-locale = "L" [ <locale-identifier> ] <sort-option-terminator>
-
-locale-identifier = {text: locale identifier or "system"} (* default: "system" *)
+locale-identifier = {text: locale identifier, "canonical", or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A `<locale-identifier>` of `system` identifies the system locale.
+A `<locale-identifier>` of `canonical` identifies the canonical conventions; of
+`system`, the system locale.
 
-`<canonical>` uses a locale-independent comparison, while `<localized>` uses a
-locale-dependent comparison. This also affects numeric fractional part & integer
-grouping separators.
+The canonical conventions compare text locale-independently, while a locale
+compares it locale-dependently. Each also supplies [`<grouped-numeric>`'s
+default number conventions](#sort-number-segments).
 
 Canonical number formatting uses a `.` decimal separator, a `,` digit group
 separator & a digit group size of 3.
 
-##### Sort Numbers in Strings
+##### Sort Number Segments
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-numbers-in-strings = <lexical> | <numeric> | <grouped-numeric> (* default: <lexical> *)
+number-segments = <lexical> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexical> *)
 
-lexical         = "x" (* mnemonic: 3rd letter of lexical *)
-numeric         = "n"
-grouped-numeric = <localization-grouped-numeric> | <custom-grouped-numeric>
+lexical           = "x" (* mnemonic: 3rd letter of lexical *)
+ungrouped-numeric = "u" (* mnemonic: ungrouped *)
+versions          = "v"
+grouped-numeric   = "N" <grouped-numeric-arguments> <sort-option-terminator> (* default locale-identifier: {<locale>'s <locale-identifier>} *)
 
-localization-grouped-numeric = "g"
-custom-grouped-numeric       =
-  "G"
-  [ <digit-group-separator> ]
-  <argument-separator> [ <digit-group-size> ]
-  <argument-separator> [ <secondary-digit-group-size> ]
-  <argument-separator> [ <decimal-separator> ]
-  <sort-option-terminator>
-  (*
-    default digit-group-separator: {<localization>'s digit group separator};
-    default digit-group-size: 0;
-    default secondary-digit-group-size: {<localization>'s secondary digit group size};
-    default decimal-separator: {<localization>'s decimal separator}
-  *)
+grouped-numeric-arguments = <number-format-arguments> <argument-separator>? [ <number-signs> ]
+
+number-signs = <word-initial-signs> | <all-signs> | <no-signs> (* default: <word-initial-signs> *)
+
+word-initial-signs = "word-initial"
+all-signs          = "all"
+no-signs           = "none"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`<lexical>` compares digits as characters. `<numeric>` compares each run of
-digits as a number. `<grouped-numeric>` does the same after removing the digit
-group separators from each **grouped number**, so it compares as a single number
-(e.g., `1,234` as `1234`) rather than being broken into smaller ones by the
-separator.
+The number segments are:
+
+- `<lexical>`: none.
+- `<ungrouped-numeric>`: each maximal run of ASCII digits, with a word-initial
+  sign.
+- `<versions>`: each **version**: 1 or more `.`-separated components, each an
+  ASCII digit followed by any letters, digits, `+`s & `-`s (e.g., `1.2.3-beta`,
+  but only `1.2` in `(1.2)` & in `1.2.beta`), without a sign.
+- `<grouped-numeric>`: each **grouped number**, with a sign per
+  `<number-signs>`.
 
 A grouped number is a run of digits split into [digit
 groups](fields-format.md#numberformat) by a digit group separator, optionally
 followed by a decimal separator & a fractional part, then optionally by an
 exponent indicator (`e` or `E`) & an optionally signed integer exponent (e.g.,
-`1.5e3` compares as `1500`), with group sizes & separators from:
+`1.5e3` compares as `1500`), so it compares as a single number (e.g., `1,234` as
+`1234`) rather than being broken into smaller ones by the separator. Its group
+sizes & separators come from its [number format
+arguments](fields-format.md#numberformat), each absent one defaulting to the
+base conventions; a `<digit-group-size>` of `0` allows groups of any size.
 
-- `g`: the [canonical or localized](#sort-localization) conventions.
-- `G`: its arguments; a `<digit-group-size>` of `0` allows groups of any size.
+If the digit group separator equals the decimal separator, an error is reported.
 
-If `G`'s `<digit-group-separator>` equals its `<decimal-separator>`, an error is
-reported.
+A `-` or `+` immediately preceding a number segment's 1st digit is its sign:
 
-`<custom-grouped-numeric>`'s arguments follow the
-[argument](fields-format.md#transforms) rules.
+- `<word-initial-signs>`: iff it starts the value or follows whitespace (e.g.,
+  in `-5` & `a -5`, but not in `a-5`).
+- `<all-signs>`: always.
+- `<no-signs>`: never.
+
+`<grouped-numeric-arguments>` follow the [argument](fields-format.md#transforms)
+rules.
+
+##### Sort Chronologic Segments
+
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
+```ebnf
+chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* default: "Ciso:" *)
+
+chronologic-formats = <chronologic-format> … <argument-separator>
+chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time>
+
+iso          = "iso"
+iso-date     = "iso-date"
+iso-datetime = "iso-datetime"
+iso-time     = "iso-time"
+```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
+
+The chronologic segments are each longest text that a `<chronologic-format>`
+matches, as [`%c` detects](fields-format.md#chronologic-formatting) it, unless
+an ASCII digit immediately precedes or follows it:
+
+- `<iso-date>`: an ISO-8601 date-only.
+- `<iso-datetime>`: an ISO-8601 datetime.
+- `<iso-time>`: an ISO-8601 time-only.
+- `<iso>`: any of the above.
+
+Absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic segments.
+
+`<chronologic-formats>` follow the [argument](fields-format.md#transforms)
+rules.
 
 ##### Sort Boundaries
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries = <no-boundaries> | <uncollapsed-boundaries> | <collapsed-boundaries> (* default: <uncollapsed-boundaries> *)
+boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+space+:" *)
 
-no-boundaries          = "b" (* default boundary-groups: empty *)
 uncollapsed-boundaries = "B" [ <boundary-groups> ] <sort-option-terminator>
-collapsed-boundaries   = "C" [ <boundary-groups> ] <sort-option-terminator>
+collapsed-boundaries   = "M" [ <boundary-groups> ] <sort-option-terminator> (* mnemonic: merged *)
 
-boundary-groups          = <boundary-group> … <boundary-group-separator> (* default: "+space+" *)
+boundary-groups          = <boundary-group> … <boundary-group-separator>
 boundary-group-separator = "_"
 
 boundary-group      = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
@@ -729,52 +765,52 @@ their group & over all non-boundary characters.
 
 `<uncollapsed-boundaries>` retains contiguous boundaries in input as separate
 characters; `<collapsed-boundaries>` collapses contiguous boundaries belonging
-to the same boundary group into one. `<no-boundaries>` tokenizes nothing.
+to the same boundary group into one. Absent `<boundary-groups>` (e.g., `B:`),
+nothing is a boundary.
 
 ##### Sort Nonconforming Values
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nonconforming-comparison = <nonconforming-least> | <nonconforming-greatest> (* default: <nonconforming-greatest> *)
+nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconforming-greatest> (* default: <all-conforming> *)
 
+all-conforming         = "k" (* mnemonic: keep in place *)
 nonconforming-least    = "a" (* mnemonic: 1st letter, so least *)
 nonconforming-greatest = "z" (* mnemonic: last letter, so greatest *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A value is **nonconforming** to `<primary-sort-option-set>` iff it does not
-conform to the field's [type](fields-format.md#types), e.g., `"XYZ"` for a
-chronologic field, or `null` for a string field. [Nonconforming values are
-ordered among themselves by `<fallback-sort-option-set>`, if any](#sorting);
-otherwise, or if nonconforming to it, they tie & fall through to the next sort
-key. `<nonconforming-comparison>` compares each `<sort-option-set>`'s
-nonconforming values as less than (`a`) or greater than (`z`) its conforming
-ones, so `<descending>` also reverses their location.
+With `<nonconforming-least>` or `<nonconforming-greatest>`, a value is
+**nonconforming** iff it has no [typed segment](#sort-segments) (e.g., `Free`
+for a price, or `null`). Nonconforming values compare among themselves as other
+values do, but as less than (`a`) or greater than (`z`) every conforming value,
+so `<descending>` also reverses their location.
 
-##### Sort Trivia Order
+With `<all-conforming>`, no value is nonconforming.
+
+##### Sort Text Order
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-trivia-order = <trivia-first> | <trivia-last> | <trivia-split> | <trivia-excluded> (* default: <trivia-first> *)
+text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* default: <text-in-place> *)
 
-trivia-first    = "h" (* mnemonic: head *)
-trivia-last     = "t" (* mnemonic: tail *)
-trivia-split    = "m" (* mnemonic: middle *)
-trivia-excluded = "e" (* mnemonic: excluded *)
+text-first    = "h" (* mnemonic: head *)
+text-last     = "t" (* mnemonic: tail *)
+text-in-place = "p" (* mnemonic: positional *)
+text-excluded = "e" (* mnemonic: excluded *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- A number field whose [number coercion](fields-format.md#coercion) has a
-  `<trivia-prefix-regex>` or `<trivia-suffix-regex>` sorts by:
-  - `<trivia-first>`: trivia prefix, then trivia suffix, then number.
-  - `<trivia-last>`: number, then trivia prefix, then trivia suffix.
-  - `<trivia-split>`: trivia prefix, then number, then trivia suffix.
-  - `<trivia-excluded>`: number.
-- Otherwise: `<trivia-order>` does not affect sorting.
+Each run of non-boundary text compares its [segments](#sort-segments) as:
+
+- `<text-first>`: its text segments, then its typed segments.
+- `<text-last>`: its typed segments, then its text segments.
+- `<text-in-place>`: all its segments, in order.
+- `<text-excluded>`: its typed segments.
 
 ## Appendix: Escaping
 
@@ -807,7 +843,7 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<reference-field-name>` in `<field-spec-hide>`                                     |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
 | `<reference-field-name>` in `<field-spec-removal>`                                  |                 | `@` `,`             | ignored            | ignored                 |
 | `<label>`                                                                           |                 | `:` `/` `,`         | ignored            | ignored                 |
-| `<locale-identifier>` in `<custom-locale>`                                          |                 | `:`                 | ignored            | ignored                 |
+| `<locale-identifier>` in `<locale>`                                                 |                 | `:`                 | ignored            | ignored                 |
 | `<boundary-characters>`                                                             |                 | `%` `+` `_` `:`     | ignored            | ignored                 |
 | `<multi-character-boundary-text>`                                                   |                 | `%`                 | ignored            | ignored                 |
 | `<format-name>` in a `<format-block>`                                               |                 | `.` `/` `,`         | ignored            | ignored                 |
@@ -817,9 +853,7 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<template-text>` starting a `<block>`                                              | `:` `.`         | `%` `+`             | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a `<placeholder>` in a `<block>`                |                 | `%` `+`             | consumed           | consumed iff before `%` |
 | `<decimal-separator>` in `<number-format>`                                          |                 | `:`                 | ignored            | ignored                 |
-| Other text arguments in `<number-format-arguments>` / `<number-coercion-arguments>` |                 | `,` `:`             | ignored            | ignored                 |
-| `<digit-group-separator>` in `<custom-grouped-numeric>`                             |                 | `,` `:`             | ignored            | ignored                 |
-| `<decimal-separator>` in `<custom-grouped-numeric>`                                 |                 | `:`                 | ignored            | ignored                 |
-| `<time-zone-code>`                                                                  |                 | `:`                 | ignored            | ignored                 |
+| `<reference-date>`                                                                  |                 | `:`                 | ignored            | ignored                 |
+| Any other text argument                                                             |                 | `,` `:`             | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

@@ -62,8 +62,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: end (as a synonym for side)
 15. - 1st
     - initial: only in `initialTitlecase` & its **initial character**
-    - REJECTED: first (except in `<trivia-first>`) / leftmost / initial (in
-      other senses) / earliest
+    - REJECTED: first (except in `<text-first>`) / leftmost / initial (in other
+      senses) / earliest
 16. - sole: adjective (the sole element, its sole purpose)
     - only: adverb / adjective
     - REJECTED: final / last (as a synonym for sole)
@@ -118,7 +118,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - omit: leave out
     - consume: take input into a token
     - ignore: disregard (outer bare whitespace)
-    - exclude: leave out of a comparison (`<trivia-excluded>`)
+    - exclude: leave out of a comparison (`<text-excluded>`)
     - REJECTED: disallow / prohibit / prevent / not allow / not let / may not /
       reject / significant / insignificant
 24. - disable
@@ -272,7 +272,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 51. - built-in
     - REJECTED: hardcoded / predefined
 52. - custom: a user-given alternative to a built-in, default, or locale-sourced
-      value (`<custom-locale>`, `<custom-grouped-numeric>`)
+      value (e.g., a `<locale-identifier>`)
     - explicit: only in "explicit default" & in contrast with implied
     - persisted: saved
     - REJECTED: user-configurable / user-defined / saved / manual / explicit (as
@@ -346,6 +346,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
 70. - date-only: adjective
+    - time-only: adjective
     - datetime: noun
     - REJECTED: date-time / date time
 71. - app: software implementing the specs (e.g., mas;
@@ -398,18 +399,39 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - mixed: the static multiplicity of a choice whose alternatives' static
       multiplicities differ
     - REJECTED: product / record (for a tuple)
-82. - fallback: `<fallback-sort-option-set>`, which sorts the values
-      nonconforming to `<primary-sort-option-set>`
-      ([defined](../Specs/fields.md#sorting))
-    - REJECTED: extra / later / subsequent / succeeding `<sort-option-set>`s
-83. - tie & fall through: compare as equal for a sort key, leaving the order to
-      the next sort key ([used](../Specs/fields.md#sort-nonconforming-values))
+82. - tie & fall through: compare as equal for a sort key, leaving the order to
+      the next sort key ([used](../Specs/fields.md#sort-source))
     - REJECTED: retain their input order
-84. - field occurrence index: `<field-occurrence-index>`, an index into only the
+83. - field occurrence index: `<field-occurrence-index>`, an index into only the
       field specs for 1 field
       ([defined](../Specs/fields.md#field-spec-references))
     - field spec index: `<field-spec-index>`, an index into all field specs
     - REJECTED: named field spec index / indexed field spec index
-85. - default field spec: the field spec selected for a field that the base
+84. - default field spec: the field spec selected for a field that the base
       fields config lacks ([defined](../Specs/fields.md#default-field-specs))
     - REJECTED: field spec with default settings
+85. - segment: a part of a run of non-boundary text that sorting compares as 1
+      element ([defined](../Specs/fields.md#sort-segments))
+    - typed segment: a chronologic or number segment
+    - text segment: a maximal run of text that is in no typed segment
+    - REJECTED: chunk / token (for a segment) / trivia (for text segments)
+86. - ungrouped numeric: comparing each run of digits as a number
+      (`<ungrouped-numeric>`)
+    - grouped numeric: comparing each grouped number as a number
+      (`<grouped-numeric>`)
+    - REJECTED: natural / numeric (for ungrouped numeric)
+87. - word-initial: at the start of the value or after whitespace
+      (`<word-initial-signs>`)
+    - REJECTED: leading / standalone / attached
+88. - reference date: the date as if on which a time-only value is rendered in a
+      time zone (`<reference-date>`)
+    - REJECTED: mode / daylight saving mode
+89. - number format arguments: the arguments of `<number-format-arguments>`
+      ([defined](../Specs/fields-format.md#numberformat))
+    - REJECTED: number conventions arguments
+90. - trailing-omissible: an expression that may consume nothing iff no
+      expression after it in its trailing run consumes a token (`EXPRESSION?`;
+      [defined](../Specs/ebnf.md#trailing-omissibles))
+    - trailing run: the longest run of adjacent optionals & trailing-omissibles
+      containing an expression, across nonterminal references
+    - REJECTED: omissible (for trailing-omissible)

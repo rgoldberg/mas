@@ -7,7 +7,7 @@
 
 private import Darwin
 
-enum Justification { // swiftlint:disable sorted_enum_cases
+enum Justification: Equatable { // swiftlint:disable sorted_enum_cases
 	case start
 	case centerStart
 	case centerEnd
