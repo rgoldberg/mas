@@ -13,7 +13,7 @@ private extension MASTests {
 	@Test
 	func `cannot lookup app info for unknown app ID`() async throws {
 		let actual =
-			try await consequencesOf(try await MAS.main(try MAS.Lookup.parse(["1"])) { $0.run(catalogApps: .init()) })
+			try await consequencesOf(try await MAS.main(try MAS.Lookup.parse(["1"])) { try $0.run(catalogApps: .init()) })
 		let expected = Consequences()
 		#expect(actual == expected)
 	}
@@ -22,7 +22,7 @@ private extension MASTests {
 	func `outputs app info`() async throws {
 		let actual = try await consequencesOf(
 			try await MAS.main(try MAS.Lookup.parse(["--json", "1472954003"])) { command in
-				command.run(catalogApps: [try decode(CatalogApp.self, fromResource: "things-lookup")])
+				try command.run(catalogApps: [try decode(CatalogApp.self, fromResource: "things-lookup")])
 			},
 		)
 		let expected = Consequences(
@@ -34,16 +34,8 @@ private extension MASTests {
 			"averageUserRating":0,\
 			"averageUserRatingForCurrentVersion":0,\
 			"bundleID":"uikitformac.com.tinybop.thingamabops",\
-			"categories":[\
-			"Games",\
-			"Action",\
-			"Family"\
-			],\
-			"categoryIDs":[\
-			"6014",\
-			"7001",\
-			"7009"\
-			],\
+			"categories":["Games","Action","Family"],\
+			"categoryIDs":["6014","7001","7009"],\
 			"censoredName":"Things That Go Bump",\
 			"contentAdvisoryRating":"4+",\
 			"contentRating":"4+",\
@@ -60,9 +52,7 @@ private extension MASTests {
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/d4/b9/74/d4b974d7-0c4c-1515-49ec-ecedec84c5a0/source/512x512bb.png",\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"mac-software",\
-			"languageCodesISO2A":[\
-			"EN"\
-			],\
+			"languageCodesISO2A":["EN"],\
 			"minimumOSVersion":"10.15.0",\
 			"name":"Things That Go Bump",\
 			"originalVersionReleaseDate":"2019-10-18T07:00:00Z",\
@@ -70,17 +60,7 @@ private extension MASTests {
 			"primaryCategoryID":6014,\
 			"primaryCategoryName":"Games",\
 			"releaseNotes":"* BOOM *, this is a BIG update. The house spawns a game room, complete with video games you can ENTER INTO. It's fun and a little bit weird! Try it! \\n»-(¯`·.·´¯)->",\
-			"screenshotURLs":[\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/36/fe/ff/36feffbc-a07b-e61e-f0e5-88dcc4455871/pr_source.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/c6/85/09/c68509b2-c2c8-3000-bf85-4ead056b26f3/pr_source.png/800x500bb.jpg",\
-			"https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/18/42/aa/1842aab5-0500-b08b-b9a5-fc364f83fbdb/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/de/b9/99/deb99962-f1d0-a7ad-0fc8-ef4bf906515b/pr_source.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/41/70/7d/41707d88-8ba1-5a28-1f2f-0f2e43a73706/pr_source.png/800x500bb.jpg",\
-			"https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/be/a3/a2/bea3a233-d82f-34bf-b0cd-38f262b04939/pr_source.png/800x500bb.jpg",\
-			"https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/e5/41/b4/e541b49d-06ed-9ec6-1544-3df88c8dc340/pr_source.png/800x500bb.jpg",\
-			"https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/8f/08/49/8f0849f4-7d20-567f-47e6-ef1bfb901619/pr_source.png/800x500bb.jpg",\
-			"https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/7d/74/8a/7d748af9-50fa-e009-39a8-b5eb7774b2be/pr_source.png/800x500bb.jpg"\
-			],\
+			"screenshotURLs":["https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/36/fe/ff/36feffbc-a07b-e61e-f0e5-88dcc4455871/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/c6/85/09/c68509b2-c2c8-3000-bf85-4ead056b26f3/pr_source.png/800x500bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple113/v4/18/42/aa/1842aab5-0500-b08b-b9a5-fc364f83fbdb/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/de/b9/99/deb99962-f1d0-a7ad-0fc8-ef4bf906515b/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/41/70/7d/41707d88-8ba1-5a28-1f2f-0f2e43a73706/pr_source.png/800x500bb.jpg","https://is1-ssl.mzstatic.com/image/thumb/Purple124/v4/be/a3/a2/bea3a233-d82f-34bf-b0cd-38f262b04939/pr_source.png/800x500bb.jpg","https://is2-ssl.mzstatic.com/image/thumb/Purple113/v4/e5/41/b4/e541b49d-06ed-9ec6-1544-3df88c8dc340/pr_source.png/800x500bb.jpg","https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/8f/08/49/8f0849f4-7d20-567f-47e6-ef1bfb901619/pr_source.png/800x500bb.jpg","https://is5-ssl.mzstatic.com/image/thumb/Purple123/v4/7d/74/8a/7d748af9-50fa-e009-39a8-b5eb7774b2be/pr_source.png/800x500bb.jpg"],\
 			"sellerName":"Tinybop Inc.",\
 			"sellerURL":"https://tinybop.com",\
 			"userRatingCount":0,\
