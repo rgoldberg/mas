@@ -13,7 +13,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 ```ebnf
 key-value-option = "--key-value" [ &<key-value-config> ]
 
-key-value-config  = [ <key-value-setting>+ ] (* last wins; default: "" *)
+key-value-config  = <key-value-setting>+ (* last wins *)
 key-value-setting =
   <key-setting>
   | <key-styling-setting>

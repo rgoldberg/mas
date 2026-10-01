@@ -23,14 +23,14 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 	@OptionGroup
 	private var installedAppsOptionGroup: InstalledAppsOptionGroup
 
-	func outdatedApps(considerAllOutdated: Bool, withFullJSON: Bool) async -> [OutdatedApp] {
+	func outdatedApps(considerAllOutdated: Bool, fields: [String]) async -> [OutdatedApp] {
 		considerAllOutdated
-			? await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON)
+			? await installedAppsOptionGroup.installedApps(fields: fields)
 				.map { .init(installedApp: $0, newVersion: "") }
-			: await outdatedApps(withFullJSON: withFullJSON)
+			: await outdatedApps(fields: fields)
 	}
 
-	func outdatedApps(withFullJSON: Bool) async -> [OutdatedApp] {
+	func outdatedApps(fields: [String]) async -> [OutdatedApp] {
 		let lookupAppFromAppID = Environment.current.lookupAppFromAppID
 		@Sendable
 		func installableCatalogApp(from installedApp: InstalledApp) async -> CatalogApp? {
@@ -61,7 +61,7 @@ struct OutdatedAppsOptionGroup: ParsableArguments {
 			}
 		}
 
-		return await installedAppsOptionGroup.installedApps(withFullJSON: withFullJSON).concurrentCompactMap(
+		return await installedAppsOptionGroup.installedApps(fields: fields).concurrentCompactMap(
 			accuracy == .accurate
 				? { @Sendable installedApp in
 					if shouldCheckMinimumOSVersion, await installableCatalogApp(from: installedApp) == nil {

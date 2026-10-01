@@ -33,7 +33,10 @@ complete -c mas -n __fish_use_subcommand -fa uninstall -d 'Uninstall apps alread
 complete -c mas -n __fish_use_subcommand -fa update -d 'Update outdated apps already installed from the App Store'
 complete -c mas -n __fish_use_subcommand -fa version -d 'Output version number' # editorconfig-checker-disable
 
-complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json' -l json -d 'Output JSON'
+complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt fields' -l fields -x -d 'Select, order, label, format & sort output fields'
+complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l json -d 'Output JSON, optionally configured'
+complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l key-value -d 'Output key-value pairs, optionally configured'
+complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l table -d 'Output a table, optionally configured'
 complete -c mas -n '__fish_seen_subcommand_from get home info install lookup open purchase seller vendor' -xa '(__fish_mas_list_available)'
 complete -c mas -n '__fish_seen_subcommand_from get home info install list lookup open outdated purchase seller uninstall update upgrade vendor; and not __fish_contains_opt bundle' -l bundle -d 'Process all app IDs as bundle IDs'
 complete -c mas -n '__fish_seen_subcommand_from get install lucky purchase update upgrade; and not __fish_contains_opt force' -l force -d 'Force reinstall'
@@ -44,7 +47,6 @@ complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt check-min-os; and not __fish_contains_opt no-check-min-os' -l check-min-os -d 'Check if macOS can install latest app version'
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt check-min-os; and not __fish_contains_opt no-check-min-os' -l no-check-min-os -d 'Do not check if macOS can install latest app version'
 complete -c mas -n '__fish_seen_subcommand_from outdated update upgrade; and not __fish_contains_opt verbose' -l verbose -d 'Warn about app IDs unknown to the App Store'
-complete -c mas -n '__fish_seen_subcommand_from search; and not __fish_contains_opt price' -l price -d 'Output the price of each app'
 complete -c mas -n '__fish_seen_subcommand_from uninstall; and not __fish_contains_opt all' -l all -d 'Uninstall all App Store apps'
 complete -c mas -n '__fish_seen_subcommand_from uninstall; and not __fish_contains_opt dry-run' -l dry-run -d 'Perform dry run'
 complete -c mas -n '__fish_seen_subcommand_from update upgrade' -xa '(__fish_mas_outdated_installed)'

@@ -61,6 +61,6 @@ private extension MASTests {
 			.results
 			.first,
 		)
-		#expect(catalogApp.jsonObject.fields.map(\.key.rawValue) == ["bar", "fooApp", "fooAppBar", "fooApps2"])
+		#expect(catalogApp.jsonObject.fields.map(\.key.rawValue) == ["bar", "fooAppBar", "fooApp", "fooApps2"])
 	}
 }

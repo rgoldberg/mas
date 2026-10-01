@@ -164,11 +164,26 @@ In specs, annotate an outer bare whitespace treatment on the expression whose
 tokens need it (e.g., `-[ <format-block> ]-`), rather than on its neighbors'
 constant nonterminals (e.g., not `-"/"` for a following `/`).
 
-In specs, make a nonterminal's references optional, never its definition, since
-an expression that consumes no token is never present.
+In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
+make its references optional instead, since an expression that consumes no token
+is never present.
 
 In specs, make every block reference optional & give every block a direct
 default of an empty string.
+
+In specs, when 2 constructs express the same concept with similarly complex
+syntax (e.g., a format's number coercion & a sort's grouped numbers), share 1
+syntax; give a much simpler one its own simpler syntax.
+
+In specs, make an argument list's trailing arguments omissible in its grammar,
+by making each `<argument-separator>` trailing-omissible (e.g.,
+`[ <a> ] <argument-separator>? [ <b> ] <argument-separator>? [ <c> ]`), never
+only in prose; reference a shared argument list (e.g.,
+`<number-format-arguments>`) rather than repeating its arguments.
+
+In specs, give a sort option that takes arguments an uppercase letter & end its
+arguments with its `<sort-option-terminator>`; an empty list argument means
+none, while an empty scalar argument means its default.
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").

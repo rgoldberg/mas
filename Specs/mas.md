@@ -51,37 +51,29 @@ Default labels & formats favor:
   - Label is the field name.
   - Output is formatted as `%i`.
 
-## Price Coercion
+## Price Sorting
 
-Price fields' default formats coerce numbers with `.*` as both
-`<trivia-prefix-regex>` & `<trivia-suffix-regex>`, and with the **App Store
-locale**'s conventions as their [base
-conventions](fields-format.md#numberformat).
-
-Price fields' default formats are `%.:…:N%i+%i+`, so they are typed as numbers,
-but render the field value as is, whether it conforms (e.g., `$1,299.99`,
-retaining its digit group separators, instead of the coerced value `$1299.99`)
-or not (e.g., `Free`).
+`formattedPrice`'s default sort options compare [grouped
+numbers](fields.md#sort-number-segments) with the **App Store locale**'s
+conventions as their [base conventions](fields-format.md#numberformat) & include
+`a`, because its nonconforming values are almost always `Free` or a translation
+of it, which equals 0.
 
 The App Store's locale cannot be determined programmatically, so the App Store
 locale is the locale of the App Store region that mas guesses from the macOS
 region.
 
-`formattedPrice`'s default sort options include `a`, because its nonconforming
-values are almost always `Free` or a translation of it, which equals 0.
-
 ## Default Sort Options
 
-Price fields' default formats use [`%.:…:N%i+%i+`](#price-coercion) & version
-fields' `%V%v+%i+`, so they are typed & compare per type, but render the field
-value as is, whether it conforms or not (e.g., `v1.2`, which would abort a `%v`
-format); the sort options below apply to string fields:
+Version fields' default sort options compare
+[versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s compare
+[grouped numbers](#price-sorting), but they otherwise match the following:
 
-| Format    | String Content | Default            |
-|:----------|:---------------|:-------------------|
-| Table     | Non-path       | `I+ilg`            |
-| Table     | Path           | `I+ilgB/_+space+:` |
-| Key-Value | Non-path       | `I+ilg`            |
-| Key-Value | Path           | `I+ilgB/_+space+:` |
-| JSON      | Non-path       | `I+scgb`           |
-| JSON      | Path           | `I+scgB/:`         |
+| Format    | String Content | Default              |
+|:----------|:---------------|:---------------------|
+| Table     | Non-path       | `I+iL:N:`            |
+| Table     | Path           | `I+iL:N:B/_+space+:` |
+| Key-Value | Non-path       | `I+iL:N:`            |
+| Key-Value | Path           | `I+iL:N:B/_+space+:` |
+| JSON      | Non-path       | `I+sN:B:`            |
+| JSON      | Path           | `I+sN:B/:`           |
