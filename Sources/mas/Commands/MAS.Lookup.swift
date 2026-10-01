@@ -7,7 +7,6 @@
 
 internal import ArgumentParser
 private import Foundation
-private import JSONAST
 
 extension MAS { // swiftlint:disable:this file_types_order
 	/// Outputs app info from the App Store.
@@ -22,52 +21,106 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueOutputConfig>
 		@OptionGroup
 		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
-		func run() async {
-			run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
+		func run() async throws {
+			try run(catalogApps: await catalogAppsOptionGroup.appIDs.catalogApps)
 		}
 
-		func run(catalogApps: [CatalogApp]) {
-			outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
+		func run(catalogApps: [CatalogApp]) throws {
+			try outputConfigOptionGroup.output(catalogApps.map(\.jsonObject))
 		}
 	}
 }
 
-private struct KeyValueConfig: OutputConfig, FieldConfigured {
-	static let defaultFormat = OutputFormat.keyValue
-
-	static let fieldConfigs = [
-		(key: JSON.Key("name"), label: "Name", transform: defaultTransform),
-		(key: "adamID", label: "ADAM ID", transform: defaultTransform),
-		(key: "bundleID", label: "Bundle ID", transform: defaultTransform),
-		(key: "version", label: "Version", transform: defaultTransform),
-		(key: "formattedPrice", label: "Price", transform: defaultTransform),
-		(key: "sellerName", label: "By", transform: defaultTransform),
-		(
-			key: "currentVersionReleaseDate",
-			label: "Released",
-			transform: { @Sendable (string: String?) in string?.isoLocalDate ?? "" },
-		),
-		(key: "minimumOSVersion", label: "Minimum OS", transform: defaultTransform),
-		(key: "fileSizeBytes", label: "Size", transform: { (string: String?) in string?.megabyteCount ?? "" }),
-		(key: "appStorePageURL", label: "From", transform: defaultTransform),
-	]
-}
-
-private extension String {
-	var megabyteCount: Self {
-		Int64(self).map { size in
-			((size + 500_000) / 1_000_000 * 1_000_000)
-				.formatted(.byteCount(style: .file, allowedUnits: .mb, spellsOutZero: false))
-		}
-			?? self
-	}
-
-	var isoLocalDate: Self {
-		(try? Date(self, strategy: .iso8601).formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()))
-			?? self
-	}
+private struct KeyValueOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.keyValue(.default)
+	static let standardFieldsConfig = SelectedFieldsConfig(
+		fieldSpecs: [
+			.init(name: "name", label: "Name", format: defaultFieldFormat(forFieldNamed: "name"), sortSpec: nil),
+			.init(
+				name: "adamID",
+				label: "ADAM ID",
+				format: defaultFieldFormat(forFieldNamed: "adamID"),
+				sortSpec: nil,
+				justification: defaultJustification(forFieldNamed: "adamID"),
+			),
+			.init(name: "bundleID", label: "Bundle ID", format: defaultFieldFormat(forFieldNamed: "bundleID"), sortSpec: nil),
+			.init(name: "version", label: "Version", format: defaultFieldFormat(forFieldNamed: "version"), sortSpec: nil),
+			.init(
+				name: "formattedPrice",
+				label: "Price",
+				format: defaultFieldFormat(forFieldNamed: "formattedPrice"),
+				sortSpec: nil,
+			),
+			.init(name: "sellerName", label: "By", format: defaultFieldFormat(forFieldNamed: "sellerName"), sortSpec: nil),
+			.init(
+				name: "currentVersionReleaseDate",
+				label: "Released",
+				// `%C.dateOnly++`: the release date, date-only, in the system time zone
+				format: .template(
+					[
+						.placeholder(
+							.conditional(
+								.init(predicate: .chronologic, coercion: nil),
+								.binary(success: .pipeline([.init(transform: .dateOnly, coercion: nil)]), failure: nil),
+							),
+						),
+					],
+				),
+				sortSpec: nil,
+			),
+			.init(
+				name: "minimumOSVersion",
+				label: "Minimum OS",
+				format: defaultFieldFormat(forFieldNamed: "minimumOSVersion"),
+				sortSpec: nil,
+			),
+			.init(
+				name: "fileSizeBytes",
+				label: "Size",
+				// `%+.N.scale:10,6,,0:.numberFormat+ MB`: a byte count as whole,
+				// grouped decimal megabytes, with an appended " MB". JSON gets the raw
+				// byte count instead: `--json` resolves to the machine-facing `@json`
+				// variant (see `machineFacingVariant()`), which labels each field spec
+				// by its name & formats its output as `%i`, per mas.md
+				format: .template(
+					[
+						.placeholder(
+							.conditional(
+								.init(predicate: .number, coercion: .default),
+								.abortOnFailure(
+									success: .pipeline(
+										[
+											.init(
+												transform: .scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
+												coercion: nil,
+											),
+											.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),
+										],
+									),
+								),
+							),
+						),
+						.text(" MB"),
+					],
+				),
+				sortSpec: nil,
+				justification: defaultJustification(forFieldNamed: "fileSizeBytes"),
+			),
+			.init(
+				name: "appStorePageURL",
+				label: "From",
+				format: defaultFieldFormat(forFieldNamed: "appStorePageURL"),
+				sortSpec: nil,
+			),
+		],
+	)
+	/// The field set is open-ended (dynamically-discovered API fields);
+	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort
+	/// alphabetically by label) applies here, absent a user-requested order,
+	/// rather than showing them in their arbitrary discovery order.
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

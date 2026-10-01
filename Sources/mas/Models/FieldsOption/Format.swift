@@ -1,0 +1,889 @@
+//
+// Format.swift
+// mas
+//
+// Copyright © 2026 mas-cli. All rights reserved.
+//
+
+internal import Foundation
+internal import JSONAST
+
+// MARK: - Format (fields-format.md)
+
+/// A parsed `<format-block>`, `<success-block>`, or `<failure-block>`: either a
+/// pipeline of `<*-transform-call>`s or a template. A `<format-block>`'s
+/// `<format-transform-pipeline>` is not part of it: it is extracted into
+/// `FieldSpec.justification` at parse time.
+indirect enum Format: Equatable {
+	/// A `<*-pipeline>`'s value `<*-transform-call>`s, applied in order to the
+	/// value the pipeline formats. Empty iff the pipeline consists solely of a
+	/// `<format-transform-pipeline>`.
+	case pipeline([TransformCall])
+	/// A `<*-template>`'s elements.
+	case template([TemplateElement])
+
+	/// The standard default: `%i`. Fields needing a different one are configured
+	/// by their display command, at the `FieldSpec` level, instead.
+	// swiftlint:disable:next todo
+	// TODO: a per-field, per-context user-configured default, once persisted
+	//  fields configs exist
+	static func `default`(fieldName _: String) -> Self {
+		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
+	}
+
+	/// A `<format-block>`'s direct default: the nullary placeholder for
+	/// `typeDeterminant`'s type & coercion.
+	static func nullaryPlaceholder(for typeDeterminant: TypeDeterminant) -> Self {
+		.template(
+			[
+				.placeholder(
+					typeDeterminant.type == .any
+						? .unconditional(.input, pipeline: .init())
+						: .conditional(
+							.init(predicate: typeDeterminant.type.nullaryPredicate, coercion: typeDeterminant.coercion),
+							.abortOnFailure(success: nil),
+						),
+				),
+			],
+		)
+	}
+}
+
+/// A `<*-transform-call>`: its `<value-transform>` & its `<coercion>` (or
+/// `<number-coercion>`), if any.
+struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
+	let transform: Transform
+	let coercion: Coercion?
+}
+
+/// An element of a `<*-template>`.
+enum TemplateElement: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<block-placeholder>`: the enclosing matcher's value, through
+	/// `pipeline`.
+	case blockPlaceholder(pipeline: [TransformCall])
+	/// A `<placeholder>`.
+	case placeholder(Placeholder)
+	/// A `<template-text>`'s value.
+	case text(String)
+}
+
+/// A `<placeholder>`.
+enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<nullary-scalar-conditional-placeholder>` or
+	/// `<non-nullary-scalar-conditional-placeholder>`.
+	case conditional(Matcher, ConditionalForm)
+	/// A `<match-placeholder>`.
+	case match([Branch], MatchForm)
+	/// An `<unconditional-placeholder>`; `pipeline` is empty for a nullary one.
+	case unconditional(UnconditionalPredicate, pipeline: [TransformCall])
+}
+
+/// An `<unconditional-placeholder>`'s or `<unconditional-branch>`'s predicate,
+/// by its nullary letter.
+enum UnconditionalPredicate: Character { // swiftlint:disable:this one_declaration_per_file
+	case input = "i"
+	case label = "l"
+	case name = "k"
+}
+
+/// A scalar conditional matcher's `<coercion>` & `<predicate>`.
+struct Matcher: Equatable { // swiftlint:disable:this one_declaration_per_file
+	let predicate: Predicate
+	let coercion: Coercion?
+}
+
+/// A scalar conditional `<predicate>`, by its nullary letter.
+enum Predicate: Character { // swiftlint:disable:this one_declaration_per_file
+	// swiftlint:disable sorted_enum_cases
+	case boolean = "b"
+	case chronologic = "c"
+	case empty = "e"
+	case `false` = "f"
+	case null = "u"
+	case number = "n"
+	case string = "s"
+	case `true` = "t"
+	case version = "v"
+	case whitespace = "w" // swiftlint:enable sorted_enum_cases
+}
+
+/// A `<coercion>`, with its `<number-coercion-arguments>`' values (their
+/// defaults absent them, as for a boolean coercion, which has none).
+struct Coercion: Hashable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<coercion>` without `<number-coercion-arguments>`.
+	static let `default` = Self(numberConventions: .canonical, triviaPrefixRegex: .empty, triviaSuffixRegex: .empty)
+
+	/// The conventions a number coercion parses a number's separators & digit
+	/// group sizes per.
+	let numberConventions: NumberConventions
+	let triviaPrefixRegex: TriviaRegex
+	let triviaSuffixRegex: TriviaRegex
+}
+
+/// A `<trivia-prefix-regex>` or `<trivia-suffix-regex>`, compared by its
+/// pattern.
+struct TriviaRegex: Hashable, @unchecked Sendable { // swiftlint:disable:this one_declaration_per_file
+	/// The default, which matches only an empty string.
+	static let empty = Self(pattern: "", regex: .init(/(?:)/))
+	/// A regex that matches any string.
+	static let any = Self(pattern: ".*", regex: .init(/.*/))
+
+	static func == (lhs: Self, rhs: Self) -> Bool {
+		lhs.pattern == rhs.pattern
+	}
+
+	let pattern: String
+	let regex: Regex<AnyRegexOutput>
+
+	/// The regex for Swift Regex `pattern`, else `nil` iff `pattern` is invalid.
+	init?(pattern: String) {
+		guard let regex = try? Regex(pattern) else {
+			return nil
+		}
+		self.init(pattern: pattern, regex: regex)
+	}
+
+	private init(pattern: String, regex: Regex<AnyRegexOutput>) {
+		self.pattern = pattern
+		self.regex = regex
+	}
+
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(pattern)
+	}
+}
+
+/// What a scalar conditional placeholder evaluates to on success & on failure.
+enum ConditionalForm: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// Nullary (`%n`) or `<abort-on-failure>` (`%+N…+`): on success, `success`
+	/// (the matcher's value iff `nil`); on failure, formatting aborts.
+	case abortOnFailure(success: Format?)
+	/// `<abort-on-success>` (`%-n` / `%-N…+`): on success, formatting aborts; on
+	/// failure, `failure` (`""` iff `nil`).
+	case abortOnSuccess(failure: Format?)
+	/// Binary (`%N…+…+`): on success, `success` (the matcher's value iff `nil`);
+	/// on failure, `failure` (`""` iff `nil`).
+	case binary(success: Format?, failure: Format?)
+}
+
+/// What a `<match-placeholder>` evaluates to iff no branch returns a value.
+enum MatchForm: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `%m`: formatting aborts.
+	case abortOnNoMatch
+	/// `%M`: `failure` (`""` iff `nil`).
+	case binary(failure: Format?)
+}
+
+/// A `<branch>`.
+enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// A `<conditional-branch>`: iff `isNegated`, returns `block` (the field
+	/// value iff `nil`) iff the matcher fails; otherwise, returns `block` (the
+	/// matcher's value iff `nil`) iff the matcher succeeds.
+	case conditional(Matcher, isNegated: Bool, block: Format?)
+	/// An `<unconditional-branch>`, which always returns `block` (its predicate's
+	/// value iff `nil`).
+	case unconditional(UnconditionalPredicate, block: Format?)
+}
+
+// MARK: - Types
+
+/// A `<predicate>`'s or `<value-transform>`'s type, in ascending specificity.
+enum FieldType: Comparable { // swiftlint:disable:this one_declaration_per_file
+	case any // swiftlint:disable sorted_enum_cases
+	case string
+	case boolean
+	case number
+	case version
+	case chronologic // swiftlint:enable sorted_enum_cases
+}
+
+/// A field's type determinant's type & coercion.
+struct TypeDeterminant: Equatable { // swiftlint:disable:this one_declaration_per_file
+	static let any = Self(type: .any, coercion: nil)
+
+	let type: FieldType
+	let coercion: Coercion?
+}
+
+extension Format { // swiftlint:disable:this file_types_order
+	/// This format's type determinant: the 1st matcher or transform of the most
+	/// specific type (including every branch), or `.any` iff there is none.
+	var typeDeterminant: TypeDeterminant {
+		typeDeterminants.reduce(TypeDeterminant.any) { $1.type > $0.type ? $1 : $0 }
+	}
+
+	/// Every matcher's & transform's type determinant, in order.
+	fileprivate var typeDeterminants: [TypeDeterminant] {
+		switch self {
+		case let .pipeline(calls):
+			calls.map(\.typeDeterminant)
+		case let .template(elements):
+			elements.flatMap { element in
+				switch element {
+				case let .blockPlaceholder(pipeline):
+					pipeline.map(\.typeDeterminant)
+				case let .placeholder(placeholder):
+					placeholder.typeDeterminants
+				case .text:
+					[TypeDeterminant]()
+				}
+			}
+		}
+	}
+}
+
+private extension Placeholder { // swiftlint:disable:this file_types_order
+	var typeDeterminants: [TypeDeterminant] {
+		switch self {
+		case let .conditional(matcher, form):
+			[matcher.typeDeterminant] + form.blocks.flatMap(\.typeDeterminants)
+		case let .match(branches, form):
+			branches.flatMap(\.typeDeterminants) + form.blocks.flatMap(\.typeDeterminants)
+		case let .unconditional(_, pipeline):
+			pipeline.map(\.typeDeterminant)
+		}
+	}
+}
+
+private extension ConditionalForm { // swiftlint:disable:this file_types_order
+	var blocks: [Format] {
+		switch self {
+		case let .abortOnFailure(success):
+			[success].compactMap(\.self)
+		case let .abortOnSuccess(failure):
+			[failure].compactMap(\.self)
+		case let .binary(success, failure):
+			[success, failure].compactMap(\.self)
+		}
+	}
+}
+
+private extension MatchForm { // swiftlint:disable:this file_types_order
+	var blocks: [Format] {
+		switch self {
+		case .abortOnNoMatch:
+			.init()
+		case let .binary(failure):
+			[failure].compactMap(\.self)
+		}
+	}
+}
+
+private extension Branch { // swiftlint:disable:this file_types_order
+	var typeDeterminants: [TypeDeterminant] {
+		switch self {
+		case let .conditional(matcher, _, block):
+			[matcher.typeDeterminant] + (block?.typeDeterminants ?? .init())
+		case let .unconditional(_, block):
+			block?.typeDeterminants ?? .init()
+		}
+	}
+}
+
+private extension Matcher { // swiftlint:disable:this file_types_order
+	var typeDeterminant: TypeDeterminant {
+		.init(type: predicate.type, coercion: coercion)
+	}
+}
+
+extension Predicate { // swiftlint:disable:this file_types_order
+	/// This predicate's `type:` comment part.
+	var type: FieldType {
+		switch self {
+		case .boolean, .false, .true: // swiftformat:disable:this sortSwitchCases
+			.boolean
+		case .chronologic:
+			.chronologic
+		case .empty, .null, .whitespace: // swiftformat:disable:this sortSwitchCases
+			.any
+		case .number:
+			.number
+		case .string:
+			.string
+		case .version:
+			.version
+		}
+	}
+}
+
+private extension FieldType { // swiftlint:disable:this file_types_order
+	/// The nullary predicate whose type this is; `.any` has none (its nullary
+	/// placeholder is `%i`, which is unconditional).
+	var nullaryPredicate: Predicate {
+		switch self {
+		case .any, .string: // swiftformat:disable:this sortSwitchCases
+			.string
+		case .boolean:
+			.boolean
+		case .chronologic:
+			.chronologic
+		case .number:
+			.number
+		case .version:
+			.version
+		}
+	}
+}
+
+private extension TransformCall { // swiftlint:disable:this file_types_order
+	/// This call's transform's `type:` comment part, except that a coerced
+	/// `<string-transform>` is "any".
+	var typeDeterminant: TypeDeterminant {
+		switch transform.kind {
+		case .chronologic:
+			.init(type: .chronologic, coercion: coercion)
+		case .number, .numberToString: // swiftformat:disable:this sortSwitchCases
+			.init(type: .number, coercion: coercion)
+		case .string:
+			coercion == nil ? .init(type: .string, coercion: nil) : .any
+		}
+	}
+}
+
+// MARK: - Formatting errors
+
+/// An error reported while formatting a value.
+enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	/// A transform without `<coercion>` was applied to an input that is not
+	/// already of its input type.
+	case transformInputTypeMismatch(transform: Transform, input: String)
+
+	var description: String {
+		switch self {
+		case let .transformInputTypeMismatch(transform, input):
+			"Transform \(transform) requires an input of its input type (<coercion> '.' coerces it): \(input)"
+		}
+	}
+}
+
+// MARK: - Evaluation
+
+extension Format { // swiftlint:disable:this file_types_order
+	private var isPassthrough: Bool {
+		switch self {
+		case let .pipeline(calls):
+			calls.isEmpty
+		case let .template(elements):
+			elements == [.placeholder(.unconditional(.input, pipeline: .init()))]
+		}
+	}
+
+	/// Renders this format against `value` (`nil` iff the field does not exist
+	/// for this item), producing the node to display / embed in output. A format
+	/// that is solely `%i` (or `%I` without a pipeline), or a pipeline without
+	/// any value transforms, passes the original node through unchanged (so JSON
+	/// output preserves the value's type); anything else produces a string, which
+	/// is empty iff formatting aborts.
+	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
+		isPassthrough
+			? value ?? .null
+			: .string(try evaluated(in: .init(input: value, label: label, name: name, matched: nil)) ?? "")
+	}
+
+	/// The evaluated string, or `nil` iff formatting aborts.
+	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .pipeline(calls):
+			// A block's pipeline formats the enclosing matcher's value; a
+			// `<format-block>`'s, the field value
+			return try (context.matched ?? .input(context.input)).applying(calls)?.string
+		case let .template(elements):
+			var result = ""
+			for element in elements {
+				guard let evaluated = try element.evaluated(in: context) else {
+					return nil
+				}
+				result += evaluated
+			}
+			return result
+		}
+	}
+}
+
+/// The context a format is evaluated in.
+private struct FormatContext { // swiftlint:disable:this one_declaration_per_file
+	let input: JSON.Node?
+	let label: String
+	let name: String
+	/// The enclosing matcher's value, for a `<block-placeholder>`.
+	let matched: FormatValue?
+
+	func matching(_ matched: FormatValue) -> Self {
+		.init(input: input, label: label, name: name, matched: matched)
+	}
+}
+
+private extension TemplateElement { // swiftlint:disable:this file_types_order
+	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .blockPlaceholder(pipeline):
+			try (context.matched ?? .input(context.input)).applying(pipeline)?.string
+		case let .placeholder(placeholder):
+			try placeholder.evaluated(in: context)
+		case let .text(text):
+			text
+		}
+	}
+}
+
+private extension Placeholder { // swiftlint:disable:this file_types_order
+	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+		switch self {
+		case let .conditional(matcher, form):
+			let matched = matcher.matched(context.input)
+			return switch form {
+			case let .abortOnFailure(success):
+				if let matched {
+					try success.evaluatedBlock(in: context.matching(matched), absentValue: matched.string)
+				} else {
+					nil
+				}
+			case let .abortOnSuccess(failure):
+				if matched == nil {
+					try failure.evaluatedBlock(in: context, absentValue: "")
+				} else {
+					nil
+				}
+			case let .binary(success, failure):
+				if let matched {
+					try success.evaluatedBlock(in: context.matching(matched), absentValue: matched.string)
+				} else {
+					try failure.evaluatedBlock(in: context, absentValue: "")
+				}
+			}
+		case let .match(branches, form):
+			for branch in branches {
+				if case let .value(value) = try branch.evaluated(in: context) {
+					return value
+				}
+			}
+			return switch form {
+			case .abortOnNoMatch:
+				nil
+			case let .binary(failure):
+				try failure.evaluatedBlock(in: context, absentValue: "")
+			}
+		case let .unconditional(predicate, pipeline):
+			return try predicate.value(in: context).applying(pipeline)?.string
+		}
+	}
+}
+
+/// What a `<branch>` returns.
+private enum BranchOutcome { // swiftlint:disable:this one_declaration_per_file
+	/// No value, so the next branch is tried.
+	case noValue
+	/// A value, which is `nil` iff formatting aborts.
+	case value(String?)
+}
+
+private extension Branch { // swiftlint:disable:this file_types_order
+	func evaluated(in context: FormatContext) throws(FormattingError) -> BranchOutcome {
+		switch self {
+		case let .conditional(matcher, isNegated, block):
+			let matched = matcher.matched(context.input)
+			return if isNegated {
+				matched == nil
+					? .value(try block.evaluatedBlock(in: context, absentValue: FormatValue.input(context.input).string))
+					: .noValue
+			} else if let matched {
+				.value(try block.evaluatedBlock(in: context.matching(matched), absentValue: matched.string))
+			} else {
+				.noValue
+			}
+		case let .unconditional(predicate, block):
+			let value = predicate.value(in: context)
+			return .value(try block.evaluatedBlock(in: context.matching(value), absentValue: value.string))
+		}
+	}
+}
+
+private extension Format? { // swiftlint:disable:this file_types_order
+	/// This block's evaluated value, `absentValue` iff the block is absent, or
+	/// `nil` iff formatting aborts.
+	func evaluatedBlock(in context: FormatContext, absentValue: String) throws(FormattingError) -> String? {
+		switch self {
+		case let .some(block):
+			try block.evaluated(in: context)
+		case .none:
+			absentValue
+		}
+	}
+}
+
+private extension UnconditionalPredicate { // swiftlint:disable:this file_types_order
+	func value(in context: FormatContext) -> FormatValue {
+		switch self {
+		case .input:
+			.input(context.input)
+		case .label:
+			.string(context.label)
+		case .name:
+			.string(context.name)
+		}
+	}
+}
+
+extension Matcher { // swiftlint:disable:this file_types_order
+	/// Whether `value` conforms to this matcher's predicate with its coercion.
+	func conforms(_ value: JSON.Node?) -> Bool {
+		matched(value) != nil
+	}
+
+	/// This matcher's value iff it matches `value`, else `nil`.
+	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
+		switch predicate {
+		case .boolean:
+			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
+		case .chronologic:
+			.chronologic(from: value)
+		case .empty:
+			value.isNullish || value.jsonString?.isEmpty == true ? .string("") : nil
+		case .false:
+			value.boolean(isCoerced: coercion != nil) == false ? .input(.bool(false)) : nil
+		case .null:
+			value.isNullish ? .string("") : nil
+		case .number:
+			.number(from: value, coercion: coercion)
+		case .string:
+			value.jsonString.map(FormatValue.string)
+		case .true:
+			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
+		case .version:
+			value.jsonString.flatMap { isVersion($0) ? .string($0) : nil }
+		case .whitespace:
+			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .string("") : nil
+		}
+	}
+}
+
+/// Whether `string` is a version: 1 or more `.`-separated components, each a
+/// non-negative integer optionally followed by non-`.` characters.
+func isVersion(_ string: String) -> Bool {
+	string.split(separator: ".", omittingEmptySubsequences: false).allSatisfy { component in
+		component.first.map { $0.isASCII && $0.isWholeNumber } ?? false
+	}
+}
+
+/// A number & its trivia (both empty unless coerced with a trivia regex).
+struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file
+	let number: DecimalNumber
+	/// The number's text: a JSON number's literal, or a coerced number's
+	/// canonical form.
+	let text: String
+	let triviaPrefix: Substring
+	let triviaSuffix: Substring
+}
+
+/// `value` as a number, per `coercion`: a JSON number; with `coercion`, also a
+/// string that `coercion` coerces to a number; else `nil`.
+func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTrivia? {
+	switch (value, coercion) {
+	case let (.number(number), _):
+		DecimalNumber("\(number)").map { .init(number: $0, text: "\(number)", triviaPrefix: "", triviaSuffix: "") }
+	case let (.string(literal), coercion?):
+		coercion.coercedNumber(in: literal.value).flatMap { text, triviaPrefix, triviaSuffix in
+			DecimalNumber(text).map { .init(number: $0, text: text, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix) }
+		}
+	default:
+		nil
+	}
+}
+
+extension Coercion { // swiftlint:disable:this file_types_order
+	/// `string` coerced to a number: a trivia prefix (the shortest whole match of
+	/// `triviaPrefixRegex` that a number succeeds), the longest number there (as
+	/// a canonical number) & a trivia suffix (the rest of `string`, which must be
+	/// a whole match of `triviaSuffixRegex`); else `nil`. See "Coercion" in
+	/// fields-format.md.
+	func coercedNumber(in string: String) -> (number: String, triviaPrefix: Substring, triviaSuffix: Substring)? {
+		string.indices
+			.lazy
+			.compactMap { index in
+				numberConventions.numberPrefix(of: string[index...]).flatMap { number, end in
+					string[..<index].wholeMatch(of: triviaPrefixRegex.regex) == nil ? nil : (index, number, end)
+				}
+			}
+			.first
+			.flatMap { index, number, end in
+				string[end...].wholeMatch(of: triviaSuffixRegex.regex) == nil
+					? nil
+					: (number, string[..<index], string[end...])
+			}
+	}
+}
+
+/// `value` parsed as chronologic: an ISO-8601 datetime, then an ISO-8601
+/// date-only (in the system time zone), then a Unix epoch (seconds) numeric
+/// timestamp; else `nil`.
+func chronologicDate(from value: JSON.Node?) -> Date? {
+	chronologicDateAndIsDateOnly(from: value)?.date
+}
+
+private func chronologicDateAndIsDateOnly(from value: JSON.Node?) -> (date: Date, isDateOnly: Bool)? {
+	switch value {
+	case let .number(number):
+		DecimalNumber("\(number)").flatMap(unixEpochDate).map { ($0, false) }
+	case let .string(literal):
+		iso8601DateAndIsDateOnly(in: literal.value) ?? unixEpochDate(in: literal.value).map { ($0, false) }
+	default:
+		nil
+	}
+}
+
+/// `string`'s date iff its entire content is an ISO-8601 extended-format
+/// datetime (in its UTC offset, else in the system time zone, its fractional
+/// seconds truncated to whole milliseconds) or date-only (midnight in the
+/// system time zone), whose every field is in range; else `nil`.
+private func iso8601DateAndIsDateOnly(in string: String) -> (date: Date, isDateOnly: Bool)? {
+	guard
+		let match = string.wholeMatch(of: unsafe iso8601DateRegex),
+		let timeZone = match.8.map(iso8601UTCOffsetTimeZone) ?? Environment.current.systemTimeZone
+	else {
+		return nil
+	}
+	let components = DateComponents(
+		calendar: .init(identifier: .gregorian),
+		timeZone: timeZone,
+		year: Int(match.1),
+		month: Int(match.2),
+		day: Int(match.3),
+		hour: match.4.flatMap { Int($0) } ?? 0,
+		minute: match.5.flatMap { Int($0) } ?? 0,
+		second: match.6.flatMap { Int($0) } ?? 0,
+	)
+	return components.isValidDate
+		? components.date.map { date in
+			(date.addingTimeInterval(match.7.flatMap { Double("0.\($0.prefix(3))") } ?? 0), match.4 == nil)
+		}
+		: nil
+}
+
+private nonisolated(unsafe) let iso8601DateRegex = #/
+	([0-9]{4})-([0-9]{2})-([0-9]{2})
+	(?:T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:[.,]([0-9]+))?(Z|[+-][0-9]{2}(?::?[0-9]{2})?)?)?
+/#
+
+/// The time zone of an ISO-8601 UTC offset (`Z`, or a sign, a 2-digit hour & an
+/// optional, optionally `:`-prefixed 2-digit minute), else `nil` iff it is out
+/// of range.
+private func iso8601UTCOffsetTimeZone(_ offset: Substring) -> TimeZone? {
+	let digits = offset.dropFirst().filter(\.isASCIIDigit)
+	let minutes = Int(digits.dropFirst(2)) ?? 0
+	return minutes < 60
+		? .init(
+			secondsFromGMT: // swiftformat:disable:next indent
+				(offset.first == "-" ? -1 : 1) * ((.init(digits.prefix(2)).map { $0 * 3600 } ?? 0) + minutes * 60),
+		)
+		: nil
+}
+
+/// `string`'s Unix epoch (seconds) date iff its entire content is a decimal
+/// number, else `nil`.
+private func unixEpochDate(in string: String) -> Date? {
+	(try? /[-+]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?/.wholeMatch(in: string)) != nil
+		? DecimalNumber(string).flatMap(unixEpochDate)
+		: nil
+}
+
+/// The date `seconds` after the Unix epoch, truncated to whole milliseconds;
+/// else `nil` iff it is out of range.
+private func unixEpochDate(_ seconds: DecimalNumber) -> Date? {
+	seconds.flooredThousandths.map { Date(timeIntervalSince1970: Double($0) / 1000) }
+}
+
+// MARK: - Values
+
+/// A value being formatted.
+private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
+	/// A chronologic value, rendered per `style`.
+	case chronologic(Date, style: ChronologicStyle)
+	/// The field value, at its original type.
+	case input(JSON.Node?)
+	/// A number, between its trivia (both empty unless coerced with a trivia
+	/// regex).
+	case number(String, triviaPrefix: Substring, triviaSuffix: Substring)
+	/// A string.
+	case string(String)
+
+	/// The value parsed as chronologic; else `nil`.
+	static func chronologic(from value: JSON.Node?) -> Self? {
+		chronologicDateAndIsDateOnly(from: value).map { date, isDateOnly in
+			.chronologic(date, style: .init(isInputDateOnly: isDateOnly, isDateOnly: isDateOnly))
+		}
+	}
+
+	/// The value as a number, per `coercion`; else `nil`.
+	static func number(from value: JSON.Node?, coercion: Coercion?) -> Self? {
+		numberWithTrivia(in: value, coercion: coercion).map { number in
+			.number(number.text, triviaPrefix: number.triviaPrefix, triviaSuffix: number.triviaSuffix)
+		}
+	}
+
+	/// The rendered value.
+	var string: String {
+		switch self {
+		case let .chronologic(date, style):
+			style.formatted(date)
+		case let .input(node):
+			node?.stringValue ?? ""
+		case let .number(number, triviaPrefix, triviaSuffix):
+			triviaPrefix + number + triviaSuffix
+		case let .string(string):
+			string
+		}
+	}
+
+	private var isString: Bool {
+		switch self {
+		case .chronologic, .number:
+			false
+		case let .input(node):
+			node.jsonString != nil
+		case .string:
+			true
+		}
+	}
+
+	/// This value transformed by `calls`, or `nil` iff a coercion fails
+	/// (formatting aborts).
+	func applying(_ calls: [TransformCall]) throws(FormattingError) -> Self? {
+		var value = self
+		for call in calls {
+			guard let transformed = try value.applying(call) else {
+				return nil
+			}
+			value = transformed
+		}
+		return value
+	}
+
+	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
+		switch call.transform.kind {
+		case .chronologic:
+			guard case let .chronologic(date, style)? = try coercedChronologic(for: call) else {
+				return nil
+			}
+			return .chronologic(date, style: style.applying(call.transform))
+		case .number, .numberToString: // swiftformat:disable:this sortSwitchCases
+			guard case let .number(number, triviaPrefix, triviaSuffix)? = try coercedNumber(for: call) else {
+				return nil
+			}
+			return .number(call.transform.applied(to: number), triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix)
+		case .string:
+			guard call.coercion != nil || isString else {
+				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			}
+			return .string(call.transform.applied(to: string))
+		}
+	}
+
+	/// This value as chronologic iff it conforms to the chronologic predicate,
+	/// else `nil` iff `call` has `<coercion>` (formatting aborts).
+	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
+		if case .chronologic = self {
+			return self
+		}
+		let chronologic = if case let .input(node) = self {
+			Self.chronologic(from: node)
+		} else {
+			Self.chronologic(from: .string(string))
+		}
+		guard chronologic != nil || call.coercion != nil else {
+			throw .transformInputTypeMismatch(transform: call.transform, input: string)
+		}
+		return chronologic
+	}
+
+	/// This value as a number, coerced iff `call` has `<number-coercion>` (`nil`
+	/// iff that coercion fails).
+	private func coercedNumber(for call: TransformCall) throws(FormattingError) -> Self? {
+		switch self {
+		case let .input(.number(number)):
+			return .number("\(number)", triviaPrefix: "", triviaSuffix: "")
+		case .number:
+			return self
+		default:
+			guard let coercion = call.coercion else {
+				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			}
+			return .number(from: .string(string), coercion: coercion)
+		}
+	}
+}
+
+/// How a chronologic value is rendered: ISO-8601, per input (date-only or
+/// datetime), in the system time zone, unless modified by chronologic
+/// transforms. A date-only input's date ignores time zones.
+private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// Whether the input is date-only (parsed as midnight in the system time
+	/// zone), so it is always rendered in the system time zone.
+	let isInputDateOnly: Bool
+	var isDateOnly: Bool
+	var timeZone = TimeZone?.none
+
+	/// This style modified by a chronologic `transform`: `dateOnly` renders only
+	/// the date; `timeZone` sets the output time zone (the last one wins).
+	func applying(_ transform: Transform) -> Self {
+		var style = self
+		switch transform {
+		case .dateOnly:
+			style.isDateOnly = true
+		case let .timeZone(timeZone):
+			style.timeZone = timeZone
+		default:
+			break
+		}
+		return style
+	}
+
+	/// `date`, which is at a whole millisecond, rendered per this style; a
+	/// datetime includes 3-digit fractional seconds iff its milliseconds are
+	/// nonzero.
+	func formatted(_ date: Date) -> String {
+		let systemTimeZone = Environment.current.systemTimeZone
+		let milliseconds = (date.timeIntervalSince1970 * 1000).rounded()
+		let style = Date.ISO8601FormatStyle(
+			timeZoneSeparator: .colon,
+			includingFractionalSeconds: milliseconds.truncatingRemainder(dividingBy: 1000) != 0,
+			timeZone: isInputDateOnly ? systemTimeZone : timeZone ?? systemTimeZone,
+		)
+		// `date`'s `Double` may be slightly less than its millisecond, to which
+		// `style` truncates, so half a millisecond later is formatted
+		let formattedDate = Date(timeIntervalSince1970: (milliseconds + 0.5) / 1000)
+		return isDateOnly ? style.year().month().day().format(formattedDate) : style.format(formattedDate)
+	}
+}
+
+private extension JSON.Node? {
+	var isNullish: Bool {
+		switch self {
+		case nil, .some(.null):
+			true
+		default:
+			false
+		}
+	}
+
+	/// The string iff this is a JSON string.
+	var jsonString: String? {
+		if case let .string(literal) = self {
+			literal.value
+		} else {
+			nil
+		}
+	}
+
+	/// The boolean iff this is a JSON boolean or, iff `isCoerced`, a string that
+	/// is `true` or `false`, verbatim.
+	func boolean(isCoerced: Bool) -> Bool? { // swiftlint:disable:this discouraged_optional_boolean
+		switch self {
+		case let .bool(bool):
+			bool
+		case let .string(literal) where isCoerced:
+			["false": false, "true": true][literal.value]
+		default:
+			nil
+		}
+	}
+}

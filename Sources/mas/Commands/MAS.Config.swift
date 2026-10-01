@@ -19,10 +19,10 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueOutputConfig>
 
-		func run() {
-			outputConfigOptionGroup.output(
+		func run() throws {
+			try outputConfigOptionGroup.output(
 				[
 					.init( // swiftformat:disable:this wrap wrapArguments
 						dictionaryLiteral: // swiftlint:disable vertical_parameter_alignment_on_call
@@ -48,25 +48,34 @@ extension MAS { // swiftlint:disable:this file_types_order
 	}
 }
 
-private struct KeyValueConfig: OutputConfig, Keyed {
-	static let defaultFormat = OutputFormat.keyValue
-	static let keys = [
-		JSON.Key("mas"),
-		"slice",
-		"slices",
-		"dist",
-		"origin",
-		"rev",
-		"swift",
-		"driver",
-		"store",
-		"region",
-		"macos",
-		"build",
-		"mac",
-		"cpu",
-		"arch",
-	]
+private struct KeyValueOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.keyValue(.default)
+	/// `config`'s field set is fully static & fully known, so `standard` is
+	/// itself all-inclusive: there is no separate dynamic component to merge at
+	/// render time (unlike `list` / `search` / `outdated` / `lookup`).
+	static let standardFieldsConfig = allFieldsConfig
+	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
+		fieldSpecs: [
+			"mas",
+			"slice",
+			"slices",
+			"dist",
+			"origin",
+			"rev",
+			"swift",
+			"driver",
+			"store",
+			"region",
+			"macos",
+			"build",
+			"mac",
+			"cpu",
+			"arch",
+		]
+			.map { .init(name: $0, label: $0, format: defaultFieldFormat(forFieldNamed: $0), sortSpec: nil) },
+	)
+	/// `config`'s field set is fully static & fully known.
+	static let fieldNameSet = Set<String>?.some(.init(allFieldsConfig.fieldSpecs.map(\.name)))
 }
 
 private func configStringValue(_ name: String) -> String {

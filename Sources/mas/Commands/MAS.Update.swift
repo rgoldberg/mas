@@ -24,7 +24,7 @@ extension MAS {
 		func run() async throws {
 			try await AppStore.update.apps(
 				withADAMIDs: await outdatedAppsOptionGroup
-					.outdatedApps(considerAllOutdated: forceOptionGroup.force, withFullJSON: false)
+					.outdatedApps(considerAllOutdated: forceOptionGroup.force, fields: ["adamID"])
 					.map(\.installedApp.adamID),
 			)
 		}

@@ -1,0 +1,638 @@
+//
+// MASTests+FieldSpec.swift
+// mas
+//
+// Copyright © 2026 mas-cli. All rights reserved.
+//
+
+internal import Foundation
+internal import JSONAST
+@testable private import mas
+internal import Testing
+
+private extension MASTests {
+	@Test
+	func `parses default field specs when input is empty`() throws {
+		let specs = try parseFieldSpecs("")
+		#expect(!specs.isEmpty)
+		#expect(specs[0].name == "adamID")
+	}
+
+	@Test
+	func `parses all field specs`() throws {
+		let specs = try parseFieldSpecs("@all")
+		#expect(specs.count == 2)
+		#expect(specs.map(\.name).contains("adamID"))
+		#expect(specs.map(\.name).contains("bundleID"))
+	}
+
+	@Test
+	func `parses none as all with every field spec hidden & its sort disabled, which an overlay unhides`() throws {
+		let none = try parseFieldsConfig("@none")
+		#expect(none.fieldSpecs.map(\.isHidden) == [true, true])
+		#expect(none.fieldSpecs.map(\.sortSpec?.priority) == [0, nil])
+		#expect(none.itemSort.keys.isEmpty)
+		let specs = try parseFieldSpecs("@none.bundleID")
+		#expect(specs.filter { !$0.isHidden }.map(\.name) == ["bundleID"])
+	}
+
+	@Test
+	func `parses standalone field spec`() throws {
+		let specs = try parseFieldSpecs("adamID=ID,bundleID")
+		#expect(specs.count == 2)
+		#expect(specs[0].name == "adamID")
+		#expect(specs[0].label == "ID")
+		#expect(specs[1].name == "bundleID")
+		#expect(specs[1].label == "bundleID")
+	}
+
+	@Test
+	func `parses in-place edit`() throws {
+		let specs = try parseFieldSpecs(".adamID=AppID")
+		#expect(!specs.isEmpty)
+		#expect(specs[0].name == "adamID")
+		#expect(specs[0].label == "AppID")
+	}
+
+	@Test
+	func `parses field specs section insertion & overlay`() throws {
+		let specs = try parseFieldSpecs(".+bundleID,adamID=SecondaryID").filter { !$0.isHidden }
+		#expect(specs.count == 2)
+		#expect(specs[0].name == "bundleID")
+		let secondary = try #require(specs.last)
+		#expect(secondary.name == "adamID")
+		#expect(secondary.label == "SecondaryID")
+	}
+
+	@Test
+	func `moves a field spec to the front`() throws {
+		// Base is [adamID, bundleID]; move bundleID (@2) to immediately after
+		// $previous$ (nothing yet ⇒ the front)
+		let specs = try parseFieldSpecs("@all.%@2")
+		#expect(specs.map(\.name) == ["bundleID", "adamID"])
+	}
+
+	@Test
+	func `removes a field spec`() throws {
+		let specs = try parseFieldSpecs("@all.-bundleID")
+		#expect(specs.map(\.name) == ["adamID"])
+	}
+
+	@Test
+	func `insert lands immediately after the previous field spec, not always at the end`() throws {
+		// Base is [adamID, hidden bundleID]; overlay adamID (no-op-ish, just to set
+		// $previous$), then insert 2 more fields, both should land after adamID, in
+		// order, not accumulate before / after each other incorrectly
+		let specs = try parseFieldSpecs(".adamID,+one,+two")
+		#expect(specs.map(\.name) == ["adamID", "one", "two", "bundleID"])
+	}
+
+	@Test
+	func `hides a field spec, retaining its sort`() throws {
+		let specs = try parseFieldSpecs("@all._adamID/1-")
+		#expect(specs.map(\.name) == ["adamID", "bundleID"])
+		#expect(specs[0].isHidden)
+		#expect(specs[0].sortSpec?.priority == 1)
+		#expect(specs[0].sortSpec?.optionSet.direction == .descending)
+		#expect(!specs[1].isHidden)
+	}
+
+	@Test
+	func `hiding a nonexistent field inserts a hidden field spec`() throws {
+		let specs = try parseFieldSpecs("@all.adamID,_size/1-")
+		#expect(specs.map(\.name) == ["adamID", "size", "bundleID"])
+		#expect(specs[1].isHidden)
+		#expect(specs[1].sortSpec?.priority == 1)
+	}
+
+	@Test
+	func `hiding a field removed earlier in the section inserts a hidden copy of its base field spec`() throws {
+		let specs = try parseFieldSpecs("@all.-adamID,_adamID")
+		#expect(specs.map(\.name) == ["adamID", "bundleID"])
+		#expect(specs[0].isHidden)
+		#expect(specs[0].sortSpec?.priority == 1000)
+	}
+
+	@Test
+	func `a named reference to a field spec removed earlier in the section is an error`() {
+		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "adamID")) {
+			try parseFieldSpecs("@all.-adamID,adamID")
+		}
+	}
+
+	@Test(arguments: ["@all._adamID,adamID", "@all._adamID,%adamID"])
+	func `overlay & move unhide a hidden field spec`(value: String) throws {
+		#expect(try parseFieldSpecs(value).map(\.isHidden) == [false, false])
+	}
+
+	@Test
+	func `insertion copies the base fields config's field spec, by name or index`() throws {
+		let byName = try parseFieldSpecs("@all.+adamID")
+		#expect(byName.map(\.name) == ["adamID", "adamID", "bundleID"])
+		#expect(byName[0].sortSpec?.priority == 1000)
+		let byIndex = try parseFieldSpecs("@all.+@-1")
+		#expect(byIndex.map(\.name) == ["bundleID", "adamID", "bundleID"])
+		#expect(throws: ParsingError.invalidPosition(3)) { try parseFieldSpecs("@all.+@3") }
+	}
+
+	@Test
+	func `insertion of an unknown name selects default settings`() throws {
+		let specs = try parseFieldSpecs("@all.+size")
+		#expect(specs[0].name == "size")
+		#expect(specs[0].label == "size")
+		#expect(specs[0].sortSpec == nil)
+		#expect(!specs[0].isHidden)
+	}
+
+	@Test
+	func `parses sort spec without numeric priority`() throws {
+		let specs = try parseFieldSpecs(".adamID/+")
+		let sortSpec = try #require(specs[0].sortSpec)
+		#expect(sortSpec.optionSet.direction == .ascending)
+	}
+
+	@Test
+	func `parses sort spec with numeric priority`() throws {
+		let specs = try parseFieldSpecs(".adamID/500-")
+		let sortSpec = try #require(specs[0].sortSpec)
+		#expect(sortSpec.priority == 500)
+		#expect(sortSpec.optionSet.direction == .descending)
+	}
+
+	@Test
+	func `item-sort disable-all-sorts sets priority to 0 but retains sort options`() throws {
+		let config = try parseFieldsConfig("//0")
+		let sortSpec = try #require(config.fieldSpecs[0].sortSpec)
+		#expect(sortSpec.priority == 0)
+		#expect(sortSpec.optionSet.caseSensitivity == .sensitive) // Fixture default, retained
+		#expect(config.itemSort.keys.isEmpty)
+	}
+
+	@Test
+	func `field spec edit re-enables a sort disabled by disable-all-sorts`() throws {
+		let config = try parseFieldsConfig("//0.adamID/1")
+		#expect(config.fieldSpecs[0].sortSpec?.priority == 1)
+		#expect(config.itemSort.keys.map(\.fieldSpec.name) == ["adamID"])
+	}
+
+	@Test
+	func `item-sort section without disable-all-sorts leaves inherited sorts alone`() throws {
+		let config = try parseFieldsConfig("//-")
+		#expect(config.fieldSpecs[0].sortSpec?.priority == 1000)
+		#expect(config.itemSort.tiebreakDirection == .descending)
+	}
+
+	@Test(arguments: [
+		("//", ParsingError.missingItemSortOptionSet),
+		("//.adamID", .missingItemSortOptionSet),
+		("//x", .invalidSortOption("x")),
+	])
+	func `reports an item-sort-section error`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldsConfig(value) }
+	}
+
+	@Test(arguments: ["/", "/.adamID", "/ ", "/ .adamID"])
+	func `field order section requires a field-order-option-set`(value: String) {
+		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig(value) }
+	}
+
+	@Test
+	func `an absolute config's field specs are visible copies of none's, overlaid with their modifiers`() throws {
+		let price = FieldSpec(
+			name: "price",
+			label: "Price",
+			format: defaultFieldFormat(forFieldNamed: "price"),
+			sortSpec: .init(priority: 2, optionSets: [.default]),
+			justification: .end,
+		)
+		let all = BaseIncludesAllFieldsConfig(fieldSpecs: [price])
+		let fieldSpecs =
+			try resolvedFieldsConfig(
+				from: "price,price=Cost/,size",
+				standard: SelectedFieldsConfig(),
+				all: all,
+				outputFormat: .table(.default),
+			)
+			.fieldSpecs
+		#expect(
+			fieldSpecs
+				== [
+					price.withSortDisabled,
+					.init(name: "price", label: "Cost", format: price.format, sortSpec: nil, justification: .end),
+					.defaultSettings(forName: "size"),
+				],
+		)
+		let jsonFieldSpecs =
+			try resolvedFieldsConfig(from: "price", standard: SelectedFieldsConfig(), all: all, outputFormat: .json(.default))
+			.fieldSpecs
+		#expect(jsonFieldSpecs.map(\.label) == ["price"])
+		#expect(jsonFieldSpecs.map(\.format) == [price.format])
+		#expect(jsonFieldSpecs.map(\.outputsInput) == [true])
+	}
+
+	@Test
+	func `an absolute config is equivalent to none with positional order & an insertion per field spec`() throws {
+		let absolute = try parseFieldsConfig("bundleID=B,adamID,bundleID")
+		let relative = try parseFieldsConfig("@none/P.+bundleID=B,+adamID,+bundleID")
+		#expect(absolute.fieldSpecs == relative.fieldSpecs.filter { !$0.isHidden })
+		#expect(absolute.fieldOrder == relative.fieldOrder)
+		#expect(absolute.itemSort == relative.itemSort)
+	}
+
+	@Test(arguments: [("/P,x", Character(",")), ("/I+/-x", "x")])
+	func `input left over after a field order section is an error`(value: String, character: Character) {
+		#expect(throws: ParsingError.unexpectedCharacter(character)) { try parseFieldsConfig(value) }
+	}
+
+	@Test(
+		arguments: [
+			(".adamID:.uppercase", Justification.end),
+			(".adamID:%i", .end),
+			(".adamID:.startJustify..uppercase", .start),
+			(".+size:.uppercase", .start),
+		],
+	)
+	func `an absent justify is inherited, or start-justify absent any to inherit`(
+		value: String,
+		justification: Justification,
+	) throws {
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: value,
+			standard: SelectedFieldsConfig(
+				fieldSpecs: [
+					.init(
+						name: "adamID",
+						label: "adamID",
+						format: .default(fieldName: "adamID"),
+						sortSpec: nil,
+						justification: .end,
+					),
+				],
+			),
+			all: allFixture,
+			outputFormat: .table(.default),
+		)
+		.fieldSpecs
+		#expect(fieldSpecs[0].justification == justification)
+	}
+
+	@Test(
+		arguments: [
+			("/P", FieldOrder.positional),
+			("/-P", .positional),
+			("/P-", .positional),
+			("/DP", .positional),
+			("/D", .document(nil, tiebreakDirection: .ascending)),
+			("/D-", .document(.descending, tiebreakDirection: .ascending)),
+			("/D/-", .document(nil, tiebreakDirection: .descending)),
+			("/D-/+", .document(.descending, tiebreakDirection: .ascending)),
+			("/PD/-", .document(nil, tiebreakDirection: .descending)),
+			("/D / -", .document(nil, tiebreakDirection: .descending)),
+			("/D//-", .document(nil, tiebreakDirection: .ascending)),
+		],
+	)
+	func `field order positional-order & document-order`(value: String, fieldOrder: FieldOrder) throws {
+		#expect(try parseFieldsConfig(value, outputFormat: .json(.default)).fieldOrder == fieldOrder)
+	}
+
+	@Test(
+		arguments: [
+			("@all/P", ["adamID", "bundleID"]),
+			("@all/P-", ["bundleID", "adamID"]),
+			("@all/P-.%adamID", ["adamID", "bundleID"]),
+			("@all/P-.%@1", ["bundleID", "adamID"]),
+			("@all/P-.+@1", ["bundleID", "bundleID", "adamID"]),
+			("@all/P-.-@1", ["adamID"]),
+		],
+	)
+	func `positional-order's descending reverses positions before field spec edits`(value: String, names: [String])
+	throws {
+		#expect(try parseFieldSpecs(value).map(\.name) == names)
+	}
+
+	@Test(arguments: [("D", ["b", "a", "c"]), ("D-", ["c", "a", "b"])])
+	func `document-order orders each item's fields by its own key order`(order: String, expected: [String]) throws {
+		let fieldSpecs = ["a", "b", "c"].map(FieldSpec.defaultSettings(forName:))
+		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
+		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json(.default)).fieldOrder
+		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.name) == expected)
+	}
+
+	@Test(arguments: ["/D", "/-D"])
+	func `document-order is unsupported for table output`(value: String) {
+		#expect(throws: ParsingError.documentOrderUnsupportedForTable) { try parseFieldsConfig(value) }
+	}
+
+	@Test
+	func `field order sort-option-set defaults source to output`() throws {
+		guard case let .byLabel(sortSpec, _) = try parseFieldsConfig("/-").fieldOrder else {
+			Issue.record("Expected .byLabel")
+			return
+		}
+		#expect(sortSpec.direction == .descending)
+		guard case .byName = try parseFieldsConfig("/I+").fieldOrder else {
+			Issue.record("Expected .byName")
+			return
+		}
+	}
+
+	@Test(arguments: [("/I+", SortOptionSet.Direction.ascending), ("/I+/-", .descending), ("/-/+", .ascending)])
+	func `field order sort-option-set parses field-order-tiebreaker`(
+		value: String,
+		tiebreakDirection: SortOptionSet.Direction,
+	) throws {
+		let parsedTiebreakDirection =
+			switch try parseFieldsConfig(value).fieldOrder {
+			case let .byLabel(_, tiebreakDirection), let .byName(_, tiebreakDirection):
+				tiebreakDirection
+			default:
+				SortOptionSet.Direction?.none
+			}
+		#expect(parsedTiebreakDirection == tiebreakDirection)
+	}
+
+	@Test(
+		arguments: [
+			("I+", ["1", "3", "2"]),
+			("I+/-", ["3", "1", "2"]),
+			("I-", ["2", "1", "3"]),
+			("I-/-", ["2", "3", "1"]),
+		],
+	)
+	func `field order sort-option-set tiebreaks by position per field-order-tiebreaker`(
+		options: String,
+		expectedLabels: [String],
+	) throws {
+		let fieldSpecs = [("a", "1"), ("b", "2"), ("a", "3")].map(fieldSpec(name:label:))
+		let fieldOrder = try parseFieldsConfig("/" + options).fieldOrder
+		#expect(fieldOrder.applied(to: fieldSpecs).map(\.label) == expectedLabels)
+	}
+
+	@Test(
+		arguments: [
+			("D", ["2", "1", "4", "3", "5"]),
+			("D/-", ["2", "4", "1", "5", "3"]),
+			("D-", ["3", "5", "1", "4", "2"]),
+			("D-/-", ["5", "3", "4", "1", "2"]),
+		],
+	)
+	func `document-order tiebreaks by position per field-order-tiebreaker`(
+		options: String,
+		expectedLabels: [String],
+	) throws {
+		let fieldSpecs = [("a", "1"), ("b", "2"), ("c", "3"), ("a", "4"), ("d", "5")].map(fieldSpec(name:label:))
+		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
+		let fieldOrder = try parseFieldsConfig("/" + options, outputFormat: .json(.default)).fieldOrder
+		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.label) == expectedLabels)
+	}
+
+	@Test(
+		arguments: [
+			("/D/", ParsingError.missingFieldOrderTiebreakerDirection),
+			("/D/x", .missingFieldOrderTiebreakerDirection),
+			("/I+/", .missingFieldOrderTiebreakerDirection),
+			("/P/-", .tiebreakerUnsupportedForPositionalOrder),
+			("/DP/+", .tiebreakerUnsupportedForPositionalOrder),
+		],
+	)
+	func `invalid field-order-tiebreaker is an error`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldsConfig(value, outputFormat: .json(.default)) }
+	}
+
+	@Test
+	func `clears sort spec with empty slash`() throws {
+		let sortSpec = try parseFieldSpecs(".adamID/")[0].sortSpec
+		#expect(sortSpec == nil)
+	}
+
+	@Test(
+		arguments: [
+			(".adamID@", ParsingError.missingIndex),
+			(".@", .missingIndex),
+			(".+adamID@x", .missingIndex),
+			(".-adamID=x", .nonexistentFieldSpec(forName: "adamID=x")),
+			("@all.adamID@3", .invalidPosition(3)),
+		],
+	)
+	func `reports a field-spec-reference error`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
+	}
+
+	@Test(arguments: ["@all . bundleID @ 1 = Bundle , adamID", "@all.bundleID@-1=Bundle"])
+	func `ignores whitespace around field-spec-edits' syntax tokens`(value: String) throws {
+		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
+	}
+
+	@Test(arguments: ["bogus", ".+bogus", "._bogus", "adamID,bogus=B"])
+	func `a reference to a nonexistent field is an error iff every field is known up front`(value: String) throws {
+		#expect(throws: ParsingError.nonexistentField("bogus")) {
+			try resolvedFieldsConfig(
+				from: value,
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .keyValue(.default),
+				fieldNameSet: ["adamID", "bundleID"],
+			)
+		}
+		_ = try parseFieldSpecs(value)
+	}
+
+	@Test
+	func `throws error for nonexistent field edit`() {
+		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "nonexistentField")) {
+			try parseFieldSpecs(".nonexistentField")
+		}
+	}
+
+	@Test
+	func `fetchFieldNames returns empty for an all-derived base`() throws {
+		#expect(
+			try fetchFieldNames(for: "@all", standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+				.isEmpty,
+		)
+	}
+
+	@Test
+	func `fetchFieldNames unions base names with insert names`() throws {
+		let nameSet = Set(
+			try fetchFieldNames(for: ".+extra", standard: standardFixture, all: allFixture, outputFormat: .table(.default)),
+		)
+		#expect(nameSet == ["adamID", "extra"])
+	}
+
+	@Test
+	func `fetchFieldNames excludes hidden field specs that do not sort items`() throws {
+		let nameSet = Set(
+			try fetchFieldNames(
+				for: "._adamID/0,_extra/1",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			),
+		)
+		#expect(nameSet == ["extra"])
+	}
+
+	@Test
+	func `fetchFieldNames for an absolute config is just its field names`() throws {
+		let nameSet = Set(
+			try fetchFieldNames(
+				for: "adamID,bundleID",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			),
+		)
+		#expect(nameSet == ["adamID", "bundleID"])
+	}
+
+	@Test
+	func `a built-in fields config's machine-facing variant labels each field spec by its name & outputs its input`() {
+		let builtIn = BaseIncludesAllFieldsConfig(
+			fieldSpecs: [.init(name: "fileSizeBytes", label: "Size", format: .template([.text("custom")]), sortSpec: nil)],
+		)
+		let json = builtIn.machineFacingVariant()
+		#expect(json.fieldSpecs[0].label == "fileSizeBytes")
+		#expect(json.fieldSpecs[0].format == .template([.text("custom")]))
+		#expect(json.fieldSpecs[0].outputsInput)
+	}
+
+	@Test(
+		arguments: [
+			("@standard", OutputFormat.json(.default), ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
+			("@standard@none", .json(.default), ["adamID"], "Adam"),
+			("@standard@table", .json(.default), ["adamID"], "Adam"),
+			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
+			("@default@key-value", .json(.default), ["adamID"], "Adam"),
+			("@standard", .keyValue(.default), ["adamID"], "Adam"),
+		],
+	)
+	func `resolves a built-in fields config's variant by suffix or output format`(
+		value: String,
+		outputFormat: OutputFormat,
+		names: [String],
+		adamIDLabel: String,
+	) throws {
+		let config = try resolvedFieldsConfig(
+			from: value,
+			standard: SelectedFieldsConfig(
+				fieldSpecs: [.init(name: "adamID", label: "Adam", format: .default(fieldName: "adamID"), sortSpec: nil)],
+			),
+			all: allFixture,
+			outputFormat: outputFormat,
+		)
+		#expect(config.fieldSpecs.filter { !$0.isHidden }.map(\.name).sorted() == names)
+		#expect(config.fieldSpecs.first { $0.name == "adamID" }?.label == adamIDLabel)
+	}
+
+	@Test
+	func `standard differs from all only in which field specs are hidden`() throws {
+		let specs = try parseFieldSpecs("@standard")
+		#expect(specs.map(\.name) == ["adamID", "bundleID"])
+		#expect(specs.map(\.isHidden) == [false, true])
+		#expect(try parseFieldSpecs("@standard.bundleID").map(\.isHidden) == [false, false])
+	}
+
+	@Test
+	func `fetchFieldNames fetches every field for a reference to a field not yet discovered`() throws {
+		#expect(
+			try fetchFieldNames(
+				for: ".undiscovered",
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+			)
+			.isEmpty,
+		)
+	}
+
+	@Test(
+		arguments: [
+			("@bogus", ParsingError.nonexistentFieldsConfig("bogus")),
+			("@all@xml", .invalidBaseFieldsConfigName("all@xml")),
+			("@a b", .invalidBaseFieldsConfigName("a b")),
+			("@@json", .invalidBaseFieldsConfigName("@json")),
+		],
+	)
+	func `reports an invalid or nonexistent base fields config name`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
+	}
+
+	@Test
+	func `table end-justifies a field per its field spec's justification; a start-justified last column is not padded`(
+	) throws {
+		let table = try [
+			JSON.Object([("adamID", .number(7)), ("name", .string("Slack"))]),
+			.init([("adamID", .number(1_234_567)), ("name", .string("A"))]),
+		]
+			.table(
+				fieldSpecs: [
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+				],
+				tableConfig: .default,
+			)
+		let expected = "      7  Slack\n1234567  A"
+		#expect(table == expected)
+	}
+
+	@Test
+	func `table pads even a end-justified last column`() throws {
+		let table = try [
+			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567))]),
+			.init([("name", .string("Slack")), ("adamID", .number(7))]),
+		]
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+				],
+				tableConfig: .default,
+			)
+		let expected = "A      1234567\nSlack        7"
+		#expect(table == expected)
+	}
+
+	@Test
+	func `table still gaps a end-justified middle column from the column after it`() throws {
+		let table = try [
+			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567)), ("version", .string("1.0"))]),
+			.init([("name", .string("Slack")), ("adamID", .number(7)), ("version", .string("2.0"))]),
+		]
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				tableConfig: .default,
+			)
+		let expected = "A      1234567  1.0\nSlack        7  2.0"
+		#expect(table == expected)
+	}
+}
+
+private func parseFieldSpecs(_ value: String) throws(ParsingError) -> [FieldSpec] {
+	try parseFieldsConfig(value).fieldSpecs
+}
+
+private func parseFieldsConfig(_ value: String, outputFormat: OutputFormat = .table(.default))
+throws(ParsingError) -> any FieldsConfig {
+	try resolvedFieldsConfig(from: value, standard: standardFixture, all: allFixture, outputFormat: outputFormat)
+}
+
+private func fieldSpec(name: String, label: String) -> FieldSpec {
+	.init(name: name, label: label, format: .default(fieldName: name), sortSpec: nil)
+}
+
+private let adamIDFieldSpec = FieldSpec(
+	name: "adamID",
+	label: "adamID",
+	format: .default(fieldName: "adamID"),
+	sortSpec: .init(priority: 1000, optionSets: [.default]),
+)
+private let bundleIDFieldSpec =
+	FieldSpec(name: "bundleID", label: "bundleID", format: .default(fieldName: "bundleID"), sortSpec: nil)
+
+private let standardFixture = SelectedFieldsConfig(fieldSpecs: [adamIDFieldSpec])
+private let allFixture = BaseIncludesAllFieldsConfig(fieldSpecs: [adamIDFieldSpec, bundleIDFieldSpec])

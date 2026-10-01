@@ -67,14 +67,34 @@
 
 ### Formatting
 
-1. [Chronologic
+1. [Version fields' default formats use
+   `%v`](../Specs/mas.md#default-sort-options): implemented as `%V+%i+`, so a
+   nonconforming value still renders as is instead of aborting to an empty
+   string. Is that intended?
+2. [Chronologic
    auto-detection](../Specs/fields-format.md#chronologic-formatting):
    1. `<nullary-chronologic>`'s value is an "ISO date / datetime / time, per
       input", but auto-detection tries only ISO-8601 datetime, ISO-8601
       date-only & Unix epoch, so time-only input (e.g., `12:30:00`) is not
-      chronologic. Should time-only input be detected, or should "/ time" be
-      removed?
-   2. Which ISO-8601 representations should be detected?
+      chronologic (implemented as such). Should time-only input be detected, or
+      should "/ time" be removed?
+   2. It accepts a string of a decimal number (e.g., `"0"`) as a Unix epoch
+      timestamp, unlike `%n`, which requires a JSON number absent `<coercion>`.
+      Should only a JSON number be a "numeric timestamp"?
+   3. Which ISO-8601 representations should be detected?
+      1. Implemented:
+         1. Extended-format date.
+         2. Extended-format date & complete time, with optional fractional
+            seconds (after `.` or `,`) & an optional UTC offset (`Z`, `±hh`,
+            `±hhmm`, or `±hh:mm`).
+      2. Undetected:
+         1. Basic format (e.g., `20200318`, currently read as a Unix epoch).
+         2. Reduced precision (e.g., `2020-03-18T17:39`).
+         3. Ordinal dates.
+         4. Week dates.
+         5. RFC 3339 variants:
+            1. Space separator.
+            2. Lowercase `t` or `z`.
 
 ### Sorting
 
@@ -94,9 +114,15 @@
    set sorts values that conform to none of the preceding sets' types, but a set
    has no type of its own (e.g., for `price:%.n/1n/Ii`, which values the 2nd set
    sorts, and as which type?).
+   1. [Values that conform to no `<sort-option-set>` "retain their input
+      order"](../Specs/fields.md#sort-nonconforming-values): implemented as
+      comparing equal for that sort key, so a lower-priority sort key may still
+      order them; should they instead be ordered by input order immediately?
 3. A [`<sort-priority>`](../Specs/fields.md#sort-priority) directly absent from
    a `<sort>` (e.g., `name/I`) is `null`, which is an error, so
-   `[ <sort-priority> ]` can never be absent.
+   `[ <sort-priority> ]` can never be absent: implemented as the working fields
+   config's `<sort-priority>` (an error iff the field spec has no `<sort>`).
+   Which is intended?
 
 ### Output Configs
 
