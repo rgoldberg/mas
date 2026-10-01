@@ -9,7 +9,7 @@ private import JSONAST
 
 struct OutdatedApp {
 	let installedApp: InstalledApp
-	let newVersion: String // periphery:ignore
+	let newVersion: String // swiftlint:disable:this unused_declaration
 
 	private let lazyJSON: Lazy<String>
 

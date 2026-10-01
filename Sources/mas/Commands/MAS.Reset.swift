@@ -2,7 +2,7 @@
 // MAS.Reset.swift
 // mas
 //
-// Copyright © 2016 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import AppKit
@@ -65,7 +65,7 @@ extension MAS {
 				return
 			}
 
-			unsafe withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
+			withUnsafeTemporaryAllocation(of: CChar.self, capacity: .init(PATH_MAX)) { buffer in
 				guard let baseAddress = buffer.baseAddress else {
 					return
 				}

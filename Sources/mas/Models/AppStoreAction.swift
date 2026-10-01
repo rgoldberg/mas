@@ -2,7 +2,7 @@
 // AppStoreAction.swift
 // mas
 //
-// Copyright © 2015 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import CommerceKit
@@ -13,7 +13,7 @@ private import ObjectiveC
 private import OrderedCollections
 private import StoreFoundation
 private import Subprocess
-private import System // swiftlint:disable:this unused_import
+private import System
 
 enum AppStoreAction: String {
 	case get
@@ -287,10 +287,10 @@ enum AppStoreAction: String {
 			throw MASError.error("Failed to find receipt to import for \(appNameAndVersion)")
 		}
 
-		if
+		if // swiftformat:disable:this wrap wrapArguments
 			(try? await run(.path("/usr/bin/sudo"), arguments: ["-n", "true"], output: .discarded))?
-				.terminationStatus
-				.isSuccess != true
+				.terminationStatus // swiftformat:disable:this indent
+				.isSuccess != true // swiftformat:disable:this indent
 		{
 			MAS.printer.info()
 		}
@@ -305,12 +305,12 @@ enum AppStoreAction: String {
 			errorMessage: "Failed to \(self) \(appNameAndVersion) from \(pkgHardLinkPath)",
 		)
 
-		guard
-			let appFolderURLSubstring = standardErrorString
+		guard // swiftformat:disable:this wrap wrapArguments
+			let appFolderURLSubstring = standardErrorString // swiftformat:disable indent
 				.matches(of: appFolderURLRegex)
 				.compactMap(\.1)
 				.min(by: { $0.count < $1.count })
-		else {
+		else { // swiftformat:enable indent
 			throw MASError.error(
 				"Failed to find app folder URL in installer output for \(appNameAndVersion)",
 				cause: standardErrorString,

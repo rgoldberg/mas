@@ -2,7 +2,7 @@
 // MAS.Search.swift
 // mas
 //
-// Copyright © 2016 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 internal import ArgumentParser
@@ -21,8 +21,8 @@ extension MAS {
 		@OptionGroup
 		private var outputFormatOptionGroup: OutputFormatOptionGroup
 		@Flag(help: "Output the price of each app") // swiftlint:disable:next unused_declaration
-		private var price = false // periphery:ignore
-		@OptionGroup // swiftformat:disable:previous unusedPrivateDeclarations
+		private var price = false // swiftformat:disable:this unusedPrivateDeclarations
+		@OptionGroup
 		private var searchTermOptionGroup: SearchTermOptionGroup
 
 		func run() async throws {
