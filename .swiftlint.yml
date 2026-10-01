@@ -2,7 +2,7 @@
 # .swiftlint.yml
 # mas
 #
-# SwiftLint 0.65.0
+# SwiftLint 0.65.1
 #
 ---
 excluded:
@@ -50,9 +50,9 @@ deployment_target:
   watchOSApplicationExtension_deployment_target: 99
 file_length:
   ignore_comment_only_lines: true
-  warning: 500
+  warning: 1000
 file_name:
-  excluded: [Group.swift, Subprocess.swift, User.swift]
+  excluded: [Group.swift, User.swift]
 file_types_order:
   order:
   - main_type

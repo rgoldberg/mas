@@ -2,7 +2,7 @@
 // MASTests+MAS.Search.swift
 // mas
 //
-// Copyright © 2018 mas-cli. All rights reserved.
+// Copyright © 2026 mas-cli. All rights reserved.
 //
 
 private import ArgumentParser
@@ -13,7 +13,7 @@ private extension MASTests {
 	@Test
 	func `searches for slack`() async throws {
 		let actual = try await consequencesOf(
-			try MAS.main(try MAS.Search.parse(["--json", "things"])) { command in
+			try await MAS.main(try MAS.Search.parse(["--json", "things"])) { command in
 				try command.run(catalogApps: try decode(CatalogAppResults.self, fromResource: "things").results)
 			},
 		)
@@ -895,9 +895,10 @@ private extension MASTests {
 	@Test
 	func `cannot search for nonexistent app`() async throws {
 		let searchTerm = "nonexistent"
-		let actual =
-			try await consequencesOf(try MAS.main(try MAS.Search.parse([searchTerm])) { try $0.run(catalogApps: .init()) })
+		let actual = try await consequencesOf(
+			try await MAS.main(try MAS.Search.parse([searchTerm])) { try $0.run(catalogApps: .init()) },
+		)
 		let expected = Consequences(nil, "", "Error: \(MASError.noCatalogAppsFound(for: searchTerm))\n")
 		#expect(actual == expected)
 	}
-} // swiftlint:disable:this file_length
+}

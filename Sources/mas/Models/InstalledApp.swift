@@ -11,7 +11,7 @@ internal import JSONAST
 private import JSONParsing
 private import ObjectiveC
 private import Subprocess
-private import System // swiftlint:disable:this unused_import
+private import System
 
 struct InstalledApp {
 	let adamID: ADAMID
