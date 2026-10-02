@@ -317,8 +317,11 @@ private func unsortedInstalledApps(matching appIDs: [AppID], withFullJSON: Bool)
 		NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
 	}
 	query.searchScopes = applicationsFolderURLs
-	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
-	query.start()
+	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering)
+	guard query.start() else {
+		MAS.printer.error("Failed to start Spotlight query")
+		return .init()
+	}
 	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
 		break
 	}
