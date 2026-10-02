@@ -37,14 +37,20 @@ extension Version {
 }
 
 private extension String {
+	/// This element's integer value iff it is all digits (`BigUInt(_:)` also
+	/// accepts a sign, but SemVer deems, e.g., `-0` alphanumeric).
+	var semVerInteger: BigUInt? {
+		allSatisfy(\.isASCIIDigit) ? BigUInt(self) : nil
+	}
+
 	func compareSemVerElement(
 		to that: Self,
 		options mask: CompareOptions = .init(),
 		range: Range<Self.Index>? = nil,
 		locale: Locale? = nil,
 	) -> ComparisonResult {
-		let thatInteger = BigUInt(that)
-		return BigUInt(self).map { thisInteger in
+		let thatInteger = that.semVerInteger
+		return semVerInteger.map { thisInteger in
 			thatInteger.map { ComparableComparator().compare(thisInteger, $0) } ?? .orderedAscending
 		}
 			?? thatInteger.map { _ in .orderedDescending }
