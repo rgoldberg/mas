@@ -26,9 +26,9 @@ struct CatalogAppResults: JSONDecodable {
 		}
 		resultCount = try object["resultCount"]?.decode() ?? 0
 		resultObjects = if case let .array(array) = object[nodeKey: "results"] {
-			try array.elements.map { element in
+			try array.elements.enumerated().map { index, element in
 				guard case let .object(object) = element else {
-					throw MASError.invalidJSON(.init(json))
+					throw MASError.invalidJSONValue(.init(element), normalizedPath: "$['results'][\(index)]")
 				}
 				return object
 			}
