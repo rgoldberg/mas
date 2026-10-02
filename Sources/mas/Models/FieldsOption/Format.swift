@@ -567,7 +567,10 @@ func isVersion(_ string: String) -> Bool {
 
 /// A number & its trivia (both empty unless coerced with a trivia regex).
 struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file
-	let number: Double
+	let number: DecimalNumber
+	/// The number's text: a JSON number's literal, or a coerced number's
+	/// canonical form.
+	let text: String
 	let triviaPrefix: Substring
 	let triviaSuffix: Substring
 }
@@ -577,10 +580,10 @@ struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file
 func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTrivia? {
 	switch (value, coercion) {
 	case let (.number(number), _):
-		Double("\(number)").map { .init(number: $0, triviaPrefix: "", triviaSuffix: "") }
+		DecimalNumber("\(number)").map { .init(number: $0, text: "\(number)", triviaPrefix: "", triviaSuffix: "") }
 	case let (.string(literal), coercion?):
-		coercion.coercedNumber(in: literal.value).flatMap { number, triviaPrefix, triviaSuffix in
-			Double(number).map { .init(number: $0, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix) }
+		coercion.coercedNumber(in: literal.value).flatMap { text, triviaPrefix, triviaSuffix in
+			DecimalNumber(text).map { .init(number: $0, text: text, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix) }
 		}
 	default:
 		nil
@@ -662,13 +665,8 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	/// The value as a number, per `coercion`; else `nil`.
 	static func number(from value: JSON.Node?, coercion: Coercion?) -> Self? {
-		switch value {
-		case let .number(number):
-			.number("\(number)", triviaPrefix: "", triviaSuffix: "")
-		default:
-			numberWithTrivia(in: value, coercion: coercion).map { number in
-				.number(numberString(number.number), triviaPrefix: number.triviaPrefix, triviaSuffix: number.triviaSuffix)
-			}
+		numberWithTrivia(in: value, coercion: coercion).map { number in
+			.number(number.text, triviaPrefix: number.triviaPrefix, triviaSuffix: number.triviaSuffix)
 		}
 	}
 
@@ -801,11 +799,6 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 		)
 		return isDateOnly ? style.year().month().day().format(date) : style.format(date)
 	}
-}
-
-/// `value`, printed as a plain integer iff it is integral.
-private func numberString(_ value: Double) -> String {
-	value == value.rounded() && abs(value) < 1e15 ? .init(Int(value)) : .init(value)
 }
 
 private extension JSON.Node? {

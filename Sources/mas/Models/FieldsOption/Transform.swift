@@ -70,15 +70,16 @@ enum Transform: Hashable {
 		case .round:
 			rounded(string) ?? string
 		case let .scale(radix, exponent, significantDigits, fractionalDigits):
-			Double(string).map { rawValue in
-				radixScaled(
-					rawValue,
-					radix: radix,
-					exponent: exponent,
-					significantDigits: significantDigits,
-					fractionalDigits: fractionalDigits,
-				)
-			}
+			DecimalNumber(string)
+				.flatMap { number in
+					radixScaled(
+						number,
+						radix: radix,
+						exponent: exponent,
+						significantDigits: significantDigits,
+						fractionalDigits: fractionalDigits,
+					)
+				}
 				?? string
 		case .dateOnly, .timeZone:
 			string // Unreachable here; see doc comment above
@@ -132,7 +133,7 @@ private let initialTitlecaseCandidateCategorySet = Set([
 /// Else `nil`.
 private func rounded(_ string: String) -> String? {
 	guard
-		Double(string)?.isFinite == true,
+		DecimalNumber(string) != nil,
 		let match = string.wholeMatch(of: unsafe decimalNumberRegex),
 		let significand = BigInt(match.2 + (match.3 ?? "")),
 		let exponent = Int(match.5 ?? "0")
@@ -191,37 +192,60 @@ private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
 
 private nonisolated(unsafe) let utcOffsetRegex = /(?i)z|(?:utc|gmt)?([+-])([0-9]{1,2})(?::([0-9]{2}))?/
 
-/// Renders `rawValue` per `scale`'s semantics (see its doc comment on
-/// `Transform.scale`).
+/// `number` rendered per `scale`'s semantics (see its doc comment on
+/// `Transform.scale`), computed exactly; `nil` iff `number`'s exponent is too
+/// large to compute with.
 private func radixScaled(
-	_ rawValue: Double,
+	_ number: DecimalNumber,
 	radix: Int,
 	exponent: Int,
 	significantDigits: Int?,
 	fractionalDigits: Int,
-) -> String {
-	let radixDouble = Double(radix)
-	var value = rawValue / pow(radixDouble, Double(exponent))
-	if let significantDigits, value != 0 {
-		let unit = pow(radixDouble, .init(Int(floor(log(abs(value)) / log(radixDouble))) + 1 - significantDigits))
-		value = (value / unit).rounded() * unit
+) -> String? {
+	number.magnitudeFraction.map { numerator, denominator in
+		let radix = BigInt(radix)
+		var numerator = numerator
+		var denominator = denominator * radix.power(exponent)
+		if let significantDigits, numerator != 0 {
+			// The rounding unit is `radix^unitExponent`
+			let unitExponent = radixMagnitude(numerator, denominator, radix: radix) + 1 - significantDigits
+			(numerator, denominator) = unitExponent >= 0
+				? (roundedQuotient(numerator, denominator * radix.power(unitExponent)) * radix.power(unitExponent), 1)
+				: (roundedQuotient(numerator * radix.power(-unitExponent), denominator), radix.power(-unitExponent))
+		}
+		let fractionalScale = radix.power(fractionalDigits)
+		let (integerPart, fractionalPart) =
+			roundedQuotient(numerator * fractionalScale, denominator).quotientAndRemainder(dividingBy: fractionalScale)
+		let integerText = (number.isNegative && (integerPart != 0 || fractionalPart != 0) ? "-" : "")
+			+ String(integerPart, radix: Int(radix))
+		let fractionalText = String(fractionalPart, radix: Int(radix))
+		return fractionalDigits > 0
+			? "\(integerText).\(String(repeating: "0", count: fractionalDigits - fractionalText.count))\(fractionalText)"
+			: integerText
 	}
-	let fractionalScale = pow(radixDouble, Double(fractionalDigits))
-	guard abs(value) * fractionalScale < maxExactInteger else {
-		return .init(value) // Too large to render in positional notation via `Int`
-	}
-	let scaledMagnitude = Int((abs(value) * fractionalScale).rounded())
-	let divisor = Int(fractionalScale.rounded())
-	let integerPart = String(scaledMagnitude / divisor, radix: radix)
-	let sign = value < 0 && scaledMagnitude != 0 ? "-" : ""
-	let fractionalText = String(scaledMagnitude % divisor, radix: radix)
-	return fractionalDigits > 0
-		? "\(sign)\(integerPart).\(String(repeating: "0", count: fractionalDigits - fractionalText.count))\(fractionalText)"
-		: sign + integerPart
 }
 
-/// The magnitude below which every integral `Double` is exactly an `Int`.
-private let maxExactInteger = 9_007_199_254_740_992.0
+/// `floor(log_radix(numerator / denominator))`, for a positive fraction.
+private func radixMagnitude(_ numerator: BigInt, _ denominator: BigInt, radix: BigInt) -> Int {
+	let quotient = numerator / denominator
+	guard quotient == 0 else {
+		return String(quotient, radix: Int(radix)).count - 1
+	}
+	var magnitude = -1
+	var scaled = numerator * radix
+	while scaled < denominator {
+		magnitude -= 1
+		scaled *= radix
+	}
+	return magnitude
+}
+
+/// `numerator / denominator`, both non-negative, rounded to the nearest
+/// integer, halves away from 0.
+private func roundedQuotient(_ numerator: BigInt, _ denominator: BigInt) -> BigInt {
+	let (quotient, remainder) = numerator.quotientAndRemainder(dividingBy: denominator)
+	return quotient + (2 * remainder >= denominator ? 1 : 0)
+}
 
 extension Transform: CustomStringConvertible { // swiftlint:disable:this file_types_order
 	var description: String {

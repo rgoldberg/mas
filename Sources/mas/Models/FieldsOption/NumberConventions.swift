@@ -73,27 +73,32 @@ extension NumberConventions {
 	/// The canonical form & end of the longest number at the start of `string`
 	/// (an optional sign, an integer part, an optional `decimalSeparator` &
 	/// fractional part & an optional exponent; the integer part may be omitted
-	/// iff the fractional part is present); else `nil`.
+	/// iff the fractional part is present); else `nil`. The canonical form has no
+	/// `+` sign, no `-` sign for 0, no leading `0`s in its integer part (except a
+	/// sole `0`), no trailing `0`s in its fractional part & no `.` without a
+	/// fractional part, but retains any exponent.
 	func numberPrefix(of string: Substring) -> (number: String, end: Substring.Index)? {
 		var rest = string
-		var number = ""
-		if let sign = rest.first, sign == "-" || sign == "+" {
-			number.append(sign)
+		let sign = rest.first.flatMap { $0 == "-" || $0 == "+" ? $0 : nil }
+		if sign != nil {
 			rest.removeFirst()
 		}
 		let integerPart = integerPart(of: rest)
 		if let integerPart {
-			number += integerPart.digits
 			rest = rest[integerPart.end...]
 		}
 		let fractionalPart = fractionalPart(of: rest)
 		if let fractionalPart {
-			number += "." + fractionalPart
 			rest = rest[fractionalPart.endIndex...]
 		}
 		guard integerPart != nil || fractionalPart != nil else {
 			return nil
 		}
+		let integerDigits = integerPart.map { String($0.digits.drop { $0 == "0" }) } ?? ""
+		let fractionalDigits = fractionalPart.map { String($0.reversed().drop { $0 == "0" }.reversed()) } ?? ""
+		var number = (sign == "-" && !(integerDigits.isEmpty && fractionalDigits.isEmpty) ? "-" : "")
+			+ (integerDigits.isEmpty ? "0" : integerDigits)
+			+ (fractionalDigits.isEmpty ? "" : "." + fractionalDigits)
 		if let exponentIndicator = rest.first, exponentIndicator == "e" || exponentIndicator == "E" {
 			let exponentSign = rest.dropFirst().prefix { $0 == "-" || $0 == "+" }.prefix(1)
 			let exponentDigits = rest[exponentSign.endIndex...].prefix(while: \.isASCIIDigit)
@@ -105,27 +110,17 @@ extension NumberConventions {
 		return (number, rest.startIndex)
 	}
 
-	/// `string` with `digitGroupSeparator` removed from each grouped number (a
-	/// run of digits split into digit groups by `digitGroupSeparator`, optionally
-	/// followed by `decimalSeparator` & a fractional part). See
+	/// The value & end of the grouped number at the start of `string` (a run of
+	/// digits split into digit groups by `digitGroupSeparator`, optionally
+	/// followed by `decimalSeparator` & a fractional part); else `nil`. See
 	/// `<grouped-numeric>` in fields.md.
-	func ungrouped(_ string: String) -> String {
-		var result = ""
-		var rest = string[...]
-		while let first = rest.first {
-			guard first.isASCIIDigit, result.last?.isASCIIDigit != true, let integerPart = integerPart(of: rest) else {
-				result.append(first)
-				rest.removeFirst()
-				continue
-			}
-			result += integerPart.digits
-			rest = rest[integerPart.end...]
-			if let fractionalPart = fractionalPart(of: rest) {
-				result += rest[..<fractionalPart.endIndex]
-				rest = rest[fractionalPart.endIndex...]
+	func groupedNumberPrefix(of string: Substring) -> (number: DecimalNumber, end: Substring.Index)? {
+		integerPart(of: string).flatMap { integerPart in
+			let fractionalPart = fractionalPart(of: string[integerPart.end...])
+			return DecimalNumber(integerPart.digits + (fractionalPart.map { "." + $0 } ?? "")).map { number in
+				(number, fractionalPart?.endIndex ?? integerPart.end)
 			}
 		}
-		return result
 	}
 
 	/// `digits` with `digitGroupSeparator` between its digit groups, counting

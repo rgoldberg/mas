@@ -433,13 +433,21 @@ extension SortSpec {
 }
 
 extension SortOptionSet {
+	/// A token of a string being compared: a number, or a maximal run of other
+	/// text.
+	private struct TextToken {
+		let text: Substring
+		/// The number iff this token is a number.
+		let number: DecimalNumber?
+	}
+
 	/// Whether any `<sort-option-set>` in `optionSets` has `<output>`.
 	static func anyHasOutputSource(_ optionSets: [Self]) -> Bool {
 		optionSets.contains { $0.source == .output }
 	}
 
-	/// The conventions whose grouped numbers `<grouped-numeric>` ungroups; `nil`
-	/// for `<lexical>` & `<numeric>`.
+	/// The conventions of the grouped numbers that `<grouped-numeric>` compares;
+	/// `nil` for `<lexical>` & `<numeric>`.
 	private var groupedNumberConventions: NumberConventions? {
 		switch numbersInStrings {
 		case let .customGroupedNumeric(customGrouping):
@@ -536,8 +544,8 @@ extension SortOptionSet {
 
 	/// Compares 2 numbers & their trivia per `triviaOrder`.
 	private func compareNumbers(_ lhs: NumberWithTrivia?, _ rhs: NumberWithTrivia?) -> ComparisonResult {
-		let lhs = lhs ?? .init(number: 0, triviaPrefix: "", triviaSuffix: "")
-		let rhs = rhs ?? .init(number: 0, triviaPrefix: "", triviaSuffix: "")
+		let lhs = lhs ?? .init(number: .zero, text: "0", triviaPrefix: "", triviaSuffix: "")
+		let rhs = rhs ?? .init(number: .zero, text: "0", triviaPrefix: "", triviaSuffix: "")
 		let comparisons: [() -> ComparisonResult] = [
 			{ ComparableComparator().compare(lhs.number, rhs.number) },
 			{ compareStrings(.init(lhs.triviaPrefix), .init(rhs.triviaPrefix)) },
@@ -570,10 +578,12 @@ extension SortOptionSet {
 			let lhsSuffix = lhsComponent.dropFirst(lhsDigits.count)
 			let rhsSuffix = rhsComponent.dropFirst(rhsDigits.count)
 			let result =
-				ComparableComparator().compare(UInt64(lhsDigits) ?? 0, UInt64(rhsDigits) ?? 0).nonSame
-					?? (lhsSuffix.isEmpty == rhsSuffix.isEmpty
-						? compareStrings(.init(lhsSuffix), .init(rhsSuffix))
-						: lhsSuffix.isEmpty ? .orderedDescending : .orderedAscending)
+				ComparableComparator()
+				.compare(DecimalNumber(lhsDigits) ?? .zero, DecimalNumber(rhsDigits) ?? .zero)
+				.nonSame
+				?? (lhsSuffix.isEmpty == rhsSuffix.isEmpty
+					? compareStrings(.init(lhsSuffix), .init(rhsSuffix))
+					: lhsSuffix.isEmpty ? .orderedDescending : .orderedAscending)
 			guard result == .orderedSame else {
 				return result
 			}
@@ -603,13 +613,34 @@ extension SortOptionSet {
 		return ComparableComparator().compare(lhsSegments.count, rhsSegments.count)
 	}
 
+	/// Compares 2 strings per `numbersInStrings`: each number (a run of digits,
+	/// or, for `<grouped-numeric>`, a grouped number) numerically & other text
+	/// lexically.
 	private func compareText(_ lhs: String, _ rhs: String) -> ComparisonResult {
+		guard numbersInStrings != .lexical else {
+			return compareLexically(lhs[...], rhs[...])
+		}
+		let lhsTokens = textTokens(of: lhs)
+		let rhsTokens = textTokens(of: rhs)
+		return zip(lhsTokens, rhsTokens)
+			.lazy
+			.map { lhsToken, rhsToken in
+				switch (lhsToken.number, rhsToken.number) {
+				case let (lhsNumber?, rhsNumber?):
+					ComparableComparator().compare(lhsNumber, rhsNumber)
+				default:
+					compareLexically(lhsToken.text, rhsToken.text)
+				}
+			}
+			.first { $0 != .orderedSame }
+			?? ComparableComparator().compare(lhsTokens.count, rhsTokens.count)
+	}
+
+	/// Compares 2 texts per `caseSensitivity` & `localization`.
+	private func compareLexically(_ lhs: Substring, _ rhs: Substring) -> ComparisonResult {
 		var options = String.CompareOptions()
 		if caseSensitivity == .insensitive {
 			options.insert(.caseInsensitive)
-		}
-		if numbersInStrings != .lexical {
-			options.insert(.numeric)
 		}
 		let locale =
 			if case let .localized(locale) = localization {
@@ -617,9 +648,30 @@ extension SortOptionSet {
 			} else {
 				Locale?.none
 			}
+		return lhs.compare(rhs, options: options, range: nil, locale: locale)
+	}
+
+	/// `string`'s tokens: each number (a run of digits, or, iff
+	/// `groupedNumberConventions` isn't `nil`, a grouped number) & each maximal
+	/// run of other text.
+	private func textTokens(of string: String) -> [TextToken] {
 		let conventions = groupedNumberConventions
-		return (conventions?.ungrouped(lhs) ?? lhs)
-			.compare(conventions?.ungrouped(rhs) ?? rhs, options: options, range: nil, locale: locale)
+		var tokens = [TextToken]()
+		var rest = string[...]
+		while let first = rest.first {
+			guard first.isASCIIDigit else {
+				let text = rest.prefix { !$0.isASCIIDigit }
+				tokens.append(.init(text: text, number: nil))
+				rest = rest[text.endIndex...]
+				continue
+			}
+			let digits = rest.prefix(while: \.isASCIIDigit)
+			let (number, end) =
+				conventions?.groupedNumberPrefix(of: rest) ?? (DecimalNumber(digits) ?? .zero, digits.endIndex)
+			tokens.append(.init(text: rest[..<end], number: number))
+			rest = rest[end...]
+		}
+		return tokens
 	}
 }
 

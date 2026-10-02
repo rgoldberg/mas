@@ -38,7 +38,7 @@ private extension MASTests {
 			(.canonical, "1234,567", "1234", ",567"),
 			(.canonical, "1,2345", "1", ",2345"),
 			(.canonical, "1,234,5678", "1234", ",5678"),
-			(.canonical, ".5e2!", ".5e2", "!"),
+			(.canonical, ".5e2!", "0.5e2", "!"),
 			(.canonical, "5e", "5", "e"),
 			(.canonical, "5.", "5", "."),
 			(.canonical, "x5", nil, ""),
@@ -63,19 +63,23 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(NumberConventions.canonical, "v1,234 & 5,678.9", "v1234 & 5678.9"),
-			(.canonical, "1,2345", "1,2345"),
-			(.canonical, "0.123,456", "0.123,456"),
-			(.canonical, "a,b", "a,b"),
-			(germanConventions, "1.234,5", "1234,5"),
+			(NumberConventions.canonical, "1,234 & 5", String?.some("1234"), " & 5"),
+			(.canonical, "5,678.9x", "5678.9", "x"),
+			(.canonical, "1,2345", "1", ",2345"),
+			(.canonical, "0.123,456", "0.123", ",456"),
+			(.canonical, "a,b", nil, "a,b"),
+			(germanConventions, "1.234,5", "1234.5", ""),
 		],
 	)
-	func `removes digit group separators only from grouped numbers`(
+	func `parses a grouped number's value, removing its digit group separators`(
 		conventions: NumberConventions,
 		string: String,
-		expected: String,
+		number: String?,
+		rest: String,
 	) {
-		#expect(conventions.ungrouped(string) == expected)
+		let prefix = conventions.groupedNumberPrefix(of: string[...])
+		#expect(prefix?.number == number.flatMap(DecimalNumber.init))
+		#expect(prefix.map { String(string[$0.end...]) } ?? string == rest)
 	}
 
 	@Test

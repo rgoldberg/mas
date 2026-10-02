@@ -154,6 +154,9 @@ private extension MASTests {
 			// Numbers compare numerically
 			("%n", "1", JSON.Node.number(2), JSON.Node.number(10), ComparisonResult.orderedAscending),
 			("%n", "1d", .number(2), .number(10), .orderedDescending),
+			("%.n", "1", .string("12345678901234567890"), .string("12345678901234567891"), .orderedAscending),
+			("%.n", "1", .string("1e400"), .string("1e401"), .orderedAscending),
+			("%.n", "1", .string("-0.0"), .number(0), .orderedSame),
 			// Numbers coerced with trivia compare by trivia per `<trivia-order>`,
 			// then number
 			("%.:,,,,,.*,.*:n", "1q", .string("$999.00"), .string("$1,234.56"), .orderedAscending),
@@ -178,6 +181,7 @@ private extension MASTests {
 			("%v", "1", .string("1.0b"), .string("1.0"), .orderedAscending),
 			("%v", "1", .string("1.2"), .string("1.2.0"), .orderedAscending),
 			("%v", "1", .string("1.2a"), .string("1.2b"), .orderedAscending),
+			("%v", "1", .string("1.18446744073709551616"), .string("1.18446744073709551617"), .orderedAscending),
 			// Booleans sort `false` before `true`
 			("%b", "1", .bool(true), .bool(false), .orderedDescending),
 			("%.b", "1", .string("false"), .bool(true), .orderedAscending),
@@ -190,6 +194,11 @@ private extension MASTests {
 			("%s", "1x", .string("file10"), .string("file2"), .orderedAscending),
 			("%s", "1n", .string("file10"), .string("file2"), .orderedDescending),
 			("%s", "1n", .string("1,234"), .string("999"), .orderedAscending),
+			("%s", "1n", .string("a12345678901234567890"), .string("a12345678901234567891"), .orderedAscending),
+			("%s", "1n", .string("1.5"), .string("1.25"), .orderedAscending),
+			("%s", "1g", .string("1.5"), .string("1.25"), .orderedDescending),
+			("%s", "1g", .string("v1.5 b"), .string("v1.50 a"), .orderedDescending),
+			("%s", "1G.,3,,,+", .string("1.234,5"), .string("1.234,25"), .orderedDescending),
 			("%s", "1g", .string("1,234"), .string("999"), .orderedDescending),
 			("%s", "1g", .string("1.234"), .string("999"), .orderedAscending),
 			("%s", "1L de_DE +g", .string("1.234"), .string("999"), .orderedDescending),

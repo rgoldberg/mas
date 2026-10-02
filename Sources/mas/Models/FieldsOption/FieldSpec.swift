@@ -254,7 +254,11 @@ func resolvedFieldsConfig(
 ) throws(ParsingError) -> any FieldsConfig {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
 	guard isRelativeConfig(input) else {
-		var builder = FieldSpecsBuilder(fieldSpecs: .init(), outputFormat: outputFormat, fieldNameSet: fieldNameSet)
+		// An `<absolute-config>` is the equivalent of the base fields config being
+		// `none`
+		let none =
+			try resolveBaseFieldsConfig(named: noneFieldsConfigName, standard: standard, all: all, outputFormat: outputFormat)
+		var builder = FieldSpecsBuilder(fieldSpecs: none.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
 		try builder.parseAbsoluteConfig(&input)
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
@@ -587,22 +591,28 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
+	/// Parses an `<absolute-config>`, replacing the working field specs (the base
+	/// fields config `none`'s) with its field specs, each a visible copy of the
+	/// base fields config's 1st field spec for its field (or of a field spec with
+	/// default settings, absent one), overlaid with its `<field-modifiers>`.
 	mutating func parseAbsoluteConfig(_ input: inout Substring) throws(ParsingError) {
+		fieldSpecs.removeAll()
+		workingTags.removeAll()
 		while true {
 			let name = try parseName(&input)
-			guard fieldNameSet?.contains(name) != false else {
-				throw .nonexistentField(name)
-			}
-			let label = try parseLabel(&input) ?? name
-			let parsed = try parseFormat(&input, existing: nil)
-			fieldSpecs.append(
-				.init(
-					name: name,
-					label: label,
-					format: parsed?.format ?? .default(fieldName: name),
-					sortSpec: try parseSortSpecModifier(&input, existing: nil, fieldName: name, outputFormat: outputFormat),
-					justification: parsed?.justification ?? .start,
-				),
+			let source =
+				if let fieldSpec = baseFieldSpecs.first(where: { $0.name == name }) {
+					fieldSpec
+				} else {
+					try defaultSettingsFieldSpec(forName: name)
+				}
+			try apply(
+				.insert(isHidden: false),
+				name: name,
+				existing: source,
+				label: try parseLabel(&input),
+				format: try parseFormat(&input, existing: source.format),
+				sortModifierInput: &input,
 			)
 			input = input.drop(while: \.isWhitespace)
 			guard !input.isEmpty else {

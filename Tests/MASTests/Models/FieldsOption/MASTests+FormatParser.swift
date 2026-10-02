@@ -71,7 +71,10 @@ private extension MASTests {
 			("[%.n]", .string("4.5a"), ""),
 			("[%.n]", .string("nan"), ""),
 			("[%.n]", .string("0x10"), ""),
-			("%.n", .string("-1e3"), "-1000"),
+			("%.n", .string("-1e3"), "-1e3"),
+			("%.n", .string("12345678901234567890.123456789000"), "12345678901234567890.123456789"),
+			("%.n", .string("+007.50"), "7.5"),
+			("%.n", .string("-0.0"), "0"),
 			("%n", .number(4.5), "4.5"),
 			// fields-format.md's examples
 			("%.:de:n", .string("1.234,56"), "1234.56"),
@@ -204,7 +207,12 @@ private extension MASTests {
 			(".absoluteValue", .number(-5.5), "5.5"),
 			(".round", .number(1e30), "1e+30"),
 			(".absoluteValue", .number(-1e30), "1e+30"),
-			(".scale:10,0,,0:", .number(1e30), "1e+30"),
+			(".scale:10,0,,0:", .number(1e30), "1000000000000000000000000000000"),
+			("..scale:10,3,,2:", .string("123456789012345678901234567890"), "123456789012345678901234567.89"),
+			("..scale:10,0,3,0:", .string("123456"), "123000"),
+			("..scale:10,0,2,3:", .string("-0.0001234"), "0.000"),
+			("..scale:2,0,,0:", .string("1e20"), "1010110101111000111010111100010110101100011000100000000000000000000"),
+			("..round", .string("12345678901234567890.5"), "12345678901234567891"),
 		],
 	)
 	func `applies a format-block's value-transform-pipeline`(format: String, value: JSON.Node, expected: String)

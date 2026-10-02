@@ -193,6 +193,39 @@ private extension MASTests {
 		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig(value) }
 	}
 
+	@Test
+	func `an absolute config's field specs are visible copies of none's, overlaid with their modifiers`() throws {
+		let price = FieldSpec(
+			name: "price",
+			label: "Price",
+			format: defaultFieldFormat(forFieldNamed: "price"),
+			sortSpec: .init(priority: 2, optionSets: [.default]),
+			justification: .end,
+		)
+		let all = BaseIncludesAllFieldsConfig(fieldSpecs: [price])
+		let fieldSpecs =
+			try resolvedFieldsConfig(
+				from: "price,price=Cost/,size",
+				standard: SelectedFieldsConfig(),
+				all: all,
+				outputFormat: .table(.default),
+			)
+			.fieldSpecs
+		#expect(
+			fieldSpecs
+				== [
+					price,
+					.init(name: "price", label: "Cost", format: price.format, sortSpec: nil, justification: .end),
+					.defaultSettings(forName: "size"),
+				],
+		)
+		let jsonFieldSpecs =
+			try resolvedFieldsConfig(from: "price", standard: SelectedFieldsConfig(), all: all, outputFormat: .json)
+			.fieldSpecs
+		#expect(jsonFieldSpecs.map(\.label) == ["price"])
+		#expect(jsonFieldSpecs.map(\.format) == [.default(fieldName: "price")])
+	}
+
 	@Test(arguments: [("/w,x", Character(",")), ("/Ia/x", "/")])
 	func `input left over after a field order section is an error`(value: String, character: Character) {
 		#expect(throws: ParsingError.unexpectedCharacter(character)) { try parseFieldsConfig(value) }

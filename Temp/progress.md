@@ -195,3 +195,16 @@ including in a `<pipeline>` whose `<format-transform-pipeline>` is directly
 absent. fields.md's "Absent Values" now states once that an absent value is
 output as an empty string unless its format renders it otherwise (e.g., via a
 `<failure-block>`). Each change of this & the previous audit has tests.
+
+### Absolute Configs & Exact Numbers (2026-10-01)
+
+Each `<absolute-field-spec>` is a visible copy of the base fields config
+`none`'s 1st field spec for its field (or of a field spec with default
+settings), so it inherits mas's labels, typed formats, sorts & justification
+(machine-facing for JSON), overlaid with its `<field-modifiers>`. Numbers are
+processed exactly, of unlimited precision & magnitude, via `DecimalNumber` &
+`BigInt`: comparisons (number, version & `<numeric>` / `<grouped-numeric>`
+string sorting), coercion (a coerced number's canonical form retains its
+notation, e.g., `1e3`) & `scale`; `<grouped-numeric>` compares each grouped
+number, fractional part included, as 1 number. Chronologic Unix epoch timestamps
+still go through `Date`'s `Double`.
