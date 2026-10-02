@@ -7,6 +7,6 @@ brew "markdownlint-cli2"    # 0.23.3
 brew "shellcheck"           # 0.11.0
 brew "swiftformat"          # 0.63.1
 brew "swiftlint"            # 0.65.1
-brew "swiftly"              if MacOS.version < :tahoe # 1.1.4
+brew "swiftly"              if MacOS::Xcode.version < File.read(".xcode-version").strip # 1.1.4
 brew "vale"                 # 3.24.0
 brew "yamllint"             # 1.38.0
