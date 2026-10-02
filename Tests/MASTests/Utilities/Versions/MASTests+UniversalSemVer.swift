@@ -44,6 +44,8 @@ private extension MASTests {
 			("1.10", "1.9", .orderedDescending),
 			("1.2", "1.2.0", .orderedSame),
 			("1.99999999999999999999", "1.9", .orderedDescending),
+			("01.2", "1.3", .orderedAscending),
+			("1.01.5", "1.1.2", .orderedDescending),
 			("1.a", "1.b", .orderedAscending),
 			("1.0.0-alpha", "1.0.0", .orderedAscending),
 			("1.0.0-alpha", "1.0.0-alpha.1", .orderedAscending),
