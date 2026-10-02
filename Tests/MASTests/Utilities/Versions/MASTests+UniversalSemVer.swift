@@ -65,6 +65,29 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("1.2.0.0", "1.2", ComparisonResult.orderedSame),
+			("1.2.00", "1.2", .orderedSame),
+			("1.0", "1.00", .orderedSame),
+			("1.a.0", "1.a", .orderedDescending),
+			("1.0.0-alpha.0", "1.0.0-alpha", .orderedDescending),
+			("1.0.0-alpha.0.0", "1.0.0-alpha.0", .orderedDescending),
+			("1.0.0-alpha.1.0", "1.0.0-alpha.1", .orderedDescending),
+			("1.0.0-1.0", "1.0.0-1", .orderedDescending),
+			("1.0.0+1.0", "1.0.0+1", .orderedSame),
+			("1.0.0+1.00", "1.0.0+1", .orderedSame),
+			("1.0.0+b.0", "1.0.0+b", .orderedDescending),
+		],
+	)
+	func `universal SemVers ignore trailing all-0 core & build elements only after an all-digit element`(
+		lhs: String,
+		rhs: String,
+		result: ComparisonResult,
+	) {
+		#expect(UniversalSemVer(rawValue: lhs).compareSemVerAndBuild(to: .init(rawValue: rhs)) == result)
+	}
+
+	@Test(
+		arguments: [
 			("1.0.0+1", "1.0.0+2", ComparisonResult.orderedAscending),
 			("1.0.0+10", "1.0.0+9", .orderedDescending),
 			("1.0.1+1", "1.0.0+2", .orderedDescending),
