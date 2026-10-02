@@ -85,7 +85,8 @@ separator-pattern = ^{text}^ (* default: "-" *)
 - `s`: no separator line.
 - `S`: a line between the header row & the 1st data row. `<separator-pattern>`
   is repeated to fill the line, truncated at the line's width iff it does not
-  evenly divide the width.
+  evenly divide the width. A 0-width `<separator-pattern>` (e.g., a tab) is
+  printed once, since no number of repetitions can fill any width.
 
 ## Broken
 

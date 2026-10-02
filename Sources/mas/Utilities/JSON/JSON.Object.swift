@@ -205,10 +205,12 @@ private func renderedTableRow(
 /// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition (never
 /// padding) if `pattern`'s width doesn't evenly divide `targetWidth` (table.md:
 /// a separator line's repetition cuts off immediately, even mid-character-
-/// group, rather than rounding to a whole number of repetitions).
+/// group, rather than rounding to a whole number of repetitions). Returns a
+/// 0-width `pattern` (e.g., a tab) once, since no number of repetitions can
+/// fill any width.
 private func repeatedTablePattern(_ pattern: String, toWidth targetWidth: Int) -> String {
-	guard !pattern.isEmpty, targetWidth > 0 else {
-		return ""
+	guard pattern.terminalWidth > 0 else {
+		return pattern
 	}
 	let patternCharacters = Array(pattern)
 	var result = ""

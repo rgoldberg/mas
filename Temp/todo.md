@@ -170,6 +170,12 @@ literal reading makes `hS` a header on, contradicting Implied Settings) &
       Fields Configs" heading: it only contrasts with custom configs, but
       [configs.md](../Specs/configs.md) links to the heading's anchor.
 
+### Bug Fix Session Open Issues (2026-10-02)
+
+1. A `<separator-pattern>` ([table.md](../Specs/table.md), Separator) whose last
+   repeated character is wide (e.g., `中`) can overshoot its line's width, since
+   a character can't be split & table.md forbids padding instead.
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Named Formats & Custom Named Configs
