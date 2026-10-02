@@ -8,6 +8,7 @@
 enum MASError: Error {
 	case error(String, cause: any Error? = nil, separatorWhenCause: String = ":\n", separatorWhenNoCause: String = "")
 	case invalidJSON(String)
+	case invalidJSONValue(String, normalizedPath: String)
 	case invalidURL(String)
 	case noCatalogAppsFound(for: String)
 	case unknownAppID(AppID)
@@ -20,6 +21,8 @@ extension MASError: CustomStringConvertible {
 			"\(message)\(cause.map { "\(separatorWhenCause)\($0)" } ?? separatorWhenNoCause)"
 		case let .invalidJSON(string):
 			"Failed to parse JSON:\n\(string)"
+		case let .invalidJSONValue(string, normalizedPath):
+			"Failed to parse JSON value at \(normalizedPath):\n\(string)"
 		case let .invalidURL(string):
 			"Failed to parse URL: \(string)"
 		case let .noCatalogAppsFound(searchTerm):
