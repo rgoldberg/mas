@@ -407,7 +407,8 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 		version = metadata.bundleVersion
 		appNameAndVersion = "\(metadata.title ?? "unknown app") \(version ?? "unknown version")"
 		activePhaseType = .init(action, rawValue: status.activePhase?.phaseType)
-		phasePercentComplete = status.phasePercentComplete
+		// Clamp, since NaN, < 0, or > 1 would crash the progress bar
+		phasePercentComplete = status.phasePercentComplete.clampedToUnitInterval
 		appFolderPath = download.installPath
 		isCancelled = status.isCancelled
 		isFailed = status.isFailed
