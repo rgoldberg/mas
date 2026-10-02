@@ -23,6 +23,10 @@ extension URL {
 		return path.isEmpty ? "/" : .init(path)
 	}
 
+	var isWebURL: Bool {
+		scheme.map { ["http", "https"].contains($0.lowercased()) } ?? false
+	}
+
 	init(folderPath path: String, relativeTo base: Self? = nil) {
 		self.init(filePath: path, directoryHint: .isDirectory, relativeTo: base)
 	}
