@@ -54,7 +54,7 @@ private extension String {
 
 private extension [String] {
 	func compareSemVerElements(to that: Self) -> ComparisonResult {
-		zip(self, that).first { $0 != $1 }.map { $0.compareSemVerElement(to: $1) }
+		zip(self, that).lazy.map { $0.compareSemVerElement(to: $1) }.first { $0 != .orderedSame }
 			?? ComparableComparator().compare(dropLast { $0 == "0" }.count, that.dropLast { $0 == "0" }.count)
 	}
 }
