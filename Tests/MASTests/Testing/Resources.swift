@@ -13,3 +13,8 @@ private import JSONParsing
 func decode<T: JSONDecodable>(_: T.Type = T.self, fromResource resource: String) throws -> T {
 	try .init(json: .init(parsing: Data(fromResource: resource).bytes))
 }
+
+// swiftlint:disable:next function_default_parameter_at_end
+func decode<T: JSONDecodable>(_: T.Type = T.self, fromJSON json: String) throws -> T {
+	try .init(json: .init(parsing: Data(json.utf8).bytes))
+}
