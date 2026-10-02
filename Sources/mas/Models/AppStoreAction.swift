@@ -8,7 +8,7 @@
 private import CommerceKit
 private import CoreFoundation
 private import CoreServices
-private import Foundation
+internal import Foundation
 private import ObjectiveC
 private import OrderedCollections
 private import StoreFoundation
@@ -140,6 +140,7 @@ enum AppStoreAction: String {
 								.url, // swiftformat:disable:this indent
 							existing: pkgHardLinkURL,
 							adamID: adamID,
+							fileType: "pkg",
 						)
 					} catch {
 						MAS.printer.warning("Failed to link pkg for", snapshot.appNameAndVersion, error: error)
@@ -149,6 +150,7 @@ enum AppStoreAction: String {
 							to: downloadFolderChildURLs.first { $0.lastPathComponent == "receipt" },
 							existing: receiptHardLinkURL,
 							adamID: adamID,
+							fileType: "receipt",
 						)
 					} catch {
 						MAS.printer.warning("Failed to link receipt for", snapshot.appNameAndVersion, error: error)
@@ -484,7 +486,8 @@ private extension URL {
 	}
 }
 
-private func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?, adamID: ADAMID) throws -> URL? {
+func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?, adamID: ADAMID, fileType: String)
+throws -> URL? {
 	guard let url, try !url.linksToSameInode(as: existingHardLinkURL) else {
 		return existingHardLinkURL
 	}
@@ -496,7 +499,13 @@ private func hardLinkURL(to url: URL?, existing existingHardLinkURL: URL?, adamI
 		create: true,
 	)
 	.appending(path: "\(adamID)-\(url.lastPathComponent)", directoryHint: .notDirectory)
-	try fileManager.linkItem(at: url, to: hardLinkURL)
+	do {
+		try fileManager.linkItem(at: url, to: hardLinkURL)
+	} catch {
+		deleteTempFolder(containing: hardLinkURL, fileType: fileType)
+		throw error
+	}
+	deleteTempFolder(containing: existingHardLinkURL, fileType: fileType)
 	return hardLinkURL
 }
 
