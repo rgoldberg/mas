@@ -183,18 +183,10 @@ private func renderedTableRow(
 	columns: [(maxWidth: Int, justification: Justification)],
 	columnSpacing: String,
 ) -> String {
-	guard let firstCell = cells.first, let firstColumn = columns.first else {
+	guard let lastCell = cells.last, let lastColumn = columns.last else {
 		return ""
 	}
-	let trailingCells = cells.dropFirst()
-	guard let lastCell = trailingCells.last, let lastColumn = columns.dropFirst().last else {
-		return firstCell.terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
-	}
-	let middleCells = trailingCells.dropLast()
-	let middleColumns = columns.dropFirst().dropLast()
-	return firstCell.terminalJustify(firstColumn.justification, to: firstColumn.maxWidth)
-		+ columnSpacing
-		+ zip(middleCells, middleColumns)
+	return zip(cells.dropLast(), columns.dropLast())
 		.map { cell, column in cell.terminalJustify(column.justification, to: column.maxWidth) + columnSpacing }
 		.joined()
 		+ (lastColumn.justification == .start

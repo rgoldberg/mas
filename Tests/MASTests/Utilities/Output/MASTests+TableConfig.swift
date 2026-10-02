@@ -176,7 +176,7 @@ private extension MASTests {
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("H"),
 			)
-		#expect(table == "Name \nSlack")
+		#expect(table == "Name\nSlack")
 	}
 
 	@Test
@@ -186,7 +186,7 @@ private extension MASTests {
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("H1:a"),
 			)
-		#expect(table == "\u{1B}[1mName \u{1B}[0m\nSlack")
+		#expect(table == "\u{1B}[1mName\u{1B}[0m\nSlack")
 	}
 
 	@Test
@@ -196,7 +196,7 @@ private extension MASTests {
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
 				tableConfig: try parseTableConfig("S\\ :"),
 			)
-		#expect(table == "Name \n     \nSlack")
+		#expect(table == "Name\n     \nSlack")
 	}
 
 	@Test
@@ -204,9 +204,9 @@ private extension MASTests {
 		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
 		let objects = [JSON.Object([("name", .string("Slack"))])]
 		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
-		#expect(alwaysStyled == "\u{1B}[1mName \u{1B}[0m\nSlack")
+		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m\nSlack")
 		let terminalOnly = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
-		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name \nSlack"))
+		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name\nSlack"))
 	}
 
 	@Test
