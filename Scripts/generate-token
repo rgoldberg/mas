@@ -35,4 +35,6 @@ if [[ -z "${token}" || "${token}" = null ]]; then
 	printf $'Error: Failed to parse installation token from:\n%s\n' "${response}" >&2
 	exit 2
 fi
+# Mask the token in workflow logs, including in xtrace output of its assignment
+printf $'::add-mask::%s\n' "${token}" >&2
 printf %s "${token}"
