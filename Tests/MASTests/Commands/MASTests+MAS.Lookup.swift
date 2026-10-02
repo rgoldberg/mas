@@ -19,9 +19,18 @@ private extension MASTests {
 	}
 
 	@Test
+	func `outputs an empty JSON array for unknown app ID with an item array`() async throws {
+		let actual = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1", "--json", "a"])) { try $0.run(catalogApps: .init()) },
+		)
+		let expected = Consequences(nil, "[]\n")
+		#expect(actual == expected)
+	}
+
+	@Test
 	func `outputs app info`() async throws {
 		let actual = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(["--json", "1472954003"])) { command in
+			try await MAS.main(try MAS.Lookup.parse(["1472954003", "--json"])) { command in
 				try command.run(catalogApps: [try decode(CatalogApp.self, fromResource: "things-lookup")])
 			},
 		)
@@ -72,5 +81,24 @@ private extension MASTests {
 			""", // editorconfig-checker-enable
 		)
 		#expect(actual == expected)
+	}
+
+	@Test(arguments: ["--json", "--key-value", "--table"])
+	func `an empty output option value is equivalent to a bare output option`(option: String) async throws {
+		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
+		let bare = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1472954003", option])) { try $0.run(catalogApps: catalogApps) },
+		)
+		let empty = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1472954003", option, ""])) { try $0.run(catalogApps: catalogApps) },
+		)
+		#expect(!bare.stdout.isEmpty)
+		#expect(bare == empty)
+	}
+
+	@Test
+	func `at most 1 output option may be given`() {
+		let error = #expect(throws: (any Error).self) { try MAS.Lookup.parse(["1", "--json", "", "--table", ""]) }
+		#expect(error.map(MAS.Lookup.message(for:)) == "At most 1 of '--json', '--key-value', or '--table' may be given.")
 	}
 }

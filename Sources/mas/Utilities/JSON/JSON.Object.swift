@@ -198,11 +198,23 @@ extension [JSON.Object] {
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
-	/// `--fields`-resolved field specs, ordered per item by `fieldOrder`.
-	func jsonObjects(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder) throws(FormattingError) -> [JSON.Object] {
-		try map { object throws(FormattingError) in
-			try object.jsonObject(fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object))
+	/// `--fields`-resolved field specs ordered per item by `fieldOrder`,
+	/// structured & rendered per `jsonConfig` (json.md): each item as a top-level
+	/// JSON value, or every item in a single top-level JSON array, each top-level
+	/// JSON value on its own line(s).
+	func json(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, jsonConfig: JSONConfig) throws(FormattingError)
+	-> String {
+		let nodes = try map { object throws(FormattingError) in
+			JSON.Node.object(try object.jsonObject(fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object)))
 		}
+		let topLevelNodes =
+			switch jsonConfig.topLevelStructure {
+			case .itemArray:
+				[JSON.Node.array(.init(nodes))]
+			case .itemStream:
+				nodes
+			}
+		return topLevelNodes.map { $0.rendered(jsonConfig: jsonConfig) }.joined(separator: "\n")
 	}
 }
 
@@ -251,6 +263,58 @@ private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> Str
 		index += 1
 	}
 	return result
+}
+
+extension JSON.Node {
+	/// This node's JSON text per `jsonConfig` (json.md): compact or
+	/// pretty-printed, with non-ASCII characters verbatim or escaped.
+	func rendered(jsonConfig: JSONConfig) -> String {
+		let text = jsonConfig.indentation.map { prettyPrinted(indentation: $0, depth: 0) } ?? description
+		return switch jsonConfig.nonASCIIRendering {
+		case .escaped:
+			text.unicodeScalars.reduce(into: "") { result, scalar in
+				result += scalar.isASCII
+					? String(scalar)
+					: String(scalar)
+						.utf16
+						.map { codeUnit in
+							let hexDigits = String(codeUnit, radix: 16)
+							return "\\u\(String(repeating: "0", count: 4 - hexDigits.count))\(hexDigits)"
+						}
+						.joined()
+			}
+		case .verbatim:
+			text
+		}
+	}
+
+	/// This node's pretty-printed JSON text, at nesting level `depth`: each
+	/// non-empty object's members & each non-empty array's elements on their own
+	/// lines, indented by `indentation` per nesting level, with 1 space after
+	/// each `:` between a key & its value.
+	private func prettyPrinted(indentation: String, depth: Int) -> String {
+		let memberIndentation = String(repeating: indentation, count: depth + 1)
+		let closingIndentation = String(repeating: indentation, count: depth)
+		return switch self {
+		case let .array(array) where !array.elements.isEmpty:
+			"[\n"
+				+ array.elements
+				.map { memberIndentation + $0.prettyPrinted(indentation: indentation, depth: depth + 1) }
+				.joined(separator: ",\n")
+				+ "\n\(closingIndentation)]"
+		case let .object(object) where !object.fields.isEmpty:
+			"{\n"
+				+ object.fields
+				.map { key, value in
+					"\(memberIndentation)\(Self.string(key.rawValue)): "
+						+ value.prettyPrinted(indentation: indentation, depth: depth + 1)
+				}
+				.joined(separator: ",\n")
+				+ "\n\(closingIndentation)}"
+		default:
+			description
+		}
+	}
 }
 
 private extension JSON.Node {

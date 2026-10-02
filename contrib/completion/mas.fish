@@ -34,7 +34,7 @@ complete -c mas -n __fish_use_subcommand -fa update -d 'Update outdated apps alr
 complete -c mas -n __fish_use_subcommand -fa version -d 'Output version number' # editorconfig-checker-disable
 
 complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt fields' -l fields -x -d 'Select, order, label, format & sort output fields'
-complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l json -d 'Output JSON'
+complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l json -d 'Output JSON, optionally configured'
 complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l key-value -d 'Output key-value pairs, optionally configured'
 complete -c mas -n '__fish_seen_subcommand_from config info list lookup outdated search; and not __fish_contains_opt json key-value table' -l table -d 'Output a table, optionally configured'
 complete -c mas -n '__fish_seen_subcommand_from get home info install lookup open purchase seller vendor' -xa '(__fish_mas_list_available)'

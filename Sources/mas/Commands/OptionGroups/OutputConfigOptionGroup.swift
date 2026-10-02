@@ -9,8 +9,13 @@ private import ArgumentParser
 internal import JSONAST
 
 struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
-	@Flag(name: .customLong("json"), help: "Output format: JSON")
-	private var isJSON = false
+	@Option(
+		name: .customLong("json"),
+		defaultAsFlag: "",
+		parsing: .next,
+		help: "Output format: JSON, optionally configuring pretty-printing, an item array & non-ASCII escaping (json.md)",
+	)
+	private var jsonOptionValue: String?
 	@Option(
 		name: .customLong("key-value"),
 		defaultAsFlag: "",
@@ -28,20 +33,21 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	@Option(name: .customLong("fields"), help: "Select, order, label, format & sort output fields")
 	private var fieldsOptionValue = ""
 
-	/// Resolves `isJSON` / `keyValueOptionValue` / `tableOptionValue` into a
-	/// single `OutputFormat`, falling back to `Config.defaultFormat` iff none was
-	/// given. Re-derived (cheaply: `keyValueOptionValue` & `tableOptionValue` are
-	/// tiny) on every access, same as `fieldsOptionValue`, rather than stored, so
-	/// there's only 1 source of truth to validate.
+	/// Resolves `jsonOptionValue` / `keyValueOptionValue` / `tableOptionValue`
+	/// into a single `OutputFormat`, falling back to `Config.defaultFormat` iff
+	/// none was given. Re-derived (cheaply: each option value is tiny) on every
+	/// access, same as `fieldsOptionValue`, rather than stored, so there's only 1
+	/// source of truth to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
+			let json = try jsonOptionValue.map(parseJSONConfig)
 			let keyValue = try keyValueOptionValue.map(parseKeyValueConfig)
 			let table = try tableOptionValue.map(parseTableConfig)
-			guard [isJSON, keyValue != nil, table != nil].count(where: \.self) <= 1 else {
+			guard [json != nil, keyValue != nil, table != nil].count(where: \.self) <= 1 else {
 				throw ValidationError("At most 1 of '--json', '--key-value', or '--table' may be given.")
 			}
-			return if isJSON {
-				.json
+			return if let json {
+				.json(json)
 			} else if let keyValue {
 				.keyValue(keyValue)
 			} else if let table {

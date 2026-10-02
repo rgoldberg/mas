@@ -34,6 +34,11 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 	static func output(_ objects: [JSON.Object], outputFormat: OutputFormat, fieldsOptionValue: String)
 	throws(OutputError) {
 		guard !objects.isEmpty else {
+			// json.md: an item array renders `[]` for 0 items; every other output
+			// renders nothing
+			if case let .json(jsonConfig) = outputFormat, jsonConfig.topLevelStructure == .itemArray {
+				MAS.printer.info("[]")
+			}
 			return
 		}
 		let resolved: any FieldsConfig
@@ -88,10 +93,9 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 			.map { objects[$0] }
 		let displayFieldSpecs = orderedFieldSpecs.filter { !$0.isHidden }
 		switch outputFormat {
-		case .json:
+		case let .json(jsonConfig):
 			MAS.printer.info(
-				try sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder) as [Any],
-				separator: "\n",
+				try sortedObjects.json(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder, jsonConfig: jsonConfig),
 			)
 		case let .keyValue(keyValueConfig):
 			MAS.printer.info(

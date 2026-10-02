@@ -27,7 +27,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		}
 
 		func run(installedApps: [InstalledApp]) throws {
-			guard !installedApps.isEmpty else {
+			if installedApps.isEmpty {
 				printer.warning(
 					"""
 					Failed to find any installed apps
@@ -46,7 +46,6 @@ extension MAS { // swiftlint:disable:this file_types_order
 					sudo mdutil -Eai on
 					""",
 				)
-				return
 			}
 			try outputConfigOptionGroup.output(installedApps.map(\.jsonObject))
 		}

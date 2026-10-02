@@ -9,8 +9,6 @@ All `--fields` / `--table` work is in 1 commit (`` TODO: `FieldsSpec`. ``).
   lookup, as described by Temp/todo.md "Persisted Named Formats & Custom Named
   Configs" & by `// TODO:`s in `FieldSpec.swift` & `FormatParser.swift`: every
   `<named-format-reference>` reports `unknownNamedFormat`.
-- [json.md](../Specs/json.md): `--json` takes no value; JSON output always uses
-  the `standard` JSON config's settings (`psv`).
 - Version fields' default format is `%V+%i+`, not mas.md's `%v` (Temp/todo.md
   "Implementation Questions").
 - Behaviors pending the open questions in Temp/todo.md "Current Version", each
@@ -65,6 +63,17 @@ accepts no escape sequences. Comments & names use table.md's vocabulary
 `parseTableConfig`; `K` requires non-empty `<sgr-parameters>`. `repeatedPattern`
 (formerly `repeatedTablePattern`) also fills leaders & item separator lines,
 printing a 0-width pattern (e.g., a tab) once.
+
+### JSON Config (2026-10-02)
+
+`parseJSONConfig` parses `--json`'s value into `JSONConfig` (json.md);
+`JSON.Node.rendered(jsonConfig:)` pretty-prints & escapes non-ASCII characters
+(lowercase hex `\uXXXX`). For 0 items, `a` renders `[]`: `list` now outputs
+after its "Failed to find any installed apps" warning, while `search` still
+reports `noCatalogAppsFound`. Like `--table`, `--key-value` & `--json` consume
+the next argument as their value, so a positional argument must not immediately
+follow them (e.g., `mas lookup 497799835 --json`, not
+`mas lookup --json 497799835`).
 
 ### Placeholders & Transforms (2026-09-18, revised 2026-09-25)
 

@@ -13,7 +13,7 @@ private extension MASTests {
 	@Test
 	func `searches for slack`() async throws {
 		let actual = try await consequencesOf(
-			try await MAS.main(try MAS.Search.parse(["--json", "things"])) { command in
+			try await MAS.main(try MAS.Search.parse(["things", "--json"])) { command in
 				try command.run(catalogApps: try decode(CatalogAppResults.self, fromResource: "things").results)
 			},
 		)

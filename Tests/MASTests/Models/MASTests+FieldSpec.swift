@@ -220,7 +220,7 @@ private extension MASTests {
 				],
 		)
 		let jsonFieldSpecs =
-			try resolvedFieldsConfig(from: "price", standard: SelectedFieldsConfig(), all: all, outputFormat: .json)
+			try resolvedFieldsConfig(from: "price", standard: SelectedFieldsConfig(), all: all, outputFormat: .json(.default))
 			.fieldSpecs
 		#expect(jsonFieldSpecs.map(\.label) == ["price"])
 		#expect(jsonFieldSpecs.map(\.format) == [.default(fieldName: "price")])
@@ -274,14 +274,14 @@ private extension MASTests {
 		],
 	)
 	func `field order base-fields-config-order & original-input-order`(value: String, fieldOrder: FieldOrder) throws {
-		#expect(try parseFieldsConfig(value, outputFormat: .json).fieldOrder == fieldOrder)
+		#expect(try parseFieldsConfig(value, outputFormat: .json(.default)).fieldOrder == fieldOrder)
 	}
 
 	@Test(arguments: [("o", ["b", "a", "c"]), ("od", ["c", "a", "b"])])
 	func `original-input-order orders each item's fields by its own key order`(order: String, expected: [String]) throws {
 		let fieldSpecs = ["a", "b", "c"].map(FieldSpec.defaultSettings(forName:))
 		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
-		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json).fieldOrder
+		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json(.default)).fieldOrder
 		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.name) == expected)
 	}
 
@@ -402,11 +402,11 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("@standard", OutputFormat.json, ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
-			("@standard@none", .json, ["adamID"], "Adam"),
-			("@standard@table", .json, ["adamID"], "Adam"),
+			("@standard", OutputFormat.json(.default), ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
+			("@standard@none", .json(.default), ["adamID"], "Adam"),
+			("@standard@table", .json(.default), ["adamID"], "Adam"),
 			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
-			("@default@key-value", .json, ["adamID"], "Adam"),
+			("@default@key-value", .json(.default), ["adamID"], "Adam"),
 			("@standard", .keyValue(.default), ["adamID"], "Adam"),
 		],
 	)

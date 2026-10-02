@@ -347,7 +347,7 @@ func resolveBaseFieldsConfig(
 	guard !stem.isEmpty, stem.allSatisfy(\.isConfigNameCharacter) else {
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
-	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? (outputFormat == .json))
+	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? outputFormat.isJSON)
 	let allVariant = all.withDefaultFieldOrder(outputFormat: outputFormat)
 	let config: any FieldsConfig =
 		switch stem {

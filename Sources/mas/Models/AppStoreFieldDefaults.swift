@@ -74,7 +74,7 @@ func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: Output
 	if fieldName == leastNonconformingFieldName {
 		optionSet.nonconformingComparison = .least
 	}
-	if outputFormat == .json {
+	if outputFormat.isJSON {
 		// `Iascgb` / `IascgB/+`
 		optionSet.boundaries = isPath ? .uncollapsed([.init(boundaries: [.character("/")])]) : .noBoundaries
 	} else {

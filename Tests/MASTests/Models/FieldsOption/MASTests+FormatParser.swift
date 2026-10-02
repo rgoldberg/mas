@@ -415,8 +415,13 @@ private extension MASTests {
 }
 
 private func parsedFieldSpec(_ format: String) throws(ParsingError) -> FieldSpec {
-	try resolvedFieldsConfig(from: "n:" + format, standard: SelectedFieldsConfig(), all: .init(), outputFormat: .json)
-		.fieldSpecs[0]
+	try resolvedFieldsConfig(
+		from: "n:" + format,
+		standard: SelectedFieldsConfig(),
+		all: .init(),
+		outputFormat: .json(.default),
+	)
+	.fieldSpecs[0]
 }
 
 private func rendered(_ format: String, _ value: JSON.Node?) throws -> String? {

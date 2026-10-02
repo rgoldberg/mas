@@ -6,7 +6,15 @@
 //
 
 enum OutputFormat: Equatable {
-	case json
+	case json(JSONConfig)
 	case keyValue(KeyValueConfig)
 	case table(TableConfig)
+
+	var isJSON: Bool {
+		if case .json = self {
+			true
+		} else {
+			false
+		}
+	}
 }

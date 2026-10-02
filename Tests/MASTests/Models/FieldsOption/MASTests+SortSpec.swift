@@ -296,7 +296,7 @@ private func parsedFieldSpec(format: String, sort: String) throws(ParsingError) 
 		from: "n:\(format)/\(sort)",
 		standard: SelectedFieldsConfig(),
 		all: .init(),
-		outputFormat: .json,
+		outputFormat: .json(.default),
 	)
 	.fieldSpecs[0]
 }
