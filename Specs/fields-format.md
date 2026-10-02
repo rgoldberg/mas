@@ -717,6 +717,11 @@ digit group separator adjacent to a digit group of any other size thus ends the
 number before that separator (e.g., `%.:,,,,,,.*:n` matches `"1,2345"` as the
 number `1` followed by the trivia suffix `,2345`).
 
+A number coercion accepts both positional & scientific notation (an exponent
+indicator, `e` or `E`, followed by an optionally signed integer exponent). The
+coerced value retains the input's notation, without a `+` sign, leading `0`s, or
+trailing fractional `0`s (e.g., `%.n` coerces `"+01.50e+3"` to `1.5e+3`).
+
 A number coercion also allows **trivia** around the number, matching a string
 iff the string is:
 

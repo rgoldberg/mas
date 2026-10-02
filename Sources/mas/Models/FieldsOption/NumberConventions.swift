@@ -99,27 +99,23 @@ extension NumberConventions {
 		var number = (sign == "-" && !(integerDigits.isEmpty && fractionalDigits.isEmpty) ? "-" : "")
 			+ (integerDigits.isEmpty ? "0" : integerDigits)
 			+ (fractionalDigits.isEmpty ? "" : "." + fractionalDigits)
-		if let exponentIndicator = rest.first, exponentIndicator == "e" || exponentIndicator == "E" {
-			let exponentSign = rest.dropFirst().prefix { $0 == "-" || $0 == "+" }.prefix(1)
-			let exponentDigits = rest[exponentSign.endIndex...].prefix(while: \.isASCIIDigit)
-			if !exponentDigits.isEmpty {
-				number += String(exponentIndicator) + exponentSign + exponentDigits
-				rest = rest[exponentDigits.endIndex...]
-			}
+		if let exponent = exponent(of: rest) {
+			number += exponent
+			rest = rest[exponent.endIndex...]
 		}
 		return (number, rest.startIndex)
 	}
 
 	/// The value & end of the grouped number at the start of `string` (a run of
 	/// digits split into digit groups by `digitGroupSeparator`, optionally
-	/// followed by `decimalSeparator` & a fractional part); else `nil`. See
-	/// `<grouped-numeric>` in fields.md.
+	/// followed by `decimalSeparator` & a fractional part, then optionally by an
+	/// exponent); else `nil`. See `<grouped-numeric>` in fields.md.
 	func groupedNumberPrefix(of string: Substring) -> (number: DecimalNumber, end: Substring.Index)? {
 		integerPart(of: string).flatMap { integerPart in
 			let fractionalPart = fractionalPart(of: string[integerPart.end...])
-			return DecimalNumber(integerPart.digits + (fractionalPart.map { "." + $0 } ?? "")).map { number in
-				(number, fractionalPart?.endIndex ?? integerPart.end)
-			}
+			let exponent = exponent(of: string[(fractionalPart?.endIndex ?? integerPart.end)...])
+			return DecimalNumber(integerPart.digits + (fractionalPart.map { "." + $0 } ?? "") + (exponent ?? ""))
+				.map { number in (number, exponent?.endIndex ?? fractionalPart?.endIndex ?? integerPart.end) }
 		}
 	}
 
@@ -172,6 +168,17 @@ extension NumberConventions {
 			}
 		}
 		return integerPart
+	}
+
+	/// The exponent (an `e` or `E` exponent indicator, an optional sign & digits)
+	/// iff `string` starts with one, else `nil`.
+	private func exponent(of string: Substring) -> Substring? {
+		guard let exponentIndicator = string.first, exponentIndicator == "e" || exponentIndicator == "E" else {
+			return nil
+		}
+		let exponentSign = string.dropFirst().prefix { $0 == "-" || $0 == "+" }.prefix(1)
+		let exponentDigits = string[exponentSign.endIndex...].prefix(while: \.isASCIIDigit)
+		return exponentDigits.isEmpty ? nil : string[..<exponentDigits.endIndex]
 	}
 
 	/// The fractional part's digits iff `string` starts with `decimalSeparator`

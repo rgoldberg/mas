@@ -205,6 +205,8 @@ private extension MASTests {
 			("%s", "1G.,3,,,+", .string("1.234"), .string("999"), .orderedDescending),
 			("%s", "1G+", .string("1,2345"), .string("999"), .orderedDescending),
 			("%s", "1g", .string("1,2345"), .string("999"), .orderedAscending),
+			("%s", "1g", .string("1.5e3"), .string("999"), .orderedDescending),
+			("%s", "1n", .string("1e3"), .string("999"), .orderedAscending),
 			("%s", "1b", .string("a/b"), .string("a!b"), .orderedDescending),
 			("%s", "1B/+", .string("a/b"), .string("a!b"), .orderedAscending),
 			("%s", "1B/_:space:+", .string("a/b"), .string("a b"), .orderedAscending),

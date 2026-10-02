@@ -605,8 +605,9 @@ separator.
 
 A grouped number is a run of digits split into [digit
 groups](fields-format.md#numberformat) by a digit group separator, optionally
-followed by a decimal separator & a fractional part, with group sizes &
-separators from:
+followed by a decimal separator & a fractional part, then optionally by an
+exponent indicator (`e` or `E`) & an optionally signed integer exponent (e.g.,
+`1.5e3` compares as `1500`), with group sizes & separators from:
 
 - `g`: the [canonical or localized](#sort-localization) conventions.
 - `G`: its arguments; a `<digit-group-size>` of `0` allows groups of any size.

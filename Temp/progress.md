@@ -206,5 +206,5 @@ processed exactly, of unlimited precision & magnitude, via `DecimalNumber` &
 `BigInt`: comparisons (number, version & `<numeric>` / `<grouped-numeric>`
 string sorting), coercion (a coerced number's canonical form retains its
 notation, e.g., `1e3`) & `scale`; `<grouped-numeric>` compares each grouped
-number, fractional part included, as 1 number. Chronologic Unix epoch timestamps
-still go through `Date`'s `Double`.
+number, fractional part & exponent included, as 1 number. Chronologic Unix epoch
+timestamps still go through `Date`'s `Double`.

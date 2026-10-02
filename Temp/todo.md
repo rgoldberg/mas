@@ -151,9 +151,6 @@ literal reading makes `hS` a header on, contradicting Implied Settings) &
 10. Selecting an output notation (positional, `e`, or `E`) isn't supported:
     every number transform retains its input's notation, except `scale`, which
     always renders positional notation.
-11. Agreed, but not yet specified: every input (sorting & coercion) accepts
-    every numeric notation, and output retains the input's notation unless
-    another output notation is selected.
 
 ### Custom Names Removal Session Open Issues (2026-10-01)
 

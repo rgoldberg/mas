@@ -39,6 +39,7 @@ private extension MASTests {
 			(.canonical, "1,2345", "1", ",2345"),
 			(.canonical, "1,234,5678", "1234", ",5678"),
 			(.canonical, ".5e2!", "0.5e2", "!"),
+			(.canonical, "+01.50e+3", "1.5e+3", ""),
 			(.canonical, "5e", "5", "e"),
 			(.canonical, "5.", "5", "."),
 			(.canonical, "x5", nil, ""),
@@ -68,6 +69,9 @@ private extension MASTests {
 			(.canonical, "1,2345", "1", ",2345"),
 			(.canonical, "0.123,456", "0.123", ",456"),
 			(.canonical, "a,b", nil, "a,b"),
+			(.canonical, "1,234.5e3x", "1234500", "x"),
+			(.canonical, "2E-1!", "0.2", "!"),
+			(.canonical, "3e+", "3", "e+"),
 			(germanConventions, "1.234,5", "1234.5", ""),
 		],
 	)
