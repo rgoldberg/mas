@@ -28,6 +28,9 @@ extension ProcessInfo {
 	}
 
 	func dropEffectiveRootWheel() throws(MASError) {
+		if geteuid() == 0 {
+			try set(groupsOfUID: try sudoUID, gid: try sudoGID)
+		}
 		if getegid() == 0 {
 			try set(effectiveGID: try sudoGID)
 		}
@@ -37,6 +40,9 @@ extension ProcessInfo {
 	}
 
 	func dropRootWheel() throws(MASError) {
+		if geteuid() == 0 {
+			try set(groupsOfUID: try sudoUID, gid: try sudoGID)
+		}
 		if getegid() == 0 || getgid() == 0 {
 			try set(gid: try sudoGID)
 		}

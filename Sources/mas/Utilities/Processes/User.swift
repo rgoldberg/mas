@@ -8,10 +8,10 @@
 internal import Darwin
 
 extension uid_t {
-	var nameAndUID: String {
+	var name: String? {
 		let bufferLength = sysconf(_SC_GETPW_R_SIZE_MAX)
 		guard bufferLength > 0 else {
-			return "(\(self))"
+			return nil
 		}
 		var pwd = unsafe passwd()
 		var buffer = Array(repeating: CChar(0), count: bufferLength)
@@ -21,10 +21,14 @@ extension uid_t {
 			unsafe result != nil,
 			let namePtr = unsafe pwd.pw_name
 		{
-			"\(unsafe String(cString: unsafe namePtr).quoted) (\(self))"
+			unsafe String(cString: unsafe namePtr)
 		} else {
-			"(\(self))"
+			nil
 		}
+	}
+
+	var nameAndUID: String {
+		name.map { "\($0.quoted) (\(self))" } ?? "(\(self))"
 	}
 }
 
