@@ -35,7 +35,10 @@ file to reflect it.
 - Before committing:
   1. Add or edit tests for all non-trivial changes (to preserve tokens, agents
      should not add tests unless explicitly directed to do so)
-  2. Repeatedly run `Scripts/format` until no modifications are made
+  2. Repeatedly run `Scripts/format` until no modifications are made, reviewing
+     each run's modifications before the next run (each run stops after the 1st
+     tool that modifies any file, so that no 2 tools modify files in the same
+     run)
   3. Repeatedly run `Scripts/lint` & fix all violations until no violations are
      reported (to preserve tokens & to save time, agents should run
      `Scripts/lint -A` instead)

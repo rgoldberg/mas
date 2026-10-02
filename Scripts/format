@@ -5,7 +5,8 @@
 #
 # Copyright © 2025 mas-cli. All rights reserved.
 #
-# Automatically formats & fixes style violations using various tools.
+# Automatically formats & fixes style violations using various tools. Exits 1 after the 1st tool that modifies any file,
+# so that each run's modifications can be reviewed 1 tool at a time.
 #
 # Please keep in sync with Scripts/lint.
 #
@@ -21,18 +22,36 @@ export -r MAS_DISTRIBUTION=format
 # shellcheck disable=SC2034
 readonly -a files=("${(@0)"$(non_ignored_files)"}")
 
+# Prints the hash of each file's contents
+hash_files() {
+	git hash-object --no-filters --stdin-paths <<<"${(F)files}"
+}
+
+original_hashes="$(hash_files)"
+readonly original_hashes
+
+# Exits 1 iff any file's contents have changed since this script started (for tools that exit 0 after modifying files)
+exit_if_modified() {
+	if [[ "$(hash_files)" != "${original_hashes}" ]]; then
+		printf $'Modified files; review the modifications, then rerun Scripts/format\n'
+		exit 1
+	fi
+}
+
 printf -- $'--> 🕊​ SwiftFormat\n'
 script -q /dev/null swiftformat --strict --markdown-files format-strict "${(@M)files:#*.(md|swift)}" </dev/null |
 	filter_swiftformat_output '0/\d+ files formatted\.\r'
 
 printf -- $'--> 🦅 SwiftLint\n'
 swiftlint --fix --quiet --reporter relative-path -- "${(@M)files:#*.swift}"
+exit_if_modified
 
 printf -- $'--> 📏 Layout\n'
 Scripts/layout -f
 
 printf -- $'--> 〽️ Markdown\n'
 markdownlint-cli2 --fix -- "${(@)${(@M)files:#*.md}/#/:}"
+exit_if_modified
 
 printf -- $'--> 🚷 Non-Executables\n'
 # shellcheck disable=SC1036,SC2206
