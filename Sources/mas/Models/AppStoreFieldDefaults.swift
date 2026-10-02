@@ -61,9 +61,7 @@ private let versionFieldNameSet = Set(["minimumOSVersion", "newVersion", "versio
 /// mas.md's App Store locale: the App Store's own locale cannot be determined
 /// programmatically, so the likely locale of the App Store region that mas
 /// guesses from the macOS region.
-private var appStoreLocale: Locale {
-	.init(identifier: Locale.Language(identifier: "und-\(appStoreRegion)").maximalIdentifier)
-}
+private let appStoreLocale = Locale(identifier: Locale.Language(identifier: "und-\(appStoreRegion)").maximalIdentifier)
 
 /// mas.md's "Default Sort Options" for string fields, for `outputFormat`: the
 /// path row iff `fieldName` is a path field's name, else the non-path row (also
