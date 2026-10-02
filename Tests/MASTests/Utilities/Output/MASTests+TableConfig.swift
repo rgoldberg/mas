@@ -71,6 +71,11 @@ private extension MASTests {
 		#expect(throws: TableConfigParsingError.invalidSeparatorPattern(pattern)) { try parseTableConfig("S\(pattern):") }
 	}
 
+	@Test(arguments: ["\n", " \r\n ", "\u{85}", "\u{2029}"])
+	func `a column spacing containing a line terminator is invalid`(spacing: String) {
+		#expect(throws: TableConfigParsingError.invalidColumnSpacing(spacing)) { try parseTableConfig("C\(spacing):") }
+	}
+
 	@Test
 	func `a backslash escapes the next character in a setting's text`() throws {
 		#expect(try parseTableConfig("S\\::").separator?.pattern == ":")

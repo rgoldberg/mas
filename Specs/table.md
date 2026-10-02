@@ -123,7 +123,8 @@ column-spacing = ^{text}^ (* direct default: ""; transitive default: "  " *)
 - `c`: resets column spacing to `<column-spacing>`'s transitive default.
 - `C`: a literal custom spacing string between adjacent columns (e.g., `C:` for
   no spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a literal tab
-  character, e.g., `$'C\t:'` in zsh).
+  character, e.g., `$'C\t:'` in zsh). A `<column-spacing>` containing a line
+  terminator (e.g., LF or CR) is invalid, since it would split each row.
 
 ## Table Setting Termination
 

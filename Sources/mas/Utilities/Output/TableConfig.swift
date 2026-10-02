@@ -88,7 +88,11 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		case "c":
 			columnSpacing = TableConfig.default.columnSpacing
 		case "C":
-			columnSpacing = try parseTableSettingText(&input, setting: setting)
+			let spacing = try parseTableSettingText(&input, setting: setting)
+			guard !spacing.contains(where: \.isNewline) else {
+				throw .invalidColumnSpacing(spacing)
+			}
+			columnSpacing = spacing
 		default:
 			throw .invalidSetting(setting)
 		}
@@ -110,6 +114,7 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 // swiftlint:disable:next one_declaration_per_file
 enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
+	case invalidColumnSpacing(String)
 	case invalidHeaderStyle(String)
 	case invalidSeparatorPattern(String)
 	case invalidSetting(Character)
@@ -118,6 +123,8 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 		switch self {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --table's value"
+		case let .invalidColumnSpacing(spacing):
+			"Invalid column spacing (a line terminator would split each row): \(spacing.debugDescription)"
 		case let .invalidHeaderStyle(sgrCodes):
 			"Invalid header style (expected ANSI SGR parameters, e.g., \"1\" or \"1;4\"): \(sgrCodes)"
 		case let .invalidSeparatorPattern(pattern):
