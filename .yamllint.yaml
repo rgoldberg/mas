@@ -7,7 +7,6 @@
 ---
 extends: default
 locale: en_US.UTF-8
-ignore-from-file: .gitignore
 rules:
   anchors:
     forbid-duplicated-anchors: true

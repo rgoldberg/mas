@@ -52,6 +52,13 @@ ensure_command_available() {
 	return "${return_status}"
 }
 
+# Prints each existing regular file, except ignored files, separated by NULs
+non_ignored_files() {
+	# shellcheck disable=SC1036,SC2034,SC2206
+	local -ar files=(${^${(0)"$(git ls-files -z --cached --others --exclude-standard --deduplicate)"}}(N.))
+	print -rn -- "${(pj:\0:)files}"
+}
+
 # Removes SwiftFormat's progress & summary lines from stdin, plus each line fully matching an extended regex in ${@}
 filter_swiftformat_output() {
 	# shellcheck disable=SC2034
