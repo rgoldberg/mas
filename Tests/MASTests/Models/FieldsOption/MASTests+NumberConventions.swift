@@ -143,6 +143,7 @@ private extension MASTests {
 				decimalSeparator: ",",
 			)),
 			(["system", nil, nil, nil, nil], .init(locale: .current)),
+			(["en-US", nil, nil, nil, nil], .init(locale: .init(identifier: "en_US"))),
 		],
 	)
 	func `number-format-arguments default to the base conventions`(

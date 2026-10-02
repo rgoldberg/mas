@@ -18,8 +18,7 @@ internal import Foundation
 ///   determinant selects the direct default for an absent `<format-block>`.
 /// - Returns: The format & the justification from its
 ///   `<format-transform-pipeline>`, which is `nil` iff the working fields
-///   config's justification is retained (i.e., the
-///   `<format-transform-pipeline>` is transitively absent).
+///   config's justification is inherited (i.e., `<justify>` is absent).
 func parseFormatBlock(_ input: inout Substring, existing: Format)
 throws(ParsingError) -> (format: Format, justification: Justification?) {
 	var parser = FormatParser(input: input)
@@ -85,9 +84,8 @@ private struct FormatParser {
 		guard calls.isEmpty || valueTransformPipelineShapeSet.contains(where: calls.hasShape) else {
 			throw .invalidPipeline("<value-transform-pipeline>")
 		}
-		// A directly absent `<format-transform-pipeline>` preceding a
-		// `<value-transform-pipeline>` defaults to `<start-justify>`
-		return (.pipeline(calls), justification ?? (calls.isEmpty ? nil : .start))
+		// An absent `<justify>` is inherited
+		return (.pipeline(calls), justification)
 	}
 
 	/// Parses a block's `<*-pipeline>`, whose kind `kind` selects the valid

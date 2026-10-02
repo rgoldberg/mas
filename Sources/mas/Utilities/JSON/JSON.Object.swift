@@ -86,8 +86,8 @@ extension [JSON.Object] {
 	/// (table.md): an optional header row of labels, an optional separator line,
 	/// then a cell per field per item (fields.md: label is a field spec's "Header
 	/// for table"). Every item gets a cell for every field, per fields.md's
-	/// "Absent Values" (absent ⇒ empty string, via `Format.rendered`'s
-	/// null-passthrough).
+	/// "Absent Values" (absent ⇒ empty string, unless its format renders it
+	/// otherwise, e.g., via a `<failure-block>`).
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String {
 		guard !isEmpty else {
 			return ""

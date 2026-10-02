@@ -188,10 +188,46 @@ private extension MASTests {
 		#expect(throws: error) { try parseFieldsConfig(value) }
 	}
 
-	@Test
-	func `field order section requires a field-order-option-set`() {
-		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig("/") }
-		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig("/.adamID") }
+	@Test(arguments: ["/", "/.adamID", "/ ", "/ .adamID"])
+	func `field order section requires a field-order-option-set`(value: String) {
+		#expect(throws: ParsingError.missingFieldOrderOptionSet) { try parseFieldsConfig(value) }
+	}
+
+	@Test(arguments: [("/w,x", Character(",")), ("/Ia/x", "/")])
+	func `input left over after a field order section is an error`(value: String, character: Character) {
+		#expect(throws: ParsingError.unexpectedCharacter(character)) { try parseFieldsConfig(value) }
+	}
+
+	@Test(
+		arguments: [
+			(".adamID:.uppercase", Justification.end),
+			(".adamID:%i", .end),
+			(".adamID:.startJustify..uppercase", .start),
+			(".+size:.uppercase", .start),
+		],
+	)
+	func `an absent justify is inherited, or start-justify absent any to inherit`(
+		value: String,
+		justification: Justification,
+	) throws {
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: value,
+			standard: SelectedFieldsConfig(
+				fieldSpecs: [
+					.init(
+						name: "adamID",
+						label: "adamID",
+						format: .default(fieldName: "adamID"),
+						sortSpec: nil,
+						justification: .end,
+					),
+				],
+			),
+			all: allFixture,
+			outputFormat: .table(.default),
+		)
+		.fieldSpecs
+		#expect(fieldSpecs[0].justification == justification)
 	}
 
 	@Test(

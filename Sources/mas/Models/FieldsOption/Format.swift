@@ -434,34 +434,34 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 			return switch form {
 			case let .abortOnFailure(success):
 				if let matched {
-					try success?.evaluated(in: context.matching(matched)) ?? matched.string
+					try success.evaluatedBlock(in: context.matching(matched), absentValue: matched.string)
 				} else {
 					nil
 				}
 			case let .abortOnSuccess(failure):
 				if matched == nil {
-					try failure?.evaluated(in: context) ?? ""
+					try failure.evaluatedBlock(in: context, absentValue: "")
 				} else {
 					nil
 				}
 			case let .binary(success, failure):
 				if let matched {
-					try success?.evaluated(in: context.matching(matched)) ?? matched.string
+					try success.evaluatedBlock(in: context.matching(matched), absentValue: matched.string)
 				} else {
-					try failure?.evaluated(in: context) ?? ""
+					try failure.evaluatedBlock(in: context, absentValue: "")
 				}
 			}
 		case let .match(branches, form):
 			for branch in branches {
-				if let evaluated = try branch.evaluated(in: context) {
-					return evaluated
+				if case let .value(value) = try branch.evaluated(in: context) {
+					return value
 				}
 			}
 			return switch form {
 			case .abortOnNoMatch:
 				nil
 			case let .binary(failure):
-				try failure?.evaluated(in: context) ?? ""
+				try failure.evaluatedBlock(in: context, absentValue: "")
 			}
 		case let .unconditional(predicate, pipeline):
 			return try predicate.value(in: context).applying(pipeline)?.string
@@ -469,23 +469,44 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 	}
 }
 
+/// What a `<branch>` returns.
+private enum BranchOutcome { // swiftlint:disable:this one_declaration_per_file
+	/// No value, so the next branch is tried.
+	case noValue
+	/// A value, which is `nil` iff formatting aborts.
+	case value(String?)
+}
+
 private extension Branch { // swiftlint:disable:this file_types_order
-	/// The branch's value, or `nil` iff it returns none (the next branch is
-	/// tried); a branch's block aborting is indistinguishable from no value.
-	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+	func evaluated(in context: FormatContext) throws(FormattingError) -> BranchOutcome {
 		switch self {
 		case let .conditional(matcher, isNegated, block):
 			let matched = matcher.matched(context.input)
 			return if isNegated {
-				matched == nil ? try block?.evaluated(in: context) ?? FormatValue.input(context.input).string : nil
+				matched == nil
+					? .value(try block.evaluatedBlock(in: context, absentValue: FormatValue.input(context.input).string))
+					: .noValue
 			} else if let matched {
-				try block?.evaluated(in: context.matching(matched)) ?? matched.string
+				.value(try block.evaluatedBlock(in: context.matching(matched), absentValue: matched.string))
 			} else {
-				nil
+				.noValue
 			}
 		case let .unconditional(predicate, block):
 			let value = predicate.value(in: context)
-			return try block?.evaluated(in: context.matching(value)) ?? value.string
+			return .value(try block.evaluatedBlock(in: context.matching(value), absentValue: value.string))
+		}
+	}
+}
+
+private extension Format? { // swiftlint:disable:this file_types_order
+	/// This block's evaluated value, `absentValue` iff the block is absent, or
+	/// `nil` iff formatting aborts.
+	func evaluatedBlock(in context: FormatContext, absentValue: String) throws(FormattingError) -> String? {
+		switch self {
+		case let .some(block):
+			try block.evaluated(in: context)
+		case .none:
+			absentValue
 		}
 	}
 }

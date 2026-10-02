@@ -184,3 +184,14 @@ after a `<field-order-section>` (e.g., `/w,x`, `/Ia/x`) reports
 settings & around each `<sgr-parameter>` (e.g., `h s`, `H 1 ; 4 :`); &
 `<locale-identifier>` accepts BCP 47 identifiers (e.g., `en-US`), as well as ICU
 ones.
+
+### Aborting Blocks, Justify Inheritance & Absent Values (2026-10-01)
+
+A block that aborts (a success block, a failure block, or a branch's block) now
+aborts the whole format, instead of falling back to the matcher's value, `""`,
+or the next branch. An absent `<justify>` is inherited from the working fields
+config (`<start-justify>` absent any to inherit, e.g., in a built-in config),
+including in a `<pipeline>` whose `<format-transform-pipeline>` is directly
+absent. fields.md's "Absent Values" now states once that an absent value is
+output as an empty string unless its format renders it otherwise (e.g., via a
+`<failure-block>`). Each change of this & the previous audit has tests.

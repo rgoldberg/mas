@@ -74,6 +74,14 @@ private extension MASTests {
 		#expect(throws: TableConfigParsingError.danglingEscape) { try parseTableConfig("S-\\") }
 	}
 
+	@Test(arguments: [(" h s ", "hs"), ("H 1 ; 4 : S", "H1;4:S"), ("H :", "H"), ("H : a", "H:a")])
+	func `outer bare whitespace between settings & around each SGR parameter is ignored`(
+		value: String,
+		equivalent: String,
+	) throws {
+		#expect(try parseTableConfig(value) == parseTableConfig(equivalent))
+	}
+
 	@Test
 	func `an uppercase S implies a header iff none was already set`() throws {
 		#expect(try parseTableConfig("S").header == .init(sgrCodes: ""))
@@ -131,6 +139,34 @@ private extension MASTests {
 				tableConfig: .default,
 			)
 		#expect(table == "Slack")
+	}
+
+	@Test
+	func `table renders an absent value as an empty string, unless its format renders it otherwise`() throws {
+		let table = try [JSON.Object([("a", .string("1"))])]
+			.table(
+				fieldSpecs: [
+					.init(name: "a", label: "a", format: .default(fieldName: "a"), sortSpec: nil),
+					.init(name: "b", label: "b", format: .default(fieldName: "b"), sortSpec: nil),
+					.init(
+						name: "c",
+						label: "c",
+						format: .template(
+							[
+								.placeholder(
+									.conditional(
+										.init(predicate: .number, coercion: nil),
+										.binary(success: nil, failure: .template([.text("none")])),
+									),
+								),
+							],
+						),
+						sortSpec: nil,
+					),
+				],
+				tableConfig: .default,
+			)
+		#expect(table == "1    none")
 	}
 
 	@Test

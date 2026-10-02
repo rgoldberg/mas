@@ -89,7 +89,46 @@ private extension MASTests {
 	) {
 		#expect(Matcher(predicate: predicate, coercion: coercion).conforms(value) == conforms)
 	}
+
+	@Test(
+		arguments: [
+			Placeholder.conditional(numberMatcher, .abortOnFailure(success: abortingBlock)),
+			.conditional(numberMatcher, .binary(success: abortingBlock, failure: nil)),
+			.conditional(stringMatcher, .abortOnSuccess(failure: abortingBlock)),
+			.conditional(stringMatcher, .binary(success: nil, failure: abortingBlock)),
+			.match(
+				[.conditional(numberMatcher, isNegated: false, block: abortingBlock), .unconditional(.input, block: nil)],
+				.abortOnNoMatch,
+			),
+			.match(
+				[.conditional(stringMatcher, isNegated: true, block: abortingBlock), .unconditional(.input, block: nil)],
+				.abortOnNoMatch,
+			),
+			.match(
+				[.conditional(stringMatcher, isNegated: false, block: nil), .unconditional(.input, block: abortingBlock)],
+				.abortOnNoMatch,
+			),
+			.match(
+				[
+					.conditional(stringMatcher, isNegated: false, block: nil),
+					.conditional(.init(predicate: .boolean, coercion: nil), isNegated: false, block: nil),
+				],
+				.binary(failure: abortingBlock),
+			),
+		],
+	)
+	func `a block that aborts aborts the whole format`(placeholder: Placeholder) throws {
+		let format = Format.template([.text("A"), .placeholder(placeholder), .text("B")])
+		#expect(try format.rendered(value: .number(5), label: "L", name: "n").stringValue?.isEmpty == true)
+	}
 }
+
+private let numberMatcher = Matcher(predicate: .number, coercion: nil)
+private let stringMatcher = Matcher(predicate: .string, coercion: nil)
+
+/// A block that aborts for any non-`null` value.
+private let abortingBlock =
+	Format.template([.placeholder(.conditional(.init(predicate: .null, coercion: nil), .abortOnFailure(success: nil)))])
 
 extension JSON.Node {
 	/// Whether this is the JSON number `number`.
