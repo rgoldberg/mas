@@ -172,10 +172,18 @@ private func envVars(from fileHandle: FileHandle) throws(MASError) -> [(name: St
 	return envVars
 }
 
-let applicationsFolderURLs = UserDefaults(suiteName: "com.apple.appstored")?
-	.dictionary(forKey: "PreferredVolume")?["name"]
-	.map { [applicationsFolderURL, .init(folderPath: "/Volumes/\($0)\(applicationsFolderPath)")] }
-	?? [applicationsFolderURL]
+let applicationsFolderURLs: [URL] = applicationsFolderURLs(
+	forPreferredVolumeName: UserDefaults(suiteName: "com.apple.appstored")?
+		.dictionary(forKey: "PreferredVolume")?["name"],
+)
+
+/// The applications folders: `/Applications` & iff `preferredVolumeName` is a
+/// `String`, the preferred volume's `Applications` folder.
+func applicationsFolderURLs(forPreferredVolumeName preferredVolumeName: Any?) -> [URL] {
+	(preferredVolumeName as? String)
+		.map { [applicationsFolderURL, .init(folderPath: "/Volumes/\($0)\(applicationsFolderPath)")] }
+		?? [applicationsFolderURL]
+}
 
 private let applicationsFolderPath = "/Applications"
 private let applicationsFolderURL = URL(folderPath: applicationsFolderPath)
