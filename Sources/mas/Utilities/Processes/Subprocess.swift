@@ -38,14 +38,7 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 	) { execution in
 		let stdin = execution.standardInputWriter
 		func writeFully(_ string: String) async throws {
-			var substring = Substring(string)
-			while !substring.isEmpty {
-				let writtenByteCount = try await stdin.write(substring)
-				guard writtenByteCount > 0 else {
-					throw error("Failed to write \(substring.quoted) from \(string.quoted) to sudo's stdin")
-				}
-				substring.removeFirst(writtenByteCount)
-			}
+			try await mas::writeFully(string, to: "sudo's stdin", using: stdin.write)
 		}
 
 		for (name, value) in ProcessInfo.processInfo.environment
@@ -68,6 +61,20 @@ func nestedSudoMAS(platformOptions: PlatformOptions = .init(), input: CustomWrit
 	}
 	guard execResult.terminationStatus.isSuccess else {
 		throw ExitCode.failure
+	}
+}
+
+/// Writes all of `string`'s UTF-8 bytes to `destination` via `write`, which
+/// returns how many of the bytes it was given it wrote, so it's retried with
+/// the remaining bytes after a partial write.
+func writeFully(_ string: String, to destination: String, using write: ([UInt8]) async throws -> Int) async throws {
+	var bytes = Array(string.utf8)[...]
+	while !bytes.isEmpty {
+		let writtenByteCount = try await write(.init(bytes))
+		guard writtenByteCount > 0 else {
+			throw error("Failed to write last \(bytes.count) bytes of \(string.quoted) to \(destination)")
+		}
+		bytes.removeFirst(writtenByteCount)
 	}
 }
 
