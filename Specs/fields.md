@@ -291,13 +291,13 @@ solely by this tiebreak.
 ```ebnf
 field-spec-reference = <named-field-spec-reference> | <indexed-field-spec-reference>
 
-named-field-spec-reference   = <reference-field-name> [ <index-prefix> <index> ] (* default index: "1" *)
+named-field-spec-reference   = <reference-field-name> [ <index-prefix> <index> ]
 indexed-field-spec-reference = <index-prefix> <index>
 
 reference-field-name = {text: field name}
 
 index-prefix = "@"
-index        = {integer}
+index        = {integer} (* default: "1" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -411,10 +411,10 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-label-modifier        = <label-modifier-prefix> [ <label> ] (* transitive default label: {field name from the enclosing field-spec} *)
+label-modifier        = <label-modifier-prefix> [ <label> ]
 label-modifier-prefix = "="
 
-label = {text} (* default: "" *)
+label = {text} (* direct default: ""; transitive default: {field name from the enclosing field-spec} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
