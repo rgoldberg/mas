@@ -66,9 +66,9 @@ extension DecimalNumber: Comparable {
 }
 
 extension DecimalNumber {
-	/// This number as a fraction of non-negative `BigInt`s (`numerator /
-	/// denominator`), ignoring its sign; `nil` iff its exponent is too large to
-	/// compute with.
+	/// This number as a fraction of non-negative `BigInt`s
+	/// (`numerator / denominator`), ignoring its sign; `nil` iff its exponent is
+	/// too large to compute with.
 	var magnitudeFraction: (numerator: BigInt, denominator: BigInt)? {
 		Int(exactly: exponent - BigInt(digits.count)).map { scale in
 			let significand = BigInt(digits.isEmpty ? "0" : digits) ?? 0
