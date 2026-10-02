@@ -1,4 +1,6 @@
 /.build/
+/.claude/settings.local.json
+/.claude/worktrees/
 /.idea/
 /.swiftpm/
 /.vscode/
