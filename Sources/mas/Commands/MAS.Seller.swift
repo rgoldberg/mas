@@ -33,7 +33,7 @@ extension MAS {
 					printer.error("Failed to find seller app web page for ADAM ID", catalogApp.adamID)
 					return
 				}
-				guard let url = URL(string: sellerURLString) else {
+				guard let url = URL(string: sellerURLString), url.isWebURL else {
 					throw MASError.invalidURL(sellerURLString)
 				}
 				_ = try await url.open()
