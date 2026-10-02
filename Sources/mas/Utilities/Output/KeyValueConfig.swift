@@ -41,8 +41,8 @@ struct KeyValueConfig: Equatable {
 }
 
 /// Parses `--key-value`'s value (`key-value.md`'s `<key-value-config>`):
-/// `<key-value-setting>+`, last wins per axis. Outer bare whitespace between
-/// settings is ignored.
+/// `[ <key-value-setting>+ ]`, last wins per axis. Outer bare whitespace
+/// between settings is ignored.
 func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> KeyValueConfig {
 	var keySGRParameters = KeyValueConfig.default.keySGRParameters
 	var keyStyling = KeyValueConfig.default.keyStyling

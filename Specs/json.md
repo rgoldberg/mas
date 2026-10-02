@@ -13,9 +13,9 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-json-option = "--json" [ &<json-config> ]
+json-option = "--json" [ &<json-config> ] (* default json-config: "" *)
 
-json-config  = <json-setting>+ (* last wins *)
+json-config  = [ <json-setting>+ ] (* last wins *)
 json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-ascii-setting>
 ```
 <!--markdownlint-enable line-length-->

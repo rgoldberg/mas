@@ -71,8 +71,8 @@ would make `Iad` collapse to `d`. Either move the comments to the innermost
 choices or restore the per-alternative formulation. Non-choice instances:
 `table-config = [ <table-setting>+ ]` ([`table.md`](../Specs/table.md); the
 literal reading makes `hS` a header on, contradicting Implied Settings),
-`key-value-config = <key-value-setting>+`
-([`key-value.md`](../Specs/key-value.md)), `json-config = <json-setting>+`
+`key-value-config = [ <key-value-setting>+ ]`
+([`key-value.md`](../Specs/key-value.md)), `json-config = [ <json-setting>+ ]`
 ([`json.md`](../Specs/json.md)) & `format-transform-pipeline = ( … )+`
 ([`fields-format.md`](../Specs/fields-format.md)).
 

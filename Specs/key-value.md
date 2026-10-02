@@ -13,9 +13,9 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-value-option = "--key-value" [ &<key-value-config> ]
+key-value-option = "--key-value" [ &<key-value-config> ] (* default key-value-config: "" *)
 
-key-value-config  = <key-value-setting>+ (* last wins *)
+key-value-config  = [ <key-value-setting>+ ] (* last wins *)
 key-value-setting = <key-setting> | <key-styling-setting> | <leader-setting> | <key-value-spacing-setting> | <item-separator-setting>
 ```
 <!--markdownlint-enable line-length-->
