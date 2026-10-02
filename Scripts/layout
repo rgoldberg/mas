@@ -13,7 +13,8 @@
 #
 # Usage: layout [-f]
 #
-# -f: rewrap reported paragraphs instead of reporting them, wide lines, tables & fenced blocks
+# -f: rewrap reported paragraphs instead of reporting them, wide lines, tables & fenced blocks; exit 1 iff any file is
+#     rewrapped
 #
 
 . "${0:A:h}/_setup-script"
@@ -412,6 +413,7 @@ for file in ${(0)"$(GIT_LITERAL_PATHSPECS=1 git grep --no-index -Ilz '' -- "${(@
 	if [[ -v 'received_flag[-f]' && "${(pj:\n:)result_lines}" != "${(pj:\n:)source_lines}" ]]; then
 		print -r -- "${(pj:\n:)result_lines}" >"${file}"
 		printf $'Rewrapped %s\n' "${file}"
+		exit_status=1
 	fi
 done
 
