@@ -26,7 +26,7 @@ readonly -A option_value
 
 readonly version="${1}"
 readonly title="${2}"
-readonly formula_path="${option_value[-f]}"
+readonly formula_path="${option_value[-f]-}"
 
 export MAS_VERSION="${version}"
 print_notice '🚀 Starting release for' "${@}"
@@ -77,4 +77,4 @@ gh workflow run release-start.yaml\
 	-f version="${version}"\
 	-f title="${title}"\
 	-f ref="${commit_sha}"\
-	${formula_path:+-F formula=@"${formula_path}"}
+	${formula_path:+-Fformula=@"${formula_path}"}
