@@ -11,7 +11,7 @@
 
 @protocol ISAccountStoreObserver, ISAssetService, ISDownloadService, ISInAppService, ISServiceRemoteObject, ISTransactionService, ISUIService, ISURLBagObserver;
 
-typedef void (^UnknownBlock)();
+typedef void (^UnknownBlock)(void);
 
 #import "ISStoreAccount.h"
 #import "ISAccountService-Protocol.h"
