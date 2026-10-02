@@ -217,17 +217,12 @@ private extension JSON.Key {
 					return output.0.first.map { $0.isLowercase ? "icon\(output.1)URL" : "Icon\(output.1)URL" } ?? ""
 				}
 					.replacing(unsafe trackRegex) { match in // swiftformat:disable indent
-						func track(_ prefix: String) -> String {
-							output.3.first.map { $0.isUppercase ? $0.lowercased() : "\(prefix)\(output.2)\($0)" }
-								?? "\(prefix)\(output.2)"
-						}
-
 						let output = match.output
 						return switch output.1 {
 						case "track":
-							track("app")
+							output.3.first.map { $0.isUppercase ? $0.lowercased() : "app\(output.2)\($0)" } ?? "app\(output.2)"
 						case "Track":
-							track("App")
+							"App\(output.2)\(output.3)"
 						case "trackId":
 							"adamID\(output.2)\(output.3)"
 						case "TrackId":
