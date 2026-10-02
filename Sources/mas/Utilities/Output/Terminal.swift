@@ -49,12 +49,14 @@ private extension Character {
 }
 
 private extension Unicode.Scalar {
-	private static let localeInitialization: Void = {
-		_ = unsafe setlocale(LC_ALL, "")
-	}()
+	/// A UTF-8 `LC_CTYPE` locale, since mas always outputs UTF-8, regardless of
+	/// the environment's locale (e.g., `C`, in which `wcwidth` fails for every
+	/// non-ASCII character).
+	private nonisolated(unsafe) static let utf8Locale = unsafe newlocale(LC_CTYPE_MASK, "UTF-8", nil)
 
 	var terminalWidth: Int {
-		_ = Self.localeInitialization
+		let previousLocale = unsafe uselocale(unsafe Self.utf8Locale)
+		defer { unsafe uselocale(previousLocale) }
 		return max(0, .init(wcwidth(.init(value))))
 	}
 }
