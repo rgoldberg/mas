@@ -48,18 +48,40 @@ extension JSON.Object {
 		)
 	}
 
-	/// `keyValue`, but driven by `--fields`-resolved field specs (label &
-	/// rendered value per field) instead of a static key list.
-	func keyValue(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> String {
+	/// This item's key-value output rows, each with its unstyled width, driven by
+	/// `--fields`-resolved field specs (label & rendered value per field) &
+	/// `keyValueConfig` (key-value.md): each row is its key (styled per
+	/// `keyValueConfig`), its leader (iff any), then its value, with
+	/// `keyValueSpacing` on each side of the leader (or once between the key &
+	/// the value, iff there is no leader). A leader's width is the item's widest
+	/// key's width, less its own key's width, plus the leader pattern's width.
+	func keyValueRows(fieldSpecs: some Sequence<FieldSpec>, keyValueConfig: KeyValueConfig)
+	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldSpecs.map { fieldSpec throws(FormattingError) in try keyValueRow(for: fieldSpec) }
 			.compactMap(\.self)
-		guard !rows.isEmpty else {
-			return ""
-		}
 		let maxLabelWidth = rows.map(\.label.terminalWidth).max() ?? 0
-		return rows
-			.map { "\($0) \(String(repeating: "▁", count: maxLabelWidth - $0.terminalWidth + 1)) \($1)" }
-			.joined(separator: "\n")
+		let keyValueSpacing = keyValueConfig.keyValueSpacing
+		return rows.map { label, value in
+			let labelWidth = label.terminalWidth
+			let suffix = (
+				keyValueConfig.leaderPattern.map { leaderPattern in
+					keyValueSpacing
+						+ repeatedPattern(leaderPattern, toWidth: maxLabelWidth - labelWidth + leaderPattern.terminalWidth)
+				}
+					?? "",
+			)
+				+ keyValueSpacing
+				+ value
+			return (
+				styled(
+					label,
+					sgrParameters: keyValueConfig.keySGRParameters,
+					isAlwaysStyled: keyValueConfig.keyStyling == .always,
+				)
+					+ suffix,
+				labelWidth + suffix.terminalWidth,
+			)
+		}
 	}
 
 	/// This item's JSON output object, per `--fields`-resolved field specs: keyed
@@ -128,11 +150,11 @@ extension [JSON.Object] {
 			rows.append(
 				separator.broken
 					? renderedTableRow(
-						cells: columnMetadata.map { repeatedTablePattern(separator.pattern, toWidth: $0.maxWidth) },
+						cells: columnMetadata.map { repeatedPattern(separator.pattern, toWidth: $0.maxWidth) },
 						columns: columnMetadata,
 						columnSpacing: columnSpacing,
 					)
-					: repeatedTablePattern(
+					: repeatedPattern(
 						separator.pattern,
 						toWidth: // swiftformat:disable:next indent
 							columnMetadata.map(\.maxWidth).reduce(0, +) + columnSpacing.terminalWidth * (columnMetadata.count - 1),
@@ -152,13 +174,27 @@ extension [JSON.Object] {
 		return rows.joined(separator: "\n")
 	}
 
-	/// `keyValue`, but driven by `--fields`-resolved field specs, ordered per
-	/// item by `fieldOrder`.
-	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder) throws(FormattingError) -> String {
-		try map { object throws(FormattingError) in
-			try object.keyValue(fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object))
+	/// This item list's key-value output, per `--fields`-resolved field specs
+	/// ordered per item by `fieldOrder` & per `keyValueConfig` (key-value.md):
+	/// each item's rows, with an item separator line (iff any) between each pair
+	/// of adjacent items, filled to the width of the widest row of any item.
+	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
+	throws(FormattingError) -> String {
+		let itemRows = try map { object throws(FormattingError) in
+			try object.keyValueRows(
+				fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object),
+				keyValueConfig: keyValueConfig,
+			)
 		}
-		.joined(separator: "\n\n")
+		return itemRows
+			.lazy
+			.map { $0.map(\.row).joined(separator: "\n") }
+			.joined(
+				separator: keyValueConfig.itemSeparatorPattern.map { itemSeparatorPattern in
+					"\n\(repeatedPattern(itemSeparatorPattern, toWidth: itemRows.joined().map(\.width).max() ?? 0))\n"
+				}
+					?? "\n",
+			)
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
@@ -195,12 +231,12 @@ private func renderedTableRow(
 }
 
 /// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition (never
-/// padding) if `pattern`'s width doesn't evenly divide `targetWidth` (table.md:
-/// a separator line's repetition cuts off immediately, even mid-character-
-/// group, rather than rounding to a whole number of repetitions). Returns a
-/// 0-width `pattern` (e.g., a tab) once, since no number of repetitions can
-/// fill any width.
-private func repeatedTablePattern(_ pattern: String, toWidth targetWidth: Int) -> String {
+/// padding) if `pattern`'s width doesn't evenly divide `targetWidth` (table.md
+/// & key-value.md: a separator line's or leader's repetition cuts off
+/// immediately, even mid-character-group, rather than rounding to a whole
+/// number of repetitions). Returns a 0-width `pattern` (e.g., a tab) once,
+/// since no number of repetitions can fill any width.
+private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> String {
 	guard pattern.terminalWidth > 0 else {
 		return pattern
 	}

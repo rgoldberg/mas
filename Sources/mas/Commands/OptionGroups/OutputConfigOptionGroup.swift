@@ -11,8 +11,13 @@ internal import JSONAST
 struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	@Flag(name: .customLong("json"), help: "Output format: JSON")
 	private var isJSON = false
-	@Flag(name: .customLong("key-value"), help: "Output format: key-value")
-	private var isKeyValue = false
+	@Option(
+		name: .customLong("key-value"),
+		defaultAsFlag: "",
+		parsing: .next,
+		help: "Output format: key-value, optionally configuring keys, leaders, spacing & item separators (key-value.md)",
+	)
+	private var keyValueOptionValue: String?
 	@Option(
 		name: .customLong("table"),
 		defaultAsFlag: "",
@@ -23,21 +28,22 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	@Option(name: .customLong("fields"), help: "Select, order, label, format & sort output fields")
 	private var fieldsOptionValue = ""
 
-	/// Resolves `isJSON` / `isKeyValue` / `tableOptionValue` into a single
-	/// `OutputFormat`, falling back to `Config.defaultFormat` iff none was given.
-	/// Re-derived (cheaply: `tableOptionValue` is tiny) on every access, same as
-	/// `fieldsOptionValue`, rather than stored, so there's only 1 source of truth
-	/// to validate.
+	/// Resolves `isJSON` / `keyValueOptionValue` / `tableOptionValue` into a
+	/// single `OutputFormat`, falling back to `Config.defaultFormat` iff none was
+	/// given. Re-derived (cheaply: `keyValueOptionValue` & `tableOptionValue` are
+	/// tiny) on every access, same as `fieldsOptionValue`, rather than stored, so
+	/// there's only 1 source of truth to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
+			let keyValue = try keyValueOptionValue.map(parseKeyValueConfig)
 			let table = try tableOptionValue.map(parseTableConfig)
-			guard [isJSON, isKeyValue, table != nil].count(where: \.self) <= 1 else {
+			guard [isJSON, keyValue != nil, table != nil].count(where: \.self) <= 1 else {
 				throw ValidationError("At most 1 of '--json', '--key-value', or '--table' may be given.")
 			}
 			return if isJSON {
 				.json
-			} else if isKeyValue {
-				.keyValue
+			} else if let keyValue {
+				.keyValue(keyValue)
 			} else if let table {
 				.table(table)
 			} else {

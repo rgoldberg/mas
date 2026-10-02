@@ -174,9 +174,11 @@ literal reading makes `hS` a header on, contradicting Implied Settings),
 
 ### Bug Fix Session Open Issues (2026-10-02)
 
-1. A `<separator-pattern>` ([table.md](../Specs/table.md), Separator) whose last
-   repeated character is wide (e.g., `中`) can overshoot its line's width, since
-   a character can't be split & table.md forbids padding instead.
+1. A `<separator-pattern>` ([table.md](../Specs/table.md), Separator),
+   `<leader-pattern>`, or `<item-separator-pattern>`
+   ([key-value.md](../Specs/key-value.md), Leader & Item Separator) whose last
+   repeated character is wide (e.g., `中`) can overshoot its width, since a
+   character can't be split & both specs forbid padding instead.
 
 ## ASAP Version, But Massive Effort
 

@@ -21,7 +21,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueOutputConfig>
 		@OptionGroup
 		private var catalogAppsOptionGroup: CatalogAppsOptionGroup
 
@@ -35,8 +35,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 	}
 }
 
-private struct KeyValueConfig: OutputConfig {
-	static let defaultFormat = OutputFormat.keyValue
+private struct KeyValueOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.keyValue(.default)
 	static let standardFieldsConfig = SelectedFieldsConfig(
 		fieldSpecs: [
 			.init(name: "name", label: "Name", format: defaultFieldFormat(forFieldNamed: "name"), sortSpec: nil),

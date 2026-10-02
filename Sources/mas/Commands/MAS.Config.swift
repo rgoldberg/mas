@@ -19,7 +19,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 		)
 
 		@OptionGroup
-		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueConfig>
+		private var outputConfigOptionGroup: OutputConfigOptionGroup<KeyValueOutputConfig>
 
 		func run() throws {
 			try outputConfigOptionGroup.output(
@@ -48,8 +48,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 	}
 }
 
-private struct KeyValueConfig: OutputConfig {
-	static let defaultFormat = OutputFormat.keyValue
+private struct KeyValueOutputConfig: OutputConfig {
+	static let defaultFormat = OutputFormat.keyValue(.default)
 	/// `config`'s field set is fully static & fully known, so `standard` is
 	/// itself all-inclusive: there's no separate dynamic component to merge at
 	/// render time (unlike `list` / `search` / `outdated` / `lookup`).

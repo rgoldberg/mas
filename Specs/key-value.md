@@ -86,6 +86,8 @@ leader-pattern = ^{text}^ (* default: "▁" *)
   width iff it does not evenly divide the width. A leader's width is the width
   of its item's widest key, less the width of its own key, plus the width of
   `<leader-pattern>`, so the widest key's leader is a single `<leader-pattern>`.
+  A 0-width `<leader-pattern>` (e.g., a tab) is printed once, since no number of
+  repetitions can fill any width.
 
 ## Key-Value Spacing
 
@@ -126,8 +128,10 @@ item-separator-pattern = ^{text}^ (* default: "" *)
   previous item's last row.
 - `S`: a line between each pair of adjacent items. `<item-separator-pattern>` is
   repeated to fill the width of the widest row of any item, truncated at that
-  width iff it does not evenly divide the width; an empty
-  `<item-separator-pattern>` renders a blank line.
+  width iff it does not evenly divide the width. A 0-width
+  `<item-separator-pattern>` (e.g., a tab) is printed once, since no number of
+  repetitions can fill any width, so an empty `<item-separator-pattern>` renders
+  a blank line.
 
 ## Key-Value Setting Termination
 

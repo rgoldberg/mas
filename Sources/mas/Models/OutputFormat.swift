@@ -7,6 +7,6 @@
 
 enum OutputFormat: Equatable {
 	case json
-	case keyValue
+	case keyValue(KeyValueConfig)
 	case table(TableConfig)
 }

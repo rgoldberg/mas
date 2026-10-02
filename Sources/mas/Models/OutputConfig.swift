@@ -93,8 +93,14 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 				try sortedObjects.jsonObjects(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder) as [Any],
 				separator: "\n",
 			)
-		case .keyValue:
-			MAS.printer.info(try sortedObjects.keyValue(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder))
+		case let .keyValue(keyValueConfig):
+			MAS.printer.info(
+				try sortedObjects.keyValue(
+					fieldSpecs: displayFieldSpecs,
+					fieldOrder: resolved.fieldOrder,
+					keyValueConfig: keyValueConfig,
+				),
+			)
 		case let .table(tableConfig):
 			MAS.printer.info(try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
 		}

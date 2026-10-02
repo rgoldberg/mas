@@ -49,7 +49,7 @@ private extension MASTests {
 		fieldName: String,
 		nonconformingComparison: SortOptionSet.NonconformingComparison,
 	) {
-		for outputFormat in [OutputFormat.json, .keyValue] {
+		for outputFormat in [OutputFormat.json, .keyValue(.default)] {
 			#expect(
 				defaultSortOptionSet(forFieldNamed: fieldName, outputFormat: outputFormat).nonconformingComparison
 					== nonconformingComparison,
@@ -82,7 +82,7 @@ private extension MASTests {
 				],
 			),
 			all: .init(),
-			outputFormat: .keyValue,
+			outputFormat: .keyValue(.default),
 		)
 		.fieldSpecs[0]
 		#expect(

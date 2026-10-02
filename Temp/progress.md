@@ -9,9 +9,8 @@ All `--fields` / `--table` work is in 1 commit (`` TODO: `FieldsSpec`. ``).
   lookup, as described by Temp/todo.md "Persisted Named Formats & Custom Named
   Configs" & by `// TODO:`s in `FieldSpec.swift` & `FormatParser.swift`: every
   `<named-format-reference>` reports `unknownNamedFormat`.
-- [key-value.md](../Specs/key-value.md) & [json.md](../Specs/json.md):
-  `--key-value` & `--json` take no value; key-value & JSON output always use
-  their `standard` configs' settings (`kLtcS` & `psv`).
+- [json.md](../Specs/json.md): `--json` takes no value; JSON output always uses
+  the `standard` JSON config's settings (`psv`).
 - Version fields' default format is `%V+%i+`, not mas.md's `%v` (Temp/todo.md
   "Implementation Questions").
 - Behaviors pending the open questions in Temp/todo.md "Current Version", each
@@ -57,6 +56,15 @@ handles escaping (`\:`, `\\`, dangling `\` is an error) in `<separator-pattern>`
 accepts no escape sequences. Comments & names use table.md's vocabulary
 (`<table-setting-termination>`, `<table-setting-terminator>`,
 `<end-of-table-config>`, `TableConfigParsingError.invalidSetting`).
+
+### Key-Value Config (2026-10-02)
+
+`parseKeyValueConfig` parses `--key-value`'s value into `KeyValueConfig`
+(key-value.md), sharing `parseOutputConfigSettingPayload`,
+`normalizedSGRParameters` & `styled` (`OutputConfigSetting.swift`) with
+`parseTableConfig`; `K` requires non-empty `<sgr-parameters>`. `repeatedPattern`
+(formerly `repeatedTablePattern`) also fills leaders & item separator lines,
+printing a 0-width pattern (e.g., a tab) once.
 
 ### Placeholders & Transforms (2026-09-18, revised 2026-09-25)
 

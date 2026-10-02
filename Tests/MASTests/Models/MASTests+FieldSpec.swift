@@ -334,7 +334,7 @@ private extension MASTests {
 				from: value,
 				standard: standardFixture,
 				all: allFixture,
-				outputFormat: .keyValue,
+				outputFormat: .keyValue(.default),
 				fieldNameSet: ["adamID", "bundleID"],
 			)
 		}
@@ -407,7 +407,7 @@ private extension MASTests {
 			("@standard@table", .json, ["adamID"], "Adam"),
 			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
 			("@default@key-value", .json, ["adamID"], "Adam"),
-			("@standard", .keyValue, ["adamID"], "Adam"),
+			("@standard", .keyValue(.default), ["adamID"], "Adam"),
 		],
 	)
 	func `resolves a built-in fields config's variant by suffix or output format`(

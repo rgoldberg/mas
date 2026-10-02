@@ -405,7 +405,7 @@ private extension MASTests {
 				],
 			),
 			all: .init(),
-			outputFormat: .keyValue,
+			outputFormat: .keyValue(.default),
 		)
 		#expect(
 			config.fieldSpecs[0].format
