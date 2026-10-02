@@ -195,9 +195,7 @@ Mirror number coercion: chronologic coercion takes fenced arguments giving the
 input format (e.g., `%.:yyyy-MM-dd:c`, `..:yyyy-MM-dd:timeZone:UTC:`), with
 [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
-) as the pattern syntax. This replaces the removed `<input-chronologic-format>`
-partial spec, which put input formats in the `<success-block>` & needed extra
-`,` & `_` separators.
+) as the pattern syntax.
 
 A named or literal output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax & persisted named
