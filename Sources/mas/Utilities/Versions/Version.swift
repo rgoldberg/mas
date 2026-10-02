@@ -25,7 +25,7 @@ extension Version {
 			? coreComparison
 			: prereleaseElements.isEmpty != that.prereleaseElements.isEmpty // swiftformat:disable:next wrap wrapArguments
 				? prereleaseElements.isEmpty ? .orderedDescending : .orderedAscending
-				: prereleaseElements.compareSemVerElements(to: that.prereleaseElements)
+				: prereleaseElements.compareSemVerElements(to: that.prereleaseElements, countedBy: \.count)
 	}
 
 	func compareSemVerAndBuild(to that: Self) -> ComparisonResult {
@@ -53,8 +53,23 @@ private extension String {
 }
 
 private extension [String] {
-	func compareSemVerElements(to that: Self) -> ComparisonResult {
+	/// The element count, ignoring each trailing all-`0` element (e.g., `0` or
+	/// `00`) that follows an all-digit element (SemVer ranks a prerelease with
+	/// more elements higher, so a prerelease is counted by `count` instead).
+	var significantCount: Int {
+		indices.last { index in
+			index == startIndex
+				|| self[index].isEmpty
+				|| self[index].contains { $0 != "0" }
+				|| !self[index - 1].allSatisfy(\.isASCIIDigit)
+		}
+		.map { $0 + 1 }
+		?? 0
+	}
+
+	func compareSemVerElements(to that: Self, countedBy count: KeyPath<Self, Int> = \.significantCount)
+	-> ComparisonResult {
 		zip(self, that).lazy.map { $0.compareSemVerElement(to: $1) }.first { $0 != .orderedSame }
-			?? ComparableComparator().compare(dropLast { $0 == "0" }.count, that.dropLast { $0 == "0" }.count)
+			?? ComparableComparator().compare(self[keyPath: count], that[keyPath: count])
 	}
 }
