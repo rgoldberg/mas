@@ -45,9 +45,9 @@ struct TableConfig: Equatable {
 }
 
 /// Parses `--table`'s value (`table.md`'s `<table-config>`):
-/// `<table-setting>+`, last wins per axis. A defaulted (i.e., unset) axis with
-/// a prerequisite is filled in per `table.md`'s "Implied Settings": `b` / `u`
-/// imply a separator line (`S`, default `<separator-pattern>` `-`); any
+/// `[ <table-setting>+ ]`, last wins per axis. A defaulted (i.e., unset) axis
+/// with a prerequisite is filled in per `table.md`'s "Implied Settings": `b` /
+/// `u` imply a separator line (`S`, default `<separator-pattern>` `-`); any
 /// separator line implies a header row (`H`, unstyled). A setting that
 /// explicitly sets an axis (even to "off") always overrides an implied default
 /// for that axis. Outer bare whitespace between settings is ignored.
