@@ -6,6 +6,7 @@
 //
 
 private import Foundation
+private import JSONAST
 @testable private import mas
 private import ObjectiveC
 internal import Testing
@@ -47,5 +48,19 @@ private extension MASTests {
 		#expect(catalogApp.name == "Slack")
 		#expect(catalogApp.sellerURLString == "https://slack.com")
 		#expect(catalogApp.version == "3.3.3")
+	}
+
+	@Test
+	func `normalizing a catalog app's keys drops a leading track before an uppercase letter, but makes Track App`()
+	throws {
+		let catalogApp = try #require(
+			try decode(
+				CatalogAppResults.self,
+				fromJSON: #"{"results":[{"trackBar":1,"fooTrackBar":2,"fooTrack":3,"fooTracks2":4}]}"#,
+			)
+			.results
+			.first,
+		)
+		#expect(catalogApp.jsonObject.fields.map(\.key.rawValue) == ["bar", "fooAppBar", "fooApp", "fooApps2"])
 	}
 }
