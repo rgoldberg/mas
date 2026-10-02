@@ -18,21 +18,27 @@ ensure_command_available markdownlint-cli2 swiftformat swiftlint
 
 export -r MAS_DISTRIBUTION=format
 
+# shellcheck disable=SC2034
+readonly -a files=("${(@0)"$(non_ignored_files)"}")
+
 printf -- $'--> 🕊​ SwiftFormat\n'
-swiftformat --strict --color always --symlinks follow . |& filter_swiftformat_output '0/\d+ files formatted\.'
+readonly -a swiftformat_files=("${(@M)files:#*.(md|swift)}")
+if ((${#swiftformat_files})); then
+	swiftformat --strict --color always "${swiftformat_files[@]}" |& filter_swiftformat_output '0/\d+ files formatted\.'
+fi
 
 printf -- $'--> 🦅 SwiftLint\n'
-swiftlint --fix --quiet --reporter relative-path
+swiftlint --fix --quiet --reporter relative-path -- "${(@M)files:#*.swift}"
 
 printf -- $'--> 📏 Layout\n'
 Scripts/layout -f
 
 printf -- $'--> 〽️ Markdown\n'
-# shellcheck disable=SC1036
-markdownlint-cli2 --fix -- ***/*.md(.)
+markdownlint-cli2 --fix -- "${(@)${(@M)files:#*.md}/#/:}"
 
 printf -- $'--> 🚷 Non-Executables\n'
-readonly -a non_executables=(Scripts/***/*(N.^f+111))
+# shellcheck disable=SC1036,SC2206
+readonly -a non_executables=(${^${(M)files:#Scripts/*}}(N^f+111))
 if (("${#non_executables[@]}")); then
 	chmod -vv a+x "${non_executables[@]}"
 	exit 1
