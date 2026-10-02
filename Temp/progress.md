@@ -9,6 +9,9 @@ All `--fields` / `--table` work is in 1 commit (`` TODO: `FieldsSpec`. ``).
   lookup, as described by Temp/todo.md "Persisted Named Formats & Custom Named
   Configs" & by `// TODO:`s in `FieldSpec.swift` & `FormatParser.swift`: every
   `<named-format-reference>` reports `unknownNamedFormat`.
+- [key-value.md](../Specs/key-value.md) & [json.md](../Specs/json.md):
+  `--key-value` & `--json` take no value; key-value & JSON output always use
+  their `standard` configs' settings (`kLtcS` & `psv`).
 - Version fields' default format is `%V+%i+`, not mas.md's `%v` (Temp/todo.md
   "Implementation Questions").
 - Behaviors pending the open questions in Temp/todo.md "Current Version", each

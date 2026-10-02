@@ -56,9 +56,9 @@ referenced, or extended among configs of its own kind. The kinds are:
 
 - [**Fields config**](fields.md#fields-configs): which fields are output & how.
 - [**Table config**](table.md#table-config): table output settings.
-- **Key-value config**: key-value output settings, of which there are currently
-  none.
-- **JSON config**: JSON output settings, of which there are currently none.
+- [**Key-value config**](key-value.md#key-value-config): key-value output
+  settings.
+- [**JSON config**](json.md#json-config): JSON output settings.
 
 The rules below apply to every kind unless a kind specifies otherwise.
 

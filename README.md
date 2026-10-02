@@ -166,8 +166,12 @@ output formats, each selectable via a flag (note: an item is normally an app):
 in [`Specs/fields.md`](Specs/fields.md) &
 [`Specs/fields-format.md`](Specs/fields-format.md); `--table` configures table
 output's header row, separator line & column spacing, as specified in
-[`Specs/table.md`](Specs/table.md). mas-specific defaults are specified in
-[`Specs/mas.md`](Specs/mas.md). e.g.:
+[`Specs/table.md`](Specs/table.md); `--key-value` configures key-value output's
+key styling, leader, key-value spacing & item separator line, as specified in
+[`Specs/key-value.md`](Specs/key-value.md); `--json` configures JSON output's
+pretty-printing, top-level structure & non-ASCII character rendering, as
+specified in [`Specs/json.md`](Specs/json.md). mas-specific defaults are
+specified in [`Specs/mas.md`](Specs/mas.md). e.g.:
 
 - `mas list --fields 'name=App,version/1d' --table S`: only the name (labeled
   `App`) & version fields, sorted by descending version, with a header row & a
