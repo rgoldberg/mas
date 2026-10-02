@@ -342,7 +342,10 @@ private func unsortedInstalledApps(matching appIDs: [AppID], fields: [String]) a
 	}
 	query.searchScopes = applicationsFolderURLs
 	let notifications = NotificationCenter.default.notifications(named: .NSMetadataQueryDidFinishGathering, object: nil)
-	query.start()
+	guard query.start() else {
+		MAS.printer.error("Failed to start Spotlight query")
+		return .init()
+	}
 	for await notification in notifications where (notification.object as? NSMetadataQuery) === query {
 		break
 	}
