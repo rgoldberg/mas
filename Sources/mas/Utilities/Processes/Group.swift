@@ -39,3 +39,12 @@ func set(gid: gid_t) throws(MASError) {
 		throw .error("Failed to switch group from \(getgid().nameAndGID) to \(gid.nameAndGID)")
 	}
 }
+
+func set(groupsOfUID uid: uid_t, gid: gid_t) throws(MASError) {
+	guard let name = uid.name else {
+		throw .error("Failed to get name of user \(uid.nameAndUID)")
+	}
+	guard unsafe initgroups(name, .init(bitPattern: gid)) == 0 else {
+		throw .error("Failed to switch groups to those of user \(uid.nameAndUID) & group \(gid.nameAndGID)")
+	}
+}
