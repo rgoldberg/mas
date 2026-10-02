@@ -8,8 +8,9 @@
 private import AppKit
 internal import ArgumentParser
 private import CommerceKit
-private import Darwin
+internal import Darwin
 private import Foundation
+private import System
 
 extension MAS {
 	/// Mimics the "Reset Application" command in the App Store debug menu, which
@@ -27,7 +28,7 @@ extension MAS {
 			abstract: "Reset App Store processes & clear cached App Store downloads",
 		)
 
-		func run() {
+		func run() throws {
 			for bundleID in ["com.apple.dock", "com.apple.storeuid"] {
 				for app in NSRunningApplication.runningApplications(withBundleIdentifier: bundleID) where !app.terminate() {
 					printer.warning("Failed to terminate app with bundle ID", bundleID)
@@ -50,27 +51,15 @@ extension MAS {
 					"/System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/storelegacy",
 				],
 			)
-			var processListMIB = [CTL_KERN, KERN_PROC, KERN_PROC_ALL]
-			var length = 0
-			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), nil, &length, nil, 0) == 0 else {
-				printer.error("Failed to get process list length")
-				return
-			}
-			var kinfoProcs = unsafe Array(repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
-			guard unsafe sysctl(&processListMIB, .init(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
-				printer.error("Failed to get process list")
-				return
-			}
 			var buffer = Array(repeating: UInt8(0), count: .init(PATH_MAX))
-			for unsafe pid in unsafe kinfoProcs.lazy.map(unsafe \.kp_proc.p_pid) {
+			for pid in try runningProcessIDs {
 				if
 					unsafe proc_pidpath(pid, &buffer, .init(PATH_MAX)) > 0,
 					let executablePath = String(validating: buffer.prefix { $0 != 0 }, as: UTF8.self),
 					executablePathSet.contains(executablePath)
 				{
-					let exitStatus = kill(pid, SIGTERM)
-					if exitStatus != 0 {
-						printer.error("Failed to terminate", executablePath, "getting exit status", exitStatus, "for pid", pid)
+					if kill(pid, SIGTERM) != 0 {
+						printer.error("Failed to terminate", executablePath, "with pid", pid, error: Errno(rawValue: errno))
 					}
 				}
 			}
@@ -81,5 +70,23 @@ extension MAS {
 				printer.error("Failed to delete download folder", folder, error: error)
 			}
 		}
+	}
+}
+
+/// The process IDs of all running processes.
+var runningProcessIDs: [pid_t] {
+	get throws(MASError) {
+		var processListMIB = [CTL_KERN, KERN_PROC, KERN_PROC_ALL]
+		var length = 0
+		guard unsafe sysctl(&processListMIB, .init(processListMIB.count), nil, &length, nil, 0) == 0 else {
+			throw error("Failed to get process list length")
+		}
+		var kinfoProcs = unsafe Array(repeating: unsafe kinfo_proc(), count: length / MemoryLayout<kinfo_proc>.stride)
+		guard unsafe sysctl(&processListMIB, .init(processListMIB.count), &kinfoProcs, &length, nil, 0) == 0 else {
+			throw error("Failed to get process list")
+		}
+		// The process list can shrink between the 2 sysctl calls, and the kernel
+		// over-estimates its length, so ignore unfilled trailing entries
+		return unsafe kinfoProcs.prefix(length / MemoryLayout<kinfo_proc>.stride).map(unsafe \.kp_proc.p_pid)
 	}
 }
