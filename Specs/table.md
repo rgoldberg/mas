@@ -13,9 +13,9 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-table-option = "--table" [ &<table-config> ]
+table-option = "--table" [ &<table-config> ] (* default table-config: "" *)
 
-table-config  = <table-setting>+ (* last wins *)
+table-config  = [ <table-setting>+ ] (* last wins *)
 table-setting = <header-setting> | <header-styling-setting> | <separator-setting> | <broken-setting> | <column-spacing-setting>
 ```
 <!--markdownlint-enable line-length-->
