@@ -12,7 +12,7 @@ internal import BigInt
 struct DecimalNumber: Hashable {
 	static let zero = Self(digits: "", exponent: 0, isNegative: false)
 
-	/// The significant digits, without leading or trailing `0`s; empty iff zero.
+	/// The significant digits, without leading or trailing `0`s; empty iff 0.
 	let digits: String
 	/// The power of 10 by which `0.digits` is multiplied.
 	let exponent: BigInt
@@ -59,7 +59,7 @@ extension DecimalNumber: Comparable {
 	}
 
 	/// Whether this number's magnitude is less than `other`'s, both being nonzero
-	/// or both being zero.
+	/// or both being 0.
 	private func hasLesserMagnitude(than other: Self) -> Bool {
 		exponent < other.exponent || exponent == other.exponent && digits.lexicographicallyPrecedes(other.digits)
 	}
