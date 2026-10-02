@@ -53,6 +53,8 @@ private extension MASTests {
 			("1.0.0-beta.2", "1.0.0-beta.11", .orderedAscending),
 			("1.0.0-rc.1", "1.0.0-beta.11", .orderedDescending),
 			("1.0.0+2", "1.0.0+1", .orderedSame),
+			("1.0.0-alpha.-0", "1.0.0-alpha.1", .orderedDescending),
+			("1.0.0-alpha.-1", "1.0.0-alpha.a", .orderedAscending),
 		],
 	)
 	func `universal SemVers compare per SemVer precedence, ignoring builds`(
