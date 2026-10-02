@@ -86,7 +86,9 @@ separator-pattern = ^{text}^ (* default: "-" *)
 - `S`: a line between the header row & the 1st data row. `<separator-pattern>`
   is repeated to fill the line, truncated at the line's width iff it does not
   evenly divide the width. A 0-width `<separator-pattern>` (e.g., a tab) is
-  printed once, since no number of repetitions can fill any width.
+  printed once, since no number of repetitions can fill any width. A
+  `<separator-pattern>` containing a line terminator (e.g., LF or CR) is
+  invalid, since it would split the separator line.
 
 ## Broken
 

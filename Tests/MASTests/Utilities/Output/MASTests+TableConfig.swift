@@ -66,6 +66,11 @@ private extension MASTests {
 		#expect(try parseTableConfig(value).headerStyling == headerStyling)
 	}
 
+	@Test(arguments: ["\n", "-\r\n-", "\u{85}", "\u{2028}"])
+	func `a separator pattern containing a line terminator is invalid`(pattern: String) {
+		#expect(throws: TableConfigParsingError.invalidSeparatorPattern(pattern)) { try parseTableConfig("S\(pattern):") }
+	}
+
 	@Test
 	func `a backslash escapes the next character in a setting's text`() throws {
 		#expect(try parseTableConfig("S\\::").separator?.pattern == ":")

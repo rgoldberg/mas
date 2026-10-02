@@ -20,7 +20,8 @@ struct TableConfig: Equatable {
 	/// The line between the header row & the 1st data row.
 	struct Separator: Equatable {
 		/// Repeated (truncating mid-repetition if needed, never padded) to fill its
-		/// line; never empty (`<separator-pattern>` defaults to `-`).
+		/// line; never empty (`<separator-pattern>` defaults to `-`) & never
+		/// contains a line terminator.
 		let pattern: String
 		/// - `true`: 1 segment per column, each independently filled to that
 		///   column's width, joined by `columnSpacing` (matching every other row).
@@ -76,6 +77,9 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 			// `<separator-pattern>` is a non-empty text token: absent, its default
 			// `-` applies
 			let pattern = try parseTableSettingText(&input, setting: setting)
+			guard !pattern.contains(where: \.isNewline) else {
+				throw .invalidSeparatorPattern(pattern)
+			}
 			separatorPattern = .set(pattern.isEmpty ? "-" : pattern)
 		case "b":
 			broken = .set(true)
@@ -107,6 +111,7 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
 	case invalidHeaderStyle(String)
+	case invalidSeparatorPattern(String)
 	case invalidSetting(Character)
 
 	var description: String {
@@ -115,6 +120,8 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Escape prefix '\\' at the end of --table's value"
 		case let .invalidHeaderStyle(sgrCodes):
 			"Invalid header style (expected ANSI SGR parameters, e.g., \"1\" or \"1;4\"): \(sgrCodes)"
+		case let .invalidSeparatorPattern(pattern):
+			"Invalid separator pattern (a line terminator would split the separator line): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
 			"Invalid --table <table-setting>: \(setting)"
 		}

@@ -47,10 +47,11 @@ its base field spec. Output omits hidden field specs.
 
 `parseTableConfig` supports `<header-styling-setting>` (`t` / `a`, stored as
 `TableConfig.headerStyling`; `<sgr-parameters>` apply iff `a` or standard output
-is a terminal), defaults an absent `<separator-pattern>` to `-` & handles
-escaping (`\:`, `\\`, dangling `\` is an error) in `<separator-pattern>` /
-`<column-spacing>` text via `parseTableSettingText`; `<sgr-parameters>` accepts
-no escape sequences. Comments & names use table.md's vocabulary
+is a terminal), defaults an absent `<separator-pattern>` to `-`, rejects a
+`<separator-pattern>` containing a line terminator & handles escaping (`\:`,
+`\\`, dangling `\` is an error) in `<separator-pattern>` / `<column-spacing>`
+text via `parseTableSettingText`; `<sgr-parameters>` accepts no escape
+sequences. Comments & names use table.md's vocabulary
 (`<table-setting-termination>`, `<table-setting-terminator>`,
 `<end-of-table-config>`, `TableConfigParsingError.invalidSetting`).
 
