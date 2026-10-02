@@ -473,10 +473,10 @@ extension SortOptionSet {
 			fieldTypeDeterminant
 		case .output:
 			// swiftlint:disable:next todo
-			// TODO: Temp/todo.md "`<output>` sort source": this compares rendered
-			//  values by their JSON type (only a passthrough `%i` retains a
-			//  non-string type); the alternative is the output type of the format's
-			//  final pipeline / placeholder
+			// TODO: Temp/todo.md "Implementation Questions" `<output>` sort source
+			//  question: this compares rendered values by their JSON type (only a
+			//  passthrough `%i` retains a non-string type); the alternative is the
+			//  output type of the format's final pipeline / placeholder
 			.any
 		}
 	}

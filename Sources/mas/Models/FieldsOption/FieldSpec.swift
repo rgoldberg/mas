@@ -269,6 +269,9 @@ func resolvedFieldsConfig(
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 	let tiebreakDirection = try builder.parseItemSortSection(&input)
 	try builder.parseFieldSpecEditsSection(&input)
+	guard input.isEmpty else {
+		throw .unexpectedCharacter(input.first ?? " ")
+	}
 	let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
 	return base.baseIncludesAllFields
 		? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
@@ -442,6 +445,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			return .inherited
 		}
 		input.removeFirst()
+		input = input.drop(while: \.isWhitespace)
 		guard
 			let first = input.first, first != fieldSpecSeparator,
 			!itemSortAndFieldSpecEditsPrefixSet.contains(first)

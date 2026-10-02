@@ -275,16 +275,17 @@ func numberConventions(
 	return conventions
 }
 
-/// The locale that a `<locale-identifier>` identifies: the system locale for
-/// `system`.
+/// The locale that a `<locale-identifier>` (ICU or BCP 47) identifies: the
+/// system locale for `system`.
 func locale(forIdentifier identifier: String) throws(ParsingError) -> Locale {
 	guard identifier != systemLocaleIdentifier else {
 		return .current
 	}
-	guard Locale.availableIdentifiers.contains(identifier) else {
+	let icuIdentifier = Locale.identifier(.icu, from: identifier)
+	guard Locale.availableIdentifiers.contains(icuIdentifier) else {
 		throw .invalidLocaleIdentifier(identifier)
 	}
-	return .init(identifier: identifier)
+	return .init(identifier: icuIdentifier)
 }
 
 extension Character {

@@ -3,7 +3,7 @@
 ## Status (2026-10-01)
 
 All `--fields` / `--table` work is in 1 commit (`` TODO: `FieldsSpec`. ``).
-`Specs/*.md` are implemented, except:
+`Specs/*.md` are implemented (audited 2026-10-01), except:
 
 - Persisted named formats & custom named configs, including context stack
   lookup, as described by Temp/todo.md "Persisted Named Formats & Custom Named
@@ -61,7 +61,7 @@ Placeholder letters match fields-format.md (`%i`, `%l`, `%k`, `%c`, `%m`, `%b`,
 `:UTC:`, `:-05\:30:`, `:system:`) sets the output time zone (last wins); it
 matches IANA Time Zone Database identifiers, Foundation time zone abbreviations
 & `system` case-insensitively, reports `invalidTransformArguments` for an
-unknown `<time-zone-code>` & reports an error for an absent one. Versions are
+unknown `<time-zone-code>` & defaults an absent one to `system`. Versions are
 `.`-separated components each starting with an ASCII digit. `<justify>` names
 are `startJustify`, `endJustify`, `centerStartJustify` & `centerEndJustify`;
 `Transform.initialTitlecase` matches `<initial-titlecase>`.
@@ -174,3 +174,13 @@ alongside `--json`, each output format option excluding the others; option
 values aren't completed. `mas.bash` only completes commands, so it's unchanged.
 `README.md`'s Output Formats section links the specs & gives verified `--fields`
 / `--table` examples.
+
+### Spec Compliance Audit (2026-10-01)
+
+Re-audited every spec against the code, fixing each divergence: input left over
+after a `<field-order-section>` (e.g., `/w,x`, `/Ia/x`) reports
+`unexpectedCharacter`; a whitespace-only `<field-order-option-set>` reports
+`missingFieldOrderOptionSet`; `--table` ignores outer bare whitespace between
+settings & around each `<sgr-parameter>` (e.g., `h s`, `H 1 ; 4 :`); &
+`<locale-identifier>` accepts BCP 47 identifiers (e.g., `en-US`), as well as ICU
+ones.

@@ -5,6 +5,8 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+private import Foundation
+
 /// A fully-parsed `--table`'s value (table.md). `nil` `header` / `separator`
 /// means neither is shown.
 struct TableConfig: Equatable {
@@ -49,7 +51,7 @@ struct TableConfig: Equatable {
 /// imply a separator line (`S`, default `<separator-pattern>` `-`); any
 /// separator line implies a header row (`H`, unstyled). A setting that
 /// explicitly sets an axis (even to "off") always overrides an implied default
-/// for that axis.
+/// for that axis. Outer bare whitespace between settings is ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigAxis<String>.unset
 	var headerStyling = TableConfig.HeaderStyling.terminalOnly
@@ -57,8 +59,8 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 	var broken = TableConfigAxis<Bool>.unset
 	var columnSpacing = String?.none
 	var input = value[...]
-	while let setting = input.first {
-		input.removeFirst()
+	while case let trimmed = input.drop(while: \.isWhitespace), let setting = trimmed.first {
+		input = trimmed.dropFirst()
 		switch setting {
 		case "h":
 			header = .off
@@ -150,11 +152,12 @@ private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_
 /// `<table-setting-termination>`: up through (& excluding) a
 /// `<table-setting-terminator>`, else through `<end-of-table-config>` (so
 /// omitting the terminator anywhere but at the end swallows subsequent settings
-/// into this payload). Outer bare whitespace is consumed. In a `{text}` token
-/// (`<separator-pattern>` / `<column-spacing>`), a `\` escapes the next
-/// character (e.g., `\:`), and an escape prefix at the end of the input is an
-/// error; `<sgr-parameters>` is not a `{text}` token, so it supports no escape
-/// sequences (a `\` is invalid there).
+/// into this payload). A `{text}` token (`<separator-pattern>` /
+/// `<column-spacing>`) consumes its outer bare whitespace, and a `\` in it
+/// escapes the next character (e.g., `\:`), an escape prefix at the end of the
+/// input being an error; `<sgr-parameters>` is not a `{text}` token, so it
+/// supports no escape sequences (a `\` is invalid there) & ignores the outer
+/// bare whitespace around each `<sgr-parameter>`.
 private func parseTableSettingText(_ input: inout Substring, setting: Character)
 throws(TableConfigParsingError) -> String {
 	var text = ""
@@ -173,15 +176,15 @@ throws(TableConfigParsingError) -> String {
 	if input.first == tableSettingTerminator {
 		input.removeFirst()
 	}
-	if setting == "H" {
-		guard
-			text.isEmpty || text.allSatisfy({ $0.isASCII && ($0.isNumber || $0 == ";") })
-			&& !text.hasPrefix(";") && !text.hasSuffix(";") && !text.contains(";;")
-		else {
-			throw .invalidHeaderStyle(text)
-		}
+	guard setting == "H" else {
+		return text
 	}
-	return text
+	let sgrParameters = text.split(separator: ";", omittingEmptySubsequences: false)
+		.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+	guard sgrParameters == [""] || sgrParameters.allSatisfy({ !$0.isEmpty && $0.allSatisfy(\.isASCIIDigit) }) else {
+		throw .invalidHeaderStyle(text)
+	}
+	return sgrParameters.joined(separator: ";")
 }
 
 private let tableSettingTerminator = Character(":")
