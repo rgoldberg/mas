@@ -31,20 +31,18 @@ jobs:
     - name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo
 
-    - name: 🖋 Delete tag lacking trusted SSH signature
+    - name: 🖋 Verify tag has trusted SSH signature
       run: |
         git fetch --force origin "${GITHUB_REF}:${GITHUB_REF}"
         if [[
           "$(git tag -l --format='%(contents:signature)' "${GITHUB_REF_NAME}")" != '-----BEGIN SSH SIGNATURE-----'*
         ]]; then
-          printf $'::error::Tag %s does not have an SSH signature; deleting\n' "${GITHUB_REF_NAME}" >&2
-          git push -d origin "${GITHUB_REF_NAME}"
+          printf $'::error::Tag %s does not have an SSH signature; delete the tag\n' "${GITHUB_REF_NAME}" >&2
           exit 1
         fi
         git config gpg.ssh.allowedSignersFile .github/allowed_signers
         if ! git verify-tag "${GITHUB_REF_NAME}"; then
-          printf $'::error::Tag %s SSH signature is not trusted; deleting\n' "${GITHUB_REF_NAME}" >&2
-          git push -d origin "${GITHUB_REF_NAME}"
+          printf $'::error::Tag %s SSH signature is not trusted; delete the tag\n' "${GITHUB_REF_NAME}" >&2
           exit 2
         fi
 
@@ -55,13 +53,16 @@ jobs:
           exit 3
         fi
 
-    - name: 🌿 Delete version tag not on default branch
+    - name: 🌿 Verify version tag is on default branch
       env:
         DEFAULT_BRANCH: ${{github.event.repository.default_branch}}
       run: |
         if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}"; then
-          printf $'::error::Tag %s is not on the %s branch; deleting\n' "${GITHUB_REF_NAME}" "${DEFAULT_BRANCH}" >&2
-          git push -d origin "${GITHUB_REF_NAME}"
+          printf\
+            $'::error::Tag %s is not on the %s branch; delete the tag\n'\
+            "${GITHUB_REF_NAME}"\
+            "${DEFAULT_BRANCH}"\
+            >&2
           exit 4
         fi
 
@@ -76,30 +77,27 @@ jobs:
         ) || true
         readonly draft_target draft_title
         if [[ -z "${draft_title}" ]]; then
-          printf $'::error::Failed to find draft release for tag %s; deleting\n' "${GITHUB_REF_NAME}" >&2
-          git push -d origin "${GITHUB_REF_NAME}"
+          printf $'::error::Failed to find draft release for tag %s; delete the tag\n' "${GITHUB_REF_NAME}" >&2
           exit 5
         fi
         tag_commit="$(git rev-parse "${GITHUB_REF_NAME}^{commit}")"
         readonly tag_commit
         if [[ "${draft_target}" != "${tag_commit}" ]]; then
           printf\
-            $'::error::Draft release target (%s) does not match tag commit (%s); deleting\n'\
+            $'::error::Draft release target (%s) does not match tag commit (%s); delete the tag\n'\
             "${draft_target}"\
             "${tag_commit}"\
             >&2
-          git push -d origin "${GITHUB_REF_NAME}"
           exit 6
         fi
         tag_title="${GITHUB_REF_NAME}: $(git tag -l --format='%(contents:subject)' "${GITHUB_REF_NAME}")"
         readonly tag_title
         if [[ "${draft_title}" != "${tag_title}" ]]; then
           printf\
-            $'::error::Draft release title (%s) does not match tag title (%s); deleting\n'\
+            $'::error::Draft release title (%s) does not match tag title (%s); delete the tag\n'\
             "${draft_title}"\
             "${tag_title}"\
             >&2
-          git push -d origin "${GITHUB_REF_NAME}"
           exit 7
         fi
 
