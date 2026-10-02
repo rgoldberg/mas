@@ -120,9 +120,9 @@ extension [JSON.Object] {
 		if let header = tableConfig.header {
 			let headerRow =
 				renderedTableRow(cells: columns.map(\.label), columns: columnMetadata, columnSpacing: columnSpacing)
-			let isStyled =
-				!header.sgrCodes.isEmpty && (tableConfig.headerStyling == .always || FileHandle.standardOutput.isTerminal)
-			rows.append(isStyled ? "\u{1B}[\(header.sgrCodes)m\(headerRow)\u{1B}[0m" : headerRow)
+			rows.append(
+				styled(headerRow, sgrParameters: header.sgrCodes, isAlwaysStyled: tableConfig.headerStyling == .always),
+			)
 		}
 		if let separator = tableConfig.separator {
 			rows.append(

@@ -5,8 +5,6 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-private import Foundation
-
 /// A fully-parsed `--table`'s value (table.md). `nil` `header` / `separator`
 /// means neither is shown.
 struct TableConfig: Equatable {
@@ -163,42 +161,22 @@ private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_
 
 /// Parses an uppercase `<table-setting>`'s payload (`<sgr-parameters>`,
 /// `<separator-pattern>`, or `<column-spacing>`) through its
-/// `<table-setting-termination>`: up through (& excluding) a
-/// `<table-setting-terminator>`, else through `<end-of-table-config>` (so
-/// omitting the terminator anywhere but at the end swallows subsequent settings
-/// into this payload). A `{text}` token (`<separator-pattern>` /
-/// `<column-spacing>`) consumes its outer bare whitespace, and a `\` in it
-/// escapes the next character (e.g., `\:`), an escape prefix at the end of the
-/// input being an error; `<sgr-parameters>` is not a `{text}` token, so it
-/// supports no escape sequences (a `\` is invalid there) & ignores the outer
-/// bare whitespace around each `<sgr-parameter>`.
+/// `<table-setting-termination>` via `parseOutputConfigSettingPayload`;
+/// `<sgr-parameters>` is not a `{text}` token, so it supports no escape
+/// sequences (a `\` is invalid there) & ignores the outer bare whitespace
+/// around each `<sgr-parameter>`.
 private func parseTableSettingText(_ input: inout Substring, setting: Character)
 throws(TableConfigParsingError) -> String {
-	var text = ""
-	while let char = input.first, char != tableSettingTerminator {
-		input.removeFirst()
-		guard char == escapePrefix, setting != "H" else {
-			text.append(char)
-			continue
-		}
-		guard let escaped = input.first else {
-			throw .danglingEscape
-		}
-		input.removeFirst()
-		text.append(escaped)
-	}
-	if input.first == tableSettingTerminator {
-		input.removeFirst()
-	}
+	let text = try parseOutputConfigSettingPayload(
+		&input,
+		supportsEscapeSequences: setting != "H",
+		danglingEscapeError: TableConfigParsingError.danglingEscape,
+	)
 	guard setting == "H" else {
 		return text
 	}
-	let sgrParameters = text.split(separator: ";", omittingEmptySubsequences: false)
-		.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-	guard sgrParameters == [""] || sgrParameters.allSatisfy({ !$0.isEmpty && $0.allSatisfy(\.isASCIIDigit) }) else {
+	guard let sgrParameters = normalizedSGRParameters(text) else {
 		throw .invalidHeaderStyle(text)
 	}
-	return sgrParameters.joined(separator: ";")
+	return sgrParameters
 }
-
-private let tableSettingTerminator = Character(":")
