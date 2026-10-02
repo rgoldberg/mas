@@ -73,6 +73,7 @@ jobs:
         ref: ${{inputs.ref}}
         # Include all history & tags for Scripts/version
         fetch-depth: 0
+        persist-credentials: false
 
     - name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo
@@ -132,6 +133,7 @@ jobs:
         ref: ${{needs.validate-inputs.outputs.commit_sha}}
         # Include all history & tags for Scripts/version
         fetch-depth: 0
+        persist-credentials: false
 
     - name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo

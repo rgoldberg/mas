@@ -40,6 +40,7 @@ jobs:
       with:
         # Include all history & tags for Scripts/version
         fetch-depth: 0
+        persist-credentials: false
 
     - name: 🔧 Setup repo
       run: Scripts/setup-workflow-repo
