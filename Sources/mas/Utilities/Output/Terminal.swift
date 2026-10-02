@@ -43,8 +43,17 @@ extension StringProtocol {
 }
 
 private extension Character {
+	/// An emoji presentation sequence (incl. a ZWJ, flag, keycap, or modifier
+	/// sequence) occupies 2 columns as a whole; any other character occupies the
+	/// sum of its scalars' widths (e.g., a base & its 0-width combining marks).
 	var terminalWidth: Int {
-		unicodeScalars.reduce(0) { $0 + $1.terminalWidth }
+		unicodeScalars.first.map { firstScalar in
+			firstScalar.properties.isEmojiPresentation
+				|| firstScalar.properties.isEmoji && unicodeScalars.contains("\u{FE0F}") // VS16: emoji presentation
+				? 2
+				: unicodeScalars.reduce(0) { $0 + $1.terminalWidth }
+		}
+			?? 0
 	}
 }
 
