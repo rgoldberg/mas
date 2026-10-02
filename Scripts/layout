@@ -470,8 +470,7 @@ check_markdown_blocks() {
 	done
 }
 
-for file in ${(0)"$(git grep -Ilz '')"}; do
-	[[ -L "${file}" ]] && continue
+for file in ${(0)"$(GIT_LITERAL_PATHSPECS=1 git grep --no-index -Ilz '' -- "${(@0)"$(non_ignored_files)"}")"}; do
 	source_lines=("${(@f)"$(<"${file}")"}")
 	result_lines=()
 	set_max_line_length "${file}"

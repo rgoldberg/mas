@@ -33,10 +33,15 @@ ensure_command_available\
 
 export -r MAS_DISTRIBUTION=lint
 
+readonly -a files=("${(@0)"$(non_ignored_files)"}")
+readonly -a swift_files=("${(@M)files:#*.swift}")
+readonly -a markdown_files=("${(@M)files:#*.md}")
+readonly -a script_files=("${(@M)files:#Scripts/*}")
+
 integer exit_status=0
 
 printf -- $'--> 🕊​ SwiftFormat\n'
-script -q /dev/null swiftformat --lint --markdown-files format-strict . --symlinks follow </dev/null |
+script -q /dev/null swiftformat --lint --markdown-files format-strict "${(@M)files:#*.(md|swift)}" </dev/null |
 	filter_swiftformat_output\
 		'\(lint mode - no files will be changed\.\)\r'\
 		'0/\d+ files require formatting\.\r'\
@@ -44,7 +49,7 @@ script -q /dev/null swiftformat --lint --markdown-files format-strict . --symlin
 ((exit_status |= ${?}))
 
 printf -- $'--> 🦅 SwiftLint\n'
-swiftlint --strict --quiet --reporter relative-path
+swiftlint --strict --quiet --reporter relative-path -- "${swift_files[@]}"
 ((exit_status |= ${?}))
 
 # shellcheck disable=SC1046,SC1047,SC1072,SC1073
@@ -52,12 +57,12 @@ if ! [[ -v 'received_flag[-A]' ]]; then
 	printf -- $'--> 🔬 SwiftLint Analyze\n'
 	# shellcheck disable=SC1036
 	swiftlint analyze --strict --quiet --reporter relative-path --compiler-log-path\
-		=(xcodebuild -scheme mas -destination "platform=macOS,arch=$(arch),variant=macos" 2>&1)
+		=(xcodebuild -scheme mas -destination "platform=macOS,arch=$(arch),variant=macos" 2>&1) -- "${swift_files[@]}"
 	((exit_status |= ${?}))
 	printf -- $'--> 🔬 SwiftLint Analyze Tests\n'
 	swiftlint analyze --strict --quiet --reporter relative-path --compiler-log-path\
 		=(xcodebuild -scheme mas -destination "platform=macOS,arch=$(arch),variant=macos" build-for-testing 2>&1)\
-		--config .swiftlint.yml --config Tests/.swiftlint.yml
+		--config .swiftlint.yml --config Tests/.swiftlint.yml -- "${swift_files[@]}"
 	((exit_status |= ${?}))
 fi
 
@@ -68,17 +73,17 @@ if ! [[ -v 'received_flag[-L]' ]]; then
 fi
 
 printf -- $'--> 〽️ Markdown\n'
-markdownlint-cli2 -- ***/*.md(.)
+markdownlint-cli2 -- "${markdown_files[@]/#/:}"
 ((exit_status |= ${?}))
 
 if ! [[ -v 'received_flag[-V]' ]]; then
 	printf -- $'--> 📖 Vale\n'
-	vale --output=line -- ${^${(0)"$(git ls-files -z -- '*.md' '*.swift')"}}(N.)
+	vale --output=line -- "${markdown_files[@]}" "${swift_files[@]}"
 	((exit_status |= ${?}))
 fi
 
 printf -- $'--> 📝 YAML\n'
-yamllint -s .
+yamllint -s -- "${(@M)files:#(*.yaml|*.yml|(*/|).yamllint)}"
 ((exit_status |= ${?}))
 
 printf -- $'--> 🌳 Git\n'
@@ -86,25 +91,27 @@ git diff --check
 ((exit_status |= ${?}))
 
 printf -- $'--> 💤 Zsh\n'
-for script in Scripts/***/*(.); do
+for script in "${script_files[@]}"; do
 	/bin/zsh -fn "${script}"
 	((exit_status |= ${?}))
 done
 
 printf -- $'--> 🐙 ActionLint\n'
-actionlint -shellcheck shellcheck
+actionlint -shellcheck shellcheck -- "${(@M)files:#.github/workflows/[^/]##.(yaml|yml)}"
 ((exit_status |= ${?}))
 
 printf -- $'--> 🐚 ShellCheck\n'
-shellcheck -s bash -o all -e SC1009,SC1088,SC2296,SC2298,SC2299,SC2300,SC2301,SC2312 -a -P SCRIPTDIR Scripts/***/*(.)
+shellcheck -s bash -o all -e SC1009,SC1088,SC2296,SC2298,SC2299,SC2300,SC2301,SC2312 -a -P SCRIPTDIR --\
+	"${script_files[@]}"
 ((exit_status |= ${?}))
 
 printf -- $'--> 🐭 EditorConfig\n'
-editorconfig-checker -disable-max-line-length # Scripts/layout lints line lengths, counting tabs as 2
+editorconfig-checker -disable-max-line-length -- "${files[@]}" # Scripts/layout lints line lengths, counting tabs as 2
 ((exit_status |= ${?}))
 
 printf -- $'--> 🚷 Non-Executables\n'
-readonly -a non_executables=(Scripts/***/*(N.^f+111))
+# shellcheck disable=SC1036,SC2206
+readonly -a non_executables=(${^script_files}(N^f+111))
 if (("${#non_executables[@]}")); then
 	printf $'\e[1;91m%s\e[0m\n' "${non_executables[@]}"
 	((exit_status |= 1))
