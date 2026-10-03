@@ -341,9 +341,9 @@ It initiates a download of an installed app's latest release from the App Store
 to obtain the correct latest version from the download metadata. Subsequent
 behavior depends on the command:
 
-- `outdated`: Each download is immediately cancelled; an app is reported as
+- `outdated`: Each download is immediately canceled; an app is reported as
   outdated if its version differs from the download metadata version.
-- `update`: The download is cancelled iff the installed version is the same as
+- `update`: The download is canceled iff the installed version is the same as
   the download metadata version. Otherwise, the update is allowed to complete.
 
 This mode:
