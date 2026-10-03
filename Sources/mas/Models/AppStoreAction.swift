@@ -214,8 +214,8 @@ enum AppStoreAction: String {
 					guard !shouldCancel(snapshot.version, false) else {
 						return
 					}
-					guard !snapshot.isCancelled else {
-						throw error("Download cancelled for \(snapshot.appNameAndVersion)")
+					guard !snapshot.isCanceled else {
+						throw error("Download canceled for \(snapshot.appNameAndVersion)")
 					}
 					appFolderURL = snapshot.appFolderPath.map { .init(folderPath: $0) }
 				}
@@ -376,7 +376,7 @@ private final class DownloadQueueObserver: NSObject, CKDownloadQueueObserver {
 		guard
 			let snapshot = DownloadSnapshot(to: action, download),
 			snapshot.adamID == adamID,
-			!snapshot.isCancelled,
+			!snapshot.isCanceled,
 			!snapshot.isFailed
 		else {
 			return
@@ -404,7 +404,7 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 	let activePhaseType: PhaseType
 	let phasePercentComplete: Float
 	let appFolderPath: String?
-	let isCancelled: Bool
+	let isCanceled: Bool
 	let isFailed: Bool
 	let error: (any Error)?
 
@@ -419,7 +419,7 @@ private struct DownloadSnapshot { // swiftlint:disable:this one_declaration_per_
 		activePhaseType = .init(action, rawValue: status.activePhase?.phaseType)
 		phasePercentComplete = status.phasePercentComplete
 		appFolderPath = download.installPath
-		isCancelled = status.isCancelled
+		isCanceled = status.isCancelled
 		isFailed = status.isFailed
 		error = status.error.map { error in
 			if case let error as NSError = error, error.domain == "PKInstallErrorDomain", error.code == 201 {
