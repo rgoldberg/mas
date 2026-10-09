@@ -59,7 +59,8 @@ By becoming a contributor, you agree to the following terms:
   may be added to it after they have made substantial contributions
 - Retain [@argon](https://github.com/argon)'s name (Andrew Naylor), [GitHub
   account](https://github.com/argon) & [X handle](https://x.com/argon) in the
-  [README](README.md), though they may be repositioned as deemed suitable
+  [project credits](README.md#credits), though they may be repositioned as
+  deemed suitable
 
 ## Project Lead Responsibilities
 
