@@ -1,7 +1,11 @@
 /.build/
+/.claude/settings.local.json
+/.claude/worktrees/
 /.idea/
+/.index-build/
 /.swiftpm/
 /.vscode/
+/MAS+BuildInfo-*
 /libexec/bin/mas
 .DS_Store
 *~
