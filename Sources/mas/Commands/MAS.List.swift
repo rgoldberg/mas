@@ -34,7 +34,7 @@ extension MAS {
 
 					If this is unexpected, index apps in Spotlight (which might take some time):
 
-					# Individual app (if the omitted apps are known). e.g., for Xcode:
+					# Individual app (if the omitted apps are known), e.g., for Xcode:
 					mdimport /Applications/Xcode.app
 
 					# All apps:
