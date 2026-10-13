@@ -128,7 +128,7 @@ ADAM IDs can be found via:
   1. Open an app's App Store page.
   2. Open the page's Share Sheet.
   3. Choose `Copy`.
-  4. Extract the ADAM ID from the URL in the copied text. e.g., `497799835` from
+  4. Extract the ADAM ID from the URL in the copied text, e.g., `497799835` from
      `https://apps.apple.com/us/app/xcode/id497799835?mt=12`.
 
 ## JSON App Output
@@ -201,7 +201,7 @@ If any App Store apps are not properly indexed, index via:
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```shell
-# Individual app (if the omitted apps are known). e.g., for Xcode:
+# Individual app (if the omitted apps are known), e.g., for Xcode:
 mdimport /Applications/Xcode.app
 
 # All apps:
