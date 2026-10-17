@@ -435,3 +435,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - trailing run: the longest run of adjacent optionals & trailing-omissibles
       containing an expression, across nonterminal references
     - REJECTED: omissible (for trailing-omissible)
+91. - axis: an alternative whose last occurrence overrides its preceding
+      occurrences within a `(* last wins *)` nonterminal (e.g.,
+      `<header-setting>`; [defined](../Specs/ebnf.md#last-wins-comments))
