@@ -22,27 +22,6 @@
       possibly in ["Immutable Built-In Named
       Configs"](../Specs/configs.md#immutable-built-in-named-configs).
 
-### EBNF
-
-1. [`(* last wins *)`](../Specs/ebnf.md#last-wins-comments) is defined on a
-   choice as "the last occurrence of any of the choice's alternatives overrides
-   all preceding occurrences of any of the choice's alternatives", which
-   describes a comment attached to an innermost choice (e.g., `<direction>`),
-   but the comments sit on the option _sets_
-   ([`<sort-option-set>`](../Specs/fields.md#sort-options), etc.), which would
-   make `I+-` collapse to `-`. Either move the comments to the innermost choices
-   or restore the per-alternative formulation. Non-choice instances:
-   1. [`table-config = <table-setting>+`](../Specs/table.md#table-config): the
-      literal reading makes `hS` a header on, contradicting the [implied
-      settings](../Specs/table.md#implied-settings).
-   2. [`key-value-config = <key-value-setting>+`](
-        ../Specs/key-value.md#key-value-config
-      ).
-   3. [`json-config = <json-setting>+`](../Specs/json.md#json-config).
-   4. [`format-transform-pipeline = ( … )+`](
-        ../Specs/fields-format.md#format-transforms
-      ).
-
 ### Fields
 
 1. Should [`<field-modifiers>`s](../Specs/fields.md#field-modifiers) be

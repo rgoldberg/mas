@@ -662,15 +662,23 @@ definitions.
 
 ##### Last-Wins Comments
 
-Defined via a modified meta-grammar supporting [choices](#choices):
-
 ```ebnf
-NONTERMINAL = A | B (* last wins *)
+NONTERMINAL = DEFINITION (* last wins *)
 ```
 
-If `NONTERMINAL` is a valid element of any repetition, the last occurrence of
-any of the choice's alternatives overrides all preceding occurrences of any of
-the choice's alternatives.
+Within each occurrence of `NONTERMINAL`, the last occurrence of each **axis**
+overrides all preceding occurrences of that axis, where:
+
+- `NONTERMINAL`'s axes are the alternatives of the definition of each
+  nonterminal that a repetition in `DEFINITION` repeats, either as the repeated
+  expression or as its sole variable child (a definition that is not a choice
+  being its own sole alternative), excluding each that is, transitively, an
+  alternative of another axis.
+- An occurrence of an axis is an occurrence of it or, transitively, of any of
+  its alternatives.
+
+E.g., [`<sort-option-set>`](fields.md#sort-options)'s axes include `<source>` &
+`<direction>`, so `I+-` is equivalent to `I-`.
 
 ##### Default Resolution
 
