@@ -105,7 +105,7 @@ For each [leaf context](configs.md#context-stacks):
   [disabled](#sort-priority).
 - `all`: Every field spec is visible. Absent a built-in field order: field specs
   are sorted by label (`<output>`), while other `<sort-option>`s are as per the
-  defaults for string fields for the current output format.
+  app's default sort options for labels for the current output format.
 - `standard`: Only a select list of field specs is visible.
 
 A built-in fields config:
@@ -497,7 +497,7 @@ A field spec with a `<sort>`:
 - Has its sort **disabled** by a `<sort-priority>` of `0`: its `<sort-option>`s
   are retained, but do not sort items until a positive `<sort-priority>` enables
   them, e.g., `_size/1` enables a hidden field spec's inherited `/0-`.
-- Otherwise, takes sort precedence over fields:
+- Otherwise, takes sort precedence over field specs:
   - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
     priority).
   - Succeeding it with the same `<sort-priority>`.
@@ -638,7 +638,7 @@ compares it locale-dependently. Each also supplies [`<grouped-numeric>`'s
 default number conventions](#sort-number-segments).
 
 Canonical number formatting uses a `.` decimal separator, a `,` digit group
-separator & a digit group size of 3.
+separator, a digit group size of 3 & a secondary digit group size of 0.
 
 ##### Sort Number Segments
 

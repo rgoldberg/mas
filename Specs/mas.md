@@ -65,6 +65,9 @@ region.
 
 ## Default Sort Options
 
+Field names' & labels' default sort options are those of non-path string
+content.
+
 Version fields' default sort options compare
 [versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s compare
 [grouped numbers](#price-sorting), but they otherwise match the following:
