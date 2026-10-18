@@ -32,7 +32,7 @@ Each of the following evaluates to a value whose type is:
 - Template text: string.
 
 A field value may also be an array or an object, each a **structured value**. No
-predicate whose output type is not any (e.g., `%s`, or `%.n`) matches a
+predicate whose output type is not any (e.g., `%s` or `%.n`) matches a
 structured value.
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
@@ -92,12 +92,13 @@ A **named format** is a format that:
 If no named format exists for a referenced name, an error is reported.
 
 If a `<transform-pipeline>` immediately follows a `<named-format-reference>`,
-the referenced format's output must also have the transforms' input type (a
-template's output is a string, e.g., `:name.round` requires `name` to be a
-`<number-transform-pipeline>`). Otherwise, an error is reported.
+the referenced format's value must also have the transforms' input type (e.g.,
+`:name.round` requires `name`'s value to be a number). Otherwise, an error is
+reported.
 
 Because every `<success-block>` includes `<unconditional-block>`, a named
-unconditional format satisfies every `<named-format-reference>`.
+unconditional format satisfies every `<named-format-reference>`, except that
+`<named-format>` also requires a `<format-template>` to contain a placeholder.
 
 ##### Transforms
 
@@ -261,14 +262,14 @@ The **number format arguments** are those of `<number-format-arguments>`, which
 argument lists start with.
 
 `numberFormat` inserts `<digit-group-separator>` between the **digit groups** of
-the field's integer part, counting from its least significant digit: the least
+its input's integer part, counting from its least significant digit: the least
 significant (**primary**) group has `<digit-group-size>` digits, and each other
 (**secondary**) group has `<secondary-digit-group-size>` digits, or
 `<digit-group-size>` digits if `<secondary-digit-group-size>` is `0`; the most
 significant group may have fewer digits (e.g., `.numberFormat:,\,,3,2:` renders
 `12345678` as `1,23,45,678`).
 
-`numberFormat` also replaces the `.` between the field's integer & fractional
+`numberFormat` also replaces the `.` between its input's integer & fractional
 parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
 `1.234,5`).
 
@@ -303,14 +304,14 @@ scale-arguments =
   <argument-fence>
 
 radix              = {integer from 2 to 36}  (* base for `exponent` & the rendered digits *)
-exponent           = {non-negative integer}  (* divides the field's value by `radix^exponent` before rendering *)
+exponent           = {non-negative integer}  (* divides the input by `radix^exponent` before rendering *)
 significant-digits = {integer from 1 to 100} (* rounds to this many total `radix` digits; absent: no rounding *)
 fractional-digits  = {integer from 0 to 100} (* exactly this many `radix` digits after the point; `0`: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`scale` divides the field's value by `radix^exponent`, optionally rounds it to
+`scale` divides its input by `radix^exponent`, optionally rounds it to
 `significant-digits` total `radix` digits, then renders it in positional
 notation, base `radix`, with exactly `fractional-digits` digits after the radix
 point.
@@ -319,8 +320,8 @@ point.
   halves away from 0.
 - `fractional-digits` of `0` renders a plain integer, with no radix point.
 - For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
-- `0` always renders as `0` (or `0` followed by `fractional-digits` `0`s, if
-  any), never spelled out.
+- `0` always renders as `0` (or, if `fractional-digits` is positive, `0`, a
+  radix point & `fractional-digits` `0`s), never spelled out.
 - A value that would render with more than 100 digits before the radix point
   does not conform to `scale`'s input type, so [value coercion](#value-coercion)
   applies (e.g., `.scale:10,0,,0:` reports an error for `1e100`, while
@@ -420,7 +421,8 @@ Unlike a `<value-transform>`, a `<format-transform>` does not transform any
 value; it sets a property of the field itself, currently just its `table`-output
 column alignment. It therefore does not affect the field's rendered value: it is
 a no-op for `json` / `key-value` output (which have no columns to align); it
-does not change the type of the value it formats, unlike every other transform.
+accepts a value of any type & does not change it, unlike every
+`<value-transform>`.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's padding
 is odd-width: `centerStartJustify` puts the extra padding character after the
@@ -571,7 +573,8 @@ A `<success-block>` is evaluated iff its enclosing matcher succeeds.
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
 A `<success-block>`'s kind follows the matched value's type; where that can be
-any type, the block's pipeline must start by coercing to a string.
+any type, or is a version, the block's pipeline must start by coercing to a
+string.
 
 `<unconditional-block>` differs from `<any-block>` only by forbidding
 `<block-placeholder>`s.
@@ -853,9 +856,9 @@ than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
 a signed 64-bit integer).
 
 A datetime's or time-only's fractional seconds are truncated to 3 digits, which
-are omitted iff all are `0` (e.g., `2020-03-18T17:39:23.1234Z` renders as
-`2020-03-18T17:39:23.123Z`, but `2020-03-18T17:39:23.0004Z` renders as
-`2020-03-18T17:39:23Z`).
+are omitted iff all are `0` (e.g., in the UTC output time zone,
+`2020-03-18T17:39:23.1234Z` renders as `2020-03-18T17:39:23.123Z`, but
+`2020-03-18T17:39:23.0004Z` renders as `2020-03-18T17:39:23Z`).
 
 ###### Branched Formatting
 
@@ -911,4 +914,4 @@ Examples:
 - `%MN.absoluteValue+b+Status Unknown+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
-  - Otherwise, outputs `"Status Unknown"`.
+  - Otherwise, outputs `Status Unknown`.
