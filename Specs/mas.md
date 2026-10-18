@@ -32,8 +32,13 @@ process.
 
 ## Built-In Named Fields Configs
 
-`none`, `all` & `standard` variants with the same output format suffix for the
-same `mas` leaf context differ only in which field specs are hidden.
+For the same `mas` leaf context & output format suffix, every field is in each
+of `all`, `none` & `standard`:
+
+- `all`: Every field spec is visible.
+- `none`: `all`, with every field spec hidden & its sort disabled.
+- `standard`: Its own visible field specs, followed by hidden copies of `all`'s
+  field specs for every other field.
 
 A `mas` built-in fields config has:
 
@@ -69,14 +74,13 @@ Field names' & labels' default sort options are those of non-path string
 content.
 
 Version fields' default sort options compare
-[versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s compare
-[grouped numbers](#price-sorting), but they otherwise match the following:
+[versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s use the
+[App Store locale's conventions & include `a`](#price-sorting), but they
+otherwise match the following:
 
-| Format    | String Content | Default              |
-|:----------|:---------------|:---------------------|
-| Table     | Non-path       | `I+iL:N:`            |
-| Table     | Path           | `I+iL:N:B/_+space+:` |
-| Key-Value | Non-path       | `I+iL:N:`            |
-| Key-Value | Path           | `I+iL:N:B/_+space+:` |
-| JSON      | Non-path       | `I+sN:B:`            |
-| JSON      | Path           | `I+sN:B/:`           |
+| Format            | String Content | Default              |
+|:------------------|:---------------|:---------------------|
+| Table / Key-Value | Non-path       | `I+iL:N:`            |
+| Table / Key-Value | Path           | `I+iL:N:B/_+space+:` |
+| JSON              | Non-path       | `I+sN:B:`            |
+| JSON              | Path           | `I+sN:B/:`           |
