@@ -143,6 +143,9 @@ error, but `.scale:10,6, ,0:` omits `<significant-digits>`).
 A transform without `<coercion>` requires its input to already be of its input
 type; otherwise, an error is reported.
 
+An [absent](fields.md#absent-values) field value remains absent through every
+transform, with or without `<coercion>`, so it is never an error.
+
 A `<coercion>` attempts to coerce an input value into the correct input type for
 the annotated transform. If the coercion is successful, the transform is applied
 to the coerced input; otherwise, formatting [aborts](#success--failure).

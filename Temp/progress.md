@@ -419,3 +419,8 @@ aborts, or iff the field value is absent & the format evaluates to it unchanged
 decide whether to output a field from its formatted value instead of from its
 field value, so a fallback (e.g., `%N%n+none+`) outputs for an absent field,
 while an aborted format outputs nothing (instead of an empty string).
+
+An absent field value remains absent through every transform
+(`FormatValue.applying(_:)`), so an uncoerced transform on an absent field
+(e.g., `.round`) outputs nothing instead of reporting
+`transformInputTypeMismatch`.

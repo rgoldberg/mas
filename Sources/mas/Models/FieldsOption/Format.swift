@@ -731,11 +731,21 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
+	/// Whether this is an absent field value.
+	private var isAbsent: Bool {
+		if case .input(nil) = self {
+			true
+		} else {
+			false
+		}
+	}
+
 	/// This value transformed by `calls`, or `nil` iff a coercion fails
-	/// (formatting aborts).
+	/// (formatting aborts). An absent field value remains absent through every
+	/// transform, so it is never an error.
 	func applying(_ calls: [TransformCall]) throws(FormattingError) -> Self? {
 		var value = self
-		for call in calls {
+		for call in calls where !isAbsent {
 			guard let transformed = try value.applying(call) else {
 				return nil
 			}
