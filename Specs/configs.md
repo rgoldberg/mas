@@ -5,7 +5,7 @@ persisted, named configs; each [config kind](#config-kinds) has its own
 per-[context](#contexts) lookup hierarchy.
 
 An **app** (software implementing these specs, e.g., mas) may override any
-behavior or default that they define.
+behavior or default that these specs define.
 
 ## Commands
 
@@ -81,6 +81,10 @@ A named config may be referenced:
 A named config is found by returning the 1st config of the given kind found with
 a given name while iterating through the context stack from most to least
 specific context; if no match is found, an error is reported.
+
+A persisted fields config **extends** the fields config that its
+[`<base-fields-config-section>`](fields.md#base-fields-config-selection) names;
+a config of any other kind extends no config.
 
 A persisted config that extends a config of its own name resolves that config
 from the next less specific context in the context stack, so a config may extend

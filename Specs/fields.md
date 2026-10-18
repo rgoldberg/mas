@@ -115,8 +115,8 @@ A built-in fields config:
 
 #### Default Fields Configs
 
-If a nonexistent [`default`](configs.md#default-configs) was referenced with an
-output format suffix, that suffix is appended to `standard`.
+If [`default`](configs.md#default-configs) is referenced with an output format
+suffix & no custom `default` is found, that suffix is appended to `standard`.
 
 ### Base Fields Config
 
@@ -131,7 +131,7 @@ modified by the command line so far.
 ### Baseline Fields Config
 
 The **baseline fields config** is an immutable snapshot of the working fields
-config immediately before the current section.
+config immediately before `<field-spec-edits-section>`.
 
 ### Resolved Fields Config
 
@@ -187,8 +187,8 @@ An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does, and is
 
 Output depends on the formatted value, not on the field value:
 
-- **Table**: A cell is output for each field spec, regardless of whether its
-  formatted value is absent, which is output as an empty string.
+- **Table**: A cell is output for each visible field spec, regardless of whether
+  its formatted value is absent, which is output as an empty string.
 - **Key-Value**: A key-value pair is output for the field label & formatted
   value iff the formatted value is neither absent nor `null`.
 - **JSON**: A key-value pair is output for the field label & formatted value iff
@@ -358,7 +358,7 @@ index = {integer}
 The **reference fields config** is a potentially partial, semi-mutable copy of
 the baseline fields config. The order of field specs in the reference fields
 config is immutable (i.e., unaffected by any inserts, moves, or removals
-performed in the current section).
+performed in `<field-spec-edits-section>`).
 
 Each index references a position in a list of the reference fields config's
 field specs, in reference fields config order, filtered to include:
@@ -416,9 +416,8 @@ field-spec-separator = ","
 <!--editorconfig-checker-enable-->
 
 For a given `<reference-sourced-field-spec-edit>` `fs`, its `source` is the
-field spec from the reference fields config referenced by `fs`. Thus, field
-specs inserted in a section cannot be modified by other field spec edits in the
-same section.
+field spec from the reference fields config referenced by `fs`. Thus, an
+inserted field spec cannot be modified by another field spec edit.
 
 For a given `<base-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the base fields config referenced by `fs`, resolved as in the
@@ -717,9 +716,6 @@ A `-` or `+` immediately preceding a number segment's 1st digit is its sign:
 - `<all-signs>`: always.
 - `<no-signs>`: never.
 
-`<grouped-numeric-arguments>` follow the [argument](fields-format.md#transforms)
-rules.
-
 ##### Sort Chronologic Segments
 
 <!--editorconfig-checker-disable-->
@@ -756,9 +752,6 @@ character immediately precedes or follows it that is:
   segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
 Absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic segments.
-
-`<chronologic-formats>` follow the [argument](fields-format.md#transforms)
-rules.
 
 ##### Sort Boundaries
 

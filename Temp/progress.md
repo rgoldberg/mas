@@ -461,3 +461,8 @@ implemented; `<match-placeholder>`'s predicates have `output type:` comments;
 
 The unused implicit scalar & implicit repetition categories & optionality states
 are removed from the custom EBNF grammar.
+
+Configs specify that only a persisted fields config extends another (via its
+`<base-fields-config-section>`); fields.md no longer refers to a "current
+section", since a `<relative-config>` has at most 1
+`<field-spec-edits-section>`.

@@ -149,4 +149,5 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 
 Let `--table`'s, `--key-value`'s & `--json`'s values each select a named config
 of its kind other than the context stack's `default` (e.g., via a
-`<base-table-config-name>`).
+`<base-table-config-name>`), which a persisted config of that kind would then
+[extend](../Specs/configs.md#referencing-named-configs).
