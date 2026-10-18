@@ -135,8 +135,8 @@ default `iso`), `<boundaries>` (`B` / `M`, an empty `<boundary-groups>` meaning
 none; default `+space+`), `<nonconforming-comparison>` (`k`, `a`, or `z`) &
 `<text-order>` (`h`, `t`, `p`, or `e`)); a `/` after it reports
 `invalidSortOption`. A value compares as a string (`null` as `""`), except that
-a number is a single number segment unless `<lexical>`: each run of non-boundary
-text splits into chronologic, number & text segments, compared per
+a number is a single number segment unless `<lexicographic>`: each run of
+non-boundary text splits into chronologic, number & text segments, compared per
 `<text-order>` element by element, by kind (time-only chronologic, other
 chronologic, number, text), then per kind. Formats no longer type fields, so the
 type determinant & `FieldSpec.outputsInput` are gone (a machine-facing variant's

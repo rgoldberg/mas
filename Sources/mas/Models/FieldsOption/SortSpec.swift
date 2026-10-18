@@ -48,7 +48,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 	enum NumberSegments: Equatable {
 		/// `<grouped-numeric>`.
 		case groupedNumeric(GroupedNumericArguments)
-		case lexical
+		case lexicographic
 		/// `<ungrouped-numeric>`.
 		case ungroupedNumeric
 		case versions
@@ -163,7 +163,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 		direction: .ascending,
 		caseSensitivity: .sensitive,
 		locale: nil,
-		numberSegments: .lexical,
+		numberSegments: .lexicographic,
 		chronologicSegments: Set(ISO8601Form.allCases),
 		hasUnixTimeSegments: false,
 		boundaries: .uncollapsed(defaultBoundaryGroups),
@@ -505,13 +505,13 @@ extension SortOptionSet {
 
 	/// `value`'s single segment iff it is a number: a chronologic segment iff
 	/// `hasUnixTimeSegments` & it is a chronologic Unix time, else a number
-	/// segment unless `numberSegments` is `<lexical>`; else `nil`.
+	/// segment unless `numberSegments` is `<lexicographic>`; else `nil`.
 	private func numberValueSegment(of value: JSON.Node?) -> Segment? {
 		guard case let .number(number)? = value, let number = DecimalNumber("\(number)") else {
 			return nil
 		}
 		return (hasUnixTimeSegments ? unixTimeDate(number).map { .chronologic(.datetime($0)) } : nil)
-			?? (numberSegments == .lexical ? nil : .number(number))
+			?? (numberSegments == .lexicographic ? nil : .number(number))
 	}
 
 	/// `string`'s pieces: each boundary outside its typed segments & each run of
@@ -699,7 +699,7 @@ extension SortOptionSet {
 	private func numberSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		let signs: NumberSigns
 		switch numberSegments {
-		case .lexical:
+		case .lexicographic:
 			return nil
 		case let .groupedNumeric(arguments):
 			signs = arguments.signs
@@ -729,7 +729,7 @@ extension SortOptionSet {
 		switch numberSegments {
 		case let .groupedNumeric(arguments):
 			arguments.conventions(localeConventions: locale.numberConventions).groupedNumberPrefix(of: string)
-		case .lexical, .versions:
+		case .lexicographic, .versions:
 			nil
 		case .ungroupedNumeric:
 			string.prefix(while: \.isASCIIDigit).nilIfEmpty.flatMap { digits in
@@ -907,7 +907,7 @@ private let localeOption = Character("L")
 private let numberSegmentsByOption = [
 	Character("u"): SortOptionSet.NumberSegments.ungroupedNumeric,
 	"v": .versions,
-	"x": .lexical,
+	"x": .lexicographic,
 ]
 private let groupedNumericOption = Character("N")
 

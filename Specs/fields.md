@@ -543,7 +543,7 @@ representation (e.g., `false`), except that a number is a single
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
   the number is a [chronologic Unix
   time](fields-format.md#chronologic-formatting).
-- Otherwise, a number segment, unless `<number-segments>` is `<lexical>`.
+- Otherwise, a number segment, unless `<number-segments>` is `<lexicographic>`.
 
 E.g., for an input Unix time being output as an ISO date (without time):
 
@@ -645,9 +645,9 @@ separator & a digit group size of 3.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-segments = <lexical> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexical>; last wins *)
+number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexicographic>; last wins *)
 
-lexical           = "x" (* mnemonic: 3rd letter of lexical *)
+lexicographic     = "x" (* mnemonic: 3rd letter of lexicographic *)
 ungrouped-numeric = "u" (* mnemonic: ungrouped *)
 versions          = "v"
 grouped-numeric   = "N" <grouped-numeric-arguments> <sort-option-terminator> (* default locale-identifier: {<locale>'s <locale-identifier>} *)
@@ -665,7 +665,7 @@ no-signs           = "none"
 
 The number segments are:
 
-- `<lexical>`: none.
+- `<lexicographic>`: none.
 - `<ungrouped-numeric>`: each maximal run of ASCII digits, with a word-initial
   sign.
 - `<versions>`: each [version](fields-format.md#version-formatting) (e.g., only

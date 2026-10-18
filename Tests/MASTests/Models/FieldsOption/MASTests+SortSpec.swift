@@ -211,7 +211,7 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			// A number is a single number segment, unless lexical
+			// A number is a single number segment, unless lexicographic
 			("1", JSON.Node.number(2), JSON.Node.number(10), ComparisonResult.orderedDescending),
 			("1u", .number(2), .number(10), .orderedAscending),
 			("1u-", .number(2), .number(10), .orderedDescending),
@@ -400,7 +400,7 @@ private extension SortOptionSet.NumberSegments {
 		switch self {
 		case .groupedNumeric:
 			"N"
-		case .lexical:
+		case .lexicographic:
 			"x"
 		case .ungroupedNumeric:
 			"u"
