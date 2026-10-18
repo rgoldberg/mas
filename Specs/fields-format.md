@@ -827,10 +827,15 @@ An ISO-8601:
 - Date-only is an extended-format date (e.g., `2020-03-18`).
 - Time-only is an extended-format complete time (e.g., `17:39:23`), with
   optional fractional seconds (after `.` or `,`) & an optional UTC offset (`Z`,
-  `±hh`, `±hhmm`, or `±hh:mm`).
-- Datetime is a date-only, `T`, then a time-only (e.g., `2020-03-18T17:39:23Z`).
+  `z` per RFC 3339, `±hh`, `±hhmm`, or `±hh:mm`).
+- Datetime is a date-only, `T` (or, per RFC 3339, `t` or a space), then a
+  time-only, optionally without its seconds & fractional seconds (e.g.,
+  `2020-03-18T17:39:23Z` or `2020-03-18 17:39`).
 
 Each of their fields must be in range.
+
+No other ISO-8601 representation is detected (e.g., basic format, ordinal dates,
+week dates, or reduced precision other than a datetime without seconds).
 
 A datetime or time-only without a UTC offset is in the system time zone.
 

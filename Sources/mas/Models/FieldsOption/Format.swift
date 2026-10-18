@@ -560,9 +560,10 @@ func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Chronologic? {
 
 /// The longest ISO-8601 extended-format chronologic value of one of `forms` at
 /// the start of `string` (whose every field is in range) & its end: a datetime
-/// (in its UTC offset, else in the system time zone), a date-only (at its start
-/// in the system time zone), or a time-only; fractional seconds are truncated
-/// to whole milliseconds. Else `nil`.
+/// (its date & time separated by `T`, `t`, or a space, its seconds optional; in
+/// its UTC offset, else in the system time zone), a date-only (at its start in
+/// the system time zone), or a time-only; fractional seconds are truncated to
+/// whole milliseconds. Else `nil`.
 func iso8601ChronologicPrefix(of string: Substring, forms: Set<ISO8601Form>)
 -> (chronologic: Chronologic, end: Substring.Index)? {
 	guard let date = string.prefixMatch(of: unsafe iso8601DateRegex) else {
@@ -573,8 +574,8 @@ func iso8601ChronologicPrefix(of string: Substring, forms: Set<ISO8601Form>)
 	let day = DateComponents(year: Int(date.1), month: Int(date.2), day: Int(date.3))
 	if
 		forms.contains(.datetime),
-		string[date.range.upperBound...].first == "T",
-		let time = iso8601TimePrefix(of: string[string.index(after: date.range.upperBound)...]),
+		string[date.range.upperBound...].first.map("Tt ".contains) == true,
+		let time = iso8601TimePrefix(of: string[string.index(after: date.range.upperBound)...], isSecondOptional: true),
 		dateOnly(on: day, in: time.time.timeZone ?? Environment.current.systemTimeZone) != nil,
 		let datetime = time.time.date(on: day)
 	{
@@ -598,14 +599,16 @@ private func dateOnly(on day: DateComponents, in timeZone: TimeZone) -> Date? {
 	return components.isValidDate ? components.date : nil
 }
 
-/// The ISO-8601 extended-format complete time at the start of `string` (whose
-/// every field is in range) & its end; else `nil`.
-private func iso8601TimePrefix(of string: Substring) -> (time: TimeOfDay, end: Substring.Index)? {
+/// The ISO-8601 extended-format complete time (or, iff `isSecondOptional`, time
+/// without seconds) at the start of `string` (whose every field is in range) &
+/// its end; else `nil`.
+private func iso8601TimePrefix(of string: Substring, isSecondOptional: Bool = false)
+-> (time: TimeOfDay, end: Substring.Index)? {
 	guard
 		let match = string.prefixMatch(of: unsafe iso8601TimeRegex),
 		let hour = Int(match.1),
 		let minute = Int(match.2),
-		let second = Int(match.3),
+		let second = Int(match.3 ?? (isSecondOptional ? "0" : "")),
 		hour < 24,
 		minute < 60,
 		second < 60
@@ -631,11 +634,11 @@ private func iso8601TimePrefix(of string: Substring) -> (time: TimeOfDay, end: S
 private nonisolated(unsafe) let jsonNumberRegex = #/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/#
 private nonisolated(unsafe) let iso8601DateRegex = #/([0-9]{4})-([0-9]{2})-([0-9]{2})/#
 private nonisolated(unsafe) let iso8601TimeRegex =
-	#/([0-9]{2}):([0-9]{2}):([0-9]{2})(?:[.,]([0-9]+))?(Z|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
+	#/([0-9]{2}):([0-9]{2})(?::([0-9]{2})(?:[.,]([0-9]+))?)?([Zz]|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
 
-/// The time zone of an ISO-8601 UTC offset (`Z`, or a sign, a 2-digit hour & an
-/// optional, optionally `:`-prefixed 2-digit minute), else `nil` iff it is out
-/// of range.
+/// The time zone of an ISO-8601 UTC offset (`Z`, `z`, or a sign, a 2-digit hour
+/// & an optional, optionally `:`-prefixed 2-digit minute), else `nil` iff it is
+/// out of range.
 private func iso8601UTCOffsetTimeZone(_ offset: Substring) -> TimeZone? {
 	let digits = offset.dropFirst().filter(\.isASCIIDigit)
 	let minutes = Int(digits.dropFirst(2)) ?? 0
