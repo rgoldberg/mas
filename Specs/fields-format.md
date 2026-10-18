@@ -333,8 +333,11 @@ point.
   halves away from 0.
 - `fractional-digits` of `0` renders a plain integer, with no radix point.
 - For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
-- `0` always renders as `0` (or, if `fractional-digits` is positive, `0`, a
-  radix point & `fractional-digits` `0`s), never spelled out.
+- `0` renders as `0`, followed, iff `fractional-digits` is positive, by a radix
+  point & `fractional-digits` `0`s.
+- A leading `+` is retained, while a leading `-` is retained iff the result is
+  nonzero (e.g., `.scale:10,0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as
+  for `round`.
 - A value that would render with more than 100 digits before the radix point
   does not conform to `scale`'s input type, so [value coercion](#value-coercion)
   applies (e.g., `.scale:10,0,,0:` reports an error for `1e100`, while

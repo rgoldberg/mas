@@ -81,6 +81,19 @@ private extension MASTests {
 		#expect(Transform.round.applied(to: input) == expected)
 	}
 
+	@Test(arguments: [("+2.4", 0, "+2"), ("-2.4", 0, "-2"), ("-0.4", 0, "0"), ("+0.4", 0, "+0"), ("+0", 1, "+0.0")])
+	func `scale retains a leading plus & a leading minus iff the result is nonzero`(
+		input: String,
+		fractionalDigits: Int,
+		expected: String,
+	) {
+		#expect(
+			Transform.scale(radix: 10, exponent: 0, significantDigits: nil, fractionalDigits: fractionalDigits)
+				.applied(to: input)
+				== expected,
+		)
+	}
+
 	@Test(
 		arguments: [
 			// Abbreviations take precedence over IANA Time Zone Database identifiers

@@ -76,6 +76,7 @@ enum Transform: Hashable {
 			DecimalNumber(string).flatMap { number in
 				radixScaled(
 					number,
+					isPlusSigned: string.hasPrefix("+"),
 					radix: radix,
 					exponent: exponent,
 					significantDigits: significantDigits,
@@ -218,10 +219,13 @@ private nonisolated(unsafe) let utcOffsetRegex =
 	/(?i)z|(?:utc|gmt)?([+-])(?:([0-9]{2})([0-9]{2})|([0-9]{1,2})(?::([0-9]{2}))?)/
 
 /// `number` rendered per `scale`'s semantics (see its doc comment on
-/// `Transform.scale`), computed exactly; `nil` iff the rendering would have
-/// more than `maxScaledIntegerDigitCount` digits before the radix point.
+/// `Transform.scale`), computed exactly, a leading `+` retained iff
+/// `isPlusSigned` & a leading `-` iff the result is nonzero; `nil` iff the
+/// rendering would have more than `maxScaledIntegerDigitCount` digits before
+/// the radix point.
 private func radixScaled(
 	_ number: DecimalNumber,
+	isPlusSigned: Bool,
 	radix: Int,
 	exponent: Int,
 	significantDigits: Int?,
@@ -261,7 +265,8 @@ private func radixScaled(
 	)
 	.quotientAndRemainder(dividingBy: radix.power(fractionalDigits))
 	let integerDigits = String(integerPart, radix: Int(radix))
-	let integerText = (number.isNegative && (integerPart != 0 || fractionalPart != 0) ? "-" : "") + integerDigits
+	let integerText = (number.isNegative && (integerPart != 0 || fractionalPart != 0) ? "-" : isPlusSigned ? "+" : "")
+		+ integerDigits
 	let fractionalText = String(fractionalPart, radix: Int(radix))
 	return integerDigits.count > maxScaledIntegerDigitCount
 		? nil
