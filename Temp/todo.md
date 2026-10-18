@@ -22,6 +22,16 @@
          1. Space separator.
          2. Lowercase `t` or `z`.
 
+### Structured Values
+
+1. Specify arrays & objects as field values: JSON output renders them at their
+   type, coercing one to a string renders its compact JSON text & no type
+   predicate matches one.
+2. Reserve `.` in field names for [nested field
+   references](#structured-value-operations): a bare `.` in a field name is
+   invalid, while an escaped one is consumed (e.g., `a\.b` names the field
+   `a.b`).
+
 ### Documentation
 
 1. Update `README.md`
@@ -85,8 +95,10 @@ persistence-based functionality from specs & code:
 Number templates for `numberFormat` (e.g., [UTS #35 number
 patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
 
-1. They would cover group sizes, fraction digits & scientific notation, leaving
-   only the locale & symbol overrides as arguments.
+1. They would cover group sizes, fraction digits & scientific notation, as an
+   alternative argument form, distinguished from `<number-format-arguments>`
+   (which would remain valid) by a leading character that no locale identifier
+   can contain.
 2. They overlap `round` & `scale`'s fraction digits, and are base 10 only.
 3. They would also select an output notation (positional, `e`, or `E`), which is
    not supported: every number transform retains its input's notation, except
@@ -126,7 +138,19 @@ Coercion arguments for boolean coercion, e.g.:
 
 ### Heterogeneous Pipeline Types & Coercion Anywhere
 
-### Nested Objects & Arrays
+Let a pipeline mix value types, requiring only that each transform's input type
+accept its predecessor's output type (e.g., a transform that takes any input &
+outputs a number may precede one whose input type is number or any). Allow
+`<coercion>` before any transform call. Each makes only currently invalid
+formats valid.
+
+### Structured Value Operations
+
+1. Nested field references via the `.` reserved in field names (e.g., `a.b` for
+   member `b` of field `a`'s object, `a.0` for element `0` of field `a`'s
+   array).
+2. Array & object type predicates.
+3. Array & object transforms.
 
 ### Configurable Absent Value Handling
 
