@@ -470,3 +470,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       precedes every other character (e.g., `New York` before `Newark`)
     - letter-by-letter ordering: ordering that ignores word boundaries
     - REJECTED: word sort / letter sort
+98. - whitespace: any Unicode `White_Space` character
+      ([defined](../Specs/ebnf.md#whitespace))
+    - REJECTED: blank space / white space

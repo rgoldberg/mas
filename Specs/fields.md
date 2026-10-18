@@ -687,8 +687,8 @@ If the digit group separator equals the decimal separator, an error is reported.
 
 A `-` or `+` immediately preceding a number segment's 1st digit is its sign:
 
-- `<word-initial-signs>`: iff it starts the value or follows whitespace (e.g.,
-  in `-5` & `a -5`, but not in `a-5`).
+- `<word-initial-signs>`: iff it starts the value or follows
+  [whitespace](ebnf.md#whitespace) (e.g., in `-5` & `a -5`, but not in `a-5`).
 - `<all-signs>`: always.
 - `<no-signs>`: never.
 

@@ -328,7 +328,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 		var forms = Set<ISO8601Form>()
 		var hasUnixTime = false
 		for format in text.isEmpty ? .init() : text.split(separator: argumentSeparator, omittingEmptySubsequences: false) {
-			let format = format.trimmingCharacters(in: .whitespaces)
+			let format = String(format.drop(while: \.isWhitespace).dropLast(while: \.isWhitespace))
 			if format == unixTimeChronologicFormat {
 				hasUnixTime = true
 			} else {

@@ -34,6 +34,11 @@ A **bare character** is any character that is not part of an escape sequence.
 A syntax may treat the same character differently when bare or escaped, despite
 both evaluating to that same character.
 
+### Whitespace
+
+**Whitespace** is any Unicode `White_Space` character: Unicode general category
+`Z` characters, `U+0009` to `U+000D` & `U+0085`.
+
 ### Ad Hoc Text
 
 **Ad hoc text** is data rather than syntax.
