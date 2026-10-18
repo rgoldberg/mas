@@ -168,16 +168,15 @@ spec](../Specs/configs.md#named-configs) (`^[-_0-9A-Za-z]+$` plus an optional
 output format suffix & an optional `@none` reference suffix), reports a
 nonexistent name & selects variants per suffix or, absent one, the output
 format: `@json` is machine-facing (`machineFacingVariant()`: label = name,
-output formatted as `%i`, format retained to type the field), `@none` / `@table`
-/ `@key-value` user-facing & `standard@json` is `all`. [Per
-spec](../Specs/mas.md#built-in-named-fields-configs), built-in `none`, `all` &
-`standard` differ only in which field specs are hidden: `none` is `all` with
-every field spec hidden & its sort disabled; user-facing `standard` is its own
-field specs followed by `all`'s other field specs, hidden, so an overlay may
-select any field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames`
-fully parses the value against the static base (fetching every field for a
-reference to a field not yet discovered), excluding hidden field specs that do
-not sort items.
+format = `%i`), `@none` / `@table` / `@key-value` user-facing & `standard@json`
+is `all`. [Per spec](../Specs/mas.md#built-in-named-fields-configs), every field
+is in each of built-in `none`, `all` & `standard`: `none` is `all` with every
+field spec hidden & its sort disabled; user-facing `standard` is its own field
+specs followed by `all`'s other field specs, hidden, so an overlay may select
+any field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames` fully
+parses the value against the static base (fetching every field for a reference
+to a field not yet discovered), excluding hidden field specs that do not sort
+items.
 
 ### mas Defaults (2026-09-25)
 
