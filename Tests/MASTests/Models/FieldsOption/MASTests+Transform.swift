@@ -105,6 +105,7 @@ private extension MASTests {
 			("Z", 0),
 			("z", 0),
 			("+05:30", 19800),
+			("+0530", 19800),
 			("+5", 18000),
 			("-05", -18000),
 			("+18", 64800),
@@ -112,6 +113,7 @@ private extension MASTests {
 			("utc+5", 18000),
 			("UTC+5:30", 19800),
 			("gmt-08:00", -28800),
+			("UTC-0800", -28800),
 		],
 	)
 	func `resolves a UTC offset time zone code`(code: String, secondsFromGMT: Int) {
@@ -123,7 +125,22 @@ private extension MASTests {
 		#expect(try inSystemTimeZone("Asia/Tokyo") { timeZone(forCode: code)?.identifier } == "Asia/Tokyo")
 	}
 
-	@Test(arguments: ["", "5", "+0530", "+05-30", "+05:60", "+19", "+18:30", "UTC+", "EST+5", "America", "Nowhere/Land"])
+	@Test(arguments: [
+		"",
+		"5",
+		"+530",
+		"+053",
+		"+05300",
+		"+05:3",
+		"+05-30",
+		"+05:60",
+		"+19",
+		"+18:30",
+		"UTC+",
+		"EST+5",
+		"America",
+		"Nowhere/Land",
+	])
 	func `rejects an invalid time zone code`(code: String) {
 		#expect(timeZone(forCode: code) == nil)
 	}

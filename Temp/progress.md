@@ -395,3 +395,6 @@ boundaries split only the remaining text.
 version (`versionRegex`), so they no longer match a component with characters
 other than Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
 `1.0 beta`).
+
+A `<time-zone-code>` UTC offset may also be a 2-digit hour & a 2-digit minute
+without a `:` (e.g., `+0530`), as an ISO-8601 UTC offset may.
