@@ -2,16 +2,6 @@
 
 ## Current Version
 
-### Fields
-
-1. Should [`<field-modifiers>`s](../Specs/fields.md#field-modifiers) be
-   unordered?
-2. Deferred: whether to remove
-   [`{text: field name}`](../Specs/fields.md#absolute-config) &
-   [`{text: fields config name}`](
-     ../Specs/fields.md#base-fields-config-selection
-   ).
-
 ### Formatting
 
 1. Which ISO-8601 representations should [chronologic
