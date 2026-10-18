@@ -82,9 +82,10 @@ A named config is found by returning the 1st config of the given kind found with
 a given name while iterating through the context stack from most to least
 specific context; if no match is found, an error is reported.
 
-A persisted config whose base config name is its own name resolves its base
-config from the context above its own, so a config may extend its nearest
-same-named ancestor. Any other cyclic chain of references is an error.
+A persisted config that extends a config of its own name resolves that config
+from the next less specific context in the context stack, so a config may extend
+its nearest same-named ancestor. Any other cyclic chain of references is an
+error.
 
 ### Immutable Built-In Named Configs
 
