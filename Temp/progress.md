@@ -409,3 +409,6 @@ because every argument has a default (e.g., `.timeZone` ≡ `.timeZone::`).
 [Chronologic rendering](../Specs/fields-format.md#chronologic-formatting) is
 specified as RFC 3339, as already implemented: seconds always render & a UTC
 offset renders as `Z` iff it is 0, else as `±hh:mm`.
+
+`numberFormat` retaining scientific notation is specified, as already
+implemented (e.g., `.numberFormat:de:` renders `12345.6E3` as `12.345,6E3`).

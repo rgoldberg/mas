@@ -11,9 +11,7 @@
 
 ### Open Questions
 
-1. [`numberFormat`](../Specs/fields-format.md#numberformat): specify how it
-   renders a value in scientific notation (e.g., `1.5e3`).
-2. [Absent values](../Specs/fields.md#absent-values): specify whether
+1. [Absent values](../Specs/fields.md#absent-values): specify whether
    key-value's & JSON's "a value exists" refers to the field value or to the
    formatted value (e.g., `%N%n+none+` for an absent field).
 
