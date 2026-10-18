@@ -25,11 +25,26 @@ private extension MASTests {
 			("9223372036854775.808", false),
 		],
 	)
-	func `a Unix epoch timestamp is chronologic iff its whole milliseconds fit in 64 bits`(
-		timestamp: String,
+	func `a Unix time is chronologic iff its whole milliseconds fit in 64 bits`(
+		unixTime: String,
 		isChronologic: Bool,
 	) {
-		#expect((chronologic(from: .string(timestamp)) != nil) == isChronologic)
+		#expect((chronologic(from: .string(unixTime), isCoerced: true) != nil) == isChronologic)
+	}
+
+	@Test(
+		arguments: [
+			(JSON.Node.number(0), false, true),
+			(.string("0"), false, false),
+			(.string("0"), true, true),
+			(.string(".5e3"), true, true),
+			(.string("5."), true, false),
+			(.string("1,000"), true, false),
+			(.string("\u{0661}"), true, false),
+		],
+	)
+	func `a string is a Unix time iff coerced`(value: JSON.Node, isCoerced: Bool, isChronologic: Bool) {
+		#expect((chronologic(from: value, isCoerced: isCoerced) != nil) == isChronologic)
 	}
 
 	@Test

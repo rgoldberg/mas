@@ -533,13 +533,17 @@ If an input value is modified by a format for output, `<input>` sorts based on
 the input, not the output. `<output>` is the opposite.
 
 A value is compared as a string: a string as is, `null` as an empty string & any
-other value as its canonical string representation (e.g., `false`), except that,
-unless `<number-segments>` is `<lexical>`, a number is a single [number
-segment](#sort-segments).
+other value as its canonical string representation (e.g., `false`), except that
+a number is a single [segment](#sort-segments):
 
-E.g., for an input timestamp being output as an ISO date (without time):
+- A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
+  the number is a [chronologic Unix
+  time](fields-format.md#chronologic-formatting).
+- Otherwise, a number segment, unless `<number-segments>` is `<lexical>`.
 
-- `<input>` sorts by the input timestamp.
+E.g., for an input Unix time being output as an ISO date (without time):
+
+- `<input>` sorts by the input Unix time.
 - `<output>` sorts by the output ISO date (without time), so rows on the same
   date tie & fall through to the next sort key.
 
@@ -685,24 +689,32 @@ rules.
 chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: "iso"; last wins *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
-chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time>
+chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time> | <unix-time>
 
 iso          = "iso"
 iso-date     = "iso-date"
 iso-datetime = "iso-datetime"
 iso-time     = "iso-time"
+unix-time    = "unix-time"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 The chronologic segments are each longest text that a `<chronologic-format>`
-matches, as [`%c` detects](fields-format.md#chronologic-formatting) it, unless
-an ASCII digit immediately precedes or follows it:
+matches, as [`%.c` detects](fields-format.md#chronologic-formatting) it:
 
 - `<iso-date>`: an ISO-8601 date-only.
 - `<iso-datetime>`: an ISO-8601 datetime.
 - `<iso-time>`: an ISO-8601 time-only.
-- `<iso>`: any of the above.
+- `<iso>`: an ISO-8601 date-only, datetime, or time-only.
+- `<unix-time>`: a chronologic Unix time written as a decimal number.
+
+Text that a `<chronologic-format>` matches is not a chronologic segment iff a
+character immediately precedes or follows it that is:
+
+- For `<iso>`, `<iso-date>`, `<iso-datetime>`, or `<iso-time>`: an ASCII digit.
+- For `<unix-time>`: not whitespace (e.g., `at 1584553163 UTC` has a Unix time
+  segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
 Absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic segments.
 

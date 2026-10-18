@@ -296,6 +296,12 @@ private extension MASTests {
 			("%C.timeZone:UTC:++", .number(0.5), "1970-01-01T00:00:00.500Z"),
 			("%C.dateOnly.timeZone:UTC:++", .string("2020-03-18T17:39:23.123Z"), "2020-03-18"),
 			("[%c]", .string("not a date"), ""),
+			// Only <coercion> allows a string as a Unix time
+			("[%c]", .string("0"), ""),
+			("%.C.timeZone:UTC:++", .string("0"), "1970-01-01T00:00:00Z"),
+			("%.C.timeZone:UTC:++", .string("1.5e9"), "2017-07-14T02:40:00Z"),
+			("..dateOnly.timeZone:UTC:", .string("0"), "1970-01-01"),
+			("..dateOnly", .string("x"), ""),
 			("%-c", .string("not a date"), "not a date"),
 		],
 	)
@@ -389,6 +395,7 @@ private extension MASTests {
 			("%.:,,,,,,[:n", .invalidTriviaRegex("[")),
 			("%_n", .invalidLetter("_")),
 			("%.v", .coercionNotSupported("v")),
+			("%.:de:c", .numberCoercionArgumentsNotSupported("c")),
 			("%+n", .invalidModifier("n")),
 			("%-i", .invalidModifier("i")),
 			("%.m", .invalidModifier("m")),

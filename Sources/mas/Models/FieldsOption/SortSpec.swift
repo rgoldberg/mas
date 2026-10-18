@@ -165,6 +165,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 		locale: nil,
 		numberSegments: .lexical,
 		chronologicSegments: Set(ISO8601Form.allCases),
+		hasUnixTimeSegments: false,
 		boundaries: .uncollapsed(defaultBoundaryGroups),
 		nonconformingComparison: .allConforming,
 		textOrder: .inPlace,
@@ -179,8 +180,10 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 	/// `<locale>`'s locale; `nil` iff it identifies the canonical conventions.
 	var locale: Locale?
 	var numberSegments: NumberSegments
-	/// `<chronologic-segments>`' forms.
+	/// `<chronologic-segments>`' ISO-8601 forms.
 	var chronologicSegments: Set<ISO8601Form>
+	/// Whether `<chronologic-segments>` includes `<unix-time>`.
+	var hasUnixTimeSegments: Bool
 	var boundaries: Boundaries
 	var nonconformingComparison: NonconformingComparison
 	var textOrder: TextOrder
@@ -242,7 +245,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				case groupedNumericOption:
 					optionSet.numberSegments = .groupedNumeric(try parseGroupedNumericArguments(&input))
 				case chronologicSegmentsOption:
-					optionSet.chronologicSegments = try parseChronologicFormats(&input)
+					(optionSet.chronologicSegments, optionSet.hasUnixTimeSegments) = try parseChronologicFormats(&input)
 				case uncollapsedBoundariesOption:
 					optionSet.boundaries = .uncollapsed(try parseBoundaryGroups(&input))
 				case collapsedBoundariesOption:
@@ -316,18 +319,26 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 	}
 
 	/// Parses `<chronologic-segments>`' optional `<chronologic-formats>` (none
-	/// iff absent) & its `<sort-option-terminator>`.
-	private static func parseChronologicFormats(_ input: inout Substring) throws(ParsingError) -> Set<ISO8601Form> {
+	/// iff absent) & its `<sort-option-terminator>`: its ISO-8601 forms & whether
+	/// it includes `<unix-time>`.
+	private static func parseChronologicFormats(_ input: inout Substring)
+	throws(ParsingError) -> (iso8601Forms: Set<ISO8601Form>, hasUnixTime: Bool) {
 		let text = try parseText(&input, terminatorSet: [sortOptionTerminator])
 		try parseSortOptionTerminator(&input)
 		var forms = Set<ISO8601Form>()
+		var hasUnixTime = false
 		for format in text.isEmpty ? .init() : text.split(separator: argumentSeparator, omittingEmptySubsequences: false) {
-			guard let formatForms = iso8601FormsByChronologicFormat[format.trimmingCharacters(in: .whitespaces)] else {
-				throw .invalidSortOptionArguments(chronologicSegmentsOption)
+			let format = format.trimmingCharacters(in: .whitespaces)
+			if format == unixTimeChronologicFormat {
+				hasUnixTime = true
+			} else {
+				guard let formatForms = iso8601FormsByChronologicFormat[format] else {
+					throw .invalidSortOptionArguments(chronologicSegmentsOption)
+				}
+				forms.formUnion(formatForms)
 			}
-			forms.formUnion(formatForms)
 		}
-		return forms
+		return (forms, hasUnixTime)
 	}
 
 	/// Parses `<uncollapsed-boundaries>`' / `<collapsed-boundaries>`' optional
@@ -481,15 +492,26 @@ extension SortOptionSet {
 		direction == .ascending ? result : result.reversed
 	}
 
-	/// `value`'s pieces: a number is a single number segment, unless
-	/// `numberSegments` is `<lexical>`; any other value is compared as a string
+	/// `value`'s pieces: a number is a single segment, per
+	/// `numberValueSegment(of:)`, if any; any other value is compared as a string
 	/// (`null` as an empty string).
 	private func pieces(of value: JSON.Node?) -> [Piece] {
-		if case let .number(number)? = value, numberSegments != .lexical, let number = DecimalNumber("\(number)") {
-			[.init(rank: boundaries.groups.count, segments: [.number(number)])]
+		if let segment = numberValueSegment(of: value) {
+			[.init(rank: boundaries.groups.count, segments: [segment])]
 		} else {
 			pieces(of: value?.stringValue ?? "")
 		}
+	}
+
+	/// `value`'s single segment iff it is a number: a chronologic segment iff
+	/// `hasUnixTimeSegments` & it is a chronologic Unix time, else a number
+	/// segment unless `numberSegments` is `<lexical>`; else `nil`.
+	private func numberValueSegment(of value: JSON.Node?) -> Segment? {
+		guard case let .number(number)? = value, let number = DecimalNumber("\(number)") else {
+			return nil
+		}
+		return (hasUnixTimeSegments ? unixTimeDate(number).map { .chronologic(.datetime($0)) } : nil)
+			?? (numberSegments == .lexical ? nil : .number(number))
 	}
 
 	/// `string`'s pieces: each boundary & each run of non-boundary text's
@@ -639,7 +661,9 @@ extension SortOptionSet {
 	/// `value`) & its end; else `nil`.
 	private func typedSegment(at index: Substring.Index, in text: Substring, value: String)
 	-> (segment: Segment, end: Substring.Index)? {
-		chronologicSegment(at: index, in: text, value: value) ?? numberSegment(at: index, in: text, value: value)
+		chronologicSegment(at: index, in: text, value: value)
+			?? unixTimeSegment(at: index, in: text, value: value)
+			?? numberSegment(at: index, in: text, value: value)
 	}
 
 	/// The chronologic segment at `index` in `text` (a run of non-boundary text
@@ -656,6 +680,21 @@ extension SortOptionSet {
 			return nil
 		}
 		return (.chronologic(prefix.chronologic), prefix.end)
+	}
+
+	/// The Unix time chronologic segment at `index` in `text` (a run of
+	/// non-boundary text in `value`) & its end iff `hasUnixTimeSegments` & it is
+	/// neither preceded nor followed by a non-whitespace character in `value`;
+	/// else `nil`.
+	private func unixTimeSegment(at index: Substring.Index, in text: Substring, value: String)
+	-> (segment: Segment, end: Substring.Index)? {
+		guard hasUnixTimeSegments, index == value.startIndex || value[value.index(before: index)].isWhitespace else {
+			return nil
+		}
+		let word = text[index...].prefix { !$0.isWhitespace }
+		return word.endIndex == value.endIndex || value[word.endIndex].isWhitespace
+			? unixTimeDate(in: word).map { (.chronologic(.datetime($0)), word.endIndex) }
+			: nil
 	}
 
 	/// The number segment (including its sign, if any) at `index` in `text` (a
@@ -881,6 +920,7 @@ private let groupedNumericOption = Character("N")
 private nonisolated(unsafe) let versionRegex = #/[0-9][\p{L}\p{N}+\-]*(?:\.[0-9][\p{L}\p{N}+\-]*)*/#
 
 private let chronologicSegmentsOption = Character("C")
+private let unixTimeChronologicFormat = "unix-time"
 private let iso8601FormsByChronologicFormat = [
 	"iso": Set(ISO8601Form.allCases),
 	"iso-date": [.date],
