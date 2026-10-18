@@ -604,7 +604,7 @@ insensitive = "i"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* default: "Lcanonical:"; last wins *)
+locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: "canonical"; last wins *)
 
 locale-identifier = {text: locale identifier, "canonical", or "system"} (* default: "system" *)
 ```
@@ -682,7 +682,7 @@ rules.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* default: "Ciso:"; last wins *)
+chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: "iso"; last wins *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
 chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time>
