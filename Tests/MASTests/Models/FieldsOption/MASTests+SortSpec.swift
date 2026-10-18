@@ -335,6 +335,18 @@ private extension MASTests {
 		)
 	}
 
+	@Test(arguments: [OutputFormat.json(.default), .keyValue(.default), .table(.default)])
+	func `sorts output values by their formatted values' types for every output format`(outputFormat: OutputFormat)
+	throws {
+		// As numbers, 1.5 > 1.10; as versions, 1.5 < 1.10
+		let fieldSpec = try parsedFieldSpec(format: "..absoluteValue", sort: "1Ov", outputFormat: outputFormat)
+		let sortSpec = try #require(fieldSpec.sortSpec)
+		#expect(
+			sortSpec.compare(try sortValues("1.5", fieldSpec: fieldSpec), try sortValues("1.10", fieldSpec: fieldSpec))
+				== .orderedDescending,
+		)
+	}
+
 	@Test
 	func `item sort orders by ascending priority, then tiebreaks by input order`() throws {
 		let fieldSpec = try parsedFieldSpec(format: "%n", sort: "1")
@@ -397,12 +409,13 @@ private func parsedSortSpec(_ sort: String, existing: SortSpec? = nil) throws(Pa
 	return sortSpec
 }
 
-private func parsedFieldSpec(format: String, sort: String) throws(ParsingError) -> FieldSpec {
+private func parsedFieldSpec(format: String, sort: String, outputFormat: OutputFormat = .json(.default))
+throws(ParsingError) -> FieldSpec {
 	try resolvedFieldsConfig(
 		from: "n:\(format)/\(sort)",
 		standard: SelectedFieldsConfig(),
 		all: .init(),
-		outputFormat: .json(.default),
+		outputFormat: outputFormat,
 	)
 	.fieldSpecs[0]
 }

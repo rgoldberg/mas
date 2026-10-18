@@ -31,10 +31,11 @@ Each of the following evaluates to a value whose type is:
 - Template: if solely 1 placeholder, that placeholder's type; otherwise, string.
 - Template text: string.
 
-Output renders a `<format-block>`'s value at its type iff the output supports
+A field spec's **formatted value** is its `<format-block>`'s value, at its type,
+regardless of the output format, which renders it at its type iff it supports
 that type (`json`: string, boolean, `null` & a number whose text, including any
 trivia, is JSON number syntax; `table` & `key-value`: string); otherwise, it
-renders the value coerced to a string.
+renders it coerced to a string.
 
 ##### Pipelines
 

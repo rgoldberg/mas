@@ -193,10 +193,10 @@ enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:d
 
 extension Format { // swiftlint:disable:this file_types_order
 	/// Renders this format against `value` (`nil` iff the field does not exist
-	/// for this item), producing the node to display / embed in output, at its
-	/// evaluated value's type (fields-format.md "Value Types"): e.g., `%i`
-	/// renders `null` as `null`, while `(%i)` renders it as `"()"`. An empty
-	/// string iff formatting aborts.
+	/// for this item), producing the formatted value (fields-format.md "Value
+	/// Types"), at its type, for any output format to render: e.g., `%i` renders
+	/// `null` as `null`, while `(%i)` renders it as `"()"`. An empty string iff
+	/// formatting aborts.
 	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
 		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node ?? .string("")
 	}
