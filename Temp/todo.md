@@ -2,26 +2,6 @@
 
 ## Current Version
 
-### Formatting
-
-1. Which ISO-8601 representations should [chronologic
-   auto-detection](../Specs/fields-format.md#chronologic-formatting) detect?
-   1. Implemented:
-      1. Extended-format date.
-      2. Extended-format complete time, with optional fractional seconds (after
-         `.` or `,`) & an optional UTC offset (`Z`, `±hh`, `±hhmm`, or
-         `±hh:mm`).
-      3. Extended-format date, `T` & complete time, as above.
-   2. Undetected:
-      1. Basic format (e.g., `20200318`, currently not chronologic, or a Unix
-         time with `<coercion>`).
-      2. Reduced precision (e.g., `2020-03-18T17:39`).
-      3. Ordinal dates.
-      4. Week dates.
-      5. RFC 3339 variants:
-         1. Space separator.
-         2. Lowercase `t` or `z`.
-
 ### Documentation
 
 1. Update `README.md`
@@ -110,7 +90,8 @@ Mirror number coercion: chronologic coercion takes fenced arguments giving the
 input format (e.g., `%.:yyyy-MM-dd:c`, `..:yyyy-MM-dd:timeZone:UTC:`), with
 [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
-) as the pattern syntax.
+) as the pattern syntax. It would also cover the ISO-8601 representations that
+auto-detection omits (e.g., week dates).
 
 A named or literal output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax & persisted named

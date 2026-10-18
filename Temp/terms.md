@@ -459,3 +459,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 95. - structured value: a field value that is an array or an object
       ([defined](../Specs/fields-format.md#value-types))
     - REJECTED: nested value / composite value / complex value
+96. - extended format: ISO-8601's representation with `-` & `:` separators
+    - basic format: ISO-8601's representation without `-` & `:` separators
+    - reduced precision: an ISO-8601 representation omitting its trailing
+      components (e.g., seconds)
+    - REJECTED: compact format (for basic format) / truncated (for reduced
+      precision)

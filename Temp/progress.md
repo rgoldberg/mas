@@ -373,3 +373,10 @@ text (non-ASCII characters verbatim) everywhere else, including `table` &
 `key-value` output & sorting; no predicate whose output type is not any matches
 one. A bare `.` in a field name reports `reservedFieldNameCharacter`, reserving
 it for nested field references; `\.` names a field containing `.`.
+
+### ISO-8601 Detection Variants (2026-10-18)
+
+Chronologic auto-detection also accepts RFC 3339's `t` or space separator & `z`
+UTC offset, and a datetime without seconds (e.g., `2020-03-18 17:39`); basic
+format, ordinal dates, week dates & other reduced precision remain undetected,
+since most collide with numbers, ratios, ranges, or IDs.

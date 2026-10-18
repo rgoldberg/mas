@@ -347,6 +347,20 @@ private extension MASTests {
 			("%C.timeZone:UTC:++", .string("2020-03-18T17:39:23.0004Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:UTC:++", .number(0.5), "1970-01-01T00:00:00.500Z"),
 			("%C.dateOnly.timeZone:UTC:++", .string("2020-03-18T17:39:23.123Z"), "2020-03-18"),
+			// A datetime's RFC 3339 variants & omitted seconds
+			("%C.timeZone:UTC:++", .string("2020-03-18 17:39:23Z"), "2020-03-18T17:39:23Z"),
+			("%C.timeZone:UTC:++", .string("2020-03-18t17:39:23z"), "2020-03-18T17:39:23Z"),
+			("%C.timeZone:UTC:++", .string("2020-03-18T17:39Z"), "2020-03-18T17:39:00Z"),
+			("%C.timeZone:UTC:++", .string("2020-03-18 17:39+02:00"), "2020-03-18T15:39:00Z"),
+			// Other ISO-8601 representations are not detected
+			("[%c]", .string("2020-03-18T17:39.5Z"), ""),
+			("[%c]", .string("2020-03-18T17Z"), ""),
+			("[%c]", .string("2020-03-18_17:39:23Z"), ""),
+			("[%c]", .string("20200318"), ""),
+			("[%c]", .string("20200318T173923Z"), ""),
+			("[%c]", .string("2020-03"), ""),
+			("[%c]", .string("2020-078"), ""),
+			("[%c]", .string("2020-W12-3"), ""),
 			("[%c]", .string("not a date"), ""),
 			// Only <coercion> allows a string as a Unix time
 			("[%c]", .string("0"), ""),
@@ -393,6 +407,10 @@ private extension MASTests {
 			("%C.timeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("%C.timeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
 			("[%c]", "24:00:00", ""),
+			("%C.timeZone:UTC:++", "17:39:23z", "17:39:23Z"),
+			// Only a datetime's seconds can be omitted
+			("[%c]", "17:39", ""),
+			("[%c]", "17:39Z", ""),
 			// A time-only value fails a chronologic predicate whose block applies
 			// `dateOnly` to it
 			("%C.dateOnly+-+", "17:39:23", "-"),
