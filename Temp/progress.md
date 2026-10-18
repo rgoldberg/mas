@@ -157,18 +157,18 @@ segment (`unixTimeSegment(at:in:value:)`).
 
 `resolveBaseFieldsConfig` validates config names [per
 spec](../Specs/configs.md#named-configs) (`^[-_0-9A-Za-z]+$` plus an optional
-output format suffix & an optional `@none` reference suffix), reports a
+output format suffix & an optional `@unsuffixed` reference suffix), reports a
 nonexistent name & selects variants per suffix or, absent one, the output
 format: `@json` is machine-facing (`machineFacingVariant()`: label = name,
-format = `%i`), `@none` / `@table` / `@key-value` user-facing & `standard@json`
-is `all`. [Per spec](../Specs/mas.md#built-in-named-fields-configs), every field
-is in each of built-in `none`, `all` & `standard`: `none` is `all` with every
-field spec hidden & its sort disabled; user-facing `standard` is its own field
-specs followed by `all`'s other field specs, hidden, so an overlay may select
-any field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames` fully
-parses the value against the static base (fetching every field for a reference
-to a field not yet discovered), excluding hidden field specs that do not sort
-items.
+format = `%i`), `@unsuffixed` / `@table` / `@key-value` user-facing &
+`standard@json` is `all`. [Per
+spec](../Specs/mas.md#built-in-named-fields-configs), every field is in each of
+built-in `none`, `all` & `standard`: `none` is `all` with every field spec
+hidden & its sort disabled; user-facing `standard` is its own field specs
+followed by `all`'s other field specs, hidden, so an overlay may select any
+field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames` fully parses
+the value against the static base (fetching every field for a reference to a
+field not yet discovered), excluding hidden field specs that do not sort items.
 
 ### mas Defaults (2026-09-25)
 
@@ -483,3 +483,7 @@ e.g., `alpha` includes `Ⅻ`, `blank` includes U+3000 & `xdigit` excludes `Ａ`.
 With `<versions>`, a number value compares as its text, so its versions compare
 with a string's versions (e.g., `2` follows `"1.5"`), instead of tying with
 every version segment.
+
+The reference suffix that selects a fields config's unsuffixed variant is
+`@unsuffixed` (`unsuffixedVariantReferenceSuffix`), instead of `@none`, which
+clashed with the built-in `none`.

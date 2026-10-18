@@ -605,7 +605,7 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			("@standard", OutputFormat.json(.default), ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
-			("@standard@none", .json(.default), ["adamID"], "Adam"),
+			("@standard@unsuffixed", .json(.default), ["adamID"], "Adam"),
 			("@standard@table", .json(.default), ["adamID"], "Adam"),
 			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
 			("@default@key-value", .json(.default), ["adamID"], "Adam"),
@@ -657,6 +657,7 @@ private extension MASTests {
 			("@all@xml", .invalidBaseFieldsConfigName("all@xml")),
 			("@a b", .invalidBaseFieldsConfigName("a b")),
 			("@@json", .invalidBaseFieldsConfigName("@json")),
+			("@standard@none", .invalidBaseFieldsConfigName("standard@none")),
 		],
 	)
 	func `reports an invalid or nonexistent base fields config name`(value: String, error: ParsingError) {
