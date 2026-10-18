@@ -310,8 +310,8 @@ only its output as `%i`, retaining each field spec's format to type its field
 
 ### Style Settings (2026-10-10)
 
-`H` / `K` take a `<style-specifier>`, a [described constrained text
-terminal](../Specs/ebnf.md#described-constrained-text-terminals) parsed by
+`H` / `K` take a `<style-specifier>`, a [constrained text
+terminal](../Specs/ebnf.md#constrained-text-terminals) parsed by
 `parseStyleSpecifier`, which ignores its outer bare whitespace & rejects a bare
 ASCII letter. `styled` wraps a styled string in `StyleSequences`
 (`TableConfig.headerStyleSequences` / `KeyValueConfig.keyStyleSequences`):

@@ -18,7 +18,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
    - for only: restrict numeric quantities or durations
 6. - restrict: narrow scope or applicability
    - constrain: narrow permissible values (`{text: CONSTRAINTS}`)
-   - describe: give meaning without constraining (`{text= DESCRIPTION}`)
+   - describe: state valid values in prose (`{DESCRIPTION}`,
+     `{text: CONSTRAINTS}`)
    - REJECTED: limit
 7. - bare character: `x`
    - escape prefix: `\`
