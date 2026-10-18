@@ -388,3 +388,10 @@ whole value before boundaries (`SortOptionSet.pieces(of:)`), so a boundary
 within a typed segment is part of it (e.g., `2020-03-18 17:39` is 1 datetime
 segment & `1 000` is 1 grouped number when space is its digit group separator);
 boundaries split only the remaining text.
+
+### Spec Review Fixes (2026-10-18)
+
+`%v` & `%V` match a string whose entire content is a `<versions>` sort segment's
+version (`versionRegex`), so they no longer match a component with characters
+other than Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
+`1.0 beta`).

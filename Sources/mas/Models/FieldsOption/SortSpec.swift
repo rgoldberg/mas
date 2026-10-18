@@ -911,10 +911,6 @@ private let numberSegmentsByOption = [
 ]
 private let groupedNumericOption = Character("N")
 
-/// A `<versions>` number segment: 1 or more `.`-separated components, each an
-/// ASCII digit followed by any letters, digits, `+`s & `-`s.
-private nonisolated(unsafe) let versionRegex = #/[0-9][\p{L}\p{N}+\-]*(?:\.[0-9][\p{L}\p{N}+\-]*)*/#
-
 private let chronologicSegmentsOption = Character("C")
 private let unixTimeChronologicFormat = "unix-time"
 private let iso8601FormsByChronologicFormat = [
