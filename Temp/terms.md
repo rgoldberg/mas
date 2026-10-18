@@ -421,7 +421,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (`<ungrouped-numeric>`)
     - grouped numeric: comparing each grouped number as a number
       (`<grouped-numeric>`)
-    - REJECTED: natural / numeric (for ungrouped numeric)
+    - lexicographic: comparing numbers as text (`<lexicographic>`)
+    - REJECTED: natural / numeric (for ungrouped numeric) / lexical (for
+      lexicographic)
 87. - word-initial: at the start of the value or after whitespace
       (`<word-initial-signs>`)
     - REJECTED: leading / standalone / attached
