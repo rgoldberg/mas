@@ -97,8 +97,8 @@ A named or literal output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax & persisted named
 formats.
 
-[`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) could
-then take custom formats (e.g., `yyyy-MM-dd`).
+[`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) can then
+take custom formats (e.g., `yyyy-MM-dd`).
 
 ### Boolean Coercion Options
 
