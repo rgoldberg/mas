@@ -241,6 +241,7 @@ private extension MASTests {
 			("..numberFormat:de:", .string("12345.6E3"), "12.345,6E3"),
 			("..numberFormat:en:", .string("-1234e-2"), "-1,234e-2"),
 			("..scale:10,0,,2:.numberFormat:de:", .string("1.5e3"), "1.500,00"),
+			("..:,,,,,[$]:numberFormat:de:", .string("$1234.5"), "$1.234,5"),
 			("..:de:round", .string("1.234,56"), "1235"),
 			("..:,,,,,.*,.*:round", .string("about 2.5 MB"), "about 3 MB"),
 			("..:,,,,,.*,.*:numberFormat:en:", .string("~1234567 B"), "~1,234,567 B"),

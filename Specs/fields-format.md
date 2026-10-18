@@ -442,10 +442,8 @@ is odd-width: `centerStartJustify` puts the extra padding character after the
 value (leaving it nearer the column's start); `centerEndJustify` puts it before
 the value (leaving it nearer the column's end).
 
-An absent `<justify>` is inherited from the working fields config; a field spec
-with no justification to inherit (e.g., a [default field
-spec](fields.md#default-field-specs), or one in a [built-in
-config](configs.md#immutable-built-in-named-configs)) is `<start-justify>`.
+An absent `<justify>` is inherited from the working fields config; absent any
+justification to inherit, it is `<start-justify>`.
 
 ##### Placeholders
 
@@ -498,9 +496,6 @@ block-terminator = -"+"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
-
-A matcher's **nullary form** replaces its `<non-nullary-predicate>` with the
-corresponding `<nullary-predicate>` (e.g., `%.N` → `%.n`).
 
 ###### Success & Failure
 
@@ -574,8 +569,8 @@ by its blocks, which define the matcher's **form**:
 - **Binary**: a `<success-block>` & a `<failure-block>`.
 - **Abort-on-failure** (`%+…`): a `<success-block>`.
 - **Abort-on-success** (`%-…`): a `<failure-block>`.
-- **Unary match** (`%m`): `<branches>`.
-- **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
+- **Nullary match** (`%m`): `<branches>`.
+- **Non-nullary match** (`%M`): `<branches>` & a `<failure-block>`.
 
 A matcher succeeds iff it matches the value against which it is evaluated.
 
@@ -675,15 +670,13 @@ non-nullary-scalar-conditional-predicate = <non-nullary-standard-predicate> | <n
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | [ <coercible-modifiers> ] <nullary-coercible-standard-predicate>
-non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | [ <coercible-modifiers> ] <non-nullary-coercible-standard-predicate>
+nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | [ <coercion> ] <nullary-coercible-standard-predicate>
+non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | [ <coercion> ] <non-nullary-coercible-standard-predicate>
 
 non-nullary-standard-success =
   <non-nullary-string> -[ <string-block> ]
-  | [ <coercible-modifiers> ] <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
+  | [ <coercion> ] <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
   | <non-nullary-blank-predicate> -[ <any-block> ]
-
-coercible-modifiers = <coercion>
 
 nullary-standard-predicate     = <nullary-incoercible-standard-predicate> | <nullary-coercible-standard-predicate>
 non-nullary-standard-predicate = <non-nullary-incoercible-standard-predicate> | <non-nullary-coercible-standard-predicate>
@@ -719,11 +712,9 @@ non-nullary-string     = "S" (* is string;                                      
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-number-matcher     = [ <number-modifiers> ] <nullary-number>
-non-nullary-number-matcher = [ <number-modifiers> ] <non-nullary-number>
+nullary-number-matcher     = [ <number-coercion> ] <nullary-number>
+non-nullary-number-matcher = [ <number-coercion> ] <non-nullary-number>
 non-nullary-number-success = <non-nullary-number-matcher> -[ <number-block> ]
-
-number-modifiers = <number-coercion>
 
 nullary-number     = "n" (* is number; output type: number; value: {field value} *)
 non-nullary-number = "N" (* is number; output type: number; value: {field value} *)
@@ -806,7 +797,9 @@ iff the string is:
 
 The default regexes match only an empty string, allowing no trivia (e.g.,
 `%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`). Number
-transforms are applied to the number alone, retaining the trivia unchanged.
+transforms & number-to-string transforms are applied to the number alone,
+retaining the trivia unchanged (e.g., `..:,,,,,[$]:numberFormat:de:` renders
+`"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every text token, a regex's own `\` is
 written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and
@@ -818,8 +811,8 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-chronologic-matcher     = [ <coercible-modifiers> ] <nullary-chronologic>
-non-nullary-chronologic-matcher = [ <coercible-modifiers> ] <non-nullary-chronologic>
+nullary-chronologic-matcher     = [ <coercion> ] <nullary-chronologic>
+non-nullary-chronologic-matcher = [ <coercion> ] <non-nullary-chronologic>
 non-nullary-chronologic-success = <non-nullary-chronologic-matcher> -[ <chronologic-block> ]
 
 nullary-chronologic     = "c" (* is chronologic; output type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
@@ -895,8 +888,8 @@ match-placeholder = <nullary-match-placeholder> | <non-nullary-match-placeholder
 nullary-match-placeholder     = <placeholder-prefix> <nullary-match> <branches> <block-terminator>
 non-nullary-match-placeholder = <placeholder-prefix> <non-nullary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
 
-nullary-match     = "m" (* matches a branch in `<branches>`; value: {matched branch value} *)
-non-nullary-match = "M" (* matches a branch in `<branches>`; value: {matched branch value} *)
+nullary-match     = "m" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
+non-nullary-match = "M" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
 
 branches = <conditional-branch>+ <branch>
 branch   = <conditional-branch> | <unconditional-branch>
