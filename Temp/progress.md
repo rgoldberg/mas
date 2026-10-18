@@ -405,3 +405,7 @@ matches `"5,x"`).
 
 `timeZone`'s `<time-zone-arguments>` are optional, as `numberFormat`'s are,
 because every argument has a default (e.g., `.timeZone` ≡ `.timeZone::`).
+
+[Chronologic rendering](../Specs/fields-format.md#chronologic-formatting) is
+specified as RFC 3339, as already implemented: seconds always render & a UTC
+offset renders as `Z` iff it is 0, else as `±hh:mm`.
