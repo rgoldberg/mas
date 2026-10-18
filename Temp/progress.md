@@ -402,3 +402,6 @@ table's `<separator-pattern>` & `<column-spacing>` do.
 A `<trivia-suffix-regex>` is the last argument of `<number-coercion-arguments>`,
 so a bare `,` in it is part of it instead of an error (e.g., `%.:,,,,,,,.*:n`
 matches `"5,x"`).
+
+`timeZone`'s `<time-zone-arguments>` are optional, as `numberFormat`'s are,
+because every argument has a default (e.g., `.timeZone` ≡ `.timeZone::`).
