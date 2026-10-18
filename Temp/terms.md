@@ -417,6 +417,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - typed segment: a chronologic or number segment
     - text segment: a maximal run of non-boundary text that is in no typed
       segment
+    - piece: a run of non-boundary text or a boundary, which sorting compares as
+      1 element of a value ([defined](../Specs/fields.md#sort-segments))
     - REJECTED: chunk / token (for a segment) / trivia (for text segments)
 86. - ungrouped numeric: comparing each run of digits as a number
       (`<ungrouped-numeric>`)
