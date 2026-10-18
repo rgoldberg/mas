@@ -398,3 +398,7 @@ other than Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
 
 A `<time-zone-code>` UTC offset may also be a 2-digit hour & a 2-digit minute
 without a `:` (e.g., `+0530`), as an ISO-8601 UTC offset may.
+
+`%u`, `%e` & `%w` (& their non-nullary forms) evaluate to the field value
+instead of `""` (e.g., `%w` inserts a whitespace-only string as is, and `json`
+output renders a solely-`%u` format's value as `null`).

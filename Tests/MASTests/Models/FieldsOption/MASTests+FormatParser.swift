@@ -60,7 +60,7 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			// Nullary: on failure, formatting aborts
-			("%u", JSON.Node?.none, String?.some("")),
+			("%u", JSON.Node?.none, String?.none),
 			("%u", .string("x"), ""),
 			("x%ny", .string("a"), ""),
 			// Nullary abort-on-success: on failure, the field value
@@ -89,6 +89,8 @@ private extension MASTests {
 			("[%V+%i+]", .string("1.2"), "[]"),
 			("[%V+%i+]", .string("v1.2"), "[v1.2]"),
 			("[%-N+]", .string("x"), "[]"),
+			("[%w]", .string(" \t"), "[ \t]"),
+			("[%e]", .null, "[]"),
 		],
 	)
 	func `renders scalar conditional placeholders`(format: String, value: JSON.Node?, expected: String?) throws {
@@ -323,6 +325,9 @@ private extension MASTests {
 			(".scale:16,0,,0:", .number(255), #""ff""#),
 			(".numberFormat", .number(5), #""5""#),
 			("%t", .bool(true), "true"),
+			("%u", .null, "null"),
+			("%e", .string(""), #""""#),
+			("%w", .string(" \t"), #"" \t""#),
 			("%c", .string("2020-03-18"), #""2020-03-18""#),
 			("%i", structuredValue, #"["é",{"a":null}]"#),
 			("(%i)", structuredValue, #""([\"é\",{\"a\":null}])""#),
