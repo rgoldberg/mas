@@ -696,11 +696,11 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.boolean
 			case .chronologic:
 				.chronologic
-			case .empty, .null, .version, .whitespace:
+			case .empty, .null, .whitespace:
 				.any
 			case .number:
 				.number
-			case .string:
+			case .string, .version:
 				.string
 			}
 	}

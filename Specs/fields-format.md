@@ -534,7 +534,7 @@ block-placeholder =
 
 string-block-placeholder =
   <placeholder-prefix>
-  ( <nullary-string> | <non-nullary-string> -<string-pipeline> <block-terminator> )
+  ( <nullary-string> | <nullary-version> | ( <non-nullary-string> | <non-nullary-version> ) -<string-pipeline> <block-terminator> )
   (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
 
 boolean-block-placeholder =
@@ -554,7 +554,7 @@ chronologic-block-placeholder =
 
 any-block-placeholder =
   <placeholder-prefix>
-  ( <nullary-scalar-conditional-predicate> | <non-nullary-scalar-conditional-predicate> -<unconditional-pipeline> <block-terminator> )
+  ( <nullary-blank-predicate> | <non-nullary-blank-predicate> -<unconditional-pipeline> <block-terminator> )
   (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
 
 abort-on-success = "-"!
@@ -584,8 +584,8 @@ A `<success-block>` is evaluated iff its enclosing matcher succeeds.
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
 A `<success-block>`'s kind follows the matched value's type; where that can be
-any type, or is a version, the block's pipeline must start by coercing to a
-string.
+any type, the block's pipeline must start, after any named format, by coercing
+to a string.
 
 `<unconditional-block>` differs from `<any-block>` only by forbidding
 `<block-placeholder>`s.
@@ -661,9 +661,6 @@ non-nullary-scalar-conditional-placeholder =
 nullary-scalar-matcher     = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-chronologic-matcher>
 non-nullary-scalar-matcher = <non-nullary-standard-matcher> | <non-nullary-number-matcher> | <non-nullary-version> | <non-nullary-chronologic-matcher>
 non-nullary-scalar-success = <non-nullary-standard-success> | <non-nullary-number-success> | <non-nullary-version-success> | <non-nullary-chronologic-success>
-
-nullary-scalar-conditional-predicate     = <nullary-standard-predicate> | <nullary-number> | <nullary-version> | <nullary-chronologic>
-non-nullary-scalar-conditional-predicate = <non-nullary-standard-predicate> | <non-nullary-number> | <non-nullary-version> | <non-nullary-chronologic>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -680,9 +677,6 @@ non-nullary-standard-success =
   <non-nullary-string> -[ <string-block> ]
   | [ <coercion> ] <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
   | <non-nullary-blank-predicate> -[ <any-block> ]
-
-nullary-standard-predicate     = <nullary-incoercible-standard-predicate> | <nullary-coercible-standard-predicate>
-non-nullary-standard-predicate = <non-nullary-incoercible-standard-predicate> | <non-nullary-coercible-standard-predicate>
 
 nullary-incoercible-standard-predicate     = <nullary-blank-predicate> | <nullary-string>
 non-nullary-incoercible-standard-predicate = <non-nullary-blank-predicate> | <non-nullary-string>
@@ -730,10 +724,10 @@ non-nullary-number = "N" (* is number; output type: number; value: {field value}
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-nullary-version-success = <non-nullary-version> -[ <any-block> ]
+non-nullary-version-success = <non-nullary-version> -[ <string-block> ]
 
-nullary-version     = "v" (* is version; output type: version; value: {field value} *)
-non-nullary-version = "V" (* is version; output type: version; value: {field value} *)
+nullary-version     = "v" (* is version; output type: string; value: {field value} *)
+non-nullary-version = "V" (* is version; output type: string; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

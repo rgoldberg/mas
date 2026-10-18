@@ -487,3 +487,9 @@ every version segment.
 The reference suffix that selects a fields config's unsuffixed variant is
 `@unsuffixed` (`unsuffixedVariantReferenceSuffix`), instead of `@none`, which
 clashed with the built-in `none`.
+
+`%v` & `%V` have output type string & a `<string-block>`, so a string transform
+applies to a matched version without `<coercion>` (e.g., `%V.uppercase+-+`);
+`<any-block-placeholder>` covers only `<nullary-blank-predicate>`s & their
+non-nullary forms, so `<nullary-scalar-conditional-predicate>` &
+`<nullary-standard-predicate>` (& their non-nullary forms) are removed.

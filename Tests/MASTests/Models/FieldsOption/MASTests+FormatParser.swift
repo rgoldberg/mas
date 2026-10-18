@@ -187,6 +187,8 @@ private extension MASTests {
 			("%.B%b!++", .string("true"), "true!"),
 			("%C%C.dateOnly+++", .string("2020-03-18T17:39:23Z"), "2020-03-18"),
 			("%V[%v]++", .string("1.2"), "[1.2]"),
+			("%V.uppercase+-+", .string("1.2b"), "1.2B"),
+			("%V%V.uppercase+++", .string("1.2b"), "1.2B"),
 			("%U(%u)++", .null, "()"),
 		],
 	)
