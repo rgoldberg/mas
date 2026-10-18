@@ -278,6 +278,16 @@ Context-dependent multiplicity.
 
 The absence of a value; matches no input.
 
+#### End
+
+```ebnf
+end
+```
+
+Inherent scalar.
+
+A constant expression that matches no input, only at the end of the input.
+
 #### Literal Text
 
 ```ebnf

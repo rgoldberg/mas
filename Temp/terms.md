@@ -5,7 +5,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 
 1. - start: noun & verb
    - REJECTED: begin / beginning
-2. - end: noun
+2. - end: noun; also the `end` terminal ([defined](../Specs/ebnf.md#end))
    - REJECTED: finish
 3. - terminate: verb; an expression or token ends, explicitly at a terminator or
      implicitly
