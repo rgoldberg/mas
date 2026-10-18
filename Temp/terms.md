@@ -55,7 +55,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       config exists")
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
-13. - inherited: from the base fields config
+13. - inherited: from a base or working config
     - existing: already in the working fields config
     - previous: the immediately preceding one (`$previous$`)
     - REJECTED: prior / predefined
@@ -121,7 +121,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - ignore: disregard (outer bare whitespace)
     - exclude: leave out of a comparison (`<text-excluded>`)
     - REJECTED: disallow / prohibit / prevent / not allow / not let / may not /
-      reject / significant / insignificant
+      reject / significant / insignificant (for whitespace)
 24. - disable
     - enable
 25. - disabled
@@ -324,7 +324,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       expression between its letter & its `<sort-option-terminator>`
       ([defined](../Specs/fields.md#payloads))
     - argument: an element of an argument list (a transform's, a number
-      coercion's, or `G`'s)
+      coercion's, `N`'s, or `C`'s)
     - REJECTED: body / argument (for other modifiers & options)
 67. - titlecase: verb & adjective
     - uppercase: verb & adjective
@@ -437,7 +437,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       expression after it in its trailing run consumes a token (`EXPRESSION?`;
       [defined](../Specs/ebnf.md#trailing-omissibles))
     - trailing run: the longest run of adjacent optionals & trailing-omissibles
-      containing an expression, across nonterminal references
+      that includes an expression, through nonterminal references
     - REJECTED: omissible (for trailing-omissible)
 91. - axis: a concept that a setting sets (e.g., a header row), whose
       `(* last wins *)` nonterminal (e.g., `<header-setting>`) overrides its

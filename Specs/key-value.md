@@ -159,9 +159,9 @@ leader-pattern = ^{text}^ (* default: "▁" *)
   the width of its item's widest key, less the width of its own key, plus the
   width of `<leader-pattern>`, so the widest key's leader is a single
   `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is printed
-  once, since no number of repetitions can fill any width. A `<leader-pattern>`
-  containing a line terminator (e.g., LF or CR) is invalid, because it would
-  split each row.
+  once, because no number of repetitions can fill any width. A
+  `<leader-pattern>` that contains a line terminator (e.g., LF or CR) is
+  invalid, because it would split each row.
 
 ## Leading Spacing
 
@@ -223,9 +223,9 @@ item-separator-pattern = ^{text}^ (* default: {empty string} *)
   repeated to fill the width of the widest row of any item, truncated before the
   1st character that would exceed that width; spaces fill any remaining width
   (e.g., when that character is wide, such as `中`). A 0-width
-  `<item-separator-pattern>` (e.g., a tab) is printed once, since no number of
+  `<item-separator-pattern>` (e.g., a tab) is printed once, because no number of
   repetitions can fill any width, so an empty `<item-separator-pattern>` renders
-  a blank line. An `<item-separator-pattern>` containing a line terminator is
+  a blank line. An `<item-separator-pattern>` that contains a line terminator is
   invalid, because it would split the item separator line.
 
 ## Key-Value Setting Termination

@@ -562,7 +562,7 @@ A value is split into **segments**, in descending precedence:
 
 A chronologic or number segment is a **typed segment**.
 
-Typed segments are detected across the whole value, before boundaries: a
+Typed segments are detected throughout the entire value, before boundaries: a
 boundary within a typed segment is part of it (e.g., with the default
 boundaries, `2020-03-18 17:39` is 1 datetime segment), while boundaries split
 only the remaining text. The rules about a typed segment's adjacent characters

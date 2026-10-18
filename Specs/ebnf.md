@@ -454,8 +454,8 @@ EXPRESSION?
 
 Content-dependent multiplicity.
 
-An expression's **trailing run** is the longest run of adjacent expressions
-containing it that are each an optional or a trailing-omissible, treating each
+An expression's **trailing run** is the longest run of adjacent expressions,
+each an optional or a trailing-omissible, that includes it, treating each
 nonterminal reference whose definition is a sequence as that sequence's children
 written in place.
 
@@ -484,8 +484,8 @@ empty
 
 Inherent repetition.
 
-A repetition containing 0 elements; matches no input. Distinct from `null` &
-from an empty string.
+A repetition of 0 elements; matches no input. Distinct from `null` & from an
+empty string.
 
 ### Repetitions with Separators (1 or More)
 

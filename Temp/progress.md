@@ -48,7 +48,7 @@ its base field spec. Output omits hidden field specs.
 `parseTableConfig` supports `<header-styling-setting>` (`t` / `a`, stored as
 `TableConfig.headerStyling`; the header row is styled iff `a` or standard output
 is a terminal), defaults an absent `<separator-pattern>` to `-`, rejects a
-`<separator-pattern>` / `<column-spacing>` containing a line terminator &
+`<separator-pattern>` / `<column-spacing>` that contains a line terminator &
 handles escaping (`\:`, `\\`, dangling `\` is an error) in `<separator-pattern>`
 / `<column-spacing>` text via `parseTableSettingText`; `<style-specifier>` is
 parsed via `parseStyleSpecifier`. Comments & names use the [table
@@ -251,7 +251,7 @@ ones.
 ### Aborting Blocks, Justify Inheritance & Absent Values (2026-10-01)
 
 A block that aborts (a success block, a failure block, or a branch's block) now
-aborts the whole format, instead of falling back to the matcher's value, `""`,
+aborts the entire format, instead of falling back to the matcher's value, `""`,
 or the next branch. An absent `<justify>` is inherited from the working fields
 config (`<start-justify>` absent any to inherit, e.g., in a built-in config),
 including in a `<pipeline>` whose `<format-transform-pipeline>` is directly
@@ -323,13 +323,13 @@ ASCII letter. `styled` wraps a styled string in `StyleSequences`
 ### Integer Scalar Descriptions (2026-10-10)
 
 `scale` constrains `<significant-digits>` from 1 to 100 & `<fractional-digits>`
-from 0 to 100, bounding its computation & output length.
+from 0 to 100, bounding its calculation & output length.
 
 Integer descriptions' scalar tokens are consumed via maximal munch by
 `parseIntegerText`: ASCII digits, after an optional sign only for `<index>`.
 Their magnitudes are unconstrained: an `<index>` beyond `Int`'s range reports
 `invalidPosition`, `<sort-priority>` is a `BigUInt` & `nonNegativeInteger`
-saturates at `Int.max`. `scale` renders `0` without computing `radix^exponent`
+saturates at `Int.max`. `scale` renders `0` without calculating `radix^exponent`
 for a huge `<exponent>`.
 
 A Unix time is chronologic iff its whole milliseconds, rounded down, fit in a
@@ -339,14 +339,14 @@ A value that `scale` would render with more than 100 digits before the radix
 point does not conform to its input type, so `Transform.applied(to:)` returns
 `nil` for it: an uncoerced `scale` reports `transformInputTypeMismatch`, while a
 coerced one aborts. `radixScaled` estimates the result's radix magnitude from
-the value's exponent, to skip computing a result that is too large or that
+the value's exponent, to skip calculating a result that is too large or that
 renders as `0`.
 
-`round` computes no power of 10 larger than its value's significand: an integer
-value is its own result & a value less than `0.1` rounds to `0`, so a huge
-exponent no longer hangs it.
+`round` calculates no power of 10 larger than its value's significand: an
+integer value is its own result & a value less than `0.1` rounds to `0`, so a
+huge exponent no longer hangs it.
 
-`ScaledMagnitude` rounds `scale`'s magnitude without computing powers of 10 or
+`ScaledMagnitude` rounds `scale`'s magnitude without calculating powers of 10 or
 of `<radix>` larger than its result needs, so a huge field value & a huge
 `<exponent>` that nearly cancel no longer hang `scale`: it approximates with
 doubling precision until the approximation decides each rounding, deciding a
@@ -372,19 +372,19 @@ object) is rendered at its type by `json` output & coerced to its compact JSON
 text (non-ASCII characters verbatim) everywhere else, including `table` &
 `key-value` output & sorting; no predicate whose output type is not any matches
 one. A bare `.` in a field name reports `reservedFieldNameCharacter`, reserving
-it for nested field references; `\.` names a field containing `.`.
+it for nested field references; `\.` names a field that contains `.`.
 
 ### ISO-8601 Detection Variants (2026-10-18)
 
 Chronologic auto-detection also accepts RFC 3339's `t` or space separator & `z`
 UTC offset, and a datetime without seconds (e.g., `2020-03-18 17:39`); basic
 format, ordinal dates, week dates & other reduced precision remain undetected,
-since most collide with numbers, ratios, ranges, or IDs.
+because most collide with numbers, ratios, ranges, or IDs.
 
 ### Typed Segments Before Boundaries (2026-10-18)
 
-Sorting detects [typed segments](../Specs/fields.md#sort-segments) across the
-whole value before boundaries (`SortOptionSet.pieces(of:)`), so a boundary
+Sorting detects [typed segments](../Specs/fields.md#sort-segments) throughout
+the entire value before boundaries (`SortOptionSet.pieces(of:)`), so a boundary
 within a typed segment is part of it (e.g., `2020-03-18 17:39` is 1 datetime
 segment & `1 000` is 1 grouped number when space is its digit group separator);
 boundaries split only the remaining text.
@@ -403,9 +403,9 @@ without a `:` (e.g., `+0530`), as an ISO-8601 UTC offset may.
 instead of `""` (e.g., `%w` inserts a whitespace-only string as is, and `json`
 output renders a solely-`%u` format's value as `null`).
 
-A `<leader-pattern>` or `<item-separator-pattern>` containing a line terminator
-reports `invalidLeaderPattern` / `invalidItemSeparatorPattern`, as a table's
-`<separator-pattern>` & `<column-spacing>` do.
+A `<leader-pattern>` or `<item-separator-pattern>` that contains a line
+terminator reports `invalidLeaderPattern` / `invalidItemSeparatorPattern`, as a
+table's `<separator-pattern>` & `<column-spacing>` do.
 
 A `<trivia-suffix-regex>` is the last argument of `<number-coercion-arguments>`,
 so a bare `,` in it is part of it instead of an error (e.g., `%.:,,,,,,,.*:n`
