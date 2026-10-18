@@ -170,7 +170,7 @@ A reference to a nonexistent field is an error.
 A field spec's [formatted value](fields-format.md#value-types) is **absent** iff
 formatting [aborts](fields-format.md#success--failure), or iff the field value
 is absent & the format evaluates to it (e.g., via `%i`, `%u`, or `.round`,
-because an absent field value remains absent through every
+because an absent value remains unchanged through every
 [transform](fields-format.md#value-coercion)).
 
 Output depends on the formatted value, not on the field value:

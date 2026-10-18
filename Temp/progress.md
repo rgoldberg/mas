@@ -420,7 +420,7 @@ decide whether to output a field from its formatted value instead of from its
 field value, so a fallback (e.g., `%N%n+none+`) outputs for an absent field,
 while an aborted format outputs nothing (instead of an empty string).
 
-An absent field value remains absent through every transform
-(`FormatValue.applying(_:)`), so an uncoerced transform on an absent field
-(e.g., `.round`) outputs nothing instead of reporting
-`transformInputTypeMismatch`.
+A `null` or absent value remains unchanged through every transform, with or
+without `<coercion>` (`FormatValue.applying(_:)`), so a transform on a `null` or
+absent field (e.g., `.round`) never reports `transformInputTypeMismatch`, and
+`..uppercase` renders `null` as `null` instead of `""`.
