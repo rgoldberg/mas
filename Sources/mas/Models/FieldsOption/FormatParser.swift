@@ -449,7 +449,7 @@ private struct FormatParser {
 			&input,
 			count: numberFormatArgumentCount + 2,
 			terminator: argumentFence,
-			isLastArgumentSeparatorTerminated: true,
+			isLastArgumentSeparatorTerminated: false,
 			invalidArgumentsError: .invalidNumberCoercionArguments,
 		)
 		guard input.first == argumentFence else {

@@ -795,8 +795,9 @@ The default regexes match only an empty string, allowing no trivia (e.g.,
 transforms are applied to the number alone, retaining the trivia unchanged.
 
 Because `\` escapes the next character in every text token, a regex's own `\` is
-written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and a regex's
-`,` & `:` must be escaped.
+written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and
+`<trivia-prefix-regex>`'s `,` & `:` & `<trivia-suffix-regex>`'s `:` must be
+escaped.
 
 ###### Chronologic Formatting
 

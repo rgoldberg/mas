@@ -133,6 +133,9 @@ private extension MASTests {
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("x-1.50 y"), "x1.5 y"),
 			("[%.:,,,,,.*:n]", .string("5 MB"), ""),
 			("%.:,,,,, [$] :n", .string("$5"), "$5"),
+			// The trivia suffix regex is the last argument, so its `,` is unescaped
+			("%.:,,,,,,,.*:n", .string("5,x"), "5,x"),
+			("[%.:,,,,,,,.*:n]", .string("5x"), ""),
 		],
 	)
 	func `renders coerced number placeholders`(format: String, value: JSON.Node, expected: String) throws {
@@ -461,7 +464,6 @@ private extension MASTests {
 			("..:de:uppercase", .numberCoercionArgumentsNotSupported("uppercase")),
 			("..:de:dateOnly", .numberCoercionArgumentsNotSupported("dateOnly")),
 			("%I..:de:uppercase+", .numberCoercionArgumentsNotSupported("uppercase")),
-			("%.:,,,,,,,:n", .invalidNumberCoercionArguments),
 			("%.:,,x:n", .invalidNumberCoercionArguments),
 			("%.:,.:n", .invalidNumberCoercionArguments),
 			("%.:,,,,", .invalidNumberCoercionArguments),
