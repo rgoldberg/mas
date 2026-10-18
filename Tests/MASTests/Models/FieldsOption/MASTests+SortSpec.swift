@@ -19,6 +19,7 @@ private extension MASTests {
 			("1Lcanonical:", nil),
 			("1L de_DE :-", .init(identifier: "de_DE")),
 			("1L system :", .current),
+			("1Lcanonical:Lde_DE:", .init(identifier: "de_DE")),
 		],
 	)
 	func `parses sort locale`(sort: String, locale: Locale?) throws {
@@ -42,6 +43,8 @@ private extension MASTests {
 			("1e", "textOrder", "e"),
 			("1hp", "textOrder", "p"),
 			("1 I O", "source", "O"),
+			("1I+-", "source", "I"),
+			("1I+-", "direction", "-"),
 		],
 	)
 	func `parses sort options, the last of each option winning`(sort: String, option: String, expected: Character)
@@ -70,6 +73,7 @@ private extension MASTests {
 			("1", SortOptionSet.Boundaries.uncollapsed(SortOptionSet.defaultBoundaryGroups)),
 			("1B:", .uncollapsed(.init())),
 			("1M:", .collapsed(.init())),
+			("1M:B:", .uncollapsed(.init())),
 			(
 				"1B/_+space+:",
 				.uncollapsed([.init(boundaries: [.character("/")]), .init(boundaries: [.characterClass(.space)])]),
@@ -131,6 +135,7 @@ private extension MASTests {
 			("1Ciso:", .init(ISO8601Form.allCases)),
 			("1C iso-date , iso-time :", .init([.date, .time])),
 			("1Ciso-datetime:", .init([.datetime])),
+			("1C:Ciso-date:", .init([.date])),
 		],
 	)
 	func `parses chronologic segments`(sort: String, forms: Set<ISO8601Form>) throws {

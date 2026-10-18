@@ -378,10 +378,10 @@ behind).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+ (* last wins *)
+format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+
 format-transform          = <justify>
 
-justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: {inherited justify} *)
+justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: {inherited justify}; last wins *)
 
 start-justify        = "startJustify"
 center-start-justify = "centerStartJustify"

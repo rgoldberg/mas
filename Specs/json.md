@@ -15,7 +15,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 ```ebnf
 json-option = "--json" [ &<json-config> ]
 
-json-config  = <json-setting>+ (* last wins *)
+json-config  = <json-setting>+
 json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-ascii-setting>
 ```
 <!--markdownlint-enable line-length-->
@@ -34,14 +34,18 @@ config sets every `<json-setting>` to its default.
 
 ## Pretty-Printing
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact> *)
+pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; last wins *)
 
 compact        = "p" (* mnemonic: lowercase of P, as off *)
 pretty-printed = "P" [ <indentation> ] <json-setting-termination>
 
 indentation = ^{text: only spaces & tabs}^ (* default: "  " *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `p`: each top-level JSON value is rendered on 1 line, with no whitespace
   outside strings.
@@ -56,7 +60,7 @@ indentation = ^{text: only spaces & tabs}^ (* default: "  " *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-top-level-structure-setting = <item-stream> | <item-array> (* default: <item-stream> *)
+top-level-structure-setting = <item-stream> | <item-array> (* default: <item-stream>; last wins *)
 
 item-stream = "s"
 item-array  = "a"
@@ -74,7 +78,7 @@ item-array  = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-ascii-setting = <non-ascii-verbatim> | <non-ascii-escaped> (* default: <non-ascii-verbatim> *)
+non-ascii-setting = <non-ascii-verbatim> | <non-ascii-escaped> (* default: <non-ascii-verbatim>; last wins *)
 
 non-ascii-verbatim = "v"
 non-ascii-escaped  = "e"

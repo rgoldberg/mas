@@ -349,6 +349,8 @@ private extension MASTests {
 		arguments: [
 			("@all/P", ["adamID", "bundleID"]),
 			("@all/P-", ["bundleID", "adamID"]),
+			("@all/-P+", ["adamID", "bundleID"]),
+			("@all/+P-", ["bundleID", "adamID"]),
 			("@all/P-.%adamID", ["adamID", "bundleID"]),
 			("@all/P-.%@1", ["bundleID", "adamID"]),
 			("@all/P-.+@1", ["bundleID", "bundleID", "adamID"]),

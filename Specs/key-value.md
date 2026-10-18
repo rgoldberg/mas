@@ -13,7 +13,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 ```ebnf
 key-value-option = "--key-value" [ &<key-value-config> ]
 
-key-value-config  = <key-value-setting>+ (* last wins *)
+key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
   | <key-styling-setting>
@@ -43,12 +43,16 @@ trailing spacing are between its key & its value.
 
 ## Key
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key> *)
+key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key>; last wins *)
 
 unstyled-key = "k" (* default style-specifier: "" *)
 styled-key   = "K" <style-specifier> <key-value-setting-termination>
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `k`: unstyled keys.
 - `K`: keys styled by `<style-specifier>`, as [defined for table
@@ -62,7 +66,7 @@ styled-key   = "K" <style-specifier> <key-value-setting-termination>
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling> *)
+key-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -79,7 +83,7 @@ output](table.md#header-styling):
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-style-prefix-setting = <key-style-prefix-default> | <key-style-prefix-custom> (* default: <key-style-prefix-default> *)
+key-style-prefix-setting = <key-style-prefix-default> | <key-style-prefix-custom> (* default: <key-style-prefix-default>; last wins *)
 
 key-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 key-style-prefix-custom  = "P" [ <style-prefix> ] <key-value-setting-termination>
@@ -99,7 +103,7 @@ key-style-prefix-custom  = "P" [ <style-prefix> ] <key-value-setting-termination
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-style-suffix-setting = <key-style-suffix-default> | <key-style-suffix-custom> (* default: <key-style-suffix-default> *)
+key-style-suffix-setting = <key-style-suffix-default> | <key-style-suffix-custom> (* default: <key-style-suffix-default>; last wins *)
 
 key-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
 key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination> (* mnemonic: suffix *)
@@ -118,7 +122,7 @@ key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-style-reset-setting = <key-style-reset-default> | <key-style-reset-custom> (* default: <key-style-reset-default> *)
+key-style-reset-setting = <key-style-reset-default> | <key-style-reset-custom> (* default: <key-style-reset-default>; last wins *)
 
 key-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> (* mnemonic: off *)
@@ -136,7 +140,7 @@ key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-leader-setting = <leader-off> | <leader-on> (* default: <leader-on> *)
+leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins *)
 
 leader-off = "f" (* default leader-pattern: ""; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
@@ -162,7 +166,7 @@ leader-pattern = ^{text}^ (* default: "▁" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (* default: <leading-spacing-default> *)
+leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (* default: <leading-spacing-default>; last wins *)
 
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
@@ -182,7 +186,7 @@ leading-spacing = ^{text}^ (* default: "" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom> (* default: <trailing-spacing-default> *)
+trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom> (* default: <trailing-spacing-default>; last wins *)
 
 trailing-spacing-default = "r" (* default trailing-spacing: " "; mnemonic: right *)
 trailing-spacing-custom  = "R" [ <trailing-spacing> ] <key-value-setting-termination> (* mnemonic: right *)
@@ -201,7 +205,7 @@ trailing-spacing = ^{text}^ (* default: "" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-item-separator-setting = <item-separator-off> | <item-separator-on> (* default: <item-separator-on> *)
+item-separator-setting = <item-separator-off> | <item-separator-on> (* default: <item-separator-on>; last wins *)
 
 item-separator-off = "s"
 item-separator-on  = "S" [ <item-separator-pattern> ] <key-value-setting-termination>

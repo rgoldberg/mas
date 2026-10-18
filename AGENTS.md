@@ -185,6 +185,10 @@ In specs, give a sort option that takes arguments an uppercase letter & end its
 arguments with its `<sort-option-terminator>`; an empty list argument means
 none, while an empty scalar argument means its default.
 
+In specs, attach `(* last wins *)` to the definition of each nonterminal whose
+later occurrences override its earlier ones (e.g., `<direction>`), never to a
+nonterminal that repeats it (e.g., `<sort-option-set>`).
+
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 

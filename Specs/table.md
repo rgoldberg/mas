@@ -13,7 +13,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 ```ebnf
 table-option = "--table" [ &<table-config> ]
 
-table-config  = <table-setting>+ (* last wins *)
+table-config  = <table-setting>+
 table-setting =
   <header-setting>
   | <header-styling-setting>
@@ -41,7 +41,7 @@ config sets every `<table-setting>` to its default.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-setting = <header-off> | <header-on> (* default: <header-off> *)
+header-setting = <header-off> | <header-on> (* default: <header-off>; last wins *)
 
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
@@ -67,7 +67,7 @@ style-specifier = {text= terminal-specific output format specifier: no bare ASCI
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling> *)
+header-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins *)
 
 terminal-only-styling = "t"
 always-styling        = "a"
@@ -84,7 +84,7 @@ always-styling        = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-prefix-setting = <header-style-prefix-default> | <header-style-prefix-custom> (* default: <header-style-prefix-default> *)
+header-style-prefix-setting = <header-style-prefix-default> | <header-style-prefix-custom> (* default: <header-style-prefix-default>; last wins *)
 
 header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
@@ -104,7 +104,7 @@ style-prefix = ^{text}^ (* default: "" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default> *)
+header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default>; last wins *)
 
 header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
 header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: suffix *)
@@ -123,7 +123,7 @@ style-suffix = ^{text}^ (* default: "" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-reset-setting = <header-style-reset-default> | <header-style-reset-custom> (* default: <header-style-reset-default> *)
+header-style-reset-setting = <header-style-reset-default> | <header-style-reset-custom> (* default: <header-style-reset-default>; last wins *)
 
 header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
@@ -142,7 +142,7 @@ style-reset = ^{text}^ (* default: "" *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-separator-setting = <separator-off> | <separator-on> (* default: <separator-off> *)
+separator-setting = <separator-off> | <separator-on> (* default: <separator-off>; last wins *)
 
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
@@ -164,7 +164,7 @@ separator-pattern = ^{text}^ (* default: "-" *)
 ## Broken
 
 ```ebnf
-broken-setting = <broken> | <unbroken> (* default: <unbroken> *)
+broken-setting = <broken> | <unbroken> (* default: <unbroken>; last wins *)
 
 broken   = "b"
 unbroken = "u"
@@ -181,7 +181,7 @@ unbroken = "u"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default> *)
+column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default>; last wins *)
 
 column-spacing-default = "c" (* default column-spacing: "  " *)
 column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>
