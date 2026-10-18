@@ -381,7 +381,8 @@ While a field spec's position in the reference fields config cannot be modified:
 When accessing a field spec position via an index:
 
 - If the position access reports an error, or if a `null` is present at the
-  effective index in the list, an error is reported.
+  effective index in the list (unless `<field-spec-hide>` specifies otherwise),
+  an error is reported.
 - Otherwise, the field spec at the effective index in the list is the referenced
   field spec.
 
@@ -443,8 +444,9 @@ Field spec edits act as follows:
   - Moves `source` to immediately after $previous$ & unhides it.
   - Sets $previous$ to `source`'s new index in the working fields config.
 - `<field-spec-hide>`:
-  - If its `<named-field-spec-reference>` resolves to no field spec, inserts a
-    new field spec (as `<field-spec-insertion>` would) as `source`.
+  - If its `<named-field-spec-reference>` resolves to no field spec, or to a
+    `null`, inserts a new field spec (as `<field-spec-insertion>` would) as
+    `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`'s index in the working fields config.
