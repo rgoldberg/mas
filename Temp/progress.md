@@ -380,3 +380,11 @@ Chronologic auto-detection also accepts RFC 3339's `t` or space separator & `z`
 UTC offset, and a datetime without seconds (e.g., `2020-03-18 17:39`); basic
 format, ordinal dates, week dates & other reduced precision remain undetected,
 since most collide with numbers, ratios, ranges, or IDs.
+
+### Typed Segments Before Boundaries (2026-10-18)
+
+Sorting detects [typed segments](../Specs/fields.md#sort-segments) across the
+whole value before boundaries (`SortOptionSet.pieces(of:)`), so a boundary
+within a typed segment is part of it (e.g., `2020-03-18 17:39` is 1 datetime
+segment & `1 000` is 1 grouped number when space is its digit group separator);
+boundaries split only the remaining text.

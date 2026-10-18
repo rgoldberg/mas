@@ -514,15 +514,42 @@ extension SortOptionSet {
 			?? (numberSegments == .lexical ? nil : .number(number))
 	}
 
-	/// `string`'s pieces: each boundary & each run of non-boundary text's
-	/// segments.
+	/// `string`'s pieces: each boundary outside its typed segments & each run of
+	/// non-boundary text's segments (typed segments being detected across the
+	/// whole string, before boundaries).
 	private func pieces(of string: String) -> [Piece] {
-		boundaries.pieces(of: string).map { piece in
-			.init(
-				rank: piece.rank,
-				segments: piece.rank == boundaries.groups.count ? segments(of: piece.text, in: string) : .init(),
-			)
+		let textRank = boundaries.groups.count
+		var pieces = [Piece]()
+		func append(_ segment: Segment) {
+			if let last = pieces.last, last.rank == textRank {
+				pieces[pieces.count - 1] = .init(rank: textRank, segments: last.segments + [segment])
+			} else {
+				pieces.append(.init(rank: textRank, segments: [segment]))
+			}
 		}
+		func appendUntyped(_ text: Substring) {
+			for piece in boundaries.pieces(of: text) {
+				if piece.rank == textRank {
+					append(.text(piece.text))
+				} else {
+					pieces.append(.init(rank: piece.rank, segments: .init()))
+				}
+			}
+		}
+		var untypedStart = string.startIndex
+		var index = string.startIndex
+		while index < string.endIndex {
+			guard let typedSegment = typedSegment(at: index, in: string) else {
+				index = string.index(after: index)
+				continue
+			}
+			appendUntyped(string[untypedStart..<index])
+			append(typedSegment.segment)
+			index = typedSegment.end
+			untypedStart = index
+		}
+		appendUntyped(string[untypedStart...])
+		return pieces
 	}
 
 	/// Compares 2 values' pieces: with `<nonconforming-least>` or
@@ -633,48 +660,20 @@ extension SortOptionSet {
 		return lhs.compare(rhs, options: options, range: nil, locale: locale)
 	}
 
-	/// `text`'s segments, `text` being a run of non-boundary text in `value`:
-	/// each typed segment & each maximal run of other text.
-	private func segments(of text: Substring, in value: String) -> [Segment] {
-		var segments = [Segment]()
-		var textStart = text.startIndex
-		var index = text.startIndex
-		while index < text.endIndex {
-			guard let typedSegment = typedSegment(at: index, in: text, value: value) else {
-				index = text.index(after: index)
-				continue
-			}
-			if textStart < index {
-				segments.append(.text(text[textStart..<index]))
-			}
-			segments.append(typedSegment.segment)
-			index = typedSegment.end
-			textStart = index
-		}
-		if textStart < text.endIndex {
-			segments.append(.text(text[textStart...]))
-		}
-		return segments
+	/// The typed segment at `index` in `value` & its end; else `nil`.
+	private func typedSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
+		chronologicSegment(at: index, in: value)
+			?? unixTimeSegment(at: index, in: value)
+			?? numberSegment(at: index, in: value)
 	}
 
-	/// The typed segment at `index` in `text` (a run of non-boundary text in
-	/// `value`) & its end; else `nil`.
-	private func typedSegment(at index: Substring.Index, in text: Substring, value: String)
-	-> (segment: Segment, end: Substring.Index)? {
-		chronologicSegment(at: index, in: text, value: value)
-			?? unixTimeSegment(at: index, in: text, value: value)
-			?? numberSegment(at: index, in: text, value: value)
-	}
-
-	/// The chronologic segment at `index` in `text` (a run of non-boundary text
-	/// in `value`) & its end, unless an ASCII digit immediately precedes or
-	/// follows it in `value`; else `nil`.
-	private func chronologicSegment(at index: Substring.Index, in text: Substring, value: String)
-	-> (segment: Segment, end: Substring.Index)? {
+	/// The chronologic segment at `index` in `value` & its end, unless an ASCII
+	/// digit immediately precedes or follows it; else `nil`.
+	private func chronologicSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		guard
 			!chronologicSegments.isEmpty,
 			index == value.startIndex || !value[value.index(before: index)].isASCIIDigit,
-			let prefix = iso8601ChronologicPrefix(of: text[index...], forms: chronologicSegments),
+			let prefix = iso8601ChronologicPrefix(of: value[index...], forms: chronologicSegments),
 			prefix.end == value.endIndex || !value[prefix.end].isASCIIDigit
 		else {
 			return nil
@@ -682,25 +681,22 @@ extension SortOptionSet {
 		return (.chronologic(prefix.chronologic), prefix.end)
 	}
 
-	/// The Unix time chronologic segment at `index` in `text` (a run of
-	/// non-boundary text in `value`) & its end iff `hasUnixTimeSegments` & it is
-	/// neither preceded nor followed by a non-whitespace character in `value`;
-	/// else `nil`.
-	private func unixTimeSegment(at index: Substring.Index, in text: Substring, value: String)
-	-> (segment: Segment, end: Substring.Index)? {
+	/// The Unix time chronologic segment at `index` in `value` & its end iff
+	/// `hasUnixTimeSegments` & it is neither preceded nor followed by a
+	/// non-whitespace character; else `nil`.
+	private func unixTimeSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		guard hasUnixTimeSegments, index == value.startIndex || value[value.index(before: index)].isWhitespace else {
 			return nil
 		}
-		let word = text[index...].prefix { !$0.isWhitespace }
+		let word = value[index...].prefix { !$0.isWhitespace }
 		return word.endIndex == value.endIndex || value[word.endIndex].isWhitespace
 			? unixTimeDate(in: word).map { (.chronologic(.datetime($0)), word.endIndex) }
 			: nil
 	}
 
-	/// The number segment (including its sign, if any) at `index` in `text` (a
-	/// run of non-boundary text in `value`) & its end; else `nil`.
-	private func numberSegment(at index: Substring.Index, in text: Substring, value: String)
-	-> (segment: Segment, end: Substring.Index)? {
+	/// The number segment (including its sign, if any) at `index` in `value` &
+	/// its end; else `nil`.
+	private func numberSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		let signs: NumberSigns
 		switch numberSegments {
 		case .lexical:
@@ -710,17 +706,17 @@ extension SortOptionSet {
 		case .ungroupedNumeric:
 			signs = .wordInitialSigns
 		case .versions:
-			return text[index].isASCIIDigit
-				? text[index...].prefixMatch(of: unsafe versionRegex).map { (.version($0.output), $0.range.upperBound) }
+			return value[index].isASCIIDigit
+				? value[index...].prefixMatch(of: unsafe versionRegex).map { (.version($0.output), $0.range.upperBound) }
 				: nil
 		}
-		let sign = text[index] == "-" || text[index] == "+" ? text[index] : nil
-		let start = sign == nil ? index : text.index(after: index)
+		let sign = value[index] == "-" || value[index] == "+" ? value[index] : nil
+		let start = sign == nil ? index : value.index(after: index)
 		guard
-			start < text.endIndex,
-			text[start].isASCIIDigit,
+			start < value.endIndex,
+			value[start].isASCIIDigit,
 			sign == nil || isSign(at: index, in: value, signs: signs),
-			let number = unsignedNumberPrefix(of: text[start...])
+			let number = unsignedNumberPrefix(of: value[start...])
 		else {
 			return nil
 		}
@@ -808,7 +804,7 @@ private extension SortOptionSet.Boundaries {
 	/// `string`'s pieces: each maximal run of non-boundary text & each boundary
 	/// (iff collapsed, each maximal run of contiguous boundaries of the same
 	/// group).
-	func pieces(of string: String) -> [Piece] {
+	func pieces(of string: Substring) -> [Piece] {
 		let textRank = groups.count
 		let isCollapsed = if case .collapsed = self {
 			true
@@ -833,7 +829,7 @@ private extension SortOptionSet.Boundaries {
 	/// The rank & length of the longest boundary at `index` (a boundary defined
 	/// by multiple groups belongs to the last one), else non-boundary text's rank
 	/// & a length of 1.
-	private func rankAndLength(in string: String, at index: String.Index) -> (rank: Int, length: Int) {
+	private func rankAndLength(in string: Substring, at index: String.Index) -> (rank: Int, length: Int) {
 		var best = (rank: groups.count, length: 1)
 		var matchedLength = 0
 		for (groupIndex, group) in groups.enumerated() {
@@ -852,7 +848,7 @@ private extension SortOptionSet.Boundaries {
 private extension SortOptionSet.Boundary {
 	/// The number of characters this boundary matches at `index` in `string`, or
 	/// `nil` iff it does not match there.
-	func matchLength(in string: String, at index: String.Index) -> Int? {
+	func matchLength(in string: Substring, at index: String.Index) -> Int? {
 		switch self {
 		case let .character(match):
 			string[index] == match ? 1 : nil

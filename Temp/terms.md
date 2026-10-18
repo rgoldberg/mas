@@ -414,7 +414,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 85. - segment: a part of a run of non-boundary text that sorting compares as 1
       element ([defined](../Specs/fields.md#sort-segments))
     - typed segment: a chronologic or number segment
-    - text segment: a maximal run of text that is in no typed segment
+    - text segment: a maximal run of non-boundary text that is in no typed
+      segment
     - REJECTED: chunk / token (for a segment) / trivia (for text segments)
 86. - ungrouped numeric: comparing each run of digits as a number
       (`<ungrouped-numeric>`)
@@ -465,3 +466,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       components (e.g., seconds)
     - REJECTED: compact format (for basic format) / truncated (for reduced
       precision)
+97. - word-by-word ordering: ordering in which a word boundary (e.g., a space)
+      precedes every other character (e.g., `New York` before `Newark`)
+    - letter-by-letter ordering: ordering that ignores word boundaries
+    - REJECTED: word sort / letter sort
