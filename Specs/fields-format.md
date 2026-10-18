@@ -184,8 +184,8 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
   ). Titlecasing leaves a number, symbol, or private-use character unchanged
   (e.g., `"hello"` becomes `"Hello"`, but `1st` & `$abc` are unaffected).
 - `lowercase`: lowercases every character.
-- `trimWhitespace`: removes leading & trailing whitespace (Unicode general
-  category `Z` characters, `U+0009` to `U+000D` & `U+0085`).
+- `trimWhitespace`: removes leading & trailing
+  [whitespace](ebnf.md#whitespace).
 - `uppercase`: uppercases every character.
 <!--editorconfig-checker-enable-->
 

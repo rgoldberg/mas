@@ -134,6 +134,7 @@ private extension MASTests {
 			("1C:", .init()),
 			("1Ciso:", .init(ISO8601Form.allCases)),
 			("1C iso-date , iso-time :", .init([.date, .time])),
+			("1C\niso-date\u{3000}:", .init([.date])),
 			("1Ciso-datetime:", .init([.datetime])),
 			("1C:Ciso-date:", .init([.date])),
 		],
