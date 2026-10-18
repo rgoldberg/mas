@@ -592,6 +592,13 @@ boundaries included.
 A **run of non-boundary text** is a maximal sequence of segments between
 boundaries.
 
+A value's **pieces** are, in order, its runs of non-boundary text & its
+boundaries outside typed segments (with `<collapsed-boundaries>`, each run of
+contiguous boundaries of the same boundary group being 1 piece). 2 values
+compare their pieces as lists: a boundary piece precedes a run of non-boundary
+text, and boundary pieces compare per their boundary groups' [sort
+precedence](#sort-boundaries).
+
 2 runs of non-boundary text compare their segments as 1 or 2 lists, per
 `<text-order>`. Lists compare element by element: the 1st unequal pair of
 elements decides, else a list that is a prefix of the other precedes it.
@@ -857,10 +864,12 @@ text-excluded = "e" (* mnemonic: excluded *)
 
 Each run of non-boundary text compares its [segments](#sort-segments) as:
 
-- `<text-first>`: its text segments, then its typed segments.
-- `<text-last>`: its typed segments, then its text segments.
-- `<text-in-place>`: all its segments, in order.
-- `<text-excluded>`: its typed segments.
+- `<text-first>`: a list of its text segments, then, iff those are equal, a list
+  of its typed segments.
+- `<text-last>`: a list of its typed segments, then, iff those are equal, a list
+  of its text segments.
+- `<text-in-place>`: a list of all its segments, in order.
+- `<text-excluded>`: a list of its typed segments.
 
 ## Appendix: Escaping
 
