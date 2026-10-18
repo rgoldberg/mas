@@ -273,6 +273,11 @@ significant group may have fewer digits (e.g., `.numberFormat:,\,,3,2:` renders
 parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
 `1.234,5`).
 
+`numberFormat` retains scientific notation, applying to its significand &
+rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
+renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
+it (e.g., `.scale:10,0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
+
 If `<digit-group-separator>` equals `<decimal-separator>`, an error is reported.
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
