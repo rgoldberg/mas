@@ -319,6 +319,14 @@ private extension MASTests {
 			("1B\\_:", "a__c", "a_b", .orderedAscending),
 			("1M\\_:", "a__c", "a_b", .orderedDescending),
 			("1B%ab%:", "xab", "xa", .orderedAscending),
+			// Character classes are UTS #18 Annex C's POSIX Compatible ones
+			("1B+alpha+:", "1\u{216B}", "1!", .orderedAscending),
+			("1B+blank+:", "a\u{3000}b", "a!b", .orderedAscending),
+			("1B+cntrl+:", "a\u{85}b", "a!b", .orderedAscending),
+			("1B+digit+:", "a\u{663}b", "a1b", .orderedDescending),
+			("1B+punct+:", "a$b", "a,b", .orderedSame),
+			("1B+xdigit+:", "x\u{FF21}", "xA", .orderedDescending),
+			("1B+ascii+:", "a\u{7F}", "a\u{80}", .orderedAscending),
 			// Other values compare as strings, `null` as `""`
 			("1", .bool(true), "s", .orderedDescending),
 			("1", .null, "", .orderedSame),
