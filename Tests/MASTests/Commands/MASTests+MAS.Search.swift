@@ -143,8 +143,8 @@ private extension MASTests {
 			{\
 			"adamID":1128190780,\
 			"advisories":[],\
-			"appStorePageURL":"https://apps.apple.com/us/app/random-lists-decision-maker/id1128190780?uo=4",\
 			"appleTVScreenshotURLs":[],\
+			"appStorePageURL":"https://apps.apple.com/us/app/random-lists-decision-maker/id1128190780?uo=4",\
 			"averageUserRating":4.6104900000000004212097337585873901844024658203125,\
 			"averageUserRatingForCurrentVersion":4.6104900000000004212097337585873901844024658203125,\
 			"bundleID":"com.yahenskyi.random",\
@@ -162,10 +162,10 @@ private extension MASTests {
 			"features":["iosUniversal"],\
 			"fileSizeBytes":"76392448",\
 			"formattedPrice":"Free",\
-			"iPadScreenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/3f/23/5e/3f235e16-c049-8ee8-ebdc-3d52f25f2636/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/80/48/1d/80481dff-e404-721c-920e-4688f860cf27/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/58/a2/c9/58a2c970-1bd3-6f4d-1bdc-502f75faaa6a/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/2c/a6/06/2ca606eb-8b40-219a-34c5-626f79b7e593/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/c7/d7/04/c7d70441-51bd-1417-c7bf-a5d2702380e4/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/87/e0/75/87e075fd-a979-6151-5744-56ab76ac8f18/pr_source.png/552x414bb.png"],\
 			"icon60URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/60x60bb.jpg",\
 			"icon100URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/100x100bb.jpg",\
 			"icon512URL":"https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/b3/ce/e9/b3cee939-9c28-6e05-f600-2e1b9419e0d2/source/512x512bb.jpg",\
+			"iPadScreenshotURLs":["https://is4-ssl.mzstatic.com/image/thumb/Purple123/v4/3f/23/5e/3f235e16-c049-8ee8-ebdc-3d52f25f2636/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/80/48/1d/80481dff-e404-721c-920e-4688f860cf27/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/58/a2/c9/58a2c970-1bd3-6f4d-1bdc-502f75faaa6a/pr_source.png/552x414bb.png","https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/2c/a6/06/2ca606eb-8b40-219a-34c5-626f79b7e593/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/c7/d7/04/c7d70441-51bd-1417-c7bf-a5d2702380e4/pr_source.png/552x414bb.png","https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/87/e0/75/87e075fd-a979-6151-5744-56ab76ac8f18/pr_source.png/552x414bb.png"],\
 			"isGameCenterEnabled":false,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\
@@ -307,8 +307,8 @@ private extension MASTests {
 			{\
 			"adamID":1289070327,\
 			"advisories":[],\
-			"appStorePageURL":"https://apps.apple.com/us/app/planny-3-smart-to-do-list/id1289070327?uo=4",\
 			"appleTVScreenshotURLs":[],\
+			"appStorePageURL":"https://apps.apple.com/us/app/planny-3-smart-to-do-list/id1289070327?uo=4",\
 			"averageUserRating":4.3897300000000001318767317570745944976806640625,\
 			"averageUserRatingForCurrentVersion":4.3897300000000001318767317570745944976806640625,\
 			"bundleID":"com.kevinreutter.Callisto",\
@@ -326,10 +326,10 @@ private extension MASTests {
 			"features":["gameCenter","iosUniversal"],\
 			"fileSizeBytes":"47687680",\
 			"formattedPrice":"Free",\
-			"iPadScreenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/43/19/bb/4319bb4b-5700-0f6b-2c19-7bd386bf186c/pr_source.jpg/552x414bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/5d/51/1a/5d511a30-7fab-fd18-6967-c0caf9674d55/pr_source.jpg/552x414bb.jpg"],\
 			"icon60URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/60x60bb.jpg",\
 			"icon100URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/100x100bb.jpg",\
 			"icon512URL":"https://is4-ssl.mzstatic.com/image/thumb/Purple124/v4/42/50/53/425053d8-2b26-c28a-72db-40323cc62aeb/source/512x512bb.jpg",\
+			"iPadScreenshotURLs":["https://is5-ssl.mzstatic.com/image/thumb/Purple114/v4/43/19/bb/4319bb4b-5700-0f6b-2c19-7bd386bf186c/pr_source.jpg/552x414bb.jpg","https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/5d/51/1a/5d511a30-7fab-fd18-6967-c0caf9674d55/pr_source.jpg/552x414bb.jpg"],\
 			"isGameCenterEnabled":true,\
 			"isVPPDeviceBasedLicensingEnabled":true,\
 			"kind":"software",\

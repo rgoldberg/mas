@@ -644,6 +644,9 @@ insensitive = "i"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
+`<insensitive>` ignores case differences, as a collation's secondary strength
+does (e.g., `a` equals `A`, but `é` does not equal `e`).
+
 ##### Sort Locale
 
 <!--editorconfig-checker-disable-->
@@ -659,9 +662,12 @@ locale-identifier = {text: locale identifier, "canonical", or "system"} (* defau
 A `<locale-identifier>` of `canonical` identifies the canonical conventions; of
 `system`, the system locale.
 
-The canonical conventions compare text locale-independently, while a locale
-compares it locale-dependently. Each also supplies [`<grouped-numeric>`'s
-default number conventions](#sort-number-segments).
+The canonical conventions compare text per the [CLDR root collation](
+  https://www.unicode.org/reports/tr35/tr35-collation.html#Root_Collation
+) (the Unicode Collation Algorithm with CLDR's root collation order & settings,
+which is independent of every real-world locale), while a locale compares it per
+its own collation. Each also supplies [`<grouped-numeric>`'s default number
+conventions](#sort-number-segments).
 
 Canonical number formatting uses a `.` decimal separator, a `,` digit group
 separator, a digit group size of 3 & a secondary digit group size of 0.
