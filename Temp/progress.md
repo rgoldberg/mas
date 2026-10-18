@@ -442,3 +442,7 @@ enclosing matcher's value, as already implemented.
 
 An absent value matching `u`, `e` & `w` as `null` does & coercing to an empty
 string is specified, as already implemented.
+
+A `<field-spec-hide>` of a field spec removed earlier in the section inserting
+a hidden copy of its base field spec, instead of reporting an error, is
+specified, as already implemented.
