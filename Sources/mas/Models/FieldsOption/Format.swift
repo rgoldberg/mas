@@ -466,12 +466,13 @@ extension Coercion { // swiftlint:disable:this file_types_order
 	}
 }
 
-/// A chronologic value, per its form.
+/// A chronologic value, per its form; an instant is in milliseconds since
+/// 1970-01-01T00:00:00Z, ignoring leap seconds.
 enum Chronologic: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// An ISO-8601 date-only, at its start in the system time zone.
-	case date(Date)
+	case date(Int)
 	/// An ISO-8601 datetime, or a Unix time.
-	case datetime(Date)
+	case datetime(Int)
 	/// An ISO-8601 time-only.
 	case time(TimeOfDay)
 }
@@ -490,27 +491,107 @@ struct TimeOfDay: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// Its milliseconds since midnight UTC, normalized to UTC via its UTC offset
 	/// (as UTC iff it has none) & wrapped into a single day.
 	var utcMillisecondOfDay: Int {
-		let millisecondsPerDay = 86_400_000
-		let milliseconds =
-			((hour * 60 + minute) * 60 + second - (timeZone?.secondsFromGMT() ?? 0)) * 1000 + millisecond
+		let milliseconds = (localMillisecondOfDay - (timeZone?.secondsFromGMT() ?? 0) * 1000)
 		return (milliseconds % millisecondsPerDay + millisecondsPerDay) % millisecondsPerDay
 	}
 
-	/// This time of day on the date `day` (its year, month & day), in its UTC
-	/// offset, else in the system time zone; else `nil` iff that does not exist.
-	func date(on day: DateComponents) -> Date? {
-		DateComponents(
-			calendar: .init(identifier: .gregorian),
-			timeZone: timeZone ?? Environment.current.systemTimeZone,
-			year: day.year,
-			month: day.month,
-			day: day.day,
-			hour: hour,
-			minute: minute,
-			second: second,
-		)
-		.date
-		.map { $0.addingTimeInterval(Double(millisecond) / 1000) }
+	/// Its milliseconds since midnight, in its own time zone.
+	private var localMillisecondOfDay: Int {
+		((hour * 60 + minute) * 60 + second) * 1000 + millisecond
+	}
+
+	/// This time of day's instant on `day`, in its UTC offset, else in the system
+	/// time zone; else `nil` iff that instant is out of range.
+	func instant(on day: CivilDate) -> Int? {
+		day.daysSinceUnixEpoch.flatMap { days in
+			let (dayStart, overflow) = days.multipliedReportingOverflow(by: millisecondsPerDay)
+			return overflow ? nil : utcInstant(fromLocal: dayStart, plus: localMillisecondOfDay, in: timeZone)
+		}
+	}
+}
+
+/// A proleptic Gregorian calendar date, as ISO-8601 dates are.
+struct CivilDate: Hashable { // swiftlint:disable:this one_declaration_per_file
+	private static func dayCount(ofMonth month: Int, inYear year: Int) -> Int {
+		switch month {
+		case 2:
+			year.isMultiple(of: 4) && (!year.isMultiple(of: 100) || year.isMultiple(of: 400)) ? 29 : 28
+		case 4, 6, 9, 11:
+			30
+		default:
+			31
+		}
+	}
+
+	let year: Int
+	let month: Int
+	let day: Int
+
+	/// The number of days from 1970-01-01 to this date (negative iff before it),
+	/// else `nil` iff this date is beyond every instant.
+	var daysSinceUnixEpoch: Int? {
+		guard abs(year) <= maxInstantYear else {
+			return nil
+		}
+		// Howard Hinnant's `days_from_civil`
+		let marchYear = month <= 2 ? year - 1 : year
+		let era = (marchYear >= 0 ? marchYear : marchYear - 399) / 400
+		let yearOfEra = marchYear - era * 400
+		let dayOfYear = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1
+		return era * 146_097 + yearOfEra * 365 + yearOfEra / 4 - yearOfEra / 100 + dayOfYear - 719_468
+	}
+
+	/// ISO-8601 extended-format text: a 4-digit year from `0000` to `9999`, else
+	/// a sign & at least 5 digits, then `-MM-DD`.
+	var iso8601Text: String {
+		let yearText = (0...9999).contains(year)
+			? zeroPadded(year, toLength: 4)
+			: (year < 0 ? "-" : "+") + zeroPadded(abs(year), toLength: 5)
+		return "\(yearText)-\(zeroPadded(month, toLength: 2))-\(zeroPadded(day, toLength: 2))"
+	}
+
+	/// The date `days` days after 1970-01-01 (before it iff negative).
+	init(daysSinceUnixEpoch days: Int) {
+		// Howard Hinnant's `civil_from_days`, in 400-year eras starting March 1
+		let shiftedDays = days + 719_468
+		let era = (shiftedDays >= 0 ? shiftedDays : shiftedDays - 146_096) / 146_097
+		let dayOfEra = shiftedDays - era * 146_097
+		let yearOfEra = (dayOfEra - dayOfEra / 1460 + dayOfEra / 36524 - dayOfEra / 146_096) / 365
+		let dayOfYear = dayOfEra - (365 * yearOfEra + yearOfEra / 4 - yearOfEra / 100)
+		let shiftedMonth = (5 * dayOfYear + 2) / 153
+		month = shiftedMonth < 10 ? shiftedMonth + 3 : shiftedMonth - 9
+		year = yearOfEra + era * 400 + (month <= 2 ? 1 : 0)
+		day = dayOfYear - (153 * shiftedMonth + 2) / 5 + 1
+	}
+
+	/// The date of `year`, `month` & `day`, else `nil` iff it does not exist.
+	init?(year: Int, month: Int, day: Int) {
+		guard (1...12).contains(month), day >= 1, day <= Self.dayCount(ofMonth: month, inYear: year) else {
+			return nil
+		}
+		self.year = year
+		self.month = month
+		self.day = day
+	}
+
+	/// The date that `text`'s entire content denotes as an ISO-8601
+	/// extended-format date, else `nil`.
+	init?(iso8601Text text: some StringProtocol) {
+		guard
+			let match = String(text).wholeMatch(of: unsafe iso8601DateRegex),
+			let date = Self(iso8601Match: match.output)
+		else {
+			return nil
+		}
+		self = date
+	}
+
+	/// The date of an `iso8601DateRegex` match, else `nil`.
+	fileprivate init?(iso8601Match match: (Substring, Substring, Substring, Substring)) {
+		guard let year = Int(match.1), let month = Int(match.2), let day = Int(match.3) else {
+			return nil
+		}
+		self.init(year: year, month: month, day: day)
 	}
 }
 
@@ -527,22 +608,23 @@ enum ISO8601Form: CaseIterable { // swiftlint:disable:this one_declaration_per_f
 func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Chronologic? {
 	switch value {
 	case let .number(number):
-		DecimalNumber("\(number)").flatMap(unixTimeDate).map(Chronologic.datetime)
+		DecimalNumber("\(number)").flatMap(unixTimeInstant).map(Chronologic.datetime)
 	case let .string(literal):
 		iso8601ChronologicPrefix(of: literal.value[...], forms: Set(ISO8601Form.allCases))
 			.flatMap { chronologic, end in end == literal.value.endIndex ? chronologic : nil }
-			?? (isCoerced ? unixTimeDate(in: literal.value[...]).map(Chronologic.datetime) : nil)
+			?? (isCoerced ? unixTimeInstant(in: literal.value[...]).map(Chronologic.datetime) : nil)
 	default:
 		nil
 	}
 }
 
 /// The longest ISO-8601 extended-format chronologic value of one of `forms` at
-/// the start of `string` (whose every field is in range) & its end: a datetime
-/// (its date & time separated by `T`, `t`, or a space, its seconds optional; in
-/// its UTC offset, else in the system time zone), a date-only (at its start in
-/// the system time zone), or a time-only; fractional seconds are truncated to
-/// whole milliseconds. Else `nil`.
+/// the start of `string` (whose every field is in range & whose instant is in
+/// range) & its end: a datetime (its date & time separated by `T`, `t`, or a
+/// space, its seconds optional; in its UTC offset, else in the system time
+/// zone), a date-only (at its start in the system time zone), or a time-only; a
+/// date's year is 4 digits, or a sign & at least 5 digits; fractional seconds
+/// are truncated to whole milliseconds. Else `nil`.
 func iso8601ChronologicPrefix(of string: Substring, forms: Set<ISO8601Form>)
 -> (chronologic: Chronologic, end: Substring.Index)? {
 	guard let date = string.prefixMatch(of: unsafe iso8601DateRegex) else {
@@ -550,32 +632,22 @@ func iso8601ChronologicPrefix(of string: Substring, forms: Set<ISO8601Form>)
 			? iso8601TimePrefix(of: string).map { time, end in (.time(time), end) }
 			: nil
 	}
-	let day = DateComponents(year: Int(date.1), month: Int(date.2), day: Int(date.3))
+	guard let day = CivilDate(iso8601Match: date.output) else {
+		return nil
+	}
 	if
 		forms.contains(.datetime),
 		string[date.range.upperBound...].first.map("Tt ".contains) == true,
 		let time = iso8601TimePrefix(of: string[string.index(after: date.range.upperBound)...], isSecondOptional: true),
-		dateOnly(on: day, in: time.time.timeZone ?? Environment.current.systemTimeZone) != nil,
-		let datetime = time.time.date(on: day)
+		let instant = time.time.instant(on: day)
 	{
-		return (.datetime(datetime), time.end)
+		return (.datetime(instant), time.end)
 	}
 	return forms.contains(.date)
-		? dateOnly(on: day, in: Environment.current.systemTimeZone).map { (.date($0), date.range.upperBound) }
+		? TimeOfDay(hour: 0, minute: 0, second: 0, millisecond: 0, timeZone: nil)
+			.instant(on: day)
+			.map { (.date($0), date.range.upperBound) }
 		: nil
-}
-
-/// The start of `day` (its year, month & day) in `timeZone`, else `nil` iff
-/// `day` is out of range.
-private func dateOnly(on day: DateComponents, in timeZone: TimeZone) -> Date? {
-	let components = DateComponents(
-		calendar: .init(identifier: .gregorian),
-		timeZone: timeZone,
-		year: day.year,
-		month: day.month,
-		day: day.day,
-	)
-	return components.isValidDate ? components.date : nil
 }
 
 /// The ISO-8601 extended-format complete time (or, iff `isSecondOptional`, time
@@ -611,7 +683,7 @@ private func iso8601TimePrefix(of string: Substring, isSecondOptional: Bool = fa
 }
 
 private nonisolated(unsafe) let jsonNumberRegex = #/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/#
-private nonisolated(unsafe) let iso8601DateRegex = #/([0-9]{4})-([0-9]{2})-([0-9]{2})/#
+private nonisolated(unsafe) let iso8601DateRegex = #/([+-][0-9]{5,}|[0-9]{4})-([0-9]{2})-([0-9]{2})/#
 private nonisolated(unsafe) let iso8601TimeRegex =
 	#/([0-9]{2}):([0-9]{2})(?::([0-9]{2})(?:[.,]([0-9]+))?)?([Zz]|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
 
@@ -629,19 +701,61 @@ private func iso8601UTCOffsetTimeZone(_ offset: Substring) -> TimeZone? {
 		: nil
 }
 
-/// `string`'s Unix time date iff its entire content is a decimal number, else
-/// `nil`.
-func unixTimeDate(in string: Substring) -> Date? {
+/// `string`'s Unix time instant iff its entire content is a decimal number,
+/// else `nil`.
+func unixTimeInstant(in string: Substring) -> Int? {
 	(try? /[-+]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?/.wholeMatch(in: string)) != nil
-		? DecimalNumber(string).flatMap(unixTimeDate)
+		? DecimalNumber(string).flatMap(unixTimeInstant)
 		: nil
 }
 
-/// The Unix time `seconds`' date, truncated to whole milliseconds; else `nil`
-/// iff it is out of range.
-func unixTimeDate(_ seconds: DecimalNumber) -> Date? {
-	seconds.flooredThousandths.map { Date(timeIntervalSince1970: Double($0) / 1000) }
+/// The Unix time `seconds`' instant, truncated to whole milliseconds; else
+/// `nil` iff it is out of range.
+func unixTimeInstant(_ seconds: DecimalNumber) -> Int? {
+	seconds.flooredThousandths
 }
+
+/// The instant of the local time `dayStart` + `millisecondOfDay` (milliseconds
+/// as if UTC) in `timeZone` (the system time zone iff `nil`), a local time that
+/// a time zone skips being shifted forward by the skipped duration; else `nil`
+/// iff out of range.
+private func utcInstant(fromLocal dayStart: Int, plus millisecondOfDay: Int, in timeZone: TimeZone?) -> Int? {
+	let timeZone = timeZone ?? Environment.current.systemTimeZone
+	let (local, overflow) = dayStart.addingReportingOverflow(millisecondOfDay)
+	guard !overflow else {
+		return nil
+	}
+	func localLess(_ offset: Int) -> Int? {
+		let (instant, overflow) = local.subtractingReportingOverflow(offset)
+		return overflow ? nil : instant
+	}
+	let offset = offsetMilliseconds(of: timeZone, at: local)
+	guard let instant = localLess(offset) else {
+		return nil
+	}
+	let adjustedOffset = offsetMilliseconds(of: timeZone, at: instant)
+	return adjustedOffset == offset
+		? instant
+		: localLess(adjustedOffset).flatMap { adjustedInstant in
+			offsetMilliseconds(of: timeZone, at: adjustedInstant) == adjustedOffset ? adjustedInstant : instant
+		}
+}
+
+/// `timeZone`'s UTC offset at `instant`, in milliseconds.
+private func offsetMilliseconds(of timeZone: TimeZone, at instant: Int) -> Int {
+	timeZone.secondsFromGMT(for: .init(timeIntervalSince1970: Double(instant) / 1000)) * 1000
+}
+
+/// `value`'s decimal digits, preceded by `0`s to at least `length` digits.
+private func zeroPadded(_ value: Int, toLength length: Int) -> String {
+	let digits = String(value)
+	return String(repeating: "0", count: max(length - digits.count, 0)) + digits
+}
+
+private let millisecondsPerDay = 86_400_000
+
+/// The greatest year magnitude at which a date can be an instant's.
+private let maxInstantYear = 300_000_000
 
 // MARK: - Values
 
@@ -801,41 +915,57 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	}
 }
 
-/// How a chronologic value is rendered: ISO-8601, per input (date-only,
-/// datetime, or time-only), in the system time zone, unless modified by
-/// chronologic transforms. A date-only input's date ignores time zones; a
-/// time-only input is rendered in a time zone as if on a reference date.
+/// How a chronologic value is rendered: ISO-8601 extended format, per input
+/// (date-only, datetime, or time-only), in the system time zone, unless
+/// modified by chronologic transforms. A date-only input's date ignores time
+/// zones; a time-only input is rendered in a time zone as if on a reference
+/// date.
 private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// The current date in the system time zone.
-	private static var currentDay: DateComponents {
-		var calendar = Calendar(identifier: .gregorian)
-		calendar.timeZone = Environment.current.systemTimeZone
-		return calendar.dateComponents([.year, .month, .day], from: Environment.current.now())
+	private static var currentDay: CivilDate {
+		let now = Int((Environment.current.now().timeIntervalSince1970 * 1000).rounded(.down))
+		return local(now, in: Environment.current.systemTimeZone).day
 	}
 
-	/// `date`, which is at a whole millisecond, rendered in `timeZone` as `form`;
-	/// a datetime or time-only includes 3-digit fractional seconds iff its
-	/// milliseconds are nonzero.
-	private static func formatted(_ date: Date, in timeZone: TimeZone, as form: ISO8601Form) -> String {
-		let milliseconds = (date.timeIntervalSince1970 * 1000).rounded()
-		let includesFractionalSeconds = milliseconds.truncatingRemainder(dividingBy: 1000) != 0
-		let style = Date.ISO8601FormatStyle(
-			timeZoneSeparator: .colon,
-			includingFractionalSeconds: includesFractionalSeconds,
-			timeZone: timeZone,
-		)
-		// `date`'s `Double` may be slightly less than its millisecond, to which
-		// `style` truncates, so half a millisecond later is formatted
-		let formattedDate = Date(timeIntervalSince1970: (milliseconds + 0.5) / 1000)
+	/// `instant`'s local date, its local millisecond of day in `timeZone` & that
+	/// time zone's UTC offset at `instant`, in seconds.
+	private static func local(_ instant: Int, in timeZone: TimeZone)
+	-> (day: CivilDate, millisecondOfDay: Int, offsetSeconds: Int) {
+		let offsetSeconds = offsetMilliseconds(of: timeZone, at: instant) / 1000
+		// Adding the offset to the millisecond of day, rather than to `instant`,
+		// cannot overflow
+		let (days, millisecondOfDay) = floorQuotientAndRemainder(instant, millisecondsPerDay)
+		let (dayShift, localMillisecondOfDay) =
+			floorQuotientAndRemainder(millisecondOfDay + offsetSeconds * 1000, millisecondsPerDay)
+		return (.init(daysSinceUnixEpoch: days + dayShift), localMillisecondOfDay, offsetSeconds)
+	}
+
+	/// `instant` rendered in `timeZone` as `form`. A datetime or time-only
+	/// includes 3-digit fractional seconds iff its milliseconds are nonzero. Its
+	/// UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
+	private static func formatted(_ instant: Int, in timeZone: TimeZone, as form: ISO8601Form) -> String {
+		let (day, millisecondOfDay, offsetSeconds) = local(instant, in: timeZone)
+		let seconds = millisecondOfDay / 1000
+		let millisecond = millisecondOfDay % 1000
+		let offsetMinutes = abs(offsetSeconds) / 60
+		let fraction = millisecond == 0 ? "" : ".\(zeroPadded(millisecond, toLength: 3))"
+		let offset = offsetSeconds == 0
+			? "Z"
+			: (offsetSeconds < 0 ? "-" : "+") + zeroPadded(offsetMinutes / 60, toLength: 2) + ":"
+				+ zeroPadded(offsetMinutes % 60, toLength: 2)
+		let time = [seconds / 3600, seconds / 60 % 60, seconds % 60]
+			.lazy
+			.map { zeroPadded($0, toLength: 2) }
+			.joined(separator: ":")
+			+ fraction
+			+ offset
 		return switch form {
 		case .date:
-			style.year().month().day().format(formattedDate)
+			day.iso8601Text
 		case .datetime:
-			style.format(formattedDate)
+			"\(day.iso8601Text)T\(time)"
 		case .time:
-			style.time(includingFractionalSeconds: includesFractionalSeconds)
-				.timeZone(separator: .colon)
-				.format(formattedDate)
+			time
 		}
 	}
 
@@ -843,7 +973,7 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	var timeZone = TimeZone?.none
 	/// The last `timeZone`'s `<reference-date>`, iff any; else the current date
 	/// in the system time zone.
-	var referenceDate = DateComponents?.none
+	var referenceDate = CivilDate?.none
 
 	/// This style modified by a chronologic `transform`: `dateOnly` renders only
 	/// the date; `timeZone` sets the output time zone & the reference date (the
@@ -866,17 +996,24 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	func formatted(_ chronologic: Chronologic) -> String {
 		let systemTimeZone = Environment.current.systemTimeZone
 		return switch chronologic {
-		case let .date(date):
-			Self.formatted(date, in: systemTimeZone, as: .date)
-		case let .datetime(date):
-			Self.formatted(date, in: timeZone ?? systemTimeZone, as: isDateOnly ? .date : .datetime)
+		case let .date(instant):
+			Self.formatted(instant, in: systemTimeZone, as: .date)
+		case let .datetime(instant):
+			Self.formatted(instant, in: timeZone ?? systemTimeZone, as: isDateOnly ? .date : .datetime)
 		case let .time(time):
-			time.date(on: referenceDate ?? Self.currentDay).map { date in
-				Self.formatted(date, in: timeZone ?? systemTimeZone, as: .time)
+			time.instant(on: referenceDate ?? Self.currentDay).map { instant in
+				Self.formatted(instant, in: timeZone ?? systemTimeZone, as: .time)
 			}
 				?? ""
 		}
 	}
+}
+
+/// The floored quotient of `dividend` divided by a positive `divisor` & the
+/// non-negative remainder.
+private func floorQuotientAndRemainder(_ dividend: Int, _ divisor: Int) -> (quotient: Int, remainder: Int) {
+	let (quotient, remainder) = dividend.quotientAndRemainder(dividingBy: divisor)
+	return remainder < 0 ? (quotient - 1, remainder + divisor) : (quotient, remainder)
 }
 
 private extension JSON.Node? {
