@@ -169,8 +169,11 @@ make its references optional instead, since an expression that consumes no token
 is never present.
 
 In specs, make every block reference optional & give every block a direct
-default of `{empty string}` (a value, not the literal text `""`, which no block
-can consume).
+default of `{empty string}`.
+
+In specs, give an empty-string default for a block or a text terminal as
+`{empty string}` (a value), never as the literal text `""`, which neither a
+block nor a text token can consume.
 
 In specs, when 2 constructs express the same concept with similarly complex
 syntax (e.g., a format's number coercion & a sort's grouped numbers), share 1

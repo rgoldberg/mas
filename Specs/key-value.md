@@ -48,7 +48,7 @@ trailing spacing are between its key & its value.
 ```ebnf
 key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key>; last wins *)
 
-unstyled-key = "k" (* default style-specifier: "" *)
+unstyled-key = "k" (* default style-specifier: {empty string} *)
 styled-key   = "K" <style-specifier> <key-value-setting-termination>
 ```
 <!--markdownlint-enable line-length-->
@@ -142,7 +142,7 @@ key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> 
 ```ebnf
 leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins *)
 
-leader-off = "f" (* default leader-pattern: ""; mnemonic: fill *)
+leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
 leader-pattern = ^{text}^ (* default: "▁" *)
@@ -171,7 +171,7 @@ leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
 
-leading-spacing = ^{text}^ (* default: "" *)
+leading-spacing = ^{text}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -191,7 +191,7 @@ trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom
 trailing-spacing-default = "r" (* default trailing-spacing: " "; mnemonic: right *)
 trailing-spacing-custom  = "R" [ <trailing-spacing> ] <key-value-setting-termination> (* mnemonic: right *)
 
-trailing-spacing = ^{text}^ (* default: "" *)
+trailing-spacing = ^{text}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -210,7 +210,7 @@ item-separator-setting = <item-separator-off> | <item-separator-on> (* default: 
 item-separator-off = "s"
 item-separator-on  = "S" [ <item-separator-pattern> ] <key-value-setting-termination>
 
-item-separator-pattern = ^{text}^ (* default: "" *)
+item-separator-pattern = ^{text}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
