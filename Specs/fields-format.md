@@ -7,7 +7,7 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline> | <format-template> (* direct default: "" *)
+format-block = <pipeline> | <format-template> (* direct default: {empty string} *)
 
 pipeline        =
   <named-format>
@@ -24,7 +24,7 @@ template-text = ~^{text}^~
 
 Each of the following evaluates to a value whose type is:
 
-- Block: its pipeline's or template's type; if empty, string.
+- Block: its pipeline's or template's type.
 - Pipeline: its last value transform's output's type; absent any, its named
   format's value's type, or else its input's type.
 - Placeholder: its inserted value's type.
@@ -495,12 +495,12 @@ block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 success-block = <string-block> | <boolean-block> | <number-block> | <chronologic-block> | <any-block> | <unconditional-block> (* non-structural *)
 failure-block = <unconditional-block>
 
-string-block        = <string-pipeline> | <string-template>               (* direct default: "" *)
-boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: "" *)
-number-block        = <number-pipeline> | <number-template>               (* direct default: "" *)
-chronologic-block   = <chronologic-pipeline> | <chronologic-template>     (* direct default: "" *)
-any-block           = <unconditional-pipeline> | <any-template>           (* direct default: "" *)
-unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: "" *)
+string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
+boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
+number-block        = <number-pipeline> | <number-template>               (* direct default: {empty string} *)
+chronologic-block   = <chronologic-pipeline> | <chronologic-template>     (* direct default: {empty string} *)
+any-block           = <unconditional-pipeline> | <any-template>           (* direct default: {empty string} *)
+unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: {empty string} *)
 
 string-template        = ( <string-block-placeholder> | <unconditional-placeholder> | <template-text> )+
 boolean-template       = ( <boolean-block-placeholder> | <unconditional-placeholder> | <template-text> )+
