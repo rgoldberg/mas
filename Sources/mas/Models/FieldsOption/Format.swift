@@ -30,8 +30,8 @@ indirect enum Format: Equatable, Sendable {
 	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
 	// swiftlint:disable:next todo
-	// TODO: a per-field, per-context user-configured default, once persisted
-	//  fields configs exist
+	// TODO: a per-field, per-context custom default, once persisted fields
+	//  configs exist
 	static func `default`(fieldName _: String) -> Self {
 		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
 	}

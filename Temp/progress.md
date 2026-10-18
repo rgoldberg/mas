@@ -57,14 +57,13 @@ spec's](../Specs/table.md) vocabulary (`<table-setting-termination>`,
 value](../Specs/key-value.md#key-value-config) into `KeyValueConfig`, sharing
 `parseOutputConfigSettingPayload`, `parseStyleSpecifier` & `styled`
 (`OutputConfigSetting.swift`) with `parseTableConfig`; `K` requires a non-empty
-`<style-specifier>`. `repeatedPattern` (formerly `repeatedTablePattern`) also
-fills leaders & item separator lines, printing a 0-width pattern (e.g., a tab)
-once; it truncates each pattern before the 1st character that would exceed its
-width, then fills any remaining width (e.g., after a truncated `中`) with spaces.
-`<leader-setting>` is `f` / `F`; `<leading-spacing-setting>` (`l` / `L`) &
-`<trailing-spacing-setting>` (`r` / `R`) set `KeyValueConfig.leadingSpacing` &
-`.trailingSpacing`; `f` implies a leading spacing of `:`, if none is otherwise
-set.
+`<style-specifier>`. `repeatedPattern` also fills leaders & item separator
+lines, printing a 0-width pattern (e.g., a tab) once; it truncates each pattern
+before the 1st character that would exceed its width, then fills any remaining
+width (e.g., after a truncated `中`) with spaces. `<leader-setting>` is `f` /
+`F`; `<leading-spacing-setting>` (`l` / `L`) & `<trailing-spacing-setting>` (`r`
+/ `R`) set `KeyValueConfig.leadingSpacing` & `.trailingSpacing`; `f` implies a
+leading spacing of `:`, if none is otherwise set.
 
 ### JSON Config (2026-10-02)
 
@@ -104,20 +103,19 @@ the canonical conventions (`SortOptionSet.locale` is `nil`).
 `Format.swift` (AST, evaluation, chronologic parsing) & `FormatParser.swift`
 implement [formatting](../Specs/fields-format.md#formatting): a `<format-block>`
 is a `<pipeline>` (whose `<format-transform-pipeline>` becomes
-`FieldSpec.justification`, retained iff transitively absent) or a
-`<format-template>` (at least 1 placeholder); blocks are `+`-terminated
-(`<block-terminator>`) with kinds per matcher (string, boolean, number,
-chronologic, any, unconditional) & may contain placeholders; placeholders
-support `<abort-on-success>`, `<abort-on-failure>`, `<coercion>` /
-`<number-coercion>` (with trivia), block placeholders & match placeholders with
-`<branch-negation>` & unconditional branches; template-text whitespace follows
-the [escaping appendix](../Specs/fields.md#appendix-escaping); forbidden
-whitespace after `%`, modifiers, `.` & `:` is an error. An uncoerced transform
-on an input not of its input type throws `FormattingError` at render time
-(surfaced via `OutputError`). An absent block or `<format-block>` defaults to an
-empty string; the pipeline of a non-nullary unconditional placeholder or block
-placeholder is mandatory. The built-in `hidden` named format is gone (hiding is
-only `<field-spec-hide>`). Tests are in
+`FieldSpec.justification`, inherited iff absent) or a `<format-template>` (at
+least 1 placeholder); blocks are `+`-terminated (`<block-terminator>`) with
+kinds per matcher (string, boolean, number, chronologic, any, unconditional) &
+may contain placeholders; placeholders support `<abort-on-success>`,
+`<abort-on-failure>`, `<coercion>` / `<number-coercion>` (with trivia), block
+placeholders & match placeholders with `<branch-negation>` & unconditional
+branches; template-text whitespace follows the [escaping
+appendix](../Specs/fields.md#appendix-escaping); forbidden whitespace after `%`,
+modifiers, `.` & `:` is an error. An uncoerced transform on an input not of its
+input type throws `FormattingError` at render time (surfaced via `OutputError`).
+An absent block or `<format-block>` defaults to an empty string; the pipeline of
+a non-nullary unconditional placeholder or block placeholder is mandatory.
+Hiding is only `<field-spec-hide>`. Tests are in
 `Tests/MASTests/Models/FieldsOption/MASTests+Format*.swift`.
 
 ### Sort Rewrite (2026-09-25, revised 2026-10-15)
@@ -133,10 +131,9 @@ none; default `+space+`), `<nonconforming-comparison>` (`k`, `a`, or `z`) &
 a number is a single number segment unless `<lexicographic>`: each run of
 non-boundary text splits into chronologic, number & text segments, compared per
 `<text-order>` element by element, by kind (time-only chronologic, other
-chronologic, number, text), then per kind. Formats no longer type fields, so the
-type determinant & `FieldSpec.outputsInput` are gone (a machine-facing variant's
-format is `%i`). Each uncollapsed boundary is its own piece, compared by group
-precedence alone.
+chronologic, number, text), then per kind. Formats do not type fields (a
+machine-facing variant's format is `%i`). Each uncollapsed boundary is its own
+piece, compared by group precedence alone.
 
 ### Time-Only Chronologic Values (2026-10-15)
 
@@ -257,14 +254,14 @@ audit has tests.
 ### Absolute Configs & Exact Numbers (2026-10-01)
 
 Each `<absolute-field-spec>` is a visible copy of the base fields config
-`none`'s 1st field spec for its field (or of a field spec with default
-settings), so it inherits mas's labels, formats, disabled sorts & justification
-(machine-facing for JSON), overlaid with its `<field-modifiers>`. Numbers are
-processed exactly, of unlimited precision & magnitude, via `DecimalNumber` &
-`BigInt`: comparisons (number & version segments), coercion (a coerced number's
-canonical form retains its notation, e.g., `1e3`) & `scale`; `<grouped-numeric>`
-compares each grouped number, fractional part & exponent included, as 1 number.
-Chronologic Unix times still go through `Date`'s `Double`.
+`none`'s 1st field spec for its field (or of its default field spec), so it
+inherits mas's labels, formats, disabled sorts & justification (machine-facing
+for JSON), overlaid with its `<field-modifiers>`. Numbers are processed exactly,
+of unlimited precision & magnitude, via `DecimalNumber` & `BigInt`: comparisons
+(number & version segments), coercion (a coerced number's canonical form retains
+its notation, e.g., `1e3`) & `scale`; `<grouped-numeric>` compares each grouped
+number, fractional part & exponent included, as 1 number. Chronologic Unix times
+still go through `Date`'s `Double`.
 
 ### Field Order Tiebreaker (2026-10-06)
 
@@ -466,3 +463,6 @@ Configs specify that only a persisted fields config extends another (via its
 `<base-fields-config-section>`); fields.md no longer refers to a "current
 section", since a `<relative-config>` has at most 1
 `<field-spec-edits-section>`.
+
+`Temp/` no longer names removed identifiers or features, and uses [standard
+terminology](terms.md).

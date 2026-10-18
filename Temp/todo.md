@@ -33,7 +33,7 @@
    [table](../Specs/table.md#implied-settings) &
    [key-value](../Specs/key-value.md#implied-settings) settings' precedence over
    inherited ones has no effect yet.
-4. Per-context user-configured default formats.
+4. Per-context custom default formats.
 
 #### Custom Names Removal
 
@@ -144,6 +144,11 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 - All
 
 ### `<document-order>` for `@table`
+
+Let `<document-order>` order a table's columns by the 1st item's document order
+(e.g., the key order of the 1st input JSON object), since rows otherwise share
+no document order; every later item's fields would follow the 1st item's order,
+with fields that the 1st item lacks after the others, in position order.
 
 ### Base Output Config Names
 

@@ -70,11 +70,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: final / last (as a synonym for sole)
 17. - last: positional element located at the end of a sequence or collection
       (pairs with 1st)
-    - REJECTED: rightmost
-    - REJECTED: final: irrevocable state, output, or calculated outcome of a
-      process
-    - REJECTED: terminal: EBNF symbol that cannot be expanded further (pairs
-      with nonterminal)
+    - REJECTED: rightmost / final / terminal (as synonyms for last)
 18. - precede: positional relation in a sequence where one element comes before
       another
     - leading: adjective for characters / elements positioned at the start of a
@@ -285,7 +281,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - per: for each
 55. - resolve: map a name to its referent (resolved fields config)
     - find: search outcome ("if no match is found")
-    - REJECTED: look up
+    - look up / lookup: search a context stack for a named config (name lookup)
 56. - context: resolving named fields configs, formats, etc.; grammatical
       position (`context-dependent` multiplicity, `(* only for: CONTEXT *)`)
     - circumstances: situation
