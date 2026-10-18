@@ -447,5 +447,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/fields-format.md#chronologic-formatting))
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
       timestamp / numeric timestamp
-93. - input type: the type of a transform's or predicate's input
-    - output type: the type of a transform's value
+93. - input type: the type of a nonterminal's input
+      ([defined](../Specs/ebnf.md#type-comments))
+    - output type: the type of a nonterminal's value
+      ([defined](../Specs/ebnf.md#type-comments))

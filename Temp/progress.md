@@ -361,4 +361,5 @@ elements' values, each coerced to a string), which `FormatValue.node` renders at
 its type: e.g., `%N%n+%i+` renders `null` as `null`, `.round` renders a number,
 while `numberFormat`, a chronologic value & a number whose text (trivia
 included) is not JSON number syntax (e.g., `.scale:16,0,,0:`'s `ff`) render
-strings. Type comments are `input type:` & `output type:`.
+strings. Type comments are `type:`, `input type:` & `output type:`; every
+predicate's is an `output type:`.
