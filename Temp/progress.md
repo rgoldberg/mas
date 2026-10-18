@@ -424,3 +424,12 @@ A `null` or absent value remains unchanged through every transform, with or
 without `<coercion>` (`FormatValue.applying(_:)`), so a transform on a `null` or
 absent field (e.g., `.round`) never reports `transformInputTypeMismatch`, and
 `..uppercase` renders `null` as `null` instead of `""`.
+
+### 2nd Spec Review Fixes (2026-10-18)
+
+[Presence states](../Specs/fields.md#defaults-for-absent-expressions) are
+decided by payload, as already implemented: a modifier omitted from present
+`<field-modifiers>` (e.g., `<sort-modifier>` in `name=x`) retains the working
+fields config's value, while an expression in a present payload that contains
+no token (e.g., `N:`'s arguments) resets to its default; only a field spec's
+properties are retained from the working fields config.
