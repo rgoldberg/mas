@@ -450,3 +450,7 @@ as already implemented.
 How a value's pieces (`SortOptionSet.pieces(of:)`) compare as a list & that
 `<text-first>` / `<text-last>` compare 2 lists are specified, as already
 implemented.
+
+Equal digit group & decimal separators being an error is specified once, for
+every user of number format arguments, including number coercion, as already
+implemented.
