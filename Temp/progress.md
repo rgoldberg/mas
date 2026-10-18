@@ -430,6 +430,12 @@ absent field (e.g., `.round`) never reports `transformInputTypeMismatch`, and
 [Presence states](../Specs/fields.md#defaults-for-absent-expressions) are
 decided by payload, as already implemented: a modifier omitted from present
 `<field-modifiers>` (e.g., `<sort-modifier>` in `name=x`) retains the working
-fields config's value, while an expression in a present payload that contains
-no token (e.g., `N:`'s arguments) resets to its default; only a field spec's
+fields config's value, while an expression in a present payload that contains no
+token (e.g., `N:`'s arguments) resets to its default; only a field spec's
 properties are retained from the working fields config.
+
+`<unconditional-pipeline>`'s named alternative is followed only by an
+`<unconditional-transform-pipeline>`, as `<number-pipeline>`'s &
+`<chronologic-pipeline>`'s are, so a named unconditional format satisfies every
+`<named-format-reference>`; a block's `<transform-pipeline>` applies to the
+enclosing matcher's value, as already implemented.

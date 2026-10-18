@@ -54,7 +54,7 @@ number-pipeline =
 
 chronologic-pipeline = <named-chronologic-format> | [ <named-chronologic-format> ] ( <chronologic-transform-pipeline> | <unconditional-transform-pipeline> )
 
-unconditional-pipeline = <named-unconditional-format> [ <string-transform-pipeline> ] | <unconditional-transform-pipeline>
+unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-format> ] <unconditional-transform-pipeline>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -125,7 +125,9 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 
 - A `<transform-pipeline>` `t` is a pipeline of transformations applied to:
   - If a `<named-format-reference>` `n` immediately precedes `t`: `n`'s value.
-  - Otherwise: the field's value.
+  - Otherwise: the value against which its enclosing block is evaluated (i.e.,
+    in a `<success-block>`, the enclosing matcher's value; elsewhere, the field
+    value).
 
 An **argument** is an element of an argument list: a transform's, a [number
 coercion's](#coercion), [`N`'s](fields.md#sort-number-segments), or
@@ -145,7 +147,7 @@ type; otherwise, an error is reported.
 
 A `null` or [absent](fields.md#absent-values) value remains unchanged through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
-`..uppercase` renders `null` as `null`).
+`..uppercase` evaluates to `null` for `null`).
 
 A `<coercion>` attempts to coerce an input value into the correct input type for
 the annotated transform. If the coercion is successful, the transform is applied
@@ -591,7 +593,7 @@ string.
 Within a `<success-block>`, a `<block-placeholder>` is evaluated against the
 enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
 / `%I` are evaluated against the original input, at its original type (e.g.,
-`%.N%n (%i)++` renders `4.50` as `4.5 (4.50)`).
+`%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
 
