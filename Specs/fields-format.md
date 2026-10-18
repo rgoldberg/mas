@@ -386,8 +386,10 @@ abbreviation](
 A **UTC offset** is either:
 
 - `Z`, for UTC.
-- An optional `UTC` or `GMT` prefix, then `+` or `-`, then a 1- or 2-digit hour,
-  then, optionally, `:` followed by a 2-digit minute from `00` to `59`.
+- An optional `UTC` or `GMT` prefix, then `+` or `-`, then either a 2-digit hour
+  & a 2-digit minute (e.g., `+0530`), or a 1- or 2-digit hour, then, optionally,
+  `:` followed by a 2-digit minute (e.g., `+5` or `+05:30`); each minute is from
+  `00` to `59`.
 
 A UTC offset of more than 18 hours from UTC is an error.
 

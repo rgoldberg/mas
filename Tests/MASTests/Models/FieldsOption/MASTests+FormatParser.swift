@@ -515,7 +515,7 @@ private extension MASTests {
 			(".timeZone:UTC,2020-01-01,2020-01-02:", .invalidTransformArguments(name: "timeZone")),
 			(".numberFormat:en,.,18446744073709551615:", .invalidTransformArguments(name: "numberFormat")),
 			(".timeZone:Nowhere/Land:", .invalidTransformArguments(name: "timeZone")),
-			(".timeZone:+0530:", .invalidTransformArguments(name: "timeZone")),
+			(".timeZone:+530:", .invalidTransformArguments(name: "timeZone")),
 			(".timeZone:EST+5:", .invalidTransformArguments(name: "timeZone")),
 			("%S\\", .danglingEscape),
 		],

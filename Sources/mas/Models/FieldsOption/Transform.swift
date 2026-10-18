@@ -199,13 +199,14 @@ func timeZone(forCode code: String) -> TimeZone? {
 }
 
 /// A `TimeZone` for a UTC offset `code` (`Z`, or an optional `UTC` / `GMT`
-/// prefix, a sign, a 1- or 2-digit hour & an optional `:`-prefixed 2-digit
-/// minute; case-insensitive), else `nil`.
+/// prefix, a sign, then either a 2-digit hour & a 2-digit minute, or a 1- or
+/// 2-digit hour & an optional `:`-prefixed 2-digit minute; case-insensitive),
+/// else `nil`.
 private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
 	guard
 		let match = code.wholeMatch(of: unsafe utcOffsetRegex),
-		let hours = Int(match.2 ?? "0"),
-		let minutes = Int(match.3 ?? "00"),
+		let hours = Int(match.2 ?? match.4 ?? "0"),
+		let minutes = Int(match.3 ?? match.5 ?? "00"),
 		minutes < 60
 	else {
 		return nil
@@ -213,7 +214,8 @@ private func utcOffsetTimeZone(_ code: String) -> TimeZone? {
 	return TimeZone(secondsFromGMT: (match.1 == "-" ? -1 : 1) * (hours * 3600 + minutes * 60))
 }
 
-private nonisolated(unsafe) let utcOffsetRegex = /(?i)z|(?:utc|gmt)?([+-])([0-9]{1,2})(?::([0-9]{2}))?/
+private nonisolated(unsafe) let utcOffsetRegex =
+	/(?i)z|(?:utc|gmt)?([+-])(?:([0-9]{2})([0-9]{2})|([0-9]{1,2})(?::([0-9]{2}))?)/
 
 /// `number` rendered per `scale`'s semantics (see its doc comment on
 /// `Transform.scale`), computed exactly; `nil` iff the rendering would have
