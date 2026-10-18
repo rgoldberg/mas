@@ -248,12 +248,12 @@ field-order-option-set        =
 field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
-positional-order-option-set = [ <order-option>+ ] <positional-order> [ <direction>+ ] (* last wins *)
-document-order-option-set   = [ <order-option>+ ] <document-order> [ <direction>+ ] (* last wins *)
+positional-order-option-set = [ <order-option>+ ] <positional-order> [ <direction>+ ]
+document-order-option-set   = [ <order-option>+ ] <document-order> [ <direction>+ ]
 
 order-option = <order> | <direction>
 
-order = <positional-order> | <document-order>
+order = <positional-order> | <document-order> (* last wins *)
 
 positional-order = "P"
 document-order   = "D" (* only for: json or key-value output *)
@@ -297,7 +297,7 @@ output can order each item's fields independently.
 item-sort-section        = <item-sort-section-prefix> <item-sort-option-set>
 item-sort-section-prefix = "//"
 
-item-sort-option-set = <item-sort-option>+ (* last wins *)
+item-sort-option-set = <item-sort-option>+
 item-sort-option     = <disable-all-sorts> | <direction>
 
 disable-all-sorts = "0" (* mnemonic: sort priority 0 *)
@@ -505,7 +505,7 @@ A field spec with a `<sort>`:
 ##### Sort Options
 
 ```ebnf
-sort-option-set = <sort-option>+ (* last wins *)
+sort-option-set = <sort-option>+
 sort-option     =
   <source>
   | <direction>
@@ -523,7 +523,7 @@ sort-option-terminator = ":"
 ##### Sort Source
 
 ```ebnf
-source = <input> | <output> (* default: <input> *)
+source = <input> | <output> (* default: <input>; last wins *)
 
 input  = "I"
 output = "O"
@@ -580,7 +580,7 @@ with fewer components precedes one that extends it.
 ##### Sort Direction
 
 ```ebnf
-direction = <ascending> | <descending> (* default: <ascending> *)
+direction = <ascending> | <descending> (* default: <ascending>; last wins *)
 
 ascending  = "+" (* mnemonic: increasing *)
 descending = "-" (* mnemonic: decreasing *)
@@ -588,19 +588,23 @@ descending = "-" (* mnemonic: decreasing *)
 
 ##### Sort Case Sensitivity
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-case-sensitivity = <sensitive> | <insensitive> (* default: <sensitive> *)
+case-sensitivity = <sensitive> | <insensitive> (* default: <sensitive>; last wins *)
 
 sensitive   = "s"
 insensitive = "i"
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ##### Sort Locale
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* default: "Lcanonical:" *)
+locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* default: "Lcanonical:"; last wins *)
 
 locale-identifier = {text: locale identifier, "canonical", or "system"} (* default: "system" *)
 ```
@@ -622,7 +626,7 @@ separator & a digit group size of 3.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-segments = <lexical> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexical> *)
+number-segments = <lexical> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexical>; last wins *)
 
 lexical           = "x" (* mnemonic: 3rd letter of lexical *)
 ungrouped-numeric = "u" (* mnemonic: ungrouped *)
@@ -678,7 +682,7 @@ rules.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* default: "Ciso:" *)
+chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* default: "Ciso:"; last wins *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
 chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time>
@@ -710,7 +714,7 @@ rules.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+space+:" *)
+boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+space+:"; last wins *)
 
 uncollapsed-boundaries = "B" [ <boundary-groups> ] <sort-option-terminator>
 collapsed-boundaries   = "M" [ <boundary-groups> ] <sort-option-terminator> (* mnemonic: merged *)
@@ -773,7 +777,7 @@ nothing is a boundary.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconforming-greatest> (* default: <all-conforming> *)
+nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconforming-greatest> (* default: <all-conforming>; last wins *)
 
 all-conforming         = "k" (* mnemonic: keep in place *)
 nonconforming-least    = "a" (* mnemonic: 1st letter, so least *)
@@ -795,7 +799,7 @@ With `<all-conforming>`, no value is nonconforming.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* default: <text-in-place> *)
+text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* default: <text-in-place>; last wins *)
 
 text-first    = "h" (* mnemonic: head *)
 text-last     = "t" (* mnemonic: tail *)

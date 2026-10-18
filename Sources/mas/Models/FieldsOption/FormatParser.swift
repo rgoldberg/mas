@@ -71,7 +71,7 @@ private struct FormatParser {
 				guard calls.isEmpty else {
 					throw .invalidPipeline("<pipeline>")
 				}
-				justification = parsed // `<format-transform-pipeline>` is `(* last wins *)`
+				justification = parsed // `<justify>` is `(* last wins *)`
 			case let .value(call):
 				calls.append(call)
 			}
