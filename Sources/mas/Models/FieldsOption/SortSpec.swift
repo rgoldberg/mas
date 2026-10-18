@@ -511,7 +511,7 @@ extension SortOptionSet {
 		guard case let .number(number)? = value, let number = DecimalNumber("\(number)") else {
 			return nil
 		}
-		return (hasUnixTimeSegments ? unixTimeDate(number).map { .chronologic(.datetime($0)) } : nil)
+		return (hasUnixTimeSegments ? unixTimeInstant(number).map { .chronologic(.datetime($0)) } : nil)
 			?? (numberSegments == .lexicographic || numberSegments == .versions ? nil : .number(number))
 	}
 
@@ -610,8 +610,8 @@ extension SortOptionSet {
 		case let (.chronologic(.time(lhsTime)), .chronologic(.time(rhsTime))):
 			ComparableComparator().compare(lhsTime.utcMillisecondOfDay, rhsTime.utcMillisecondOfDay)
 		case let (.chronologic(lhsChronologic), .chronologic(rhsChronologic)):
-			if let lhsDate = lhsChronologic.date, let rhsDate = rhsChronologic.date {
-				ComparableComparator().compare(lhsDate, rhsDate)
+			if let lhsInstant = lhsChronologic.instant, let rhsInstant = rhsChronologic.instant {
+				ComparableComparator().compare(lhsInstant, rhsInstant)
 			} else {
 				ComparableComparator().compare(lhs.kindRank, rhs.kindRank)
 			}
@@ -692,7 +692,7 @@ extension SortOptionSet {
 		}
 		let word = value[index...].prefix { !$0.isWhitespace }
 		return word.endIndex == value.endIndex || value[word.endIndex].isWhitespace
-			? unixTimeDate(in: word).map { (.chronologic(.datetime($0)), word.endIndex) }
+			? unixTimeInstant(in: word).map { (.chronologic(.datetime($0)), word.endIndex) }
 			: nil
 	}
 
@@ -754,11 +754,11 @@ private func isSign(at index: String.Index, in value: String, signs: SortOptionS
 }
 
 private extension Chronologic {
-	/// The date of a date-only or datetime; `nil` for a time-only.
-	var date: Date? {
+	/// The instant of a date-only or datetime; `nil` for a time-only.
+	var instant: Int? {
 		switch self {
-		case let .date(date), let .datetime(date):
-			date
+		case let .date(instant), let .datetime(instant):
+			instant
 		case .time:
 			nil
 		}

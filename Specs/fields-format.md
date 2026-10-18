@@ -882,7 +882,9 @@ whose entire content is a decimal number, as a Unix time (e.g., `%.D` matches
 
 An ISO-8601:
 
-- Date-only is an extended-format date (e.g., `2020-03-18`).
+- Date-only is an extended-format calendar date, whose year is 4 digits (e.g.,
+  `2020-03-18`) or, per ISO-8601's expanded representation, a sign & at least 5
+  digits (e.g., `+10000-01-01` or `-00001-12-31`).
 - Time-only is an extended-format complete time (e.g., `17:39:23`), with
   optional fractional seconds (after `.` or `,`) & an optional UTC offset (`Z`,
   `z` per RFC 3339, `±hh`, `±hhmm`, or `±hh:mm`).
@@ -903,18 +905,24 @@ coercion](#value-coercion) applies (e.g., `.dateOnly` reports an error for
 `17:39:23`, while `..dateOnly` aborts formatting); `%D.dateOnly+-+` outputs `-`
 for `17:39:23`.
 
+Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
+year `0000` is 1 BCE, and `1500-02-29` does not exist).
+
 A Unix time is chronologic iff it is at least `-9223372036854775.808` & less
 than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
-a signed 64-bit integer).
+a signed 64-bit integer); an ISO-8601 date-only or datetime is chronologic iff
+its instant, as a Unix time, is.
 
 A datetime's or time-only's fractional seconds are truncated to 3 digits, which
 are omitted iff all are `0` (e.g., in the UTC output time zone,
 `2020-03-18T17:39:23.1234Z` renders as `2020-03-18T17:39:23.123Z`, but
 `2020-03-18T17:39:23.0004Z` renders as `2020-03-18T17:39:23Z`).
 
-A chronologic value renders in the output time zone, per RFC 3339:
+A chronologic value renders in the output time zone, in ISO-8601 extended format
+(as RFC 3339 profiles it for a year from 0000 to 9999):
 
-- Date-only: `YYYY-MM-DD`.
+- Date-only: `YYYY-MM-DD`, its year being, outside 0000 to 9999, a sign & at
+  least 5 digits (e.g., `+10000-01-01`).
 - Time-only: `hh:mm:ss`, any fractional seconds, then its UTC offset.
 - Datetime: its date, `T`, then its time, as for a time-only.
 

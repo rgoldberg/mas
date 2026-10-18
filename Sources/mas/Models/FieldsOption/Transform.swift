@@ -33,9 +33,9 @@ enum Transform: Hashable {
 	case numberFormat(NumberConventions)
 
 	case dateOnly
-	/// Sets the output time zone & the `<reference-date>` (its year, month & day;
-	/// `nil` iff absent); see `<time-zone>` in fields-format.md.
-	case timeZone(TimeZone, referenceDate: DateComponents?) // swiftlint:enable sorted_enum_cases
+	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
+	/// `<time-zone>` in fields-format.md.
+	case timeZone(TimeZone, referenceDate: CivilDate?) // swiftlint:enable sorted_enum_cases
 
 	/// This transform's kind, per its `<value-transform>` alternative.
 	var kind: TransformKind {
@@ -316,7 +316,7 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 		case let .timeZone(timeZone, referenceDate):
 			"""
 			timeZone:\(timeZone.identifier),\
-			\(referenceDate?.date.map { $0.formatted(Date.ISO8601FormatStyle().year().month().day()) } ?? ""):
+			\(referenceDate?.iso8601Text ?? ""):
 			"""
 		}
 	}

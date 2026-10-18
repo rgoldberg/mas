@@ -259,8 +259,8 @@ for JSON), overlaid with its `<field-modifiers>`. Numbers are processed exactly,
 of unlimited precision & magnitude, via `DecimalNumber` & `BigInt`: comparisons
 (number & version segments), coercion (a coerced number's canonical form retains
 its notation, e.g., `1e3`) & `scale`; `<grouped-numeric>` compares each grouped
-number, fractional part & exponent included, as 1 number. Chronologic Unix times
-still go through `Date`'s `Double`.
+number, fractional part & exponent included, as 1 number. Chronologic instants
+are exact milliseconds (`Int`), not `Date`'s `Double`.
 
 ### Field Order Tiebreaker (2026-10-06)
 
@@ -403,8 +403,8 @@ matches `"5,x"`).
 because every argument has a default (e.g., `.timeZone` ≡ `.timeZone::`).
 
 [Chronologic rendering](../Specs/fields-format.md#chronologic-formatting) is
-specified as RFC 3339, as already implemented: seconds always render & a UTC
-offset renders as `Z` iff it is 0, else as `±hh:mm`.
+specified, as already implemented: seconds always render & a UTC offset renders
+as `Z` iff it is 0, else as `±hh:mm`.
 
 `numberFormat` retaining scientific notation is specified, as already
 implemented (e.g., `.numberFormat:de:` renders `12345.6E3` as `12.345,6E3`).
@@ -499,3 +499,10 @@ without `<coercion>`, and their block is a `<time-only-block>`, whose pipeline
 (`BlockKind.timeOnly`) cannot contain `dateOnly`, so no predicate depends on its
 block's contents (`Format.appliesDateOnly` is removed); mas's `Released` field
 uses `%D.dateOnly++`.
+
+Chronologic values render in ISO-8601 extended format (`ChronologicStyle`'s own
+formatting, instead of `Date.ISO8601FormatStyle`), a year outside 0000 to 9999
+as ISO-8601's expanded representation (a sign & at least 5 digits), which
+auto-detection also accepts; dates are in the proleptic Gregorian calendar
+(`CivilDate`), instead of Foundation's Julian calendar before 1582-10-15; &
+instants are exact milliseconds, so every Unix time in range renders exactly.

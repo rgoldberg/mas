@@ -393,6 +393,25 @@ private extension MASTests {
 			("%D.timeZone:UTC:++", .string("2020-03-18T17:39:23.000Z"), "2020-03-18T17:39:23Z"),
 			("%D.timeZone:UTC:++", .string("2020-03-18T17:39:23.0004Z"), "2020-03-18T17:39:23Z"),
 			("%D.timeZone:UTC:++", .number(0.5), "1970-01-01T00:00:00.500Z"),
+			// A year outside 0000 to 9999 renders as an ISO-8601 expanded year, and
+			// every date is in the proleptic Gregorian calendar
+			("%D.timeZone:UTC:++", .number(253_402_300_800), "+10000-01-01T00:00:00Z"),
+			("%D.timeZone:UTC:++", .number(-62_135_596_801), "0000-12-31T23:59:59Z"),
+			("%D.timeZone:UTC:++", .number(-62_167_219_201), "-00001-12-31T23:59:59Z"),
+			("[%d]", .string("9223372036854775.807"), nil),
+			("%.D.timeZone:UTC:++", .string("9223372036854775.807"), "+292278994-08-17T07:12:55.807Z"),
+			("%.D.timeZone:UTC:++", .string("-9223372036854775.808"), "-292275055-05-16T16:47:04.192Z"),
+			("[%.d]", .string("9223372036854775.808"), nil),
+			("%D.timeZone:UTC:++", .string("+10000-01-01T00:00:00Z"), "+10000-01-01T00:00:00Z"),
+			("%D.timeZone:UTC:++", .string("-00001-12-31T23:59:59Z"), "-00001-12-31T23:59:59Z"),
+			("[%d]", .string("+292278994-08-17T07:12:55.808Z"), nil),
+			("%D.timeZone:UTC:++", .string("+292278994-08-17T07:12:55.807Z"), "+292278994-08-17T07:12:55.807Z"),
+			("[%d]", .string("10000-01-01"), nil),
+			("[%d]", .string("+2020-03-18"), nil),
+			("[%d]", .string("1500-02-29"), nil),
+			("[%d]", .string("1900-02-29"), nil),
+			("%D.timeZone:UTC:++", .string("2000-02-29T00:00:00Z"), "2000-02-29T00:00:00Z"),
+			("%D.timeZone:UTC:++", .string("1500-02-28T12:00:00Z"), "1500-02-28T12:00:00Z"),
 			("%D.dateOnly.timeZone:UTC:++", .string("2020-03-18T17:39:23.123Z"), "2020-03-18"),
 			// A datetime's RFC 3339 variants & omitted seconds
 			("%D.timeZone:UTC:++", .string("2020-03-18 17:39:23Z"), "2020-03-18T17:39:23Z"),
@@ -455,6 +474,7 @@ private extension MASTests {
 			("%C.timeZone:America/New_York,2020-01-15:++", "17:39:23Z", "12:39:23-05:00"),
 			("%C.timeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("%C.timeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
+			("%C.timeZone:America/New_York,+10000-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("[%c]", "24:00:00", nil),
 			("%C.timeZone:UTC:++", "17:39:23z", "17:39:23Z"),
 			// Only a datetime's seconds can be omitted

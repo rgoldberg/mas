@@ -227,7 +227,7 @@ private struct FormatParser {
 		return .timeZone(
 			timeZone,
 			referenceDate: try arguments[1].map { argument throws(ParsingError) in
-				guard let referenceDate = referenceDate(argument) else {
+				guard let referenceDate = CivilDate(iso8601Text: argument) else {
 					throw invalidArgumentsError
 				}
 				return referenceDate
@@ -778,22 +778,6 @@ private extension Predicate {
 			false
 		}
 	}
-}
-
-/// `argument`'s date iff it is an in-range ISO-8601 extended-format date (in
-/// UTC, since only its year, month & day matter), else `nil`.
-private func referenceDate(_ argument: String) -> DateComponents? {
-	guard let match = argument.wholeMatch(of: /([0-9]{4})-([0-9]{2})-([0-9]{2})/) else {
-		return nil
-	}
-	let components = DateComponents(
-		calendar: .init(identifier: .gregorian),
-		timeZone: .gmt,
-		year: Int(match.1),
-		month: Int(match.2),
-		day: Int(match.3),
-	)
-	return components.isValidDate ? components : nil
 }
 
 // MARK: - Constants

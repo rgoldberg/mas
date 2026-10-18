@@ -489,3 +489,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 101. - time-only block: `%c` / `%C`'s block (`<time-only-block>`), whose
        pipeline can contain only `timeZone`
      - REJECTED: clock block / time block
+102. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
+       for a year outside 0000 to 9999
+     - proleptic Gregorian calendar: the Gregorian calendar extended before
+       1582-10-15, as ISO-8601 requires
+     - instant: a point in time, in milliseconds since 1970-01-01T00:00:00Z
+     - REJECTED: extended year (for an expanded representation) / timestamp (for
+       an instant)
