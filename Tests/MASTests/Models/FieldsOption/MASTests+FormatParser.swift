@@ -347,6 +347,8 @@ private extension MASTests {
 			("%C.timeZone:UTC:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:utc:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:Asia/Tokyo:++", .string("2020-03-18T17:39:23Z"), "2020-03-19T02:39:23+09:00"),
+			("%C.timeZone:Europe/London:++", .string("2020-01-15T12:00:00+01:00"), "2020-01-15T11:00:00Z"),
+			("%C.timeZone:Europe/London:++", .string("2020-07-15T12:00:00Z"), "2020-07-15T13:00:00+01:00"),
 			("%C.timeZone:asia/tokyo:++", .string("2020-03-18T17:39:23Z"), "2020-03-19T02:39:23+09:00"),
 			("%C.timeZone:-05\\:30:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T12:09:23-05:30"),
 			("%C.timeZone:UTC:++", .number(0), "1970-01-01T00:00:00Z"),

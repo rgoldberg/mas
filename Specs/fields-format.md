@@ -861,6 +861,16 @@ are omitted iff all are `0` (e.g., in the UTC output time zone,
 `2020-03-18T17:39:23.1234Z` renders as `2020-03-18T17:39:23.123Z`, but
 `2020-03-18T17:39:23.0004Z` renders as `2020-03-18T17:39:23Z`).
 
+A chronologic value renders in the output time zone, per RFC 3339:
+
+- Date-only: `YYYY-MM-DD`.
+- Time-only: `hh:mm:ss`, any fractional seconds, then its UTC offset.
+- Datetime: its date, `T`, then its time, as for a time-only.
+
+Seconds always render (e.g., in the UTC output time zone, `2020-03-18 17:39`
+renders as `2020-03-18T17:39:00Z`), so every rendered datetime or time-only has
+the same form. A UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
+
 ###### Branched Formatting
 
 <!--editorconfig-checker-disable-->
