@@ -84,12 +84,15 @@ struct Matcher: Equatable { // swiftlint:disable:this one_declaration_per_file
 enum Predicate: Character { // swiftlint:disable:this one_declaration_per_file
 	// swiftlint:disable sorted_enum_cases
 	case boolean = "b"
-	case chronologic = "c"
+	/// Is chronologic with a date: a date-only, a datetime, or a Unix time.
+	case date = "d"
 	case empty = "e"
 	case `false` = "f"
 	case null = "u"
 	case number = "n"
 	case string = "s"
+	/// Is time-only (mnemonic: clock).
+	case timeOnly = "c"
 	case `true` = "t"
 	case version = "v"
 	case whitespace = "w" // swiftlint:enable sorted_enum_cases
@@ -265,7 +268,7 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .conditional(matcher, form):
-			let matched = matcher.matched(context.input, block: form.successBlock)
+			let matched = matcher.matched(context.input)
 			return switch form {
 			case let .abortOnFailure(success):
 				if let matched {
@@ -316,7 +319,7 @@ private extension Branch { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> BranchOutcome {
 		switch self {
 		case let .conditional(matcher, isNegated, block):
-			let matched = matcher.matched(context.input, block: isNegated ? nil : block)
+			let matched = matcher.matched(context.input)
 			return if isNegated {
 				matched == nil
 					? .value(try block.evaluatedBlock(in: context, nullaryValue: .input(context.input)))
@@ -359,54 +362,20 @@ private extension UnconditionalPredicate { // swiftlint:disable:this file_types_
 	}
 }
 
-private extension ConditionalForm { // swiftlint:disable:this file_types_order
-	/// The block evaluated on success, iff any.
-	var successBlock: Format? {
-		switch self {
-		case let .abortOnFailure(success):
-			success
-		case .abortOnSuccess:
-			nil
-		case let .binary(success, _):
-			success
-		}
-	}
-}
-
-private extension Format { // swiftlint:disable:this file_types_order
-	/// Whether this block applies `dateOnly` to its enclosing matcher's value.
-	var appliesDateOnly: Bool {
-		switch self {
-		case let .pipeline(calls):
-			calls.contains { $0.transform == .dateOnly }
-		case let .template(elements):
-			elements.contains { element in
-				if case let .blockPlaceholder(pipeline) = element {
-					pipeline.contains { $0.transform == .dateOnly }
-				} else {
-					false
-				}
-			}
-		}
-	}
-}
-
 extension Matcher { // swiftlint:disable:this file_types_order
 	/// Whether `value` conforms to this matcher's predicate with its coercion.
 	func conforms(_ value: JSON.Node?) -> Bool {
-		matched(value, block: nil) != nil
+		matched(value) != nil
 	}
 
-	/// This matcher's value iff it matches `value`, else `nil`. A time-only value
-	/// has no date, so it fails a chronologic predicate whose `block` applies
-	/// `dateOnly` to it.
-	fileprivate func matched(_ value: JSON.Node?, block: Format?) -> FormatValue? {
+	/// This matcher's value iff it matches `value`, else `nil`.
+	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
 		switch predicate {
 		case .boolean:
 			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
-		case .chronologic:
+		case .date:
 			FormatValue.chronologic(from: value, isCoerced: coercion != nil).flatMap { matched in
-				if case .chronologic(.time, _) = matched, block?.appliesDateOnly == true {
+				if case .chronologic(.time, _) = matched {
 					nil
 				} else {
 					matched
@@ -422,6 +391,14 @@ extension Matcher { // swiftlint:disable:this file_types_order
 			.number(from: value, coercion: coercion)
 		case .string:
 			value.jsonString.map(FormatValue.string)
+		case .timeOnly:
+			FormatValue.chronologic(from: value, isCoerced: false).flatMap { matched in
+				if case .chronologic(.time, _) = matched {
+					matched
+				} else {
+					nil
+				}
+			}
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:

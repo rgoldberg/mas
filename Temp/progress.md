@@ -137,17 +137,16 @@ piece, compared by group precedence alone.
 
 ### Time-Only Chronologic Values (2026-10-15)
 
-`%c` also detects an ISO-8601 time-only (`Chronologic.time`), which is rendered
-in a time zone as if on `timeZone`'s `<reference-date>` (its 2nd argument), else
-on the current date in the system time zone (`Environment.now`). A time-only
-value fails a chronologic predicate whose block applies `dateOnly` to it;
-elsewhere, `dateOnly` on it is a value coercion failure.
+Chronologic auto-detection also detects an ISO-8601 time-only
+(`Chronologic.time`), which is rendered in a time zone as if on `timeZone`'s
+`<reference-date>` (its 2nd argument), else on the current date in the system
+time zone (`Environment.now`); `dateOnly` on it is a value coercion failure.
 
 ### Unix Time (2026-10-18)
 
 `chronologic(from:isCoerced:)` reads a number as a Unix time; it reads a string
 whose entire content is a decimal number as one only with `<coercion>`, which
-`%c` & `%C` now accept (e.g., `%.C` matches `"0"`). `<unix-time>` in
+`%d` & `%D` accept (e.g., `%.D` matches `"0"`). `<unix-time>` in
 `<chronologic-formats>` (`SortOptionSet.hasUnixTimeSegments`) makes a number
 value a single chronologic segment (`numberValueSegment(of:)`) & a decimal
 number that is a whole whitespace-delimited word in a string a chronologic
@@ -493,3 +492,10 @@ applies to a matched version without `<coercion>` (e.g., `%V.uppercase+-+`);
 `<any-block-placeholder>` covers only `<nullary-blank-predicate>`s & their
 non-nullary forms, so `<nullary-scalar-conditional-predicate>` &
 `<nullary-standard-predicate>` (& their non-nullary forms) are removed.
+
+`%d` & `%D` (`Predicate.date`) match a chronologic value with a date & accept
+`<coercion>`; `%c` & `%C` (`Predicate.timeOnly`) match only a time-only value
+without `<coercion>`, and their block is a `<time-only-block>`, whose pipeline
+(`BlockKind.timeOnly`) cannot contain `dateOnly`, so no predicate depends on its
+block's contents (`Format.appliesDateOnly` is removed); mas's `Released` field
+uses `%D.dateOnly++`.

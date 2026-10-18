@@ -87,11 +87,13 @@ Cross-unit conversion.
 ### Chronologic Coercion & Output Formats
 
 Mirror number coercion: chronologic coercion takes fenced arguments giving the
-input format (e.g., `%.:yyyy-MM-dd:c`, `..:yyyy-MM-dd:timeZone:UTC:`), with
+input format (e.g., `%.:yyyy-MM-dd:d`, `..:yyyy-MM-dd:timeZone:UTC:`), with
 [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 ) as the pattern syntax. It would also cover the ISO-8601 representations that
-auto-detection omits (e.g., week dates).
+auto-detection omits (e.g., week dates) & let `%c` & `%C` take a coercion (e.g.,
+`%.:HH\:mm:c`), which they currently lack, because only a time-only value
+matches them.
 
 A named or literal output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax & persisted named
