@@ -209,6 +209,12 @@ private extension MASTests {
 		#expect(overlaid.optionSet.direction == .ascending)
 	}
 
+	@Test
+	func `an absent option payload resets its arguments, rather than retaining the working value`() throws {
+		let existing = try parsedSortSpec("1N de_DE ,\\ ,2,,,all:")
+		#expect(try parsedSortSpec("N:", existing: existing).optionSet.numberSegments == .groupedNumeric(.default))
+	}
+
 	@Test(
 		arguments: [
 			// A number is a single number segment, unless lexicographic

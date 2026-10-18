@@ -55,6 +55,33 @@ private extension MASTests {
 		#expect(specs[0].label == "AppID")
 	}
 
+	@Test(arguments: [".adamID=X", ".adamID:..uppercase", ".adamID/2"])
+	func `an omitted modifier retains the working fields config's value`(value: String) throws {
+		let fieldSpec = try parseFieldSpecs(value)[0]
+		if !value.contains("=") {
+			#expect(fieldSpec.label == adamIDFieldSpec.label)
+		}
+		if !value.contains(":") {
+			#expect(fieldSpec.format == adamIDFieldSpec.format)
+		}
+		if !value.contains("/") {
+			#expect(fieldSpec.sortSpec == adamIDFieldSpec.sortSpec)
+		}
+	}
+
+	@Test(arguments: [(".adamID=", "label"), (".adamID:", "format"), (".adamID/", "sort")])
+	func `an absent modifier payload resets its value`(value: String, property: String) throws {
+		let fieldSpec = try parseFieldSpecs(value)[0]
+		switch property {
+		case "label":
+			#expect(fieldSpec.label.isEmpty)
+		case "format":
+			#expect(fieldSpec.format == .empty)
+		default:
+			#expect(fieldSpec.sortSpec == nil)
+		}
+	}
+
 	@Test
 	func `parses field specs section insertion & overlay`() throws {
 		let specs = try parseFieldSpecs(".+bundleID,adamID=SecondaryID").filter { !$0.isHidden }

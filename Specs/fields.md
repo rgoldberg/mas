@@ -140,17 +140,26 @@ line has been parsed; it is used to render output.
 
 ## Defaults for Absent Expressions
 
+[Presence states](ebnf.md#presence-states) are as in the custom EBNF grammar,
+except that an expression that contains no token, but that is neither an
+alternative of a present choice nor an element of a present repetition, is:
+
+- Directly absent iff it is in a present [payload](#payloads) (e.g., `<label>`
+  in `name=`, or `<locale-identifier>` in `N:`).
+- Otherwise, transitively absent (e.g., `<sort-modifier>` in `name=x`).
+
 The following is inserted before all other cases in the [absent variable
 expression value algorithm](ebnf.md#defaults-for-absent-expressions):
 
-- If transitively absent: the value for the given expression `EXPRESSION` in the
-  working fields config.
+- If transitively absent & it sets a property of the field spec that its
+  `<field-modifiers>` modify (e.g., its label, format, justification, or a sort
+  option): that property's value in the working fields config, if any.
 
-An omitted modifier (e.g., `<sort-modifier>` from `name`) or an option omitted
-from a present [payload](#payloads) without any mutually exclusive options
+An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
+option omitted from a present payload without any mutually exclusive options
 (e.g., `<direction>` from `name/1Ii`) thus retains the working fields config's
 value, while an absent modifier payload or option payload (e.g., from `name=`,
-`name:`, `name/`, `L:`, `B:`) resets the value to its direct or implicit
+`name:`, `name/`, `L:`, `B:`, `N:`) resets the value to its direct or implicit
 default.
 
 ## Nonexistent Fields
@@ -457,16 +466,12 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 
 #### Labeling
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
 label-modifier        = <label-modifier-prefix> [ <label> ]
 label-modifier-prefix = "="
 
-label = {text} (* direct default: {empty string}; transitive default: {field name from the enclosing field spec} *)
+label = {text} (* direct default: {empty string} *)
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
 
 - A field spec's `<label>` is its:
   - Header for table.
