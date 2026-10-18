@@ -498,6 +498,24 @@ private extension MASTests {
 		_ = try parseFieldSpecs(value)
 	}
 
+	@Test(arguments: ["a.b", "adamID,a.b", ".+a.b", ".a.b", "._a.b", ".%a.b", ".-a.b", "@all.adamID.x"])
+	func `a bare . in a field name is invalid`(value: String) {
+		#expect(throws: ParsingError.reservedFieldNameCharacter(".")) { try parseFieldSpecs(value) }
+	}
+
+	@Test(arguments: [#"a\.b"#, #"adamID,a\.b"#, #".+a\.b"#])
+	func `an escaped . in a field name is consumed`(value: String) throws {
+		#expect(try parseFieldSpecs(value).map(\.name).contains("a.b"))
+	}
+
+	@Test
+	func `table & key-value output render a structured value as its compact JSON text`() throws {
+		let object = JSON.Object([("tags", .array([.string("é"), .object(["a": .null])]))])
+		let fieldSpec = fieldSpec(name: "tags", label: "Tags")
+		#expect(try [object].table(fieldSpecs: [fieldSpec], tableConfig: .default) == #"["é",{"a":null}]"#)
+		#expect(try object.keyValueRow(for: fieldSpec)?.value == #"["é",{"a":null}]"#)
+	}
+
 	@Test
 	func `throws error for nonexistent field edit`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "nonexistentField")) {

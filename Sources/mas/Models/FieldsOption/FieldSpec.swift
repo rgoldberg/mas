@@ -106,6 +106,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case nonexistentFieldsConfig(String)
 	case nonexistentFieldSpec(forName: String)
 	case numberCoercionArgumentsNotSupported(String)
+	case reservedFieldNameCharacter(Character)
 	case singleBranch
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
@@ -184,6 +185,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Nonexistent fields config: \(name)"
 		case let .numberCoercionArgumentsNotSupported(name):
 			"<number-coercion-arguments> are not supported for: \(name)"
+		case let .reservedFieldNameCharacter(character):
+			"A field name must escape its reserved character: \(character)"
 		case .singleBranch:
 			"<branches> requires at least 2 branches"
 		case .templateLacksPlaceholder:
@@ -814,10 +817,7 @@ private extension FieldSpecsBuilder {
 		_ input: inout Substring,
 		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
 	) throws(ParsingError) -> (name: String, index: Int) {
-		let name = try parseEscapedText(&input, terminatorSet: nameTerminatorSet)
-		guard !name.isEmpty else {
-			throw .missingFieldName
-		}
+		let name = try parseFieldName(&input, terminatorSet: nameTerminatorSet)
 		return (
 			name,
 			input.first == fieldOccurrenceIndexPrefix
@@ -952,11 +952,20 @@ private func parseFieldSpecEditKind(_ input: inout Substring) -> FieldSpecEditKi
 
 private func parseName(_ input: inout Substring, extraTerminatorSet: Set<Character> = .init())
 throws(ParsingError) -> String {
-	let name = try parseEscapedText(
+	try parseFieldName(
 		&input,
 		terminatorSet: // swiftformat:disable:next indent
 			extraTerminatorSet.union([labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator]),
 	)
+}
+
+/// Parses a non-empty field name up to a character in `terminatorSet`; a bare
+/// `fieldNameReservedCharacter` is invalid (fields.md "Appendix: Escaping").
+private func parseFieldName(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
+	let name = try parseEscapedText(&input, terminatorSet: terminatorSet.union([fieldNameReservedCharacter]))
+	guard input.first != fieldNameReservedCharacter else {
+		throw .reservedFieldNameCharacter(fieldNameReservedCharacter)
+	}
 	guard !name.isEmpty else {
 		throw .missingFieldName
 	}
@@ -1055,6 +1064,8 @@ throws(ParsingError) -> (unescapedText: String, index: String.Index) {
 // MARK: Constants
 
 let escapePrefix = Character("\\")
+
+private let fieldNameReservedCharacter = Character(".")
 
 let fieldSpecSeparator = Character(",")
 

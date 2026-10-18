@@ -31,11 +31,15 @@ Each of the following evaluates to a value whose type is:
 - Template: if solely 1 placeholder, that placeholder's type; otherwise, string.
 - Template text: string.
 
+A field value may also be an array or an object, each a **structured value**. No
+predicate whose output type is not any (e.g., `%s`, or `%.n`) matches a
+structured value.
+
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
-that type (`json`: string, boolean, `null` & a number whose text, including any
-trivia, is JSON number syntax; `table` & `key-value`: string); otherwise, it
-renders it coerced to a string.
+that type (`json`: string, boolean, `null`, structured value & a number whose
+text, including any trivia, is JSON number syntax; `table` & `key-value`:
+string); otherwise, it renders it coerced to a string.
 
 ##### Pipelines
 
@@ -145,8 +149,10 @@ to the coerced input; otherwise, formatting [aborts](#success--failure).
 A number transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`).
 
-Coercing any value to a string always succeeds (`null` becomes the empty
-string), so an `<unconditional-transform-pipeline>`, which starts with a
+Coercing any value to a string always succeeds (`null` becomes the empty string,
+and a [structured value](#value-types) becomes its compact JSON text, with
+non-ASCII characters verbatim, e.g., `["é",{"a":null}]`), so an
+`<unconditional-transform-pipeline>`, which starts with a
 `<coerced-string-transform-call>`, cannot fail.
 
 ###### String Transforms

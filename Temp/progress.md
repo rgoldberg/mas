@@ -364,3 +364,12 @@ gives a number, while `numberFormat`, a chronologic value & a number whose text
 give strings. `table` & `key-value` output render it coerced to a string, while
 `<output>` sorts by it for every output format. Type comments are `type:`,
 `input type:` & `output type:`; every predicate's is an `output type:`.
+
+### Structured Values (2026-10-18)
+
+A [structured value](../Specs/fields-format.md#value-types) (an array or an
+object) is rendered at its type by `json` output & coerced to its compact JSON
+text (non-ASCII characters verbatim) everywhere else, including `table` &
+`key-value` output & sorting; no predicate whose output type is not any matches
+one. A bare `.` in a field name reports `reservedFieldNameCharacter`, reserving
+it for nested field references; `\.` names a field containing `.`.

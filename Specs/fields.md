@@ -534,9 +534,11 @@ If a format modifies an input value, `<input>` sorts by the input, while
 value](fields-format.md#value-types), so it sorts identically for every output
 format.
 
-A value is compared as a string: a string as is, `null` as an empty string & any
-other value as its canonical string representation (e.g., `false`), except that
-a number is a single [segment](#sort-segments):
+A value is compared as a string: a string as is, `null` as an empty string, a
+[structured value](fields-format.md#value-types) as its [compact JSON
+text](fields-format.md#value-coercion) & any other value as its canonical string
+representation (e.g., `false`), except that a number is a single
+[segment](#sort-segments):
 
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
   the number is a [chronologic Unix
@@ -850,28 +852,31 @@ trailing outer bare whitespace is consumed or ignored, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                                            | 1st             | Any                 | Leading Whitespace | Trailing Whitespace     |
-|:------------------------------------------------------------------------------------|:----------------|:--------------------|:-------------------|:------------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`                          | `@` `.`         | `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`                     |                 | `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<base-fields-config-name>`                                                         |                 | `/` `.`             | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-insertion>`                                |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-overlay>`                                  | `+` `%` `_` `-` | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-move>`                                     |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-hide>`                                     |                 | `@` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-removal>`                                  |                 | `@` `,`             | ignored            | ignored                 |
-| `<label>`                                                                           |                 | `:` `/` `,`         | ignored            | ignored                 |
-| `<locale-identifier>` in `<locale>`                                                 |                 | `:`                 | ignored            | ignored                 |
-| `<boundary-characters>`                                                             |                 | `%` `+` `_` `:`     | ignored            | ignored                 |
-| `<multi-character-boundary-text>`                                                   |                 | `%`                 | ignored            | ignored                 |
-| `<format-name>` in a `<format-block>`                                               |                 | `.` `/` `,`         | ignored            | ignored                 |
-| `<template-text>` starting a `<format-block>`                                       | `:` `.`         | `%` `/` `,`         | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>`                               |                 | `%` `/` `,`         | consumed           | consumed iff before `%` |
-| `<format-name>` in a `<block>`                                                      |                 | `.` `+`             | ignored            | ignored                 |
-| `<template-text>` starting a `<block>`                                              | `:` `.`         | `%` `+`             | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>` in a `<block>`                |                 | `%` `+`             | consumed           | consumed iff before `%` |
-| `<decimal-separator>` in `<number-format>`                                          |                 | `:`                 | ignored            | ignored                 |
-| `<reference-date>`                                                                  |                 | `:`                 | ignored            | ignored                 |
-| Any other text argument                                                             |                 | `,` `:`             | ignored            | ignored                 |
+| `{text}`                                                             | 1st             | Any                     | Leading Whitespace | Trailing Whitespace     |
+|:---------------------------------------------------------------------|:----------------|:------------------------|:-------------------|:------------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@`             | `.` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `.` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<base-fields-config-name>`                                          |                 | `/` `.`                 | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-insertion>`                 |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-removal>`                   |                 | `@` `.` `,`             | ignored            | ignored                 |
+| `<label>`                                                            |                 | `:` `/` `,`             | ignored            | ignored                 |
+| `<locale-identifier>` in `<locale>`                                  |                 | `:`                     | ignored            | ignored                 |
+| `<boundary-characters>`                                              |                 | `%` `+` `_` `:`         | ignored            | ignored                 |
+| `<multi-character-boundary-text>`                                    |                 | `%`                     | ignored            | ignored                 |
+| `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`             | ignored            | ignored                 |
+| `<template-text>` starting a `<format-block>`                        | `:` `.`         | `%` `/` `,`             | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`             | consumed           | consumed iff before `%` |
+| `<format-name>` in a `<block>`                                       |                 | `.` `+`                 | ignored            | ignored                 |
+| `<template-text>` starting a `<block>`                               | `:` `.`         | `%` `+`                 | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`                 | consumed           | consumed iff before `%` |
+| `<decimal-separator>` in `<number-format>`                           |                 | `:`                     | ignored            | ignored                 |
+| `<reference-date>`                                                   |                 | `:`                     | ignored            | ignored                 |
+| Any other text argument                                              |                 | `,` `:`                 | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+A bare `.` in a field name is invalid, reserving it for future syntax; an
+escaped `.` is consumed (e.g., `a\.b` names the field `a.b`).
