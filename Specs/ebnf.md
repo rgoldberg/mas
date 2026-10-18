@@ -196,8 +196,8 @@ Unless otherwise specified, expressions do not consume outer bare whitespace.
 
 #### Outer Bare Whitespace Treatment
 
-Defined via a modified meta-grammar supporting [optionals](#optionals) &
-[choices](#choices):
+Defined via a modified meta-grammar supporting [optionals](#optionals),
+[choices](#choices) & [literal text](#literal-text):
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -350,8 +350,8 @@ A [text token](#tokens) that supports [escape sequences](#escaping).
 
 `CONSTRAINTS` describes the valid values (or the text that evaluates to them,
 e.g., which characters may be bare). An invalid value is an error, unless only
-something outside mas (e.g., a terminal) can determine its validity, in which
-case mas passes it through unchecked.
+something outside the [app](configs.md#configs) (e.g., a terminal) can determine
+its validity, in which case the app passes it through unchecked.
 
 ### Nonterminals
 
@@ -422,9 +422,9 @@ Content-dependent multiplicity.
 
 An expression has 3 mutually exclusive possible optionality states:
 
-- **Required**: Neither the expression nor any of its ancestors are optional.
+- **Required**: Neither the expression nor any of its ancestors is an optional.
 - **Directly optional**: The expression is, or is a child of, an optional.
-- **Transitively optional**: Neither the expression nor its parent are an
+- **Transitively optional**: Neither the expression nor its parent is an
   optional, but one of its other ancestors is an optional.
 
 An expression is **optional** if it is either directly optional or transitively
@@ -655,7 +655,7 @@ NONTERMINAL = DEFINITION (* non-structural *)
 ```
 
 Marks a nonterminal that is referenced by comments and/or prose, but not by any
-definitions.
+structural definition.
 
 ##### Last-Wins Comments
 
