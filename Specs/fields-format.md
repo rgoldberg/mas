@@ -725,8 +725,10 @@ non-nullary-version = "V" (* is version; output type: version; value: {field val
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A **version** is a string of 1 or more `.`-separated components, each a
-non-negative integer optionally followed by non-`.` characters.
+A **version** is 1 or more `.`-separated components, each an ASCII digit
+followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
+(e.g., `1.2.3-beta`). `%v` & `%V` match a string whose entire content is a
+version.
 
 ###### Coercion
 

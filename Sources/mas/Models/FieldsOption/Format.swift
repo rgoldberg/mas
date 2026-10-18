@@ -431,13 +431,14 @@ extension Matcher { // swiftlint:disable:this file_types_order
 	}
 }
 
-/// Whether `string` is a version: 1 or more `.`-separated components, each a
-/// non-negative integer optionally followed by non-`.` characters.
+/// Whether `string`'s entire content is a version.
 func isVersion(_ string: String) -> Bool {
-	string.split(separator: ".", omittingEmptySubsequences: false).allSatisfy { component in
-		component.first.map { $0.isASCII && $0.isWholeNumber } ?? false
-	}
+	string.wholeMatch(of: unsafe versionRegex) != nil
 }
+
+/// A version: 1 or more `.`-separated components, each an ASCII digit followed
+/// by any Unicode general category `L` or `N` characters, `+`s & `-`s.
+nonisolated(unsafe) let versionRegex = #/[0-9][\p{L}\p{N}+\-]*(?:\.[0-9][\p{L}\p{N}+\-]*)*/#
 
 /// A number & its trivia (both empty unless coerced with a trivia regex).
 struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file

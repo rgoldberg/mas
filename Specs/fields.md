@@ -591,7 +591,8 @@ compare:
 ###### Version Comparison
 
 [Versions](fields-format.md#version-formatting) compare component by component:
-numerically, then by the non-`.` characters (a component with non-`.` characters
+numerically by its leading ASCII digits, then by its remaining characters per
+`<case-sensitivity>` & `<locale>` (a component with remaining characters
 precedes the same integer without them; e.g., `1.0b` precedes `1.0`); a version
 with fewer components precedes one that extends it.
 
@@ -667,9 +668,8 @@ The number segments are:
 - `<lexical>`: none.
 - `<ungrouped-numeric>`: each maximal run of ASCII digits, with a word-initial
   sign.
-- `<versions>`: each **version**: 1 or more `.`-separated components, each an
-  ASCII digit followed by any letters, digits, `+`s & `-`s (e.g., `1.2.3-beta`,
-  but only `1.2` in `(1.2)` & in `1.2.beta`), without a sign.
+- `<versions>`: each [version](fields-format.md#version-formatting) (e.g., only
+  `1.2` in `(1.2)` & in `1.2.beta`), without a sign.
 - `<grouped-numeric>`: each **grouped number**, with a sign per
   `<number-signs>`.
 

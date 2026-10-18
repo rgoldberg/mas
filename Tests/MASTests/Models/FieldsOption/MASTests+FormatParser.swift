@@ -434,7 +434,7 @@ private extension MASTests {
 		#expect(try rendered("%v", .string(version)) == version)
 	}
 
-	@Test(arguments: ["", "a1", "1..2", "1.", "٣.1", "½"])
+	@Test(arguments: ["", "a1", "1..2", "1.", "٣.1", "½", "1.0 beta", "1.0_b", "1.0!"])
 	func `%v does not match a non-version`(value: String) throws {
 		#expect(try rendered("[%v]", .string(value))?.isEmpty == true)
 	}
