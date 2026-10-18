@@ -529,8 +529,10 @@ input  = "I"
 output = "O"
 ```
 
-If an input value is modified by a format for output, `<input>` sorts based on
-the input, not the output. `<output>` is the opposite.
+If a format modifies an input value, `<input>` sorts by the input, while
+`<output>` sorts by the field spec's [formatted
+value](fields-format.md#value-types), so it sorts identically for every output
+format.
 
 A value is compared as a string: a string as is, `null` as an empty string & any
 other value as its canonical string representation (e.g., `false`), except that

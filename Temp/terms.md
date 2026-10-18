@@ -451,3 +451,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/ebnf.md#type-comments))
     - output type: the type of a nonterminal's value
       ([defined](../Specs/ebnf.md#type-comments))
+94. - formatted value: a field spec's `<format-block>`'s value, at its type,
+      before the output format renders it
+      ([defined](../Specs/fields-format.md#value-types))
+    - REJECTED: field spec output / passthrough
