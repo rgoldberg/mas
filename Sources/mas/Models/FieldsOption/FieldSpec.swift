@@ -340,7 +340,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// Resolves a `<base-fields-config-name>` (already stripped of its
 /// `<base-fields-config-section-prefix>`, empty if absent) against the built-in
 /// named fields configs, whose variants are selected by an output format suffix
-/// (`@json` / `@key-value` / `@table`), the `@none` reference suffix (the
+/// (`@json` / `@key-value` / `@table`), the `@unsuffixed` reference suffix (the
 /// unsuffixed variant), or, absent both, `outputFormat`:
 ///
 /// - `none`: `all` with every field spec hidden.
@@ -1101,7 +1101,7 @@ private let disableAllSortsOption = Character("0")
 
 private let outputFormatSuffixSet = Set(["json", "key-value", "table"] as [Substring])
 private let outputFormatSuffixPrefix = Character("@")
-private let unsuffixedVariantReferenceSuffix = "@none"
+private let unsuffixedVariantReferenceSuffix = "@unsuffixed"
 
 let defaultFieldsConfigName = "default"
 let noneFieldsConfigName = "none"

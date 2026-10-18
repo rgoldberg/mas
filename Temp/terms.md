@@ -238,6 +238,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 43. - kind: config kinds; block kinds; multiplicity kinds
     - type: value types
     - variant: same-stem fields configs
+    - unsuffixed variant: the variant whose name has no output format suffix,
+      which the `@unsuffixed` reference suffix selects
     - form: matcher forms
     - Unicode general category: Unicode's character classification
     - REJECTED: category (except Unicode general category)

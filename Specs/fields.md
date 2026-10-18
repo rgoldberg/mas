@@ -93,9 +93,9 @@ reference to the stem alone.
 Fields configs that share the same stem within the same context are
 **variants**.
 
-An additional suffix matching the regex `@none$` may be appended to a reference
-to a fields config name (not to a name itself), which resolves to the unsuffixed
-variant, regardless of the current output format.
+An additional suffix matching the regex `@unsuffixed$` may be appended to a
+reference to a fields config name (not to a name itself), which resolves to the
+unsuffixed variant, regardless of the current output format.
 
 #### Immutable Built-In Named Fields Configs
 
