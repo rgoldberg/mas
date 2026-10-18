@@ -75,12 +75,6 @@ possible occurrences, determined from the grammar instead of the input:
 - [Choice](#choices): its alternatives' static multiplicity, if they all share
   one; otherwise, **mixed**.
 
-A value may be categorized as:
-
-- **Implicit scalar**: a scalar whose expression is not an inherent scalar.
-- **Implicit repetition**: a repetition whose expression is not an inherent
-  repetition.
-
 ### Constant Vs. Variable Expressions
 
 A **constant expression** consumes invariant text (e.g., a literal).
@@ -417,18 +411,6 @@ definition is [non-structural](#non-structural-comments).
 Content-dependent multiplicity.
 
 0 or 1 occurrence of `EXPRESSION`.
-
-#### Optionality States
-
-An expression has 3 mutually exclusive possible optionality states:
-
-- **Required**: Neither the expression nor any of its ancestors is an optional.
-- **Directly optional**: The expression is, or is a child of, an optional.
-- **Transitively optional**: Neither the expression nor its parent is an
-  optional, but one of its other ancestors is an optional.
-
-An expression is **optional** if it is either directly optional or transitively
-optional.
 
 #### Presence States
 

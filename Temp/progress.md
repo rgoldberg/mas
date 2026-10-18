@@ -458,3 +458,6 @@ implemented.
 Number-to-string transforms retaining trivia is specified, as already
 implemented; `<match-placeholder>`'s predicates have `output type:` comments;
 `<coercible-modifiers>` & `<number-modifiers>` are inlined.
+
+The unused implicit scalar & implicit repetition categories & optionality states
+are removed from the custom EBNF grammar.
