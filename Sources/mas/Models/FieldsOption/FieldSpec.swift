@@ -638,7 +638,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		fieldSpecs.removeAll()
 		workingTags.removeAll()
 		while true {
-			let name = try parseName(&input)
+			let name = try parseFieldName(
+				&input,
+				terminatorSet: [labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator],
+			)
 			let source =
 				if let fieldSpec = baseFieldSpecs.first(where: { $0.name == name }) {
 					fieldSpec
@@ -949,15 +952,6 @@ private func parseFieldSpecEditKind(_ input: inout Substring) -> FieldSpecEditKi
 }
 
 // MARK: - Field modifiers (name / label / format / sort)
-
-private func parseName(_ input: inout Substring, extraTerminatorSet: Set<Character> = .init())
-throws(ParsingError) -> String {
-	try parseFieldName(
-		&input,
-		terminatorSet: // swiftformat:disable:next indent
-			extraTerminatorSet.union([labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator]),
-	)
-}
 
 /// Parses a non-empty field name up to a character in `terminatorSet`; a bare
 /// `fieldNameReservedCharacter` is invalid (fields.md "Appendix: Escaping").
