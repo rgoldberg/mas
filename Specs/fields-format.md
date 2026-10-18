@@ -20,6 +20,22 @@ template-text = ~^{text}^~
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
+##### Value Types
+
+Each of the following evaluates to a value whose type is:
+
+- Block: its pipeline's or template's type; if empty, string.
+- Pipeline: its last value transform's output's type; absent any, its named
+  format's value's type, or else its input's type.
+- Placeholder: its inserted value's type.
+- Template: if solely 1 placeholder, that placeholder's type; otherwise, string.
+- Template text: string.
+
+Output renders a `<format-block>`'s value at its type iff the output supports
+that type (`json`: string, boolean, `null` & a number whose text, including any
+trivia, is JSON number syntax; `table` & `key-value`: string); otherwise, it
+renders the value coerced to a string.
+
 ##### Pipelines
 
 <!--editorconfig-checker-disable-->
@@ -139,7 +155,7 @@ string), so an `<unconditional-transform-pipeline>`, which starts with a
 ```ebnf
 string-transform-pipeline = <string-transform-call>+
 string-transform-call     = <transform-call-prefix> [ <coercion> ] <string-transform>
-string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
+string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* input type: string; output type: string *)
 
 initial-titlecase = "initialTitlecase"
 lowercase         = "lowercase"
@@ -177,8 +193,8 @@ number-to-string-transform-pipeline = [ <number-transform-call>+ ] <number-to-st
 number-transform-call           = <transform-call-prefix> [ <number-coercion> ] <number-transform>
 number-to-string-transform-call = <transform-call-prefix> [ <number-coercion> ] <number-to-string-transform>
 
-number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
-number-to-string-transform = <number-format> (* type: number *)
+number-transform           = <absolute-value> | <round> | <scale> (* input type: number; output type: number *)
+number-to-string-transform = <number-format> (* input type: number; output type: string *)
 
 absolute-value = "absoluteValue"
 round          = "round"
@@ -311,7 +327,7 @@ point.
 ```ebnf
 chronologic-transform-pipeline = <chronologic-transform-call>+
 chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronologic-transform>
-chronologic-transform          = <date-only> | <time-zone> (* type: chronologic *)
+chronologic-transform          = <date-only> | <time-zone> (* input type: chronologic; output type: chronologic *)
 
 date-only = "dateOnly"
 time-zone = "timeZone" <time-zone-arguments> (* sets the output time zone *)
@@ -395,8 +411,7 @@ Unlike a `<value-transform>`, a `<format-transform>` does not transform any
 value; it sets a property of the field itself, currently just its `table`-output
 column alignment. It therefore does not affect the field's rendered value: it is
 a no-op for `json` / `key-value` output (which have no columns to align); it
-does not force `%i`'s type-preserving `json` passthrough into a string, unlike
-every other transform.
+does not change the type of the value it formats, unlike every other transform.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's padding
 is odd-width: `centerStartJustify` puts the extra padding character after the
@@ -569,6 +584,9 @@ A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
     value.
   - Otherwise: formatting aborts.
 
+In a template that is not solely 1 placeholder, each inserted value is [coerced
+to a string](#value-coercion).
+
 Formatting **aborts** by outputting an empty string, ignoring the rest of
 `<format-block>`, both preceding & succeeding.
 
@@ -587,12 +605,12 @@ non-nullary-unconditional-placeholder =
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>
 
-nullary-input     = "i" (* type: any; value: {field value}; "" if null *)
-non-nullary-input = "I" (* type: any; value: {field value}; "" if null *)
-nullary-label     = "l" (* type: any; value: {field label} *)
-non-nullary-label = "L" (* type: any; value: {field label} *)
-nullary-name      = "k" (* type: any; value: {field name}; mnemonic: key *)
-non-nullary-name  = "K" (* type: any; value: {field name}; mnemonic: key *)
+nullary-input     = "i" (* input type: any; value: {field value} *)
+non-nullary-input = "I" (* input type: any; value: {field value} *)
+nullary-label     = "l" (* input type: any; value: {field label} *)
+non-nullary-label = "L" (* input type: any; value: {field label} *)
+nullary-name      = "k" (* input type: any; value: {field name}; mnemonic: key *)
+non-nullary-name  = "K" (* input type: any; value: {field name}; mnemonic: key *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -652,26 +670,28 @@ non-nullary-coercible-standard-predicate   = <non-nullary-boolean> | <non-nullar
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                                  type: any; value: ""; mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                                  type: any; value: ""; mnemonic: 2nd letter of null *)
-nullary-empty          = "e" (* is null or an empty string;                               type: any; value: "" *)
-non-nullary-empty      = "E" (* is null or an empty string;                               type: any; value: "" *)
-nullary-whitespace     = "w" (* is null, an empty string, or a string of only whitespace; type: any; value: "" *)
-non-nullary-whitespace = "W" (* is null, an empty string, or a string of only whitespace; type: any; value: "" *)
-nullary-boolean        = "b" (* is boolean;                                               type: boolean; value: {field value} *)
-non-nullary-boolean    = "B" (* is boolean;                                               type: boolean; value: {field value} *)
-nullary-true           = "t" (* is true;                                                  type: boolean; value: {field value} *)
-non-nullary-true       = "T" (* is true;                                                  type: boolean; value: {field value} *)
-nullary-false          = "f" (* is false;                                                 type: boolean; value: {field value} *)
-non-nullary-false      = "F" (* is false;                                                 type: boolean; value: {field value} *)
-nullary-string         = "s" (* is string;                                                type: string; value: {field value} *)
-non-nullary-string     = "S" (* is string;                                                type: string; value: {field value} *)
+nullary-null           = "u" (* is null;                                                  input type: any; value: ""; mnemonic: 2nd letter of null *)
+non-nullary-null       = "U" (* is null;                                                  input type: any; value: ""; mnemonic: 2nd letter of null *)
+nullary-empty          = "e" (* is null or an empty string;                               input type: any; value: "" *)
+non-nullary-empty      = "E" (* is null or an empty string;                               input type: any; value: "" *)
+nullary-whitespace     = "w" (* is null, an empty string, or a string of only whitespace; input type: any; value: "" *)
+non-nullary-whitespace = "W" (* is null, an empty string, or a string of only whitespace; input type: any; value: "" *)
+nullary-boolean        = "b" (* is boolean;                                               input type: boolean; value: {field value} *)
+non-nullary-boolean    = "B" (* is boolean;                                               input type: boolean; value: {field value} *)
+nullary-true           = "t" (* is true;                                                  input type: boolean; value: {field value} *)
+non-nullary-true       = "T" (* is true;                                                  input type: boolean; value: {field value} *)
+nullary-false          = "f" (* is false;                                                 input type: boolean; value: {field value} *)
+non-nullary-false      = "F" (* is false;                                                 input type: boolean; value: {field value} *)
+nullary-string         = "s" (* is string;                                                input type: string; value: {field value} *)
+non-nullary-string     = "S" (* is string;                                                input type: string; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 ###### Number Formatting
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 nullary-number-matcher     = [ <number-modifiers> ] <nullary-number>
 non-nullary-number-matcher = [ <number-modifiers> ] <non-nullary-number>
@@ -679,18 +699,24 @@ non-nullary-number-success = <non-nullary-number-matcher> -[ <number-block> ]
 
 number-modifiers = <number-coercion>
 
-nullary-number     = "n" (* is number; type: number; value: {field value} *)
-non-nullary-number = "N" (* is number; type: number; value: {field value} *)
+nullary-number     = "n" (* is number; input type: number; value: {field value} *)
+non-nullary-number = "N" (* is number; input type: number; value: {field value} *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ###### Version Formatting
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 non-nullary-version-success = <non-nullary-version> -[ <any-block> ]
 
-nullary-version     = "v" (* is version; type: version; value: {field value} *)
-non-nullary-version = "V" (* is version; type: version; value: {field value} *)
+nullary-version     = "v" (* is version; input type: version; value: {field value} *)
+non-nullary-version = "V" (* is version; input type: version; value: {field value} *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 A **version** is a string of 1 or more `.`-separated components, each a
 non-negative integer optionally followed by non-`.` characters.
@@ -767,8 +793,8 @@ nullary-chronologic-matcher     = [ <coercible-modifiers> ] <nullary-chronologic
 non-nullary-chronologic-matcher = [ <coercible-modifiers> ] <non-nullary-chronologic>
 non-nullary-chronologic-success = <non-nullary-chronologic-matcher> -[ <chronologic-block> ]
 
-nullary-chronologic     = "c" (* is chronologic; type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
-non-nullary-chronologic = "C" (* is chronologic; type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
+nullary-chronologic     = "c" (* is chronologic; input type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
+non-nullary-chronologic = "C" (* is chronologic; input type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

@@ -31,11 +31,6 @@
       5. RFC 3339 variants:
          1. Space separator.
          2. Lowercase `t` or `z`.
-2. JSON output types are undefined: the [type-preserving passthrough for
-   `%i`](../Specs/fields-format.md#format-transforms) is mentioned but not
-   defined, and it conflicts with
-   [`"" if null`](../Specs/fields-format.md#unconditional-placeholders) (e.g.,
-   whether `%i` on `null` outputs `null` or `""`).
 
 ### Documentation
 

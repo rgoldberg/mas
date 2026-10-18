@@ -192,43 +192,35 @@ enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:d
 // MARK: - Evaluation
 
 extension Format { // swiftlint:disable:this file_types_order
-	private var isPassthrough: Bool {
-		switch self {
-		case let .pipeline(calls):
-			calls.isEmpty
-		case let .template(elements):
-			elements == [.placeholder(.unconditional(.input, pipeline: .init()))]
-		}
-	}
-
 	/// Renders this format against `value` (`nil` iff the field does not exist
-	/// for this item), producing the node to display / embed in output. A format
-	/// that is solely `%i`, or a pipeline without any value transforms, passes
-	/// the original node through unchanged (so JSON output preserves the value's
-	/// type); anything else produces a string, which is empty iff formatting
-	/// aborts or the format outputs an empty string.
+	/// for this item), producing the node to display / embed in output, at its
+	/// evaluated value's type (fields-format.md "Value Types"): e.g., `%i`
+	/// renders `null` as `null`, while `(%i)` renders it as `"()"`. An empty
+	/// string iff formatting aborts.
 	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
-		isPassthrough
-			? value ?? .null
-			: .string(try evaluated(in: .init(input: value, label: label, name: name, matched: nil)) ?? "")
+		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node ?? .string("")
 	}
 
-	/// The evaluated string, or `nil` iff formatting aborts.
-	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+	/// The evaluated value, or `nil` iff formatting aborts.
+	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .pipeline(calls):
 			// A block's pipeline formats the enclosing matcher's value; a
 			// `<format-block>`'s, the field value
-			return try (context.matched ?? .input(context.input)).applying(calls)?.string
+			return try (context.matched ?? .input(context.input)).applying(calls)
 		case let .template(elements):
+			// A template that is solely 1 placeholder has that placeholder's value
+			if let element = elements.first, elements.count == 1, element.isPlaceholder {
+				return try element.evaluated(in: context)
+			}
 			var result = ""
 			for element in elements {
 				guard let evaluated = try element.evaluated(in: context) else {
 					return nil
 				}
-				result += evaluated
+				result += evaluated.string
 			}
-			return result
+			return .string(result)
 		}
 	}
 }
@@ -247,27 +239,36 @@ private struct FormatContext { // swiftlint:disable:this one_declaration_per_fil
 }
 
 private extension TemplateElement { // swiftlint:disable:this file_types_order
-	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+	var isPlaceholder: Bool {
+		switch self {
+		case .blockPlaceholder, .placeholder:
+			true
+		case .text:
+			false
+		}
+	}
+
+	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .blockPlaceholder(pipeline):
-			try (context.matched ?? .input(context.input)).applying(pipeline)?.string
+			try (context.matched ?? .input(context.input)).applying(pipeline)
 		case let .placeholder(placeholder):
 			try placeholder.evaluated(in: context)
 		case let .text(text):
-			text
+			.string(text)
 		}
 	}
 }
 
 private extension Placeholder { // swiftlint:disable:this file_types_order
-	func evaluated(in context: FormatContext) throws(FormattingError) -> String? {
+	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .conditional(matcher, form):
 			let matched = matcher.matched(context.input, block: form.successBlock)
 			return switch form {
 			case let .abortOnFailure(success):
 				if let matched {
-					try success.evaluatedBlock(in: context.matching(matched), nullaryValue: matched.string)
+					try success.evaluatedBlock(in: context.matching(matched), nullaryValue: matched)
 				} else {
 					nil
 				}
@@ -297,7 +298,7 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 				try failure.evaluated(in: context)
 			}
 		case let .unconditional(predicate, pipeline):
-			return try predicate.value(in: context).applying(pipeline)?.string
+			return try predicate.value(in: context).applying(pipeline)
 		}
 	}
 }
@@ -307,7 +308,7 @@ private enum BranchOutcome { // swiftlint:disable:this one_declaration_per_file
 	/// No value, so the next branch is tried.
 	case noValue
 	/// A value, which is `nil` iff formatting aborts.
-	case value(String?)
+	case value(FormatValue?)
 }
 
 private extension Branch { // swiftlint:disable:this file_types_order
@@ -317,16 +318,16 @@ private extension Branch { // swiftlint:disable:this file_types_order
 			let matched = matcher.matched(context.input, block: isNegated ? nil : block)
 			return if isNegated {
 				matched == nil
-					? .value(try block.evaluatedBlock(in: context, nullaryValue: FormatValue.input(context.input).string))
+					? .value(try block.evaluatedBlock(in: context, nullaryValue: .input(context.input)))
 					: .noValue
 			} else if let matched {
-				.value(try block.evaluatedBlock(in: context.matching(matched), nullaryValue: matched.string))
+				.value(try block.evaluatedBlock(in: context.matching(matched), nullaryValue: matched))
 			} else {
 				.noValue
 			}
 		case let .unconditional(predicate, block):
 			let value = predicate.value(in: context)
-			return .value(try block.evaluatedBlock(in: context.matching(value), nullaryValue: value.string))
+			return .value(try block.evaluatedBlock(in: context.matching(value), nullaryValue: value))
 		}
 	}
 }
@@ -334,7 +335,7 @@ private extension Branch { // swiftlint:disable:this file_types_order
 private extension Format? { // swiftlint:disable:this file_types_order
 	/// This block's evaluated value, `nullaryValue` iff the enclosing matcher is
 	/// nullary (i.e., has no block), or `nil` iff formatting aborts.
-	func evaluatedBlock(in context: FormatContext, nullaryValue: String) throws(FormattingError) -> String? {
+	func evaluatedBlock(in context: FormatContext, nullaryValue: FormatValue) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .some(block):
 			try block.evaluated(in: context)
@@ -627,6 +628,7 @@ private func iso8601TimePrefix(of string: Substring) -> (time: TimeOfDay, end: S
 	)
 }
 
+private nonisolated(unsafe) let jsonNumberRegex = #/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/#
 private nonisolated(unsafe) let iso8601DateRegex = #/([0-9]{4})-([0-9]{2})-([0-9]{2})/#
 private nonisolated(unsafe) let iso8601TimeRegex =
 	#/([0-9]{2}):([0-9]{2}):([0-9]{2})(?:[.,]([0-9]+))?(Z|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
@@ -685,7 +687,20 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// The rendered value.
+	/// The value as an output node, at its type iff JSON supports it (a number
+	/// iff its text, trivia included, is JSON number syntax), else as a string.
+	var node: JSON.Node {
+		switch self {
+		case .chronologic, .string:
+			.string(string)
+		case let .input(node):
+			node ?? .null
+		case .number:
+			string.wholeMatch(of: unsafe jsonNumberRegex).map { _ in .number(.fallback(string)) } ?? .string(string)
+		}
+	}
+
+	/// The rendered value, coerced to a string.
 	var string: String {
 		switch self {
 		case let .chronologic(chronologic, style):
@@ -746,7 +761,11 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 			guard transformed != nil || call.coercion != nil else {
 				throw .transformInputTypeMismatch(transform: call.transform, input: string)
 			}
-			return transformed.map { .number($0, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix) }
+			return transformed.map { transformed in
+				call.transform.kind == .numberToString
+					? .string(triviaPrefix + transformed + triviaSuffix)
+					: .number(transformed, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix)
+			}
 		case .string:
 			guard call.coercion != nil || isString else {
 				throw .transformInputTypeMismatch(transform: call.transform, input: string)

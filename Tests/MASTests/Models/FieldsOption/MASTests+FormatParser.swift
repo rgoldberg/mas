@@ -283,6 +283,27 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("%i", JSON.Node.null, "null"),
+			("(%i)", .null, #""()""#),
+			("", .null, #""""#),
+			("%N%n+%i+", .null, "null"),
+			("%N%n+%i+", .number(42), "42"),
+			("%.N%n+%i+", .string("42"), "42"),
+			(".round", .number(5), "5"),
+			("..round", .string("+2.4"), "2"),
+			(".scale:16,0,,0:", .number(255), #""ff""#),
+			(".numberFormat", .number(5), #""5""#),
+			("%t", .bool(true), "true"),
+			("%c", .string("2020-03-18"), #""2020-03-18""#),
+		],
+	)
+	func `renders a format's value at its type iff JSON supports it`(format: String, value: JSON.Node, json: String)
+	throws {
+		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n").description == json)
+	}
+
+	@Test(
+		arguments: [
 			("%c", JSON.Node.string("2020-03-18"), "2020-03-18"),
 			("%C.timeZone:UTC:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:utc:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
