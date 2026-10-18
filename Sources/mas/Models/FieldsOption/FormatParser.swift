@@ -641,12 +641,13 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	case chronologic
 	case number
 	case string
+	case timeOnly
 	case unconditional
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
-		case .any, .boolean, .chronologic, .number, .string:
+		case .any, .boolean, .chronologic, .number, .string, .timeOnly:
 			true
 		case .unconditional:
 			false
@@ -658,7 +659,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .unconditional:
 			.unconditional
-		case .chronologic, .number, .string:
+		case .chronologic, .number, .string, .timeOnly:
 			self
 		}
 	}
@@ -674,6 +675,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<number-pipeline>"
 		case .string:
 			"<string-pipeline>"
+		case .timeOnly:
+			"<time-only-pipeline>"
 		}
 	}
 
@@ -688,6 +691,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			[.number, .numberToString, .unconditional]
 		case .string:
 			[.string]
+		case .timeOnly:
+			[.timeOnly, .unconditional]
 		}
 	}
 
@@ -697,7 +702,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			switch predicate {
 			case .boolean, .false, .true:
 				.boolean
-			case .chronologic:
+			case .date:
 				.chronologic
 			case .empty, .null, .whitespace:
 				.any
@@ -705,6 +710,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.number
 			case .string, .version:
 				.string
+			case .timeOnly:
+				.timeOnly
 			}
 	}
 }
@@ -719,6 +726,8 @@ private enum PipelineShape { // swiftlint:disable:this one_declaration_per_file
 	case numberToString
 	/// A `<string-transform-pipeline>`.
 	case string
+	/// A `<time-only-transform-pipeline>`.
+	case timeOnly
 	/// An `<unconditional-transform-pipeline>`.
 	case unconditional
 }
@@ -738,6 +747,14 @@ private extension [TransformCall] {
 			last.transform.kind == .numberToString && dropLast().allSatisfy { $0.transform.kind == .number }
 		case .string:
 			allSatisfy { $0.transform.kind == .string }
+		case .timeOnly:
+			allSatisfy { call in
+				if case .timeZone = call.transform {
+					true
+				} else {
+					false
+				}
+			}
 		case .unconditional:
 			first.coercion != nil && allSatisfy { $0.transform.kind == .string }
 		}
@@ -758,9 +775,9 @@ private extension Predicate {
 	/// Whether this predicate supports a `<coercion>`.
 	var isCoercible: Bool {
 		switch self {
-		case .boolean, .chronologic, .false, .number, .true:
+		case .boolean, .date, .false, .number, .true:
 			true
-		case .empty, .null, .string, .version, .whitespace:
+		case .empty, .null, .string, .timeOnly, .version, .whitespace:
 			false
 		}
 	}

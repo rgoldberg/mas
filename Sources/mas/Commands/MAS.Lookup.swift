@@ -59,12 +59,12 @@ private struct KeyValueOutputConfig: OutputConfig {
 			.init(
 				name: "currentVersionReleaseDate",
 				label: "Released",
-				// `%C.dateOnly++`: the release date, date-only, in the system time zone
+				// `%D.dateOnly++`: the release date, date-only, in the system time zone
 				format: .template(
 					[
 						.placeholder(
 							.conditional(
-								.init(predicate: .chronologic, coercion: nil),
+								.init(predicate: .date, coercion: nil),
 								.binary(success: .pipeline([.init(transform: .dateOnly, coercion: nil)]), failure: .empty),
 							),
 						),

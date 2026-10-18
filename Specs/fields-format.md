@@ -54,6 +54,8 @@ number-pipeline =
 
 chronologic-pipeline = <named-chronologic-format> | [ <named-chronologic-format> ] ( <chronologic-transform-pipeline> | <unconditional-transform-pipeline> )
 
+time-only-pipeline = <named-time-only-format> | [ <named-time-only-format> ] ( <time-only-transform-pipeline> | <unconditional-transform-pipeline> )
+
 unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-format> ] <unconditional-transform-pipeline>
 ```
 <!--markdownlint-enable line-length-->
@@ -68,6 +70,7 @@ named-format               = <name-prefix> <format-name> (* only for: name of a 
 named-string-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <string-block> *)
 named-number-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <number-block> *)
 named-chronologic-format   = <name-prefix> <format-name> (* only for: name of a format conforming to <chronologic-block> *)
+named-time-only-format     = <name-prefix> <format-name> (* only for: name of a format conforming to <time-only-block> *)
 named-unconditional-format = <name-prefix> <format-name> (* only for: name of a format conforming to <unconditional-block> *)
 
 named-format-reference =
@@ -75,6 +78,7 @@ named-format-reference =
   | <named-string-format>
   | <named-number-format>
   | <named-chronologic-format>
+  | <named-time-only-format>
   | <named-unconditional-format>
   (* non-structural *)
 
@@ -351,7 +355,11 @@ point.
 ```ebnf
 chronologic-transform-pipeline = <chronologic-transform-call>+
 chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronologic-transform>
-chronologic-transform          = <date-only> | <time-zone> (* type: chronologic *)
+chronologic-transform          = <date-only> | <time-only-transform> (* type: chronologic *)
+
+time-only-transform-pipeline = <time-only-transform-call>+
+time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
+time-only-transform          = <time-zone> (* type: chronologic *)
 
 date-only = "dateOnly"
 time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone *)
@@ -359,8 +367,9 @@ time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A `<chronologic-transform-pipeline>`'s transforms jointly set how its value is
-rendered, regardless of where `dateOnly` appears:
+A `<chronologic-transform-pipeline>`'s or `<time-only-transform-pipeline>`'s
+transforms jointly set how its value is rendered, regardless of where `dateOnly`
+appears:
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone`: sets the output time zone to the one that its `<time-zone-code>`
@@ -472,7 +481,8 @@ nullary-predicate =
   | <nullary-string>
   | <nullary-number>
   | <nullary-version>
-  | <nullary-chronologic>
+  | <nullary-date>
+  | <nullary-time-only>
   | <nullary-match>
   (* non-structural *)
 
@@ -489,7 +499,8 @@ non-nullary-predicate =
   | <non-nullary-string>
   | <non-nullary-number>
   | <non-nullary-version>
-  | <non-nullary-chronologic>
+  | <non-nullary-date>
+  | <non-nullary-time-only>
   | <non-nullary-match>
   (* non-structural *)
 
@@ -507,13 +518,22 @@ block-terminator = -"+"
 ```ebnf
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
-success-block = <string-block> | <boolean-block> | <number-block> | <chronologic-block> | <any-block> | <unconditional-block> (* non-structural *)
+success-block =
+  <string-block>
+  | <boolean-block>
+  | <number-block>
+  | <chronologic-block>
+  | <time-only-block>
+  | <any-block>
+  | <unconditional-block>
+  (* non-structural *)
 failure-block = <unconditional-block>
 
 string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
 boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
 number-block        = <number-pipeline> | <number-template>               (* direct default: {empty string} *)
 chronologic-block   = <chronologic-pipeline> | <chronologic-template>     (* direct default: {empty string} *)
+time-only-block     = <time-only-pipeline> | <time-only-template>         (* direct default: {empty string} *)
 any-block           = <unconditional-pipeline> | <any-template>           (* direct default: {empty string} *)
 unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: {empty string} *)
 
@@ -521,6 +541,7 @@ string-template        = ( <string-block-placeholder> | <unconditional-placehold
 boolean-template       = ( <boolean-block-placeholder> | <unconditional-placeholder> | <template-text> )+
 number-template        = ( <number-block-placeholder> | <unconditional-placeholder> | <template-text> )+
 chronologic-template   = ( <chronologic-block-placeholder> | <unconditional-placeholder> | <template-text> )+
+time-only-template     = ( <time-only-block-placeholder> | <unconditional-placeholder> | <template-text> )+
 any-template           = ( <any-block-placeholder> | <unconditional-placeholder> | <template-text> )+
 unconditional-template = ( <unconditional-placeholder> | <template-text> )+
 
@@ -529,6 +550,7 @@ block-placeholder =
   | <boolean-block-placeholder>
   | <number-block-placeholder>
   | <chronologic-block-placeholder>
+  | <time-only-block-placeholder>
   | <any-block-placeholder>
   (* non-structural *)
 
@@ -549,7 +571,12 @@ number-block-placeholder =
 
 chronologic-block-placeholder =
   <placeholder-prefix>
-  ( <nullary-chronologic> | <non-nullary-chronologic> -<chronologic-pipeline> <block-terminator> )
+  ( <nullary-date> | <non-nullary-date> -<chronologic-pipeline> <block-terminator> )
+  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+
+time-only-block-placeholder =
+  <placeholder-prefix>
+  ( <nullary-time-only> | <non-nullary-time-only> -<time-only-pipeline> <block-terminator> )
   (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
 
 any-block-placeholder =
@@ -658,9 +685,21 @@ non-nullary-scalar-conditional-placeholder =
     | <abort-on-failure> <non-nullary-scalar-success> <block-terminator>
   )
 
-nullary-scalar-matcher     = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-chronologic-matcher>
-non-nullary-scalar-matcher = <non-nullary-standard-matcher> | <non-nullary-number-matcher> | <non-nullary-version> | <non-nullary-chronologic-matcher>
-non-nullary-scalar-success = <non-nullary-standard-success> | <non-nullary-number-success> | <non-nullary-version-success> | <non-nullary-chronologic-success>
+nullary-scalar-matcher = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-date-matcher> | <nullary-time-only>
+
+non-nullary-scalar-matcher =
+  <non-nullary-standard-matcher>
+  | <non-nullary-number-matcher>
+  | <non-nullary-version>
+  | <non-nullary-date-matcher>
+  | <non-nullary-time-only>
+
+non-nullary-scalar-success =
+  <non-nullary-standard-success>
+  | <non-nullary-number-success>
+  | <non-nullary-version-success>
+  | <non-nullary-date-success>
+  | <non-nullary-time-only-success>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -808,12 +847,15 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-chronologic-matcher     = [ <coercion> ] <nullary-chronologic>
-non-nullary-chronologic-matcher = [ <coercion> ] <non-nullary-chronologic>
-non-nullary-chronologic-success = <non-nullary-chronologic-matcher> -[ <chronologic-block> ]
+nullary-date-matcher          = [ <coercion> ] <nullary-date>
+non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
+non-nullary-date-success      = <non-nullary-date-matcher> -[ <chronologic-block> ]
+non-nullary-time-only-success = <non-nullary-time-only> -[ <time-only-block> ]
 
-nullary-chronologic     = "c" (* is chronologic; output type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
-non-nullary-chronologic = "C" (* is chronologic; output type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
+nullary-date          = "d" (* is chronologic with a date; output type: chronologic; value: {ISO date / datetime, per input, in system time zone} *)
+non-nullary-date      = "D" (* is chronologic with a date; output type: chronologic; value: {ISO date / datetime, per input, in system time zone} *)
+nullary-time-only     = "c" (* is time-only;               output type: chronologic; value: {ISO time, in system time zone}; mnemonic: clock *)
+non-nullary-time-only = "C" (* is time-only;               output type: chronologic; value: {ISO time, in system time zone}; mnemonic: clock *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -821,6 +863,10 @@ non-nullary-chronologic = "C" (* is chronologic; output type: chronologic; value
 Input is always auto-detected: a string as an ISO-8601 datetime, date-only, or
 time-only (trying them in that order) & a number as a Unix time; this does not
 depend on field name, label, output format, or any other context.
+
+`%d` & `%D` match a chronologic value that has a date (i.e., a date-only, a
+datetime, or a Unix time); `%c` & `%C` match a time-only value. No predicate
+matches both (e.g., `%mdc+` matches either).
 
 **Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
 seconds.
@@ -831,8 +877,8 @@ indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
 `.5`, or `1.5e9`).
 
 [`<coercion>`](#coercion) also allows a string that is not an ISO-8601 value but
-whose entire content is a decimal number, as a Unix time (e.g., `%.C` matches
-`"0"`, but `%C` does not).
+whose entire content is a decimal number, as a Unix time (e.g., `%.D` matches
+`"0"`, but `%D` does not).
 
 An ISO-8601:
 
@@ -851,10 +897,11 @@ week dates, or reduced precision other than a datetime without seconds).
 
 A datetime or time-only without a UTC offset is in the system time zone.
 
-A time-only value has no date, so it fails a chronologic predicate (`c` or `C`)
-whose block applies `dateOnly` to it (e.g., `%C.dateOnly+-+` outputs `-` for
-`17:39:23`); elsewhere, it does not conform to `dateOnly`'s input type, so
-[value coercion](#value-coercion) applies.
+A time-only value has no date, so `%C`'s block cannot apply `dateOnly` to it,
+and elsewhere, it does not conform to `dateOnly`'s input type, so [value
+coercion](#value-coercion) applies (e.g., `.dateOnly` reports an error for
+`17:39:23`, while `..dateOnly` aborts formatting); `%D.dateOnly+-+` outputs `-`
+for `17:39:23`.
 
 A Unix time is chronologic iff it is at least `-9223372036854775.808` & less
 than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in

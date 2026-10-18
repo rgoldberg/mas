@@ -744,7 +744,7 @@ unix-time    = "unix-time"
 <!--editorconfig-checker-enable-->
 
 The chronologic segments are each longest text that a `<chronologic-format>`
-matches, as [`%.c` detects](fields-format.md#chronologic-formatting) it:
+matches, as [`%c` & `%.d` detect](fields-format.md#chronologic-formatting) it:
 
 - `<iso-date>`: an ISO-8601 date-only.
 - `<iso-datetime>`: an ISO-8601 datetime.

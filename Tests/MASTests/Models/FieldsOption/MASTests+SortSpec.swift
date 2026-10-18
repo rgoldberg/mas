@@ -351,7 +351,7 @@ private extension MASTests {
 		],
 	)
 	func `compares output values iff the sort source is output`(sort: String, result: ComparisonResult) throws {
-		let fieldSpec = try parsedFieldSpec(format: "%C.dateOnly++", sort: sort)
+		let fieldSpec = try parsedFieldSpec(format: "%D.dateOnly++", sort: sort)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
 			try inSystemTimeZone("America/New_York") {

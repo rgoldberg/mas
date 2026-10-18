@@ -70,7 +70,8 @@ private extension MASTests {
 			(.number, nil, .string("5"), false),
 			(.number, .default, .string("5"), true),
 			(.string, nil, .null, false),
-			(.chronologic, nil, .string("XYZ"), false),
+			(.date, nil, .string("XYZ"), false),
+			(.timeOnly, nil, .string("2020-03-18"), false),
 			(.boolean, .default, .string("true"), true),
 		],
 	)
