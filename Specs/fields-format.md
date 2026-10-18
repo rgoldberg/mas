@@ -616,8 +616,8 @@ non-nullary-scalar-conditional-placeholder =
     | <abort-on-failure> <non-nullary-scalar-success> <block-terminator>
   )
 
-nullary-scalar-matcher     = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-chronologic>
-non-nullary-scalar-matcher = <non-nullary-standard-matcher> | <non-nullary-number-matcher> | <non-nullary-version> | <non-nullary-chronologic>
+nullary-scalar-matcher     = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-chronologic-matcher>
+non-nullary-scalar-matcher = <non-nullary-standard-matcher> | <non-nullary-number-matcher> | <non-nullary-version> | <non-nullary-chronologic-matcher>
 non-nullary-scalar-success = <non-nullary-standard-success> | <non-nullary-number-success> | <non-nullary-version-success> | <non-nullary-chronologic-success>
 
 nullary-scalar-conditional-predicate     = <nullary-standard-predicate> | <nullary-number> | <nullary-version> | <nullary-chronologic>
@@ -763,7 +763,9 @@ written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and a regex's
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-nullary-chronologic-success = <non-nullary-chronologic> -[ <chronologic-block> ]
+nullary-chronologic-matcher     = [ <coercible-modifiers> ] <nullary-chronologic>
+non-nullary-chronologic-matcher = [ <coercible-modifiers> ] <non-nullary-chronologic>
+non-nullary-chronologic-success = <non-nullary-chronologic-matcher> -[ <chronologic-block> ]
 
 nullary-chronologic     = "c" (* is chronologic; type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
 non-nullary-chronologic = "C" (* is chronologic; type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
@@ -771,9 +773,21 @@ non-nullary-chronologic = "C" (* is chronologic; type: chronologic; value: {ISO 
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Input is always auto-detected, trying, in order: ISO-8601 datetime, ISO-8601
-date-only, ISO-8601 time-only, then a Unix epoch (seconds) numeric timestamp;
-this does not depend on field name, label, output format, or any other context.
+Input is always auto-detected: a string as an ISO-8601 datetime, date-only, or
+time-only (trying them in that order) & a number as a Unix time; this does not
+depend on field name, label, output format, or any other context.
+
+**Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
+seconds.
+
+A **decimal number** is an optional sign (`-` or `+`); ASCII digits, a `.`
+followed by ASCII digits, or both, in that order; then optionally an exponent
+indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
+`.5`, or `1.5e9`).
+
+[`<coercion>`](#coercion) also allows a string that is not an ISO-8601 value but
+whose entire content is a decimal number, as a Unix time (e.g., `%.C` matches
+`"0"`, but `%C` does not).
 
 An ISO-8601:
 
@@ -792,9 +806,9 @@ whose block applies `dateOnly` to it (e.g., `%C.dateOnly+-+` outputs `-` for
 `17:39:23`); elsewhere, it does not conform to `dateOnly`'s input type, so
 [value coercion](#value-coercion) applies.
 
-A Unix epoch timestamp is chronologic iff it is at least `-9223372036854775.808`
-& less than `9223372036854775.808` (i.e., its whole milliseconds, rounded down,
-fit in a signed 64-bit integer).
+A Unix time is chronologic iff it is at least `-9223372036854775.808` & less
+than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
+a signed 64-bit integer).
 
 A datetime's or time-only's fractional seconds are truncated to 3 digits, which
 are omitted iff all are `0` (e.g., `2020-03-18T17:39:23.1234Z` renders as

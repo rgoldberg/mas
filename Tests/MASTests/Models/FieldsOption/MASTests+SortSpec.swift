@@ -144,6 +144,21 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("1", false, Set(ISO8601Form.allCases)),
+			("1Cunix-time:", true, .init()),
+			("1C iso-date , unix-time :", true, .init([.date])),
+			("1Cunix-time:Ciso:", false, .init(ISO8601Form.allCases)),
+		],
+	)
+	func `parses unix-time chronologic segments`(sort: String, hasUnixTimeSegments: Bool, forms: Set<ISO8601Form>)
+	throws {
+		let optionSet = try parsedSortSpec(sort).optionSet
+		#expect(optionSet.hasUnixTimeSegments == hasUnixTimeSegments)
+		#expect(optionSet.chronologicSegments == forms)
+	}
+
+	@Test(
+		arguments: [
 			("1N", ParsingError.missingSortOptionTerminator),
 			("1N,.:", .invalidSortOptionArguments("N")),
 			("1N,,,,.:L de_DE :", .invalidSortOptionArguments("N")),
@@ -155,6 +170,7 @@ private extension MASTests {
 			("1C", .missingSortOptionTerminator),
 			("1Cbogus:", .invalidSortOptionArguments("C")),
 			("1Ciso,:", .invalidSortOptionArguments("C")),
+			("1Cunix:", .invalidSortOptionArguments("C")),
 			("1L", .missingSortOptionTerminator),
 			("1Lxx_Bogus:", .invalidLocaleIdentifier("xx_Bogus")),
 			("1B/", .missingSortOptionTerminator),
@@ -244,6 +260,18 @@ private extension MASTests {
 			("1Ciso-date:", "23:00:00Z", "2020-01-01", .orderedDescending),
 			// A chronologic segment is not adjacent to a digit
 			("1", "2020-03-180", "2020-03-19", .orderedDescending),
+			// A number is a Unix time iff <chronologic-formats> includes <unix-time>
+			("1", .number(1_584_553_163), "2020-03-19", .orderedDescending),
+			("1Ciso,unix-time:", .number(1_584_553_163), "2020-03-19", .orderedAscending),
+			("1Ciso,unix-time:", .number(1_584_553_163), "2020-03-17", .orderedDescending),
+			("1Cunix-time:", .number(1e19), .number(2), .orderedDescending),
+			// A Unix time segment is a whole whitespace-delimited word
+			("1Ciso,unix-time:", "at 1584553163 UTC", "at 2020-03-19 UTC", .orderedAscending),
+			("1Ciso,unix-time:", "1584553163", "2020-03-19", .orderedAscending),
+			("1Ciso,unix-time:", "1584553163,", "2020-03-19", .orderedDescending),
+			("1Ciso,unix-time:", "v1584553163", "2020-03-19", .orderedDescending),
+			("1Cunix-time:", "1584553163", "2", .orderedDescending),
+			("1Cunix-time:B+punct+:", "(1584553163)", "(2)", .orderedAscending),
 			// Without <all-conforming>, a value without typed segments is
 			// nonconforming
 			("1N:", "Free", "$5", .orderedDescending),

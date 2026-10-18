@@ -151,6 +151,16 @@ on the current date in the system time zone (`Environment.now`). A time-only
 value fails a chronologic predicate whose block applies `dateOnly` to it;
 elsewhere, `dateOnly` on it is a value coercion failure.
 
+### Unix Time (2026-10-18)
+
+`chronologic(from:isCoerced:)` reads a number as a Unix time; it reads a string
+whose entire content is a decimal number as one only with `<coercion>`, which
+`%c` & `%C` now accept (e.g., `%.C` matches `"0"`). `<unix-time>` in
+`<chronologic-formats>` (`SortOptionSet.hasUnixTimeSegments`) makes a number
+value a single chronologic segment (`numberValueSegment(of:)`) & a decimal
+number that is a whole whitespace-delimited word in a string a chronologic
+segment (`unixTimeSegment(at:in:value:)`).
+
 ### Built-In Fields Config Variants (2026-09-25)
 
 `resolveBaseFieldsConfig` validates config names [per
@@ -209,7 +219,7 @@ Probed every [formatting](../Specs/fields-format.md),
 [fields](../Specs/fields.md) & [table](../Specs/table.md) grammar construct &
 prose example (~300 cases, via a throwaway test) against the parser & renderer,
 and fixed every divergence (e.g., chronologic coercion of ISO-8601 strings &
-Unix epoch numbers, extended ISO-8601 UTC offsets like `+09:00`, an explicit `s`
+Unix time numbers, extended ISO-8601 UTC offsets like `+09:00`, an explicit `s`
 with `b` / `u` no longer implying a table header row).
 
 ### Spec Revision Updates (after 2026-09-27)
@@ -260,7 +270,7 @@ processed exactly, of unlimited precision & magnitude, via `DecimalNumber` &
 `BigInt`: comparisons (number & version segments), coercion (a coerced number's
 canonical form retains its notation, e.g., `1e3`) & `scale`; `<grouped-numeric>`
 compares each grouped number, fractional part & exponent included, as 1 number.
-Chronologic Unix epoch timestamps still go through `Date`'s `Double`.
+Chronologic Unix times still go through `Date`'s `Double`.
 
 ### Field Order Tiebreaker (2026-10-06)
 
@@ -322,8 +332,8 @@ Their magnitudes are unconstrained: an `<index>` beyond `Int`'s range reports
 saturates at `Int.max`. `scale` renders `0` without computing `radix^exponent`
 for a huge `<exponent>`.
 
-A Unix epoch timestamp is chronologic iff its whole milliseconds, rounded down,
-fit in a signed 64-bit integer, as `unixEpochDate` already implemented.
+A Unix time is chronologic iff its whole milliseconds, rounded down, fit in a
+signed 64-bit integer, as `unixTimeDate` already implemented.
 
 A value that `scale` would render with more than 100 digits before the radix
 point does not conform to its input type, so `Transform.applied(to:)` returns

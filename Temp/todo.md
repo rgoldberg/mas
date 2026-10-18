@@ -34,26 +34,23 @@
 
 ### Formatting
 
-1. [Chronologic
-   auto-detection](../Specs/fields-format.md#chronologic-formatting):
-   1. It accepts a string of a decimal number (e.g., `"0"`) as a Unix epoch
-      timestamp, unlike `%n`, which requires a JSON number absent `<coercion>`.
-      Should only a JSON number be a "numeric timestamp"?
-   2. Which ISO-8601 representations should be detected?
-      1. Implemented:
-         1. Extended-format date.
-         2. Extended-format complete time, with optional fractional seconds
-            (after `.` or `,`) & an optional UTC offset (`Z`, `±hh`, `±hhmm`, or
-            `±hh:mm`).
-         3. Extended-format date, `T` & complete time, as above.
-      2. Undetected:
-         1. Basic format (e.g., `20200318`, currently read as a Unix epoch).
-         2. Reduced precision (e.g., `2020-03-18T17:39`).
-         3. Ordinal dates.
-         4. Week dates.
-         5. RFC 3339 variants:
-            1. Space separator.
-            2. Lowercase `t` or `z`.
+1. Which ISO-8601 representations should [chronologic
+   auto-detection](../Specs/fields-format.md#chronologic-formatting) detect?
+   1. Implemented:
+      1. Extended-format date.
+      2. Extended-format complete time, with optional fractional seconds (after
+         `.` or `,`) & an optional UTC offset (`Z`, `±hh`, `±hhmm`, or
+         `±hh:mm`).
+      3. Extended-format date, `T` & complete time, as above.
+   2. Undetected:
+      1. Basic format (e.g., `20200318`, currently not chronologic, or a Unix
+         time with `<coercion>`).
+      2. Reduced precision (e.g., `2020-03-18T17:39`).
+      3. Ordinal dates.
+      4. Week dates.
+      5. RFC 3339 variants:
+         1. Space separator.
+         2. Lowercase `t` or `z`.
 2. JSON output types are undefined: the [type-preserving passthrough for
    `%i`](../Specs/fields-format.md#format-transforms) is mentioned but not
    defined, and it conflicts with
@@ -130,8 +127,7 @@ mirroring `numberFormat`) needs the same pattern syntax & persisted named
 formats.
 
 [`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) could
-then take custom formats (e.g., Unix epoch timestamps, which a bare number
-cannot otherwise be told apart from).
+then take custom formats (e.g., `yyyy-MM-dd`).
 
 ### Boolean Coercion Options
 
@@ -151,6 +147,12 @@ Configurable behavior per output format:
 - `error`: Report an error for absent values.
 - `omit`: Omit output for absent values.
 - `emit`: Output a configurable default value for absent values.
+
+### Configurable Unix Time Segment Neighbors
+
+Let a [`<unix-time>`](../Specs/fields.md#sort-chronologic-segments) sort segment
+be adjacent to configurable characters other than whitespace (e.g., brackets:
+Unicode `Ps` & `Pe`), separately from sort boundaries.
 
 ### Configurable Boundary Collapsing
 

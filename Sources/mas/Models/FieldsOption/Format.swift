@@ -403,7 +403,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .boolean:
 			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
 		case .chronologic:
-			FormatValue.chronologic(from: value).flatMap { matched in
+			FormatValue.chronologic(from: value, isCoerced: coercion != nil).flatMap { matched in
 				if case .chronologic(.time, _) = matched, block?.appliesDateOnly == true {
 					nil
 				} else {
@@ -490,7 +490,7 @@ extension Coercion { // swiftlint:disable:this file_types_order
 enum Chronologic: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// An ISO-8601 date-only, at its start in the system time zone.
 	case date(Date)
-	/// An ISO-8601 datetime, or a Unix epoch (seconds) numeric timestamp.
+	/// An ISO-8601 datetime, or a Unix time.
 	case datetime(Date)
 	/// An ISO-8601 time-only.
 	case time(TimeOfDay)
@@ -541,16 +541,17 @@ enum ISO8601Form: CaseIterable { // swiftlint:disable:this one_declaration_per_f
 	case time
 }
 
-/// `value` parsed as chronologic: an ISO-8601 datetime, date-only, or
-/// time-only, then a Unix epoch (seconds) numeric timestamp; else `nil`.
-func chronologic(from value: JSON.Node?) -> Chronologic? {
+/// `value` parsed as chronologic: a string as an ISO-8601 datetime, date-only,
+/// or time-only, else, iff `isCoerced`, as a Unix time iff its entire content
+/// is a decimal number; a number as a Unix time; else `nil`.
+func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Chronologic? {
 	switch value {
 	case let .number(number):
-		DecimalNumber("\(number)").flatMap(unixEpochDate).map(Chronologic.datetime)
+		DecimalNumber("\(number)").flatMap(unixTimeDate).map(Chronologic.datetime)
 	case let .string(literal):
 		iso8601ChronologicPrefix(of: literal.value[...], forms: Set(ISO8601Form.allCases))
 			.flatMap { chronologic, end in end == literal.value.endIndex ? chronologic : nil }
-			?? unixEpochDate(in: literal.value).map(Chronologic.datetime)
+			?? (isCoerced ? unixTimeDate(in: literal.value[...]).map(Chronologic.datetime) : nil)
 	default:
 		nil
 	}
@@ -644,17 +645,17 @@ private func iso8601UTCOffsetTimeZone(_ offset: Substring) -> TimeZone? {
 		: nil
 }
 
-/// `string`'s Unix epoch (seconds) date iff its entire content is a decimal
-/// number, else `nil`.
-private func unixEpochDate(in string: String) -> Date? {
-	(try? /[-+]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?/.wholeMatch(in: string)) != nil
-		? DecimalNumber(string).flatMap(unixEpochDate)
+/// `string`'s Unix time date iff its entire content is a decimal number, else
+/// `nil`.
+func unixTimeDate(in string: Substring) -> Date? {
+	(try? /[-+]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?/.wholeMatch(in: string)) != nil
+		? DecimalNumber(string).flatMap(unixTimeDate)
 		: nil
 }
 
-/// The date `seconds` after the Unix epoch, truncated to whole milliseconds;
-/// else `nil` iff it is out of range.
-private func unixEpochDate(_ seconds: DecimalNumber) -> Date? {
+/// The Unix time `seconds`' date, truncated to whole milliseconds; else `nil`
+/// iff it is out of range.
+func unixTimeDate(_ seconds: DecimalNumber) -> Date? {
 	seconds.flooredThousandths.map { Date(timeIntervalSince1970: Double($0) / 1000) }
 }
 
@@ -672,9 +673,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	/// A string.
 	case string(String)
 
-	/// The value parsed as chronologic; else `nil`.
-	static func chronologic(from value: JSON.Node?) -> Self? {
-		mas.chronologic(from: value).map { .chronologic($0, style: .init()) }
+	/// The value parsed as chronologic, per `isCoerced`; else `nil`.
+	static func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Self? {
+		mas.chronologic(from: value, isCoerced: isCoerced).map { .chronologic($0, style: .init()) }
 	}
 
 	/// The value as a number, per `coercion`; else `nil`.
@@ -761,9 +762,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 			return self
 		}
 		let chronologic = if case let .input(node) = self {
-			Self.chronologic(from: node)
+			Self.chronologic(from: node, isCoerced: call.coercion != nil)
 		} else {
-			Self.chronologic(from: .string(string))
+			Self.chronologic(from: .string(string), isCoerced: call.coercion != nil)
 		}
 		guard chronologic != nil || call.coercion != nil else {
 			throw .transformInputTypeMismatch(transform: call.transform, input: string)
