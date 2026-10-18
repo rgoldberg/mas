@@ -743,8 +743,8 @@ number-coercion-arguments =
   <argument-separator>? [ <trivia-suffix-regex> ]
   <argument-fence>
 
-trivia-prefix-regex = {text: Swift Regex} (* default: "" *)
-trivia-suffix-regex = {text: Swift Regex} (* default: "" *)
+trivia-prefix-regex = {text: Swift Regex} (* default: {empty string} *)
+trivia-suffix-regex = {text: Swift Regex} (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

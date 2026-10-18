@@ -454,7 +454,7 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 label-modifier        = <label-modifier-prefix> [ <label> ]
 label-modifier-prefix = "="
 
-label = {text} (* direct default: ""; transitive default: {field name from the enclosing field-spec} *)
+label = {text} (* direct default: {empty string}; transitive default: {field name from the enclosing field spec} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

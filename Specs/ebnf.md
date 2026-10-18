@@ -470,7 +470,7 @@ empty
 Inherent repetition.
 
 A repetition containing 0 elements; matches no input. Distinct from `null` &
-from the empty string (`""`).
+from an empty string.
 
 ### Repetitions with Separators (1 or More)
 
