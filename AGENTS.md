@@ -189,6 +189,12 @@ In specs, attach `(* last wins *)` to the definition of each nonterminal whose
 later occurrences override its earlier ones (e.g., `<direction>`), never to a
 nonterminal that repeats it (e.g., `<sort-option-set>`).
 
+In specs, give a default as a specific value for the nonterminal it defaults
+(e.g., `(* transitive default locale-identifier: "canonical" *)`), using
+descendant and/or transitive defaults as needed, rather than as syntax that must
+be parsed (e.g., `(* default: "Lcanonical:" *)`), unless only syntax can express
+it (e.g., choosing an alternative of a choice).
+
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 
