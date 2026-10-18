@@ -636,11 +636,12 @@ an error is reported.
 ##### Type Comments
 
 ```ebnf
-NONTERMINAL = DEFINITION (* type: TYPE *)
+NONTERMINAL = DEFINITION (* input type: TYPE *)
+NONTERMINAL = DEFINITION (* output type: TYPE *)
 ```
 
-`NONTERMINAL`'s value has the type that `TYPE` describes; a syntax defines the
-types & their use.
+`NONTERMINAL`'s input (for `input type:`) or value (for `output type:`) has the
+type that `TYPE` describes; a syntax defines the types & their use.
 
 ##### Value Comments
 

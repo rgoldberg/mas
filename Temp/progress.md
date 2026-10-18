@@ -351,3 +351,14 @@ of `<radix>` larger than its result needs, so a huge field value & a huge
 `<exponent>` that nearly cancel no longer hang `scale`: it approximates with
 doubling precision until the approximation decides each rounding, deciding a
 value exactly at a rounding boundary via its prime factorization.
+
+### Value Types (2026-10-18)
+
+Formats evaluate to [typed values](../Specs/fields-format.md#value-types):
+`Format.evaluated(in:)` returns a `FormatValue` (a template that is solely 1
+placeholder has that placeholder's value; any other template concatenates its
+elements' values, each coerced to a string), which `FormatValue.node` renders at
+its type: e.g., `%N%n+%i+` renders `null` as `null`, `.round` renders a number,
+while `numberFormat`, a chronologic value & a number whose text (trivia
+included) is not JSON number syntax (e.g., `.scale:16,0,,0:`'s `ff`) render
+strings. Type comments are `input type:` & `output type:`.
