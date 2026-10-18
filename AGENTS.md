@@ -198,8 +198,9 @@ it (e.g., choosing an alternative of a choice).
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 
-Keep spec wording input-format agnostic (e.g., "as a string", not "as its JSON
-text"), since input need not be JSON.
+Keep all prose about input (in specs, code comments, `Temp/*`, discussion, etc.)
+input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not
+"as its JSON text"), since input need not be JSON.
 
 ## Temp Files
 
