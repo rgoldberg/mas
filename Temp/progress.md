@@ -472,3 +472,8 @@ The canonical conventions compare text per the CLDR root collation
 non-localized order, so, e.g., `é` precedes `f` & JSON output's keys sort
 `appleTVScreenshotURLs` before `appStorePageURL`; `<insensitive>` ignores only
 case differences.
+
+`<character-class-name>`s follow UTS #18 Annex C's POSIX Compatible definitions
+(`CharacterClass.contains(_:)`, per a character's 1st Unicode scalar), instead
+of ASCII-only `cntrl`, `graph` & `print` & approximations of the others, so,
+e.g., `alpha` includes `Ⅻ`, `blank` includes U+3000 & `xdigit` excludes `Ａ`.

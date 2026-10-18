@@ -808,8 +808,11 @@ Each of the following is itself a boundary:
 
 - Each character in a `<boundary-characters>`.
 - Each `<multi-character-boundary-text>`.
-- Each character belonging to a GNU Extended POSIX character class named
-  `<character-class-name>`.
+- Each character belonging to the character class named
+  `<character-class-name>`, per the POSIX Compatible definitions of [UTS #18
+  Annex C](https://www.unicode.org/reports/tr18/#Compatibility_Properties)
+  (e.g., `digit` is only `0` to `9`, and `punct` includes every symbol that is
+  not alphabetic, such as `$`), with `ascii` being U+0000 to U+007F.
 
 If multiple `<boundary-group>`s define the same boundary, it belongs to the last
 group.

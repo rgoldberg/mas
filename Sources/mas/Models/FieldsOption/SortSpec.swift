@@ -862,41 +862,70 @@ private extension SortOptionSet.Boundary {
 }
 
 private extension SortOptionSet.CharacterClass {
-	/// Whether `character` belongs to this GNU Extended POSIX character class,
-	/// approximated via `Character`'s Unicode-aware properties.
+	/// Whether `character`'s 1st Unicode scalar belongs to this character class,
+	/// per UTS #18 Annex C's POSIX Compatible definitions (`ascii` being U+0000
+	/// to U+007F).
 	func contains(_ character: Character) -> Bool {
-		switch self {
+		character.unicodeScalars.first.map(contains) ?? false
+	}
+
+	private func contains(_ scalar: Unicode.Scalar) -> Bool {
+		let properties = scalar.properties
+		return switch self {
 		case .alnum:
-			character.isLetter || character.isNumber
+			properties.isAlphabetic || Self.digit.contains(scalar)
 		case .alpha:
-			character.isLetter
+			properties.isAlphabetic
 		case .ascii:
-			character.isASCII
+			scalar.isASCII
 		case .blank:
-			character == " " || character == "\t"
+			properties.generalCategory == .spaceSeparator || scalar == "\t"
 		case .cntrl:
-			character.asciiValue.map { $0 < 0x20 || $0 == 0x7f } ?? false
+			properties.generalCategory == .control
 		case .digit:
-			character.isASCIIDigit
+			("0"..."9").contains(scalar)
 		case .graph:
-			character.asciiValue.map { (0x21...0x7e).contains($0) } ?? false
+			!properties.isWhitespace && !nonGraphCategorySet.contains(properties.generalCategory)
 		case .lower:
-			character.isLowercase
+			properties.isLowercase
 		case .print:
-			character.asciiValue.map { (0x20...0x7e).contains($0) } ?? false
+			(Self.graph.contains(scalar) || Self.blank.contains(scalar)) && !Self.cntrl.contains(scalar)
 		case .punct:
-			character.isPunctuation || character.isSymbol
+			punctuationCategorySet.contains(properties.generalCategory)
+				|| symbolCategorySet.contains(properties.generalCategory) && !properties.isAlphabetic
 		case .space:
-			character.isWhitespace
+			properties.isWhitespace
 		case .upper:
-			character.isUppercase
+			properties.isUppercase
 		case .word:
-			character.isLetter || character.isNumber || character == "_"
+			properties.isAlphabetic
+				|| markCategorySet.contains(properties.generalCategory)
+				|| Self.digit.contains(scalar)
+				|| properties.generalCategory == .connectorPunctuation
+				|| properties.isJoinControl
 		case .xdigit:
-			character.isHexDigit
+			Self.digit.contains(scalar) || ("A"..."F").contains(scalar) || ("a"..."f").contains(scalar)
 		}
 	}
 }
+
+private let markCategorySet = Set([Unicode.GeneralCategory.enclosingMark, .nonspacingMark, .spacingMark])
+private let nonGraphCategorySet = Set([Unicode.GeneralCategory.control, .surrogate, .unassigned])
+private let punctuationCategorySet = Set([
+	Unicode.GeneralCategory.closePunctuation,
+	.connectorPunctuation,
+	.dashPunctuation,
+	.finalPunctuation,
+	.initialPunctuation,
+	.openPunctuation,
+	.otherPunctuation,
+])
+private let symbolCategorySet = Set([
+	Unicode.GeneralCategory.currencySymbol,
+	.mathSymbol,
+	.modifierSymbol,
+	.otherSymbol,
+])
 
 // MARK: - Constants
 

@@ -480,3 +480,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       text ([used](../Specs/fields.md#sort-locale))
     - REJECTED: code point order / Unicode order (for the canonical conventions'
       text comparison)
+100. - character class: a `<character-class-name>`'s characters, per UTS #18
+       Annex C's POSIX Compatible definitions
+       ([used](../Specs/fields.md#sort-boundaries))
+     - REJECTED: GNU Extended POSIX character class / bracket expression class
