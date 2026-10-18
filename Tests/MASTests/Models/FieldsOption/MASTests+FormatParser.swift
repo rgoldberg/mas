@@ -302,6 +302,11 @@ private extension MASTests {
 		#expect(throws: FormattingError.self) { try fieldSpec.format.rendered(value: value, label: "L", name: "n") }
 	}
 
+	@Test(arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat", ".endJustify.round"])
+	func `an absent field value remains absent through every transform`(format: String) throws {
+		#expect(try parsedFieldSpec(format).format.rendered(value: nil, label: "L", name: "n") == nil)
+	}
+
 	@Test(
 		arguments: [
 			(".endJustify", Justification.end),
