@@ -37,7 +37,7 @@
 
 #### Custom Names Removal
 
-If an initial version is released before persistance is supported, then remove
+If an initial version is released before persistence is supported, then remove
 persistence-based functionality from specs & code:
 
 1. Possibly vestigial after `1226-fields-no-custom-names` removes named formats
@@ -145,7 +145,8 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 
 ### `<document-order>` for `@table`
 
-### `<base-table-config-name>`
+### Base Output Config Names
 
-Let `--table`'s value select a named table config other than the context stack's
-`default`.
+Let `--table`'s, `--key-value`'s & `--json`'s values each select a named config
+of its kind other than the context stack's `default` (e.g., via a
+`<base-table-config-name>`).
