@@ -2,26 +2,6 @@
 
 ## Current Version
 
-### Custom Names Removal
-
-1. Possibly vestigial after `1226-fields-no-custom-names` removes named formats
-   & custom configs; decide whether to remove each in
-   `1226-fields-no-custom-names`:
-   1. [`<string-pipeline>` &
-      `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): each is
-      only an alias of a single `<*-transform-pipeline>`.
-   2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
-      always `standard`; removing it also requires editing the [default
-      configs](../Specs/configs.md#default-configs).
-   3. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
-      custom config lookup, but the [context stacks
-      definition](../Specs/configs.md#context-stacks) links to it as its
-      example.
-   4. "Immutable" in ["Immutable Built-In Named Fields
-      Configs"](../Specs/fields.md#immutable-built-in-named-fields-configs) &
-      possibly in ["Immutable Built-In Named
-      Configs"](../Specs/configs.md#immutable-built-in-named-configs).
-
 ### Fields
 
 1. Should [`<field-modifiers>`s](../Specs/fields.md#field-modifiers) be
@@ -89,6 +69,29 @@
    [key-value](../Specs/key-value.md#implied-settings) settings' precedence over
    inherited ones has no effect yet.
 4. Per-context user-configured default formats.
+
+#### Custom Names Removal
+
+If an initial version is released before persistance is supported, then remove
+persistence-based functionality from specs & code:
+
+1. Possibly vestigial after `1226-fields-no-custom-names` removes named formats
+   & custom configs; decide whether to remove each in
+   `1226-fields-no-custom-names`:
+   1. [`<string-pipeline>` &
+      `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): each is
+      only an alias of a single `<*-transform-pipeline>`.
+   2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
+      always `standard`; removing it also requires editing the [default
+      configs](../Specs/configs.md#default-configs).
+   3. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
+      custom config lookup, but the [context stacks
+      definition](../Specs/configs.md#context-stacks) links to it as its
+      example.
+   4. "Immutable" in ["Immutable Built-In Named Fields
+      Configs"](../Specs/fields.md#immutable-built-in-named-fields-configs) &
+      possibly in ["Immutable Built-In Named
+      Configs"](../Specs/configs.md#immutable-built-in-named-configs).
 
 ## Later Versions
 
