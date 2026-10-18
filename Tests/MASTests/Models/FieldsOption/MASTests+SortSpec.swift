@@ -259,10 +259,13 @@ private extension MASTests {
 			("1", "23:00:00Z", "2020-01-01", .orderedAscending),
 			("1Ciso-date:", "23:00:00Z", "2020-01-01", .orderedDescending),
 			("1", "2020-03-18t17:39-05:00", "2020-03-18T18:00z", .orderedDescending),
-			// A space-separated datetime is a single segment iff space is not a
-			// boundary
-			("1B:", "2020-03-18 17:39-05:00", "2020-03-18 18:00Z", .orderedDescending),
-			("1", "2020-03-18 17:39-05:00", "2020-03-18 18:00Z", .orderedAscending),
+			// Typed segments are detected before boundaries
+			("1", "2020-03-18 17:39-05:00", "2020-03-18 18:00Z", .orderedDescending),
+			("1C:", "2020-03-18 17:39-05:00", "2020-03-18 18:00Z", .orderedAscending),
+			("1N,\\ :", "1 000", "999", .orderedDescending),
+			("1N:", "1 000", "999", .orderedAscending),
+			("1N,,,,,all:B-:", "a-5", "a-3", .orderedAscending),
+			("1N:B-:", "a-5", "a-3", .orderedDescending),
 			// A chronologic segment is not adjacent to a digit
 			("1", "2020-03-180", "2020-03-19", .orderedDescending),
 			// A number is a Unix time iff <chronologic-formats> includes <unix-time>

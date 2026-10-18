@@ -553,14 +553,24 @@ E.g., for an input Unix time being output as an ISO date (without time):
 
 ##### Sort Segments
 
-Within each maximal run of [non-boundary](#sort-boundaries) text, never across a
-boundary, a value is split into **segments**, in descending precedence:
+A value is split into **segments**, in descending precedence:
 
 1. **Chronologic segments**, per `<chronologic-segments>`.
 2. **Number segments**, per `<number-segments>`.
-3. **Text segments**: each maximal run of the remaining text.
+3. **Text segments**: each maximal run of the remaining
+   [non-boundary](#sort-boundaries) text.
 
 A chronologic or number segment is a **typed segment**.
+
+Typed segments are detected across the whole value, before boundaries: a
+boundary within a typed segment is part of it (e.g., with the default
+boundaries, `2020-03-18 17:39` is 1 datetime segment), while boundaries split
+only the remaining text. The rules about a typed segment's adjacent characters
+(e.g., digit adjacency, or a word-initial sign) apply to the value's characters,
+boundaries included.
+
+A **run of non-boundary text** is a maximal sequence of segments between
+boundaries.
 
 2 runs of non-boundary text compare their segments as 1 or 2 lists, per
 `<text-order>`. Lists compare element by element: the 1st unequal pair of
@@ -766,9 +776,9 @@ character-class-name  =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Input is tokenized by **boundaries** assigned to ordered sort precedence
-**boundary groups**, each defined by a `<boundary-group>`; each group's members
-share the same sort precedence.
+Input outside [typed segments](#sort-segments) is tokenized by **boundaries**
+assigned to ordered sort precedence **boundary groups**, each defined by a
+`<boundary-group>`; each group's members share the same sort precedence.
 
 Each of the following is itself a boundary:
 
