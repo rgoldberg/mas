@@ -454,3 +454,7 @@ implemented.
 Equal digit group & decimal separators being an error is specified once, for
 every user of number format arguments, including number coercion, as already
 implemented.
+
+Number-to-string transforms retaining trivia is specified, as already
+implemented; `<match-placeholder>`'s predicates have `output type:` comments;
+`<coercible-modifiers>` & `<number-modifiers>` are inlined.
