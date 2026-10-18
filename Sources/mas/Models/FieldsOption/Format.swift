@@ -412,11 +412,11 @@ extension Matcher { // swiftlint:disable:this file_types_order
 				}
 			}
 		case .empty:
-			value.isNullish || value.jsonString?.isEmpty == true ? .string("") : nil
+			value.isNullish || value.jsonString?.isEmpty == true ? .input(value) : nil
 		case .false:
 			value.boolean(isCoerced: coercion != nil) == false ? .input(.bool(false)) : nil
 		case .null:
-			value.isNullish ? .string("") : nil
+			value.isNullish ? .input(value) : nil
 		case .number:
 			.number(from: value, coercion: coercion)
 		case .string:
@@ -426,7 +426,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .version:
 			value.jsonString.flatMap { isVersion($0) ? .string($0) : nil }
 		case .whitespace:
-			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .string("") : nil
+			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .input(value) : nil
 		}
 	}
 }

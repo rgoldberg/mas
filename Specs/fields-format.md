@@ -679,20 +679,20 @@ non-nullary-coercible-standard-predicate   = <non-nullary-boolean> | <non-nullar
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                                  output type: any; value: ""; mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                                  output type: any; value: ""; mnemonic: 2nd letter of null *)
-nullary-empty          = "e" (* is null or an empty string;                               output type: any; value: "" *)
-non-nullary-empty      = "E" (* is null or an empty string;                               output type: any; value: "" *)
-nullary-whitespace     = "w" (* is null, an empty string, or a string of only whitespace; output type: any; value: "" *)
-non-nullary-whitespace = "W" (* is null, an empty string, or a string of only whitespace; output type: any; value: "" *)
-nullary-boolean        = "b" (* is boolean;                                               output type: boolean; value: {field value} *)
-non-nullary-boolean    = "B" (* is boolean;                                               output type: boolean; value: {field value} *)
-nullary-true           = "t" (* is true;                                                  output type: boolean; value: {field value} *)
-non-nullary-true       = "T" (* is true;                                                  output type: boolean; value: {field value} *)
-nullary-false          = "f" (* is false;                                                 output type: boolean; value: {field value} *)
-non-nullary-false      = "F" (* is false;                                                 output type: boolean; value: {field value} *)
-nullary-string         = "s" (* is string;                                                output type: string; value: {field value} *)
-non-nullary-string     = "S" (* is string;                                                output type: string; value: {field value} *)
+nullary-null           = "u" (* is null;                                               output type: any; value: {field value}; mnemonic: 2nd letter of null *)
+non-nullary-null       = "U" (* is null;                                               output type: any; value: {field value}; mnemonic: 2nd letter of null *)
+nullary-empty          = "e" (* is null or an empty string;                            output type: any; value: {field value} *)
+non-nullary-empty      = "E" (* is null or an empty string;                            output type: any; value: {field value} *)
+nullary-whitespace     = "w" (* is null, an empty string, or a whitespace-only string; output type: any; value: {field value} *)
+non-nullary-whitespace = "W" (* is null, an empty string, or a whitespace-only string; output type: any; value: {field value} *)
+nullary-boolean        = "b" (* is boolean;                                            output type: boolean; value: {field value} *)
+non-nullary-boolean    = "B" (* is boolean;                                            output type: boolean; value: {field value} *)
+nullary-true           = "t" (* is true;                                               output type: boolean; value: {field value} *)
+non-nullary-true       = "T" (* is true;                                               output type: boolean; value: {field value} *)
+nullary-false          = "f" (* is false;                                              output type: boolean; value: {field value} *)
+non-nullary-false      = "F" (* is false;                                              output type: boolean; value: {field value} *)
+nullary-string         = "s" (* is string;                                             output type: string; value: {field value} *)
+non-nullary-string     = "S" (* is string;                                             output type: string; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
