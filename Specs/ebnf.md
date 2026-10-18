@@ -312,7 +312,6 @@ minimum or maximum).
 
 - Be bare `text`.
 - Start with bare `text:`.
-- Start with bare `text=`.
 
 #### Text Terminals
 
@@ -334,34 +333,10 @@ Inherent scalar.
 
 A [text token](#tokens) that supports [escape sequences](#escaping).
 
-`CONSTRAINTS` constrains the valid values (or the text that evaluates to them,
-e.g., which characters may be bare); for any other value, an error is reported.
-
-#### Described Text Terminals
-
-```ebnf
-{text= DESCRIPTION}
-```
-
-Inherent scalar.
-
-A [text token](#tokens) that supports [escape sequences](#escaping).
-
-`DESCRIPTION` describes the meaning of the value, without constraining the valid
-values.
-
-#### Described Constrained Text Terminals
-
-```ebnf
-{text= DESCRIPTION: CONSTRAINTS}
-```
-
-Inherent scalar.
-
-A [described text terminal](#described-text-terminals) whose `CONSTRAINTS` are
-as for a [constrained text terminal](#constrained-text-terminals).
-
-`DESCRIPTION` must not contain bare `:`.
+`CONSTRAINTS` describes the valid values (or the text that evaluates to them,
+e.g., which characters may be bare). An invalid value is an error, unless only
+something outside mas (e.g., a terminal) can determine its validity, in which
+case mas passes it through unchecked.
 
 ### Nonterminals
 
