@@ -284,7 +284,9 @@ rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
 renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
 it (e.g., `.scale:10,0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
 
-If `<digit-group-separator>` equals `<decimal-separator>`, an error is reported.
+Number format arguments whose digit group separator equals their decimal
+separator, each after defaulting to the base conventions, are an error, whether
+they are `numberFormat`'s, a number coercion's, or `N`'s.
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.

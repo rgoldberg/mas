@@ -710,8 +710,6 @@ sizes & separators come from its [number format
 arguments](fields-format.md#numberformat), each absent one defaulting to the
 base conventions; a `<digit-group-size>` of `0` allows groups of any size.
 
-If the digit group separator equals the decimal separator, an error is reported.
-
 A `-` or `+` immediately preceding a number segment's 1st digit is its sign:
 
 - `<word-initial-signs>`: iff it starts the value or follows
