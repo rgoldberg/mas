@@ -505,13 +505,14 @@ extension SortOptionSet {
 
 	/// `value`'s single segment iff it is a number: a chronologic segment iff
 	/// `hasUnixTimeSegments` & it is a chronologic Unix time, else a number
-	/// segment unless `numberSegments` is `<lexicographic>`; else `nil`.
+	/// segment unless `numberSegments` is `<lexicographic>` or `<versions>`
+	/// (either of which compares its text); else `nil`.
 	private func numberValueSegment(of value: JSON.Node?) -> Segment? {
 		guard case let .number(number)? = value, let number = DecimalNumber("\(number)") else {
 			return nil
 		}
 		return (hasUnixTimeSegments ? unixTimeDate(number).map { .chronologic(.datetime($0)) } : nil)
-			?? (numberSegments == .lexicographic ? nil : .number(number))
+			?? (numberSegments == .lexicographic || numberSegments == .versions ? nil : .number(number))
 	}
 
 	/// `string`'s pieces: each boundary outside its typed segments & each run of

@@ -562,7 +562,9 @@ representation (e.g., `false`), except that a number is a single
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
   the number is a [chronologic Unix
   time](fields-format.md#chronologic-formatting).
-- Otherwise, a number segment, unless `<number-segments>` is `<lexicographic>`.
+- Otherwise, a number segment, unless `<number-segments>` is `<lexicographic>`
+  or `<versions>`, either of which compares the number as its text (so, with
+  `<versions>`, its text's versions compare with other versions).
 
 E.g., for an input Unix time being output as an ISO date (without time):
 
