@@ -272,9 +272,10 @@ The working fields config's field specs are ordered per
   - `<output>`: sorted by label.
 
 `<descending>` reverses `<order>`'s field order. For `<positional-order>`, it
-does so by reversing the positions of the working fields config's field specs
-before `<field-spec-edits-section>`, so its edits & each `<index>` apply to the
-reversed positions.
+does so by reversing the positions of the working & base fields configs' field
+specs before `<field-spec-edits-section>`, so its edits & each `<index>`
+(including a `<base-sourced-field-spec-edit>`'s) apply to the reversed positions
+(e.g., in `@all/P-.+@1`, `@1` references `all`'s last field spec).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
