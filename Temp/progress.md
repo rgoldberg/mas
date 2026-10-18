@@ -402,3 +402,7 @@ without a `:` (e.g., `+0530`), as an ISO-8601 UTC offset may.
 `%u`, `%e` & `%w` (& their non-nullary forms) evaluate to the field value
 instead of `""` (e.g., `%w` inserts a whitespace-only string as is, and `json`
 output renders a solely-`%u` format's value as `null`).
+
+A `<leader-pattern>` or `<item-separator-pattern>` containing a line terminator
+reports `invalidLeaderPattern` / `invalidItemSeparatorPattern`, as a table's
+`<separator-pattern>` & `<column-spacing>` do.

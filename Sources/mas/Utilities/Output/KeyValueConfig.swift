@@ -96,6 +96,9 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			// `<leader-pattern>` is a non-empty text token: absent, its default `▁`
 			// applies
 			let pattern = try parseKeyValueSettingText(&input)
+			guard !pattern.contains(where: \.isNewline) else {
+				throw .invalidLeaderPattern(pattern)
+			}
 			leaderPattern = pattern.isEmpty ? defaultLeaderPattern : pattern
 		case "l":
 			leadingSpacing = KeyValueConfig.default.leadingSpacing
@@ -108,7 +111,11 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "s":
 			itemSeparatorPattern = nil
 		case "S":
-			itemSeparatorPattern = try parseKeyValueSettingText(&input)
+			let pattern = try parseKeyValueSettingText(&input)
+			guard !pattern.contains(where: \.isNewline) else {
+				throw .invalidItemSeparatorPattern(pattern)
+			}
+			itemSeparatorPattern = pattern
 		default:
 			throw .invalidSetting(setting)
 		}
@@ -128,15 +135,24 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 // swiftlint:disable:next one_declaration_per_file
 enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
+	case invalidItemSeparatorPattern(String)
 	case invalidKeyStyleSpecifier(String)
+	case invalidLeaderPattern(String)
 	case invalidSetting(Character)
 
 	var description: String {
 		switch self {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --key-value's value"
+		case let .invalidItemSeparatorPattern(pattern):
+			"""
+			Invalid item separator pattern (a line terminator would split the item separator line): \
+			\(pattern.debugDescription)
+			"""
 		case let .invalidKeyStyleSpecifier(styleSpecifier):
 			"Invalid key style specifier (expected non-empty, escaping each ASCII letter, e.g., \"\\b\"): \(styleSpecifier)"
+		case let .invalidLeaderPattern(pattern):
+			"Invalid leader pattern (a line terminator would split each row): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
 			"Invalid --key-value <key-value-setting>: \(setting)"
 		}
