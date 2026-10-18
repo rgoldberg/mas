@@ -338,7 +338,7 @@ chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronol
 chronologic-transform          = <date-only> | <time-zone> (* type: chronologic *)
 
 date-only = "dateOnly"
-time-zone = "timeZone" <time-zone-arguments> (* sets the output time zone *)
+time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

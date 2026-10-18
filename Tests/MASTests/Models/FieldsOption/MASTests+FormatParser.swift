@@ -388,6 +388,8 @@ private extension MASTests {
 			("%c", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
 			("%C.timeZone:system:++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
 			("%C.timeZone::++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
+			("%C.timeZone++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
+			("%C.timeZone:UTC:.timeZone++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
 			("%C.timeZone:GMT+5:++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-18T22:39:23+05:00"),
 			("%C.dateOnly.timeZone:Asia/Tokyo:++", "America/New_York", "2020-03-18T17:39:23Z", "2020-03-19"),
 			// A date-only value's date is independent of time zones

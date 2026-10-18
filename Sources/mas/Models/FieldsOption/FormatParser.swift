@@ -138,7 +138,7 @@ private struct FormatParser {
 			case scaleName:
 				try parseScaleArguments()
 			case timeZoneName:
-				try parseTimeZoneArguments()
+				try parseTimeZoneArgumentsIfPresent()
 			default:
 				valueTransformByName[name]! // swiftlint:disable:this force_unwrapping
 			}
@@ -203,19 +203,24 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses `timeZone`'s `<time-zone-arguments>`, whose `<time-zone-code>`
-	/// defaults to `system` & whose absent `<reference-date>` is `nil`.
-	private mutating func parseTimeZoneArguments() throws(ParsingError) -> Transform {
-		try parseArgumentFence(for: timeZoneName)
+	/// Parses `timeZone`'s optional `<time-zone-arguments>`, whose
+	/// `<time-zone-code>` defaults to `system` & whose absent `<reference-date>`
+	/// is `nil`.
+	private mutating func parseTimeZoneArgumentsIfPresent() throws(ParsingError) -> Transform {
 		let invalidArgumentsError = ParsingError.invalidTransformArguments(name: timeZoneName)
-		let arguments = try parseArguments(
-			&input,
-			count: 2,
-			terminator: argumentFence,
-			isLastArgumentSeparatorTerminated: false,
-			invalidArgumentsError: invalidArgumentsError,
-		)
-		try parseArgumentFence(for: timeZoneName)
+		let afterWhitespace = input.drop(while: \.isWhitespace)
+		var arguments = [String?](repeating: nil, count: 2)
+		if afterWhitespace.first == argumentFence {
+			input = afterWhitespace.dropFirst()
+			arguments = try parseArguments(
+				&input,
+				count: 2,
+				terminator: argumentFence,
+				isLastArgumentSeparatorTerminated: false,
+				invalidArgumentsError: invalidArgumentsError,
+			)
+			try parseArgumentFence(for: timeZoneName)
+		}
 		guard let timeZone = timeZone(forCode: arguments[0] ?? systemTimeZoneCode) else {
 			throw invalidArgumentsError
 		}

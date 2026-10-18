@@ -185,6 +185,10 @@ by making each `<argument-separator>` trailing-omissible (e.g.,
 only in prose; reference a shared argument list (e.g.,
 `<number-format-arguments>`) rather than repeating its arguments.
 
+In specs, make an argument list's `<argument-fence>`s optional iff every
+argument in it is omissible, because the empty list `::` would otherwise be
+required to express all defaults.
+
 In specs, give a sort option that takes arguments an uppercase letter & end its
 arguments with its `<sort-option-terminator>`; an empty list argument means
 none, while an empty scalar argument means its default.
