@@ -197,7 +197,7 @@ fields configs.
 absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <absolute-field-name> <field-modifiers>
-absolute-field-name = {text: field name}
+absolute-field-name = {text: field name with no bare "."}
 ```
 
 An `<absolute-config>` is equivalent to a `<relative-config>` with base fields
@@ -321,7 +321,7 @@ field-spec-reference = <named-field-spec-reference> | <indexed-field-spec-refere
 named-field-spec-reference   = <reference-field-name> [ <field-occurrence-index-prefix> <field-occurrence-index> ]
 indexed-field-spec-reference = <field-spec-index-prefix> <field-spec-index>
 
-reference-field-name = {text: field name}
+reference-field-name = {text: field name with no bare "."}
 
 field-occurrence-index-prefix = "@"
 field-occurrence-index        = <index> (* transitive default: 1 *)
