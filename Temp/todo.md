@@ -9,12 +9,6 @@
 3. Manual accompanying specs
 4. Examples
 
-### Open Questions
-
-1. [Absent values](../Specs/fields.md#absent-values): specify whether
-   key-value's & JSON's "a value exists" refers to the field value or to the
-   formatted value (e.g., `%N%n+none+` for an absent field).
-
 ## ASAP Version, But Massive Effort
 
 ### Persisted Custom Named Formats & Configs

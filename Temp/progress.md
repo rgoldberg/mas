@@ -412,3 +412,10 @@ offset renders as `Z` iff it is 0, else as `±hh:mm`.
 
 `numberFormat` retaining scientific notation is specified, as already
 implemented (e.g., `.numberFormat:de:` renders `12345.6E3` as `12.345,6E3`).
+
+A formatted value is [absent](../Specs/fields.md#absent-values) iff formatting
+aborts, or iff the field value is absent & the format evaluates to it unchanged
+(`Format.rendered(value:label:name:)` returns `nil`); key-value & JSON output
+decide whether to output a field from its formatted value instead of from its
+field value, so a fallback (e.g., `%N%n+none+`) outputs for an absent field,
+while an aborted format outputs nothing (instead of an empty string).

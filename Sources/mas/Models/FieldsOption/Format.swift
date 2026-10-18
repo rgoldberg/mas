@@ -195,10 +195,11 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// Renders this format against `value` (`nil` iff the field does not exist
 	/// for this item), producing the formatted value (fields-format.md "Value
 	/// Types"), at its type, for any output format to render: e.g., `%i` renders
-	/// `null` as `null`, while `(%i)` renders it as `"()"`. An empty string iff
-	/// formatting aborts.
-	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node {
-		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node ?? .string("")
+	/// `null` as `null`, while `(%i)` renders it as `"()"`. `nil` iff the
+	/// formatted value is absent (fields.md "Absent Values"): iff formatting
+	/// aborts, or iff `value` is `nil` & this format evaluates to it unchanged.
+	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node? {
+		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node
 	}
 
 	/// The evaluated value, or `nil` iff formatting aborts.
@@ -692,13 +693,14 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	}
 
 	/// The value as an output node, at its type iff JSON supports it (a number
-	/// iff its text, trivia included, is JSON number syntax), else as a string.
-	var node: JSON.Node {
+	/// iff its text, trivia included, is JSON number syntax), else as a string;
+	/// `nil` iff it is an absent field value.
+	var node: JSON.Node? {
 		switch self {
 		case .chronologic, .string:
 			.string(string)
 		case let .input(node):
-			node ?? .null
+			node
 		case .number:
 			string.wholeMatch(of: unsafe jsonNumberRegex).map { _ in .number(.fallback(string)) } ?? .string(string)
 		}

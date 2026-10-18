@@ -56,8 +56,8 @@ struct FieldSpec: Equatable {
 	}
 
 	/// Renders `value` (`nil` iff the field does not exist for this item) per
-	/// `format`.
-	func rendered(value: JSON.Node?) throws(FormattingError) -> JSON.Node {
+	/// `format`; `nil` iff the formatted value is absent.
+	func rendered(value: JSON.Node?) throws(FormattingError) -> JSON.Node? {
 		try format.rendered(value: value, label: label, name: name)
 	}
 }

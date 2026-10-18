@@ -604,8 +604,9 @@ A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
 In a template that is not solely 1 placeholder, each inserted value is [coerced
 to a string](#value-coercion).
 
-Formatting **aborts** by outputting an empty string, ignoring the rest of
-`<format-block>`, both preceding & succeeding.
+Formatting **aborts** by making the formatted value
+[absent](fields.md#absent-values), ignoring the rest of `<format-block>`, both
+preceding & succeeding.
 
 ###### Unconditional Placeholders
 

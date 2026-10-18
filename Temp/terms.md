@@ -167,7 +167,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 31. - null: absence of a scalar value
     - empty: repetition containing 0 elements, or text containing 0 characters
     - absent: state of being omitted (union of directly absent & transitively
-      absent)
+      absent); of a formatted value: omitted from key-value & JSON output
+      ([defined](../Specs/fields.md#absent-values))
     - none: specific named value
     - blank: null, empty, or whitespace-only (`<nullary-blank-predicate>`); a
       blank line

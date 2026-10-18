@@ -61,17 +61,17 @@ private extension MASTests {
 		arguments: [
 			// Nullary: on failure, formatting aborts
 			("%u", JSON.Node?.none, String?.none),
-			("%u", .string("x"), ""),
-			("x%ny", .string("a"), ""),
+			("%u", .string("x"), nil),
+			("x%ny", .string("a"), nil),
 			// Nullary abort-on-success: on failure, the field value
 			("%-u", .string("x"), "x"),
-			("%-u", .null, ""),
+			("%-u", .null, nil),
 			// Non-nullary abort-on-failure
 			("%+N.round+", .number(5.6), "6"),
-			("[%+N.round+]", .string("x"), ""),
+			("[%+N.round+]", .string("x"), nil),
 			// Non-nullary abort-on-success
 			("%-Nnot a number+", .string("x"), "not a number"),
-			("[%-Nnot a number+]", .number(5), ""),
+			("[%-Nnot a number+]", .number(5), nil),
 			// Binary
 			("%N%n+fail+", .number(5), "5"),
 			("%N%n+fail+", .string("x"), "fail"),
@@ -99,15 +99,15 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("%.:,,,,,.*,.*:n", JSON.Node.string("US$1,234.50"), "US$1234.5"),
+			("%.:,,,,,.*,.*:n", JSON.Node.string("US$1,234.50"), String?.some("US$1234.5")),
 			("%.:,,,,,.*,.*:N.round++", .string("US$1,234.50"), "US$1235"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("-3 MB"), "3 MB"),
-			("[%.n]", .string("US$5"), ""),
-			("[%.:,,,,,.*,.*:n]", .string("none"), ""),
+			("[%.n]", .string("US$5"), nil),
+			("[%.:,,,,,.*,.*:n]", .string("none"), nil),
 			("%.n", .string("4.50"), "4.5"),
-			("[%.n]", .string("4.5a"), ""),
-			("[%.n]", .string("nan"), ""),
-			("[%.n]", .string("0x10"), ""),
+			("[%.n]", .string("4.5a"), nil),
+			("[%.n]", .string("nan"), nil),
+			("[%.n]", .string("0x10"), nil),
 			("%.n", .string("-1e3"), "-1e3"),
 			("%.n", .string("12345678901234567890.123456789000"), "12345678901234567890.123456789"),
 			("%.n", .string("+007.50"), "7.5"),
@@ -117,28 +117,28 @@ private extension MASTests {
 			("%.:de:n", .string("1.234,56"), "1234.56"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("US$4.99"), "US$4.99"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("$4.99"), "$4.99"),
-			("[%.:,,,,,[A-Z]*[$]:n]", .string("4.99"), ""),
+			("[%.:,,,,,[A-Z]*[$]:n]", .string("4.99"), nil),
 			("%.:,,,,,,.*:n", .string("1,2345"), "1,2345"),
 			// Number coercion's base conventions are canonical absent a locale
-			("[%.:de:n]", .string("1,234.56"), ""),
+			("[%.:de:n]", .string("1,234.56"), nil),
 			("%.::n", .string("1,234.5"), "1234.5"),
 			("%.:,\\ ,,,\\,:n", .string("1 234,5"), "1234.5"),
 			("%.:,,2:n", .string("12,34"), "1234"),
 			("%.:,,0:n", .string("1,23,4567"), "1234567"),
 			("%.:,,3,2:n", .string("12,34,567"), "1234567"),
-			("[%.:,,3,2:n]", .string("1,234,567"), ""),
+			("[%.:,,3,2:n]", .string("1,234,567"), nil),
 			// The trivia prefix is the shortest one that a number succeeds
 			("%.:,,,,,\\\\d:n", .string("15"), "15"),
 			("%.:,,,,,\\\\\\$:n", .string("$5"), "$5"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("x-1.50 y"), "x1.5 y"),
-			("[%.:,,,,,.*:n]", .string("5 MB"), ""),
+			("[%.:,,,,,.*:n]", .string("5 MB"), nil),
 			("%.:,,,,, [$] :n", .string("$5"), "$5"),
 			// The trivia suffix regex is the last argument, so its `,` is unescaped
 			("%.:,,,,,,,.*:n", .string("5,x"), "5,x"),
-			("[%.:,,,,,,,.*:n]", .string("5x"), ""),
+			("[%.:,,,,,,,.*:n]", .string("5x"), nil),
 		],
 	)
-	func `renders coerced number placeholders`(format: String, value: JSON.Node, expected: String) throws {
+	func `renders coerced number placeholders`(format: String, value: JSON.Node, expected: String?) throws {
 		#expect(try rendered(format, value) == expected)
 	}
 
@@ -201,7 +201,7 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			("%mn-s+", JSON.Node.number(5), String?.some("5")),
-			("[%mn-s+]", .string("x"), ""),
+			("[%mn-s+]", .string("x"), nil),
 			("%mn-s+", .bool(true), "true"),
 			("%mn-SnotString++", .bool(true), "notString"),
 			("%mn.Bbool:%b+k+", .string("true"), "bool:true"),
@@ -220,11 +220,11 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(".uppercase", JSON.Node.string("abc"), "ABC"),
+			(".uppercase", JSON.Node.string("abc"), String?.some("ABC")),
 			("..uppercase", .number(5), "5"),
 			(".round", .number(5.6), "6"),
 			("..round", .string("5.6"), "6"),
-			("..round", .string("x"), ""),
+			("..round", .string("x"), nil),
 			(".round.numberFormat:,.,3,,,:", .number(1_234_567.8), "1.234.568"),
 			(".numberFormat:en,\\,,2:", .number(123_456), "12,34,56"),
 			(".numberFormat:en,\\ ,3:", .number(1234), "1 234"),
@@ -275,14 +275,14 @@ private extension MASTests {
 			("..scale:2,0,1,0:", .string("8"), "1000"),
 			("..scale:10,0,1,1:", .string("100"), "100.0"),
 			("..scale:6,0,1,0:", .string("0.1e-1"), "0"),
-			("..scale:10,0,,0:", .string("1e100"), ""),
-			("..scale:10,0,2,0:", .string("9.995e99"), ""),
-			("..scale:2,0,,0:", .string("1e999999999999"), ""),
+			("..scale:10,0,,0:", .string("1e100"), nil),
+			("..scale:10,0,2,0:", .string("9.995e99"), nil),
+			("..scale:2,0,,0:", .string("1e999999999999"), nil),
 			(".numberFormat:en,\\,,18446744073709551616:", .number(12_345_678), "12345678"),
 			("..round", .string("12345678901234567890.5"), "12345678901234567891"),
 		],
 	)
-	func `applies a format-block's value-transform-pipeline`(format: String, value: JSON.Node, expected: String)
+	func `applies a format-block's value-transform-pipeline`(format: String, value: JSON.Node, expected: String?)
 	throws {
 		#expect(try rendered(format, value) == expected)
 	}
@@ -316,7 +316,10 @@ private extension MASTests {
 
 	@Test
 	func `a pipeline of only format transforms passes the value through`() throws {
-		#expect(try parsedFieldSpec(".endJustify").format.rendered(value: .number(5), label: "L", name: "n").isNumber(5))
+		#expect(try parsedFieldSpec(".endJustify")
+			.format
+			.rendered(value: .number(5), label: "L", name: "n")?
+			.isNumber(5) == true)
 	}
 
 	@Test(
@@ -342,12 +345,12 @@ private extension MASTests {
 	)
 	func `renders a format's value at its type iff JSON supports it`(format: String, value: JSON.Node, json: String)
 	throws {
-		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n").description == json)
+		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.description == json)
 	}
 
 	@Test(
 		arguments: [
-			("%c", JSON.Node.string("2020-03-18"), "2020-03-18"),
+			("%c", JSON.Node.string("2020-03-18"), String?.some("2020-03-18")),
 			("%C.timeZone:UTC:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:utc:++", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%C.timeZone:Asia/Tokyo:++", .string("2020-03-18T17:39:23Z"), "2020-03-19T02:39:23+09:00"),
@@ -367,25 +370,25 @@ private extension MASTests {
 			("%C.timeZone:UTC:++", .string("2020-03-18T17:39Z"), "2020-03-18T17:39:00Z"),
 			("%C.timeZone:UTC:++", .string("2020-03-18 17:39+02:00"), "2020-03-18T15:39:00Z"),
 			// Other ISO-8601 representations are not detected
-			("[%c]", .string("2020-03-18T17:39.5Z"), ""),
-			("[%c]", .string("2020-03-18T17Z"), ""),
-			("[%c]", .string("2020-03-18_17:39:23Z"), ""),
-			("[%c]", .string("20200318"), ""),
-			("[%c]", .string("20200318T173923Z"), ""),
-			("[%c]", .string("2020-03"), ""),
-			("[%c]", .string("2020-078"), ""),
-			("[%c]", .string("2020-W12-3"), ""),
-			("[%c]", .string("not a date"), ""),
+			("[%c]", .string("2020-03-18T17:39.5Z"), nil),
+			("[%c]", .string("2020-03-18T17Z"), nil),
+			("[%c]", .string("2020-03-18_17:39:23Z"), nil),
+			("[%c]", .string("20200318"), nil),
+			("[%c]", .string("20200318T173923Z"), nil),
+			("[%c]", .string("2020-03"), nil),
+			("[%c]", .string("2020-078"), nil),
+			("[%c]", .string("2020-W12-3"), nil),
+			("[%c]", .string("not a date"), nil),
 			// Only <coercion> allows a string as a Unix time
-			("[%c]", .string("0"), ""),
+			("[%c]", .string("0"), nil),
 			("%.C.timeZone:UTC:++", .string("0"), "1970-01-01T00:00:00Z"),
 			("%.C.timeZone:UTC:++", .string("1.5e9"), "2017-07-14T02:40:00Z"),
 			("..dateOnly.timeZone:UTC:", .string("0"), "1970-01-01"),
-			("..dateOnly", .string("x"), ""),
+			("..dateOnly", .string("x"), nil),
 			("%-c", .string("not a date"), "not a date"),
 		],
 	)
-	func `renders chronologic placeholders`(format: String, value: JSON.Node, expected: String) throws {
+	func `renders chronologic placeholders`(format: String, value: JSON.Node, expected: String?) throws {
 		#expect(try rendered(format, value) == expected)
 	}
 
@@ -416,27 +419,27 @@ private extension MASTests {
 		arguments: [
 			// A time-only value is converted between time zones as if on the
 			// reference date
-			("%c", "17:39:23", "17:39:23-04:00"),
+			("%c", "17:39:23", String?.some("17:39:23-04:00")),
 			("%c", "17:39:23.1234Z", "13:39:23.123-04:00"),
 			("%C.timeZone:UTC:++", "17:39:23+02:00", "15:39:23Z"),
 			("%C.timeZone:America/New_York,2020-01-15:++", "17:39:23Z", "12:39:23-05:00"),
 			("%C.timeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("%C.timeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
-			("[%c]", "24:00:00", ""),
+			("[%c]", "24:00:00", nil),
 			("%C.timeZone:UTC:++", "17:39:23z", "17:39:23Z"),
 			// Only a datetime's seconds can be omitted
-			("[%c]", "17:39", ""),
-			("[%c]", "17:39Z", ""),
+			("[%c]", "17:39", nil),
+			("[%c]", "17:39Z", nil),
 			// A time-only value fails a chronologic predicate whose block applies
 			// `dateOnly` to it
 			("%C.dateOnly+-+", "17:39:23", "-"),
 			("%C.dateOnly+-+", "2020-03-18T17:39:23Z", "2020-03-18"),
 			("%C<%C.dateOnly+>+-+", "17:39:23", "-"),
 			("%mC.dateOnly+i+", "17:39:23", "17:39:23"),
-			("..dateOnly", "17:39:23", ""),
+			("..dateOnly", "17:39:23", nil),
 		],
 	)
-	func `renders time-only chronologic values`(format: String, value: String, expected: String) throws {
+	func `renders time-only chronologic values`(format: String, value: String, expected: String?) throws {
 		#expect(
 			try inSystemTimeZone("America/New_York", now: Date(timeIntervalSince1970: 1_594_771_200)) {
 				try rendered(format, .string(value))
@@ -452,7 +455,7 @@ private extension MASTests {
 
 	@Test(arguments: ["", "a1", "1..2", "1.", "٣.1", "½", "1.0 beta", "1.0_b", "1.0!"])
 	func `%v does not match a non-version`(value: String) throws {
-		#expect(try rendered("[%v]", .string(value))?.isEmpty == true)
+		#expect(try rendered("[%v]", .string(value)) == nil)
 	}
 
 	@Test(
@@ -572,5 +575,5 @@ private func parsedFieldSpec(_ format: String) throws(ParsingError) -> FieldSpec
 private let structuredValue = JSON.Node.array([.string("é"), .object(["a": .null])])
 
 private func rendered(_ format: String, _ value: JSON.Node?) throws -> String? {
-	try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n").stringValue
+	try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.stringValue
 }
