@@ -1,18 +1,13 @@
 # Progress
 
-## Status (2026-10-09)
+## Status (2026-10-18)
 
-All `--fields` / `--table` work is in 1 commit (`` TODO: `FieldsSpec`. ``).
-`Specs/*.md` are implemented (audited 2026-10-09), except:
-
-- Persisted named formats & custom named configs, including context stack
-  lookup, as described by [its open
-  issues](todo.md#persisted-named-formats--custom-named-configs) & by
-  `// TODO:`s in `FieldSpec.swift` & `FormatParser.swift`: every
-  `<named-format-reference>` reports `unknownNamedFormat`.
-- Behaviors pending the [open questions for the current
-  version](todo.md#current-version), each marked by a `// TODO:` where
-  implemented provisionally (e.g., the `<output>` sort source's type).
+`Specs/*.md` are implemented (audited 2026-10-09, then implemented with each
+later spec change), except persisted named formats & custom named configs,
+including context stack lookup, as described by [their open
+issues](todo.md#persisted-custom-named-formats--configs) & by `// TODO:`s in
+`Format.swift`, `FieldSpec.swift` & `FormatParser.swift`: every
+`<named-format-reference>` reports `unknownNamedFormat`.
 
 ## History
 
@@ -301,11 +296,9 @@ Foundation's lenient parsing, which accepted trailing text, unpadded fields &
 out-of-range fields (e.g., `2020-02-30`), and read the local datetime
 `2020-03-18T17:39:23` as date-only; a datetime may have a `,` decimal sign &
 omit its UTC offset (for the system time zone); fractional seconds are truncated
-to whole milliseconds exactly (e.g., `.3` no longer renders as `.299`); each
+to whole milliseconds exactly (e.g., `.3` no longer renders as `.299`); & each
 sort key's `<output>` values use its own field spec's format & label, even if
-another field spec has the same field name; & a machine-facing variant formats
-only its output as `%i`, retaining each field spec's format to type its field
-(e.g., so `@json` sorts prices as numbers & versions as versions).
+another field spec has the same field name.
 
 ### Style Settings (2026-10-10)
 

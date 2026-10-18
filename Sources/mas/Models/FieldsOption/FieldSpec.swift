@@ -330,10 +330,10 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 // MARK: - Base fields config resolution
 
 // swiftlint:disable:next todo
-// TODO: Temp/todo.md "Persisted Named Formats & Custom Named Configs": once
-//  custom named fields configs are persisted, look a name up through the
-//  command's context stack (most to least specific context), resolving a config
-//  whose base config name is its own name from the context above its own,
+// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": once custom
+//  named fields configs are persisted, look a name up through the command's
+//  context stack (most to least specific context), resolving a config that
+//  extends a config of its own name from the next less specific context,
 //  reporting any other reference cycle & substituting `standard` for a
 //  nonexistent `default` (appending any output format suffix)
 
