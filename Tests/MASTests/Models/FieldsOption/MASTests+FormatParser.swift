@@ -13,6 +13,35 @@ internal import Testing
 private extension MASTests {
 	@Test(
 		arguments: [
+			"%S%s+no+",
+			"%.N%n+no+",
+			#"%.:,,,,,\\[,\\]:N%n+no+"#,
+			"%.B%b+no+",
+			"%.T%t+no+",
+			"%.F%f+no+",
+			"%.C%c+no+",
+			"%V%v+no+",
+		],
+	)
+	func `no predicate whose output type is not any matches a structured value`(format: String) throws {
+		#expect(try rendered(format, structuredValue) == "no")
+	}
+
+	@Test
+	func `a number coercion parses a string, but not a structured value, whose text is a number between trivia`()
+	throws {
+		let format = #"%.:,,,,,\\[,\\]:N%n+no+"#
+		#expect(try rendered(format, .string("[1]")) == "[1]")
+		#expect(try rendered(format, .array([.number(1)])) == "no")
+	}
+
+	@Test
+	func `coerces a structured value to its compact JSON text`() throws {
+		#expect(try rendered("(%i)", structuredValue) == #"(["é",{"a":null}])"#)
+	}
+
+	@Test(
+		arguments: [
 			// fields-format.md's examples
 			("%.N%n (%i)++", JSON.Node.string("4.50"), String?.some("4.5 (4.50)")),
 			("%mN.absoluteValue+bI..uppercase++", .number(-5), "5"),
@@ -295,6 +324,8 @@ private extension MASTests {
 			(".numberFormat", .number(5), #""5""#),
 			("%t", .bool(true), "true"),
 			("%c", .string("2020-03-18"), #""2020-03-18""#),
+			("%i", structuredValue, #"["é",{"a":null}]"#),
+			("(%i)", structuredValue, #""([\"é\",{\"a\":null}])""#),
 		],
 	)
 	func `renders a format's value at its type iff JSON supports it`(format: String, value: JSON.Node, json: String)
@@ -504,6 +535,8 @@ private func parsedFieldSpec(_ format: String) throws(ParsingError) -> FieldSpec
 	)
 	.fieldSpecs[0]
 }
+
+private let structuredValue = JSON.Node.array([.string("é"), .object(["a": .null])])
 
 private func rendered(_ format: String, _ value: JSON.Node?) throws -> String? {
 	try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n").stringValue

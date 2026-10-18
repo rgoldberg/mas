@@ -22,16 +22,6 @@
          1. Space separator.
          2. Lowercase `t` or `z`.
 
-### Structured Values
-
-1. Specify arrays & objects as field values: JSON output renders them at their
-   type, coercing one to a string renders its compact JSON text & no type
-   predicate matches one.
-2. Reserve `.` in field names for [nested field
-   references](#structured-value-operations): a bare `.` in a field name is
-   invalid, while an escaped one is consumed (e.g., `a\.b` names the field
-   `a.b`).
-
 ### Documentation
 
 1. Update `README.md`
@@ -146,9 +136,9 @@ formats valid.
 
 ### Structured Value Operations
 
-1. Nested field references via the `.` reserved in field names (e.g., `a.b` for
-   member `b` of field `a`'s object, `a.0` for element `0` of field `a`'s
-   array).
+1. Nested field references via the `.` [reserved in field
+   names](../Specs/fields.md#appendix-escaping) (e.g., `a.b` for member `b` of
+   field `a`'s object, `a.0` for element `0` of field `a`'s array).
 2. Array & object type predicates.
 3. Array & object transforms.
 

@@ -348,6 +348,19 @@ private extension MASTests {
 	}
 
 	@Test
+	func `compares a structured value as its compact JSON text`() throws {
+		let fieldSpec = try parsedFieldSpec(format: "%i", sort: "1")
+		let sortSpec = try #require(fieldSpec.sortSpec)
+		#expect(
+			sortSpec.compare(
+				try sortValues(.array([.string("é"), .object(["a": .null])]), fieldSpec: fieldSpec),
+				try sortValues(.string(#"["é",{"a":null}]"#), fieldSpec: fieldSpec),
+			)
+				== .orderedSame,
+		)
+	}
+
+	@Test
 	func `item sort orders by ascending priority, then tiebreaks by input order`() throws {
 		let fieldSpec = try parsedFieldSpec(format: "%n", sort: "1")
 		let itemSort =
