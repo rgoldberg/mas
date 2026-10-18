@@ -540,8 +540,11 @@ nonterminals.
 - `null` or `empty`.
 - A [scalar description](#scalar-descriptions) of the value.
 - A literal scalar.
-- A [nonterminal reference](#nonterminal-references), evaluating to the
-  referenced nonterminal's global default for the directly absent state.
+- A [nonterminal reference](#nonterminal-references): if it references an
+  alternative of the choice to which the default applies, it selects that
+  alternative, as if that alternative were present with every descendant
+  directly absent; otherwise, it evaluates to the referenced nonterminal's
+  global default for the directly absent state.
 - [Literal text](#literal-text), consumed by the nonterminal to which the
   default applies.
 
