@@ -9,6 +9,17 @@
 3. Manual accompanying specs
 4. Examples
 
+### Open Questions
+
+1. [Chronologic rendering](../Specs/fields-format.md#chronologic-formatting):
+   specify how a rendered datetime or time-only writes its UTC offset (e.g., `Z`
+   vs `+00:00`) & whether a datetime detected without seconds renders seconds.
+2. [`numberFormat`](../Specs/fields-format.md#numberformat): specify how it
+   renders a value in scientific notation (e.g., `1.5e3`).
+3. [Absent values](../Specs/fields.md#absent-values): specify whether
+   key-value's & JSON's "a value exists" refers to the field value or to the
+   formatted value (e.g., `%N%n+none+` for an absent field).
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Custom Named Formats & Configs
