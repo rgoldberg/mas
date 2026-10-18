@@ -884,6 +884,7 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`                 | consumed           | consumed iff before `%` |
 | `<decimal-separator>` in `<number-format>`                           |                 | `:`                     | ignored            | ignored                 |
 | `<reference-date>`                                                   |                 | `:`                     | ignored            | ignored                 |
+| `<trivia-suffix-regex>`                                              |                 | `:`                     | ignored            | ignored                 |
 | Any other text argument                                              |                 | `,` `:`                 | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

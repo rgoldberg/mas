@@ -406,3 +406,7 @@ output renders a solely-`%u` format's value as `null`).
 A `<leader-pattern>` or `<item-separator-pattern>` containing a line terminator
 reports `invalidLeaderPattern` / `invalidItemSeparatorPattern`, as a table's
 `<separator-pattern>` & `<column-spacing>` do.
+
+A `<trivia-suffix-regex>` is the last argument of `<number-coercion-arguments>`,
+so a bare `,` in it is part of it instead of an error (e.g., `%.:,,,,,,,.*:n`
+matches `"5,x"`).
