@@ -439,3 +439,6 @@ properties are retained from the working fields config.
 `<chronologic-pipeline>`'s are, so a named unconditional format satisfies every
 `<named-format-reference>`; a block's `<transform-pipeline>` applies to the
 enclosing matcher's value, as already implemented.
+
+An absent value matching `u`, `e` & `w` as `null` does & coercing to an empty
+string is specified, as already implemented.

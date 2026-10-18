@@ -303,6 +303,23 @@ private extension MASTests {
 	}
 
 	@Test(
+		arguments: [
+			("%u", String?.none),
+			("%e", nil),
+			("%w", nil),
+			("%U+-+", ""),
+			("%S+-+", "-"),
+			("[%u]", "[]"),
+			("x%iy", "xy"),
+			("[%s]", nil),
+		],
+	)
+	func `an absent value matches u, e & w as null does & coerces to the empty string`(format: String, expected: String?)
+	throws {
+		#expect(try rendered(format, nil) == expected)
+	}
+
+	@Test(
 		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat", ".endJustify.round"],
 		[JSON.Node?.none, .null],
 	)
