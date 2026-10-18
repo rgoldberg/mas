@@ -233,7 +233,7 @@ item-separator-pattern = ^{text}^ (* default: {empty string} *)
 key-value-setting-termination = <key-value-setting-terminator> | <end-of-key-value-config>
 
 key-value-setting-terminator = ":"
-end-of-key-value-config      = {end of <key-value-config>}
+end-of-key-value-config      = end
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

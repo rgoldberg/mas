@@ -203,7 +203,7 @@ column-spacing = ^{text}^ (* default: {empty string} *)
 table-setting-termination = <table-setting-terminator> | <end-of-table-config>
 
 table-setting-terminator = ":"
-end-of-table-config      = {end of <table-config>}
+end-of-table-config      = end
 ```
 
 E.g., in `--table Hb`, `b` is interpreted as invalid `<style-specifier>` text,

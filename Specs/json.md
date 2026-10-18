@@ -99,7 +99,7 @@ Applies to every key & every string value.
 json-setting-termination = <json-setting-terminator> | <end-of-json-config>
 
 json-setting-terminator = ":"
-end-of-json-config      = {end of <json-config>}
+end-of-json-config      = end
 ```
 
 E.g., in `--json Pa`, `a` is interpreted as invalid `<indentation>` text, not as
