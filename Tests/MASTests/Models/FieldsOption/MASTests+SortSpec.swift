@@ -217,11 +217,12 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			// A number is a single number segment, unless lexicographic
+			// A number is a single number segment, unless lexicographic or versions
 			("1", JSON.Node.number(2), JSON.Node.number(10), ComparisonResult.orderedDescending),
 			("1u", .number(2), .number(10), .orderedAscending),
 			("1u-", .number(2), .number(10), .orderedDescending),
 			("1v", .number(2), .number(10), .orderedAscending),
+			("1v", .number(2), "1.5", .orderedDescending),
 			// Ungrouped number segments are runs of digits
 			("1x", "file10", "file2", .orderedAscending),
 			("1u", "file10", "file2", .orderedDescending),

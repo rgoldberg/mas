@@ -479,3 +479,7 @@ of ASCII-only `cntrl`, `graph` & `print` & approximations of the others, so,
 e.g., `alpha` includes `Ⅻ`, `blank` includes U+3000 & `xdigit` excludes `Ａ`.
 
 `scale` retains a leading `+` (`radixScaled`'s `isPlusSigned`), as `round` does.
+
+With `<versions>`, a number value compares as its text, so its versions compare
+with a string's versions (e.g., `2` follows `"1.5"`), instead of tying with
+every version segment.
