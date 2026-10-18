@@ -477,3 +477,5 @@ case differences.
 (`CharacterClass.contains(_:)`, per a character's 1st Unicode scalar), instead
 of ASCII-only `cntrl`, `graph` & `print` & approximations of the others, so,
 e.g., `alpha` includes `Ⅻ`, `blank` includes U+3000 & `xdigit` excludes `Ａ`.
+
+`scale` retains a leading `+` (`radixScaled`'s `isPlusSigned`), as `round` does.
