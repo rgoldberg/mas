@@ -635,13 +635,16 @@ an error is reported.
 
 ##### Type Comments
 
+Defined via a modified meta-grammar supporting [optionals](#optionals),
+[choices](#choices) & [literal text](#literal-text):
+
 ```ebnf
-NONTERMINAL = DEFINITION (* input type: TYPE *)
-NONTERMINAL = DEFINITION (* output type: TYPE *)
+NONTERMINAL "=" DEFINITION "(*" [ "input" | "output" ] "type:" TYPE "*)"
 ```
 
-`NONTERMINAL`'s input (for `input type:`) or value (for `output type:`) has the
-type that `TYPE` describes; a syntax defines the types & their use.
+`TYPE` is the type of `NONTERMINAL`'s input (iff `"input"` is present), value
+(iff `"output"` is present), or both (otherwise); a syntax defines the types &
+their use.
 
 ##### Value Comments
 

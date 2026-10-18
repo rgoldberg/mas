@@ -155,7 +155,7 @@ string), so an `<unconditional-transform-pipeline>`, which starts with a
 ```ebnf
 string-transform-pipeline = <string-transform-call>+
 string-transform-call     = <transform-call-prefix> [ <coercion> ] <string-transform>
-string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* input type: string; output type: string *)
+string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
 initial-titlecase = "initialTitlecase"
 lowercase         = "lowercase"
@@ -193,7 +193,7 @@ number-to-string-transform-pipeline = [ <number-transform-call>+ ] <number-to-st
 number-transform-call           = <transform-call-prefix> [ <number-coercion> ] <number-transform>
 number-to-string-transform-call = <transform-call-prefix> [ <number-coercion> ] <number-to-string-transform>
 
-number-transform           = <absolute-value> | <round> | <scale> (* input type: number; output type: number *)
+number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
 
 absolute-value = "absoluteValue"
@@ -327,7 +327,7 @@ point.
 ```ebnf
 chronologic-transform-pipeline = <chronologic-transform-call>+
 chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronologic-transform>
-chronologic-transform          = <date-only> | <time-zone> (* input type: chronologic; output type: chronologic *)
+chronologic-transform          = <date-only> | <time-zone> (* type: chronologic *)
 
 date-only = "dateOnly"
 time-zone = "timeZone" <time-zone-arguments> (* sets the output time zone *)
@@ -605,12 +605,12 @@ non-nullary-unconditional-placeholder =
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>
 
-nullary-input     = "i" (* input type: any; value: {field value} *)
-non-nullary-input = "I" (* input type: any; value: {field value} *)
-nullary-label     = "l" (* input type: any; value: {field label} *)
-non-nullary-label = "L" (* input type: any; value: {field label} *)
-nullary-name      = "k" (* input type: any; value: {field name}; mnemonic: key *)
-non-nullary-name  = "K" (* input type: any; value: {field name}; mnemonic: key *)
+nullary-input     = "i" (* output type: any; value: {field value} *)
+non-nullary-input = "I" (* output type: any; value: {field value} *)
+nullary-label     = "l" (* output type: string; value: {field label} *)
+non-nullary-label = "L" (* output type: string; value: {field label} *)
+nullary-name      = "k" (* output type: string; value: {field name}; mnemonic: key *)
+non-nullary-name  = "K" (* output type: string; value: {field name}; mnemonic: key *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -670,20 +670,20 @@ non-nullary-coercible-standard-predicate   = <non-nullary-boolean> | <non-nullar
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                                  input type: any; value: ""; mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                                  input type: any; value: ""; mnemonic: 2nd letter of null *)
-nullary-empty          = "e" (* is null or an empty string;                               input type: any; value: "" *)
-non-nullary-empty      = "E" (* is null or an empty string;                               input type: any; value: "" *)
-nullary-whitespace     = "w" (* is null, an empty string, or a string of only whitespace; input type: any; value: "" *)
-non-nullary-whitespace = "W" (* is null, an empty string, or a string of only whitespace; input type: any; value: "" *)
-nullary-boolean        = "b" (* is boolean;                                               input type: boolean; value: {field value} *)
-non-nullary-boolean    = "B" (* is boolean;                                               input type: boolean; value: {field value} *)
-nullary-true           = "t" (* is true;                                                  input type: boolean; value: {field value} *)
-non-nullary-true       = "T" (* is true;                                                  input type: boolean; value: {field value} *)
-nullary-false          = "f" (* is false;                                                 input type: boolean; value: {field value} *)
-non-nullary-false      = "F" (* is false;                                                 input type: boolean; value: {field value} *)
-nullary-string         = "s" (* is string;                                                input type: string; value: {field value} *)
-non-nullary-string     = "S" (* is string;                                                input type: string; value: {field value} *)
+nullary-null           = "u" (* is null;                                                  output type: any; value: ""; mnemonic: 2nd letter of null *)
+non-nullary-null       = "U" (* is null;                                                  output type: any; value: ""; mnemonic: 2nd letter of null *)
+nullary-empty          = "e" (* is null or an empty string;                               output type: any; value: "" *)
+non-nullary-empty      = "E" (* is null or an empty string;                               output type: any; value: "" *)
+nullary-whitespace     = "w" (* is null, an empty string, or a string of only whitespace; output type: any; value: "" *)
+non-nullary-whitespace = "W" (* is null, an empty string, or a string of only whitespace; output type: any; value: "" *)
+nullary-boolean        = "b" (* is boolean;                                               output type: boolean; value: {field value} *)
+non-nullary-boolean    = "B" (* is boolean;                                               output type: boolean; value: {field value} *)
+nullary-true           = "t" (* is true;                                                  output type: boolean; value: {field value} *)
+non-nullary-true       = "T" (* is true;                                                  output type: boolean; value: {field value} *)
+nullary-false          = "f" (* is false;                                                 output type: boolean; value: {field value} *)
+non-nullary-false      = "F" (* is false;                                                 output type: boolean; value: {field value} *)
+nullary-string         = "s" (* is string;                                                output type: string; value: {field value} *)
+non-nullary-string     = "S" (* is string;                                                output type: string; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -699,8 +699,8 @@ non-nullary-number-success = <non-nullary-number-matcher> -[ <number-block> ]
 
 number-modifiers = <number-coercion>
 
-nullary-number     = "n" (* is number; input type: number; value: {field value} *)
-non-nullary-number = "N" (* is number; input type: number; value: {field value} *)
+nullary-number     = "n" (* is number; output type: number; value: {field value} *)
+non-nullary-number = "N" (* is number; output type: number; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -712,8 +712,8 @@ non-nullary-number = "N" (* is number; input type: number; value: {field value} 
 ```ebnf
 non-nullary-version-success = <non-nullary-version> -[ <any-block> ]
 
-nullary-version     = "v" (* is version; input type: version; value: {field value} *)
-non-nullary-version = "V" (* is version; input type: version; value: {field value} *)
+nullary-version     = "v" (* is version; output type: version; value: {field value} *)
+non-nullary-version = "V" (* is version; output type: version; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -793,8 +793,8 @@ nullary-chronologic-matcher     = [ <coercible-modifiers> ] <nullary-chronologic
 non-nullary-chronologic-matcher = [ <coercible-modifiers> ] <non-nullary-chronologic>
 non-nullary-chronologic-success = <non-nullary-chronologic-matcher> -[ <chronologic-block> ]
 
-nullary-chronologic     = "c" (* is chronologic; input type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
-non-nullary-chronologic = "C" (* is chronologic; input type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
+nullary-chronologic     = "c" (* is chronologic; output type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
+non-nullary-chronologic = "C" (* is chronologic; output type: chronologic; value: {ISO date / datetime / time, per input, in system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
