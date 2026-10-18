@@ -466,3 +466,9 @@ section", since a `<relative-config>` has at most 1
 
 `Temp/` no longer names removed identifiers or features, and uses [standard
 terminology](terms.md).
+
+The canonical conventions compare text per the CLDR root collation
+(`compareLexically` uses the `root` locale), instead of Foundation's
+non-localized order, so, e.g., `é` precedes `f` & JSON output's keys sort
+`appleTVScreenshotURLs` before `appStorePageURL`; `<insensitive>` ignores only
+case differences.

@@ -651,13 +651,14 @@ extension SortOptionSet {
 		return ComparableComparator().compare(lhsComponents.count, rhsComponents.count)
 	}
 
-	/// Compares 2 texts per `caseSensitivity` & `locale`.
+	/// Compares 2 texts per `caseSensitivity` & `locale`'s collation, the CLDR
+	/// root collation iff `locale` is `nil` (i.e., the canonical conventions).
 	private func compareLexically(_ lhs: Substring, _ rhs: Substring) -> ComparisonResult {
 		var options = String.CompareOptions()
 		if caseSensitivity == .insensitive {
 			options.insert(.caseInsensitive)
 		}
-		return lhs.compare(rhs, options: options, range: nil, locale: locale)
+		return lhs.compare(rhs, options: options, range: nil, locale: locale ?? rootLocale)
 	}
 
 	/// The typed segment at `index` in `value` & its end; else `nil`.
@@ -900,6 +901,10 @@ private extension SortOptionSet.CharacterClass {
 // MARK: - Constants
 
 private let sortOptionTerminator = Character(":")
+
+/// The CLDR root locale, whose collation the canonical conventions compare text
+/// per.
+private let rootLocale = Locale(identifier: "root")
 private let sortModifierTerminatorSet = Set([fieldSpecSeparator])
 
 private let localeOption = Character("L")

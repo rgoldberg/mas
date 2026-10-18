@@ -474,3 +474,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 98. - whitespace: any Unicode `White_Space` character
       ([defined](../Specs/ebnf.md#whitespace))
     - REJECTED: blank space / white space
+99. - collation: a locale's rules for comparing text
+    - CLDR root collation: the Unicode Collation Algorithm with CLDR's root
+      collation order & settings, per which the canonical conventions compare
+      text ([used](../Specs/fields.md#sort-locale))
+    - REJECTED: code point order / Unicode order (for the canonical conventions'
+      text comparison)

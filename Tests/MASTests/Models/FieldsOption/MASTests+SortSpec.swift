@@ -303,9 +303,14 @@ private extension MASTests {
 			("1utB:", "a 2", "b 1", .orderedDescending),
 			("1ueB:", "a 2", "b 2", .orderedSame),
 			("1u", "a1", "a1b", .orderedAscending),
-			// Text compares per case sensitivity & locale
-			("1s", "B", "a", .orderedAscending),
-			("1i", "B", "a", .orderedDescending),
+			// Text compares per case sensitivity & locale, the canonical conventions
+			// per the CLDR root collation
+			("1", "B", "a", .orderedDescending),
+			("1", "é", "f", .orderedAscending),
+			("1", "e\u{301}", "\u{E9}", .orderedSame),
+			("1s", "a", "A", .orderedAscending),
+			("1i", "a", "A", .orderedSame),
+			("1i", "é", "e", .orderedDescending),
 			// Boundaries take sort precedence over non-boundary text
 			("1B:", "a/b", "a!b", .orderedDescending),
 			("1B/:", "a/b", "a!b", .orderedAscending),
