@@ -49,14 +49,14 @@ private extension MASTests {
 	@Test
 	func `key-value & JSON omit an absent formatted value, but not a fallback for an absent field`() throws {
 		let fieldSpecs = try resolvedFieldsConfig(
-			from: "a,b:%N%n+none+,c:%n,d,e:.round",
+			from: "a,b:%N%n+none+,c:%n,d,e:.round,f:..uppercase",
 			standard: SelectedFieldsConfig(),
 			all: .init(),
 			outputFormat: .json(.default),
 		)
 		.fieldSpecs
-		let object = JSON.Object([("d", .null)])
-		#expect(try fieldSpecs.map { try object.keyValueRow(for: $0)?.value } == [nil, "none", nil, nil, nil])
-		#expect(try object.jsonObject(fieldSpecs: fieldSpecs).fields.map(\.key.rawValue) == ["b", "d"])
+		let object = JSON.Object([("d", .null), ("f", .null)])
+		#expect(try fieldSpecs.map { try object.keyValueRow(for: $0)?.value } == [nil, "none", nil, nil, nil, nil])
+		#expect(try object.jsonObject(fieldSpecs: fieldSpecs).fields.map(\.key.rawValue) == ["b", "d", "f"])
 	}
 }
