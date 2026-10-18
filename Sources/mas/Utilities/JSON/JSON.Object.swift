@@ -36,16 +36,16 @@ extension JSON.Node {
 
 extension JSON.Object {
 	/// A field spec's row for key-value output: `(label, rendered value)`, or
-	/// `nil` if the field's raw value is absent or `null` (per fields.md's
-	/// "Absent Values": key-value omits both).
+	/// `nil` iff its formatted value is absent or `null` (per fields.md's "Absent
+	/// Values": key-value omits both).
 	func keyValueRow(for fieldSpec: FieldSpec) throws(FormattingError) -> (label: String, value: String)? {
-		guard let node = self[nodeKey: .init(rawValue: fieldSpec.name)], !node.isNull else {
+		guard
+			let node = try fieldSpec.rendered(value: self[nodeKey: .init(rawValue: fieldSpec.name)]),
+			!node.isNull
+		else {
 			return nil
 		}
-		return (
-			fieldSpec.label,
-			try fieldSpec.rendered(value: node).stringValue ?? "",
-		)
+		return (fieldSpec.label, node.stringValue ?? "")
 	}
 
 	/// This item's key-value output rows, each with its unstyled width, driven by
@@ -84,17 +84,14 @@ extension JSON.Object {
 	}
 
 	/// This item's JSON output object, per `--fields`-resolved field specs: keyed
-	/// by each field's label, omitting a field entirely iff its raw value is
-	/// absent (a `null` value, unlike key-value output, is still included).
+	/// by each field's label, omitting a field entirely iff its formatted value
+	/// is absent (a `null` value, unlike key-value output, is still included).
 	func jsonObject(fieldSpecs: some Sequence<FieldSpec>) throws(FormattingError) -> Self {
 		.init(
 			try fieldSpecs
 				.map { fieldSpec throws(FormattingError) in
-					try self[nodeKey: .init(rawValue: fieldSpec.name)].map { raw throws(FormattingError) in
-						(
-							JSON.Key(rawValue: fieldSpec.label),
-							try fieldSpec.rendered(value: raw),
-						)
+					try fieldSpec.rendered(value: self[nodeKey: .init(rawValue: fieldSpec.name)]).map { node in
+						(JSON.Key(rawValue: fieldSpec.label), node)
 					}
 				}
 				.compactMap(\.self),
@@ -116,7 +113,7 @@ extension [JSON.Object] {
 		let showsHeader = tableConfig.header != nil
 		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
 			let cells = try map { object throws(FormattingError) in
-				try fieldSpec.rendered(value: object[nodeKey: .init(rawValue: fieldSpec.name)]).stringValue ?? ""
+				try fieldSpec.rendered(value: object[nodeKey: .init(rawValue: fieldSpec.name)])?.stringValue ?? ""
 			}
 			return (
 				label: fieldSpec.label,

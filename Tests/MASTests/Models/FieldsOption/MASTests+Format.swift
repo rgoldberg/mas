@@ -13,8 +13,8 @@ private extension MASTests {
 	@Test
 	func `%i passes the value through at its original type`() throws {
 		let number = try Format.default(fieldName: "n").rendered(value: .number(42), label: "L", name: "n")
-		#expect(number.isNumber(42))
-		#expect(try Format.default(fieldName: "n").rendered(value: nil, label: "L", name: "n").stringValue == nil)
+		#expect(number?.isNumber(42) == true)
+		#expect(try Format.default(fieldName: "n").rendered(value: nil, label: "L", name: "n") == nil)
 	}
 
 	@Test(
@@ -56,7 +56,7 @@ private extension MASTests {
 				.text("B"),
 			],
 		)
-		#expect(try format.rendered(value: .string("x"), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(try format.rendered(value: .string("x"), label: "L", name: "n") == nil)
 	}
 
 	@Test(
@@ -112,7 +112,7 @@ private extension MASTests {
 	)
 	func `a block that aborts aborts the whole format`(placeholder: Placeholder) throws {
 		let format = Format.template([.text("A"), .placeholder(placeholder), .text("B")])
-		#expect(try format.rendered(value: .number(5), label: "L", name: "n").stringValue?.isEmpty == true)
+		#expect(try format.rendered(value: .number(5), label: "L", name: "n") == nil)
 	}
 }
 

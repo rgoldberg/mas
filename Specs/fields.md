@@ -167,17 +167,23 @@ A reference to a nonexistent field is an error.
 
 ## Absent Values
 
-Wherever an absent value is output, it is output as an empty string, unless the
-field spec's format renders it otherwise (e.g., via a `<failure-block>`, as for
-`%N%n+none+`, which outputs `none`).
+A field spec's [formatted value](fields-format.md#value-types) is **absent** iff
+formatting [aborts](fields-format.md#success--failure), or iff the field value
+is absent & the format evaluates to it unchanged (e.g., via `%i` or `%u`).
 
-- **Table**: A column is output for each field spec regardless of whether a
-  value exists for a given item.
-- **Key-Value**: A key-value pair is output for the field label & value iff a
-  non-`null` value exists.
-- **JSON**: A key-value pair is output for the field label & value iff a value
-  exists; e.g., for JSON input, `null`, `true`, `false`, `0`, `1`, `""` &
-  `"null"` are all values.
+Output depends on the formatted value, not on the field value:
+
+- **Table**: A cell is output for each field spec, regardless of whether its
+  formatted value is absent, which is output as an empty string.
+- **Key-Value**: A key-value pair is output for the field label & formatted
+  value iff the formatted value is neither absent nor `null`.
+- **JSON**: A key-value pair is output for the field label & formatted value iff
+  the formatted value is not absent; e.g., for JSON input, `null`, `true`,
+  `false`, `0`, `1`, `""` & `"null"` are all values.
+
+E.g., for an absent field, `%N%n+none+` outputs `none` in every output format,
+while `%i` & `%n` output an empty table cell, but no key-value pair in key-value
+or JSON output.
 
 ## Fields Option
 
@@ -535,8 +541,9 @@ If a format modifies an input value, `<input>` sorts by the input, while
 value](fields-format.md#value-types), so it sorts identically for every output
 format.
 
-A value is compared as a string: a string as is, `null` as an empty string, a
-[structured value](fields-format.md#value-types) as its [compact JSON
+A value is compared as a string: a string as is, `null` & an [absent
+value](#absent-values) as an empty string, a [structured
+value](fields-format.md#value-types) as its [compact JSON
 text](fields-format.md#value-coercion) & any other value as its canonical string
 representation (e.g., `false`), except that a number is a single
 [segment](#sort-segments):
