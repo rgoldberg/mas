@@ -168,7 +168,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `hiding a field removed earlier in the section inserts a hidden copy of its base field spec`() throws {
+	func `hiding a field removed earlier in the section inserts a hidden copy of its baseline field spec`() throws {
 		let specs = try parseFieldSpecs("@all.-adamID,_adamID")
 		#expect(specs.map(\.name) == ["adamID", "bundleID"])
 		#expect(specs[0].isHidden)
@@ -237,6 +237,14 @@ private extension MASTests {
 		let config = try parseFieldsConfig("//0.adamID/1")
 		#expect(config.fieldSpecs[0].sortSpec?.priority == 1)
 		#expect(config.itemSort.keys.map(\.fieldSpec.name) == ["adamID"])
+	}
+
+	@Test(arguments: ["//0.+adamID", "//0.-adamID,+adamID", "//0.-adamID,_adamID"])
+	func `disable-all-sorts disables the sort of a field spec copied from the baseline fields config`(value: String)
+	throws {
+		let config = try parseFieldsConfig(value)
+		#expect(config.fieldSpecs.compactMap(\.sortSpec).allSatisfy { $0.priority == 0 })
+		#expect(config.itemSort.keys.isEmpty)
 	}
 
 	@Test

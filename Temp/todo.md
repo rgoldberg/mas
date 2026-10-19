@@ -11,13 +11,7 @@
 
 ### Open Spec Questions
 
-1. A [`<base-sourced-field-spec-edit>`](../Specs/fields.md#relative-field-specs)
-   copies its `source` from the base fields config, which `<disable-all-sorts>`
-   does not modify, so `@standard//0.+name` inserts `name` with `standard`'s
-   enabled sort, if any. Copying it from the baseline fields config instead
-   would apply `//0`, and also `/P-`'s reversal, which then need not also
-   reverse the base fields config.
-2. The output options' syntaxes (e.g., [`--fields`'s
+1. The output options' syntaxes (e.g., [`--fields`'s
    `&<fields-config>`](../Specs/fields.md#fields-option)) treat the gap between
    2 command-line arguments as [outer bare
    whitespace](../Specs/ebnf.md#outer-bare-whitespace), which no spec defines,

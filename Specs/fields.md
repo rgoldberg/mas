@@ -329,10 +329,10 @@ The working fields config's field specs are ordered per
   - `<output>`: sorted by label.
 
 `<descending>` reverses `<order>`'s field order. For `<positional-order>`, it
-does so by reversing the positions of the working & base fields configs' field
-specs before `<field-spec-edits-section>`, so its edits & each `<index>`
-(including a `<base-sourced-field-spec-edit>`'s) apply to the reversed positions
-(e.g., in `@all/P-.+@1`, `@1` references `all`'s last field spec).
+does so by reversing the positions of the working fields config's field specs
+before `<field-spec-edits-section>`, so its edits & each `<index>` (including a
+`<baseline-sourced-field-spec-edit>`'s) apply to the reversed positions (e.g.,
+in `@all/P-.+@1`, `@1` references `all`'s last field spec).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
@@ -431,9 +431,9 @@ When accessing a field spec position via an index:
 field-spec-edits-section        = <field-spec-edits-section-prefix> [ <field-spec-edit> … <field-spec-separator> ]
 field-spec-edits-section-prefix = "."
 
-field-spec-edit = <base-sourced-field-spec-edit> | <reference-sourced-field-spec-edit>
+field-spec-edit = <baseline-sourced-field-spec-edit> | <reference-sourced-field-spec-edit>
 
-base-sourced-field-spec-edit      = <field-spec-insertion>
+baseline-sourced-field-spec-edit  = <field-spec-insertion>
 reference-sourced-field-spec-edit = <field-spec-overlay> | <field-spec-move> | <field-spec-hide> | <field-spec-removal>
 
 field-spec-insertion = <insert> <field-spec-reference> <field-modifiers>
@@ -456,12 +456,14 @@ For a given `<reference-sourced-field-spec-edit>` `fs`, its `source` is the
 field spec from the reference fields config referenced by `fs`. Thus, an
 inserted field spec cannot be modified by another field spec edit.
 
-For a given `<base-sourced-field-spec-edit>` `fs`, its `source` is the field
-spec from the base fields config referenced by `fs`, resolved as in the
+For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
+spec from the baseline fields config referenced by `fs`, resolved as in the
 reference fields config, except that a `<named-field-spec-reference>` whose
 `<reference-field-name>` names no field spec selects a [default field
 spec](#default-field-specs) for field `<reference-field-name>` (whereas a
-`<field-occurrence-index>` beyond its field's field specs is an error).
+`<field-occurrence-index>` beyond its field's field specs is an error). Thus,
+`<disable-all-sorts>` disables an inserted copy's sort (e.g., in
+`@all//0.+name`).
 
 The $previous$ index is the index in the working fields config where the direct
 results of the immediately preceding `<field-spec-edit>` were effected. It is
