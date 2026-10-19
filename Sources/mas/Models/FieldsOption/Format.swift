@@ -444,25 +444,23 @@ func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTr
 }
 
 extension Coercion { // swiftlint:disable:this file_types_order
-	/// `string` coerced to a number: a trivia prefix (the shortest whole match of
-	/// `triviaPrefixRegex` that a number succeeds), the longest number there (as
-	/// a canonical number) & a trivia suffix (the rest of `string`, which must be
-	/// a whole match of `triviaSuffixRegex`); else `nil`. See "Coercion" in
+	/// `string` coerced to a number: the shortest trivia prefix (a whole match of
+	/// `triviaPrefixRegex`) for which the longest number after it (as a canonical
+	/// number) leaves a trivia suffix (the rest of `string`) that is a whole
+	/// match of `triviaSuffixRegex`; else `nil`. See "Coercion" in
 	/// fields-format.md.
 	func coercedNumber(in string: String) -> (number: String, triviaPrefix: Substring, triviaSuffix: Substring)? {
 		string.indices
 			.lazy
 			.compactMap { index in
 				numberConventions.numberPrefix(of: string[index...]).flatMap { number, end in
-					string[..<index].wholeMatch(of: triviaPrefixRegex.regex) == nil ? nil : (index, number, end)
+					string[..<index].wholeMatch(of: triviaPrefixRegex.regex) == nil
+						|| string[end...].wholeMatch(of: triviaSuffixRegex.regex) == nil
+						? nil
+						: (number, string[..<index], string[end...])
 				}
 			}
 			.first
-			.flatMap { index, number, end in
-				string[end...].wholeMatch(of: triviaSuffixRegex.regex) == nil
-					? nil
-					: (number, string[..<index], string[end...])
-			}
 	}
 }
 

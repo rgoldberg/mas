@@ -67,6 +67,12 @@ private extension MASTests {
 				JSON.Node?.some(.string("$5")),
 				true,
 			),
+			(
+				.number,
+				Coercion?.some(.init(numberConventions: .canonical, triviaPrefixRegex: .any, triviaSuffixRegex: .empty)),
+				JSON.Node?.some(.string("a1b2")),
+				true,
+			),
 			(.number, nil, .string("5"), false),
 			(.number, .default, .string("5"), true),
 			(.string, nil, .null, false),

@@ -816,15 +816,17 @@ leading `0`s, or trailing fractional `0`s (e.g., `%.n` coerces `"+01.50e+3"` to
 `1.5e3` & `"-0.0"` to `0`).
 
 A number coercion also allows **trivia** around the number, matching a string
-iff the string is:
+iff the string is, for the shortest trivia prefix for which such a string
+exists:
 
 <!--editorconfig-checker-disable-->
-1. A **trivia prefix**: the shortest [Swift Regex](
+1. A **trivia prefix**: a [Swift Regex](
      https://github.com/swiftlang/swift-evolution/blob/main/proposals/0355-regex-syntax-run-time-construction.md
-   ) whole match of `<trivia-prefix-regex>` that a number succeeds.
+   ) whole match of `<trivia-prefix-regex>`.
 2. The longest number there.
-3. A **trivia suffix**: the rest of the string, which must be a whole match of
-   `<trivia-suffix-regex>`.
+3. A **trivia suffix**: the rest of the string, a whole match of
+   `<trivia-suffix-regex>` (e.g., `%.:,,,,,.*:n` matches `"a1b2"` as the trivia
+   prefix `a1b` & the number `2`).
 <!--editorconfig-checker-enable-->
 
 The default regexes match only an empty string, allowing no trivia (e.g.,
