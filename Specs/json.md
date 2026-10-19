@@ -13,15 +13,14 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-json-option = "--json" [ &<json-config> | !<json-option-value-separator> [ <json-config> ] ]
-
-json-option-value-separator = "="
-
 json-config  = <json-setting>+
 json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-ascii-setting>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+`--json`'s optional [value](configs.md#option-values), iff non-empty, is a
+`<json-config>`.
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.

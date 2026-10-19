@@ -10,13 +10,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 
 ## Table Config
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
-table-option = "--table" [ &<table-config> | !<table-option-value-separator> [ <table-config> ] ]
-
-table-option-value-separator = "="
-
 table-config  = <table-setting>+
 table-setting =
   <header-setting>
@@ -28,8 +22,9 @@ table-setting =
   | <broken-setting>
   | <column-spacing-setting>
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
+
+`--table`'s optional [value](configs.md#option-values), iff non-empty, is a
+`<table-config>`.
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.
