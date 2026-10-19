@@ -521,5 +521,5 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - REJECTED: duplicate / instance / occurrence (for a member)
 106. - option value separator: the `=` between a long option & its attached
        value (e.g., `<fields-option-value-separator>`)
-     - REJECTED: option-argument separator (the specs use "argument" for
-       transform arguments)
+     - REJECTED: option-argument separator (the specs use "argument" for an
+       argument list's elements)
