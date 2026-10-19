@@ -597,3 +597,11 @@ whether nonconforming values' location depends on `<direction>`:
 before, while `<fixed-nonconforming>` (`f`) keeps them 1st (`a`) or last (`z`)
 regardless of `<direction>` (e.g., `af-`), as SQL's `NULLS FIRST` & `NULLS LAST`
 do.
+
+A `<document-order-option-set>` also takes `<absent-field-comparison>` (`a` /
+`z`, default `z`) & `<absent-field-placement>` (`r` / `f`, default `r`)
+(`DocumentOrderOptionSet`): a field spec whose field an item lacks compares as
+less or greater than every member, and `<descending>` reverses its location iff
+`<relative-absent-fields>` (e.g., `D-` puts it 1st, but `D-f` last), as before
+by default; a `<positional-order-option-set>` reports either as
+`unsupportedAbsentFieldOption`.

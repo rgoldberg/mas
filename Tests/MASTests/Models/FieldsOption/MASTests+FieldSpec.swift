@@ -359,13 +359,18 @@ private extension MASTests {
 			("/-P", .positional),
 			("/P-", .positional),
 			("/DP", .positional),
-			("/D", .document(nil, tiebreakDirection: .ascending)),
-			("/D-", .document(.descending, tiebreakDirection: .ascending)),
-			("/D/-", .document(nil, tiebreakDirection: .descending)),
-			("/D-/+", .document(.descending, tiebreakDirection: .ascending)),
-			("/PD/-", .document(nil, tiebreakDirection: .descending)),
-			("/D / -", .document(nil, tiebreakDirection: .descending)),
-			("/D//-", .document(nil, tiebreakDirection: .ascending)),
+			("/D", .document(.init(), tiebreakDirection: .ascending)),
+			("/D-", .document(.init(direction: .descending), tiebreakDirection: .ascending)),
+			("/D/-", .document(.init(), tiebreakDirection: .descending)),
+			("/D-/+", .document(.init(direction: .descending), tiebreakDirection: .ascending)),
+			("/PD/-", .document(.init(), tiebreakDirection: .descending)),
+			("/D / -", .document(.init(), tiebreakDirection: .descending)),
+			("/D//-", .document(.init(), tiebreakDirection: .ascending)),
+			("/aD", .document(.init(absentFieldComparison: .least), tiebreakDirection: .ascending)),
+			(
+				"/PaD f-z",
+				.document(.init(direction: .descending, absentFieldPlacement: .fixed), tiebreakDirection: .ascending),
+			),
 		],
 	)
 	func `field order positional-order & document-order`(value: String, fieldOrder: FieldOrder) throws {
@@ -389,12 +394,28 @@ private extension MASTests {
 		#expect(try parseFieldSpecs(value).map(\.name) == names)
 	}
 
-	@Test(arguments: [("D", ["b", "a", "c"]), ("D-", ["c", "a", "b"])])
+	@Test(
+		arguments: [
+			("D", ["b", "a", "c"]),
+			("D-", ["c", "a", "b"]),
+			("aD", ["c", "b", "a"]),
+			("aD-", ["a", "b", "c"]),
+			("Dar", ["c", "b", "a"]),
+			("Df-", ["a", "b", "c"]),
+			("afD-", ["c", "a", "b"]),
+			("fD", ["b", "a", "c"]),
+		],
+	)
 	func `document-order orders each item's fields by its own key order`(order: String, expected: [String]) throws {
 		let fieldSpecs = ["a", "b", "c"].map(FieldSpec.default(forName:))
 		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
 		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json(.default)).fieldOrder
 		#expect(fieldOrder.itemMembers(fieldSpecs, for: object).map(\.fieldSpec.name) == expected)
+	}
+
+	@Test(arguments: [("/zP", Character("z")), ("/DPf", "f"), ("/aDP-", "a")])
+	func `absent-field options are unsupported for positional-order`(value: String, option: Character) {
+		#expect(throws: ParsingError.unsupportedAbsentFieldOption(option)) { try parseFieldSpecs(value) }
 	}
 
 	@Test(arguments: ["/D", "/-D"])
