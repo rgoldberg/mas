@@ -13,7 +13,9 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-json-option = "--json" [ &<json-config> ]
+json-option = "--json" [ &<json-config> | !<json-option-value-separator> [ <json-config> ] ]
+
+json-option-value-separator = "="
 
 json-config  = <json-setting>+
 json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-ascii-setting>

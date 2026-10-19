@@ -216,11 +216,17 @@ or JSON output.
 
 ## Fields Option
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-fields-option = "--fields" &<fields-config>
+fields-option = "--fields" ( &<fields-config> | !<fields-option-value-separator> <fields-config> )
+
+fields-option-value-separator = "="
 
 fields-config = ( <absolute-config> | <relative-config> )- (* default: "" *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 `<absolute-config>` & `<relative-config>` are overlaid on top of the base fields
 config for the current command line only; they do not persistently affect named
