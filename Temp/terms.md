@@ -450,9 +450,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 91. - axis: a concept that a setting sets (e.g., a header row), whose
       `(* last wins *)` nonterminal (e.g., `<header-setting>`) overrides its
       preceding occurrences
-    - last-wins scope: the enclosing occurrence within which a `(* last wins *)`
-      nonterminal's occurrences override each other
-      ([defined](../Specs/ebnf.md#last-wins-comments))
+    - last-wins scope: the nearest enclosing occurrence (else the entire input)
+      within which a `(* last wins *)` nonterminal's occurrences override each
+      other ([defined](../Specs/ebnf.md#last-wins-comments))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
     - decimal number: a Unix time's text syntax
