@@ -293,7 +293,7 @@ document-order-trailing-option = <direction> | <absent-field-comparison> | <abse
 order = <positional-order> | <document-order> (* last wins *)
 
 positional-order = "P"
-document-order   = "D" (* only for: json or key-value output *)
+document-order   = "D" (* only for: JSON or key-value output *)
 
 absent-field-comparison = <absent-fields-least> | <absent-fields-greatest> (* default: <absent-fields-greatest>; last wins *)
 absent-field-placement  = <relative-absent-fields> | <fixed-absent-fields> (* default: <relative-absent-fields>; last wins *)

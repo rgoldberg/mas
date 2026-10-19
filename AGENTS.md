@@ -99,6 +99,9 @@ chosen), except always use `.md` for Markdown.
     characters
   - **Word choice:** Avoid `curate` / `curated` / `curation`; prefer `select`,
     `handle`, etc.
+  - **Output formats:** Name an output format in prose as table, key-value, or
+    JSON (e.g., `JSON output`), never as a code span (e.g., not `json` output),
+    except as an output format suffix (e.g., `@json`)
   - **Em dashes:** Do not use em dashes, except in `CODE_OF_CONDUCT.md`
   - **Contractions:** Never use contractions (e.g., write `it is`, not `it's`;
     `do not`, not `don't`), not even in test data (e.g., App Store data in test
