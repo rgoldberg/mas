@@ -74,10 +74,9 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case byName(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
 	/// `<document-order>` (`"D"`): each item's fields in the order of its own
 	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
-	/// renames keys, never reorders them), per `itemMembers(_:for:)`.
-	/// `direction`, if `.descending`, reverses that order, except among ties,
-	/// which are ordered per `tiebreakDirection`.
-	case document(SortOptionSet.Direction?, tiebreakDirection: SortOptionSet.Direction)
+	/// renames keys, never reorders them), per `optionSet` &
+	/// `itemMembers(_:for:)`, ties ordered per `tiebreakDirection`.
+	case document(DocumentOrderOptionSet, tiebreakDirection: SortOptionSet.Direction)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the resolved
 	/// base fields config's own `fieldOrder`.
@@ -86,6 +85,35 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// position. Its `<descending>` reverses their positions while parsing,
 	/// before `<field-spec-edits-section>`, so it needs no direction here.
 	case positional
+}
+
+/// A `<document-order-option-set>`'s options other than its `<order>`s.
+struct DocumentOrderOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `<absent-field-comparison>`.
+	enum AbsentFieldComparison: Character {
+		/// `<absent-fields-greatest>`.
+		case greatest = "z"
+		/// `<absent-fields-least>`.
+		case least = "a"
+	}
+
+	/// `<absent-field-placement>`: whether `<descending>` reverses the location
+	/// of a field spec whose field an item lacks.
+	enum AbsentFieldPlacement: Character {
+		/// `<fixed-absent-fields>`.
+		case fixed = "f"
+		/// `<relative-absent-fields>`.
+		case relative = "r"
+	}
+
+	var direction = SortOptionSet.Direction.ascending
+	var absentFieldComparison = AbsentFieldComparison.greatest
+	var absentFieldPlacement = AbsentFieldPlacement.relative
+
+	/// Whether a field spec whose field an item lacks precedes every member.
+	var isAbsentFieldFirst: Bool {
+		(absentFieldComparison == .least) != (absentFieldPlacement == .relative && direction == .descending)
+	}
 }
 
 extension FieldOrder {
@@ -132,31 +160,37 @@ extension FieldOrder {
 	/// `fieldSpecs`' members in `object` (fields.md "Members"), each with its
 	/// value (`nil` for a field spec whose field `object` lacks, which formats
 	/// its absent value once), each field spec's members in input order: for
-	/// `<document-order>`, each member at its own position among `object`'s keys
-	/// (field specs for absent fields last), reversed iff `.descending`, ties
-	/// ordered by position, or by reverse position iff `tiebreakDirection` is
-	/// `.descending`; otherwise, in `fieldSpecs`' order.
+	/// `<document-order>`, each member at its own position among `object`'s keys,
+	/// reversed iff `.descending`, and field specs for absent fields 1st iff
+	/// `isAbsentFieldFirst`, else last, ties ordered by position, or by reverse
+	/// position iff `tiebreakDirection` is `.descending`; otherwise, in
+	/// `fieldSpecs`' order.
 	func itemMembers(_ fieldSpecs: [FieldSpec], for object: JSON.Object)
 	-> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
 		let members = fieldSpecs.enumerated().flatMap { offset, fieldSpec in
 			let fieldMembers = object.fields.enumerated().filter { $0.element.key.rawValue == fieldSpec.name }
 			return fieldMembers.isEmpty
-				? [(offset: offset, documentPosition: Int.max, fieldSpec: fieldSpec, value: JSON.Node?.none)]
+				? [(offset: offset, documentPosition: Int?.none, fieldSpec: fieldSpec, value: JSON.Node?.none)]
 				: fieldMembers.map { member in
 					(offset: offset, documentPosition: member.offset, fieldSpec: fieldSpec, value: member.element.value)
 				}
 		}
-		guard case let .document(direction, tiebreakDirection) = self else {
+		guard case let .document(optionSet, tiebreakDirection) = self else {
 			return members.map { ($0.fieldSpec, $0.value) }
 		}
-		return members
+		func isTiebrokenBefore(_ lhsOffset: Int, _ rhsOffset: Int) -> Bool {
+			tiebreakDirection == .ascending ? lhsOffset < rhsOffset : lhsOffset > rhsOffset
+		}
+		let presentMembers = members
+			.compactMap { member in member.documentPosition.map { (position: $0, member: member) } }
 			.sorted { lhs, rhs in
-				lhs.documentPosition == rhs.documentPosition
-					? tiebreakDirection == .ascending
-						? lhs.offset < rhs.offset
-						: lhs.offset > rhs.offset
-					: (lhs.documentPosition < rhs.documentPosition) == (direction != .descending)
+				lhs.position == rhs.position
+					? isTiebrokenBefore(lhs.member.offset, rhs.member.offset)
+					: (lhs.position < rhs.position) == (optionSet.direction == .ascending)
 			}
+			.map(\.member)
+		let absentMembers = members.filter { $0.documentPosition == nil }.sorted { isTiebrokenBefore($0.offset, $1.offset) }
+		return (optionSet.isAbsentFieldFirst ? absentMembers + presentMembers : presentMembers + absentMembers)
 			.map { ($0.fieldSpec, $0.value) }
 	}
 }

@@ -284,14 +284,24 @@ field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <direction>+ ]
-document-order-option-set   = [ <order-option>+ ] <document-order> [ <direction>+ ]
+document-order-option-set   = [ <document-order-option>+ ] <document-order> [ <document-order-trailing-option>+ ]
 
-order-option = <order> | <direction>
+order-option                   = <order> | <direction>
+document-order-option          = <order-option> | <absent-field-comparison> | <absent-field-placement>
+document-order-trailing-option = <direction> | <absent-field-comparison> | <absent-field-placement>
 
 order = <positional-order> | <document-order> (* last wins *)
 
 positional-order = "P"
 document-order   = "D" (* only for: json or key-value output *)
+
+absent-field-comparison = <absent-fields-least> | <absent-fields-greatest> (* default: <absent-fields-greatest>; last wins *)
+absent-field-placement  = <relative-absent-fields> | <fixed-absent-fields> (* default: <relative-absent-fields>; last wins *)
+
+absent-fields-least    = "a" (* mnemonic: 1st letter, so least *)
+absent-fields-greatest = "z" (* mnemonic: last letter, so greatest *)
+relative-absent-fields = "r"
+fixed-absent-fields    = "f"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -300,7 +310,13 @@ The working fields config's field specs are ordered per
 `<field-order-option-set>`:
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
-  input JSON object, each [member](#members) at its own position.
+  input JSON object, each [member](#members) at its own position. A field spec
+  whose field an item lacks (which outputs anything only per a format that
+  renders an absent value, e.g., `%N%n+none+`) has no document position, so it
+  compares as less (`a`) or greater (`z`) than every member. Per
+  `<absent-field-placement>`, `<descending>` also reverses its location
+  (`<relative-absent-fields>`, e.g., `D-` puts it 1st) or does not
+  (`<fixed-absent-fields>`, e.g., `D-f` puts it last).
 - `<positional-order>`: ordered by position.
 - `<sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.

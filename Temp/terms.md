@@ -352,12 +352,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 71. - app: software implementing the specs (e.g., mas;
       [defined](../Specs/configs.md#configs))
     - REJECTED: application / program
-72. - least: compares less than all others (`<nonconforming-least>`)
-    - greatest: compares greater than all others (`<nonconforming-greatest>`)
+72. - least: compares less than all others (`<nonconforming-least>`,
+      `<absent-fields-least>`)
+    - greatest: compares greater than all others (`<nonconforming-greatest>`,
+      `<absent-fields-greatest>`)
     - relative: of a location that `<direction>` reverses
-      (`<relative-nonconforming>`)
+      (`<relative-nonconforming>`, `<relative-absent-fields>`)
     - fixed: of a location that `<direction>` does not affect
-      (`<fixed-nonconforming>`)
+      (`<fixed-nonconforming>`, `<fixed-absent-fields>`)
     - REJECTED: lowest / highest / smallest / largest / minimum / maximum /
       pinned / anchored / directional (for relative or fixed)
 73. - code span: backtick-delimited inline code (CommonMark)

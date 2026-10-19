@@ -114,6 +114,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case unexpectedCharacter(Character)
 	case unknownNamedFormat(String)
 	case unknownTransform(String)
+	case unsupportedAbsentFieldOption(Character)
 
 	var description: String {
 		switch self {
@@ -201,6 +202,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Unknown named format: \(name)"
 		case let .unknownTransform(name):
 			"Unknown transform: \(name)"
+		case let .unsupportedAbsentFieldOption(option):
+			"<absent-field-comparison> & <absent-field-placement> are supported only for <document-order> 'D': \(option)"
 		}
 	}
 }
@@ -471,11 +474,12 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// a required `<field-order-option-set>`, either a
 	/// `<positional-order-option-set>` / `<document-order-option-set>`
 	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
-	/// respectively, last wins per axis) or a `<sort-option-set>` (whose
-	/// `<source>` defaults to `<output>`, i.e., sorted by label), the latter 2
-	/// followed by an optional `<field-order-tiebreaker>`. The alternatives are
-	/// disjoint: each but `<sort-option-set>` contains an `<order>` letter, which
-	/// is no `<sort-option>`.
+	/// respectively, plus, only for the latter, `<absent-field-comparison>`s &
+	/// `<absent-field-placement>`s, last wins per axis) or a `<sort-option-set>`
+	/// (whose `<source>` defaults to `<output>`, i.e., sorted by label), the
+	/// latter 2 followed by an optional `<field-order-tiebreaker>`. The
+	/// alternatives are disjoint: each but `<sort-option-set>` contains an
+	/// `<order>` letter, which is no `<sort-option>`.
 	mutating func parseFieldOrderSection(_ input: inout Substring) throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
 			return .inherited
@@ -501,23 +505,34 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				.byLabel(optionSet, tiebreakDirection: tiebreakDirection)
 			}
 		}
-		var direction = SortOptionSet.Direction?.none
+		var optionSet = DocumentOrderOptionSet()
+		var absentFieldOption = Character?.none
 		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
-			if let match = SortOptionSet.Direction(rawValue: char) {
-				direction = match
+			if let direction = SortOptionSet.Direction(rawValue: char) {
+				optionSet.direction = direction
+			} else if let comparison = DocumentOrderOptionSet.AbsentFieldComparison(rawValue: char) {
+				optionSet.absentFieldComparison = comparison
+				absentFieldOption = char
+			} else if let placement = DocumentOrderOptionSet.AbsentFieldPlacement(rawValue: char) {
+				optionSet.absentFieldPlacement = placement
+				absentFieldOption = char
 			}
 			input.removeFirst()
 		}
 		let tiebreakDirection = try parseFieldOrderTiebreaker(&input)
+		if order == positionalOrderOption, let absentFieldOption {
+			// `<positional-order-option-set>` has only `<order-option>`s
+			throw .unsupportedAbsentFieldOption(absentFieldOption)
+		}
 		return switch (order, outputFormat, tiebreakDirection) {
 		case (positionalOrderOption, _, nil):
-			reversingPositions(iff: direction == .descending)
+			reversingPositions(iff: optionSet.direction == .descending)
 		case (positionalOrderOption, _, _): // `<field-order-tiebreaker>` is only for a field order other than `P`
 			throw .tiebreakerUnsupportedForPositionalOrder
 		case (_, .table, _): // `<document-order>` is `(* only for: json or key-value output *)`
 			throw .documentOrderUnsupportedForTable
 		default:
-			.document(direction, tiebreakDirection: tiebreakDirection ?? .ascending)
+			.document(optionSet, tiebreakDirection: tiebreakDirection ?? .ascending)
 		}
 	}
 
@@ -703,11 +718,11 @@ private func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingE
 /// to, but not including, its terminating `<field-spec-separator>` /
 /// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
 /// is a `<positional-order-option-set>` / `<document-order-option-set>`: every
-/// top-level character is a `<direction>` or an `<order>`, with at least 1
-/// `<order>` (last wins). `nil` means it is a `<sort-option-set>` instead: the
-/// alternatives share no valid text (an all-`<direction>` sequence with no
-/// `<order>` can only be `<sort-option-set>`), so checking without consuming
-/// `input` is safe.
+/// top-level character is a `<direction>`, an `<absent-field-comparison>`, an
+/// `<absent-field-placement>`, or an `<order>`, with at least 1 `<order>` (last
+/// wins). `nil` means it is a `<sort-option-set>` instead: the alternatives
+/// share no valid text (a sequence with no `<order>` can only be
+/// `<sort-option-set>`), so checking without consuming `input` is safe.
 private func orderOptionSetOrder(_ input: Substring) -> Character? {
 	var order = Character?.none
 	for char in input {
@@ -715,7 +730,12 @@ private func orderOptionSetOrder(_ input: Substring) -> Character? {
 			break
 		}
 		guard orderOptionSet.contains(char) else {
-			guard char.isWhitespace || SortOptionSet.Direction(rawValue: char) != nil else {
+			guard
+				char.isWhitespace
+				|| SortOptionSet.Direction(rawValue: char) != nil
+				|| DocumentOrderOptionSet.AbsentFieldComparison(rawValue: char) != nil
+				|| DocumentOrderOptionSet.AbsentFieldPlacement(rawValue: char) != nil
+			else {
 				return nil
 			}
 			continue
