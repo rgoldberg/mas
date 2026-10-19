@@ -575,3 +575,7 @@ Table & key-value output print nothing (instead of an empty line) iff there is
 nothing to output: a table without any visible field spec, or key-value output
 in which no item has a row (`[JSON.Object].table(fieldSpecs:tableConfig:)` &
 `.keyValue(fieldSpecs:fieldOrder:keyValueConfig:)` return `nil`).
+
+`initialTitlecase` titlecasing a cased number or symbol at which it stops (e.g.,
+`ⓐbc` becomes `Ⓐbc` & `ⅰx` becomes `Ⅰx`), per Unicode's titlecase mappings &
+ICU, is specified, as already implemented.
