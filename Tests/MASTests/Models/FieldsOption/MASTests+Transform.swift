@@ -22,6 +22,8 @@ private extension MASTests {
 			("1st", "1st"),
 			("$abc", "$abc"),
 			("©apple", "©apple"),
+			("\u{24D0}bc", "\u{24B6}bc"),
+			("\u{2170}x", "\u{2160}x"),
 			("", ""),
 		],
 	)
