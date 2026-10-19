@@ -566,3 +566,7 @@ that names no field spec selects a default field spec or inserts one.
 A coerced number's canonical form has no leading `0`s in its exponent & no `-`
 sign on a 0 exponent (e.g., `%.n` coerces `"1e-03"` to `1e-3` & `"1e-00"` to
 `1e0`), as in its significand.
+
+ISO-8601 detection's field ranges are specified, as already implemented: an hour
+from `00` to `23` (no `24:00:00`), a minute & a second from `00` to `59` (no
+leap second) & a UTC offset at most 18 hours from UTC.
