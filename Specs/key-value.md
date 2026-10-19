@@ -38,8 +38,7 @@ The [built-in](configs.md#immutable-built-in-named-configs) `standard` key-value
 config sets every `<key-value-setting>` to its default.
 
 Each row of an item is its key, its leading spacing, its leader, its trailing
-spacing, then its value; without a leader, its leading spacing & then its
-trailing spacing are between its key & its value.
+spacing, then its value.
 
 ## Key
 

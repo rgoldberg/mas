@@ -419,7 +419,7 @@ while an aborted format outputs nothing (instead of an empty string).
 A `null` or absent value remains unchanged through every transform, with or
 without `<coercion>` (`FormatValue.applying(_:)`), so a transform on a `null` or
 absent field (e.g., `.round`) never reports `transformInputTypeMismatch`, and
-`..uppercase` renders `null` as `null` instead of `""`.
+`..uppercase` evaluates to `null` for `null` instead of to `""`.
 
 ### 2nd Spec Review Fixes (2026-10-18)
 
@@ -511,3 +511,11 @@ instants are exact milliseconds, so every Unix time in range renders exactly.
 `<unary-match-placeholder>` & `<binary-match-placeholder>` alternatives of
 `<conditional-placeholder>`, instead of nullary & non-nullary predicates,
 because `%m`'s `<branches>` make it not nullary.
+
+### 3rd Spec Review Fixes (2026-10-19)
+
+A placeholder's outcomes cover `%m` & `%M` (whose value is the matched branch's
+value), and specs clarify boolean blocks' coercion, number-to-string transforms'
+`<number-coercion-arguments>`, a named format followed by a coerced transform
+call, the reference fields config's `null`s & a number's sort text, as already
+implemented.

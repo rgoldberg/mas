@@ -96,9 +96,10 @@ A **named format** is a format that:
 If no named format exists for a referenced name, an error is reported.
 
 If a `<transform-pipeline>` immediately follows a `<named-format-reference>`,
-the referenced format's value must also have the transforms' input type (e.g.,
-`:name.round` requires `name`'s value to be a number). Otherwise, an error is
-reported.
+the referenced format's value must also have its 1st transform's input type,
+unless that transform call has a `<coercion>` (e.g., `:name.round` requires
+`name`'s value to be a number, but `:name..round` does not). Otherwise, an error
+is reported.
 
 Because every `<success-block>` includes `<unconditional-block>`, a named
 unconditional format satisfies every `<named-format-reference>`, except that
@@ -157,7 +158,7 @@ A `<coercion>` attempts to coerce an input value into the correct input type for
 the annotated transform. If the coercion is successful, the transform is applied
 to the coerced input; otherwise, formatting [aborts](#success--failure).
 
-A number transform's coercion may take
+A number or number-to-string transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`).
 
 Coercing any value to a string always succeeds (`null` becomes the empty string,
@@ -608,9 +609,9 @@ A `<success-block>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
-A `<success-block>`'s kind follows the matched value's type; where that can be
-any type, the block's pipeline must start, after any named format, by coercing
-to a string.
+A `<success-block>`'s kind follows the matched value's type; where that is
+boolean or can be any type, the block's pipeline must start, after any named
+format, by coercing to a string.
 
 `<unconditional-block>` differs from `<any-block>` only by forbidding
 `<block-placeholder>`s.
@@ -624,12 +625,12 @@ A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
 
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
-  - If it is nullary: the placeholder's value.
+  - If it is nullary, unary match, or binary match: the placeholder's value.
   - Otherwise: its `<success-block>`'s evaluated value.
 - If a placeholder fails (e.g., `%u` is evaluated against a non-`null`):
   - If it has `<abort-on-success>` & a nullary predicate: the field value.
-  - If it is binary or abort-on-success: its `<failure-block>`'s evaluated
-    value.
+  - If it is binary, binary match, or abort-on-success: its `<failure-block>`'s
+    evaluated value.
   - Otherwise: formatting aborts.
 
 In a template that is not solely 1 placeholder, each inserted value is [coerced

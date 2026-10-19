@@ -487,7 +487,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([used](../Specs/fields.md#sort-boundaries))
      - REJECTED: GNU Extended POSIX character class / bracket expression class
 101. - time-only block: `%c` / `%C`'s block (`<time-only-block>`), whose
-       pipeline can contain only `timeZone`
+       pipeline's transforms can be only `timeZone`s, or string transforms after
+       coercing to a string
      - REJECTED: clock block / time block
 102. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999
@@ -496,10 +497,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - instant: a point in time, in milliseconds since 1970-01-01T00:00:00Z
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
-103. - nullary: of a predicate letter (lowercase) or a form, followed by no
-       block
-     - non-nullary: of a predicate letter (uppercase), followed by 1 or more
-       blocks
+103. - nullary: of a form, or of a lowercase predicate letter other than `m`,
+       followed by no block
+     - non-nullary: of an uppercase predicate letter other than `M`, followed by
+       1 or more blocks
      - unary match / binary match: `%m` (`<unary-match>`) / `%M`
        (`<binary-match>`), named by arity, because `%m`'s `<branches>` make it
        not nullary
