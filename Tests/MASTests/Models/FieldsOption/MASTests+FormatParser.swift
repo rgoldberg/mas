@@ -123,6 +123,7 @@ private extension MASTests {
 			("%n", .number(4.5), "4.5"),
 			// fields-format.md's examples
 			("%.:de:n", .string("1.234,56"), "1234.56"),
+			("%.:de: n", .string("1.234,56"), "1234.56"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("US$4.99"), "US$4.99"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("$4.99"), "$4.99"),
 			("[%.:,,,,,[A-Z]*[$]:n]", .string("4.99"), nil),
@@ -253,6 +254,7 @@ private extension MASTests {
 			("..scale:10,0,,2:.numberFormat:de:", .string("1.5e3"), "1.500,00"),
 			("..:,,,,,[$]:numberFormat:de:", .string("$1234.5"), "$1.234,5"),
 			("..:de:round", .string("1.234,56"), "1235"),
+			("..:de: round", .string("1.234,56"), "1235"),
 			("..:,,,,,.*,.*:round", .string("about 2.5 MB"), "about 3 MB"),
 			("..:,,,,,.*,.*:numberFormat:en:", .string("~1234567 B"), "~1,234,567 B"),
 			(".scale:10,6, ,0:", .number(12_345_678), "12"),

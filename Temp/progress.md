@@ -611,3 +611,7 @@ by default; a `<positional-order-option-set>` reports either as
 Whitespace between a `<field-spec-edit>`'s `<insert>`, `<move>`, `<hide>`, or
 `<remove>` & its `<field-spec-index-prefix>` is ignored (e.g., `+ @1`), instead
 of reporting `missingFieldName`.
+
+Whitespace after `<number-coercion-arguments>`' closing `<argument-fence>` is
+ignored (e.g., `%.:de: n`, `..:de: round`), instead of reporting `invalidLetter`
+or `unknownTransform`; only `<coercion>`'s `.` forbids succeeding whitespace.
