@@ -79,6 +79,7 @@ private extension MASTests {
 				.uncollapsed([.init(boundaries: [.character("/")]), .init(boundaries: [.characterClass(.space)])]),
 			),
 			("1M%ab%-:", .collapsed([.init(boundaries: [.characters("ab"), .character("-")])])),
+			("1B+ space\t+/:", .uncollapsed([.init(boundaries: [.characterClass(.space), .character("/")])])),
 			("1B\\_\\:\\%:", .uncollapsed([.init(boundaries: [.character("_"), .character(":"), .character("%")])])),
 		],
 	)

@@ -365,8 +365,10 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				boundaries.append(.characters(text))
 			case characterClassFence:
 				input.removeFirst()
+				skipWhitespace(&input)
 				let name = input.prefix(while: \.isLetter)
 				input.removeFirst(name.count)
+				skipWhitespace(&input)
 				guard input.first == characterClassFence, let characterClass = CharacterClass(rawValue: .init(name)) else {
 					throw .invalidCharacterClass(.init(name))
 				}
