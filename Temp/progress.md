@@ -616,3 +616,7 @@ Whitespace after `<number-coercion-arguments>`' closing `<argument-fence>` is
 ignored (e.g., `%.:de: n`, `..:de: round`), instead of reporting `invalidLetter`
 or `unknownTransform`; within `<number-coercion>`, only `<coercion>`'s `.`
 forbids succeeding whitespace.
+
+Each output option's EBNF accepts its value after an option value separator
+(e.g., `--fields=name`, `--table=`), as Swift Argument Parser already does; a
+test confirms that each such form is equivalent to its whitespace form.

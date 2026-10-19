@@ -96,6 +96,21 @@ private extension MASTests {
 		#expect(bare == empty)
 	}
 
+	@Test(arguments: [("--fields", "name"), ("--json", ""), ("--json", "a"), ("--key-value", ""), ("--table", "")])
+	func `an output option value separator is equivalent to whitespace`(option: String, value: String) async throws {
+		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
+		let separated = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1472954003", "\(option)=\(value)"])) { command in
+				try command.run(catalogApps: catalogApps)
+			},
+		)
+		let spaced = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1472954003", option, value])) { try $0.run(catalogApps: catalogApps) },
+		)
+		#expect(!separated.stdout.isEmpty)
+		#expect(separated == spaced)
+	}
+
 	@Test
 	func `at most 1 output option may be given`() {
 		let error = #expect(throws: (any Error).self) { try MAS.Lookup.parse(["1", "--json", "", "--table", ""]) }

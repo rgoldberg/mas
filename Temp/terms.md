@@ -519,3 +519,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 105. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
+106. - option value separator: the `=` between a long option & its attached
+       value (e.g., `<fields-option-value-separator>`)
+     - REJECTED: option-argument separator (the specs use "argument" for
+       transform arguments)
