@@ -570,3 +570,8 @@ sign on a 0 exponent (e.g., `%.n` coerces `"1e-03"` to `1e-3` & `"1e-00"` to
 ISO-8601 detection's field ranges are specified, as already implemented: an hour
 from `00` to `23` (no `24:00:00`), a minute & a second from `00` to `59` (no
 leap second) & a UTC offset at most 18 hours from UTC.
+
+Table & key-value output print nothing (instead of an empty line) iff there is
+nothing to output: a table without any visible field spec, or key-value output
+in which no item has a row (`[JSON.Object].table(fieldSpecs:tableConfig:)` &
+`.keyValue(fieldSpecs:fieldOrder:keyValueConfig:)` return `nil`).

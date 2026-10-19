@@ -186,6 +186,12 @@ private extension MASTests {
 	}
 
 	@Test
+	func `table outputs nothing without any field spec, even with a header row`() throws {
+		let objects = [JSON.Object([("name", .string("Slack"))])]
+		#expect(try objects.table(fieldSpecs: [], tableConfig: parseTableConfig("S")) == nil)
+	}
+
+	@Test
 	func `table renders an absent value as an empty string, unless its format renders it otherwise`() throws {
 		let table = try [JSON.Object([("a", .string("1"))])]
 			.table(

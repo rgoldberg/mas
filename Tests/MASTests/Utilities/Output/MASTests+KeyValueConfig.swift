@@ -222,6 +222,17 @@ private extension MASTests {
 		)
 	}
 
+	@Test(arguments: ["s", "S-"])
+	func `key-value outputs nothing iff no item has a row`(value: String) throws {
+		#expect(
+			try keyValue(
+				of: [.init([("other", .null)]), .init([("name", .null)])],
+				keyValueConfig: parseKeyValueConfig(value),
+			)
+				== nil,
+		)
+	}
+
 	@Test(
 		arguments: [
 			("fL=:R:s", "Name=Slack\nVersion=4.0\nName=X\nVersion=1"),
@@ -274,7 +285,7 @@ private let twoItems = [
 	JSON.Object([("name", .string("X")), ("version", .string("1"))]),
 ]
 
-private func keyValue(of objects: [JSON.Object], keyValueConfig: KeyValueConfig) throws -> String {
+private func keyValue(of objects: [JSON.Object], keyValueConfig: KeyValueConfig) throws -> String? {
 	try objects.keyValue(
 		fieldSpecs: [
 			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
