@@ -394,7 +394,7 @@ private extension MASTests {
 		let fieldSpecs = ["a", "b", "c"].map(FieldSpec.default(forName:))
 		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
 		let fieldOrder = try parseFieldsConfig("/" + order, outputFormat: .json(.default)).fieldOrder
-		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.name) == expected)
+		#expect(fieldOrder.itemMembers(fieldSpecs, for: object).map(\.fieldSpec.name) == expected)
 	}
 
 	@Test(arguments: ["/D", "/-D"])
@@ -462,7 +462,7 @@ private extension MASTests {
 		let fieldSpecs = [("a", "1"), ("b", "2"), ("c", "3"), ("a", "4"), ("d", "5")].map(fieldSpec(name:label:))
 		let object = JSON.Object([("b", .number(1)), ("a", .number(2))])
 		let fieldOrder = try parseFieldsConfig("/" + options, outputFormat: .json(.default)).fieldOrder
-		#expect(fieldOrder.itemFieldSpecs(fieldSpecs, for: object).map(\.label) == expectedLabels)
+		#expect(fieldOrder.itemMembers(fieldSpecs, for: object).map(\.fieldSpec.label) == expectedLabels)
 	}
 
 	@Test(
@@ -542,7 +542,7 @@ private extension MASTests {
 		let object = JSON.Object([("tags", .array([.string("é"), .object(["a": .null])]))])
 		let fieldSpec = fieldSpec(name: "tags", label: "Tags")
 		#expect(try [object].table(fieldSpecs: [fieldSpec], tableConfig: .default) == #"["é",{"a":null}]"#)
-		#expect(try object.keyValueRow(for: fieldSpec)?.value == #"["é",{"a":null}]"#)
+		#expect(try fieldSpec.keyValueRow(for: object[nodeKey: "tags"])?.value == #"["é",{"a":null}]"#)
 	}
 
 	@Test

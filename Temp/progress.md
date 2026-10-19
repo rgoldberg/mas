@@ -579,3 +579,10 @@ in which no item has a row (`[JSON.Object].table(fieldSpecs:tableConfig:)` &
 `initialTitlecase` titlecasing a cased number or symbol at which it stops (e.g.,
 `ⓐbc` becomes `Ⓐbc` & `ⅰx` becomes `Ⅰx`), per Unicode's titlecase mappings &
 ICU, is specified, as already implemented.
+
+A field may have multiple [members](../Specs/fields.md#members) (e.g., a JSON
+object's duplicate keys): a table cell & a sort key use the last one
+(`JSON.Object[lastNodeKey:]`), while key-value & JSON output each one, in input
+order, formatted separately (`FieldOrder.itemMembers(_:for:)`, which, for
+`<document-order>`, orders each member at its own position), instead of every
+output format & sorting using the 1st one.

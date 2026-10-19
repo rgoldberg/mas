@@ -74,7 +74,7 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case byName(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
 	/// `<document-order>` (`"D"`): each item's fields in the order of its own
 	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
-	/// renames keys, never reorders them), per `itemFieldSpecs(_:for:)`.
+	/// renames keys, never reorders them), per `itemMembers(_:for:)`.
 	/// `direction`, if `.descending`, reverses that order, except among ties,
 	/// which are ordered per `tiebreakDirection`.
 	case document(SortOptionSet.Direction?, tiebreakDirection: SortOptionSet.Direction)
@@ -90,7 +90,7 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 
 extension FieldOrder {
 	/// Reorders `fieldSpecs` per this order. `.inherited`, `.document` (which
-	/// orders each item's fields independently; see `itemFieldSpecs(_:for:)`) &
+	/// orders each item's fields independently; see `itemMembers(_:for:)`) &
 	/// `.positional` are identity. `.byName` / `.byLabel` sort per their
 	/// `<sort-option-set>` (direction included: `SortOptionSet.compare(_:_:)`
 	/// already accounts for it), ordering ties by position, or by reverse
@@ -129,27 +129,35 @@ private extension [FieldSpec] {
 }
 
 extension FieldOrder {
-	/// `fieldSpecs` ordered for `object`: for `<document-order>`, in the order of
-	/// `object`'s keys (field specs for absent fields last), reversed iff
-	/// `.descending`, ties ordered by position, or by reverse position iff
-	/// `tiebreakDirection` is `.descending`; otherwise, unchanged.
-	func itemFieldSpecs(_ fieldSpecs: [FieldSpec], for object: JSON.Object) -> [FieldSpec] {
-		guard case let .document(direction, tiebreakDirection) = self else {
-			return fieldSpecs
+	/// `fieldSpecs`' members in `object` (fields.md "Members"), each with its
+	/// value (`nil` for a field spec whose field `object` lacks, which formats
+	/// its absent value once), each field spec's members in input order: for
+	/// `<document-order>`, each member at its own position among `object`'s keys
+	/// (field specs for absent fields last), reversed iff `.descending`, ties
+	/// ordered by position, or by reverse position iff `tiebreakDirection` is
+	/// `.descending`; otherwise, in `fieldSpecs`' order.
+	func itemMembers(_ fieldSpecs: [FieldSpec], for object: JSON.Object)
+	-> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
+		let members = fieldSpecs.enumerated().flatMap { offset, fieldSpec in
+			let fieldMembers = object.fields.enumerated().filter { $0.element.key.rawValue == fieldSpec.name }
+			return fieldMembers.isEmpty
+				? [(offset: offset, documentPosition: Int.max, fieldSpec: fieldSpec, value: JSON.Node?.none)]
+				: fieldMembers.map { member in
+					(offset: offset, documentPosition: member.offset, fieldSpec: fieldSpec, value: member.element.value)
+				}
 		}
-		let positionByName =
-			Dictionary(object.fields.enumerated().map { ($1.key.rawValue, $0) }) { first, _ in first }
-		return fieldSpecs.enumerated()
+		guard case let .document(direction, tiebreakDirection) = self else {
+			return members.map { ($0.fieldSpec, $0.value) }
+		}
+		return members
 			.sorted { lhs, rhs in
-				let lhsPosition = positionByName[lhs.element.name] ?? .max
-				let rhsPosition = positionByName[rhs.element.name] ?? .max
-				return lhsPosition == rhsPosition
+				lhs.documentPosition == rhs.documentPosition
 					? tiebreakDirection == .ascending
 						? lhs.offset < rhs.offset
 						: lhs.offset > rhs.offset
-					: (lhsPosition < rhsPosition) == (direction != .descending)
+					: (lhs.documentPosition < rhs.documentPosition) == (direction != .descending)
 			}
-			.map(\.element)
+			.map { ($0.fieldSpec, $0.value) }
 	}
 }
 

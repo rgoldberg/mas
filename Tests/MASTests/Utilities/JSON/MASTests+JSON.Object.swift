@@ -56,7 +56,56 @@ private extension MASTests {
 		)
 		.fieldSpecs
 		let object = JSON.Object([("d", .null), ("f", .null)])
-		#expect(try fieldSpecs.map { try object.keyValueRow(for: $0)?.value } == [nil, "none", nil, nil, nil, nil])
-		#expect(try object.jsonObject(fieldSpecs: fieldSpecs).fields.map(\.key.rawValue) == ["b", "d", "f"])
+		#expect(
+			try fieldSpecs.map { try $0.keyValueRow(for: object[nodeKey: .init(rawValue: $0.name)])?.value }
+				== [nil, "none", nil, nil, nil, nil],
+		)
+		#expect(
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).fields.map(\.key.rawValue)
+				== ["b", "d", "f"],
+		)
+	}
+
+	@Test
+	func `table & sorting use a field's last member, while key-value & JSON output each member`() throws {
+		let object = JSON.Object([("a", .string("x")), ("b", .string("y")), ("a", .string("z"))])
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: "a:..uppercase,b",
+			standard: SelectedFieldsConfig(),
+			all: .init(),
+			outputFormat: .json(.default),
+		)
+		.fieldSpecs
+		#expect(try [object].table(fieldSpecs: fieldSpecs, tableConfig: .default) == "Z  y")
+		#expect(
+			try object.keyValueRows(
+				fieldSpecs: fieldSpecs,
+				fieldOrder: .positional,
+				keyValueConfig: parseKeyValueConfig("fL=:R:"),
+			)
+			.map(\.row)
+			== ["a=X", "a=Z", "b=y"],
+		)
+		#expect(
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).description
+				== #"{"a":"X","a":"Z","b":"y"}"#,
+		)
+		#expect(object[lastNodeKey: "a"]?.stringValue == "z")
+	}
+
+	@Test(arguments: [("D", ["x", "y", "z"]), ("D-", ["z", "y", "x"])])
+	func `document-order orders each member at its own position`(order: String, expected: [String]) throws {
+		let object = JSON.Object([("a", .string("x")), ("b", .string("y")), ("a", .string("z"))])
+		let fieldOrder = try resolvedFieldsConfig(
+			from: "/" + order,
+			standard: SelectedFieldsConfig(),
+			all: .init(),
+			outputFormat: .json(.default),
+		)
+		.fieldOrder
+		#expect(
+			fieldOrder.itemMembers(["a", "b"].map(FieldSpec.default(forName:)), for: object).map(\.value?.stringValue)
+				== expected,
+		)
 	}
 }
