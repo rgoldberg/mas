@@ -162,7 +162,9 @@ if their values are equal.
 
 In specs, annotate an outer bare whitespace treatment on the expression whose
 tokens need it (e.g., `-[ <format-block> ]-`), rather than on its neighbors'
-constant nonterminals (e.g., not `-"/"` for a following `/`).
+constant nonterminals (e.g., not `-"/"` for a following `/`), except on a
+terminator that terminates every expression that needs it, which would otherwise
+need many annotations (e.g., `block-terminator = -"+"`).
 
 In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
 make its references optional instead, since an expression that consumes no token
