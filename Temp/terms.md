@@ -354,7 +354,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: application / program
 72. - least: compares less than all others (`<nonconforming-least>`)
     - greatest: compares greater than all others (`<nonconforming-greatest>`)
-    - REJECTED: lowest / highest / smallest / largest / minimum / maximum
+    - relative: of a location that `<direction>` reverses
+      (`<relative-nonconforming>`)
+    - fixed: of a location that `<direction>` does not affect
+      (`<fixed-nonconforming>`)
+    - REJECTED: lowest / highest / smallest / largest / minimum / maximum /
+      pinned / anchored / directional (for relative or fixed)
 73. - code span: backtick-delimited inline code (CommonMark)
     - link text: the bracketed text of a Markdown link
     - inline HTML tag: an HTML tag inside a Markdown paragraph

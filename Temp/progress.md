@@ -590,3 +590,10 @@ output format & sorting using the 1st one.
 JSON output outputting a key-value pair for each field spec's member, even if
 its key repeats another's (e.g., `--fields name=x,version=x`), is specified, as
 already implemented.
+
+`<nonconforming-placement>` (`SortOptionSet.nonconformingPlacement`) sets
+whether nonconforming values' location depends on `<direction>`:
+`<relative-nonconforming>` (`r`, the default) lets `<descending>` reverse it, as
+before, while `<fixed-nonconforming>` (`f`) keeps them 1st (`a`) or last (`z`)
+regardless of `<direction>` (e.g., `af-`), as SQL's `NULLS FIRST` & `NULLS LAST`
+do.
