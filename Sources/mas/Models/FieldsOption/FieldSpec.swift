@@ -350,7 +350,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// - `all`: every field spec visible.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs are
-///   hidden; `standard@json` is a reference to `all`.
+///   hidden; `standard@json` is a reference to `all@json`.
 /// - `default`: `standard`, absent a persisted custom `default`.
 ///
 /// The `@json` variant is machine-facing (see `machineFacingVariant()`); the

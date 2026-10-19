@@ -640,7 +640,8 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("@standard", OutputFormat.json(.default), ["adamID", "bundleID"], "adamID"), // `standard@json` is `all`
+			("@standard", OutputFormat.json(.default), ["adamID", "bundleID"], "adamID"), // `standard@json` is `all@json`
+			("@standard@json", .table(.default), ["adamID", "bundleID"], "adamID"),
 			("@standard@unsuffixed", .json(.default), ["adamID"], "Adam"),
 			("@standard@table", .json(.default), ["adamID"], "Adam"),
 			("@all@json", .table(.default), ["adamID", "bundleID"], "adamID"),
