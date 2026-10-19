@@ -355,10 +355,10 @@ index = {integer}
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The **reference fields config** is a potentially partial, semi-mutable copy of
-the baseline fields config. The order of field specs in the reference fields
-config is immutable (i.e., unaffected by any inserts, moves, or removals
-performed in `<field-spec-edits-section>`).
+The **reference fields config** is a semi-mutable copy of the baseline fields
+config, in which each removed field spec is replaced with `null`. The order of
+field specs in the reference fields config is immutable (i.e., unaffected by any
+inserts, moves, or removals performed in `<field-spec-edits-section>`).
 
 Each index references a position in a list of the reference fields config's
 field specs, in reference fields config order, filtered to include:
@@ -555,8 +555,8 @@ format.
 A value is compared as a string: a string as is, `null` & an [absent
 value](#absent-values) as an empty string, a [structured
 value](fields-format.md#value-types) as its [compact JSON
-text](fields-format.md#value-coercion) & any other value as its canonical string
-representation (e.g., `false`), except that a number is a single
+text](fields-format.md#value-coercion), a boolean as `true` or `false` & a
+number as its text (e.g., `1.50`), except that a number is a single
 [segment](#sort-segments):
 
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &

@@ -205,8 +205,9 @@ it (e.g., choosing an alternative of a choice).
 
 In specs, prefix each placeholder letter's nonterminal & each compound selected
 by letter case with `nullary-` (lowercase: no block follows) or `non-nullary-`
-(uppercase: 1 or more blocks follow), except name a letter that some block
-follows in both cases by its arity (e.g., `<unary-match>` & `<binary-match>`).
+(uppercase: 1 or more blocks follow), except name a letter that other syntax
+follows in its lowercase form too (e.g., `m`'s `<branches>`) by its arity (e.g.,
+`<unary-match>` & `<binary-match>`).
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").

@@ -21,8 +21,8 @@ A **display command** is a command whose primary function is to display data.
 Display commands support multiple **output formats**:
 
 - **Table**: Row per item, column per field.
-- **Key-Value**: Key-value pair on its own row per field, blank line between
-  items.
+- **Key-Value**: Key-value pair on its own row per field, item separator line
+  between items.
 - **JSON**: JSON object per item, key-value pair per field.
 
 Output configuration applies to every output format unless otherwise specified.
