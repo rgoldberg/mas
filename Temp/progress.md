@@ -23,7 +23,7 @@ priority-`0` sort keys are excluded from `ItemSort.keys`
 (`[FieldSpec].enabledSortKeys`), so a later `<field-spec-edit>` such as
 `.adamID/1` re-enables a sort.
 
-### Hide, Unhide & Base-Sourced Insertion (2026-09-18, revised 2026-09-25)
+### Hide, Unhide & Baseline-Sourced Insertion (2026-09-18, revised 2026-10-19)
 
 `FieldSpec.isHidden` models hiding. `<field-spec-hide>` (`_`) overlays its
 `<field-modifiers>` onto its source & hides it, inserting a new hidden field
@@ -31,12 +31,13 @@ spec iff its `<named-field-spec-reference>`'s `<reference-field-name>` names no
 field spec (e.g., `_size/1-`); `<field-spec-overlay>` & `<field-spec-move>`
 unhide their source. `<field-spec-insertion>` takes a full
 `<field-spec-reference>` (`+name`, `+name@i`, `+@i`) resolved against the
-immutable base fields config (`FieldSpecsBuilder.baseFieldSpecs`), selecting the
-default field spec iff a named reference's name names no field spec. Named
-references resolve against the reference fields config's immutable positions
+immutable baseline fields config (`FieldSpecsBuilder.baselineFieldSpecs`), so
+`<disable-all-sorts>` & `/P-`'s reversal apply to it, selecting the default
+field spec iff a named reference's name names no field spec. Named references
+resolve against the reference fields config's immutable positions
 (`referencePositions(forName:)`), so a field spec removed earlier in the section
-keeps its position as `null` (referencing it is an error), and a
-`<field-spec-hide>` of such a field inserts a hidden copy of its base field
+retains its position as `null` (referencing it is an error), and a
+`<field-spec-hide>` of such a field inserts a hidden copy of its baseline field
 spec. Output omits hidden field specs.
 
 ### Table Config (2026-09-18, revised 2026-09-25)
@@ -277,12 +278,12 @@ reports `tiebreakerUnsupportedForPositionalOrder`.
 
 `<positional-order>` (`P`, `FieldOrder.positional`) orders field specs by
 position in the working fields config, after `<field-spec-edits-section>`; its
-`<descending>` reverses the working, reference & base field specs' positions
-before `<field-spec-edits-section>`, so edits & each `<index>` apply to the
-reversed positions. An `<absolute-config>` is equivalent to `@none/P` followed
-by a `<field-spec-insertion>` per field spec, so its fields config's field order
-is `.positional`; `none`'s field specs' sorts are disabled, so its leftover
-hidden field specs never affect output.
+`<descending>` reverses the working & reference field specs' positions before
+`<field-spec-edits-section>`, so edits & each `<index>` apply to the reversed
+positions. An `<absolute-config>` is equivalent to `@none/P` followed by a
+`<field-spec-insertion>` per field spec, so its fields config's field order is
+`.positional`; `none`'s field specs' sorts are disabled, so its leftover hidden
+field specs never affect output.
 
 ### Spec Compliance Audit (2026-10-09)
 
@@ -441,8 +442,8 @@ An absent value matching `u`, `e` & `w` as `null` does & coercing to an empty
 string is specified, as already implemented.
 
 A `<field-spec-hide>` of a field spec removed earlier in the section inserting a
-hidden copy of its base field spec, instead of reporting an error, is specified,
-as already implemented.
+hidden copy of its baseline field spec, instead of reporting an error, is
+specified, as already implemented.
 
 How a value's pieces (`SortOptionSet.pieces(of:)`) compare as a list & that
 `<text-first>` / `<text-last>` compare 2 lists are specified, as already

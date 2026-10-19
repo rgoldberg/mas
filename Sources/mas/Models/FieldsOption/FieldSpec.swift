@@ -450,11 +450,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private let fieldNameSet: Set<String>? // swiftlint:disable:this discouraged_optional_collection
 
 	private var workingTags: [Int?]
-	/// The base fields config's field specs, mutated only by
-	/// `<positional-order>`'s `<descending>` reversing their positions: the
-	/// `source` of a `<base-sourced-field-spec-edit>` (i.e., a
-	/// `<field-spec-insertion>`).
-	private var baseFieldSpecs: [FieldSpec]
+	/// The baseline fields config's field specs (the working field specs
+	/// immediately before `<field-spec-edits-section>`): the `source` of a
+	/// `<baseline-sourced-field-spec-edit>` (i.e., a `<field-spec-insertion>`).
+	private var baselineFieldSpecs: [FieldSpec]
 	private var referenceFieldSpecs: [FieldSpec?]
 	/// "$previous$": the working index after which the next insert / move's
 	/// direct result lands. `-1` = before the 1st field spec.
@@ -466,7 +465,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		self.outputFormat = outputFormat
 		self.fieldNameSet = fieldNameSet
 		workingTags = Array(fieldSpecs.indices)
-		baseFieldSpecs = fieldSpecs
+		baselineFieldSpecs = fieldSpecs
 		referenceFieldSpecs = fieldSpecs
 	}
 
@@ -577,10 +576,11 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		guard !input.isEmpty else {
 			return
 		}
+		baselineFieldSpecs = fieldSpecs
 		while true {
 			switch parseFieldSpecEditKind(&input) {
 			case .insertion:
-				let source = try parseBaseSourcedFieldSpec(&input)
+				let source = try parseBaselineSourcedFieldSpec(&input)
 				try apply(
 					.insert(isHidden: false),
 					name: source.name,
@@ -658,7 +658,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				terminatorSet: [labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator],
 			)
 			let source =
-				if let fieldSpec = baseFieldSpecs.first(where: { $0.name == name }) {
+				if let fieldSpec = baselineFieldSpecs.first(where: { $0.name == name }) {
 					fieldSpec
 				} else {
 					try defaultFieldSpec(forName: name)
@@ -682,16 +682,15 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
-	/// `.positional`, after reversing the positions of the working, reference &
-	/// base field specs iff `shouldReverse` (`<positional-order>`'s
-	/// `<descending>`), before `<field-spec-edits-section>`, so its edits & each
-	/// `<index>` apply to the reversed positions. No edit precedes
-	/// `<field-order-section>`, so `workingTags` remains the identity mapping.
+	/// `.positional`, after reversing the positions of the working & reference
+	/// field specs iff `shouldReverse` (`<positional-order>`'s `<descending>`),
+	/// before `<field-spec-edits-section>`, so its edits & each `<index>` apply
+	/// to the reversed positions. No edit precedes `<field-order-section>`, so
+	/// `workingTags` remains the identity mapping.
 	private mutating func reversingPositions(iff shouldReverse: Bool) -> FieldOrder {
 		if shouldReverse {
 			fieldSpecs.reverse()
 			referenceFieldSpecs.reverse()
-			baseFieldSpecs.reverse()
 		}
 		return .positional
 	}
@@ -774,23 +773,24 @@ private extension FieldSpecsBuilder {
 		return .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
 	}
 
-	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>` &
-	/// resolves its `source` from the base fields config (as in the reference
-	/// fields config, except that a `<named-field-spec-reference>` whose
-	/// `<reference-field-name>` names no field spec selects the default field
-	/// spec for field `<reference-field-name>`).
-	private func parseBaseSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
+	/// Parses a `<field-spec-reference>` for a
+	/// `<baseline-sourced-field-spec-edit>` & resolves its `source` from the
+	/// baseline fields config (as in the reference fields config, except that a
+	/// `<named-field-spec-reference>` whose `<reference-field-name>` names no
+	/// field spec selects the default field spec for field
+	/// `<reference-field-name>`).
+	private func parseBaselineSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != fieldSpecIndexPrefix else {
-			return baseFieldSpecs[try effectivePosition(
+			return baselineFieldSpecs[try effectivePosition(
 				forIndex: parseIndex(&input, ifMissing: .missingFieldSpecIndex),
-				length: baseFieldSpecs.count,
+				length: baselineFieldSpecs.count,
 			) - 1]
 		}
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
 		return positions.isEmpty
 			? try defaultFieldSpec(forName: name)
-			: baseFieldSpecs[positions[try effectivePosition(forIndex: index, length: positions.count) - 1] - 1]
+			: baselineFieldSpecs[positions[try effectivePosition(forIndex: index, length: positions.count) - 1] - 1]
 	}
 
 	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
@@ -798,7 +798,7 @@ private extension FieldSpecsBuilder {
 	/// `<named-field-spec-reference>`'s `<reference-field-name>` names no field
 	/// spec, or the reference resolves to a `null` (a field spec removed earlier
 	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
-	/// would copy from the base fields config.
+	/// would copy from the baseline fields config.
 	private func parseHideReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
 		guard input.first != fieldSpecIndexPrefix else {
@@ -813,7 +813,7 @@ private extension FieldSpecsBuilder {
 		let reference =
 			Reference(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
 		return referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
-			?? (nil, baseFieldSpecs[reference.position - 1])
+			?? (nil, baselineFieldSpecs[reference.position - 1])
 	}
 
 	/// The default field spec for field `name`, which must not be a nonexistent
@@ -827,10 +827,10 @@ private extension FieldSpecsBuilder {
 
 	/// The 1-based positions in the reference fields config of field specs for
 	/// field `name`, including any since replaced by `null`: the reference fields
-	/// config's order & names are immutable & are those of the base fields
+	/// config's order & names are immutable & are those of the baseline fields
 	/// config.
 	private func referencePositions(forName name: String) -> [Int] {
-		baseFieldSpecs.indices.compactMap { baseFieldSpecs[$0].name == name ? $0 + 1 : nil }
+		baselineFieldSpecs.indices.compactMap { baselineFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
 	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
