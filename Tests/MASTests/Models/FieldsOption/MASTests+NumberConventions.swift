@@ -39,6 +39,8 @@ private extension MASTests {
 			(.canonical, "1,2345", "1", ",2345"),
 			(.canonical, "1,234,5678", "1234", ",5678"),
 			(.canonical, ".5e2!", "0.5e2", "!"),
+			(.canonical, "00.50", "0.5", ""),
+			(.canonical, "-000", "0", ""),
 			(.canonical, "+01.50e+3", "1.5e3", ""),
 			(.canonical, "1E+003x", "1E3", "x"),
 			(.canonical, "1e-030", "1e-30", ""),
