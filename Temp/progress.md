@@ -540,3 +540,9 @@ Re-audited every spec against the code, fixing each divergence below.
 A `<character-class-name>` ignores its outer bare whitespace inside its
 `<character-class-fence>`s (e.g., `B+ space +:`), instead of reporting
 `invalidCharacterClass`.
+
+`<number-signs>` & each `<chronologic-format>` are syntax tokens, so an escaped
+one (e.g., `N,,,,,\all:` or `C\iso:`) is an error, instead of text that matches
+it. `parseArguments` leaves an `<argument-separator>` after a
+separator-terminated last argument unconsumed, so `<grouped-numeric-arguments>`
+parses its `<number-signs>` after its `<number-format-arguments>`.

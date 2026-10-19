@@ -204,17 +204,14 @@ private let numberConventionsByLocale = Mutex([Locale: NumberConventions]())
 /// iff it is then empty; trailing `<argument-separator>`s whose succeeding
 /// arguments are all absent may be omitted.
 ///
-/// - Parameters:
-///   - isLastArgumentSeparatorTerminated: Whether an `<argument-separator>`
-///     terminates the last argument (reporting `invalidArgumentsError`) instead
-///     of being part of it.
-///   - invalidArgumentsError: The error reported for too many arguments.
+/// - Parameter isLastArgumentSeparatorTerminated: Whether an
+///   `<argument-separator>` terminates the last argument (remaining unconsumed,
+///   for the caller to parse or report) instead of being part of it.
 func parseArguments(
 	_ input: inout Substring,
 	count: Int,
 	terminator: Character,
 	isLastArgumentSeparatorTerminated: Bool,
-	invalidArgumentsError: ParsingError,
 ) throws(ParsingError) -> [String?] {
 	var arguments = [String?]()
 	while true {
@@ -225,11 +222,8 @@ func parseArguments(
 				: [argumentSeparator, terminator],
 		)
 		arguments.append(text.isEmpty ? nil : text)
-		guard input.first == argumentSeparator else {
+		guard arguments.count < count, input.first == argumentSeparator else {
 			break
-		}
-		guard arguments.count < count else {
-			throw invalidArgumentsError
 		}
 		input.removeFirst()
 	}
@@ -306,6 +300,9 @@ extension Character {
 
 let argumentFence = Character(":")
 let argumentSeparator = Character(",")
+
+/// The number of `<number-format-arguments>`' arguments.
+let numberFormatArgumentCount = 5
 
 let canonicalLocaleIdentifier = "canonical"
 private let systemLocaleIdentifier = "system"

@@ -90,7 +90,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 	}
 
 	/// `<number-signs>`.
-	enum NumberSigns: String {
+	enum NumberSigns: String, CaseIterable {
 		/// `<all-signs>`.
 		case allSigns = "all"
 		/// `<no-signs>`.
@@ -288,11 +288,18 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 		let invalidArgumentsError = ParsingError.invalidSortOptionArguments(groupedNumericOption)
 		let arguments = try parseArguments(
 			&input,
-			count: 6,
+			count: numberFormatArgumentCount,
 			terminator: sortOptionTerminator,
-			isLastArgumentSeparatorTerminated: false,
-			invalidArgumentsError: invalidArgumentsError,
+			isLastArgumentSeparatorTerminated: true,
 		)
+		let hasNumberSigns = input.first == argumentSeparator
+		if hasNumberSigns {
+			input.removeFirst()
+		}
+		let signs = hasNumberSigns ? parseLiteral(&input, from: NumberSigns.allCases.map(\.rawValue)) : nil
+		guard isAtSortOptionSetEnd(input, terminatorSet: [sortOptionTerminator]) else {
+			throw invalidArgumentsError
+		}
 		try parseSortOptionTerminator(&input)
 		func size(_ argument: String?) throws(ParsingError) -> Int? {
 			try argument.map { argument throws(ParsingError) in
@@ -308,13 +315,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 			digitGroupSize: try size(arguments[2]),
 			secondaryDigitGroupSize: try size(arguments[3]),
 			decimalSeparator: arguments[4],
-			signs: try arguments[5].map { argument throws(ParsingError) in
-				guard let signs = NumberSigns(rawValue: argument) else {
-					throw invalidArgumentsError
-				}
-				return signs
-			}
-				?? .wordInitialSigns,
+			signs: signs.flatMap(NumberSigns.init(rawValue:)) ?? .wordInitialSigns,
 		)
 	}
 
@@ -323,21 +324,28 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 	/// it includes `<unix-time>`.
 	private static func parseChronologicFormats(_ input: inout Substring)
 	throws(ParsingError) -> (iso8601Forms: Set<ISO8601Form>, hasUnixTime: Bool) {
-		let text = try parseText(&input, terminatorSet: [sortOptionTerminator])
-		try parseSortOptionTerminator(&input)
 		var forms = Set<ISO8601Form>()
 		var hasUnixTime = false
-		for format in text.isEmpty ? .init() : text.split(separator: argumentSeparator, omittingEmptySubsequences: false) {
-			let format = String(format.drop(while: \.isWhitespace).dropLast(while: \.isWhitespace))
-			if format == unixTimeChronologicFormat {
-				hasUnixTime = true
-			} else {
-				guard let formatForms = iso8601FormsByChronologicFormat[format] else {
-					throw .invalidSortOptionArguments(chronologicSegmentsOption)
-				}
+		var isAtChronologicFormat = skipWhitespace(&input)
+			&& !isAtSortOptionSetEnd(input, terminatorSet: [sortOptionTerminator])
+		while isAtChronologicFormat {
+			guard let format = parseLiteral(&input, from: chronologicFormats) else {
+				throw .invalidSortOptionArguments(chronologicSegmentsOption)
+			}
+			if let formatForms = iso8601FormsByChronologicFormat[format] {
 				forms.formUnion(formatForms)
+			} else {
+				hasUnixTime = true
+			}
+			isAtChronologicFormat = input.first == argumentSeparator
+			if isAtChronologicFormat {
+				input.removeFirst()
 			}
 		}
+		guard isAtSortOptionSetEnd(input, terminatorSet: [sortOptionTerminator]) else {
+			throw .invalidSortOptionArguments(chronologicSegmentsOption)
+		}
+		try parseSortOptionTerminator(&input)
 		return (forms, hasUnixTime)
 	}
 
@@ -411,6 +419,20 @@ private func skipWhitespace(_ input: inout Substring) -> Bool {
 /// input.
 private func parseText(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
 	try parseEscapedText(&input, terminatorSet: terminatorSet)
+}
+
+/// Parses the longest of `literals` that bare characters at the start of
+/// `input` match, ignoring its outer bare whitespace (an escaped character
+/// renders a token a text token, so it matches no literal); else `nil`,
+/// consuming only that whitespace.
+private func parseLiteral(_ input: inout Substring, from literals: some Sequence<String>) -> String? {
+	skipWhitespace(&input)
+	let literal = literals.filter(input.hasPrefix).max { $0.count < $1.count }
+	if let literal {
+		input.removeFirst(literal.count)
+		skipWhitespace(&input)
+	}
+	return literal
 }
 
 // MARK: - Comparison
@@ -951,13 +973,14 @@ private let numberSegmentsByOption = [
 private let groupedNumericOption = Character("N")
 
 private let chronologicSegmentsOption = Character("C")
-private let unixTimeChronologicFormat = "unix-time"
+/// The `<chronologic-format>`s other than `<unix-time>`, by literal.
 private let iso8601FormsByChronologicFormat = [
 	"iso": Set(ISO8601Form.allCases),
 	"iso-date": [.date],
 	"iso-datetime": [.datetime],
 	"iso-time": [.time],
 ] as [String: Set<ISO8601Form>]
+private let chronologicFormats = iso8601FormsByChronologicFormat.keys + ["unix-time"]
 
 private let uncollapsedBoundariesOption = Character("B")
 private let collapsedBoundariesOption = Character("M")
