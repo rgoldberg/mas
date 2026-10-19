@@ -222,6 +222,25 @@ private extension MASTests {
 		)
 	}
 
+	@Test(
+		arguments: [
+			("fL=:R:s", "Name=Slack\nVersion=4.0\nName=X\nVersion=1"),
+			("fL=:R:S-", "Name=Slack\nVersion=4.0\n-----------\n-----------\nName=X\nVersion=1"),
+		],
+	)
+	func `key-value outputs no line for an item without rows, only its adjacent item separator lines`(
+		value: String,
+		expected: String,
+	) throws {
+		#expect(
+			try keyValue(
+				of: [twoItems[0], .init([("other", .null)]), twoItems[1]],
+				keyValueConfig: parseKeyValueConfig(value),
+			)
+				== expected,
+		)
+	}
+
 	@Test
 	func `key-value omits a field whose value is absent or null, aligning only the remaining keys`() throws {
 		#expect(
