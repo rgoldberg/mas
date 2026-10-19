@@ -10,13 +10,7 @@ Uses the [custom EBNF grammar](ebnf.md).
 
 ## Key-Value Config
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
-key-value-option = "--key-value" [ &<key-value-config> | !<key-value-option-value-separator> [ <key-value-config> ] ]
-
-key-value-option-value-separator = "="
-
 key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
@@ -29,8 +23,9 @@ key-value-setting =
   | <trailing-spacing-setting>
   | <item-separator-setting>
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
+
+`--key-value`'s optional [value](configs.md#option-values), iff non-empty, is a
+`<key-value-config>`.
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.

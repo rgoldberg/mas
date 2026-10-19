@@ -9,16 +9,6 @@
 3. Manual accompanying specs
 4. Examples
 
-### Open Spec Questions
-
-1. The output options' syntaxes (e.g., [`--fields`'s
-   `&<fields-config>`](../Specs/fields.md#fields-option)) treat the gap between
-   2 command-line arguments as [outer bare
-   whitespace](../Specs/ebnf.md#outer-bare-whitespace), which no spec defines,
-   so they would match `--fields= name` (2 arguments) as the value `name`, which
-   mas parses as a positional argument instead. A terminal that, like `end`,
-   matches no input, but only between 2 command-line arguments, would define it.
-
 ## ASAP Version, But Massive Effort
 
 ### Persisted Custom Named Formats & Configs

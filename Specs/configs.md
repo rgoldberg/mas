@@ -29,6 +29,13 @@ Output configuration applies to every output format unless otherwise specified.
 
 Each display command has a default output format.
 
+## Option Values
+
+An option's **value** is the rest of its command-line argument after `=` (e.g.,
+`--fields=name`), or else the next command-line argument (e.g.,
+`--fields name`), if any. Each spec defines an option's syntax over its value
+alone.
+
 ## Command Lists
 
 A **command list** is the list of commands in the command line from root to

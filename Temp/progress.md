@@ -618,6 +618,8 @@ ignored (e.g., `%.:de: n`, `..:de: round`), instead of reporting `invalidLetter`
 or `unknownTransform`; within `<number-coercion>`, only `<coercion>`'s `.`
 forbids succeeding whitespace.
 
-Each output option's EBNF accepts its value after an option value separator
-(e.g., `--fields=name`, `--table=`), as Swift Argument Parser already does; a
-test confirms that each such form is equivalent to its whitespace form.
+Each output option's syntax is defined over its [option
+value](../Specs/configs.md#option-values) alone, which Swift Argument Parser
+takes from the rest of the option's command-line argument after an option value
+separator (e.g., `--fields=name`, `--table=`), or else from the next
+command-line argument; a test confirms that both forms are equivalent.
