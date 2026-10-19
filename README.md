@@ -195,8 +195,8 @@ exclusive option with an optional format-specific value, pursuant to
   pretty-printing, top-level structure & non-ASCII character
   rendering](Specs/json.md).
 
-For all output formats, `--fields` [selects, orders, labels, formats & sorts
-output fields](Specs/fields.md), e.g.:
+For all output formats, `--fields` [selects, orders, labels & formats output
+fields & sorts items](Specs/fields.md), e.g.:
 
 - `mas list --fields 'name=App,version/1-' --table S`: only the name (labeled
   `App`) & version fields, sorted by descending version, with a header row & a
