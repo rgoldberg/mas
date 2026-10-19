@@ -163,7 +163,6 @@ private struct FormatParser {
 			count: numberFormatArgumentCount,
 			terminator: argumentFence,
 			isLastArgumentSeparatorTerminated: false,
-			invalidArgumentsError: invalidArgumentsError,
 		)
 		try parseArgumentFence(for: numberFormatName)
 		return .numberFormat(
@@ -183,7 +182,6 @@ private struct FormatParser {
 			count: 4,
 			terminator: argumentFence,
 			isLastArgumentSeparatorTerminated: true,
-			invalidArgumentsError: .invalidTransformArguments(name: scaleName),
 		)
 		try parseArgumentFence(for: scaleName)
 		let integers = arguments.map { $0.map { nonNegativeInteger($0) ?? -1 } }
@@ -220,7 +218,6 @@ private struct FormatParser {
 				count: 2,
 				terminator: argumentFence,
 				isLastArgumentSeparatorTerminated: false,
-				invalidArgumentsError: invalidArgumentsError,
 			)
 			try parseArgumentFence(for: timeZoneName)
 		}
@@ -458,7 +455,6 @@ private struct FormatParser {
 			count: numberFormatArgumentCount + 2,
 			terminator: argumentFence,
 			isLastArgumentSeparatorTerminated: false,
-			invalidArgumentsError: .invalidNumberCoercionArguments,
 		)
 		guard input.first == argumentFence else {
 			throw .invalidNumberCoercionArguments
@@ -807,9 +803,6 @@ private let blockTemplateTextTerminatorSet = Set([placeholderPrefix, blockTermin
 private let numberFormatName = "numberFormat"
 private let scaleName = "scale"
 private let timeZoneName = "timeZone"
-
-/// The number of `<number-format-arguments>`' arguments.
-private let numberFormatArgumentCount = 5
 
 private let systemTimeZoneCode = "system"
 

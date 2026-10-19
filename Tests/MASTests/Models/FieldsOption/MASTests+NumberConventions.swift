@@ -111,7 +111,6 @@ private extension MASTests {
 				count: 3,
 				terminator: ":",
 				isLastArgumentSeparatorTerminated: false,
-				invalidArgumentsError: .invalidNumberCoercionArguments,
 			)
 				== expected,
 		)
@@ -119,17 +118,12 @@ private extension MASTests {
 	}
 
 	@Test
-	func `reports too many arguments iff the last argument is separator-terminated`() {
+	func `leaves an argument separator after the last argument unconsumed iff it is separator-terminated`() throws {
 		var input = "a,b,c,d:"[...]
-		#expect(throws: ParsingError.invalidNumberCoercionArguments) {
-			try parseArguments(
-				&input,
-				count: 3,
-				terminator: ":",
-				isLastArgumentSeparatorTerminated: true,
-				invalidArgumentsError: .invalidNumberCoercionArguments,
-			)
-		}
+		#expect(
+			try parseArguments(&input, count: 3, terminator: ":", isLastArgumentSeparatorTerminated: true) == ["a", "b", "c"],
+		)
+		#expect(input == ",d:")
 	}
 
 	@Test(
