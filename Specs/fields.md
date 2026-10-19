@@ -174,6 +174,21 @@ others.
 
 A reference to a nonexistent field is an error.
 
+## Members
+
+An item's field may have multiple **members** (e.g., the name / value pairs of a
+JSON object that share a name), ordered by input order. A field spec formats
+each member's value separately:
+
+- **Table**: A cell is output for the field's last member.
+- **Key-Value** & **JSON**: A key-value pair is output per member, in input
+  order (except for [`<document-order>`](#field-order), which orders each member
+  at its own position).
+- **Sorting**: An item's value for a sort key is its field's last member's
+  value.
+
+A field spec formats an absent field's absent value once.
+
 ## Absent Values
 
 A field spec's [formatted value](fields-format.md#value-types) is **absent** iff
@@ -285,7 +300,7 @@ The working fields config's field specs are ordered per
 `<field-order-option-set>`:
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
-  input JSON object.
+  input JSON object, each [member](#members) at its own position.
 - `<positional-order>`: ordered by position.
 - `<sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.

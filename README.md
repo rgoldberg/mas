@@ -183,9 +183,9 @@ exclusive option with an optional format-specific value, pursuant to
   - `search`
 - **Key-Value** (`--key-value`): Key-value pair on its own row per selected
   field, blank line between items (if an item has multiple values for a field,
-  the last value is used). [The optional value configures key-value output's key
-  styling, leader, leading spacing, trailing spacing & item separator
-  line](Specs/key-value.md). Default for:
+  each value is output on its own row, in input order). [The optional value
+  configures key-value output's key styling, leader, leading spacing, trailing
+  spacing & item separator line](Specs/key-value.md). Default for:
   - `config`
   - `lookup`
 - **JSON** (`--json`): Streamed JSON object per item, key-value pair per each
