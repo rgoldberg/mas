@@ -814,8 +814,9 @@ number `1` followed by the trivia suffix `,2345`).
 A number coercion accepts both positional & scientific notation (an exponent
 indicator, `e` or `E`, followed by an optionally signed integer exponent). The
 coerced value retains the input's notation, without `+` signs, a `-` sign on 0,
-leading `0`s, or trailing fractional `0`s (e.g., `%.n` coerces `"+01.50e+3"` to
-`1.5e3` & `"-0.0"` to `0`).
+leading `0`s, or trailing fractional `0`s, in either its significand or its
+exponent (e.g., `%.n` coerces `"+01.50e+03"` to `1.5e3`, `"-0.0"` to `0` &
+`"1e-00"` to `1e0`).
 
 A number coercion also allows **trivia** around the number, matching a string
 iff the string is, for the shortest trivia prefix for which such a string

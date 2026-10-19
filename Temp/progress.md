@@ -562,3 +562,7 @@ A `<field-occurrence-index>` beyond its field's field specs is an error
 (`invalidPosition`) for a `<field-spec-insertion>` & a `<field-spec-hide>`
 (e.g., `+adamID@3`), as already implemented: only a `<reference-field-name>`
 that names no field spec selects a default field spec or inserts one.
+
+A coerced number's canonical form has no leading `0`s in its exponent & no `-`
+sign on a 0 exponent (e.g., `%.n` coerces `"1e-03"` to `1e-3` & `"1e-00"` to
+`1e0`), as in its significand.
