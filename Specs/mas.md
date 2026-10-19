@@ -47,7 +47,7 @@ A `mas` built-in fields config has:
 - A user-facing `@key-value` variant.
 - A machine-facing `@json` variant.
 
-`standard@json` is always a reference to `all`.
+`standard@json` is always a reference to `all@json`.
 
 Default labels & formats favor:
 

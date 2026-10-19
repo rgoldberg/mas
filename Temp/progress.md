@@ -161,7 +161,7 @@ output format suffix & an optional `@unsuffixed` reference suffix), reports a
 nonexistent name & selects variants per suffix or, absent one, the output
 format: `@json` is machine-facing (`machineFacingVariant()`: label = name,
 format = `%i`), `@unsuffixed` / `@table` / `@key-value` user-facing &
-`standard@json` is `all`. [Per
+`standard@json` is `all@json`. [Per
 spec](../Specs/mas.md#built-in-named-fields-configs), every field is in each of
 built-in `none`, `all` & `standard`: `none` is `all` with every field spec
 hidden & its sort disabled; user-facing `standard` is its own field specs
