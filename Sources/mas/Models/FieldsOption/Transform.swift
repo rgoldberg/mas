@@ -54,8 +54,8 @@ enum Transform: Hashable {
 	/// Applies this transform to a string; `nil` iff the string does not conform
 	/// to this transform's input type (e.g., a number too large for `scale`).
 	/// Chronologic transforms are applied separately, by
-	/// `ChronologicStyle.applying(_:)`, since they need the field's parsed
-	/// `Date`, not just its rendered string.
+	/// `ChronologicStyle.applying(_:)`, since they need the parsed chronologic
+	/// value, not just its rendered string.
 	func applied(to string: String) -> String? {
 		switch self {
 		case .initialTitlecase:

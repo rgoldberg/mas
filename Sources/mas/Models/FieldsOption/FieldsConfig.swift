@@ -72,12 +72,11 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// `<source>` `"I"`: sorts by name, per the `<sort-option-set>`, ties ordered
 	/// per `tiebreakDirection`.
 	case byName(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
-	/// `<document-order>` (`"D"`): the order fields already have when
-	/// `applied(to:)` runs, i.e., the order their underlying `JSON.Object`s' keys
-	/// were originally found in (`CatalogApp` / `InstalledApp` normalization only
-	/// renames keys, never reorders them). `direction`, if `.descending`,
-	/// reverses that order, except among ties, which are ordered per
-	/// `tiebreakDirection`.
+	/// `<document-order>` (`"D"`): each item's fields in the order of its own
+	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
+	/// renames keys, never reorders them), per `itemFieldSpecs(_:for:)`.
+	/// `direction`, if `.descending`, reverses that order, except among ties,
+	/// which are ordered per `tiebreakDirection`.
 	case document(SortOptionSet.Direction?, tiebreakDirection: SortOptionSet.Direction)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the resolved
