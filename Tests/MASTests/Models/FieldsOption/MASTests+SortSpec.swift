@@ -264,6 +264,8 @@ private extension MASTests {
 			("1", "2020-03-17", "2020-03-18T00:00:00Z", .orderedAscending),
 			("1", "-00001-12-31T00:00:00Z", "0000-01-01T00:00:00Z", .orderedAscending),
 			("1", "+10000-01-01T00:00:00Z", "9999-12-31T00:00:00Z", .orderedDescending),
+			("1", "id-12345-06-07", "id-2020-01-01", .orderedDescending),
+			("1", "id -12345-06-07", "id 2020-01-01", .orderedAscending),
 			("1Ciso-datetime:", "2020-03-17", "2020-03-18T00:00:00Z", .orderedDescending),
 			("1", "10:00:00+02:00", "09:00:00Z", .orderedAscending),
 			("1", "23:00:00Z", "2020-01-01", .orderedAscending),

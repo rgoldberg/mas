@@ -525,3 +525,7 @@ string after the longest number matches `<trivia-suffix-regex>`
 (`Coercion.coercedNumber(in:)`), instead of failing when the shortest prefix
 followed by a number leaves a nonmatching suffix (e.g., `%.:,,,,,.*:n` now
 matches `"a1b2"`).
+
+An expanded year's sign starts a chronologic sort segment only when word-initial
+(`chronologicSegment(at:in:)`), so a hyphenated ID (e.g., `id-12345-06-07`) is
+not a date.

@@ -670,11 +670,13 @@ extension SortOptionSet {
 	}
 
 	/// The chronologic segment at `index` in `value` & its end, unless an ASCII
-	/// digit immediately precedes or follows it; else `nil`.
+	/// digit immediately precedes or follows it, or it starts with an expanded
+	/// year's sign that is not word-initial; else `nil`.
 	private func chronologicSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		guard
 			!chronologicSegments.isEmpty,
 			index == value.startIndex || !value[value.index(before: index)].isASCIIDigit,
+			value[index] != "-" && value[index] != "+" || isSign(at: index, in: value, signs: .wordInitialSigns),
 			let prefix = iso8601ChronologicPrefix(of: value[index...], forms: chronologicSegments),
 			prefix.end == value.endIndex || !value[prefix.end].isASCIIDigit
 		else {
