@@ -457,6 +457,7 @@ private struct FormatParser {
 			throw .invalidNumberCoercionArguments
 		}
 		input.removeFirst()
+		skipWhitespace() // Unlike `<coercion>`'s, its closing `<argument-fence>`'s succeeding whitespace is ignored
 		let triviaPrefixPattern = arguments[numberFormatArgumentCount] ?? ""
 		let triviaSuffixPattern = arguments[numberFormatArgumentCount + 1] ?? ""
 		guard let triviaPrefixRegex = TriviaRegex(pattern: triviaPrefixPattern) else {
