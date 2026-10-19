@@ -125,6 +125,21 @@ formats valid.
 2. Array & object type predicates.
 3. Array & object transforms.
 
+### Member Indices
+
+Let a field spec select [members](../Specs/fields.md#members) of its field via a
+**member index**, per [positions &
+indices](../Specs/fields.md#positions--indices) (e.g., `name#2` for the 2nd
+member, `name#-1` for the last), which needs:
+
+1. A prefix character reserved in field names, as `.` is (e.g., `#`).
+2. Syntax for all members (e.g., `name#*`), or an absent member index meaning
+   the default (each member for key-value & JSON output, the last for a table
+   cell & a sort key).
+3. Which member a sort key uses if multiple are selected, and whether selecting
+   multiple is an error for table output.
+4. How `<document-order>` orders selected members.
+
 ### Configurable Absent Value Handling
 
 Configurable behavior per output format:
