@@ -506,3 +506,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        not nullary
      - REJECTED: concise / verbose (the letters have equal length) / bare / full
        / block (for letter case) / nullary match / non-nullary match
+104. - success pipeline: a unary form's pipeline-only block
+       (`<success-pipeline>`), e.g., `%I…+`'s
+       ([defined](../Specs/fields-format.md#success--failure))
