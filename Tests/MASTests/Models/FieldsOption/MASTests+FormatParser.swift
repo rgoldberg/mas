@@ -139,6 +139,7 @@ private extension MASTests {
 			// The trivia prefix is the shortest one that a number succeeds
 			("%.:,,,,,\\\\d:n", .string("15"), "15"),
 			("%.:,,,,,\\\\\\$:n", .string("$5"), "$5"),
+			("%.:,,,,,\\\\$:n", .string("$5"), "$5"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("x-1.50 y"), "x1.5 y"),
 			("[%.:,,,,,.*:n]", .string("5 MB"), nil),
 			("%.:,,,,, [$] :n", .string("$5"), "$5"),

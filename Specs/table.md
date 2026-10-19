@@ -46,7 +46,7 @@ header-setting = <header-off> | <header-on> (* default: <header-off>; last wins 
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
 
-style-specifier = {text: terminal-specific output format specifier with no bare ASCII letters}
+style-specifier = {text: terminal-specific styling text with no bare ASCII letters}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

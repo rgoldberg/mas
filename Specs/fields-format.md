@@ -322,25 +322,25 @@ scale-arguments =
   <argument-separator> <fractional-digits>
   <argument-fence>
 
-radix              = {integer from 2 to 36}  (* base for `exponent` & the rendered digits *)
-exponent           = {non-negative integer}  (* divides the input by `radix^exponent` before rendering *)
-significant-digits = {integer from 1 to 100} (* rounds to this many total `radix` digits; absent: no rounding *)
-fractional-digits  = {integer from 0 to 100} (* exactly this many `radix` digits after the point; `0`: integer *)
+radix              = {integer from 2 to 36}  (* base for `<exponent>` & the rendered digits *)
+exponent           = {non-negative integer}  (* divides the input by `<radix>` to this power before rendering *)
+significant-digits = {integer from 1 to 100} (* rounds to this many total `<radix>` digits; absent: no rounding *)
+fractional-digits  = {integer from 0 to 100} (* exactly this many `<radix>` digits after the point; `0`: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`scale` divides its input by `radix^exponent`, optionally rounds it to
-`significant-digits` total `radix` digits, then renders it in positional
-notation, base `radix`, with exactly `fractional-digits` digits after the radix
-point.
+`scale` divides its input by `<radix>` to the power of `<exponent>`, optionally
+rounds it to `<significant-digits>` total `<radix>` digits, then renders it in
+positional notation, base `<radix>`, with exactly `<fractional-digits>` digits
+after the radix point.
 
-- Both roundings (to `significant-digits`, then to `fractional-digits`) round
-  halves away from 0.
-- `fractional-digits` of `0` renders a plain integer, with no radix point.
-- For `radix` > 10, digits beyond `9` are lowercase `a`-`z`.
-- `0` renders as `0`, followed, iff `fractional-digits` is positive, by a radix
-  point & `fractional-digits` `0`s.
+- Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
+  round halves away from 0.
+- A `<fractional-digits>` of `0` renders a plain integer, with no radix point.
+- For a `<radix>` greater than 10, digits beyond `9` are lowercase `a` to `z`.
+- `0` renders as `0`, followed, iff `<fractional-digits>` is positive, by a
+  radix point & `<fractional-digits>` `0`s.
 - A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `.scale:10,0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as
   for `round`.
@@ -385,9 +385,9 @@ affect it.
 A time-only value is rendered in the output time zone as if on the last
 `timeZone`'s `<reference-date>`, because a time zone's UTC offset can vary by
 date (e.g., for daylight saving time), or, absent `timeZone`, on the current
-date in the system time zone. Only a UTC offset is a fixed UTC offset: a
-Foundation time zone abbreviation identifies a time zone that can vary (e.g.,
-`EST` identifies `America/New_York`).
+date in the system time zone. Only a UTC offset `<time-zone-code>` has a fixed
+UTC offset: a Foundation time zone abbreviation identifies a time zone whose UTC
+offset can vary (e.g., `EST` identifies `America/New_York`).
 
 ###### `timeZone`
 
@@ -840,7 +840,7 @@ retaining the trivia unchanged (e.g., `..:,,,,,[$]:numberFormat:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every text token, a regex's own `\` is
-written `\\` (e.g., `\\d` for the regex `\d` & `\\\$` for `\$`), and
+written `\\` (e.g., `\\d` for the regex `\d` & `\\$` for `\$`), and
 `<trivia-prefix-regex>`'s `,` & `:` & `<trivia-suffix-regex>`'s `:` must be
 escaped.
 

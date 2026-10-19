@@ -338,10 +338,10 @@ only:
 - Which field spec an `<index>` references.
 - Tiebreaking the field order.
 
-`<document-order>` is not supported for table output because items are processed
-in a streaming manner & may each have different fields, or the same fields in
-different orders, so a table's rows share no document order; key-value & JSON
-output can order each item's fields independently.
+`<document-order>` is not supported for table output because items may each have
+different fields, or the same fields in different orders, so a table's rows
+share no document order; key-value & JSON output can order each item's fields
+independently.
 
 #### Item Sorting
 
@@ -652,10 +652,10 @@ compare:
 ###### Version Comparison
 
 [Versions](fields-format.md#version-formatting) compare component by component:
-numerically by its leading ASCII digits, then by its remaining characters per
-`<case-sensitivity>` & `<locale>` (a component with remaining characters
-precedes the same integer without them; e.g., `1.0b` precedes `1.0`); a version
-with fewer components precedes one that extends it.
+numerically by each component's leading ASCII digits, then by its remaining
+characters per `<case-sensitivity>` & `<locale>` (a component with remaining
+characters precedes the same integer without them; e.g., `1.0b` precedes `1.0`);
+a version with fewer components precedes one that extends it.
 
 ##### Sort Direction
 
