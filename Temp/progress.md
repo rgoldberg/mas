@@ -546,3 +546,8 @@ one (e.g., `N,,,,,\all:` or `C\iso:`) is an error, instead of text that matches
 it. `parseArguments` leaves an `<argument-separator>` after a
 separator-terminated last argument unconsumed, so `<grouped-numeric-arguments>`
 parses its `<number-signs>` after its `<number-format-arguments>`.
+
+A number or number-to-string transform's `<number-coercion>` does not coerce a
+structured value, so formatting aborts (e.g., `..:,,,,,\\[,\\]:round` for
+`[1]`), as no number coercion matcher matches one, instead of coercing its
+compact JSON text.

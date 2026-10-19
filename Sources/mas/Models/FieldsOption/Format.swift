@@ -897,7 +897,8 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	}
 
 	/// This value as a number, coerced iff `call` has `<number-coercion>` (`nil`
-	/// iff that coercion fails).
+	/// iff that coercion fails, e.g., for a structured value, which no number
+	/// coercion matches).
 	private func coercedNumber(for call: TransformCall) throws(FormattingError) -> Self? {
 		switch self {
 		case let .input(.number(number)):
@@ -908,7 +909,11 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 			guard let coercion = call.coercion else {
 				throw .transformInputTypeMismatch(transform: call.transform, input: string)
 			}
-			return .number(from: .string(string), coercion: coercion)
+			return if case let .input(node) = self {
+				.number(from: node, coercion: coercion)
+			} else {
+				.number(from: .string(string), coercion: coercion)
+			}
 		}
 	}
 }
