@@ -364,7 +364,7 @@ time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only
 time-only-transform          = <time-zone> (* type: chronologic *)
 
 date-only = "dateOnly"
-time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone *)
+time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -375,8 +375,7 @@ appears:
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone`: sets the output time zone to the one that its `<time-zone-code>`
-  identifies; if the pipeline contains multiple `timeZone`s, the last one takes
-  precedence.
+  identifies.
 
 Absent `timeZone`, the output time zone is the system time zone.
 
