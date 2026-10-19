@@ -75,10 +75,10 @@ extension NumberConventions {
 	/// (an optional sign, an integer part, an optional `decimalSeparator` &
 	/// fractional part & an optional exponent; the integer part may be omitted
 	/// iff the fractional part is present); else `nil`. The canonical form has no
-	/// `+` sign (neither leading nor in its exponent), no `-` sign for 0, no
-	/// leading `0`s in its integer part (except a sole `0`), no trailing `0`s in
-	/// its fractional part & no `.` without a fractional part, but retains any
-	/// exponent.
+	/// `+` sign & no `-` sign for 0 (neither leading nor in its exponent), no
+	/// leading `0`s in its integer part or exponent (except a sole `0`), no
+	/// trailing `0`s in its fractional part & no `.` without a fractional part,
+	/// but retains any exponent.
 	func numberPrefix(of string: Substring) -> (number: String, end: Substring.Index)? {
 		var rest = string
 		let sign = rest.first.flatMap { $0 == "-" || $0 == "+" ? $0 : nil }
@@ -102,7 +102,10 @@ extension NumberConventions {
 			+ (integerDigits.isEmpty ? "0" : integerDigits)
 			+ (fractionalDigits.isEmpty ? "" : "." + fractionalDigits)
 		if let exponent = exponent(of: rest) {
-			number += exponent.filter { $0 != "+" }
+			let exponentDigits = String(exponent.drop { !$0.isASCIIDigit }.drop { $0 == "0" })
+			number += exponent.prefix(1)
+				+ (exponent.dropFirst().first == "-" && !exponentDigits.isEmpty ? "-" : "")
+				+ (exponentDigits.isEmpty ? "0" : exponentDigits)
 			rest = rest[exponent.endIndex...]
 		}
 		return (number, rest.startIndex)
