@@ -484,6 +484,9 @@ private extension MASTests {
 			("%C.timeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
 			("%C.timeZone:America/New_York,+10000-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("[%c]", "24:00:00", nil),
+			("[%c]", "23:59:60", nil),
+			("[%c]", "17:39:23+19:00", nil),
+			("%C.timeZone:UTC:++", "17:39:23+18:00", "23:39:23Z"),
 			("%C.timeZone:UTC:++", "17:39:23z", "17:39:23Z"),
 			// Only a datetime's seconds can be omitted
 			("[%c]", "17:39", nil),

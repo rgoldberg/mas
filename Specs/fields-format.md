@@ -893,7 +893,15 @@ An ISO-8601:
   time-only, optionally without its seconds & fractional seconds (e.g.,
   `2020-03-18T17:39:23Z` or `2020-03-18 17:39`).
 
-Each of their fields must be in range.
+Each of their fields must be in range:
+
+- Month: `01` to `12`.
+- Day: `01` to its month's last day.
+- Hour: `00` to `23` (e.g., `24:00:00` is invalid).
+- Minute: `00` to `59`, including a UTC offset's.
+- Second: `00` to `59` (e.g., the leap second `23:59:60` is invalid, because
+  Unix time ignores leap seconds).
+- UTC offset: at most 18 hours from UTC, as for [`timeZone`](#timezone).
 
 No other ISO-8601 representation is detected (e.g., basic format, ordinal dates,
 week dates, or reduced precision other than a datetime without seconds).
