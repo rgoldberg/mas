@@ -755,7 +755,9 @@ matches, as [`%c` & `%.d` detect](fields-format.md#chronologic-formatting) it:
 Text that a `<chronologic-format>` matches is not a chronologic segment iff a
 character immediately precedes or follows it that is:
 
-- For `<iso>`, `<iso-date>`, `<iso-datetime>`, or `<iso-time>`: an ASCII digit.
+- For `<iso>`, `<iso-date>`, `<iso-datetime>`, or `<iso-time>`: an ASCII digit,
+  or, preceding an expanded year's sign, anything but whitespace (e.g.,
+  `id-12345-06-07` has no chronologic segment).
 - For `<unix-time>`: not whitespace (e.g., `at 1584553163 UTC` has a Unix time
   segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
