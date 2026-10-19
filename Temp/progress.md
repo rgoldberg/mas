@@ -551,3 +551,8 @@ A number or number-to-string transform's `<number-coercion>` does not coerce a
 structured value, so formatting aborts (e.g., `..:,,,,,\\[,\\]:round` for
 `[1]`), as no number coercion matcher matches one, instead of coercing its
 compact JSON text.
+
+Key-value output outputs no line for an item without rows (e.g., whose every
+formatted value is absent or `null`), instead of an empty line, so its adjacent
+item separator lines (iff any) are adjacent, and, without any, the next item's
+1st row immediately follows the previous item's last row.

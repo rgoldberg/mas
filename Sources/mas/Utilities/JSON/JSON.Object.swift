@@ -170,8 +170,9 @@ extension [JSON.Object] {
 
 	/// This item list's key-value output, per `--fields`-resolved field specs
 	/// ordered per item by `fieldOrder` & per `keyValueConfig` (key-value.md):
-	/// each item's rows, with an item separator line (iff any) between each pair
-	/// of adjacent items, filled to the width of the widest row of any item.
+	/// each item's rows (none for an item without any), with an item separator
+	/// line (iff any) between each pair of adjacent items, filled to the width of
+	/// the widest row of any item.
 	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> String {
 		let itemRows = try map { object throws(FormattingError) in
@@ -182,13 +183,14 @@ extension [JSON.Object] {
 		}
 		return itemRows
 			.lazy
-			.map { $0.map(\.row).joined(separator: "\n") }
+			.map { $0.map(\.row) }
 			.joined(
 				separator: keyValueConfig.itemSeparatorPattern.map { itemSeparatorPattern in
-					"\n\(repeatedPattern(itemSeparatorPattern, toWidth: itemRows.joined().map(\.width).max() ?? 0))\n"
+					[repeatedPattern(itemSeparatorPattern, toWidth: itemRows.joined().map(\.width).max() ?? 0)]
 				}
-					?? "\n",
+					?? .init(),
 			)
+			.joined(separator: "\n")
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
