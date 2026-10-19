@@ -529,3 +529,6 @@ matches `"a1b2"`).
 An expanded year's sign starts a chronologic sort segment only when word-initial
 (`chronologicSegment(at:in:)`), so a hyphenated ID (e.g., `id-12345-06-07`) is
 not a date.
+
+A unary form's block is either a `<success-block>` or a `<success-pipeline>`
+(non-structural), e.g., `%I…+`'s `<unconditional-pipeline>`.

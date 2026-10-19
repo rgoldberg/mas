@@ -528,6 +528,8 @@ success-block =
   (* non-structural *)
 failure-block = <unconditional-block>
 
+success-pipeline = <string-pipeline> | <number-pipeline> | <chronologic-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
+
 string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
 boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
 number-block        = <number-pipeline> | <number-template>               (* direct default: {empty string} *)
@@ -594,7 +596,7 @@ A **matcher** is a `<placeholder-prefix>` (in a placeholder), its `<modifiers>`
 by its blocks, which define the matcher's **form**:
 
 - **Nullary**: no blocks.
-- **Unary**: a `<success-block>`.
+- **Unary**: either a `<success-block>` or a `<success-pipeline>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`.
 - **Abort-on-failure** (`%+…`): a `<success-block>`.
 - **Abort-on-success** (`%-…`): a `<failure-block>`.
