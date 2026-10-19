@@ -519,3 +519,9 @@ value), and specs clarify boolean blocks' coercion, number-to-string transforms'
 `<number-coercion-arguments>`, a named format followed by a coerced transform
 call, the reference fields config's `null`s & a number's sort text, as already
 implemented.
+
+Number coercion selects the shortest trivia prefix for which the rest of the
+string after the longest number matches `<trivia-suffix-regex>`
+(`Coercion.coercedNumber(in:)`), instead of failing when the shortest prefix
+followed by a number leaves a nonmatching suffix (e.g., `%.:,,,,,.*:n` now
+matches `"a1b2"`).
