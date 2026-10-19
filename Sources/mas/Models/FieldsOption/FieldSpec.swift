@@ -343,7 +343,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// (`@json` / `@key-value` / `@table`), the `@unsuffixed` reference suffix (the
 /// unsuffixed variant), or, absent both, `outputFormat`:
 ///
-/// - `none`: `all` with every field spec hidden.
+/// - `none`: `all` with every field spec hidden & its sort disabled.
 /// - `all`: every field spec visible.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs are

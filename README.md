@@ -191,8 +191,9 @@ exclusive option with an optional format-specific value, pursuant to
 - **JSON** (`--json`): Streamed JSON object per item, key-value pair per each
   field (if an item has multiple values for a field, all values are output with
   their relative input order preserved in the output). Key-value pairs are
-  sorted by key. [The optional value configures JSON output's pretty-printing,
-  top-level structure & non-ASCII character rendering](Specs/json.md).
+  sorted by key by default. [The optional value configures JSON output's
+  pretty-printing, top-level structure & non-ASCII character
+  rendering](Specs/json.md).
 
 For all output formats, `--fields` [selects, orders, labels, formats & sorts
 output fields](Specs/fields.md), e.g.:
@@ -201,7 +202,7 @@ output fields](Specs/fields.md), e.g.:
   `App`) & version fields, sorted by descending version, with a header row & a
   separator line
 - `mas list --fields '.name:.uppercase,+path'`: the standard fields, with
-  uppercased names, followed by paths
+  uppercased names & with paths inserted after them
 - `mas list --fields '@none.name,version'`: only the name & version fields
 
 ## Spotlight
