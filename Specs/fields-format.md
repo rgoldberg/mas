@@ -466,7 +466,7 @@ placeholder = <unconditional-placeholder> | <conditional-placeholder>
 
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
 modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> ] (* non-structural *)
-predicate = <nullary-predicate> | <non-nullary-predicate> (* non-structural *)
+predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
 nullary-predicate =
   <nullary-input>
@@ -483,7 +483,6 @@ nullary-predicate =
   | <nullary-version>
   | <nullary-date>
   | <nullary-time-only>
-  | <nullary-match>
   (* non-structural *)
 
 non-nullary-predicate =
@@ -501,7 +500,6 @@ non-nullary-predicate =
   | <non-nullary-version>
   | <non-nullary-date>
   | <non-nullary-time-only>
-  | <non-nullary-match>
   (* non-structural *)
 
 placeholder-prefix = "%"!
@@ -599,8 +597,8 @@ by its blocks, which define the matcher's **form**:
 - **Binary**: a `<success-block>` & a `<failure-block>`.
 - **Abort-on-failure** (`%+…`): a `<success-block>`.
 - **Abort-on-success** (`%-…`): a `<failure-block>`.
-- **Nullary match** (`%m`): `<branches>`.
-- **Non-nullary match** (`%M`): `<branches>` & a `<failure-block>`.
+- **Unary match** (`%m`): `<branches>`.
+- **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
 
 A matcher succeeds iff it matches the value against which it is evaluated.
 
@@ -671,10 +669,7 @@ non-nullary-name  = "K" (* output type: string; value: {field name}; mnemonic: k
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-conditional-placeholder = <nullary-conditional-placeholder> | <non-nullary-conditional-placeholder>
-
-nullary-conditional-placeholder     = <nullary-scalar-conditional-placeholder> | <nullary-match-placeholder>
-non-nullary-conditional-placeholder = <non-nullary-scalar-conditional-placeholder> | <non-nullary-match-placeholder>
+conditional-placeholder = <nullary-scalar-conditional-placeholder> | <non-nullary-scalar-conditional-placeholder> | <match-placeholder>
 
 nullary-scalar-conditional-placeholder     = <placeholder-prefix> [ <abort-on-success> ] <nullary-scalar-matcher>
 non-nullary-scalar-conditional-placeholder =
@@ -935,13 +930,13 @@ the same form. A UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-match-placeholder = <nullary-match-placeholder> | <non-nullary-match-placeholder> (* non-structural *)
+match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 
-nullary-match-placeholder     = <placeholder-prefix> <nullary-match> <branches> <block-terminator>
-non-nullary-match-placeholder = <placeholder-prefix> <non-nullary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
+unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
+binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
 
-nullary-match     = "m" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
-non-nullary-match = "M" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
+unary-match  = "m" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
+binary-match = "M" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
 
 branches = <conditional-branch>+ <branch>
 branch   = <conditional-branch> | <unconditional-branch>

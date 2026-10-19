@@ -203,6 +203,11 @@ descendant and/or transitive defaults as needed, rather than as syntax that must
 be parsed (e.g., `(* default: "Lcanonical:" *)`), unless only syntax can express
 it (e.g., choosing an alternative of a choice).
 
+In specs, prefix each placeholder letter's nonterminal & each compound selected
+by letter case with `nullary-` (lowercase: no block follows) or `non-nullary-`
+(uppercase: 1 or more blocks follow), except name a letter that some block
+follows in both cases by its arity (e.g., `<unary-match>` & `<binary-match>`).
+
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 

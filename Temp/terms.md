@@ -496,3 +496,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - instant: a point in time, in milliseconds since 1970-01-01T00:00:00Z
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
+103. - nullary: of a predicate letter (lowercase) or a form, followed by no
+       block
+     - non-nullary: of a predicate letter (uppercase), followed by 1 or more
+       blocks
+     - unary match / binary match: `%m` (`<unary-match>`) / `%M`
+       (`<binary-match>`), named by arity, because `%m`'s `<branches>` make it
+       not nullary
+     - REJECTED: concise / verbose (the letters have equal length) / bare / full
+       / block (for letter case) / nullary match / non-nullary match

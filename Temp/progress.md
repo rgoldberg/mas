@@ -506,3 +506,8 @@ as ISO-8601's expanded representation (a sign & at least 5 digits), which
 auto-detection also accepts; dates are in the proleptic Gregorian calendar
 (`CivilDate`), instead of Foundation's Julian calendar before 1582-10-15; &
 instants are exact milliseconds, so every Unix time in range renders exactly.
+
+`%m` & `%M` are `<unary-match>` & `<binary-match>` (`unaryMatch`), with their
+`<unary-match-placeholder>` & `<binary-match-placeholder>` alternatives of
+`<conditional-placeholder>`, instead of nullary & non-nullary predicates,
+because `%m`'s `<branches>` make it not nullary.
