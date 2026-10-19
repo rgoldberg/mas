@@ -1,8 +1,8 @@
 # Progress
 
-## Status (2026-10-18)
+## Status (2026-10-19)
 
-`Specs/*.md` are implemented (audited 2026-10-09, then implemented with each
+`Specs/*.md` are implemented (audited 2026-10-19, then implemented with each
 later spec change), except persisted named formats & custom named configs,
 including context stack lookup, as described by [their open
 issues](todo.md#persisted-custom-named-formats--configs) & by `// TODO:`s in
@@ -532,3 +532,11 @@ not a date.
 
 A unary form's block is either a `<success-block>` or a `<success-pipeline>`
 (non-structural), e.g., `%I…+`'s `<unconditional-pipeline>`.
+
+### Spec Compliance Audit (2026-10-19)
+
+Re-audited every spec against the code, fixing each divergence below.
+
+A `<character-class-name>` ignores its outer bare whitespace inside its
+`<character-class-fence>`s (e.g., `B+ space +:`), instead of reporting
+`invalidCharacterClass`.
