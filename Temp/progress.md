@@ -27,16 +27,17 @@ priority-`0` sort keys are excluded from `ItemSort.keys`
 
 `FieldSpec.isHidden` models hiding. `<field-spec-hide>` (`_`) overlays its
 `<field-modifiers>` onto its source & hides it, inserting a new hidden field
-spec iff its `<named-field-spec-reference>` resolves to no field spec (e.g.,
-`_size/1-`); `<field-spec-overlay>` & `<field-spec-move>` unhide their source.
-`<field-spec-insertion>` takes a full `<field-spec-reference>` (`+name`,
-`+name@i`, `+@i`) resolved against the immutable base fields config
-(`FieldSpecsBuilder.baseFieldSpecs`), selecting the default field spec iff a
-named reference matches nothing. Named references resolve against the reference
-fields config's immutable positions (`referencePositions(forName:)`), so a field
-spec removed earlier in the section keeps its position as `null` (referencing it
-is an error), and a `<field-spec-hide>` of such a field inserts a hidden copy of
-its base field spec. Output omits hidden field specs.
+spec iff its `<named-field-spec-reference>`'s `<reference-field-name>` names no
+field spec (e.g., `_size/1-`); `<field-spec-overlay>` & `<field-spec-move>`
+unhide their source. `<field-spec-insertion>` takes a full
+`<field-spec-reference>` (`+name`, `+name@i`, `+@i`) resolved against the
+immutable base fields config (`FieldSpecsBuilder.baseFieldSpecs`), selecting the
+default field spec iff a named reference's name names no field spec. Named
+references resolve against the reference fields config's immutable positions
+(`referencePositions(forName:)`), so a field spec removed earlier in the section
+keeps its position as `null` (referencing it is an error), and a
+`<field-spec-hide>` of such a field inserts a hidden copy of its base field
+spec. Output omits hidden field specs.
 
 ### Table Config (2026-09-18, revised 2026-09-25)
 
@@ -556,3 +557,8 @@ Key-value output outputs no line for an item without rows (e.g., whose every
 formatted value is absent or `null`), instead of an empty line, so its adjacent
 item separator lines (iff any) are adjacent, and, without any, the next item's
 1st row immediately follows the previous item's last row.
+
+A `<field-occurrence-index>` beyond its field's field specs is an error
+(`invalidPosition`) for a `<field-spec-insertion>` & a `<field-spec-hide>`
+(e.g., `+adamID@3`), as already implemented: only a `<reference-field-name>`
+that names no field spec selects a default field spec or inserts one.

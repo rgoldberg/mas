@@ -421,9 +421,10 @@ inserted field spec cannot be modified by another field spec edit.
 
 For a given `<base-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the base fields config referenced by `fs`, resolved as in the
-reference fields config, except that a `<named-field-spec-reference>` that
-references no field spec selects a [default field spec](#default-field-specs)
-for field `<reference-field-name>`.
+reference fields config, except that a `<named-field-spec-reference>` whose
+`<reference-field-name>` names no field spec selects a [default field
+spec](#default-field-specs) for field `<reference-field-name>` (whereas a
+`<field-occurrence-index>` beyond its field's field specs is an error).
 
 The $previous$ index is the index in the working fields config where the direct
 results of the immediately preceding `<field-spec-edit>` were effected. It is
@@ -443,9 +444,9 @@ Field spec edits act as follows:
   - Moves `source` to immediately after $previous$ & unhides it.
   - Sets $previous$ to `source`'s new index in the working fields config.
 - `<field-spec-hide>`:
-  - If its `<named-field-spec-reference>` resolves to no field spec, or to a
-    `null`, inserts a new field spec (as `<field-spec-insertion>` would) as
-    `source`.
+  - If its `<named-field-spec-reference>`'s `<reference-field-name>` names no
+    field spec, or its `<named-field-spec-reference>` resolves to a `null`,
+    inserts a new field spec (as `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`'s index in the working fields config.

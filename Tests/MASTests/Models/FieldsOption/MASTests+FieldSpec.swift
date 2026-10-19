@@ -492,6 +492,8 @@ private extension MASTests {
 			(".-adamID=x", .nonexistentFieldSpec(forName: "adamID=x")),
 			("@all.adamID@3", .invalidPosition("3")),
 			("@all.adamID@+3", .invalidPosition("3")),
+			("@all.+adamID@3", .invalidPosition("3")),
+			("@all._adamID@3", .invalidPosition("3")),
 			("@all.adamID@99999999999999999999", .invalidPosition("99999999999999999999")),
 			("@all.adamID@-99999999999999999999", .invalidPosition("-99999999999999999999")),
 			(".adamID@+", .missingFieldOccurrenceIndex),

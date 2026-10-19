@@ -597,9 +597,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .hide:
-				// A `<named-field-spec-reference>` that resolves to no field spec
-				// inserts a new field spec (as `<field-spec-insertion>` would) as
-				// `source`
+				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
+				// no field spec, or that resolves to a `null`, inserts a new field spec
+				// (as `<field-spec-insertion>` would) as `source`
 				let (reference, existing) = try parseHideReference(&input)
 				try apply(
 					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
@@ -756,9 +756,9 @@ private extension FieldSpecsBuilder {
 
 	/// Parses a `<field-spec-reference>` for a `<base-sourced-field-spec-edit>` &
 	/// resolves its `source` from the base fields config (as in the reference
-	/// fields config, except that a `<named-field-spec-reference>` that
-	/// references no field spec selects the default field spec for field
-	/// `<reference-field-name>`).
+	/// fields config, except that a `<named-field-spec-reference>` whose
+	/// `<reference-field-name>` names no field spec selects the default field
+	/// spec for field `<reference-field-name>`).
 	private func parseBaseSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != fieldSpecIndexPrefix else {
 			return baseFieldSpecs[try effectivePosition(
@@ -775,9 +775,10 @@ private extension FieldSpecsBuilder {
 
 	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
 	/// reference & its `source` from the reference fields config; or, iff a
-	/// `<named-field-spec-reference>` resolves to no field spec (none for its
-	/// field, or 1 removed earlier in this section), `nil` & the field spec that
-	/// a `<field-spec-insertion>` would copy from the base fields config.
+	/// `<named-field-spec-reference>`'s `<reference-field-name>` names no field
+	/// spec, or the reference resolves to a `null` (a field spec removed earlier
+	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
+	/// would copy from the base fields config.
 	private func parseHideReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
 		guard input.first != fieldSpecIndexPrefix else {
