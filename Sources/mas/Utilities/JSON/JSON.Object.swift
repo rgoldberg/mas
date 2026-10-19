@@ -105,10 +105,11 @@ extension [JSON.Object] {
 	/// then a cell per field per item (fields.md: label is a field spec's "Header
 	/// for table"). Every item gets a cell for every field, per fields.md's
 	/// "Absent Values" (absent ⇒ empty string, unless its format renders it
-	/// otherwise, e.g., via a `<failure-block>`).
-	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String {
+	/// otherwise, e.g., via a `<failure-block>`). `nil` iff there are no items or
+	/// no field specs, so there is nothing to output.
+	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String? {
 		guard !isEmpty else {
-			return ""
+			return nil
 		}
 		let showsHeader = tableConfig.header != nil
 		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
@@ -123,7 +124,7 @@ extension [JSON.Object] {
 			)
 		}
 		guard !columns.isEmpty else {
-			return ""
+			return nil
 		}
 		let columnSpacing = tableConfig.columnSpacing
 		let columnMetadata = columns.map { (maxWidth: $0.maxWidth, justification: $0.justification) }
@@ -172,25 +173,28 @@ extension [JSON.Object] {
 	/// ordered per item by `fieldOrder` & per `keyValueConfig` (key-value.md):
 	/// each item's rows (none for an item without any), with an item separator
 	/// line (iff any) between each pair of adjacent items, filled to the width of
-	/// the widest row of any item.
+	/// the widest row of any item. `nil` iff no item has a row, so there is
+	/// nothing to output.
 	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
-	throws(FormattingError) -> String {
+	throws(FormattingError) -> String? {
 		let itemRows = try map { object throws(FormattingError) in
 			try object.keyValueRows(
 				fieldSpecs: fieldOrder.itemFieldSpecs(fieldSpecs, for: object),
 				keyValueConfig: keyValueConfig,
 			)
 		}
-		return itemRows
-			.lazy
-			.map { $0.map(\.row) }
-			.joined(
-				separator: keyValueConfig.itemSeparatorPattern.map { itemSeparatorPattern in
-					[repeatedPattern(itemSeparatorPattern, toWidth: itemRows.joined().map(\.width).max() ?? 0)]
-				}
-					?? .init(),
-			)
-			.joined(separator: "\n")
+		return itemRows.allSatisfy(\.isEmpty)
+			? nil
+			: itemRows
+				.lazy
+				.map { $0.map(\.row) }
+				.joined(
+					separator: keyValueConfig.itemSeparatorPattern.map { itemSeparatorPattern in
+						[repeatedPattern(itemSeparatorPattern, toWidth: itemRows.joined().map(\.width).max() ?? 0)]
+					}
+						?? .init(),
+				)
+				.joined(separator: "\n")
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per

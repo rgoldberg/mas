@@ -82,15 +82,21 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 				try sortedObjects.json(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder, jsonConfig: jsonConfig),
 			)
 		case let .keyValue(keyValueConfig):
-			MAS.printer.info(
-				try sortedObjects.keyValue(
+			// Nothing is output iff no item has a row
+			if
+				let keyValue = try sortedObjects.keyValue(
 					fieldSpecs: displayFieldSpecs,
 					fieldOrder: resolved.fieldOrder,
 					keyValueConfig: keyValueConfig,
-				),
-			)
+				)
+			{
+				MAS.printer.info(keyValue)
+			}
 		case let .table(tableConfig):
-			MAS.printer.info(try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig))
+			// Nothing is output iff no field spec is visible
+			if let table = try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig) {
+				MAS.printer.info(table)
+			}
 		}
 	}
 }
