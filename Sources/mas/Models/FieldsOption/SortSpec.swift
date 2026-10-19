@@ -148,6 +148,16 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 		case least = "a"
 	}
 
+	/// `<nonconforming-placement>`: whether nonconforming values' location
+	/// depends on `<direction>`.
+	enum NonconformingPlacement: Character {
+		/// `<fixed-nonconforming>`: 1st iff `<nonconforming-least>`, else last,
+		/// regardless of `<direction>`.
+		case fixed = "f"
+		/// `<relative-nonconforming>`: `<descending>` reverses their location.
+		case relative = "r"
+	}
+
 	/// `<text-order>`.
 	enum TextOrder: Character {
 		case excluded = "e"
@@ -168,6 +178,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 		hasUnixTimeSegments: false,
 		boundaries: .uncollapsed(defaultBoundaryGroups),
 		nonconformingComparison: .allConforming,
+		nonconformingPlacement: .relative,
 		textOrder: .inPlace,
 	)
 
@@ -186,6 +197,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 	var hasUnixTimeSegments: Bool
 	var boundaries: Boundaries
 	var nonconformingComparison: NonconformingComparison
+	var nonconformingPlacement: NonconformingPlacement
 	var textOrder: TextOrder
 }
 
@@ -236,6 +248,8 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				optionSet.numberSegments = numberSegments
 			} else if let nonconformingComparison = NonconformingComparison(rawValue: option) {
 				optionSet.nonconformingComparison = nonconformingComparison
+			} else if let nonconformingPlacement = NonconformingPlacement(rawValue: option) {
+				optionSet.nonconformingPlacement = nonconformingPlacement
 			} else if let textOrder = TextOrder(rawValue: option) {
 				optionSet.textOrder = textOrder
 			} else {
@@ -491,11 +505,15 @@ extension SortOptionSet {
 	private struct Piece {
 		let rank: Int
 		let segments: [Segment]
+
+		var hasTypedSegment: Bool {
+			segments.contains(where: \.isTyped)
+		}
 	}
 
 	/// Compares 2 strings (e.g., field names or labels).
 	func compare(_ lhs: String, _ rhs: String) -> ComparisonResult {
-		directed(compare(pieces(of: lhs), pieces(of: rhs)))
+		compare(pieces(of: lhs), pieces(of: rhs))
 	}
 
 	fileprivate func value(of values: SortValues) -> JSON.Node? {
@@ -509,7 +527,7 @@ extension SortOptionSet {
 
 	/// Compares 2 values per this option set.
 	fileprivate func compare(_ lhs: JSON.Node?, _ rhs: JSON.Node?) -> ComparisonResult {
-		directed(compare(pieces(of: lhs), pieces(of: rhs)))
+		compare(pieces(of: lhs), pieces(of: rhs))
 	}
 
 	private func directed(_ result: ComparisonResult) -> ComparisonResult {
@@ -577,20 +595,25 @@ extension SortOptionSet {
 		return pieces
 	}
 
-	/// Compares 2 values' pieces: with `<nonconforming-least>` or
+	/// Compares 2 values' pieces per `direction`: with `<nonconforming-least>` or
 	/// `<nonconforming-greatest>`, a value without any typed segment is
-	/// nonconforming, comparing as less or greater than any conforming value;
-	/// otherwise, piece by piece, a boundary of an earlier boundary group
-	/// preceding a boundary of a later group, which precedes non-boundary text;
-	/// boundaries of the same group share the same sort precedence.
+	/// nonconforming, comparing as less or greater than any conforming value
+	/// (regardless of `direction` iff `<fixed-nonconforming>`); otherwise, piece
+	/// by piece, a boundary of an earlier boundary group preceding a boundary of
+	/// a later group, which precedes non-boundary text; boundaries of the same
+	/// group share the same sort precedence.
 	private func compare(_ lhs: [Piece], _ rhs: [Piece]) -> ComparisonResult {
-		if nonconformingComparison != .allConforming {
-			let lhsIsConforming = lhs.contains { $0.segments.contains(where: \.isTyped) }
-			let rhsIsConforming = rhs.contains { $0.segments.contains(where: \.isTyped) }
-			if lhsIsConforming != rhsIsConforming {
-				return lhsIsConforming == (nonconformingComparison == .greatest) ? .orderedAscending : .orderedDescending
-			}
+		let isLHSConforming = lhs.contains(where: \.hasTypedSegment)
+		guard nonconformingComparison != .allConforming, isLHSConforming != rhs.contains(where: \.hasTypedSegment) else {
+			return directed(compareConforming(lhs, rhs))
 		}
+		let result =
+			isLHSConforming == (nonconformingComparison == .greatest) ? ComparisonResult.orderedAscending : .orderedDescending
+		return nonconformingPlacement == .fixed ? result : directed(result)
+	}
+
+	/// Compares 2 values' pieces, piece by piece, regardless of `direction`.
+	private func compareConforming(_ lhs: [Piece], _ rhs: [Piece]) -> ComparisonResult {
 		for (lhsPiece, rhsPiece) in zip(lhs, rhs) {
 			guard lhsPiece.rank == rhsPiece.rank else {
 				return ComparableComparator().compare(lhsPiece.rank, rhsPiece.rank)

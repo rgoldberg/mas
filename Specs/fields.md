@@ -549,6 +549,7 @@ sort-option     =
   | <chronologic-segments>
   | <boundaries>
   | <nonconforming-comparison>
+  | <nonconforming-placement>
   | <text-order>
 
 sort-option-terminator = ":"
@@ -855,6 +856,11 @@ nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconfor
 all-conforming         = "k" (* mnemonic: keep in place *)
 nonconforming-least    = "a" (* mnemonic: 1st letter, so least *)
 nonconforming-greatest = "z" (* mnemonic: last letter, so greatest *)
+
+nonconforming-placement = <relative-nonconforming> | <fixed-nonconforming> (* default: <relative-nonconforming>; last wins *)
+
+relative-nonconforming = "r"
+fixed-nonconforming    = "f"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -862,8 +868,14 @@ nonconforming-greatest = "z" (* mnemonic: last letter, so greatest *)
 With `<nonconforming-least>` or `<nonconforming-greatest>`, a value is
 **nonconforming** iff it has no [typed segment](#sort-segments) (e.g., `Free`
 for a price, or `null`). Nonconforming values compare among themselves as other
-values do, but as less than (`a`) or greater than (`z`) every conforming value,
-so `<descending>` also reverses their location.
+values do, but as less than (`a`) or greater than (`z`) every conforming value.
+Per `<nonconforming-placement>`:
+
+- `<relative-nonconforming>`: `<descending>` also reverses their location (e.g.,
+  `a-` puts them last).
+- `<fixed-nonconforming>`: they are 1st (`a`) or last (`z`) regardless of
+  `<direction>` (e.g., `af-` puts them 1st), as SQL's `NULLS FIRST` &
+  `NULLS LAST` put `NULL`s.
 
 With `<all-conforming>`, no value is nonconforming.
 

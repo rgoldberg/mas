@@ -38,6 +38,8 @@ private extension MASTests {
 			("1a", "nonconformingComparison", "a"),
 			("1az", "nonconformingComparison", "z"),
 			("1zk", "nonconformingComparison", "k"),
+			("1f", "nonconformingPlacement", "f"),
+			("1fr", "nonconformingPlacement", "r"),
 			("1h", "textOrder", "h"),
 			("1t", "textOrder", "t"),
 			("1e", "textOrder", "e"),
@@ -58,6 +60,8 @@ private extension MASTests {
 				optionSet.direction.rawValue
 			case "nonconformingComparison":
 				optionSet.nonconformingComparison.rawValue
+			case "nonconformingPlacement":
+				optionSet.nonconformingPlacement.rawValue
 			case "numberSegments":
 				optionSet.numberSegments.option
 			case "source":
@@ -304,6 +308,12 @@ private extension MASTests {
 			("1N:a", "Free", "$5", .orderedAscending),
 			("1N:z", "Free", "$5", .orderedDescending),
 			("1N:a-", "Free", "$5", .orderedDescending),
+			("1N:ar-", "Free", "$5", .orderedDescending),
+			("1N:af-", "Free", "$5", .orderedAscending),
+			("1N:zf-", "Free", "$5", .orderedDescending),
+			("1N:zf+", "Free", "$5", .orderedDescending),
+			("1N:af-", "$4", "$5", .orderedDescending),
+			("1N:afr-", "Free", "$5", .orderedDescending),
 			("1N:a", .null, "Free", .orderedAscending),
 			("1a", "Free", "$5", .orderedDescending),
 			// <text-order> orders text & typed segments
