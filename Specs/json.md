@@ -35,7 +35,7 @@ config sets every `<json-setting>` to its default.
 A key-value pair is output for each field spec's [member](fields.md#members),
 even if its key repeats another's (e.g., `--fields name=x,version=x` outputs 2
 `x` keys), because JSON does not forbid repeated keys, though some consumers
-keep only 1 of them.
+retain only 1 of them.
 
 ## Pretty-Printing
 

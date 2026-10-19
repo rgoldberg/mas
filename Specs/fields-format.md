@@ -37,9 +37,9 @@ structured value.
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
-that type (`json`: string, boolean, `null`, structured value & a number whose
-text, including any trivia, is JSON number syntax; `table` & `key-value`:
-string); otherwise, it renders it coerced to a string.
+that type (JSON: string, boolean, `null`, structured value & a number whose
+text, including any trivia, is JSON number syntax; table & key-value: string);
+otherwise, it renders it coerced to a string.
 
 ##### Pipelines
 
@@ -444,10 +444,10 @@ end-justify          = "endJustify"
 <!--editorconfig-checker-enable-->
 
 Unlike a `<value-transform>`, a `<format-transform>` does not transform any
-value; it sets a property of the field itself, currently just its `table`-output
-column alignment. It therefore does not affect the field's rendered value: it is
-a no-op for `json` / `key-value` output (which have no columns to align); it
-accepts a value of any type & does not change it, unlike every
+value; it sets a property of the field spec itself, currently just its table
+output column alignment. It therefore does not affect the field's rendered
+value: it is a no-op for JSON / key-value output (which have no columns to
+align); it accepts a value of any type & does not modify it, unlike every
 `<value-transform>`.
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's padding
