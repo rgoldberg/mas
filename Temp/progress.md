@@ -605,3 +605,9 @@ less or greater than every member, and `<descending>` reverses its location iff
 `<relative-absent-fields>` (e.g., `D-` puts it 1st, but `D-f` last), as before
 by default; a `<positional-order-option-set>` reports either as
 `unsupportedAbsentFieldOption`.
+
+### 2nd Spec Compliance Audit (2026-10-19)
+
+Whitespace between a `<field-spec-edit>`'s `<insert>`, `<move>`, `<hide>`, or
+`<remove>` & its `<field-spec-index-prefix>` is ignored (e.g., `+ @1`), instead
+of reporting `missingFieldName`.
