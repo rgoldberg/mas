@@ -36,6 +36,14 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a number transform's coercion parses a string, but not a structured value, whose text is a number`()
+	throws {
+		let format = #"..:,,,,,\\[,\\]:round"#
+		#expect(try rendered(format, .string("[1.5]")) == "[2]")
+		#expect(try rendered(format, .array([.number(1)])) == nil)
+	}
+
+	@Test
 	func `coerces a structured value to its compact JSON text`() throws {
 		#expect(try rendered("(%i)", structuredValue) == #"(["é",{"a":null}])"#)
 	}
