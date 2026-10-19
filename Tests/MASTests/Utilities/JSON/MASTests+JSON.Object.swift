@@ -108,4 +108,19 @@ private extension MASTests {
 				== expected,
 		)
 	}
+
+	@Test
+	func `JSON outputs each field spec's key-value pair, even if its key repeats another's`() throws {
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: "name=x,version=x",
+			standard: SelectedFieldsConfig(),
+			all: .init(),
+			outputFormat: .json(.default),
+		)
+		.fieldSpecs
+		let object = JSON.Object([("name", .string("A")), ("version", .string("1"))])
+		#expect(
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).description == #"{"x":"A","x":"1"}"#,
+		)
+	}
 }

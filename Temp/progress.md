@@ -586,3 +586,7 @@ object's duplicate keys): a table cell & a sort key use the last one
 order, formatted separately (`FieldOrder.itemMembers(_:for:)`, which, for
 `<document-order>`, orders each member at its own position), instead of every
 output format & sorting using the 1st one.
+
+JSON output outputting a key-value pair for each field spec's member, even if
+its key repeats another's (e.g., `--fields name=x,version=x`), is specified, as
+already implemented.
