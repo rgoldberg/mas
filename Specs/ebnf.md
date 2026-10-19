@@ -647,9 +647,9 @@ NONTERMINAL = DEFINITION (* last wins *)
 
 Each occurrence of any of `DEFINITION`'s alternatives (a definition that is not
 a choice being its own sole alternative) overrides all preceding such
-occurrences that share its **last-wins scope**: its enclosing occurrence of a
-nonterminal whose definition contains a repetition that, transitively, contains
-`NONTERMINAL`.
+occurrences that share its **last-wins scope**: its nearest enclosing occurrence
+of a nonterminal whose definition contains a repetition that, transitively,
+contains `NONTERMINAL`, or, absent one, the entire input.
 
 E.g., per [`<direction>`](fields.md#sort-direction)'s last wins, the [field
 order](fields.md#field-order) `-P+` is ascending, but in `D-/+`, `+` does not
