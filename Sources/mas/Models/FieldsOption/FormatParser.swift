@@ -383,7 +383,7 @@ private struct FormatParser {
 				pipeline: isNonNullary ? try parseUnconditionalPipelineBlock(predicate) : .init(),
 			)
 		}
-		if lowercaseLetter == nullaryMatch {
+		if lowercaseLetter == unaryMatch {
 			guard abortModifier == nil, coercion == nil else {
 				throw .invalidModifier(letter)
 			}
@@ -793,7 +793,7 @@ private let abortOnFailure = Character("+")
 private let abortModifierSet = Set([abortOnSuccess, abortOnFailure])
 private let coercionPrefix = Character(".")
 private let branchNegation = Character("-")
-private let nullaryMatch = Character("m")
+private let unaryMatch = Character("m")
 
 private let formatBlockTerminatorSet = Set([sortModifierPrefix, fieldSpecSeparator])
 private let formatBlockNameTerminatorSet = formatBlockTerminatorSet.union([transformCallPrefix])
