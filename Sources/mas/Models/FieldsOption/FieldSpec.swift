@@ -969,6 +969,7 @@ private func parseFieldSpecEditKind(_ input: inout Substring) -> FieldSpecEditKi
 		return .overlay
 	}
 	input.removeFirst()
+	input = input.drop(while: \.isWhitespace) // E.g., before a `<field-spec-index-prefix>`
 	return strategy
 }
 

@@ -529,9 +529,22 @@ private extension MASTests {
 		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
 	}
 
-	@Test(arguments: ["@all . bundleID @ 1 = Bundle , adamID", "@all.bundleID@-1=Bundle"])
+	@Test(
+		arguments: [
+			"@all . bundleID @ 1 = Bundle , adamID",
+			"@all.bundleID@-1=Bundle",
+			"@all.+ @2=Bundle",
+			"@all.% @2=Bundle",
+			"@all._ @ 2=Bundle",
+		],
+	)
 	func `ignores whitespace around field-spec-edits' syntax tokens`(value: String) throws {
 		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
+	}
+
+	@Test
+	func `ignores whitespace between a field-spec-removal's remove & its field-spec-index-prefix`() throws {
+		#expect(try parseFieldSpecs("@all.- @1").map(\.name) == ["bundleID"])
 	}
 
 	@Test(arguments: ["bogus", ".+bogus", "._bogus", "adamID,bogus=B"])
