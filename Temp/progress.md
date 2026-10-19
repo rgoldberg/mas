@@ -318,8 +318,8 @@ Integer descriptions' scalar tokens are consumed via maximal munch by
 `parseIntegerText`: ASCII digits, after an optional sign only for `<index>`.
 Their magnitudes are unconstrained: an `<index>` beyond `Int`'s range reports
 `invalidPosition`, `<sort-priority>` is a `BigUInt` & `nonNegativeInteger`
-saturates at `Int.max`. `scale` renders `0` without calculating `radix^exponent`
-for a huge `<exponent>`.
+saturates at `Int.max`. `scale` renders `0` without calculating `<radix>` to the
+power of `<exponent>` for a huge `<exponent>`.
 
 A Unix time is chronologic iff its whole milliseconds, rounded down, fit in a
 signed 64-bit integer, as `unixTimeDate` already implemented.
