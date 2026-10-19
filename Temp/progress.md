@@ -175,8 +175,8 @@ field not yet discovered), excluding hidden field specs that do not sort items.
 [mas's default sort options](../Specs/mas.md#default-sort-options) are in
 `defaultSortOptionSet(forFieldNamed:outputFormat:)`: `v` for version fields; `a`
 & [grouped numbers](../Specs/mas.md#price-sorting) per the App Store locale
-guessed from the macOS region for `formattedPrice`. Every field's default format
-is `%i`.
+guessed from the macOS region for `formattedPrice`. Every field's machine-facing
+default format is `%i`.
 
 ### Field Spec References & Whitespace (2026-09-25)
 
@@ -614,4 +614,5 @@ of reporting `missingFieldName`.
 
 Whitespace after `<number-coercion-arguments>`' closing `<argument-fence>` is
 ignored (e.g., `%.:de: n`, `..:de: round`), instead of reporting `invalidLetter`
-or `unknownTransform`; only `<coercion>`'s `.` forbids succeeding whitespace.
+or `unknownTransform`; within `<number-coercion>`, only `<coercion>`'s `.`
+forbids succeeding whitespace.
