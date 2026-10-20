@@ -845,7 +845,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
 		switch call.transform.kind {
-		case .chronologic:
+		case .date:
 			guard case let .chronologic(chronologic, style)? = try coercedChronologic(for: call) else {
 				return nil
 			}

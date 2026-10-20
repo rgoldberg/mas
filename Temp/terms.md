@@ -497,7 +497,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        Annex C's POSIX Compatible definitions
        ([used](../Specs/fields.md#sort-boundaries))
      - REJECTED: GNU Extended POSIX character class / bracket expression class
-101. - time-only block: `%c` / `%C`'s block (`<time-only-block>`), whose
+101. - date block: `%d` / `%D`'s block (`<date-block>`), whose pipeline's
+       transforms can be only `dateOnly`s & `timeZone`s, or string transforms
+       after coercing to a string
+     - time-only block: `%c` / `%C`'s block (`<time-only-block>`), whose
        pipeline's transforms can be only `timeZone`s, or string transforms after
        coercing to a string
      - REJECTED: clock block / time block

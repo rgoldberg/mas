@@ -52,7 +52,7 @@ number-pipeline =
   <named-number-format>
   | [ <named-number-format> ] ( <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline> )
 
-chronologic-pipeline = <named-chronologic-format> | [ <named-chronologic-format> ] ( <chronologic-transform-pipeline> | <unconditional-transform-pipeline> )
+date-pipeline = <named-date-format> | [ <named-date-format> ] ( <date-transform-pipeline> | <unconditional-transform-pipeline> )
 
 time-only-pipeline = <named-time-only-format> | [ <named-time-only-format> ] ( <time-only-transform-pipeline> | <unconditional-transform-pipeline> )
 
@@ -69,7 +69,7 @@ unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-f
 named-format               = <name-prefix> <format-name> (* only for: name of a format conforming to <format-block> *)
 named-string-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <string-block> *)
 named-number-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <number-block> *)
-named-chronologic-format   = <name-prefix> <format-name> (* only for: name of a format conforming to <chronologic-block> *)
+named-date-format          = <name-prefix> <format-name> (* only for: name of a format conforming to <date-block> *)
 named-time-only-format     = <name-prefix> <format-name> (* only for: name of a format conforming to <time-only-block> *)
 named-unconditional-format = <name-prefix> <format-name> (* only for: name of a format conforming to <unconditional-block> *)
 
@@ -77,7 +77,7 @@ named-format-reference =
   <named-format>
   | <named-string-format>
   | <named-number-format>
-  | <named-chronologic-format>
+  | <named-date-format>
   | <named-time-only-format>
   | <named-unconditional-format>
   (* non-structural *)
@@ -113,7 +113,7 @@ Because every `<success-block>` alternative's syntax includes
 ```ebnf
 transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> | <format-transform-pipeline> (* non-structural *)
 
-value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <number-to-string-transform-pipeline> | <chronologic-transform-pipeline>
+value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <number-to-string-transform-pipeline> | <date-transform-pipeline>
 
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <string-transform-pipeline> ]
 
@@ -124,7 +124,7 @@ transform-call-prefix = "."!
 argument-fence     = ":" (* fences an argument list *)
 argument-separator = "," (* separates an argument list's arguments *)
 
-value-transform = <string-transform> | <number-transform> | <number-to-string-transform> | <chronologic-transform> (* non-structural *)
+value-transform = <string-transform> | <number-transform> | <number-to-string-transform> | <date-transform> (* non-structural *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -356,9 +356,9 @@ after the radix point.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-chronologic-transform-pipeline = <chronologic-transform-call>+
-chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronologic-transform>
-chronologic-transform          = <date-only> | <time-only-transform> (* type: date *)
+date-transform-pipeline = <date-transform-call>+
+date-transform-call     = <transform-call-prefix> [ <coercion> ] <date-transform>
+date-transform          = <date-only> | <time-only-transform> (* type: date *)
 
 time-only-transform-pipeline = <time-only-transform-call>+
 time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
@@ -370,9 +370,8 @@ time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; l
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A `<chronologic-transform-pipeline>`'s or `<time-only-transform-pipeline>`'s
-transforms jointly set how its value is rendered, regardless of where `dateOnly`
-appears:
+A `<date-transform-pipeline>`'s or `<time-only-transform-pipeline>`'s transforms
+jointly set how its value is rendered, regardless of where `dateOnly` appears:
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone`: sets the output time zone to the one that its `<time-zone-code>`
@@ -522,19 +521,19 @@ success-block =
   <string-block>
   | <boolean-block>
   | <number-block>
-  | <chronologic-block>
+  | <date-block>
   | <time-only-block>
   | <any-block>
   | <unconditional-block>
   (* non-structural *)
 failure-block = <unconditional-block>
 
-success-pipeline = <string-pipeline> | <number-pipeline> | <chronologic-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
+success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
 
 string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
 boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
 number-block        = <number-pipeline> | <number-template>               (* direct default: {empty string} *)
-chronologic-block   = <chronologic-pipeline> | <chronologic-template>     (* direct default: {empty string} *)
+date-block          = <date-pipeline> | <date-template>                   (* direct default: {empty string} *)
 time-only-block     = <time-only-pipeline> | <time-only-template>         (* direct default: {empty string} *)
 any-block           = <unconditional-pipeline> | <any-template>           (* direct default: {empty string} *)
 unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: {empty string} *)
@@ -542,7 +541,7 @@ unconditional-block = <unconditional-pipeline> | <unconditional-template> (* dir
 string-template        = <template-text> | [ <template-text> ] ( ( <string-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
 boolean-template       = <template-text> | [ <template-text> ] ( ( <boolean-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
 number-template        = <template-text> | [ <template-text> ] ( ( <number-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-chronologic-template   = <template-text> | [ <template-text> ] ( ( <chronologic-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+date-template          = <template-text> | [ <template-text> ] ( ( <date-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
 time-only-template     = <template-text> | [ <template-text> ] ( ( <time-only-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
 any-template           = <template-text> | [ <template-text> ] ( ( <any-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
 unconditional-template = <template-text> | [ <template-text> ] ( <unconditional-placeholder> [ <template-text> ] )+
@@ -551,7 +550,7 @@ block-placeholder =
   <string-block-placeholder>
   | <boolean-block-placeholder>
   | <number-block-placeholder>
-  | <chronologic-block-placeholder>
+  | <date-block-placeholder>
   | <time-only-block-placeholder>
   | <any-block-placeholder>
   (* non-structural *)
@@ -571,9 +570,9 @@ number-block-placeholder =
   ( <nullary-number> | <non-nullary-number> -<number-pipeline> <block-terminator> )
   (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
 
-chronologic-block-placeholder =
+date-block-placeholder =
   <placeholder-prefix>
-  ( <nullary-date> | <non-nullary-date> -<chronologic-pipeline> <block-terminator> )
+  ( <nullary-date> | <non-nullary-date> -<date-pipeline> <block-terminator> )
   (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
 
 time-only-block-placeholder =
@@ -852,7 +851,7 @@ escaped.
 ```ebnf
 nullary-date-matcher          = [ <coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
-non-nullary-date-success      = <non-nullary-date-matcher> -[ <chronologic-block> ]
+non-nullary-date-success      = <non-nullary-date-matcher> -[ <date-block> ]
 non-nullary-time-only-success = <non-nullary-time-only> -[ <time-only-block> ]
 
 nullary-date          = "d" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)

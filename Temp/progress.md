@@ -432,7 +432,7 @@ properties are retained from the working fields config.
 
 `<unconditional-pipeline>`'s named alternative is followed only by an
 `<unconditional-transform-pipeline>`, as `<number-pipeline>`'s &
-`<chronologic-pipeline>`'s are, so a named unconditional format satisfies every
+`<date-pipeline>`'s are, so a named unconditional format satisfies every
 `<named-format-reference>`; a block's `<transform-pipeline>` applies to the
 enclosing matcher's value, as already implemented.
 
@@ -660,3 +660,8 @@ Chronologic values have 2 types: date (a date-only or a datetime: `%d`'s output
 type & `dateOnly`'s input type) & time-only (`%c`'s output type), instead of 1
 chronologic type, under which a time-only value had `dateOnly`'s input type, yet
 did not conform to it; the implementation is unchanged.
+
+`%d` & `%D`'s block, pipeline, template, block placeholder, named format &
+transforms are named for their date type (e.g., `<date-block>`,
+`<date-pipeline>` & `<date-transform>`; `BlockKind.date`, `PipelineShape.date` &
+`TransformKind.date`), as `%c` & `%C`'s are for their time-only type.

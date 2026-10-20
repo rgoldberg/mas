@@ -635,7 +635,7 @@ private enum TrailingWhitespaceTreatment { // swiftlint:disable:this one_declara
 private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case any
 	case boolean
-	case chronologic
+	case date
 	case number
 	case string
 	case timeOnly
@@ -644,7 +644,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
-		case .any, .boolean, .chronologic, .number, .string, .timeOnly:
+		case .any, .boolean, .date, .number, .string, .timeOnly:
 			true
 		case .unconditional:
 			false
@@ -656,7 +656,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .unconditional:
 			.unconditional
-		case .chronologic, .number, .string, .timeOnly:
+		case .date, .number, .string, .timeOnly:
 			self
 		}
 	}
@@ -666,8 +666,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .unconditional:
 			"<unconditional-pipeline>"
-		case .chronologic:
-			"<chronologic-pipeline>"
+		case .date:
+			"<date-pipeline>"
 		case .number:
 			"<number-pipeline>"
 		case .string:
@@ -682,8 +682,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .unconditional:
 			[.unconditional]
-		case .chronologic:
-			[.chronologic, .unconditional]
+		case .date:
+			[.date, .unconditional]
 		case .number:
 			[.number, .numberToString, .unconditional]
 		case .string:
@@ -700,7 +700,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			case .boolean, .false, .true:
 				.boolean
 			case .date:
-				.chronologic
+				.date
 			case .empty, .null, .whitespace:
 				.any
 			case .number:
@@ -715,8 +715,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 
 /// The shape of a `<*-transform-pipeline>`'s `<*-transform-call>`s.
 private enum PipelineShape { // swiftlint:disable:this one_declaration_per_file
-	/// A `<chronologic-transform-pipeline>`.
-	case chronologic
+	/// A `<date-transform-pipeline>`.
+	case date
 	/// A `<number-transform-pipeline>`.
 	case number
 	/// A `<number-to-string-transform-pipeline>`.
@@ -736,8 +736,8 @@ private extension [TransformCall] {
 			return false
 		}
 		return switch shape {
-		case .chronologic:
-			allSatisfy { $0.transform.kind == .chronologic }
+		case .date:
+			allSatisfy { $0.transform.kind == .date }
 		case .number:
 			allSatisfy { $0.transform.kind == .number }
 		case .numberToString:
@@ -826,4 +826,4 @@ private let transformNames =
 	Set(valueTransformByName.keys).union(justificationByName.keys).union([numberFormatName, scaleName, timeZoneName])
 
 /// The shapes of a `<value-transform-pipeline>`'s `<*-transform-call>`s.
-private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .chronologic])
+private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .date])
