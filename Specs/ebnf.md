@@ -416,7 +416,7 @@ Content-dependent multiplicity.
 
 An expression has 3 mutually exclusive possible presence states:
 
-- **Present**: A token is present.
+- **Present**: It contains a consumed token.
 - **Transitively absent**: At least one of the expression's ancestors is absent,
   or no consumed token matches the expression as an alternative of a present
   choice or as an element of a present repetition.
