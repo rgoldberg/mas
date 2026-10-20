@@ -171,8 +171,8 @@ until the algorithm is updated.
 ### Output Formats
 
 Display commands support 3 output formats, each selectable via a mutually
-exclusive option with an optional format-specific value, pursuant to
-[mas-specific overrides & defaults](Specs/mas.md):
+exclusive option with an optional format-specific value after `=` (e.g.,
+`--json=P`), pursuant to [mas-specific overrides & defaults](Specs/mas.md):
 
 - **Table** (`--table`): Row per item, column per selected field (if an item has
   multiple values for a field, the last value is used). [The optional value
@@ -198,7 +198,7 @@ exclusive option with an optional format-specific value, pursuant to
 For all output formats, `--fields` [selects, orders, labels & formats output
 fields & sorts items](Specs/fields.md), e.g.:
 
-- `mas list --fields 'name=App,version/1-' --table S`: only the name (labeled
+- `mas list --fields 'name=App,version/1-' --table=S`: only the name (labeled
   `App`) & version fields, sorted by descending version, with a header row & a
   separator line
 - `mas list --fields '.name:.uppercase,+path'`: the standard fields, with

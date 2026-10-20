@@ -40,9 +40,9 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	/// 1 source of truth to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
-			let json = try jsonOptionValue.map(parseJSONConfig)
-			let keyValue = try keyValueOptionValue.map(parseKeyValueConfig)
-			let table = try tableOptionValue.map(parseTableConfig)
+			let json = try jsonOptionValue.map(optionalOptionValue).map(parseJSONConfig)
+			let keyValue = try keyValueOptionValue.map(optionalOptionValue).map(parseKeyValueConfig)
+			let table = try tableOptionValue.map(optionalOptionValue).map(parseTableConfig)
 			guard [json != nil, keyValue != nil, table != nil].count(where: \.self) <= 1 else {
 				throw ValidationError("At most 1 of '--json', '--key-value', or '--table' may be given.")
 			}
@@ -80,4 +80,37 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	func output(_ objects: [JSON.Object]) throws {
 		try Config.output(objects, outputFormat: outputFormat, fieldsOptionValue: fieldsOptionValue)
 	}
+}
+
+/// The output options whose option value is optional.
+private let optionalValueOutputOptionNameSet: Set = ["--json", "--key-value", "--table"]
+
+/// Prefixes each optional output option value in a normalized command line, so
+/// that the value is never empty, because Swift Argument Parser takes an empty
+/// value after `=` (e.g., `--json=`) as no value, then takes the next
+/// command-line argument as the value. No command-line argument can contain a
+/// NUL, so the prefix never starts an actual value.
+private let optionalOptionValuePrefix = "\0"
+
+/// `arguments`, with each output option whose option value is optional, before
+/// any `--` terminator, given its value after `=` (or an empty value, absent
+/// one), prefixed with `optionalOptionValuePrefix` (e.g., `--json` becomes
+/// `--json=\0` & `--json=P` becomes `--json=\0P`), so that such an option value
+/// is only ever the rest of its option's command-line argument after `=`, never
+/// the next command-line argument (configs.md "Option Values").
+func normalizingOutputOptions(in arguments: some Sequence<String>) -> [String] {
+	let arguments = Array(arguments)
+	let terminatorIndex = arguments.firstIndex(of: "--") ?? arguments.endIndex
+	return arguments[..<terminatorIndex].map { argument in
+		let parts = argument.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+		return optionalValueOutputOptionNameSet.contains(String(parts[0]))
+			? "\(parts[0])=\(optionalOptionValuePrefix)\(parts.dropFirst().first ?? "")"
+			: argument
+	}
+		+ arguments[terminatorIndex...]
+}
+
+/// `value` without any `optionalOptionValuePrefix`.
+private func optionalOptionValue(_ value: String) -> String {
+	.init(value.trimmingPrefix(optionalOptionValuePrefix))
 }
