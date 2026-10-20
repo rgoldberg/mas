@@ -148,7 +148,7 @@ Configurable behavior per output format:
 - `omit`: Omit output for absent values.
 - `emit`: Output a configurable default value for absent values.
 
-### Configurable Unix Time Segment Neighbors
+### Configurable Unix Time Segment Adjacent Characters
 
 Let a [`<unix-time>`](../Specs/fields.md#sort-chronologic-segments) sort segment
 be adjacent to configurable characters other than whitespace (e.g., brackets:
@@ -163,7 +163,7 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 ### `<document-order>` for `@table`
 
 Let `<document-order>` order a table's columns by the 1st item's document order
-(e.g., the key order of the 1st input JSON object), since rows otherwise share
+(e.g., the key order of the 1st input JSON object), because rows otherwise share
 no document order; every later item's fields would follow the 1st item's order,
 with fields that the 1st item lacks after the others, in position order.
 
