@@ -9,6 +9,15 @@
 3. Manual accompanying specs
 4. Examples
 
+### Swift Argument Parser Empty Values
+
+Awaiting an upstream release (not actionable until then): once a Swift Argument
+Parser release includes [apple/swift-argument-parser#961](
+  https://github.com/apple/swift-argument-parser/pull/961
+), which makes an empty value after `=` (e.g., `--json=`) an empty value instead
+of no value, remove the NUL prefix that `normalizingOutputOptions(in:)` gives
+each output option value after `=`.
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Custom Named Formats & Configs

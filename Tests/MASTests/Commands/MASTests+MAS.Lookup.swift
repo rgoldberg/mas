@@ -135,6 +135,21 @@ private extension MASTests {
 	}
 
 	@Test
+	func `an empty --fields value after = never takes the next argument as its value`() async throws {
+		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
+		let empty = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["--fields=", "1472954003"]))) { command in
+				try command.run(catalogApps: catalogApps)
+			},
+		)
+		let absent = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(["1472954003"])) { try $0.run(catalogApps: catalogApps) },
+		)
+		#expect(!empty.stdout.isEmpty)
+		#expect(empty == absent)
+	}
+
+	@Test
 	func `the last output option overrides every preceding one`() async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
 		let multipleArguments = normalizingOutputOptions(in: ["1472954003", "--json=P", "--table"])
