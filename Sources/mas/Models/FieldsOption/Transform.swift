@@ -47,14 +47,14 @@ enum Transform: Hashable {
 		case .numberFormat:
 			.numberToString
 		case .dateOnly, .timeZone:
-			.chronologic
+			.date
 		}
 	}
 
 	/// Applies this transform to a string; `nil` iff the string does not conform
 	/// to this transform's input type (e.g., a number too large for `scale`).
-	/// Chronologic transforms are applied separately, by
-	/// `ChronologicStyle.applying(_:)`, since they need the parsed chronologic
+	/// Date transforms are applied separately, by
+	/// `ChronologicStyle.applying(_:)`, because they need the parsed chronologic
 	/// value, not just its rendered string.
 	func applied(to string: String) -> String? {
 		switch self {
@@ -324,7 +324,7 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 
 /// A `<value-transform>`'s kind.
 enum TransformKind { // swiftlint:disable:this one_declaration_per_file
-	case chronologic
+	case date
 	case number
 	case numberToString
 	case string
