@@ -5,6 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
+private import ArgumentParser
 @testable private import mas
 internal import Testing
 
@@ -34,5 +35,23 @@ private extension MASTests {
 	@Test
 	func `normalizing retains every argument after a -- terminator`() {
 		#expect(normalizingOutputOptions(in: ["--json", "--", "--table"]) == ["--json=\0", "--", "--table"])
+	}
+
+	@Test(arguments: [
+		"--json [<json-config>]",
+		"--key-value [<key-value-config>]",
+		"--table [<table-config>]",
+		"--fields <fields-config>",
+	])
+	func `help names each output option value by its config`(usage: String) {
+		#expect(MAS.Lookup.helpMessage().contains(usage))
+	}
+
+	@Test(arguments: ["JSON", "key-value", "table"])
+	func `help says that an optional output option value is only after =`(outputFormat: String) {
+		#expect(
+			MAS.Lookup.helpMessage(columns: 1000)
+				.contains("Output format: \(outputFormat), optionally configuring (only after =)"),
+		)
 	}
 }

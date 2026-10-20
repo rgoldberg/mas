@@ -665,3 +665,7 @@ did not conform to it; the implementation is unchanged.
 transforms are named for their date type (e.g., `<date-block>`,
 `<date-pipeline>` & `<date-transform>`; `BlockKind.date`, `PipelineShape.date` &
 `TransformKind.date`), as `%c` & `%C`'s are for their time-only type.
+
+`--help` names each output option's value by its config (`<fields-config>`,
+`<json-config>`, `<key-value-config>` & `<table-config>`), and says that
+`--json`'s, `--key-value`'s & `--table`'s optional value is only after `=`.
