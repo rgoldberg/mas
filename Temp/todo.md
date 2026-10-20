@@ -18,6 +18,16 @@ Parser release includes [apple/swift-argument-parser#961](
 of no value, remove the NUL prefix that `normalizingOutputOptions(in:)` gives
 each output option value after `=`.
 
+### Swift Argument Parser Attached-Only Values
+
+Awaiting an upstream release (not actionable until then): once a Swift Argument
+Parser release resolves [apple/swift-argument-parser#992](
+  https://github.com/apple/swift-argument-parser/issues/992
+) with a `defaultAsFlag` parsing strategy that accepts a value only after `=`,
+parse `--json`, `--key-value` & `--table` with it, so that their help usage
+shows the value only after `=` (e.g., `--json[=<json-config>]`), and stop
+`normalizingOutputOptions(in:)` from giving a bare one a value after `=`.
+
 ## ASAP Version, But Massive Effort
 
 ### Persisted Custom Named Formats & Configs
