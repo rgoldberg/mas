@@ -478,8 +478,8 @@ Field spec edits act as follows:
   - Sets $previous$ to `source`'s new index in the working fields config.
 - `<field-spec-hide>`:
   - If its `<named-field-spec-reference>`'s `<reference-field-name>` names no
-    field spec, or its `<named-field-spec-reference>` resolves to a `null`,
-    inserts a new field spec (as `<field-spec-insertion>` would) as `source`.
+    field spec, or its `<field-spec-reference>` resolves to a `null`, inserts a
+    new field spec (as `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`'s index in the working fields config.

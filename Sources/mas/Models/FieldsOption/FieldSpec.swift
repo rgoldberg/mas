@@ -613,8 +613,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				)
 			case .hide:
 				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
-				// no field spec, or that resolves to a `null`, inserts a new field spec
-				// (as `<field-spec-insertion>` would) as `source`
+				// no field spec, or a `<field-spec-reference>` that resolves to a
+				// `null`, inserts a new field spec (as `<field-spec-insertion>` would)
+				// as `source`
 				let (reference, existing) = try parseHideReference(&input)
 				try apply(
 					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
@@ -802,17 +803,23 @@ private extension FieldSpecsBuilder {
 	private func parseHideReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
 		guard input.first != fieldSpecIndexPrefix else {
-			let reference = try parseFieldSpecReference(&input)
-			return (reference, try resolvedReferenceFieldSpec(reference))
+			return hideSource(for: try parseFieldSpecReference(&input))
 		}
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
 		guard !positions.isEmpty else {
 			return (nil, try defaultFieldSpec(forName: name))
 		}
-		let reference =
-			Reference(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
-		return referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
+		return hideSource(
+			for: .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1]),
+		)
+	}
+
+	/// `reference` & its `source` from the reference fields config; or, iff it
+	/// resolves to a `null`, `nil` & its field spec in the baseline fields
+	/// config.
+	private func hideSource(for reference: Reference) -> (reference: Reference?, source: FieldSpec) {
+		referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
 			?? (nil, baselineFieldSpecs[reference.position - 1])
 	}
 
