@@ -689,3 +689,8 @@ more specific context overrides every variant in a less specific one, and that
 `default` is a context's `standard` variant for the current output format iff
 the context contains no custom `default` variant for it; both are unimplemented,
 as are all custom configs.
+
+A persisted fields config ignores each `<absolute-field-spec>` &
+`<field-spec-edit>` that references a nonexistent field, while one on the
+command line remains an error (`nonexistentField`); the former is unimplemented,
+as are all custom configs.
