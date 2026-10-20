@@ -13,24 +13,45 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 		name: .customLong("json"),
 		defaultAsFlag: "",
 		parsing: .next,
-		help: "Output format: JSON, optionally configuring pretty-printing, an item array & non-ASCII escaping (json.md)",
+		help: .init(
+			"""
+			Output format: JSON, optionally configuring (only after =) pretty-printing, an item array & non-ASCII escaping \
+			(json.md)
+			""",
+			valueName: "json-config",
+		),
 	)
 	private var jsonOptionValue: String?
 	@Option(
 		name: .customLong("key-value"),
 		defaultAsFlag: "",
 		parsing: .next,
-		help: "Output format: key-value, optionally configuring keys, leaders, spacing & item separators (key-value.md)",
+		help: .init(
+			"""
+			Output format: key-value, optionally configuring (only after =) keys, leaders, spacing & item separators \
+			(key-value.md)
+			""",
+			valueName: "key-value-config",
+		),
 	)
 	private var keyValueOptionValue: String?
 	@Option(
 		name: .customLong("table"),
 		defaultAsFlag: "",
 		parsing: .next,
-		help: "Output format: table, optionally configuring headers, a separator line & column spacing (table.md)",
+		help: .init(
+			"""
+			Output format: table, optionally configuring (only after =) headers, a separator line & column spacing \
+			(table.md)
+			""",
+			valueName: "table-config",
+		),
 	)
 	private var tableOptionValue: String?
-	@Option(name: .customLong("fields"), help: "Select, order, label & format output fields & sort items (fields.md)")
+	@Option(
+		name: .customLong("fields"),
+		help: .init("Select, order, label & format output fields & sort items (fields.md)", valueName: "fields-config"),
+	)
 	private var fieldsOptionValue = ""
 
 	/// Resolves `jsonOptionValue` / `keyValueOptionValue` / `tableOptionValue`
