@@ -170,9 +170,10 @@ until the algorithm is updated.
 
 ### Output Formats
 
-Display commands support 3 output formats, each selectable via a mutually
-exclusive option with an optional format-specific value after `=` (e.g.,
-`--json=P`), pursuant to [mas-specific overrides & defaults](Specs/mas.md):
+Display commands support 3 output formats, each selectable via an option (the
+last one given overriding any preceding ones) with an optional format-specific
+value after `=` (e.g., `--json=P`), pursuant to [mas-specific overrides &
+defaults](Specs/mas.md):
 
 - **Table** (`--table`): Row per item, column per selected field (if an item has
   multiple values for a field, the last value is used). [The optional value

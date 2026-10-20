@@ -135,13 +135,18 @@ private extension MASTests {
 	}
 
 	@Test
-	func `at most 1 output option may be given`() {
-		let error = #expect(throws: (any Error).self) { try MAS.Lookup.parse(normalizingOutputOptions(in: [
-			"1",
-			"--json=",
-			"--table=",
-		]))
-		}
-		#expect(error.map(MAS.Lookup.message(for:)) == "At most 1 of '--json', '--key-value', or '--table' may be given.")
+	func `the last output option overrides every preceding one`() async throws {
+		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
+		let multipleArguments = normalizingOutputOptions(in: ["1472954003", "--json=P", "--table"])
+		let multiple = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(multipleArguments)) { try $0.run(catalogApps: catalogApps) },
+		)
+		let last = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", "--table"]))) { command in
+				try command.run(catalogApps: catalogApps)
+			},
+		)
+		#expect(!last.stdout.isEmpty)
+		#expect(multiple == last)
 	}
 }
