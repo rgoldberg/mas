@@ -167,9 +167,11 @@ private extension MASTests {
 		#expect(specs[1].sortSpec?.priority == 1)
 	}
 
-	@Test
-	func `hiding a field removed earlier in the section inserts a hidden copy of its baseline field spec`() throws {
-		let specs = try parseFieldSpecs("@all.-adamID,_adamID")
+	@Test(arguments: ["@all.-adamID,_adamID", "@all.-@1,_@1"])
+	func `hiding a field spec removed earlier in the section inserts a hidden copy of its baseline field spec`(
+		value: String,
+	) throws {
+		let specs = try parseFieldSpecs(value)
 		#expect(specs.map(\.name) == ["adamID", "bundleID"])
 		#expect(specs[0].isHidden)
 		#expect(specs[0].sortSpec?.priority == 1000)

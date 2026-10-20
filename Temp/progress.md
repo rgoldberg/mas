@@ -630,3 +630,8 @@ A version component's remaining characters compare as lists of their maximal
 runs of ASCII digits (each compared numerically) & of other characters (each
 compared lexically) (`SortOptionSet.compareVersionSuffixes`), instead of as
 text, so, e.g., `2.0b9` precedes `2.0b10`.
+
+A `<field-spec-hide>` whose `<indexed-field-spec-reference>` resolves to a
+`null` inserts a hidden copy of its baseline field spec (e.g., `-@1,_@1`), as a
+`<named-field-spec-reference>` already did (`hideSource(for:)`), instead of
+reporting an error.
