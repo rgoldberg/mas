@@ -673,10 +673,10 @@ extension SortOptionSet {
 		}
 	}
 
-	/// Compares 2 versions component by component: numerically, then by the
-	/// non-`.` characters (a component with non-`.` characters precedes the same
-	/// integer without them); a version with fewer components precedes 1 that
-	/// extends it.
+	/// Compares 2 versions component by component: numerically by each
+	/// component's leading ASCII digits, then by its remaining characters (a
+	/// component with remaining characters precedes the same integer without
+	/// them); a version with fewer components precedes 1 that extends it.
 	private func compareVersions(_ lhs: Substring, _ rhs: Substring) -> ComparisonResult {
 		let lhsComponents = lhs.split(separator: ".", omittingEmptySubsequences: false)
 		let rhsComponents = rhs.split(separator: ".", omittingEmptySubsequences: false)
@@ -690,13 +690,43 @@ extension SortOptionSet {
 				.compare(DecimalNumber(lhsDigits) ?? .zero, DecimalNumber(rhsDigits) ?? .zero)
 				.nonSame
 				?? (lhsSuffix.isEmpty == rhsSuffix.isEmpty
-					? compareLexically(lhsSuffix, rhsSuffix)
+					? compareVersionSuffixes(lhsSuffix, rhsSuffix)
 					: lhsSuffix.isEmpty ? .orderedDescending : .orderedAscending)
 			guard result == .orderedSame else {
 				return result
 			}
 		}
 		return ComparableComparator().compare(lhsComponents.count, rhsComponents.count)
+	}
+
+	/// Compares 2 version components' remaining characters as lists of their
+	/// maximal runs of ASCII digits (each compared numerically) & of other
+	/// characters (each compared lexically), e.g., `b9` precedes `b10`.
+	private func compareVersionSuffixes(_ lhs: Substring, _ rhs: Substring) -> ComparisonResult {
+		let lhsRuns = versionSuffixRuns(of: lhs)
+		let rhsRuns = versionSuffixRuns(of: rhs)
+		return zip(lhsRuns, rhsRuns)
+			.lazy
+			.map { lhsRun, rhsRun in
+				lhsRun.first?.isASCIIDigit == true && rhsRun.first?.isASCIIDigit == true
+					? ComparableComparator().compare(DecimalNumber(lhsRun) ?? .zero, DecimalNumber(rhsRun) ?? .zero)
+					: compareLexically(lhsRun, rhsRun)
+			}
+			.first { $0 != .orderedSame }
+			?? ComparableComparator().compare(lhsRuns.count, rhsRuns.count)
+	}
+
+	/// `suffix`'s maximal runs of ASCII digits & of other characters, in order.
+	private func versionSuffixRuns(of suffix: Substring) -> [Substring] {
+		var runs = [Substring]()
+		var start = suffix.startIndex
+		while start < suffix.endIndex {
+			let isDigitRun = suffix[start].isASCIIDigit
+			let end = suffix[start...].firstIndex { $0.isASCIIDigit != isDigitRun } ?? suffix.endIndex
+			runs.append(suffix[start..<end])
+			start = end
+		}
+		return runs
 	}
 
 	/// Compares 2 texts per `caseSensitivity` & `locale`'s collation, the CLDR
