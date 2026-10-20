@@ -33,12 +33,13 @@ process.
 ## Built-In Named Fields Configs
 
 For the same `mas` leaf context & output format suffix, every field is in each
-of `all`, `none` & `standard`:
+of `all`, `none` & the [built-in
+standard](configs.md#immutable-built-in-named-configs):
 
 - `all`: Every field spec is visible.
 - `none`: `all`, with every field spec hidden & its sort disabled.
-- `standard`: Its own visible field specs, followed by hidden copies of `all`'s
-  field specs for every other field.
+- Built-in standard: Its own visible field specs, followed by hidden copies of
+  `all`'s field specs for every other field.
 
 A `mas` built-in fields config has:
 
@@ -47,7 +48,7 @@ A `mas` built-in fields config has:
 - A user-facing `@key-value` variant.
 - A machine-facing `@json` variant.
 
-`standard@json` is always a reference to `all@json`.
+The built-in standard's `@json` variant is a reference to `all@json`.
 
 Default labels & formats favor:
 

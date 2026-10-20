@@ -674,3 +674,11 @@ transforms are named for their date type (e.g., `<date-block>`,
 a NUL, so `--fields=` is an empty `<fields-config>`, instead of no value, after
 which Swift Argument Parser took the next argument as the value (e.g.,
 `mas lookup --fields= 497799835` looks up `497799835`).
+
+Configs specify each context's `standard` (the root context's is the leaf
+context's built-in standard; any other context's is its parent's `default`), a
+per-context `default` (a custom one, else that context's `standard`), a
+reference's starting context (the leaf context on the command line, else the
+context that contains the referencing config) & a root context `default` that
+extends `default` (it extends the root context's `standard`); they are
+unimplemented, as are all custom configs.

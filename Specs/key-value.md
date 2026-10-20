@@ -35,7 +35,7 @@ key-value kind.
 is overlaid on it for the current command line only, without persistently
 affecting it. Each setting's default applies iff neither sets it.
 
-The [built-in](configs.md#immutable-built-in-named-configs) `standard` key-value
+The [built-in standard](configs.md#immutable-built-in-named-configs) key-value
 config sets every `<key-value-setting>` to its default.
 
 Each row of an item is its key, its leading spacing, its leader, its trailing

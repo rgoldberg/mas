@@ -34,7 +34,7 @@ kind.
 overlaid on it for the current command line only, without persistently affecting
 it. Each setting's default applies iff neither sets it.
 
-The [built-in](configs.md#immutable-built-in-named-configs) `standard` table
+The [built-in standard](configs.md#immutable-built-in-named-configs) table
 config sets every `<table-setting>` to its default.
 
 ## Header
