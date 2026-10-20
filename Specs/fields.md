@@ -190,7 +190,11 @@ Other formats cannot guarantee field nonexistence, e.g.: JSON without a JSON
 schema, for which a field may exist for some JSON objects, but not exist for
 others.
 
-A reference to a nonexistent field is an error.
+A reference to a nonexistent field is an error on the command line, but a
+persisted fields config, which may apply to multiple commands, ignores each
+`<absolute-field-spec>` & `<field-spec-edit>` that references one (e.g., a `mas`
+context `default` of `@standard.name=App` ignores `name=App` for `mas config`,
+whose item has no `name` field).
 
 ## Members
 
