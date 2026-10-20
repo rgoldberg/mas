@@ -682,3 +682,10 @@ reference's starting context (the leaf context on the command line, else the
 context that contains the referencing config) & a root context `default` that
 extends `default` (it extends the root context's `standard`); they are
 unimplemented, as are all custom configs.
+
+Fields configs specify that a context matches a looked-up stem via its variant
+for the current output format, else its unsuffixed variant, so any variant in a
+more specific context overrides every variant in a less specific one, and that
+`default` is a context's `standard` variant for the current output format iff
+the context contains no custom `default` variant for it; both are unimplemented,
+as are all custom configs.

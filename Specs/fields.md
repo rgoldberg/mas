@@ -97,6 +97,13 @@ An additional suffix matching the regex `@unsuffixed$` may be appended to a
 reference to a fields config name (not to a name itself), which resolves to the
 unsuffixed variant, regardless of the current output format.
 
+While a reference to a stem is [looked
+up](configs.md#referencing-named-configs), a context matches it iff it contains
+the stem's variant for the current output format or its unsuffixed variant,
+preferring the former, so any variant in a more specific context overrides every
+variant in a less specific one (e.g., for table output, `x` in `mas.list`
+overrides `x@table` in `mas`).
+
 #### Immutable Built-In Named Fields Configs
 
 For each [leaf context](configs.md#context-stacks):
@@ -116,8 +123,18 @@ A built-in fields config:
 
 #### Default Fields Configs
 
-If [`default`](configs.md#default-configs) is referenced with an output format
-suffix & no custom `default` is found, that suffix is appended to `standard`.
+In a context that contains no custom [`default`](configs.md#default-configs)
+variant for the current output format (i.e., neither the suffixed nor the
+unsuffixed one), `default` is that context's
+[`standard`](configs.md#standard-configs) variant for it (e.g., for JSON output,
+`standard@json`). A non-root context's `standard` variant for an output format
+is its parent context's `default` variant for it.
+
+So a custom unsuffixed `default` overrides every `standard` variant, while a
+custom `default@json` overrides only `standard@json`. E.g., to customize table &
+key-value output while JSON output retains `standard@json`, define
+`default@table` & `default@key-value`, each extending 1 shared custom fields
+config.
 
 ### Base Fields Config
 

@@ -34,7 +34,8 @@ each output option value after `=`.
    4. A custom `default` (currently always `standard`) & each context's
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
-   5. Custom [variants](../Specs/fields.md#named-fields-configs).
+   5. Custom [variants](../Specs/fields.md#named-fields-configs), including
+      matching a stem per context & `default` variants.
 3. Inherited `--table` / `--key-value` / `--json` settings: they currently apply
    only on top of `standard`, so implied
    [table](../Specs/table.md#implied-settings) &
