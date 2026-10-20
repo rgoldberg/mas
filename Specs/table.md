@@ -68,10 +68,10 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins *)
+header-styling-setting = <header-terminal-only-styling> | <header-always-styling> (* default: <header-terminal-only-styling>; last wins *)
 
-terminal-only-styling = "t"
-always-styling        = "a"
+header-terminal-only-styling = "t"
+header-always-styling        = "a"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

@@ -642,3 +642,8 @@ are adjacent, as already implemented.
 
 `k` has no default `<style-specifier>`, which `K` could not take, so its keys
 are simply unstyled, as already implemented.
+
+`<key-styling-setting>` has its own letters' nonterminals
+(`<key-terminal-only-styling>` & `<key-always-styling>`), as each other setting
+already did, instead of sharing `<header-styling-setting>`'s
+(`<header-terminal-only-styling>` & `<header-always-styling>`).

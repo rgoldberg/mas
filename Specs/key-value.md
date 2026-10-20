@@ -66,12 +66,15 @@ styled-key   = "K" <style-specifier> <key-value-setting-termination>
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-key-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins *)
+key-styling-setting = <key-terminal-only-styling> | <key-always-styling> (* default: <key-terminal-only-styling>; last wins *)
+
+key-terminal-only-styling = "t"
+key-always-styling        = "a"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`<terminal-only-styling>` & `<always-styling>` are as [defined for table
+`<key-styling-setting>` is as [`<header-styling-setting>` is defined for table
 output](table.md#header-styling):
 
 - `t`: keys are styled iff standard output is a terminal.
