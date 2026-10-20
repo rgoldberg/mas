@@ -127,13 +127,14 @@ Hiding is only `<field-spec-hide>`. Tests are in
 (`x`, `u`, `v`, or `N` with `<grouped-numeric-arguments>`, including
 `<number-signs>`), `<chronologic-segments>` (`C` with `<chronologic-formats>`,
 default `iso`), `<boundaries>` (`B` / `M`, an empty `<boundary-groups>` meaning
-none; default `+space+`), `<nonconforming-comparison>` (`k`, `a`, or `z`) &
-`<text-order>` (`h`, `t`, `p`, or `e`)); a `/` after it reports
-`invalidSortOption`. A value compares as a string (`null` as `""`), except that
-a number is a single number segment unless `<lexicographic>`: each run of
-non-boundary text splits into chronologic, number & text segments, compared per
-`<text-order>` element by element, by kind (time-only chronologic, other
-chronologic, number, text), then per kind. Formats do not type fields (a
+none; default `+space+`), `<nonconforming-comparison>` (`k`, `a`, or `z`),
+`<nonconforming-placement>` (`r` or `f`) & `<text-order>` (`h`, `t`, `p`, or
+`e`)); a `/` after it reports `invalidSortOption`. A value compares as a string
+(`null` as `""`), except that a number is a single segment (chronologic with
+`<unix-time>`, else a number segment unless `<lexicographic>` or `<versions>`):
+each run of non-boundary text splits into chronologic, number & text segments,
+compared per `<text-order>` element by element, by kind (time-only chronologic,
+other chronologic, number, text), then per kind. Formats do not type fields (a
 machine-facing variant's format is `%i`). Each uncollapsed boundary is its own
 piece, compared by group precedence alone.
 
@@ -248,9 +249,9 @@ or the next branch. An absent `<justify>` is inherited from the working fields
 config (`<start-justify>` absent any to inherit, e.g., in a built-in config),
 including in a `<pipeline>` whose `<format-transform-pipeline>` is directly
 absent. The [absent values spec](../Specs/fields.md#absent-values) now states
-once that an absent value is output as an empty string unless its format renders
-it otherwise (e.g., via a `<failure-block>`). Each change of this & the previous
-audit has tests.
+once how each output format outputs an absent value (an empty table cell, but no
+key-value or JSON key-value pair) unless its format renders it otherwise (e.g.,
+via a `<failure-block>`). Each change of this & the previous audit has tests.
 
 ### Absolute Configs & Exact Numbers (2026-10-01)
 
@@ -454,8 +455,7 @@ every user of number format arguments, including number coercion, as already
 implemented.
 
 Number-to-string transforms retaining trivia is specified, as already
-implemented; `<match-placeholder>`'s predicates have `output type:` comments;
-`<coercible-modifiers>` & `<number-modifiers>` are inlined.
+implemented; `<match-placeholder>`'s predicates have `output type:` comments.
 
 The unused implicit scalar & implicit repetition kinds & optionality states are
 removed from the custom EBNF grammar.
@@ -486,21 +486,19 @@ with a string's versions (e.g., `2` follows `"1.5"`), instead of tying with
 every version segment.
 
 The reference suffix that selects a fields config's unsuffixed variant is
-`@unsuffixed` (`unsuffixedVariantReferenceSuffix`), instead of `@none`, which
+`@unsuffixed` (`unsuffixedVariantReferenceSuffix`), instead of a suffix that
 clashed with the built-in `none`.
 
 `%v` & `%V` have output type string & a `<string-block>`, so a string transform
 applies to a matched version without `<coercion>` (e.g., `%V.uppercase+-+`);
 `<any-block-placeholder>` covers only `<nullary-blank-predicate>`s & their
-non-nullary forms, so `<nullary-scalar-conditional-predicate>` &
-`<nullary-standard-predicate>` (& their non-nullary forms) are removed.
+non-nullary forms.
 
 `%d` & `%D` (`Predicate.date`) match a chronologic value with a date & accept
 `<coercion>`; `%c` & `%C` (`Predicate.timeOnly`) match only a time-only value
 without `<coercion>`, and their block is a `<time-only-block>`, whose pipeline
 (`BlockKind.timeOnly`) cannot contain `dateOnly`, so no predicate depends on its
-block's contents (`Format.appliesDateOnly` is removed); mas's `Released` field
-uses `%D.dateOnly++`.
+block's contents; mas's `Released` field uses `%D.dateOnly++`.
 
 Chronologic values render in ISO-8601 extended format (`ChronologicStyle`'s own
 formatting, instead of `Date.ISO8601FormatStyle`), a year outside 0000 to 9999
