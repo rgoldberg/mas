@@ -538,13 +538,13 @@ time-only-block     = <time-only-pipeline> | <time-only-template>         (* dir
 any-block           = <unconditional-pipeline> | <any-template>           (* direct default: {empty string} *)
 unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: {empty string} *)
 
-string-template        = ( <string-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-boolean-template       = ( <boolean-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-number-template        = ( <number-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-chronologic-template   = ( <chronologic-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-time-only-template     = ( <time-only-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-any-template           = ( <any-block-placeholder> | <unconditional-placeholder> | <template-text> )+
-unconditional-template = ( <unconditional-placeholder> | <template-text> )+
+string-template        = <template-text> | [ <template-text> ] ( ( <string-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+boolean-template       = <template-text> | [ <template-text> ] ( ( <boolean-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+number-template        = <template-text> | [ <template-text> ] ( ( <number-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+chronologic-template   = <template-text> | [ <template-text> ] ( ( <chronologic-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+time-only-template     = <template-text> | [ <template-text> ] ( ( <time-only-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+any-template           = <template-text> | [ <template-text> ] ( ( <any-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
+unconditional-template = <template-text> | [ <template-text> ] ( <unconditional-placeholder> [ <template-text> ] )+
 
 block-placeholder =
   <string-block-placeholder>

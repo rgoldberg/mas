@@ -635,3 +635,7 @@ A `<field-spec-hide>` whose `<indexed-field-spec-reference>` resolves to a
 `null` inserts a hidden copy of its baseline field spec (e.g., `-@1,_@1`), as a
 `<named-field-spec-reference>` already did (`hideSource(for:)`), instead of
 reporting an error.
+
+Each block's template (e.g., `<string-template>`) is structured as
+`<format-template>` is, but also allows text alone, so no 2 `<template-text>`s
+are adjacent, as already implemented.
