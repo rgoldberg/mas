@@ -110,9 +110,16 @@ private let fieldsOptionName = "--fields"
 // swiftlint:disable:next todo
 // TODO: Temp/todo.md "Swift Argument Parser Empty Values": once a Swift
 // Argument Parser release includes apple/swift-argument-parser#961, remove
-// `attachedOptionValuePrefix` & `attachedOptionValue(_:)`, have
-// `normalizingOutputOptions(in:)` give a bare optional-value output option an
-// empty value after `=` (e.g., `--json=`) & leave every other option as is
+// `attachedOptionValuePrefix` & `attachedOptionValue(_:)`, so that
+// `normalizingOutputOptions(in:)` still keeps only the last optional-value
+// output option, but gives it its value after `=` unprefixed (e.g., `--json`
+// becomes `--json=`) & leaves a `--fields` value as is
+
+// swiftlint:disable:next todo
+// TODO: Temp/todo.md "Swift Argument Parser Attached-Only Values": once a Swift
+// Argument Parser release resolves apple/swift-argument-parser#992, parse each
+// optional-value output option with its attached-only strategy, so that
+// `normalizingOutputOptions(in:)` stops giving a bare one a value after `=`
 
 /// Prefixes each output option value after `=` in a normalized command line, so
 /// that the value is never empty, because Swift Argument Parser takes an empty
