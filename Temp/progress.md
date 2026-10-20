@@ -651,3 +651,7 @@ bare one), prefixed with a NUL, which no command-line argument can contain,
 because Swift Argument Parser takes an empty value after `=` as no value. So
 neither a bare one nor one with an empty value after `=` takes the next argument
 as its value (e.g., `mas lookup --json 497799835` looks up `497799835`).
+
+The last of `--table`, `--key-value` & `--json` overrides all preceding ones
+(e.g., `--json --table` outputs a table): `normalizingOutputOptions(in:)`
+removes every preceding one, instead of reporting an error.

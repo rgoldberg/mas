@@ -29,6 +29,11 @@ Output configuration applies to every output format unless otherwise specified.
 
 Each display command has a default output format.
 
+Each output format has an option that selects it. If multiple such options are
+given, the last one overrides all preceding ones (e.g., `--json --table` outputs
+a table; `--json=P --json=a` is equivalent to `--json=a`), as with POSIX `ls`'s
+output format options (e.g., `ls -l -1`).
+
 ## Option Values
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,

@@ -35,7 +35,8 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 
 	/// Resolves `jsonOptionValue` / `keyValueOptionValue` / `tableOptionValue`
 	/// into a single `OutputFormat`, falling back to `Config.defaultFormat` iff
-	/// none was given. Re-derived (cheaply: each option value is tiny) on every
+	/// none was given (`normalizingOutputOptions(in:)` leaves at most 1, the last
+	/// one given). Re-derived (cheaply: each option value is tiny) on every
 	/// access, same as `fieldsOptionValue`, rather than stored, so there is only
 	/// 1 source of truth to validate.
 	private var outputFormat: OutputFormat {
@@ -43,9 +44,6 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 			let json = try jsonOptionValue.map(optionalOptionValue).map(parseJSONConfig)
 			let keyValue = try keyValueOptionValue.map(optionalOptionValue).map(parseKeyValueConfig)
 			let table = try tableOptionValue.map(optionalOptionValue).map(parseTableConfig)
-			guard [json != nil, keyValue != nil, table != nil].count(where: \.self) <= 1 else {
-				throw ValidationError("At most 1 of '--json', '--key-value', or '--table' may be given.")
-			}
 			return if let json {
 				.json(json)
 			} else if let keyValue {
@@ -92,22 +90,33 @@ private let optionalValueOutputOptionNameSet: Set = ["--json", "--key-value", "-
 /// NUL, so the prefix never starts an actual value.
 private let optionalOptionValuePrefix = "\0"
 
-/// `arguments`, with each output option whose option value is optional, before
-/// any `--` terminator, given its value after `=` (or an empty value, absent
-/// one), prefixed with `optionalOptionValuePrefix` (e.g., `--json` becomes
-/// `--json=\0` & `--json=P` becomes `--json=\0P`), so that such an option value
-/// is only ever the rest of its option's command-line argument after `=`, never
-/// the next command-line argument (configs.md "Option Values").
+/// `arguments` with only the last output option whose option value is optional
+/// before any `--` terminator, because it overrides the preceding ones
+/// (configs.md "Output Formats"). The last one is given its value after `=` (or
+/// an empty value, absent one), prefixed with `optionalOptionValuePrefix`
+/// (e.g., `--json` becomes `--json=\0` & `--json=P` becomes `--json=\0P`), so
+/// that such an option value is only ever the rest of its option's command-line
+/// argument after `=`, never the next command-line argument (configs.md "Option
+/// Values").
 func normalizingOutputOptions(in arguments: some Sequence<String>) -> [String] {
 	let arguments = Array(arguments)
 	let terminatorIndex = arguments.firstIndex(of: "--") ?? arguments.endIndex
-	return arguments[..<terminatorIndex].map { argument in
-		let parts = argument.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
-		return optionalValueOutputOptionNameSet.contains(String(parts[0]))
-			? "\(parts[0])=\(optionalOptionValuePrefix)\(parts.dropFirst().first ?? "")"
-			: argument
+	let options = arguments[..<terminatorIndex]
+	let lastOutputOptionIndex = options.lastIndex { optionalValueOutputOptionNameSet.contains(optionName(of: $0)) }
+	return options.indices.compactMap { index in
+		let name = optionName(of: options[index])
+		return !optionalValueOutputOptionNameSet.contains(name)
+			? options[index]
+			: index == lastOutputOptionIndex
+				? "\(name)=\(optionalOptionValuePrefix)\(options[index].dropFirst(name.count + 1))"
+				: nil
 	}
 		+ arguments[terminatorIndex...]
+}
+
+/// `argument`'s option name: its text before any `=`.
+private func optionName(of argument: String) -> String {
+	.init(argument.prefix { $0 != "=" })
 }
 
 /// `value` without any `optionalOptionValuePrefix`.
