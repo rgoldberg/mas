@@ -655,9 +655,13 @@ compare:
 
 [Versions](fields-format.md#version-formatting) compare component by component:
 numerically by each component's leading ASCII digits, then by its remaining
-characters per `<case-sensitivity>` & `<locale>` (a component with remaining
-characters precedes the same integer without them; e.g., `1.0b` precedes `1.0`);
-a version with fewer components precedes one that extends it.
+characters (a component with remaining characters precedes the same integer
+without them; e.g., `1.0b` precedes `1.0`); a version with fewer components
+precedes one that extends it.
+
+Remaining characters compare as [lists](#sort-segments) of their maximal runs of
+ASCII digits (each compared numerically) & of other characters (each compared
+per `<case-sensitivity>` & `<locale>`), e.g., `2.0b9` precedes `2.0b10`.
 
 ##### Sort Direction
 

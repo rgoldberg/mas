@@ -623,3 +623,10 @@ value](../Specs/configs.md#option-values) alone, which Swift Argument Parser
 takes from the rest of the option's command-line argument after an option value
 separator (e.g., `--fields=name`, `--table=`), or else from the next
 command-line argument; a test confirms that both forms are equivalent.
+
+### 4th Spec Review Fixes (2026-10-20)
+
+A version component's remaining characters compare as lists of their maximal
+runs of ASCII digits (each compared numerically) & of other characters (each
+compared lexically) (`SortOptionSet.compareVersionSuffixes`), instead of as
+text, so, e.g., `2.0b9` precedes `2.0b10`.
