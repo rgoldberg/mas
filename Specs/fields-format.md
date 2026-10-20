@@ -808,9 +808,9 @@ number format arguments, with defaults from the [base
 conventions](#numberformat) (e.g., `%.:de:n` matches `"1.234,56"`, coercing it
 to `1234.56`). A digit group separator is accepted only between digit groups of
 the given sizes; a `<digit-group-size>` of `0` accepts groups of any size. A
-digit group separator adjacent to a digit group of any other size thus ends the
-number before that separator (e.g., `%.:,,,,,,.*:n` matches `"1,2345"` as the
-number `1` followed by the trivia suffix `,2345`).
+digit group separator adjacent to a digit group of any other size thus
+terminates the number before that separator (e.g., `%.:,,,,,,.*:n` matches
+`"1,2345"` as the number `1` followed by the trivia suffix `,2345`).
 
 A number coercion accepts both positional & scientific notation (an exponent
 indicator, `e` or `E`, followed by an optionally signed integer exponent). The

@@ -32,7 +32,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
    - REJECTED: across
 9. - entire
    - its entirety
-   - REJECTED: entirety of / whole
+   - whole match: a Swift Regex match of an entire string
+   - whole: integral (e.g., "its whole milliseconds")
+   - REJECTED: entirety of / whole (for entire)
 10. - via: indirect mechanisms, routes, references, or syntactic pathways (e.g.,
       "referenced via index", "reached via rule")
     - by: operational agents, methods, or sorting criteria (e.g., "sorted by
@@ -476,9 +478,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       components (e.g., seconds)
     - REJECTED: compact format (for basic format) / truncated (for reduced
       precision)
-97. - word-by-word ordering: ordering in which a word boundary (e.g., a space)
+97. - word-by-word sorting: sorting in which a word boundary (e.g., a space)
       precedes every other character (e.g., `New York` before `Newark`)
-    - letter-by-letter ordering: ordering that ignores word boundaries
+    - letter-by-letter sorting: sorting that ignores word boundaries
     - REJECTED: word sort / letter sort
 98. - whitespace: any Unicode `White_Space` character
       ([defined](../Specs/ebnf.md#whitespace))

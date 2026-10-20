@@ -44,12 +44,12 @@ spec. Output omits hidden field specs.
 
 `parseTableConfig` supports `<header-styling-setting>` (`t` / `a`, stored as
 `TableConfig.headerStyling`; the header row is styled iff `a` or standard output
-is a terminal), defaults an absent `<separator-pattern>` to `-`, rejects a
-`<separator-pattern>` / `<column-spacing>` that contains a line terminator &
-handles escaping (`\:`, `\\`, dangling `\` is an error) in `<separator-pattern>`
-/ `<column-spacing>` text via `parseTableSettingText`; `<style-specifier>` is
-parsed via `parseStyleSpecifier`. Comments & names use the [table
-spec's](../Specs/table.md) vocabulary (`<table-setting-termination>`,
+is a terminal), defaults an absent `<separator-pattern>` to `-`, reports an
+error for a `<separator-pattern>` / `<column-spacing>` that contains a line
+terminator & handles escaping (`\:`, `\\`, dangling `\` is an error) in
+`<separator-pattern>` / `<column-spacing>` text via `parseTableSettingText`;
+`<style-specifier>` is parsed via `parseStyleSpecifier`. Comments & names use
+the [table spec's](../Specs/table.md) vocabulary (`<table-setting-termination>`,
 `<table-setting-terminator>`, `<end-of-table-config>`,
 `TableConfigParsingError.invalidSetting`).
 
@@ -146,9 +146,9 @@ time zone (`Environment.now`); `dateOnly` on it is a value coercion failure.
 
 ### Unix Time (2026-10-18)
 
-`chronologic(from:isCoerced:)` reads a number as a Unix time; it reads a string
-whose entire content is a decimal number as one only with `<coercion>`, which
-`%d` & `%D` accept (e.g., `%.D` matches `"0"`). `<unix-time>` in
+`chronologic(from:isCoerced:)` interprets a number as a Unix time; it interprets
+a string whose entire content is a decimal number as one only with `<coercion>`,
+which `%d` & `%D` accept (e.g., `%.D` matches `"0"`). `<unix-time>` in
 `<chronologic-formats>` (`SortOptionSet.hasUnixTimeSegments`) makes a number
 value a single chronologic segment (`numberValueSegment(of:)`) & a decimal
 number that is a whole whitespace-delimited word in a string a chronologic
@@ -194,8 +194,8 @@ trailing `,` in a `<field-spec-edits-section>` is an error.
 ### Per-Item Document Order (2026-09-25)
 
 `<document-order>` orders each item's fields independently by its own key order
-(`FieldOrder.itemFieldSpecs(_:for:)`) for JSON & key-value output, and is
-rejected for table output.
+(`FieldOrder.itemFieldSpecs(_:for:)`) for JSON & key-value output, and is an
+error for table output.
 
 ### Nonexistent Fields (2026-09-25)
 
@@ -208,7 +208,7 @@ cannot be known up front, so are not checked.
 ### Spec Compliance Audit (2026-09-25)
 
 Probed every [formatting](../Specs/fields-format.md),
-[fields](../Specs/fields.md) & [table](../Specs/table.md) grammar construct &
+[fields](../Specs/fields.md) & [table](../Specs/table.md) grammar expression &
 prose example (~300 cases, via a throwaway test) against the parser & renderer,
 and fixed every divergence (e.g., chronologic coercion of ISO-8601 strings &
 Unix time numbers, extended ISO-8601 UTC offsets like `+09:00`, an explicit `s`
@@ -291,7 +291,7 @@ Re-audited every spec against the code, fixing each divergence: chronologic
 auto-detection requires a string's entire content to be an ISO-8601
 extended-format datetime or date-only, whose every field is in range, instead of
 Foundation's lenient parsing, which accepted trailing text, unpadded fields &
-out-of-range fields (e.g., `2020-02-30`), and read the local datetime
+out-of-range fields (e.g., `2020-02-30`), and interpreted the local datetime
 `2020-03-18T17:39:23` as date-only; a datetime may have a `,` decimal sign &
 omit its UTC offset (for the system time zone); fractional seconds are truncated
 to whole milliseconds exactly (e.g., `.3` no longer renders as `.299`); & each
@@ -302,13 +302,13 @@ another field spec has the same field name.
 
 `H` / `K` take a `<style-specifier>`, a [constrained text
 terminal](../Specs/ebnf.md#constrained-text-terminals) parsed by
-`parseStyleSpecifier`, which ignores its outer bare whitespace & rejects a bare
-ASCII letter. `styled` wraps a styled string in `StyleSequences`
-(`TableConfig.headerStyleSequences` / `KeyValueConfig.keyStyleSequences`):
-`<style-prefix>` (`p` / `P`, default `ESC[`), `<style-specifier>` &
-`<style-suffix>` (`x` / `X`, default `m`) precede it; `<style-reset>` (`o` /
-`O`, default `ESC[0m`) follows it. Every output config setting payload is a
-`{text}` token.
+`parseStyleSpecifier`, which ignores its outer bare whitespace & reports an
+error for a bare ASCII letter. `styled` wraps a styled string in
+`StyleSequences` (`TableConfig.headerStyleSequences` /
+`KeyValueConfig.keyStyleSequences`): `<style-prefix>` (`p` / `P`, default
+`ESC[`), `<style-specifier>` & `<style-suffix>` (`x` / `X`, default `m`) precede
+it; `<style-reset>` (`o` / `O`, default `ESC[0m`) follows it. Every output
+config setting payload is a `{text}` token.
 
 ### Integer Scalar Descriptions (2026-10-10)
 
@@ -457,12 +457,12 @@ Number-to-string transforms retaining trivia is specified, as already
 implemented; `<match-placeholder>`'s predicates have `output type:` comments;
 `<coercible-modifiers>` & `<number-modifiers>` are inlined.
 
-The unused implicit scalar & implicit repetition categories & optionality states
-are removed from the custom EBNF grammar.
+The unused implicit scalar & implicit repetition kinds & optionality states are
+removed from the custom EBNF grammar.
 
 Configs specify that only a persisted fields config extends another (via its
 `<base-fields-config-section>`); fields.md no longer refers to a "current
-section", since a `<relative-config>` has at most 1
+section", because a `<relative-config>` has at most 1
 `<field-spec-edits-section>`.
 
 `Temp/` no longer names removed identifiers or features, and uses [standard
@@ -595,7 +595,7 @@ already implemented.
 `<nonconforming-placement>` (`SortOptionSet.nonconformingPlacement`) sets
 whether nonconforming values' location depends on `<direction>`:
 `<relative-nonconforming>` (`r`, the default) lets `<descending>` reverse it, as
-before, while `<fixed-nonconforming>` (`f`) keeps them 1st (`a`) or last (`z`)
+before, while `<fixed-nonconforming>` (`f`) puts them 1st (`a`) or last (`z`)
 regardless of `<direction>` (e.g., `af-`), as SQL's `NULLS FIRST` & `NULLS LAST`
 do.
 

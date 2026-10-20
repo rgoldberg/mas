@@ -144,9 +144,9 @@ consumed.
 
 Input is consumed as a scalar token iff a scalar description is available at the
 current position & the input starting there matches its lexical form; the
-longest match is consumed (i.e., maximal munch), then, iff its value is not a
-valid literal scalar of the scalar description (e.g., it is out of range), an
-error is reported.
+longest input that matches it is consumed (i.e., maximal munch), then, iff its
+value is not a valid literal scalar of the scalar description (e.g., it is out
+of range), an error is reported.
 
 A syntax must ensure that no candidate syntax literal of a position at which a
 scalar description is available matches the start of the scalar description's
