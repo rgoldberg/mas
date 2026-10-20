@@ -721,7 +721,7 @@ separator, a digit group size of 3 & a secondary digit group size of 0.
 number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexicographic>; last wins *)
 
 lexicographic     = "x" (* mnemonic: 3rd letter of lexicographic *)
-ungrouped-numeric = "u" (* mnemonic: ungrouped *)
+ungrouped-numeric = "u"
 versions          = "v"
 grouped-numeric   = "N" <grouped-numeric-arguments> <sort-option-terminator> (* default locale-identifier: {<locale>'s <locale-identifier>} *)
 
@@ -910,8 +910,8 @@ text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* d
 
 text-first    = "h" (* mnemonic: head *)
 text-last     = "t" (* mnemonic: tail *)
-text-in-place = "p" (* mnemonic: positional *)
-text-excluded = "e" (* mnemonic: excluded *)
+text-in-place = "p"
+text-excluded = "e"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
