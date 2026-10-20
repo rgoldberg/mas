@@ -108,16 +108,16 @@ json-setting-terminator = ":"
 end-of-json-config      = end
 ```
 
-E.g., in `--json Pa`, `a` is interpreted as invalid `<indentation>` text, not as
+E.g., in `--json=Pa`, `a` is interpreted as invalid `<indentation>` text, not as
 a separate `<top-level-structure-setting>`.
 
 ## Examples
 
 - `--json`: 1 compact JSON object per item, 1 per line.
-- `--json P`: 1 pretty-printed JSON object per item, indented by 2 spaces.
-- `--json a`: a single compact JSON array of every item, on 1 line.
-- `--json aP`: a single pretty-printed JSON array of every item, indented by 2
+- `--json=P`: 1 pretty-printed JSON object per item, indented by 2 spaces.
+- `--json=a`: a single compact JSON array of every item, on 1 line.
+- `--json=aP`: a single pretty-printed JSON array of every item, indented by 2
   spaces.
-- `--json $'P\t:a'`: a single pretty-printed JSON array of every item, indented
+- `--json=$'P\t:a'`: a single pretty-printed JSON array of every item, indented
   by tabs.
-- `--json e`: 1 compact, ASCII-only JSON object per item, 1 per line.
+- `--json=e`: 1 compact, ASCII-only JSON object per item, 1 per line.

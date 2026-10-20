@@ -61,7 +61,7 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
   `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header row
   is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so that a
   mistyped setting is not silently consumed as `<style-specifier>` text (e.g.,
-  `--table Hb`); escape it to include it (e.g., `--table H\b`).
+  `--table=Hb`); escape it to include it (e.g., `--table=H\b`).
 
 ## Header Styling
 
@@ -206,7 +206,7 @@ table-setting-terminator = ":"
 end-of-table-config      = end
 ```
 
-E.g., in `--table Hb`, `b` is interpreted as invalid `<style-specifier>` text,
+E.g., in `--table=Hb`, `b` is interpreted as invalid `<style-specifier>` text,
 not as a separate `<broken-setting>`.
 
 ## Implied Settings
@@ -224,18 +224,18 @@ A setting implied by `<table-config>` overrides inherited settings.
 
 ## Examples
 
-- `--table H1:`: a bold header row (SGR `1`) iff standard output is a terminal,
+- `--table=H1:`: a bold header row (SGR `1`) iff standard output is a terminal,
   no separator.
-- `--table H1:a`: a bold header row (SGR `1`) regardless of standard output, no
+- `--table=H1:a`: a bold header row (SGR `1`) regardless of standard output, no
   separator.
-- `--table $'H1:O\e[22m:'` (in zsh): a bold header row (SGR `1`) iff standard
+- `--table=$'H1:O\e[22m:'` (in zsh): a bold header row (SGR `1`) iff standard
   output is a terminal, reset to normal intensity (SGR `22`) instead of via a
   full reset, no separator.
-- `--table S`: a header row (implied) & a dashed (`-`) separator line.
-- `--table b`: a header row (implied) & a dashed (`-`), broken separator line.
-- `--table S-+:b`: a header row (implied) & a `-+`-patterned, broken separator
+- `--table=S`: a header row (implied) & a dashed (`-`) separator line.
+- `--table=b`: a header row (implied) & a dashed (`-`), broken separator line.
+- `--table=S-+:b`: a header row (implied) & a `-+`-patterned, broken separator
   line.
-- `--table C....`: no header, no separator, `....` between columns.
+- `--table=C....`: no header, no separator, `....` between columns.
 
 ## Appendix: Escaping
 

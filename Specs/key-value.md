@@ -244,7 +244,7 @@ end-of-key-value-config      = end
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-E.g., in `--key-value Fs`, `s` is interpreted as `<leader-pattern>` text, not as
+E.g., in `--key-value=Fs`, `s` is interpreted as `<leader-pattern>` text, not as
 a separate `<item-separator-setting>`.
 
 ## Implied Settings
@@ -259,19 +259,19 @@ A setting implied by `<key-value-config>` overrides inherited settings.
 
 ## Examples
 
-- `--key-value K1:`: bold keys (SGR `1`) iff standard output is a terminal.
-- `--key-value K1:a`: bold keys (SGR `1`) regardless of standard output.
-- `--key-value 'K\b:P<:X>:O</b>:a'`: keys wrapped in `<b>` & `</b>` tags
+- `--key-value=K1:`: bold keys (SGR `1`) iff standard output is a terminal.
+- `--key-value=K1:a`: bold keys (SGR `1`) regardless of standard output.
+- `--key-value='K\b:P<:X>:O</b>:a'`: keys wrapped in `<b>` & `</b>` tags
   regardless of standard output.
-- `--key-value F.:`: values aligned by a dotted (`.`) leader.
-- `--key-value 'F :L:R:'`: values aligned by spaces, with 1 space after each
+- `--key-value=F.:`: values aligned by a dotted (`.`) leader.
+- `--key-value='F :L:R:'`: values aligned by spaces, with 1 space after each
   item's widest key.
-- `--key-value 'L\::F :R:'`: `key:` rows with values aligned by spaces, with 1
+- `--key-value='L\::F :R:'`: `key:` rows with values aligned by spaces, with 1
   space after each item's widest `key:`.
-- `--key-value f`: `key: value` rows (implied leading spacing).
-- `--key-value fL=:R:`: `key=value` rows, with a blank line between items.
-- `--key-value S=`: a `=`-patterned line between items.
-- `--key-value s`: no line between items.
+- `--key-value=f`: `key: value` rows (implied leading spacing).
+- `--key-value=fL=:R:`: `key=value` rows, with a blank line between items.
+- `--key-value=S=`: a `=`-patterned line between items.
+- `--key-value=s`: no line between items.
 
 ## Appendix: Escaping
 

@@ -50,7 +50,9 @@ struct MAS: AsyncParsableCommand, RealDropping {
 			if let envVars, let (name, value) = envVars.first(where: { unsafe setenv($0, $1, 1) != 0 }) {
 				throw error("Failed to set environment variable \(name) to \(value)")
 			}
-			let command = try await asyncParseAsRoot(arguments)
+			let command = try await asyncParseAsRoot(
+				normalizingOutputOptions(in: arguments ?? .init(CommandLine.arguments.dropFirst())),
+			)
 			if let command = cast(command, as: (any PrivilegeModifying).self) {
 				try command.modifyPrivileges()
 			} else {

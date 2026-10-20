@@ -32,9 +32,12 @@ Each display command has a default output format.
 ## Option Values
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,
-`--fields=name`), or else the next command-line argument (e.g.,
-`--fields name`), if any. Each spec defines an option's syntax over its value
-alone.
+`--fields=name`), or else, iff the value is required, the next command-line
+argument (e.g., `--fields name`). An optional value is given only after `=`
+(e.g., `--json=P`), as for GNU `getopt_long`'s optional arguments, so that an
+option without `=` never takes the next command-line argument as its value
+(e.g., `mas lookup --json 497799835` looks up `497799835`). Each spec defines an
+option's syntax over its value alone.
 
 ## Command Lists
 

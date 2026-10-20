@@ -73,10 +73,7 @@ leading spacing of `:`, if none is otherwise set.
 `JSONConfig`; `JSON.Node.rendered(jsonConfig:)` pretty-prints & escapes
 non-ASCII characters (lowercase hex `\uXXXX`). For 0 items, `a` renders `[]`:
 `list` now outputs after its "Failed to find any installed apps" warning, while
-`search` still reports `noCatalogAppsFound`. Like `--table`, `--key-value` &
-`--json` consume the next argument as their value, so a positional argument must
-not immediately follow them (e.g., `mas lookup 497799835 --json`, not
-`mas lookup --json 497799835`).
+`search` still reports `noCatalogAppsFound`.
 
 ### Placeholders & Transforms (2026-09-18, revised 2026-09-25)
 
@@ -619,8 +616,9 @@ forbids succeeding whitespace.
 Each output option's syntax is defined over its [option
 value](../Specs/configs.md#option-values) alone, which Swift Argument Parser
 takes from the rest of the option's command-line argument after an option value
-separator (e.g., `--fields=name`, `--table=`), or else from the next
-command-line argument; a test confirms that both forms are equivalent.
+separator (e.g., `--fields=name`, `--table=`), or else, for a required option
+value (`--fields`'s), from the next command-line argument; a test confirms that
+both forms are equivalent.
 
 ### 4th Spec Review Fixes (2026-10-20)
 
@@ -645,3 +643,11 @@ are simply unstyled, as already implemented.
 (`<key-terminal-only-styling>` & `<key-always-styling>`), as each other setting
 already did, instead of sharing `<header-styling-setting>`'s
 (`<header-terminal-only-styling>` & `<header-always-styling>`).
+
+`--table`, `--key-value` & `--json` take their optional value only after `=`
+(e.g., `--json=P`): before Swift Argument Parser parses the arguments,
+`normalizingOutputOptions(in:)` gives each one its value after `=` (empty, for a
+bare one), prefixed with a NUL, which no command-line argument can contain,
+because Swift Argument Parser takes an empty value after `=` as no value. So
+neither a bare one nor one with an empty value after `=` takes the next argument
+as its value (e.g., `mas lookup --json 497799835` looks up `497799835`).
