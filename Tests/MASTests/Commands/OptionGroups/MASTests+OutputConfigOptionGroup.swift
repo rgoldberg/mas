@@ -25,6 +25,11 @@ private extension MASTests {
 		)
 	}
 
+	@Test(arguments: [("--fields=", "--fields=\0"), ("--fields=name", "--fields=\0name")])
+	func `normalizing prefixes a --fields value after = with a NUL`(option: String, normalized: String) {
+		#expect(normalizingOutputOptions(in: [option, "1"]) == [normalized, "1"])
+	}
+
 	@Test
 	func `normalizing removes every output option that a later one overrides`() {
 		#expect(

@@ -669,3 +669,8 @@ transforms are named for their date type (e.g., `<date-block>`,
 `--help` names each output option's value by its config (`<fields-config>`,
 `<json-config>`, `<key-value-config>` & `<table-config>`), and says that
 `--json`'s, `--key-value`'s & `--table`'s optional value is only after `=`.
+
+`normalizingOutputOptions(in:)` also prefixes a `--fields` value after `=` with
+a NUL, so `--fields=` is an empty `<fields-config>`, instead of no value, after
+which Swift Argument Parser took the next argument as the value (e.g.,
+`mas lookup --fields= 497799835` looks up `497799835`).
