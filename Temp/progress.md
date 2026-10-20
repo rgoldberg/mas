@@ -639,3 +639,6 @@ reporting an error.
 Each block's template (e.g., `<string-template>`) is structured as
 `<format-template>` is, but also allows text alone, so no 2 `<template-text>`s
 are adjacent, as already implemented.
+
+`k` has no default `<style-specifier>`, which `K` could not take, so its keys
+are simply unstyled, as already implemented.

@@ -48,7 +48,7 @@ spacing, then its value.
 ```ebnf
 key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key>; last wins *)
 
-unstyled-key = "k" (* default style-specifier: {empty string} *)
+unstyled-key = "k"
 styled-key   = "K" <style-specifier> <key-value-setting-termination>
 ```
 <!--markdownlint-enable line-length-->
