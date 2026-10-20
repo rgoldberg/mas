@@ -263,7 +263,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table styles a header row for a non-terminal only with always-styling`() throws {
+	func `table styles a header row for a non-terminal only with header-always-styling`() throws {
 		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
 		let objects = [JSON.Object([("name", .string("Slack"))])]
 		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
