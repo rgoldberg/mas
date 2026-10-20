@@ -94,8 +94,15 @@ A named config may be referenced:
 - By other persisted configs of the same kind
 
 A named config is found by returning the 1st config of the given kind found with
-a given name while iterating through the context stack from most to least
-specific context; if no match is found, an error is reported.
+the given name while iterating through the context stack from a **starting
+context** to the root context; if no match is found, an error is reported. A
+reference's starting context is:
+
+- On the command line: the leaf context.
+- In a persisted config: the context that contains that config.
+
+A kind may refine how a context matches a name, e.g., fields configs'
+[variants](fields.md#output-format-specific-named-fields-configs).
 
 A persisted fields config **extends** the fields config that its
 [`<base-fields-config-section>`](fields.md#base-fields-config-selection) names;
@@ -103,14 +110,34 @@ a config of any other kind extends no config.
 
 A persisted config that extends a config of its own name resolves that config
 from the next less specific context in the context stack, so a config may extend
-its nearest same-named ancestor. Any other cyclic chain of references is an
-error.
+its nearest same-named ancestor. In the root context, which has no less specific
+context, a `default` that extends `default` extends the root context's
+`standard`, as it would in a less specific context without a custom `default`,
+so an explicit `default` (e.g., `@default`) is equivalent to the implicit one
+(e.g., an absent `<base-fields-config-section>`). Any other cyclic chain of
+references is an error.
 
 ### Immutable Built-In Named Configs
 
-For each [leaf context](#context-stacks), every kind has a built-in config named
-`standard`. A kind may define further built-in configs, e.g., fields configs'
+For each [leaf context](#context-stacks), every kind has a **built-in standard**
+config. A kind may define further built-in configs, e.g., fields configs'
 [`none` & `all`](fields.md#immutable-built-in-named-fields-configs).
+
+Each context of a command list contains the leaf context's built-in configs,
+except its built-in standard, which is accessible only as the root context's
+[`standard`](#standard-configs).
+
+### Standard Configs
+
+For a command list, the config named `standard` in:
+
+- The root context is the leaf context's built-in standard.
+- Any other context is its parent context's [`default`](#default-configs).
+
+`standard` thus layers each context's custom `default`, from the root to the
+leaf, over the leaf context's built-in standard (e.g., for `mas list`,
+`mas.list`'s `standard` is `mas`'s `default`, which, absent a custom one, is
+`mas`'s `standard`: `mas.list`'s built-in standard).
 
 ### Custom Named Configs
 
@@ -120,5 +147,5 @@ All configs are ultimately derived transitively from a built-in config.
 
 ### Default Configs
 
-If no custom config named `default` is found in the context stack, `standard` is
-substituted.
+In each context that contains no custom config named `default`, `default` is
+that context's [`standard`](#standard-configs).

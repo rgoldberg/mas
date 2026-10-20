@@ -30,8 +30,8 @@ kind.
 on it for the current command line only, without persistently affecting it. Each
 setting's default applies iff neither sets it.
 
-The [built-in](configs.md#immutable-built-in-named-configs) `standard` JSON
-config sets every `<json-setting>` to its default.
+The [built-in standard](configs.md#immutable-built-in-named-configs) JSON config
+sets every `<json-setting>` to its default.
 
 A key-value pair is output for each field spec's [member](fields.md#members),
 even if its key repeats another's (e.g., `--fields name=x,version=x` outputs 2

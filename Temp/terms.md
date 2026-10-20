@@ -272,6 +272,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - affect
     - REJECTED: operate on / apply for / act on
 51. - built-in
+    - built-in standard: a leaf context's built-in config of a kind, which is
+      the root context's `standard`
+      ([defined](../Specs/configs.md#immutable-built-in-named-configs))
+    - starting context: the context from which a reference's lookup iterates
+      through the context stack
+      ([defined](../Specs/configs.md#referencing-named-configs))
     - REJECTED: hardcoded / predefined
 52. - custom: a user-given alternative to a built-in, default, or locale-sourced
       value (e.g., a `<locale-identifier>`)

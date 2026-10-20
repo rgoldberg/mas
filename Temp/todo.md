@@ -26,16 +26,14 @@ each output option value after `=`.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind:
    1. Looking a name up through the [context
-      stack](../Specs/configs.md#referencing-named-configs). Lookup order is
-      undefined: whether [suffix substitution](
-        ../Specs/fields.md#output-format-specific-named-fields-configs
-      ), the context-stack search, or [`default` →
-      `standard`](../Specs/configs.md#default-configs) applies 1st.
-      1. `x@table` in `mas` & `x` in `mas.list`: which one
-         `mas list --fields @x` uses.
-   2. Resolving a config that extends its same-named ancestor.
+      stack](../Specs/configs.md#referencing-named-configs) from its starting
+      context.
+   2. Resolving a config that extends its same-named ancestor, including a root
+      context `default` that extends `default`.
    3. Reporting reference cycles.
-   4. A custom `default` (currently always `standard`).
+   4. A custom `default` (currently always `standard`) & each context's
+      [`standard`](../Specs/configs.md#standard-configs) layering custom
+      `default`s over the built-in standard.
    5. Custom [variants](../Specs/fields.md#named-fields-configs).
 3. Inherited `--table` / `--key-value` / `--json` settings: they currently apply
    only on top of `standard`, so implied
