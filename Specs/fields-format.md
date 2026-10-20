@@ -101,9 +101,10 @@ unless that transform call has a `<coercion>` (e.g., `:name.round` requires
 `name`'s value to be a number, but `:name..round` does not). Otherwise, an error
 is reported.
 
-Because every `<success-block>` includes `<unconditional-block>`, a named
-unconditional format satisfies every `<named-format-reference>`, except that
-`<named-format>` also requires a `<format-template>` to contain a placeholder.
+Because every `<success-block>` alternative's syntax includes
+`<unconditional-block>`'s, a named unconditional format satisfies every
+`<named-format-reference>`, except that `<named-format>` also requires a
+`<format-template>` to contain a placeholder.
 
 ##### Transforms
 
