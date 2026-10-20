@@ -358,11 +358,11 @@ after the radix point.
 ```ebnf
 chronologic-transform-pipeline = <chronologic-transform-call>+
 chronologic-transform-call     = <transform-call-prefix> [ <coercion> ] <chronologic-transform>
-chronologic-transform          = <date-only> | <time-only-transform> (* type: chronologic *)
+chronologic-transform          = <date-only> | <time-only-transform> (* type: date *)
 
 time-only-transform-pipeline = <time-only-transform-call>+
 time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
-time-only-transform          = <time-zone> (* type: chronologic *)
+time-only-transform          = <time-zone> (* type: time-only *)
 
 date-only = "dateOnly"
 time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
@@ -855,10 +855,10 @@ non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
 non-nullary-date-success      = <non-nullary-date-matcher> -[ <chronologic-block> ]
 non-nullary-time-only-success = <non-nullary-time-only> -[ <time-only-block> ]
 
-nullary-date          = "d" (* is chronologic with a date; output type: chronologic; value: {ISO date / datetime, per input, in system time zone} *)
-non-nullary-date      = "D" (* is chronologic with a date; output type: chronologic; value: {ISO date / datetime, per input, in system time zone} *)
-nullary-time-only     = "c" (* is time-only;               output type: chronologic; value: {ISO time, in system time zone}; mnemonic: clock *)
-non-nullary-time-only = "C" (* is time-only;               output type: chronologic; value: {ISO time, in system time zone}; mnemonic: clock *)
+nullary-date          = "d" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
+non-nullary-date      = "D" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
+nullary-time-only     = "c" (* is time-only;               output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
+non-nullary-time-only = "C" (* is time-only;               output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

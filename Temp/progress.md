@@ -655,3 +655,8 @@ as its value (e.g., `mas lookup --json 497799835` looks up `497799835`).
 The last of `--table`, `--key-value` & `--json` overrides all preceding ones
 (e.g., `--json --table` outputs a table): `normalizingOutputOptions(in:)`
 removes every preceding one, instead of reporting an error.
+
+Chronologic values have 2 types: date (a date-only or a datetime: `%d`'s output
+type & `dateOnly`'s input type) & time-only (`%c`'s output type), instead of 1
+chronologic type, under which a time-only value had `dateOnly`'s input type, yet
+did not conform to it; the implementation is unchanged.

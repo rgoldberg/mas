@@ -348,8 +348,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
 70. - date-only: adjective
-    - time-only: adjective
+    - time-only: adjective; also the type of a time-only value (`%c`'s output
+      type)
     - datetime: noun
+    - date: the type of a date-only or a datetime (`%d`'s output type)
     - REJECTED: date-time / date time
 71. - app: software implementing the specs (e.g., mas;
       [defined](../Specs/configs.md#configs))
