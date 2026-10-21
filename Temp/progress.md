@@ -220,7 +220,7 @@ conventions, `<trivia-prefix-regex>` & `<trivia-suffix-regex>`), `numberFormat`
 `<significant-digits>` & `<fractional-digits>`, `<grouped-numeric>` (`N…:`) &
 `<nonconforming-comparison>` (`a` / `z`).
 
-### Shell Completions & README (2026-09-25)
+### Shell Completions & README (2026-09-25, revised 2026-10-20)
 
 `mas.fish` completes `--fields`, `--json-config`, `--key-value-config` &
 `--table-config` (each requiring a value) alongside `--json`, `--key-value` &
