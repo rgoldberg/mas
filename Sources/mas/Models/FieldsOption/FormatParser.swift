@@ -114,8 +114,9 @@ private struct FormatParser {
 		try forbidWhitespace(after: namePrefix)
 		// swiftlint:disable:next todo
 		// TODO: once persisted named formats exist, resolve the name to its format,
-		//  checking that its output has the input type of any succeeding
-		//  `<transform-pipeline>`
+		//  checking that its output has the input type of the 1st succeeding
+		//  `<value-transform>` in its pipeline, even after a
+		//  `<format-transform-pipeline>`
 		throw .unknownNamedFormat(try parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored))
 	}
 

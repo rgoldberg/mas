@@ -95,11 +95,11 @@ A **named format** is a format that:
 
 If no named format exists for a referenced name, an error is reported.
 
-If a `<transform-pipeline>` immediately follows a `<named-format-reference>`,
-the referenced format's value must also have its 1st transform's input type,
-unless that transform call has a `<coercion>` (e.g., `:name.round` requires
-`name`'s value to be a number, but `:name..round` does not). Otherwise, an error
-is reported.
+If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,
+the referenced format's value must also have the 1st such transform's input
+type, unless that transform call has a `<coercion>` (e.g., `:name.round` &
+`:name.endJustify.round` require `name`'s value to be a number, but
+`:name..round` does not). Otherwise, an error is reported.
 
 Because every `<success-block>` alternative's syntax includes
 `<unconditional-block>`'s, a named unconditional format satisfies every
@@ -135,7 +135,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 <!--editorconfig-checker-enable-->
 
 - A `<transform-pipeline>` `t` is a pipeline of transformations applied to:
-  - If a `<named-format-reference>` `n` immediately precedes `t`: `n`'s value.
+  - If a `<named-format-reference>` `n` precedes `t` in its pipeline
+    (immediately or after a `<format-transform-pipeline>`): `n`'s value.
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,
     in a `<success-clause>`, the enclosing matcher's value; elsewhere, the field
     value).
