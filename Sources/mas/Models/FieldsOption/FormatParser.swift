@@ -138,9 +138,16 @@ private struct FormatParser {
 			case scaleName:
 				try parseScaleArguments()
 			case timeOnlyTimeZoneName:
-				try parseTimeZoneArgumentsIfPresent(for: timeOnlyTimeZoneName, Transform.timeOnlyTimeZone)
+				try parseTimeZoneArgumentsIfPresent(
+					for: timeOnlyTimeZoneName,
+					hasReferenceDate: true,
+				) { timeZone, referenceDate in
+					.timeOnlyTimeZone(timeZone, referenceDate: referenceDate)
+				}
 			case timeZoneName:
-				try parseTimeZoneArgumentsIfPresent(for: timeZoneName, Transform.timeZone)
+				try parseTimeZoneArgumentsIfPresent(for: timeZoneName, hasReferenceDate: false) { timeZone, _ in
+					.timeZone(timeZone)
+				}
 			default:
 				valueTransformByName[name]! // swiftlint:disable:this force_unwrapping
 			}
@@ -203,22 +210,25 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses `timeZone`'s or `timeOnlyTimeZone`'s (named `transformName`)
-	/// optional `<time-zone-arguments>`, whose `<time-zone-code>` defaults to
-	/// `system` & whose absent `<reference-date>` is `nil`, into the transform
+	/// Parses `timeZone`'s `<date-time-zone-arguments>` or `timeOnlyTimeZone`'s
+	/// `<time-only-time-zone-arguments>` (iff `hasReferenceDate`), each optional,
+	/// for the transform named `transformName`, whose `<time-zone-code>` defaults
+	/// to `system` & whose absent `<reference-date>` is `nil`, into the transform
 	/// that `transform` makes.
 	private mutating func parseTimeZoneArgumentsIfPresent(
 		for transformName: String,
+		hasReferenceDate: Bool,
 		_ transform: (TimeZone, CivilDate?) -> Transform,
 	) throws(ParsingError) -> Transform {
 		let invalidArgumentsError = ParsingError.invalidTransformArguments(name: transformName)
 		let afterWhitespace = input.drop(while: \.isWhitespace)
-		var arguments = [String?](repeating: nil, count: 2)
+		let argumentCount = hasReferenceDate ? 2 : 1
+		var arguments = [String?](repeating: nil, count: argumentCount)
 		if afterWhitespace.first == argumentFence {
 			input = afterWhitespace.dropFirst()
 			arguments = try parseArguments(
 				&input,
-				count: 2,
+				count: argumentCount,
 				terminator: argumentFence,
 				isLastArgumentSeparatorTerminated: false,
 			)
@@ -229,7 +239,7 @@ private struct FormatParser {
 		}
 		return transform(
 			timeZone,
-			try arguments[1].map { argument throws(ParsingError) in
+			try (hasReferenceDate ? arguments[1] : nil).map { argument throws(ParsingError) in
 				guard let referenceDate = CivilDate(iso8601Text: argument) else {
 					throw invalidArgumentsError
 				}

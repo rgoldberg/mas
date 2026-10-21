@@ -980,21 +980,23 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 
 	var isDateOnly = false
 	var timeZone = TimeZone?.none
-	/// The last `timeZone`'s or `timeOnlyTimeZone`'s `<reference-date>`, iff any;
-	/// else the current date in the system time zone.
+	/// The last `timeOnlyTimeZone`'s `<reference-date>`, iff any; else the
+	/// current date in the system time zone.
 	var referenceDate = CivilDate?.none
 
 	/// This style modified by a chronologic `transform`: `dateOnly` renders only
-	/// the date; `timeZone` & `timeOnlyTimeZone` set the output time zone & the
-	/// reference date (the last one wins).
+	/// the date; `timeZone` sets the output time zone; `timeOnlyTimeZone` sets
+	/// the output time zone & the reference date (the last one wins).
 	func applying(_ transform: Transform) -> Self {
 		var style = self
 		switch transform {
 		case .dateOnly:
 			style.isDateOnly = true
-		case let .timeOnlyTimeZone(timeZone, referenceDate), let .timeZone(timeZone, referenceDate):
+		case let .timeOnlyTimeZone(timeZone, referenceDate):
 			style.timeZone = timeZone
 			style.referenceDate = referenceDate
+		case let .timeZone(timeZone):
+			style.timeZone = timeZone
 		default:
 			break
 		}

@@ -377,8 +377,8 @@ time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only
 time-only-transform          = <time-only-time-zone> (* type: time-only *)
 
 date-only           = "dateOnly"
-date-time-zone      = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
-time-only-time-zone = "timeOnlyTimeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
+date-time-zone      = "timeZone" [ <date-time-zone-arguments> ] (* sets the output time zone; last wins *)
+time-only-time-zone = "timeOnlyTimeZone" [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -408,7 +408,8 @@ zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
+date-time-zone-arguments      = <argument-fence> [ <time-zone-code> ] <argument-fence>
+time-only-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
 time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system"} (* default: "system" *)
 reference-date = {text: ISO-8601 date-only} (* default: {current date in the system time zone} *)

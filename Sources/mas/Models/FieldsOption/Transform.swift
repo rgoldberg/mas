@@ -33,9 +33,8 @@ enum Transform: Hashable {
 	case numberFormat(NumberConventions)
 
 	case dateOnly
-	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
-	/// `<date-time-zone>` in fields-format.md.
-	case timeZone(TimeZone, referenceDate: CivilDate?)
+	/// Sets the output time zone; see `<date-time-zone>` in fields-format.md.
+	case timeZone(TimeZone)
 
 	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
 	/// `<time-only-time-zone>` in fields-format.md.
@@ -319,11 +318,8 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"""
 		case .dateOnly:
 			"dateOnly"
-		case let .timeZone(timeZone, referenceDate):
-			"""
-			timeZone:\(timeZone.identifier),\
-			\(referenceDate?.iso8601Text ?? ""):
-			"""
+		case let .timeZone(timeZone):
+			"timeZone:\(timeZone.identifier):"
 		case let .timeOnlyTimeZone(timeZone, referenceDate):
 			"""
 			timeOnlyTimeZone:\(timeZone.identifier),\
