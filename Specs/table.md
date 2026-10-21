@@ -23,8 +23,9 @@ table-setting =
   | <column-spacing-setting>
 ```
 
-`--table-config`'s [value](configs.md#option-values), iff non-empty, is a
-`<table-config>`.
+`--table-config`'s [value](configs.md#option-values), iff it contains a
+non-[whitespace](ebnf.md#whitespace) character, is a `<table-config>`;
+otherwise, it overlays no setting (e.g., `--table-config=` ≡ `--table`).
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.

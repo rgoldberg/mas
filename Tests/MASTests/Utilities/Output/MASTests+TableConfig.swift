@@ -11,9 +11,9 @@ internal import JSONAST
 internal import Testing
 
 private extension MASTests {
-	@Test
-	func `an empty --table-config value parses to all defaults`() throws {
-		#expect(try parseTableConfig("") == .default)
+	@Test(arguments: ["", " \t"])
+	func `an empty or whitespace-only --table-config value parses to all defaults`(value: String) throws {
+		#expect(try parseTableConfig(value) == .default)
 	}
 
 	@Test

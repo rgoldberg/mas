@@ -819,3 +819,6 @@ instead of as UTC, so, e.g., in `America/New_York`, `09:00:00` follows
 `@unsuffixed` may directly follow only a stem in a fields config reference
 (`resolveBaseFieldsConfig`), so, e.g., `@standard@json@unsuffixed` reports
 `invalidBaseFieldsConfigName`, instead of resolving to the unsuffixed variant.
+
+An output config option's value without a non-whitespace character overlays no
+setting (e.g., `--json-config=` ≡ `--json`), as already implemented.

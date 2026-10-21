@@ -11,9 +11,9 @@ internal import JSONAST
 internal import Testing
 
 private extension MASTests {
-	@Test
-	func `an empty --key-value-config value parses to all defaults`() throws {
-		#expect(try parseKeyValueConfig("") == .default)
+	@Test(arguments: ["", " \t"])
+	func `an empty or whitespace-only --key-value-config value parses to all defaults`(value: String) throws {
+		#expect(try parseKeyValueConfig(value) == .default)
 	}
 
 	@Test(arguments: [("K1", "1"), ("K1;4:", "1;4"), ("K 1;4 :", "1;4"), ("K\\b", "b"), ("K1:k", ""), ("kK1:", "1")])

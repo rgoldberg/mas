@@ -24,8 +24,9 @@ key-value-setting =
   | <item-separator-setting>
 ```
 
-`--key-value-config`'s [value](configs.md#option-values), iff non-empty, is a
-`<key-value-config>`.
+`--key-value-config`'s [value](configs.md#option-values), iff it contains a
+non-[whitespace](ebnf.md#whitespace) character, is a `<key-value-config>`;
+otherwise, it overlays no setting (e.g., `--key-value-config=` ≡ `--key-value`).
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.
