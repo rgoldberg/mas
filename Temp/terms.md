@@ -239,7 +239,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - run: noun & verb, for commands
     - REJECTED: function (except in "primary function") / method / execution /
       execute / invocation / invoke
-43. - kind: config kinds; block kinds; multiplicity kinds
+43. - kind: config kinds; block kinds
     - type: value types
     - variant: same-stem fields configs
     - unsuffixed variant: the variant whose name has no output format suffix,
