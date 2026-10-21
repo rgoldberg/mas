@@ -10,9 +10,9 @@ internal import JSONAST
 internal import Testing
 
 private extension MASTests {
-	@Test
-	func `an empty --json-config value parses to all defaults`() throws {
-		#expect(try parseJSONConfig("") == .default)
+	@Test(arguments: ["", " \t"])
+	func `an empty or whitespace-only --json-config value parses to all defaults`(value: String) throws {
+		#expect(try parseJSONConfig(value) == .default)
 	}
 
 	@Test(

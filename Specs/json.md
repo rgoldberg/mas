@@ -19,8 +19,9 @@ json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`--json-config`'s [value](configs.md#option-values), iff non-empty, is a
-`<json-config>`.
+`--json-config`'s [value](configs.md#option-values), iff it contains a
+non-[whitespace](ebnf.md#whitespace) character, is a `<json-config>`; otherwise,
+it overlays no setting (e.g., `--json-config=` ≡ `--json`).
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.
