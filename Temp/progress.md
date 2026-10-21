@@ -827,3 +827,10 @@ A `<format-transform-pipeline>` may precede a `<format-template>`
 (`parseFormatBlockPipeline`), so a template can set its field spec's
 justification (e.g., `.endJustify%N..scale:10,6,,0:+?+ MB`), instead of only a
 `<pipeline>` being able to.
+
+### 8th Spec Review Fixes (2026-10-21)
+
+A `<value-transform>` that follows a `<named-format-reference>` after a
+`<format-transform-pipeline>` (e.g., `:name.endJustify.round`) applies to the
+named format's value, which must have its input type, as one that immediately
+follows the reference does; it is unimplemented, as are all named formats.
