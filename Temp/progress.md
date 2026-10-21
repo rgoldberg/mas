@@ -728,3 +728,6 @@ implementation is unchanged.
 [Value coercion](../Specs/fields-format.md#value-coercion) specifies every
 type's string form once (including a number's trivia & a date's or time-only's
 rendering), which sorting links, as already implemented.
+
+A table's separator line is before the 1st data row, after the header row, if
+any, so `hS` renders it 1st, as already implemented.
