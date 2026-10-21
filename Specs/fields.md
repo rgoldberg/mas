@@ -134,12 +134,14 @@ A built-in fields config:
 
 #### Default Fields Configs
 
-In a context that contains no custom [`default`](configs.md#default-configs)
-variant for the current output format (i.e., neither the suffixed nor the
-unsuffixed one), `default` is that context's
-[`standard`](configs.md#standard-configs) variant for it (e.g., for JSON output,
-`standard@json`). A non-root context's `standard` variant for an output format
-is its parent context's `default` variant for it.
+A reference to [`default`](configs.md#default-configs) matches a context's
+custom `default` variants as any reference matches a stem's variants (e.g., for
+JSON output, `default` matches `default@json`, then `default`). Iff it matches
+none, [`standard`](configs.md#standard-configs) is substituted for `default`,
+retaining any suffix (e.g., for JSON output, `default` becomes `standard`, which
+resolves to `standard@json`, while `default@table` becomes `standard@table`). A
+non-root context's `standard`, with any suffix, is its parent context's
+`default` with that suffix.
 
 So a custom unsuffixed `default` overrides every `standard` variant, while a
 custom `default@json` overrides only `standard@json`. E.g., to customize table &

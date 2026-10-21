@@ -158,5 +158,6 @@ All configs are ultimately derived transitively from a built-in config.
 
 ### Default Configs
 
-In each context that contains no custom config named `default`, `default` is
-that context's [`standard`](#standard-configs).
+A context's `default` is its custom config named `default` iff one exists;
+otherwise, [`standard`](#standard-configs) is substituted for `default`, so
+`default` is that context's `standard`.
