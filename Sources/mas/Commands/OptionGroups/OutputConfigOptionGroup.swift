@@ -75,7 +75,7 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	/// callers that need it before fetching data.
 	func fetchFieldNames() throws -> [String] {
 		try mas::fetchFieldNames(
-			for: attachedOptionValue(fieldsOptionValue),
+			for: fieldsOptionValue,
 			standard: Config.standardFieldsConfig,
 			all: Config.allFieldsConfig,
 			outputFormat: try outputFormat,
@@ -89,7 +89,7 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	}
 
 	func output(_ objects: [JSON.Object]) throws {
-		try Config.output(objects, outputFormat: outputFormat, fieldsOptionValue: attachedOptionValue(fieldsOptionValue))
+		try Config.output(objects, outputFormat: outputFormat, fieldsOptionValue: fieldsOptionValue)
 	}
 }
 
@@ -99,17 +99,6 @@ private let outputFormatFlagNameSet: Set = ["--json", "--key-value", "--table"]
 /// The options that each select an output format with a config.
 private let outputFormatOptionNameSet: Set = ["--json-config", "--key-value-config", "--table-config"]
 
-/// The options whose value after `=` is prefixed with
-/// `attachedOptionValuePrefix`.
-private let prefixedOptionNameSet = outputFormatOptionNameSet.union(["--fields"])
-
-// swiftlint:disable:next todo
-// TODO: Temp/todo.md "Swift Argument Parser Empty Values": once a Swift
-// Argument Parser release includes apple/swift-argument-parser#961, remove
-// `prefixedOptionNameSet`, `attachedOptionValuePrefix` &
-// `attachedOptionValue(_:)`, so that `normalizingOutputOptions(in:)` only
-// removes every output format flag / option that a later one overrides
-
 // swiftlint:disable:next todo
 // TODO: Temp/todo.md "Swift Argument Parser Attached-Only Values": once a Swift
 // Argument Parser release resolves apple/swift-argument-parser#992, replace
@@ -117,18 +106,9 @@ private let prefixedOptionNameSet = outputFormatOptionNameSet.union(["--fields"]
 // option whose optional value is accepted only after `=` (e.g.,
 // `--json[=<json-config>]`)
 
-/// Prefixes each `prefixedOptionNameSet` option value after `=` in a normalized
-/// command line, so that the value is never empty, because Swift Argument
-/// Parser takes an empty value after `=` (e.g., `--fields=`) as no value, then
-/// takes the next command-line argument as the value. No command-line argument
-/// can contain a NUL, so the prefix never starts an actual value.
-private let attachedOptionValuePrefix = "\0"
-
 /// `arguments` with only the last output format flag / option before any `--`
 /// terminator, because it overrides the preceding ones (configs.md "Output
-/// Formats"), and with each `prefixedOptionNameSet` option value after `=`
-/// prefixed with `attachedOptionValuePrefix` (e.g., `--fields=` becomes
-/// `--fields=\0`).
+/// Formats").
 ///
 /// An overridden option is removed with its value, iff that value is the next
 /// command-line argument. An option whose next command-line argument is not a
@@ -155,18 +135,7 @@ func normalizingOutputOptions(in arguments: some Sequence<String>) -> [String] {
 		}
 	}
 	let overriddenIndexSet = Set(outputFormatIndexRanges.dropLast().joined())
-	return options.indices.compactMap { index in
-		let option = options[index]
-		let name = optionName(of: option)
-		return if overriddenIndexSet.contains(index) {
-			nil
-		} else if prefixedOptionNameSet.contains(name), option.count > name.count {
-			"\(name)=\(attachedOptionValuePrefix)\(option.dropFirst(name.count + 1))"
-		} else {
-			option
-		}
-	}
-		+ arguments[terminatorIndex...]
+	return options.indices.filter { !overriddenIndexSet.contains($0) }.map { options[$0] } + arguments[terminatorIndex...]
 }
 
 /// `argument`'s option name: its text before any `=`.
@@ -180,14 +149,8 @@ private func isValue(_ argument: String) -> Bool {
 	argument == "-" || !argument.hasPrefix("-")
 }
 
-/// `value` without any `attachedOptionValuePrefix`.
-private func attachedOptionValue(_ value: String) -> String {
-	.init(value.trimmingPrefix(attachedOptionValuePrefix))
-}
-
-/// The value of an output format option, without any
-/// `attachedOptionValuePrefix`, else an empty value iff its flag was given,
-/// else `nil`.
+/// The value of an output format option, else an empty value iff its flag was
+/// given, else `nil`.
 private func outputConfigOptionValue(_ optionValue: String?, isFlagged: Bool) -> String? {
-	optionValue.map(attachedOptionValue) ?? (isFlagged ? "" : nil)
+	optionValue ?? (isFlagged ? "" : nil)
 }

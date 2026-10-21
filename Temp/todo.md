@@ -11,13 +11,13 @@
 
 ### Swift Argument Parser Empty Values
 
-Awaiting an upstream release (not actionable until then): once a Swift Argument
-Parser release includes [apple/swift-argument-parser#961](
+Awaiting an upstream release (not actionable until then): mas cannot be released
+until a Swift Argument Parser release includes
+[apple/swift-argument-parser#961](
   https://github.com/apple/swift-argument-parser/pull/961
 ), which makes an empty value after `=` (e.g., `--fields=`) an empty value
-instead of no value, remove the NUL prefix that `normalizingOutputOptions(in:)`
-gives each `--fields`, `--json-config`, `--key-value-config` & `--table-config`
-value after `=`.
+instead of no value, and `Package.swift` depends on that release (via `from:`)
+instead of on #961's merge commit in Swift Argument Parser's main branch.
 
 ### Swift Argument Parser Attached-Only Values
 

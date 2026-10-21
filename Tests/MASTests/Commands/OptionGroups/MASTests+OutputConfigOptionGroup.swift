@@ -10,17 +10,6 @@ private import ArgumentParser
 internal import Testing
 
 private extension MASTests {
-	@Test(arguments: [
-		("--fields=", "--fields=\0"),
-		("--fields=name", "--fields=\0name"),
-		("--json-config=", "--json-config=\0"),
-		("--key-value-config=s", "--key-value-config=\0s"),
-		("--table-config=S", "--table-config=\0S"),
-	])
-	func `normalizing prefixes a value after = with a NUL`(option: String, normalized: String) {
-		#expect(normalizingOutputOptions(in: [option, "1"]) == [normalized, "1"])
-	}
-
 	@Test
 	func `normalizing retains other options`() {
 		#expect(normalizingOutputOptions(in: ["--json", "1", "--fields", "name"]) == ["--json", "1", "--fields", "name"])
