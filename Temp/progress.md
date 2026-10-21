@@ -716,3 +716,7 @@ all custom configs.
 
 A custom config must not be named `standard` or any built-in config's name
 (e.g., `all`); reporting one is unimplemented, as are all custom configs.
+
+A reference with an output format suffix or `@unsuffixed` matches a context iff
+the context contains that variant; it is unimplemented, as are all custom
+configs.

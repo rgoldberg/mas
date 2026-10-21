@@ -49,7 +49,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
    6. Custom [variants](../Specs/fields.md#named-fields-configs), including
-      matching a stem per context & `default` variants.
+      matching a stem or a suffixed reference per context & `default` variants.
    7. A persisted fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
