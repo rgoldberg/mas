@@ -7,7 +7,7 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline> | <format-template> (* direct default: {empty string} *)
+format-block = <pipeline> | [ <format-transform-pipeline> ] -<format-template> (* direct default: {empty string} *)
 
 pipeline        =
   <named-format>
@@ -463,7 +463,8 @@ value; it sets a property of the field spec itself, currently just its table
 output column alignment. It therefore does not affect the field's rendered
 value: it is a no-op for JSON / key-value output (which have no columns to
 align); it accepts a value of any type & does not modify it, unlike every
-`<value-transform>`.
+`<value-transform>`. A `<format-transform-pipeline>` may thus also precede a
+`<format-template>` (e.g., `.endJustify%N..scale:10,6,,0:+?+ MB`).
 
 `centerStartJustify` & `centerEndJustify` differ only when the column's padding
 is odd-width: `centerStartJustify` puts the extra padding character after the

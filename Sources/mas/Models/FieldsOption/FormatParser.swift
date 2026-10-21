@@ -59,7 +59,8 @@ private struct FormatParser {
 		return parsed
 	}
 
-	/// Parses a `<format-block>`'s `<pipeline>`.
+	/// Parses a `<format-block>`'s `<pipeline>`, or its
+	/// `<format-transform-pipeline>` & `<format-template>`.
 	private mutating func parseFormatBlockPipeline()
 	throws(ParsingError) -> (format: Format, justification: Justification?) {
 		try parseNamedFormatIfPresent(terminatorSet: formatBlockNameTerminatorSet)
@@ -79,8 +80,11 @@ private struct FormatParser {
 		guard calls.isEmpty || valueTransformPipelineShapeSet.contains(where: calls.hasShape) else {
 			throw .invalidPipeline("<value-transform-pipeline>")
 		}
-		// An absent `<justify>` is inherited
-		return (.pipeline(calls), justification)
+		// An absent `<justify>` is inherited; a `<format-template>` may follow a
+		// `<format-transform-pipeline>`, ignoring preceding whitespace
+		return try calls.isEmpty && !isAtFormatBlockEnd
+			? (.template(parseFormatTemplate()), justification)
+			: (.pipeline(calls), justification)
 	}
 
 	/// Parses a block's `<*-pipeline>`, whose kind `kind` selects the valid
