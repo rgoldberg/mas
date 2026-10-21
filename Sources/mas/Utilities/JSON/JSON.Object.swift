@@ -114,21 +114,24 @@ extension [JSON.Object] {
 	/// "Members"; label is a field spec's "Header for table"). Every item gets a
 	/// cell for every field, per fields.md's "Absent Values" (absent ⇒ empty
 	/// string, unless its format renders it otherwise, e.g., via a
-	/// `<failure-block>`). `nil` iff there are no items or no field specs, so
-	/// there is nothing to output.
+	/// `<failure-block>`). Each line terminator in a cell renders as `⏎`, so each
+	/// row is 1 line. `nil` iff there are no items or no field specs, so there is
+	/// nothing to output.
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String? {
 		guard !isEmpty else {
 			return nil
 		}
 		let showsHeader = tableConfig.header != nil
 		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
+			let label = fieldSpec.label.lineTerminatorsSymbolized
 			let cells = try map { object throws(FormattingError) in
-				try fieldSpec.rendered(value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])?.stringValue ?? ""
+				try (fieldSpec.rendered(value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])?.stringValue ?? "")
+					.lineTerminatorsSymbolized
 			}
 			return (
-				label: fieldSpec.label,
+				label: label,
 				cells: cells,
-				maxWidth: cells.map(\.terminalWidth).reduce(showsHeader ? fieldSpec.label.terminalWidth : 0, Swift::max),
+				maxWidth: cells.map(\.terminalWidth).reduce(showsHeader ? label.terminalWidth : 0, Swift::max),
 				justification: fieldSpec.justification,
 			)
 		}
@@ -246,6 +249,14 @@ private func renderedTableRow(
 		+ (lastColumn.justification == .start
 			? lastCell
 			: lastCell.terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
+}
+
+private extension String {
+	/// This string with each line terminator (configs.md, e.g., a CRLF as a
+	/// whole) rendered as `⏎`, so it occupies 1 line.
+	var lineTerminatorsSymbolized: Self {
+		.init(map { character in character.isNewline ? "⏎" : character })
+	}
 }
 
 /// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition before

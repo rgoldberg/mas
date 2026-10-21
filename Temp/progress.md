@@ -742,3 +742,7 @@ U+000D, U+0085, U+2028, or U+2029), as already implemented
 A `<leading-spacing>` or `<trailing-spacing>` that contains a line terminator
 reports `invalidLeadingSpacing` / `invalidTrailingSpacing`, as a
 `<leader-pattern>` already did, instead of splitting each row.
+
+Table output renders each line terminator in a header or data cell as `⏎`
+(`String.lineTerminatorsSymbolized`), so each row is 1 line, instead of
+splitting the row; a `\` remains as is.

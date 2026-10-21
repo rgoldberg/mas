@@ -288,6 +288,16 @@ private extension MASTests {
 	}
 
 	@Test
+	func `table renders each line terminator in a header or data cell as a return symbol`() throws {
+		let table = try [JSON.Object([("notes", .string("a\r\nb\\nc\u{2028}d"))])]
+			.table(
+				fieldSpecs: [.init(name: "notes", label: "No\ntes", format: .default(fieldName: "notes"), sortSpec: nil)],
+				tableConfig: try parseTableConfig("S"),
+			)
+		#expect(table == "No⏎tes\n--------\na⏎b\\nc⏎d")
+	}
+
+	@Test
 	func `table renders a separator line before the 1st data row, even without a header row`() throws {
 		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(
