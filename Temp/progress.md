@@ -112,9 +112,9 @@ branches; template-text whitespace follows the [escaping
 appendix](../Specs/fields.md#appendix-escaping); forbidden whitespace after `%`,
 modifiers, `.` & `:` is an error. An uncoerced transform on an input not of its
 input type throws `FormattingError` at render time (surfaced via `OutputError`).
-An absent block or `<format-block>` defaults to an empty string; the pipeline of
-a non-nullary unconditional placeholder or block placeholder is mandatory.
-Hiding is only `<field-spec-hide>`. Tests are in
+A directly absent block or `<format-block>` defaults to an empty string; the
+pipeline of a non-nullary unconditional placeholder or block placeholder is
+mandatory. Hiding is only `<field-spec-hide>`. Tests are in
 `Tests/MASTests/Models/FieldsOption/MASTests+Format*.swift`.
 
 ### Sort Rewrite (2026-09-25, revised 2026-10-15)
