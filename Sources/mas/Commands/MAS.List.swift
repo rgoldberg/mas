@@ -12,6 +12,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 	struct List: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output apps already installed from the App Store",
+			usage: "mas list \(outputConfigUsage) [--bundle] [<app-id> ...]",
 		)
 
 		@OptionGroup

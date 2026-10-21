@@ -16,6 +16,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 	struct Config: ParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output mas config & related system info",
+			usage: "mas config \(outputConfigUsage)",
 		)
 
 		@OptionGroup

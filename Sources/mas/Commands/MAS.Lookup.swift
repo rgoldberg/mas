@@ -17,6 +17,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 	struct Lookup: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Output app info from the App Store",
+			usage: "mas lookup \(outputConfigUsage) [--bundle] <app-id> ...",
 			aliases: ["info"],
 		)
 

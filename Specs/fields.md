@@ -243,6 +243,7 @@ fields-config = ( <absolute-config> | <relative-config> )- (* default: "" *)
 ```
 
 `--fields`'s required [value](configs.md#option-values) is a `<fields-config>`.
+Giving `--fields` more than once is an error.
 
 `<absolute-config>` & `<relative-config>` are overlaid on top of the base fields
 config for the current command line only; they do not persistently affect named

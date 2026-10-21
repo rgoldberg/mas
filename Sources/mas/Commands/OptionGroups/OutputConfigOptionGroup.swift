@@ -10,7 +10,7 @@ internal import JSONAST
 
 struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	@Flag(name: .customLong("json"), help: "Output format: JSON (json.md)")
-	private var isJSON = false
+	private var jsonFlagCount: Int
 	@Option(
 		name: .customLong("json-config"),
 		help: .init(
@@ -18,9 +18,9 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 			valueName: "json-config",
 		),
 	)
-	private var jsonConfigOptionValue: String?
+	private var jsonConfigOptionValues = [String]()
 	@Flag(name: .customLong("key-value"), help: "Output format: key-value (key-value.md)")
-	private var isKeyValue = false
+	private var keyValueFlagCount: Int
 	@Option(
 		name: .customLong("key-value-config"),
 		help: .init(
@@ -28,9 +28,9 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 			valueName: "key-value-config",
 		),
 	)
-	private var keyValueConfigOptionValue: String?
+	private var keyValueConfigOptionValues = [String]()
 	@Flag(name: .customLong("table"), help: "Output format: table (table.md)")
-	private var isTable = false
+	private var tableFlagCount: Int
 	@Option(
 		name: .customLong("table-config"),
 		help: .init(
@@ -38,25 +38,30 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 			valueName: "table-config",
 		),
 	)
-	private var tableConfigOptionValue: String?
+	private var tableConfigOptionValues = [String]()
 	@Option(
 		name: .customLong("fields"),
 		help: .init("Select, order, label & format output fields & sort items (fields.md)", valueName: "fields-config"),
 	)
-	private var fieldsOptionValue = ""
+	private var fieldsOptionValues = [String]()
 
-	/// Resolves the output format flags & options into a single `OutputFormat`,
-	/// falling back to `Config.defaultFormat` iff none was given
-	/// (`normalizingOutputOptions(in:)` leaves at most 1, the last one given). A
-	/// flag is equivalent to its option with an empty value. Re-derived (cheaply:
-	/// each option value is tiny) on every access, same as `fieldsOptionValue`,
-	/// rather than stored, so there is only 1 source of truth to validate.
+	/// The value of the sole given `--fields`, else an empty value.
+	private var fieldsOptionValue: String {
+		fieldsOptionValues.first ?? ""
+	}
+
+	/// Resolves the sole given output format flag / option (`validate()` reports
+	/// an error for more than 1) into a single `OutputFormat`, falling back to
+	/// `Config.defaultFormat` iff none was given. A flag is equivalent to its
+	/// option with an empty value. Re-derived (cheaply: each option value is
+	/// tiny) on every access, same as `fieldsOptionValue`, rather than stored, so
+	/// there is only 1 source of truth to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
-			let json = try outputConfigOptionValue(jsonConfigOptionValue, isFlagged: isJSON).map(parseJSONConfig)
-			let keyValue =
-				try outputConfigOptionValue(keyValueConfigOptionValue, isFlagged: isKeyValue).map(parseKeyValueConfig)
-			let table = try outputConfigOptionValue(tableConfigOptionValue, isFlagged: isTable).map(parseTableConfig)
+			let json = try outputConfigOptionValue(jsonConfigOptionValues, flagCount: jsonFlagCount).map(parseJSONConfig)
+			let keyValue = try outputConfigOptionValue(keyValueConfigOptionValues, flagCount: keyValueFlagCount)
+				.map(parseKeyValueConfig)
+			let table = try outputConfigOptionValue(tableConfigOptionValues, flagCount: tableFlagCount).map(parseTableConfig)
 			return if let json {
 				.json(json)
 			} else if let keyValue {
@@ -84,6 +89,20 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	}
 
 	mutating func validate() throws {
+		if
+			jsonFlagCount + jsonConfigOptionValues.count + keyValueFlagCount + keyValueConfigOptionValues.count
+			+ tableFlagCount + tableConfigOptionValues.count > 1
+		{
+			throw ValidationError(
+				"""
+				Cannot specify more than 1 of --json, --json-config, --key-value, --key-value-config, --table & \
+				--table-config
+				""",
+			)
+		}
+		if fieldsOptionValues.count > 1 {
+			throw ValidationError("Cannot specify --fields more than once")
+		}
 		_ = try outputFormat
 		_ = try fetchFieldNames()
 	}
@@ -93,11 +112,13 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	}
 }
 
-/// The flags that each select an output format with its `default` config.
-private let outputFormatFlagNameSet: Set = ["--json", "--key-value", "--table"]
-
-/// The options that each select an output format with a config.
-private let outputFormatOptionNameSet: Set = ["--json-config", "--key-value-config", "--table-config"]
+/// The usage of `OutputConfigOptionGroup`'s options, for each display command's
+/// custom usage, because Swift Argument Parser's generated usage would mark
+/// each counted flag & array option as repeatable (e.g., `[--json ...]`).
+let outputConfigUsage = """
+	[--json | --json-config <json-config> | --key-value | --key-value-config <key-value-config> | --table | \
+	--table-config <table-config>] [--fields <fields-config>]
+	"""
 
 // swiftlint:disable:next todo
 // TODO: Temp/todo.md "Swift Argument Parser Attached-Only Values": once a Swift
@@ -106,51 +127,8 @@ private let outputFormatOptionNameSet: Set = ["--json-config", "--key-value-conf
 // option whose optional value is accepted only after `=` (e.g.,
 // `--json[=<json-config>]`)
 
-/// `arguments` with only the last output format flag / option before any `--`
-/// terminator, because it overrides the preceding ones (configs.md "Output
-/// Formats").
-///
-/// An overridden option is removed with its value, iff that value is the next
-/// command-line argument. An option whose next command-line argument is not a
-/// value is retained, so that Swift Argument Parser reports its missing value.
-/// Every removed command-line argument is an output format flag / option, never
-/// another option's value, because no mas option or argument uses a parsing
-/// strategy that takes a command-line argument starting with `-` as a value, or
-/// that skips ahead for a value.
-func normalizingOutputOptions(in arguments: some Sequence<String>) -> [String] {
-	let arguments = Array(arguments)
-	let terminatorIndex = arguments.firstIndex(of: "--") ?? arguments.endIndex
-	let options = arguments[..<terminatorIndex]
-	let outputFormatIndexRanges = options.indices.compactMap { index -> Range<Int>? in
-		let option = options[index]
-		return if
-			outputFormatFlagNameSet.contains(option)
-			|| option.contains("=") && outputFormatOptionNameSet.contains(optionName(of: option))
-		{
-			index..<(index + 1)
-		} else if outputFormatOptionNameSet.contains(option), index + 1 < options.endIndex, isValue(options[index + 1]) {
-			index..<(index + 2)
-		} else {
-			nil
-		}
-	}
-	let overriddenIndexSet = Set(outputFormatIndexRanges.dropLast().joined())
-	return options.indices.filter { !overriddenIndexSet.contains($0) }.map { options[$0] } + arguments[terminatorIndex...]
-}
-
-/// `argument`'s option name: its text before any `=`.
-private func optionName(of argument: String) -> String {
-	.init(argument.prefix { $0 != "=" })
-}
-
-/// Whether Swift Argument Parser takes `argument` as a value, rather than as an
-/// option or a terminator.
-private func isValue(_ argument: String) -> Bool {
-	argument == "-" || !argument.hasPrefix("-")
-}
-
-/// The value of an output format option, else an empty value iff its flag was
-/// given, else `nil`.
-private func outputConfigOptionValue(_ optionValue: String?, isFlagged: Bool) -> String? {
-	optionValue ?? (isFlagged ? "" : nil)
+/// The value of the sole given output format option, else an empty value iff
+/// its flag was given, else `nil`.
+private func outputConfigOptionValue(_ optionValues: [String], flagCount: Int) -> String? {
+	optionValues.first ?? (flagCount > 0 ? "" : nil)
 }

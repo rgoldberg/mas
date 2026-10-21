@@ -16,6 +16,7 @@ extension MAS { // swiftlint:disable:this file_types_order
 	struct Search: AsyncParsableCommand, RealDropping {
 		static let configuration = CommandConfiguration(
 			abstract: "Search for apps in the App Store",
+			usage: "mas search \(outputConfigUsage) <search-term> ...",
 		)
 
 		@OptionGroup

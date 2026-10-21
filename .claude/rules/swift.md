@@ -38,6 +38,8 @@ Commands follow a consistent structure:
 - Commands are nested structs within the `MAS` main command
 - Use `@OptionGroup` to compose reusable argument sets from dedicated types that
   conform to `ParsableArguments`
+- Never rewrite command-line arguments before Swift Argument Parser parses them;
+  rely on its normal parsing, reporting invalid combinations in `validate()`
 - Implement `func run() async { … }` as the main command entry point
 - Use the static `MAS.printer` for all output to ensure consistent formatting
 - Call methods on `AppStoreAction` enum cases (accessible via the `AppStore`
