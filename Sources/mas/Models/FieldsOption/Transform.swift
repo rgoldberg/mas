@@ -34,8 +34,12 @@ enum Transform: Hashable {
 
 	case dateOnly
 	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
-	/// `<date-time-zone>` & `<time-only-time-zone>` in fields-format.md.
-	case timeZone(TimeZone, referenceDate: CivilDate?) // swiftlint:enable sorted_enum_cases
+	/// `<date-time-zone>` in fields-format.md.
+	case timeZone(TimeZone, referenceDate: CivilDate?)
+
+	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
+	/// `<time-only-time-zone>` in fields-format.md.
+	case timeOnlyTimeZone(TimeZone, referenceDate: CivilDate?) // swiftlint:enable sorted_enum_cases
 
 	/// This transform's kind, per its `<value-transform>` alternative.
 	var kind: TransformKind {
@@ -48,12 +52,14 @@ enum Transform: Hashable {
 			.numberToString
 		case .dateOnly, .timeZone:
 			.date
+		case .timeOnlyTimeZone:
+			.timeOnly
 		}
 	}
 
 	/// Applies this transform to a string; `nil` iff the string does not conform
 	/// to this transform's input type (e.g., a number too large for `scale`).
-	/// Date transforms are applied separately, by
+	/// Date & time-only transforms are applied separately, by
 	/// `ChronologicStyle.applying(_:)`, because they need the parsed chronologic
 	/// value, not just its rendered string.
 	func applied(to string: String) -> String? {
@@ -83,7 +89,7 @@ enum Transform: Hashable {
 					fractionalDigits: fractionalDigits,
 				)
 			}
-		case .dateOnly, .timeZone:
+		case .dateOnly, .timeOnlyTimeZone, .timeZone:
 			string // Unreachable here; see doc comment above
 		}
 	}
@@ -318,6 +324,11 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			timeZone:\(timeZone.identifier),\
 			\(referenceDate?.iso8601Text ?? ""):
 			"""
+		case let .timeOnlyTimeZone(timeZone, referenceDate):
+			"""
+			timeOnlyTimeZone:\(timeZone.identifier),\
+			\(referenceDate?.iso8601Text ?? ""):
+			"""
 		}
 	}
 }
@@ -328,4 +339,5 @@ enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 	case number
 	case numberToString
 	case string
+	case timeOnly
 }

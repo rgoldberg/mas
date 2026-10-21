@@ -307,6 +307,8 @@ private extension MASTests {
 			(".round", .string("5.6")),
 			(".dateOnly", .string("not a date")),
 			(".dateOnly", .string("17:39:23")),
+			(".timeZone:UTC:", .string("17:39:23")),
+			(".timeOnlyTimeZone:UTC:", .string("2020-03-18")),
 			(".scale:10,0,,0:", .number(1e100)),
 		],
 	)
@@ -481,16 +483,16 @@ private extension MASTests {
 			// reference date
 			("%c", "17:39:23", String?.some("17:39:23-04:00")),
 			("%c", "17:39:23.1234Z", "13:39:23.123-04:00"),
-			("%C.timeZone:UTC:++", "17:39:23+02:00", "15:39:23Z"),
-			("%C.timeZone:America/New_York,2020-01-15:++", "17:39:23Z", "12:39:23-05:00"),
-			("%C.timeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
-			("%C.timeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
-			("%C.timeZone:America/New_York,+10000-07-15:++", "17:39:23Z", "13:39:23-04:00"),
+			("%C.timeOnlyTimeZone:UTC:++", "17:39:23+02:00", "15:39:23Z"),
+			("%C.timeOnlyTimeZone:America/New_York,2020-01-15:++", "17:39:23Z", "12:39:23-05:00"),
+			("%C.timeOnlyTimeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
+			("%C.timeOnlyTimeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
+			("%C.timeOnlyTimeZone:America/New_York,+10000-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("[%c]", "24:00:00", nil),
 			("[%c]", "23:59:60", nil),
 			("[%c]", "17:39:23+19:00", nil),
-			("%C.timeZone:UTC:++", "17:39:23+18:00", "23:39:23Z"),
-			("%C.timeZone:UTC:++", "17:39:23z", "17:39:23Z"),
+			("%C.timeOnlyTimeZone:UTC:++", "17:39:23+18:00", "23:39:23Z"),
+			("%C.timeOnlyTimeZone:UTC:++", "17:39:23z", "17:39:23Z"),
 			// Only a datetime's seconds can be omitted
 			("[%c]", "17:39", nil),
 			("[%c]", "17:39Z", nil),
@@ -502,6 +504,12 @@ private extension MASTests {
 			("%mdc+", "17:39:23", "17:39:23-04:00"),
 			("%mdc+", "2020-03-18", "2020-03-18"),
 			("..dateOnly", "17:39:23", nil),
+			// A top-level pipeline applies `timeOnlyTimeZone` to a time-only value &
+			// `timeZone` to a date
+			(".timeOnlyTimeZone:UTC:", "17:39:23+02:00", "15:39:23Z"),
+			(".timeZone:UTC:", "2020-03-18T17:39:23+02:00", "2020-03-18T15:39:23Z"),
+			("..timeZone:UTC:", "17:39:23", nil),
+			("..timeOnlyTimeZone:UTC:", "2020-03-18T17:39:23Z", nil),
 		],
 	)
 	func `renders time-only chronologic values`(format: String, value: String, expected: String?) throws {
@@ -540,6 +548,10 @@ private extension MASTests {
 			("..:de:uppercase", .numberCoercionArgumentsNotSupported("uppercase")),
 			("..:de:dateOnly", .numberCoercionArgumentsNotSupported("dateOnly")),
 			("%C.dateOnly++", .invalidPipeline("<time-only-pipeline>")),
+			("%C.timeZone:UTC:++", .invalidPipeline("<time-only-pipeline>")),
+			("%D.timeOnlyTimeZone:UTC:++", .invalidPipeline("<date-pipeline>")),
+			(".timeZone.timeOnlyTimeZone", .invalidPipeline("<value-transform-pipeline>")),
+			(".timeOnlyTimeZone:UTC,UTC:", .invalidTransformArguments(name: "timeOnlyTimeZone")),
 			("%C%C.dateOnly++++", .invalidPipeline("<time-only-pipeline>")),
 			("%.c", .coercionNotSupported("c")),
 			("%I..:de:uppercase+", .numberCoercionArgumentsNotSupported("uppercase")),

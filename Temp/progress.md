@@ -7,9 +7,7 @@ later spec change), except persisted named formats & custom named configs,
 including context stack lookup, as described by [their open
 issues](todo.md#persisted-custom-named-formats--configs) & by `// TODO:`s in
 `Format.swift`, `FieldSpec.swift` & `FormatParser.swift`: every
-`<named-format-reference>` reports `unknownNamedFormat`. A top-level `timeZone`
-also diverges from the specs, as described by [its open
-issue](todo.md#top-level-timezone-on-time-only-values).
+`<named-format-reference>` reports `unknownNamedFormat`.
 
 ## History
 
@@ -140,9 +138,10 @@ piece, compared by group precedence alone.
 ### Time-Only Chronologic Values (2026-10-15)
 
 Chronologic auto-detection also detects an ISO-8601 time-only
-(`Chronologic.time`), which is rendered in a time zone as if on `timeZone`'s
-`<reference-date>` (its 2nd argument), else on the current date in the system
-time zone (`Environment.now`); `dateOnly` on it is a value coercion failure.
+(`Chronologic.time`), which is rendered in a time zone as if on
+`timeOnlyTimeZone`'s `<reference-date>` (its 2nd argument), else on the current
+date in the system time zone (`Environment.now`); `dateOnly` on it is a value
+coercion failure.
 
 ### Unix Time (2026-10-18)
 
@@ -760,10 +759,9 @@ that contains a line terminator is an error (`parseStyleSpecifier` /
 
 ### 6th Spec Review Fixes (2026-10-21)
 
-`timeZone` is `<date-time-zone>` in a `<date-transform>` &
-`<time-only-time-zone>` in a `<time-only-transform>`, each typed for its
-pipeline's type, instead of 1 nonterminal shared by both; the implementation is
-unchanged.
+`<date-transform>` & `<time-only-transform>` each reference their own time zone
+transform (`<date-time-zone>` & `<time-only-time-zone>`), each typed for its
+pipeline's type, instead of 1 nonterminal shared by both.
 
 `<success-clause>` (non-structural) is a `<success-block>` or a
 `<success-pipeline>`; it replaces `<success-block>` in each rule that also
@@ -795,3 +793,10 @@ instead of `<lexicographic>`, so, e.g., a number value `2` precedes `10`, and
 `Temp/` no longer names removed identifiers or block kinds, nor an unused term,
 and its terms define date-only & time-only as nouns too & document order
 independently of the input format.
+
+The time-only time zone transform is named `timeOnlyTimeZone`
+(`Transform.timeOnlyTimeZone`), instead of `timeZone`, so a `<format-block>`'s
+`<value-transform-pipeline>` can also be a `<time-only-transform-pipeline>`,
+whose text differs from a `<date-transform-pipeline>`'s: e.g.,
+`.timeOnlyTimeZone:UTC:` renders a time-only field value in UTC, while
+`.timeZone:UTC:` is an error for one, instead of rendering it.
