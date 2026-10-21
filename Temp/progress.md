@@ -856,3 +856,8 @@ an index, so moving a field spec from before it does not change it (e.g., for
 At each position, sorting consumes the longest boundary that matches there
 (e.g., with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s),
 as already implemented (`rankAndLength(in:at:)`).
+
+A persisted `<absolute-config>` extends `none`, as its equivalent
+`<relative-config>` does, instead of `default`, which a persisted
+`<relative-config>` without a `<base-fields-config-section>` extends; it is
+unimplemented, as are all custom configs.
