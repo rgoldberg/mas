@@ -97,8 +97,8 @@ the name syntax, e.g., fields configs' [output format
 suffix](fields.md#output-format-specific-named-fields-configs).
 
 A custom config must not be named `standard` or any [built-in
-config](#immutable-built-in-named-configs)'s name (e.g., fields configs'
-`none`).
+config](#immutable-built-in-named-configs)'s name of its kind (e.g., fields
+configs' `none`).
 
 ### Referencing Named Configs
 
@@ -126,10 +126,10 @@ names; a persisted table, key-value, or JSON config extends `default`, as a
 persisted `<relative-config>` without a `<base-fields-config-section>` does; a
 named format extends no config.
 
-A persisted config that references a config of its own name (e.g., by extending
-it) resolves that config from the next less specific context in the context
-stack, so a config may reference its nearest same-named ancestor. In the root
-context, which has no less specific context, a `default` that references
+A persisted config that references a config of its own kind & name (e.g., by
+extending it) resolves that config from the next less specific context in the
+context stack, so a config may reference its nearest same-named ancestor. In the
+root context, which has no less specific context, a `default` that references
 `default` references the root context's `standard`. Any other cyclic chain of
 references is an error.
 
