@@ -195,12 +195,12 @@ directly absent state.
 ## Nonexistent Fields
 
 **Nonexistent fields** are guaranteed to not exist in any input, which is
-determinable only for formats that specify all potential input fields up front,
-e.g.: CSV, or JSON with a JSON schema.
+determinable only for input formats that specify all potential input fields up
+front, e.g.: CSV, or JSON with a JSON schema.
 
-Other formats cannot guarantee field nonexistence, e.g.: JSON without a JSON
-schema, for which a field may exist for some JSON objects, but not exist for
-others.
+Other input formats cannot guarantee field nonexistence, e.g.: JSON without a
+JSON schema, for which a field may exist for some JSON objects, but not exist
+for others.
 
 A reference to a nonexistent field is an error on the command line, but a
 persisted fields config, which may apply to multiple commands, ignores each
