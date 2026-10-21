@@ -64,6 +64,40 @@ Field specs for `adamID` & `fileSizeBytes` are
 [end-justified](fields-format.md#format-transforms); all others are
 start-justified.
 
+## Built-In Field Specs
+
+No built-in field spec has a `<sort>`, so no built-in fields config sorts items
+(e.g., `mas list` outputs apps in input order). No built-in fields config has a
+built-in field order, so `all` orders its field specs [by
+label](fields.md#immutable-built-in-named-fields-configs), while each built-in
+standard's user-facing variants order theirs by `<positional-order>`.
+
+`config`'s built-in standard's user-facing variants have a visible field spec
+for every field, in order, `mas`, `slice`, `slices`, `dist`, `origin`, `rev`,
+`swift`, `driver`, `store`, `region`, `macos`, `build`, `mac`, `cpu` & `arch`,
+each labeled by its field name & formatted as `%i`.
+
+Every other command's built-in standard's user-facing variants have the
+following visible field specs, at the given positions:
+
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
+| Field                       | Label         | Format                                 | `list` | `lookup` | `outdated` | `search` |
+|:----------------------------|:--------------|:---------------------------------------|-------:|---------:|-----------:|---------:|
+| `adamID`                    | `ADAM ID`     | `%i`                                   |      1 |        2 |          1 |        1 |
+| `name`                      | `Name`        | `%i`                                   |      2 |        1 |          2 |        2 |
+| `version`                   | `Version`     | `%i`                                   |      3 |        4 |          3 |        3 |
+| `newVersion`                | `New Version` | `%i`                                   |        |          |          4 |          |
+| `bundleID`                  | `Bundle ID`   | `%i`                                   |        |        3 |            |          |
+| `formattedPrice`            | `Price`       | `%i`                                   |        |        5 |            |          |
+| `sellerName`                | `By`          | `%i`                                   |        |        6 |            |          |
+| `currentVersionReleaseDate` | `Released`    | `%D.dateOnly++`                        |        |        7 |            |          |
+| `minimumOSVersion`          | `Minimum OS`  | `%i`                                   |        |        8 |            |          |
+| `fileSizeBytes`             | `Size`        | `%+.N.scale:10,6,,0:.numberFormat+ MB` |        |        9 |            |          |
+| `appStorePageURL`           | `From`        | `%i`                                   |        |       10 |            |          |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
+
 ## Price Sorting
 
 `formattedPrice`'s default sort options compare [grouped
