@@ -807,3 +807,11 @@ whose text differs from a `<date-transform-pipeline>`'s: e.g.,
 (`<time-only-time-zone-arguments>`), because a date's own date fixes its UTC
 offset, so `timeZone` ignored its `<reference-date>`; e.g.,
 `.timeZone:UTC,2020-01-01:` is an error.
+
+### 7th Spec Review Fixes (2026-10-21)
+
+Sorting normalizes a time-only without a UTC offset to UTC per the system time
+zone's UTC offset as if on the current date in the system time zone
+(`TimeOfDay.utcMillisecondOfDay`), as rendering does absent `timeOnlyTimeZone`,
+instead of as UTC, so, e.g., in `America/New_York`, `09:00:00` follows
+`12:00:00Z`.

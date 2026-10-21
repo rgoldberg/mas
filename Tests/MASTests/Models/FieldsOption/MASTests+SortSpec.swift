@@ -285,6 +285,7 @@ private extension MASTests {
 			("1", "id -12345-06-07", "id 2020-01-01", .orderedAscending),
 			("1Ciso-datetime:", "2020-03-17", "2020-03-18T00:00:00Z", .orderedDescending),
 			("1", "10:00:00+02:00", "09:00:00Z", .orderedAscending),
+			("1", "09:00:00", "12:00:00Z", .orderedDescending),
 			("1", "23:00:00Z", "2020-01-01", .orderedAscending),
 			("1Ciso-date:", "23:00:00Z", "2020-01-01", .orderedDescending),
 			("1", "2020-03-18t17:39-05:00", "2020-03-18T18:00z", .orderedDescending),
@@ -367,6 +368,26 @@ private extension MASTests {
 		#expect(
 			try inSystemTimeZone("America/New_York") {
 				sortSpec.compare(.init(input: lhs, output: nil), .init(input: rhs, output: nil))
+			}
+				== result,
+		)
+	}
+
+	@Test(
+		arguments: [
+			("2020-01-15T12:00:00Z", ComparisonResult.orderedDescending),
+			("2020-07-15T12:00:00Z", .orderedAscending),
+		],
+	)
+	func `compares a time-only without a UTC offset per the system time zone's on the current date`(
+		now: String,
+		result: ComparisonResult,
+	) throws {
+		let sortSpec = try parsedSortSpec("1")
+		let now = try Date(now, strategy: .iso8601)
+		#expect(
+			try inSystemTimeZone("America/New_York", now: now) {
+				sortSpec.compare(.init(input: "09:00:00", output: nil), .init(input: "13:30:00Z", output: nil))
 			}
 				== result,
 		)

@@ -669,7 +669,8 @@ chronologic, other chronologic, number, then text. Segments of the same kind
 compare:
 
 - If time-only chronologic: by time of day, normalized to UTC per its UTC
-  offset, or as UTC if it has none.
+  offset, or, if it has none, per the system time zone's UTC offset as if on the
+  current date in the system time zone.
 - If other chronologic: chronologically, a date-only at its start in the system
   time zone.
 - If a version: as [specified](#version-comparison).
