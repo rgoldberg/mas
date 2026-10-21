@@ -641,7 +641,7 @@ coercing to a string.
 
 Within a `<success-block>`, a `<block-placeholder>` is evaluated against the
 enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
-/ `%I` are evaluated against the original input, at its original type (e.g.,
+/ `%I` are evaluated against the field value, at its original type (e.g.,
 `%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
