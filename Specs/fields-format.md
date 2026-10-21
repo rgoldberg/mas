@@ -279,8 +279,8 @@ its input's integer part, counting from its least significant digit: the least
 significant (**primary**) group has `<digit-group-size>` digits, and each other
 (**secondary**) group has `<secondary-digit-group-size>` digits, or
 `<digit-group-size>` digits if `<secondary-digit-group-size>` is `0`; the most
-significant group may have fewer digits (e.g., `.numberFormat:,\,,3,2:` renders
-`12345678` as `1,23,45,678`).
+significant group may have fewer digits (e.g., `.numberFormat:canonical,,3,2:`
+renders `12345678` as `1,23,45,678`).
 
 `numberFormat` also replaces the `.` between its input's integer & fractional
 parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
