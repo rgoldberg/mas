@@ -41,6 +41,12 @@ config sets every `<key-value-setting>` to its default.
 Each row of an item is its key, its leading spacing, its leader, its trailing
 spacing, then its value.
 
+Each [line terminator](configs.md#line-terminators) in a key is rendered as `⏎`,
+so each key is 1 line. A value continues on a new line after each of its line
+terminators, each such non-empty line indented by spaces to the value's start
+(e.g., with `fL=:R:`, the key `Notes` & a value of `a` & `b` separated by an LF
+render as `Notes=a`, then 6 spaces & `b` on the next line).
+
 ## Key
 
 <!--editorconfig-checker-disable-->
@@ -227,9 +233,9 @@ item-separator-pattern = ^{text}^ (* default: {empty string} *)
 - `s`: no item separator line; each item's 1st row immediately follows the
   previous item's last row.
 - `S`: a line between each pair of adjacent items. `<item-separator-pattern>` is
-  repeated to fill the width of the widest row of any item, truncated before the
-  1st character that would exceed that width; spaces fill any remaining width
-  (e.g., when that character is wide, such as `中`). A 0-width
+  repeated to fill the width of the widest line of any item's rows, truncated
+  before the 1st character that would exceed that width; spaces fill any
+  remaining width (e.g., when that character is wide, such as `中`). A 0-width
   `<item-separator-pattern>` (e.g., a tab) is printed once, because no number of
   repetitions can fill any width, so an empty `<item-separator-pattern>` renders
   a blank line. An `<item-separator-pattern>` that contains a line terminator is

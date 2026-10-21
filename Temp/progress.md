@@ -746,3 +746,8 @@ reports `invalidLeadingSpacing` / `invalidTrailingSpacing`, as a
 Table output renders each line terminator in a header or data cell as `⏎`
 (`String.lineTerminatorsSymbolized`), so each row is 1 line, instead of
 splitting the row; a `\` remains as is.
+
+Key-value output renders each line terminator in a key as `⏎`, while a value
+continues on a new line after each of its line terminators, each such non-empty
+line indented by spaces to the value's start, instead of starting at the line's
+start; an item separator line fills to the widest line of any item's rows.

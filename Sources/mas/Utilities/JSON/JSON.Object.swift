@@ -60,16 +60,20 @@ extension JSON.Object {
 	/// (key-value.md): each row is its key (styled per `keyValueConfig`), its
 	/// leading spacing, its leader (iff any), its trailing spacing, then its
 	/// value. A leader's width is the item's widest key's width, less its own
-	/// key's width, plus the leader pattern's width.
+	/// key's width, plus the leader pattern's width. Each line terminator in a
+	/// key renders as `⏎`, while a value continues on a new line after each of
+	/// its line terminators, each such non-empty line indented by spaces to the
+	/// value's start. Each row's width is that of its widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
 			.map { fieldSpec, value throws(FormattingError) in try fieldSpec.keyValueRow(for: value) }
 			.compactMap(\.self)
+			.map { label, value in (label: label.lineTerminatorsSymbolized, value: value) }
 		let maxLabelWidth = rows.map(\.label.terminalWidth).max() ?? 0
 		return rows.map { label, value in
 			let labelWidth = label.terminalWidth
-			let suffix = keyValueConfig.leadingSpacing
+			let separation = keyValueConfig.leadingSpacing
 				+ (
 					keyValueConfig.leaderPattern.map { leaderPattern in
 						repeatedPattern(leaderPattern, toWidth: maxLabelWidth - labelWidth + leaderPattern.terminalWidth)
@@ -77,7 +81,9 @@ extension JSON.Object {
 						?? ""
 				)
 				+ keyValueConfig.trailingSpacing
-				+ value
+			let valueStartWidth = labelWidth + separation.terminalWidth
+			let valueLines = value.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+			let indentation = String(repeating: " ", count: valueStartWidth)
 			return (
 				styled(
 					label,
@@ -85,8 +91,11 @@ extension JSON.Object {
 					sequences: keyValueConfig.keyStyleSequences,
 					isAlwaysStyled: keyValueConfig.keyStyling == .always,
 				)
-					+ suffix,
-				labelWidth + suffix.terminalWidth,
+					+ separation
+					+ valueLines.dropFirst().reduce(into: String(valueLines[0])) { text, line in
+						text += "\n" + (line.isEmpty ? "" : indentation + line)
+					},
+				valueStartWidth + (valueLines.map(\.terminalWidth).max() ?? 0),
 			)
 		}
 	}
@@ -185,8 +194,8 @@ extension [JSON.Object] {
 	/// ordered per item by `fieldOrder` & per `keyValueConfig` (key-value.md):
 	/// each item's rows (none for an item without any), with an item separator
 	/// line (iff any) between each pair of adjacent items, filled to the width of
-	/// the widest row of any item. `nil` iff no item has a row, so there is
-	/// nothing to output.
+	/// the widest line of any item's rows. `nil` iff no item has a row, so there
+	/// is nothing to output.
 	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> String? {
 		let itemRows = try map { object throws(FormattingError) in
