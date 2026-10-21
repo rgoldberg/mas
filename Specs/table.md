@@ -37,6 +37,10 @@ it. Each setting's default applies iff neither sets it.
 The [built-in standard](configs.md#immutable-built-in-named-configs) table
 config sets every `<table-setting>` to its default.
 
+Each [line terminator](configs.md#line-terminators) in a header or data cell is
+rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
+render as `a⏎b`).
+
 ## Header
 
 <!--editorconfig-checker-disable-->
