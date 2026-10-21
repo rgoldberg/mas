@@ -132,7 +132,7 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 - A `<transform-pipeline>` `t` is a pipeline of transformations applied to:
   - If a `<named-format-reference>` `n` immediately precedes `t`: `n`'s value.
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,
-    in a `<success-block>`, the enclosing matcher's value; elsewhere, the field
+    in a `<success-clause>`, the enclosing matcher's value; elsewhere, the field
     value).
 
 An **argument** is an element of an argument list: a transform's, a [number
@@ -537,6 +537,7 @@ success-block =
 failure-block = <unconditional-block>
 
 success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
+success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
 boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
@@ -604,7 +605,7 @@ A **matcher** is a `<placeholder-prefix>` (in a placeholder), its `<modifiers>`
 by its blocks, which define the matcher's **form**:
 
 - **Nullary**: no blocks.
-- **Unary**: either a `<success-block>` or a `<success-pipeline>`.
+- **Unary**: a `<success-clause>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`.
 - **Abort-on-failure** (`%+…`): a `<success-block>`.
 - **Abort-on-success** (`%-…`): a `<failure-block>`.
@@ -615,13 +616,13 @@ A matcher succeeds iff it matches the value against which it is evaluated.
 
 Unconditional matchers always succeed.
 
-A `<success-block>` is evaluated iff its enclosing matcher succeeds.
+A `<success-clause>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
-A `<success-block>`'s kind follows the matched value's type; where that is
-boolean or can be any type, the block's pipeline must start, after any named
-format, by coercing to a string.
+A `<success-clause>`'s kind follows the matched value's type; where that is
+boolean or can be any type, its pipeline must start, after any named format, by
+coercing to a string.
 
 `<unconditional-block>` differs from `<any-block>` only by forbidding
 `<block-placeholder>`s.
@@ -636,7 +637,7 @@ A matcher's **value** is given by its `<predicate>`'s `value:` comment part.
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
   - If it is nullary, unary match, or binary match: the placeholder's value.
-  - Otherwise: its `<success-block>`'s evaluated value.
+  - Otherwise: its `<success-clause>`'s evaluated value.
 - If a placeholder fails (e.g., `%u` is evaluated against a non-`null`):
   - If it has `<abort-on-success>` & a nullary predicate: the field value.
   - If it is binary, binary match, or abort-on-success: its `<failure-block>`'s
