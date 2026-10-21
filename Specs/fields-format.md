@@ -614,9 +614,9 @@ abort-on-failure = "+"!
 
 A **matcher** is a `<placeholder-prefix>` (in a placeholder), its `<modifiers>`
 & its `<predicate>`; a placeholder or branch is a matcher immediately followed
-by its blocks, which define the matcher's **form**:
+by its success clause, blocks, or branches, which define the matcher's **form**:
 
-- **Nullary**: no blocks.
+- **Nullary**: nothing.
 - **Unary**: a `<success-clause>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`.
 - **Abort-on-failure** (`%+…`): a `<success-block>`.

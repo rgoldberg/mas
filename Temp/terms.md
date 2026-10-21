@@ -519,15 +519,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
 102. - nullary: of a form, or of a lowercase predicate letter other than `m`,
-       followed by no block
+       followed by no success clause or block
      - non-nullary: of an uppercase predicate letter other than `M`, followed by
-       1 or more blocks
+       a success clause or 1 or more blocks
      - unary match / binary match: `%m` (`<unary-match>`) / `%M`
        (`<binary-match>`), named by arity, because `%m`'s `<branches>` make it
        not nullary
      - REJECTED: concise / verbose (the letters have equal length) / bare / full
        / block (for letter case) / nullary match / non-nullary match
-103. - success pipeline: a unary form's pipeline-only block
+103. - success pipeline: a unary form's pipeline-only success clause
        (`<success-pipeline>`), e.g., `%I…+`'s
        ([defined](../Specs/fields-format.md#success--failure))
      - success clause: a `<success-block>` or a `<success-pipeline>`
