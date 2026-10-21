@@ -86,9 +86,7 @@ suffix](#output-format-specific-named-fields-configs).
 #### Output-Format-Specific Named Fields Configs
 
 A fields config's name may include an optional output format suffix matching the
-regex `@(json|key-value|table)$`; if the current output format matches the
-suffix, the fields config with the suffixed name is substituted for any
-reference to the stem alone.
+regex `@(json|key-value|table)$`.
 
 Fields configs that share the same stem within the same context are
 **variants**.
