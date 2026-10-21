@@ -551,3 +551,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#line-terminators))
      - newline: the LF that ends an output line (e.g., after a JSON object)
      - REJECTED: line break / line ending / EOL (for a line terminator)
+107. - negated: the form of a non-nullary branch with `<branch-negation>`
+       (`-…`), whose `<unconditional-block>` is evaluated iff its matcher fails
+       ([defined](../Specs/fields-format.md#success--failure))
