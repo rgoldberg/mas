@@ -764,3 +764,9 @@ that contains a line terminator is an error (`parseStyleSpecifier` /
 `<time-only-time-zone>` in a `<time-only-transform>`, each typed for its
 pipeline's type, instead of 1 nonterminal shared by both; the implementation is
 unchanged.
+
+`<success-clause>` (non-structural) is a `<success-block>` or a
+`<success-pipeline>`; it replaces `<success-block>` in each rule that also
+applies to a unary form's success pipeline (e.g., `%I.uppercase+`'s): when it is
+evaluated, its kind, what its transforms apply to & a placeholder's outcome; the
+implementation is unchanged.

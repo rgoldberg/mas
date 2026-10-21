@@ -531,6 +531,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 104. - success pipeline: a unary form's pipeline-only block
        (`<success-pipeline>`), e.g., `%I…+`'s
        ([defined](../Specs/fields-format.md#success--failure))
+     - success clause: a `<success-block>` or a `<success-pipeline>`
+       (`<success-clause>`), evaluated iff its enclosing matcher succeeds
 105. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
