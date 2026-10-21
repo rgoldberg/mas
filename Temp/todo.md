@@ -201,7 +201,7 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 - Same group
 - All
 
-### `<document-order>` for `@table`
+### `<document-order>` for Table Output
 
 Let `<document-order>` order a table's columns by the 1st item's document order
 (e.g., the key order of the 1st input JSON object), because rows otherwise share
