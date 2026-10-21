@@ -73,3 +73,12 @@ value", not "the `<branch>`'s value").
 
 In specs, give a nonterminal whose input & output types are equal a single
 `type:` comment, rather than both `input type:` & `output type:` comments.
+
+In specs, give each new syntax character only punctuation that no common shell
+interprets unquoted: `%`, `+`, `-`, `.`, `/`, `:`, `,`, `@`, or `_`, or `=`
+anywhere but at the start of a word.
+
+In specs, give an output config setting whose alternatives differ in whether
+they take a payload 1 letter: lowercase for the alternative without a payload
+(e.g., off, or the default), uppercase for the one with a payload (e.g., `h` /
+`H`).
