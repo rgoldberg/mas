@@ -26,3 +26,11 @@ paths:
 - Use:
   - `cp -c` instead of `cp`
   - `trash` instead of `rm`
+
+## Releases
+
+- Never delete a valid public version tag (one with a trusted SSH signature that
+  is on `main`, as `tag-pushed.yaml` checks); `release-cancel` retains local
+  version tags too
+- Never add a step that applies the `pr-pull` label to a tap formula bump PR
+  (e.g., to `tag-pushed.yaml`), because `mas-cli/homebrew-tap` is replacing it

@@ -16,6 +16,15 @@ may be repeated without an error (e.g., `--bundle --bundle`); decide whether
 giving any of them more than once is an error, as it is for output format flags
 / options & `--fields`.
 
+### Release Process
+
+1. At the next release, update the homebrew-core `mas` formula's Swift & Xcode
+   dependencies to the [minimum versions](../CLAUDE.md#minimum-versions).
+2. Update the release process & `mas-cli/homebrew-tap` to not use the `pr-pull`
+   label:
+   1. Remove the `pr-pull` [release
+      rule](../.claude/rules/scripting.md#releases).
+
 ### Swift Argument Parser Empty Values
 
 Awaiting an upstream release (not actionable until then): mas cannot be released
