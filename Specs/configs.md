@@ -31,11 +31,9 @@ Each display command has a default output format.
 
 Each output format has a flag that selects it with its
 [`default`](#default-configs) config (e.g., `--json`) & an option that selects
-it with a config overlaid on its `default` config (e.g., `--json-config P`). If
-multiple such flags and/or options are given, the last one overrides all
-preceding ones (e.g., `--json-config P --table` outputs a table;
-`--json-config P --json` outputs JSON per its `default` config), as with POSIX
-`ls`'s output format options (e.g., `ls -l -1`).
+it with a config overlaid on its `default` config (e.g., `--json-config P`).
+Giving more than 1 such flag or option, even the same one twice (e.g.,
+`--json --json` or `--json-config P --table`), is an error.
 
 ## Option Values
 

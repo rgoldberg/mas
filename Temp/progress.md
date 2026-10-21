@@ -648,15 +648,19 @@ Each output format has a flag (`--table`, `--key-value` & `--json`) that selects
 it with its `default` config & an option (`--table-config`, `--key-value-config`
 & `--json-config`) that selects it with a config, instead of 1 option with an
 optional value, because Swift Argument Parser cannot accept an optional value
-only after `=` (apple/swift-argument-parser#992). The last of these flags &
-options overrides all preceding ones (e.g., `--json-config P --table` outputs a
-table): before Swift Argument Parser parses the arguments,
-`normalizingOutputOptions(in:)` removes every preceding one (with its value, iff
-that value is the next argument), instead of reporting an error. No mas option
-or argument uses a parsing strategy that can take an argument starting with `-`
-as a value, or skip ahead for a value, so each removed argument is a flag /
-option, never another option's value; a test confirms that every parsing
-strategy is `default`.
+only after `=` (apple/swift-argument-parser#992). Giving more than 1 of these
+flags & options (e.g., `--json --json` or `--json-config P --table`), or more
+than 1 `--fields`, is an error, instead of the last one overriding the preceding
+ones, because Swift Argument Parser can neither make different options override
+each other nor report a repeated flag or option, and mas never rewrites the
+arguments before Swift Argument Parser parses them: each flag counts its
+occurrences, each option collects its values &
+`OutputConfigOptionGroup.validate()` reports more than 1. Each display command's
+custom usage (`outputConfigUsage`) shows these flags & options as mutually
+exclusive (e.g., `[--json | --json-config <json-config> | …]`), instead of Swift
+Argument Parser's generated usage, which marks each counted flag & array option
+as repeatable (e.g., `[--json ...]`); `outdated`'s generated usage abbreviates
+its options as `[<options>]`, so it needs none.
 
 Chronologic values have 2 types: date (a date-only or a datetime: `%d`'s output
 type & `dateOnly`'s input type) & time-only (`%c`'s output type), instead of 1

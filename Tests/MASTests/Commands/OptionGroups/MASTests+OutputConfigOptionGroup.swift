@@ -10,68 +10,64 @@ private import ArgumentParser
 internal import Testing
 
 private extension MASTests {
-	@Test
-	func `normalizing retains other options`() {
-		#expect(normalizingOutputOptions(in: ["--json", "1", "--fields", "name"]) == ["--json", "1", "--fields", "name"])
+	@Test(arguments: [
+		["--json", "--json"],
+		["--json-config", "P", "--json-config", "P"],
+		["--json", "--json-config", "P"],
+		["--json-config", "P", "--table"],
+		["--table", "--key-value-config", "s"],
+		["--key-value", "--table-config=S"],
+	])
+	func `more than 1 output format flag or option is an error`(arguments: [String]) {
+		#expect(throws: (any Error).self) { try MAS.Lookup.parse(arguments + ["1"]) }
 	}
 
 	@Test
-	func `normalizing removes every output format flag & option that a later one overrides`() {
-		#expect(
-			normalizingOutputOptions(in: ["--json-config", "P", "1", "--table", "--key-value-config=s", "--json"])
-				== ["1", "--json"],
-		)
+	func `more than 1 --fields is an error`() {
+		#expect(throws: (any Error).self) { try MAS.Lookup.parse(["--fields", "name", "--fields", "name", "1"]) }
 	}
 
-	@Test
-	func `normalizing removes an overridden option's next argument iff Swift Argument Parser takes it as a value`() {
-		#expect(normalizingOutputOptions(in: ["--json-config", "-", "--table"]) == ["--table"])
-		#expect(normalizingOutputOptions(in: ["--json-config", "--fields", "name", "--table"]) == [
-			"--json-config",
-			"--fields",
-			"name",
-			"--table",
-		])
-	}
-
-	@Test(arguments: [["--json-config", "--table"], ["--json-config"], ["--json=P", "--table"]])
-	func `normalizing retains an invalid output format flag or option`(arguments: [String]) {
-		#expect(normalizingOutputOptions(in: arguments) == arguments)
-	}
-
-	@Test
-	func `normalizing retains every argument after a -- terminator`() {
-		#expect(normalizingOutputOptions(in: ["--json", "--", "--table"]) == ["--json", "--", "--table"])
+	@Test(arguments: [
+		["--json"],
+		["--json-config", "P"],
+		["--key-value"],
+		["--key-value-config", "s"],
+		["--table"],
+		["--table-config", "S"],
+		["--table", "--fields", "name"],
+	])
+	func `a sole output format flag or option is valid`(arguments: [String]) throws {
+		_ = try MAS.Lookup.parse(arguments + ["1"])
 	}
 
 	@Test(arguments: [["--fields=-x", "1"], ["--fields", "-", "1"]])
 	func `an option takes a value that starts with - only after = or as -`(arguments: [String]) throws {
-		_ = try MAS.Lookup.parse(normalizingOutputOptions(in: arguments))
+		_ = try MAS.Lookup.parse(arguments)
 	}
 
 	@Test
 	func `an option never takes a next argument that starts with - as its value`() {
-		#expect(throws: (any Error).self) { try MAS.Lookup.parse(normalizingOutputOptions(in: ["--fields", "-x", "1"])) }
-	}
-
-	@Test
-	func `no option or argument uses a parsing strategy that could take another option as its value`() {
-		let parsingStrategySet = Set(
-			MAS._dumpHelp().matches(of: /"parsingStrategy" *: *"(\w+)"/).map { String($0.output.1) },
-		)
-		#expect(parsingStrategySet == ["default"])
+		#expect(throws: (any Error).self) { try MAS.Lookup.parse(["--fields", "-x", "1"]) }
 	}
 
 	@Test(arguments: [
-		"[--json]",
-		"[--json-config <json-config>]",
-		"[--key-value]",
-		"[--key-value-config <key-value-config>]",
-		"[--table]",
-		"[--table-config <table-config>]",
-		"[--fields <fields-config>]",
+		(MAS.Config.helpMessage(columns: 1000), "mas config \(outputConfigUsage)\n"),
+		(MAS.List.helpMessage(columns: 1000), "mas list \(outputConfigUsage) [--bundle] [<app-id> ...]\n"),
+		(MAS.Lookup.helpMessage(columns: 1000), "mas lookup \(outputConfigUsage) [--bundle] <app-id> ...\n"),
+		(MAS.Search.helpMessage(columns: 1000), "mas search \(outputConfigUsage) <search-term> ...\n"),
 	])
-	func `help shows each output option's usage`(usage: String) {
-		#expect(MAS.Lookup.helpMessage(columns: 1000).contains(usage))
+	func `help shows each display command's output options as mutually exclusive`(helpMessage: String, usage: String) {
+		#expect(helpMessage.contains("USAGE: \(usage)"))
+	}
+
+	@Test(arguments: [
+		MAS.Config.helpMessage(columns: 1000),
+		MAS.List.helpMessage(columns: 1000),
+		MAS.Lookup.helpMessage(columns: 1000),
+		MAS.Outdated.helpMessage(columns: 1000),
+		MAS.Search.helpMessage(columns: 1000),
+	])
+	func `help never shows an output option as repeatable`(helpMessage: String) {
+		#expect(!helpMessage.contains(/--(json|key-value|table)(-config <[\w-]+>)? \.\.\.|<fields-config> \.\.\./))
 	}
 }

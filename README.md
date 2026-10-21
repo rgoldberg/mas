@@ -172,8 +172,8 @@ until the algorithm is updated.
 
 Display commands support 3 output formats, each selectable via either a flag
 (e.g., `--json`) or an option with a format-specific value (e.g.,
-`--json-config P`), the last one given overriding any preceding ones, pursuant
-to [mas-specific overrides & defaults](Specs/mas.md):
+`--json-config P`), at most 1 of which may be given, pursuant to [mas-specific
+overrides & defaults](Specs/mas.md):
 
 - **Table** (`--table` / `--table-config`): Row per item, column per selected
   field (if an item has multiple values for a field, the last value is used).
