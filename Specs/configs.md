@@ -88,6 +88,10 @@ A config name is a stem matching the regex `^[-_0-9A-Za-z]+$`. A kind may extend
 the name syntax, e.g., fields configs' [output format
 suffix](fields.md#output-format-specific-named-fields-configs).
 
+A custom config must not be named `standard` or any [built-in
+config](#immutable-built-in-named-configs)'s name (e.g., fields configs'
+`none`).
+
 ### Referencing Named Configs
 
 A named config may be referenced:

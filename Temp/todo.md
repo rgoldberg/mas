@@ -43,7 +43,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
       context `default` that extends `default`.
    3. A persisted table, key-value, or JSON config
       [extending](../Specs/configs.md#referencing-named-configs) `default`.
-   4. Reporting reference cycles.
+   4. Reporting reference cycles & a custom config named `standard` or any
+      built-in config's name.
    5. A custom `default` (currently always `standard`) & each context's
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
