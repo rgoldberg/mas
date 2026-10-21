@@ -47,7 +47,7 @@ both evaluating to that same character.
 
 A value's multiplicity is one of:
 
-- **Scalar**: a single value (e.g., an integer, a string, etc.).
+- **Scalar**: a single value (e.g., an integer or a string).
 - **Repetition**: a sequence of 0 or more elements. A repetition with 0 or 1
   elements is still a repetition, not a scalar.
 - **Tuple**: the values of a [sequence](#sequences)'s children, in order.
