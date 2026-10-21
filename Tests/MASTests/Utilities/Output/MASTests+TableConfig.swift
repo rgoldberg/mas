@@ -288,6 +288,19 @@ private extension MASTests {
 	}
 
 	@Test
+	func `table renders a separator line before the 1st data row, even without a header row`() throws {
+		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
+			.table(
+				fieldSpecs: [
+					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				tableConfig: try parseTableConfig("hS"),
+			)
+		#expect(table == "------\nA  1.0")
+	}
+
+	@Test
 	func `table renders a broken separator as 1 independently-filled segment per column`() throws {
 		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(
