@@ -511,10 +511,11 @@ No multiplicity.
 NONTERMINAL = DEFINITION (* mnemonic: MNEMONIC *)
 ```
 
-`MNEMONIC` explains how `DEFINITION`'s literal text was chosen, iff that choice
-is non-obvious (e.g., the text is not the initial of a word in `NONTERMINAL`). A
-mnemonic comment is not a semantic comment; in a comment with multiple parts, it
-is the last part.
+`MNEMONIC` explains how `DEFINITION`'s literal text was chosen, iff that text
+contains a letter or a digit & that choice is non-obvious (e.g., the text is not
+the initial of a word in `NONTERMINAL`), because punctuation is chosen from few
+candidates, so it rarely has a mnemonic. A mnemonic comment is not a semantic
+comment; in a comment with multiple parts, it is the last part.
 
 #### Semantic Comments
 

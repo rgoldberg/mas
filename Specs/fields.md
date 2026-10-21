@@ -706,8 +706,8 @@ per `<case-sensitivity>` & `<locale>`), e.g., `2.0b9` precedes `2.0b10`.
 ```ebnf
 direction = <ascending> | <descending> (* default: <ascending>; last wins *)
 
-ascending  = "+" (* mnemonic: increasing *)
-descending = "-" (* mnemonic: decreasing *)
+ascending  = "+"
+descending = "-"
 ```
 
 ##### Sort Case Sensitivity
