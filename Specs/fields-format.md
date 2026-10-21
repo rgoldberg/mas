@@ -477,6 +477,13 @@ value (leaving it nearer the column's end).
 An absent `<justify>` is inherited from the working fields config; absent any
 justification to inherit, it is `<start-justify>`.
 
+A `<named-format-reference>` applies the justification that its referenced
+format sets, if any, as if that format's `<justify>` occurred immediately before
+the reference, in the [last-wins scope](ebnf.md#last-wins-comments) of any
+`<format-transform-pipeline>` that follows the reference (e.g., if `x` is
+`.endJustify%i`, `:x` is end-justified, but `:x.startJustify` is
+start-justified).
+
 ##### Placeholders
 
 <!--editorconfig-checker-disable-->

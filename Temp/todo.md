@@ -51,7 +51,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 1. Custom named formats: every reference to a named format other than `standard`
    & `default` (both `%i`) reports `unknownNamedFormat` (or `invalidFormatName`
-   for an invalid format name).
+   for an invalid format name), so no referenced format sets a
+   [justification](../Specs/fields-format.md#format-transforms) yet.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, named formats included:
    1. Looking a name up through the [context
