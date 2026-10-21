@@ -277,6 +277,17 @@ Context-dependent multiplicity.
 
 The absence of a value; matches no input.
 
+#### Empty
+
+```ebnf
+empty
+```
+
+Inherent repetition.
+
+A [repetition](#multiplicity) of 0 elements; matches no input. Distinct from
+`null` & from an empty string.
+
 #### End
 
 ```ebnf
@@ -457,17 +468,6 @@ ELEMENT+
 Inherent repetition.
 
 `ELEMENT` must not match empty text.
-
-#### Empty
-
-```ebnf
-empty
-```
-
-Inherent repetition.
-
-A repetition of 0 elements; matches no input. Distinct from `null` & from an
-empty string.
 
 ### Repetitions with Separators (1 or More)
 
