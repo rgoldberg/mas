@@ -174,11 +174,11 @@ input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not
 
 ## Temp Files
 
-`Temp/*` track in-progress work: `Temp/progress.md` (implementation status &
-history), `Temp/todo.md` (open issues & questions) & `Temp/terms.md` (standard
-terminology). Whenever any change (to specs, code, tests, docs, etc.) affects
-anything a `Temp/*` file says, update every affected `Temp/*` file in the same
-change, so that each:
+`Temp/*` track in-progress work: `Temp/todo.md` (open issues & questions) &
+`Temp/terms.md` (standard terminology). Never keep implementation history (e.g.,
+a changelog) in `Temp/*`, because commit messages record it. Whenever any change
+(to specs, code, tests, docs, etc.) affects anything a `Temp/*` file says,
+update every affected `Temp/*` file in the same change, so that each:
 
 - Uses only the current specs' nonterminal names & syntax, and the code's
   current identifiers, never vestigial ones.
