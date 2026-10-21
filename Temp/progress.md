@@ -838,3 +838,8 @@ follows the reference does; it is unimplemented, as are all named formats.
 A coercing matcher's value is its coerced value (e.g., `%.n` evaluates to `4.5`
 for `"4.50"`), as already implemented, instead of being given as the field
 value.
+
+An expression in the payload of a present modifier or option is directly absent
+even if the payload contains no token (e.g., `<locale-identifier>` in `N:`), as
+already implemented, instead of only in a present payload, which no payload
+without a token is.
