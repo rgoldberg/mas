@@ -496,7 +496,7 @@ non-nullary forms.
 `<coercion>`; `%c` & `%C` (`Predicate.timeOnly`) match only a time-only value
 without `<coercion>`, and their block is a `<time-only-block>`, whose pipeline
 (`BlockKind.timeOnly`) cannot contain `dateOnly`, so no predicate depends on its
-block's contents; mas's `Released` field uses `%D.dateOnly++`.
+block's content; mas's `Released` field uses `%D.dateOnly++`.
 
 Chronologic values render in ISO-8601 extended format (`ChronologicStyle`'s own
 formatting, instead of `Date.ISO8601FormatStyle`), a year outside 0000 to 9999
