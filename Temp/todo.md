@@ -41,13 +41,15 @@ only after `=` (e.g., `--json[=<json-config>]`).
       context.
    2. Resolving a config that extends its same-named ancestor, including a root
       context `default` that extends `default`.
-   3. Reporting reference cycles.
-   4. A custom `default` (currently always `standard`) & each context's
+   3. A persisted table, key-value, or JSON config
+      [extending](../Specs/configs.md#referencing-named-configs) `default`.
+   4. Reporting reference cycles.
+   5. A custom `default` (currently always `standard`) & each context's
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
-   5. Custom [variants](../Specs/fields.md#named-fields-configs), including
+   6. Custom [variants](../Specs/fields.md#named-fields-configs), including
       matching a stem per context & `default` variants.
-   6. A persisted fields config [ignoring its references to nonexistent
+   7. A persisted fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
    they currently apply only on top of `standard`, so implied
@@ -190,7 +192,7 @@ with fields that the 1st item lacks after the others, in position order.
 
 ### Base Output Config Names
 
-Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values each
-select a named config of its kind other than the context stack's `default`
-(e.g., via a `<base-table-config-name>`), which a persisted config of that kind
-would then [extend](../Specs/configs.md#referencing-named-configs).
+Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values &
+persisted configs of their kinds each select a named config of its kind to
+[extend](../Specs/configs.md#referencing-named-configs) other than `default`
+(e.g., via a `<base-table-config-name>`).

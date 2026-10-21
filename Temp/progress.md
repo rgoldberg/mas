@@ -1,6 +1,6 @@
 # Progress
 
-## Status (2026-10-20)
+## Status (2026-10-21)
 
 `Specs/*.md` are implemented (audited 2026-10-19, then implemented with each
 later spec change), except persisted named formats & custom named configs,
@@ -706,3 +706,10 @@ A persisted fields config ignores each `<absolute-field-spec>` &
 `<field-spec-edit>` that references a nonexistent field, while one on the
 command line remains an error (`nonexistentField`); the former is unimplemented,
 as are all custom configs.
+
+### 5th Spec Review Fixes (2026-10-21)
+
+A persisted table, key-value, or JSON config extends `default`, as a persisted
+fields config without a `<base-fields-config-section>` does, so each context's
+`standard` layers custom `default`s for every kind; it is unimplemented, as are
+all custom configs.
