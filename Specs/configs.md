@@ -35,6 +35,12 @@ it with a config overlaid on its `default` config (e.g., `--json-config P`).
 Giving more than 1 such flag or option, even the same one twice (e.g.,
 `--json --json` or `--json-config P --table`), is an error.
 
+## Line Terminators
+
+A **line terminator** is a CRLF (U+000D followed by U+000A, which is 1 line
+terminator), or any other character from U+000A to U+000D, U+0085, U+2028, or
+U+2029.
+
 ## Option Values
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,
