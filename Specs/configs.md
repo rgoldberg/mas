@@ -41,10 +41,10 @@ An option's **value** is the rest of its command-line argument after `=` (e.g.,
 `--fields=name`), or else the next command-line argument (e.g.,
 `--fields name`), iff that argument is `-` or does not start with `-`, so a
 value that starts with `-` must follow `=` (e.g., `--fields=-x`); otherwise, the
-option has no value, which is an error (e.g., `--fields -x`). Each spec defines
-an option's syntax over its value alone.
+option is an error (e.g., `--fields -x`). Each spec defines an option's syntax
+over its value alone.
 
-A **flag** is an option without a value (e.g., `--json`).
+A **flag** is an option that takes no value (e.g., `--json`).
 
 ## Command Lists
 

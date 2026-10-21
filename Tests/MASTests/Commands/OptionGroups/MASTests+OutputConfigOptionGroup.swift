@@ -51,7 +51,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an option without a next argument has no value, which is an error`() {
+	func `an option without a next argument is an error`() {
 		#expect(throws: (any Error).self) { try MAS.Lookup.parse(["1", "--fields"]) }
 	}
 
