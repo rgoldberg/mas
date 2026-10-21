@@ -392,9 +392,10 @@ item-sort-option     = <disable-all-sorts> | <direction>
 disable-all-sorts = "0" (* mnemonic: sort priority 0 *)
 ```
 
-`<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`, disabling
-all sorting without affecting any `<sort-option-set>`; a subsequent
-`<field-spec-edit>` may re-enable a field spec's sort.
+`<disable-all-sorts>` sets the `<sort-priority>` of each field spec that has a
+`<sort>` to `0`, disabling all sorting without affecting any
+`<sort-option-set>`; a subsequent `<field-spec-edit>` may re-enable a field
+spec's sort.
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
