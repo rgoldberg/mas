@@ -502,7 +502,7 @@ of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
 the start of the working fields config. Before the 1st `<field-spec-edit>`, it
 is the start (i.e., immediately before the 1st field spec in the working fields
 config). It locates a field spec, not an index, so moving another field spec
-does not change it (e.g., for `a,b,c,d`, `.c,%a` moves `a` immediately after
+does not affect it (e.g., for `a,b,c,d`, `.c,%a` moves `a` immediately after
 `c`, giving `b,c,a,d`).
 
 Field spec edits act as follows:
