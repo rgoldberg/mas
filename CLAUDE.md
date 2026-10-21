@@ -17,6 +17,10 @@ rule file, in the same change.
 - **Xcode:** 27
 - **macOS:** 15
 
+When bumping the minimum Swift or Xcode version, update all of its occurrences
+together: `.swift-version`, `.xcode-version`, `Package.swift`'s
+`swift-tools-version`, this section & `README.md`'s Swift badge & Build row.
+
 ## Quick Entry Points
 
 - `Scripts/bootstrap`
@@ -29,6 +33,10 @@ rule file, in the same change.
 - `Scripts/build '' -c release` (release)
 - `Scripts/test`
 - `Scripts/package`
+
+Run a built `mas` with standard input redirected from `/dev/null` (e.g.,
+`.build/debug/mas list </dev/null`), because `mas` reads environment variables
+from a non-terminal standard input, so it blocks on an open pipe.
 
 ## Git Workflow
 
