@@ -8,10 +8,6 @@ to the files that its `paths` front matter matches, so Claude loads it only when
 working on them. Read this file before making repository changes, and read each
 applicable rule file before changing a matching file.
 
-When a user states a procedure, workflow, or code-style preference in
-conversation that differs from (or is not yet captured in) these files, update
-the applicable file to reflect it.
-
 ## Minimum Versions
 
 - **Swift:** 6.4
@@ -154,14 +150,9 @@ chosen), except always use `.md` for Markdown.
 make every other file (code, tests, docs, completions, `Temp/`, etc.) consistent
 with it.
 
-Never limit a spec, or argue against a spec change, based on existing code,
-which merely implements the specs; when proposing or evaluating a spec change,
-never mention that code must be changed to match it, since that is always
-implied.
-
 Follow the [spec grammar rules](.claude/rules/specs.md) in specs.
 
-Keep all prose about input (in specs, code comments, `Temp/*`, discussion, etc.)
+Keep all prose about input (in specs, code comments, `Temp/*`, etc.)
 input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not
 "as its JSON text"), since input need not be JSON.
 
