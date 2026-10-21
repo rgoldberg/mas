@@ -77,7 +77,10 @@ private extension MASTests {
 			(.canonical, "1,234.5e3x", "1234500", "x"),
 			(.canonical, "2E-1!", "0.2", "!"),
 			(.canonical, "3e+", "3", "e+"),
+			(.canonical, ".5e1x", "5", "x"),
+			(.canonical, ".x", nil, ".x"),
 			(germanConventions, "1.234,5", "1234.5", ""),
+			(germanConventions, ",25", "0.25", ""),
 		],
 	)
 	func `parses a grouped number's value, removing its digit group separators`(

@@ -778,3 +778,7 @@ text segment is a maximal sequence of non-boundary characters, not a run of
 non-boundary text; a Foundation time zone abbreviation's UTC offset may vary,
 while other `<time-zone-code>`s may also have a fixed one; & a
 `<reference-date>` is a date-only.
+
+A grouped number may start with its decimal separator (e.g., `.5` compares as
+`0.5`), as a number coercion's number may (`groupedNumberPrefix(of:)`), instead
+of requiring a leading digit, after which `.` was text.
