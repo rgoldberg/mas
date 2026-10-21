@@ -772,11 +772,11 @@ implementation is unchanged.
 
 Specs clarify, as already implemented: a `<field-occurrence-index>` also counts
 the `null`s that replaced its field's removed field specs; each number segment
-is the longest one at the earliest position after the preceding typed segment; a
-text segment is a maximal sequence of non-boundary characters, not a run of
-non-boundary text; a Foundation time zone abbreviation's UTC offset may vary,
-while other `<time-zone-code>`s may also have a fixed one; & a
-`<reference-date>` is a date-only.
+is the longest one at the 1st position, after the preceding typed segment, at
+which one starts; a text segment is a maximal sequence of non-boundary
+characters, not a run of non-boundary text; a UTC offset `<time-zone-code>` has
+a fixed UTC offset, while a Foundation time zone abbreviation may identify a
+time zone whose UTC offset varies; & a `<reference-date>` is a date-only.
 
 A grouped number may start with its decimal separator (e.g., `.5` compares as
 `0.5`), as a number coercion's number may (`groupedNumberPrefix(of:)`), instead

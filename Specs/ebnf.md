@@ -306,7 +306,7 @@ A constant expression that matches no input, only at the end of the input.
 
 Inherent scalar.
 
-`""` is the escape sequence for an escaped `"` in `TEXT`.
+Within `TEXT`, `""` denotes a `"`.
 
 #### Scalar Descriptions
 
