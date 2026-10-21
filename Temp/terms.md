@@ -539,7 +539,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `-` ([defined](../Specs/configs.md#option-values))
      - option value separator: the `=` between a long option & its value (e.g.,
        in `--fields=name`)
-     - flag: an option without a value (e.g., `--json`)
+     - flag: an option that takes no value (e.g., `--json`)
        ([defined](../Specs/configs.md#option-values))
      - REJECTED: option-argument / option-argument separator (the specs use
        "argument" for an argument list's elements)

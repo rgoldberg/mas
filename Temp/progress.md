@@ -684,8 +684,8 @@ until a Swift Argument Parser release includes #961.
 
 An option takes the next argument as its value iff that argument is `-` or does
 not start with `-`, so a value that starts with `-` must follow `=` (e.g.,
-`--fields=-x`), and an option without a value is an error (e.g., `--fields -x`),
-as Swift Argument Parser already requires.
+`--fields=-x`), and an option that takes a value is an error without one (e.g.,
+`--fields -x`), as Swift Argument Parser already requires.
 
 Configs specify each context's `standard` (the root context's is the leaf
 context's built-in standard; any other context's is its parent's `default`), a
