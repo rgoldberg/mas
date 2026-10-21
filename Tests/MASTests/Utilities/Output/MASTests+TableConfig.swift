@@ -164,11 +164,15 @@ private extension MASTests {
 		arguments: [
 			("Hbogus:", TableConfigParsingError.invalidHeaderStyleSpecifier("bogus")),
 			("Hb", .invalidHeaderStyleSpecifier("b")),
+			("H1\n2:", .invalidHeaderStyleSpecifier("1\n2")),
+			("P\u{2028}:", .invalidHeaderStylePrefix("\u{2028}")),
+			("X\r:", .invalidHeaderStyleSuffix("\r")),
+			("O\r\n:", .invalidHeaderStyleReset("\r\n")),
 			("z", .invalidSetting("z")),
 			("H1\\", .danglingEscape),
 		],
 	)
-	func `an invalid header style specifier, unknown setting, or dangling escape is a parse error`(
+	func `an invalid header style specifier or sequence, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: TableConfigParsingError,
 	) throws {

@@ -751,3 +751,7 @@ Key-value output renders each line terminator in a key as `⏎`, while a value
 continues on a new line after each of its line terminators, each such non-empty
 line indented by spaces to the value's start, instead of starting at the line's
 start; an item separator line fills to the widest line of any item's rows.
+
+A `<style-specifier>`, `<style-prefix>`, `<style-suffix>`, or `<style-reset>`
+that contains a line terminator is an error (`parseStyleSpecifier` /
+`parseStyleSequence`), instead of splitting each row that it styles.

@@ -89,15 +89,27 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		case "p":
 			headerStylePrefix = TableConfig.default.headerStyleSequences.prefix
 		case "P":
-			headerStylePrefix = try parseTableSettingText(&input)
+			headerStylePrefix = try parseStyleSequence(
+				&input,
+				danglingEscapeError: TableConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: TableConfigParsingError.invalidHeaderStylePrefix,
+			)
 		case "x":
 			headerStyleSuffix = TableConfig.default.headerStyleSequences.suffix
 		case "X":
-			headerStyleSuffix = try parseTableSettingText(&input)
+			headerStyleSuffix = try parseStyleSequence(
+				&input,
+				danglingEscapeError: TableConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: TableConfigParsingError.invalidHeaderStyleSuffix,
+			)
 		case "o":
 			headerStyleReset = TableConfig.default.headerStyleSequences.reset
 		case "O":
-			headerStyleReset = try parseTableSettingText(&input)
+			headerStyleReset = try parseStyleSequence(
+				&input,
+				danglingEscapeError: TableConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: TableConfigParsingError.invalidHeaderStyleReset,
+			)
 		case "s":
 			separatorPattern = .off
 		case "S":
@@ -143,7 +155,10 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
 	case invalidColumnSpacing(String)
+	case invalidHeaderStylePrefix(String)
+	case invalidHeaderStyleReset(String)
 	case invalidHeaderStyleSpecifier(String)
+	case invalidHeaderStyleSuffix(String)
 	case invalidSeparatorPattern(String)
 	case invalidSetting(Character)
 
@@ -153,8 +168,17 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Escape prefix '\\' at the end of --table-config's value"
 		case let .invalidColumnSpacing(spacing):
 			"Invalid column spacing (a line terminator would split each row): \(spacing.debugDescription)"
+		case let .invalidHeaderStylePrefix(stylePrefix):
+			"Invalid header style prefix (a line terminator would split the header row): \(stylePrefix.debugDescription)"
+		case let .invalidHeaderStyleReset(styleReset):
+			"Invalid header style reset (a line terminator would split the header row): \(styleReset.debugDescription)"
 		case let .invalidHeaderStyleSpecifier(styleSpecifier):
-			"Invalid header style specifier (escape each ASCII letter, e.g., \"\\b\"): \(styleSpecifier)"
+			"""
+			Invalid header style specifier (expected no line terminator, escaping each ASCII letter, e.g., "\\b"): \
+			\(styleSpecifier)
+			"""
+		case let .invalidHeaderStyleSuffix(styleSuffix):
+			"Invalid header style suffix (a line terminator would split the header row): \(styleSuffix.debugDescription)"
 		case let .invalidSeparatorPattern(pattern):
 			"Invalid separator pattern (a line terminator would split the separator line): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
@@ -189,10 +213,9 @@ private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_
 	}
 }
 
-/// Parses an uppercase `<table-setting>`'s `{text}` payload (`<style-prefix>`,
-/// `<style-suffix>`, `<style-reset>`, `<separator-pattern>`, or
-/// `<column-spacing>`) through its `<table-setting-termination>` via
-/// `parseOutputConfigSettingPayload`.
+/// Parses an uppercase `<table-setting>`'s `{text}` payload
+/// (`<separator-pattern>` or `<column-spacing>`) through its
+/// `<table-setting-termination>` via `parseOutputConfigSettingPayload`.
 private func parseTableSettingText(_ input: inout Substring) throws(TableConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: TableConfigParsingError.danglingEscape)
 }

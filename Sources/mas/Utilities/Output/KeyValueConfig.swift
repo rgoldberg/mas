@@ -81,15 +81,27 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "p":
 			keyStylePrefix = KeyValueConfig.default.keyStyleSequences.prefix
 		case "P":
-			keyStylePrefix = try parseKeyValueSettingText(&input)
+			keyStylePrefix = try parseStyleSequence(
+				&input,
+				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStylePrefix,
+			)
 		case "x":
 			keyStyleSuffix = KeyValueConfig.default.keyStyleSequences.suffix
 		case "X":
-			keyStyleSuffix = try parseKeyValueSettingText(&input)
+			keyStyleSuffix = try parseStyleSequence(
+				&input,
+				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStyleSuffix,
+			)
 		case "o":
 			keyStyleReset = KeyValueConfig.default.keyStyleSequences.reset
 		case "O":
-			keyStyleReset = try parseKeyValueSettingText(&input)
+			keyStyleReset = try parseStyleSequence(
+				&input,
+				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
+				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStyleReset,
+			)
 		case "f":
 			leaderPattern = nil
 		case "F":
@@ -144,7 +156,10 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
 	case invalidItemSeparatorPattern(String)
+	case invalidKeyStylePrefix(String)
+	case invalidKeyStyleReset(String)
 	case invalidKeyStyleSpecifier(String)
+	case invalidKeyStyleSuffix(String)
 	case invalidLeaderPattern(String)
 	case invalidLeadingSpacing(String)
 	case invalidSetting(Character)
@@ -159,8 +174,17 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 			Invalid item separator pattern (a line terminator would split the item separator line): \
 			\(pattern.debugDescription)
 			"""
+		case let .invalidKeyStylePrefix(stylePrefix):
+			"Invalid key style prefix (a line terminator would split each row): \(stylePrefix.debugDescription)"
+		case let .invalidKeyStyleReset(styleReset):
+			"Invalid key style reset (a line terminator would split each row): \(styleReset.debugDescription)"
 		case let .invalidKeyStyleSpecifier(styleSpecifier):
-			"Invalid key style specifier (expected non-empty, escaping each ASCII letter, e.g., \"\\b\"): \(styleSpecifier)"
+			"""
+			Invalid key style specifier (expected non-empty, with no line terminator, escaping each ASCII letter, e.g., \
+			"\\b"): \(styleSpecifier)
+			"""
+		case let .invalidKeyStyleSuffix(styleSuffix):
+			"Invalid key style suffix (a line terminator would split each row): \(styleSuffix.debugDescription)"
 		case let .invalidLeaderPattern(pattern):
 			"Invalid leader pattern (a line terminator would split each row): \(pattern.debugDescription)"
 		case let .invalidLeadingSpacing(spacing):
@@ -174,10 +198,9 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 }
 
 /// Parses an uppercase `<key-value-setting>`'s `{text}` payload
-/// (`<style-prefix>`, `<style-suffix>`, `<style-reset>`, `<leader-pattern>`,
-/// `<leading-spacing>`, `<trailing-spacing>`, or `<item-separator-pattern>`)
-/// through its `<key-value-setting-termination>` via
-/// `parseOutputConfigSettingPayload`.
+/// (`<leader-pattern>`, `<leading-spacing>`, `<trailing-spacing>`, or
+/// `<item-separator-pattern>`) through its `<key-value-setting-termination>`
+/// via `parseOutputConfigSettingPayload`.
 private func parseKeyValueSettingText(_ input: inout Substring) throws(KeyValueConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: KeyValueConfigParsingError.danglingEscape)
 }

@@ -30,6 +30,10 @@ private extension MASTests {
 			("K:", .invalidKeyStyleSpecifier("")),
 			("K1S", .invalidKeyStyleSpecifier("1S")),
 			("Kb:", .invalidKeyStyleSpecifier("b")),
+			("K1\n2:", .invalidKeyStyleSpecifier("1\n2")),
+			("P\n:", .invalidKeyStylePrefix("\n")),
+			("X\u{85}:", .invalidKeyStyleSuffix("\u{85}")),
+			("O\u{2029}:", .invalidKeyStyleReset("\u{2029}")),
 			("z", .invalidSetting("z")),
 			("F-\\", .danglingEscape),
 			("F-\n", .invalidLeaderPattern("-\n")),
@@ -40,7 +44,7 @@ private extension MASTests {
 			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
 		],
 	)
-	func `an invalid key style specifier, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
+	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: KeyValueConfigParsingError,
 	) throws {
