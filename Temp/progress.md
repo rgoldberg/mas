@@ -852,3 +852,7 @@ of itself; it is unimplemented, as are all custom configs.
 $previous$ locates a field spec (or the start of the working fields config), not
 an index, so moving a field spec from before it does not change it (e.g., for
 `a,b,c,d`, `.c,%a` gives `b,c,a,d`), as already implemented.
+
+At each position, sorting consumes the longest boundary that matches there
+(e.g., with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s),
+as already implemented (`rankAndLength(in:at:)`).

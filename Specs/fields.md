@@ -903,6 +903,9 @@ Each of the following is itself a boundary:
 If multiple `<boundary-group>`s define the same boundary, it belongs to the last
 group.
 
+At each position, the longest boundary that matches there is consumed (e.g.,
+with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).
+
 Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
 
