@@ -470,10 +470,10 @@ align); it accepts a value of any type & does not modify it, unlike every
 `<value-transform>`. A `<format-transform-pipeline>` may thus also precede a
 `<format-template>` (e.g., `.endJustify%N..scale:10,6,,0:+?+ MB`).
 
-`centerStartJustify` & `centerEndJustify` differ only when the column's padding
-is odd-width: `centerStartJustify` puts the extra padding character after the
-value (leaving it nearer the column's start); `centerEndJustify` puts it before
-the value (leaving it nearer the column's end).
+`centerStartJustify` & `centerEndJustify` differ only when the value's remaining
+column width is odd: `centerStartJustify` puts the extra space after the value
+(leaving it nearer the column's start); `centerEndJustify` puts it before the
+value (leaving it nearer the column's end).
 
 An absent `<justify>` is inherited from the working fields config; absent any
 justification to inherit, it is `<start-justify>`.
