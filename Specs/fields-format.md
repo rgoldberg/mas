@@ -358,7 +358,7 @@ after the radix point.
 ```ebnf
 date-transform-pipeline = <date-transform-call>+
 date-transform-call     = <transform-call-prefix> [ <coercion> ] <date-transform>
-date-transform          = <date-only> | <time-only-transform> (* type: date *)
+date-transform          = <date-only> | <time-zone> (* type: date *)
 
 time-only-transform-pipeline = <time-only-transform-call>+
 time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
