@@ -993,6 +993,7 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<multi-character-boundary-text>`                                    |                 | `%`                     | ignored            | ignored                 |
 | `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`             | ignored            | ignored                 |
 | `<template-text>` starting a `<format-block>`                        | `:` `.`         | `%` `/` `,`             | ignored            | consumed iff before `%` |
+| `<template-text>` after a `<format-transform-pipeline>`              | `.`             | `%` `/` `,`             | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`             | consumed           | consumed iff before `%` |
 | `<format-name>` in a `<block>`                                       |                 | `.` `+`                 | ignored            | ignored                 |
 | `<template-text>` starting a `<block>`                               | `:` `.`         | `%` `+`                 | ignored            | consumed iff before `%` |

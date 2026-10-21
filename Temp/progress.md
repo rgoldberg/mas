@@ -822,3 +822,8 @@ instead of as UTC, so, e.g., in `America/New_York`, `09:00:00` follows
 
 An output config option's value without a non-whitespace character overlays no
 setting (e.g., `--json-config=` ≡ `--json`), as already implemented.
+
+A `<format-transform-pipeline>` may precede a `<format-template>`
+(`parseFormatBlockPipeline`), so a template can set its field spec's
+justification (e.g., `.endJustify%N..scale:10,6,,0:+?+ MB`), instead of only a
+`<pipeline>` being able to.

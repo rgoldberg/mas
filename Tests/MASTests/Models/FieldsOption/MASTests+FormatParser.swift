@@ -351,10 +351,25 @@ private extension MASTests {
 			(".startJustify.centerEndJustify", .centerEnd),
 			(".centerStartJustify..uppercase", .centerStart),
 			(".uppercase", .start),
+			(".endJustify%i", .end),
+			(".startJustify.centerEndJustify (%i)", .centerEnd),
 		],
 	)
 	func `extracts a format-transform-pipeline's justification`(format: String, justification: Justification) throws {
 		#expect(try parsedFieldSpec(format).justification == justification)
+	}
+
+	@Test(
+		arguments: [
+			(".endJustify%N..scale:10,6,,0:+?+ MB", JSON.Node.number(1_500_000), "2 MB"),
+			(".endJustify  (%i)", .number(5), "(5)"), // Preceding whitespace is ignored
+			(".endJustify\\.%i", .number(5), ".5"),
+			(".endJustify:%i", .number(5), ":5"),
+		],
+	)
+	func `a format-transform-pipeline may precede a format-template`(format: String, value: JSON.Node, expected: String)
+	throws {
+		#expect(try rendered(format, value) == expected)
 	}
 
 	@Test
@@ -577,6 +592,7 @@ private extension MASTests {
 			(".uppercase.endJustify", .invalidPipeline("<pipeline>")),
 			("..endJustify", .coercionNotSupported(".")),
 			(".uppercase%i", .unexpectedCharacter("%")),
+			(".endJustify x", .templateLacksPlaceholder),
 			("%N.uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%S.round++", .invalidPipeline("<string-pipeline>")),
 			("%I.uppercase+", .invalidPipeline("<unconditional-pipeline>")),
