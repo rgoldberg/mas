@@ -365,14 +365,15 @@ after the radix point.
 ```ebnf
 date-transform-pipeline = <date-transform-call>+
 date-transform-call     = <transform-call-prefix> [ <coercion> ] <date-transform>
-date-transform          = <date-only> | <time-zone> (* type: date *)
+date-transform          = <date-only> | <date-time-zone> (* type: date *)
 
 time-only-transform-pipeline = <time-only-transform-call>+
 time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
-time-only-transform          = <time-zone> (* type: time-only *)
+time-only-transform          = <time-only-time-zone> (* type: time-only *)
 
-date-only = "dateOnly"
-time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
+date-only           = "dateOnly"
+date-time-zone      = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
+time-only-time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

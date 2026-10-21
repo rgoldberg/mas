@@ -34,7 +34,7 @@ enum Transform: Hashable {
 
 	case dateOnly
 	/// Sets the output time zone & the `<reference-date>` (`nil` iff absent); see
-	/// `<time-zone>` in fields-format.md.
+	/// `<date-time-zone>` & `<time-only-time-zone>` in fields-format.md.
 	case timeZone(TimeZone, referenceDate: CivilDate?) // swiftlint:enable sorted_enum_cases
 
 	/// This transform's kind, per its `<value-transform>` alternative.

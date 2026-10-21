@@ -25,6 +25,13 @@ giving any of them more than once is an error, as it is for output format flags
    1. Remove the `pr-pull` [release
       rule](../.claude/rules/scripting.md#releases).
 
+### Top-Level `timeZone` on Time-Only Values
+
+A `<format-block>`'s `<value-transform-pipeline>` can contain only
+`<date-transform-pipeline>`'s `timeZone` (`<date-time-zone>`, whose type is
+date), so the specs make `.timeZone:UTC:` an error for a time-only field value
+(e.g., `17:39:23`), but the code renders it in UTC; decide which is right.
+
 ### Swift Argument Parser Empty Values
 
 Awaiting an upstream release (not actionable until then): mas cannot be released

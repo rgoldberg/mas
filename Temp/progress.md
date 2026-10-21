@@ -7,7 +7,9 @@ later spec change), except persisted named formats & custom named configs,
 including context stack lookup, as described by [their open
 issues](todo.md#persisted-custom-named-formats--configs) & by `// TODO:`s in
 `Format.swift`, `FieldSpec.swift` & `FormatParser.swift`: every
-`<named-format-reference>` reports `unknownNamedFormat`.
+`<named-format-reference>` reports `unknownNamedFormat`. A top-level `timeZone`
+also diverges from the specs, as described by [its open
+issue](todo.md#top-level-timezone-on-time-only-values).
 
 ## History
 
@@ -721,9 +723,9 @@ A reference with an output format suffix or `@unsuffixed` matches a context iff
 the context contains that variant; it is unimplemented, as are all custom
 configs.
 
-`<date-transform>` references `<time-zone>` instead of `<time-only-transform>`,
-whose time-only type contradicted `<date-transform>`'s date type; the
-implementation is unchanged.
+`<date-transform>` no longer references `<time-only-transform>`, whose time-only
+type contradicted `<date-transform>`'s date type; the implementation is
+unchanged.
 
 [Value coercion](../Specs/fields-format.md#value-coercion) specifies every
 type's string form once (including a number's trivia & a date's or time-only's
@@ -755,3 +757,10 @@ start; an item separator line fills to the widest line of any item's rows.
 A `<style-specifier>`, `<style-prefix>`, `<style-suffix>`, or `<style-reset>`
 that contains a line terminator is an error (`parseStyleSpecifier` /
 `parseStyleSequence`), instead of splitting each row that it styles.
+
+### 6th Spec Review Fixes (2026-10-21)
+
+`timeZone` is `<date-time-zone>` in a `<date-transform>` &
+`<time-only-time-zone>` in a `<time-only-transform>`, each typed for its
+pipeline's type, instead of 1 nonterminal shared by both; the implementation is
+unchanged.
