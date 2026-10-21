@@ -15,10 +15,9 @@ internal import JSONAST
 /// `<format-transform-pipeline>` is not part of it: it is extracted into
 /// `FieldSpec.justification` at parse time.
 indirect enum Format: Equatable, Sendable {
-	/// A `<*-pipeline>`'s value `<*-transform-call>`s, applied in order to the
-	/// value the pipeline formats. Empty iff the pipeline consists solely of a
+	/// A `<*-pipeline>`. Empty iff the pipeline consists solely of a
 	/// `<format-transform-pipeline>`.
-	case pipeline([TransformCall])
+	case pipeline(Pipeline)
 	/// A `<*-template>`'s elements.
 	case template([TemplateElement])
 
@@ -28,14 +27,28 @@ indirect enum Format: Equatable, Sendable {
 		.template(.init())
 	}
 
+	/// The built-in standard named format: `%i`.
+	static var standard: Self {
+		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
+	}
+
 	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
 	// swiftlint:disable:next todo
-	// TODO: a per-field, per-context custom default, once persisted fields
-	//  configs exist
+	// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": once custom
+	//  named formats are persisted, the `default` named format, looked up from
+	//  the starting context of the reference that selects the default field spec
 	static func `default`(fieldName _: String) -> Self {
-		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
+		.standard
 	}
+}
+
+/// A `<*-pipeline>`: its `<value-transform>` calls, applied in order to its
+/// `<named-format-reference>`'s format's value, if any, else to the value that
+/// the pipeline formats.
+struct Pipeline: Equatable { // swiftlint:disable:this one_declaration_per_file
+	var namedFormat = Format?.none
+	var calls = [TransformCall]()
 }
 
 /// A `<*-transform-call>`: its `<value-transform>` & its `<coercion>` (or
@@ -49,7 +62,7 @@ struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_
 enum TemplateElement: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<block-placeholder>`: the enclosing matcher's value, through
 	/// `pipeline`.
-	case blockPlaceholder(pipeline: [TransformCall])
+	case blockPlaceholder(pipeline: Pipeline)
 	/// A `<placeholder>`.
 	case placeholder(Placeholder)
 	/// A `<template-text>`'s value.
@@ -64,7 +77,7 @@ enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<match-placeholder>`.
 	case match([Branch], MatchForm)
 	/// An `<unconditional-placeholder>`; `pipeline` is empty for a nullary one.
-	case unconditional(UnconditionalPredicate, pipeline: [TransformCall])
+	case unconditional(UnconditionalPredicate, pipeline: Pipeline)
 }
 
 /// An `<unconditional-placeholder>`'s or `<unconditional-branch>`'s predicate,
@@ -209,10 +222,10 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// The evaluated value, or `nil` iff formatting aborts.
 	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
-		case let .pipeline(calls):
+		case let .pipeline(pipeline):
 			// A block's pipeline formats the enclosing matcher's value; a
 			// `<format-block>`'s, the field value
-			return try (context.matched ?? .input(context.input)).applying(calls)
+			return try pipeline.evaluated(on: context.matched ?? .input(context.input), in: context)
 		case let .template(elements):
 			// A template that is solely 1 placeholder has that placeholder's value
 			if let element = elements.first, elements.count == 1, element.isPlaceholder {
@@ -227,6 +240,19 @@ extension Format { // swiftlint:disable:this file_types_order
 			}
 			return .string(result)
 		}
+	}
+}
+
+private extension Pipeline { // swiftlint:disable:this file_types_order
+	/// This pipeline's calls applied to its named format's value, if any, else to
+	/// `value`; `nil` iff formatting aborts.
+	func evaluated(on value: FormatValue, in context: FormatContext) throws(FormattingError) -> FormatValue? {
+		let input = if let namedFormat {
+			try namedFormat.evaluated(in: context)
+		} else {
+			value
+		}
+		return try input?.applying(calls)
 	}
 }
 
@@ -256,7 +282,7 @@ private extension TemplateElement { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .blockPlaceholder(pipeline):
-			try (context.matched ?? .input(context.input)).applying(pipeline)
+			try pipeline.evaluated(on: context.matched ?? .input(context.input), in: context)
 		case let .placeholder(placeholder):
 			try placeholder.evaluated(in: context)
 		case let .text(text):
@@ -303,7 +329,7 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 				try failure.evaluated(in: context)
 			}
 		case let .unconditional(predicate, pipeline):
-			return try predicate.value(in: context).applying(pipeline)
+			return try pipeline.evaluated(on: predicate.value(in: context), in: context)
 		}
 	}
 }

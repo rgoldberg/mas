@@ -63,7 +63,7 @@ private struct FormatParser {
 	/// `<format-transform-pipeline>` & `<format-template>`.
 	private mutating func parseFormatBlockPipeline()
 	throws(ParsingError) -> (format: Format, justification: Justification?) {
-		try parseNamedFormatIfPresent(terminatorSet: formatBlockNameTerminatorSet)
+		let namedFormat = try parseNamedFormatIfPresent(terminatorSet: formatBlockNameTerminatorSet)
 		var justification = Justification?.none
 		var calls = [TransformCall]()
 		while skipWhitespace(), input.first == transformCallPrefix {
@@ -82,15 +82,15 @@ private struct FormatParser {
 		}
 		// An absent `<justify>` is inherited; a `<format-template>` may follow a
 		// `<format-transform-pipeline>`, ignoring preceding whitespace
-		return try calls.isEmpty && !isAtFormatBlockEnd
+		return try namedFormat == nil && calls.isEmpty && !isAtFormatBlockEnd
 			? (.template(parseFormatTemplate()), justification)
-			: (.pipeline(calls), justification)
+			: (.pipeline(.init(namedFormat: namedFormat, calls: calls)), justification)
 	}
 
 	/// Parses a block's `<*-pipeline>`, whose kind `kind` selects the valid
 	/// transforms.
-	private mutating func parseBlockPipeline(kind: BlockKind) throws(ParsingError) -> [TransformCall] {
-		try parseNamedFormatIfPresent(terminatorSet: blockNameTerminatorSet)
+	private mutating func parseBlockPipeline(kind: BlockKind) throws(ParsingError) -> Pipeline {
+		let namedFormat = try parseNamedFormatIfPresent(terminatorSet: blockNameTerminatorSet)
 		var calls = [TransformCall]()
 		while skipWhitespace(), input.first == transformCallPrefix {
 			guard case let .value(call) = try parseTransformCall() else {
@@ -98,18 +98,21 @@ private struct FormatParser {
 			}
 			calls.append(call)
 		}
-		guard kind.pipelineShapeSet.contains(where: calls.hasShape) else {
+		// A named format may form a pipeline alone
+		guard namedFormat != nil && calls.isEmpty || kind.pipelineShapeSet.contains(where: calls.hasShape) else {
 			throw .invalidPipeline(kind.pipelineName)
 		}
-		return calls
+		return .init(namedFormat: namedFormat, calls: calls)
 	}
 
-	/// Parses a `<named-format-reference>`, if present. No named formats exist
-	/// yet, so any reference reports an error, per fields-format.md:
-	/// `invalidFormatName` for an invalid format name, else `unknownNamedFormat`.
-	private mutating func parseNamedFormatIfPresent(terminatorSet: Set<Character>) throws(ParsingError) {
+	/// Parses a `<named-format-reference>`, if present, into its format. No
+	/// custom named formats exist yet, so only `standard` & `default` (which is
+	/// `standard` absent a custom `default`) exist; any other reference reports
+	/// an error: `invalidFormatName` for an invalid format name, else
+	/// `unknownNamedFormat`.
+	private mutating func parseNamedFormatIfPresent(terminatorSet: Set<Character>) throws(ParsingError) -> Format? {
 		guard input.first == namePrefix else {
-			return
+			return nil
 		}
 		input.removeFirst()
 		try forbidWhitespace(after: namePrefix)
@@ -118,11 +121,16 @@ private struct FormatParser {
 			throw .invalidFormatName(name)
 		}
 		// swiftlint:disable:next todo
-		// TODO: once persisted named formats exist, resolve the name to its format,
-		//  checking that its output has the input type of the 1st succeeding
-		//  `<value-transform>` in its pipeline, even after a
+		// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": once
+		//  custom named formats are persisted, look the name up through the context
+		//  stack from the reference's starting context, as configs.md specifies for
+		//  every config kind, checking that its output has the input type of the
+		//  1st succeeding `<value-transform>` in its pipeline, even after a
 		//  `<format-transform-pipeline>`
-		throw .unknownNamedFormat(name)
+		guard name == standardConfigName || name == defaultConfigName else {
+			throw .unknownNamedFormat(name)
+		}
+		return .standard
 	}
 
 	/// Parses a `<*-transform-call>`, including its `<transform-call-prefix>`.
@@ -316,15 +324,15 @@ private struct FormatParser {
 
 	/// Parses a pipeline of kind `kind`, without a template, then its
 	/// `<block-terminator>`.
-	private mutating func parsePipelineBlock(kind: BlockKind) throws(ParsingError) -> [TransformCall] {
+	private mutating func parsePipelineBlock(kind: BlockKind) throws(ParsingError) -> Pipeline {
 		skipWhitespace() // A pipeline ignores preceding whitespace
-		let calls = try parseBlockPipeline(kind: kind)
+		let pipeline = try parseBlockPipeline(kind: kind)
 		skipWhitespace()
 		guard input.first == blockTerminator else {
 			throw .missingBlockTerminator
 		}
 		input.removeFirst()
-		return calls
+		return pipeline
 	}
 
 	/// Parses a `<*-template>` of a block of kind `kind`, up to its
@@ -384,7 +392,7 @@ private struct FormatParser {
 	/// Parses a `<non-nullary-unconditional-placeholder>`'s pipeline & its
 	/// `<block-terminator>`.
 	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate)
-	throws(ParsingError) -> [TransformCall] {
+	throws(ParsingError) -> Pipeline {
 		try parsePipelineBlock(kind: predicate == .input ? .unconditional : .string)
 	}
 

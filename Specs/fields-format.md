@@ -88,15 +88,14 @@ name-prefix = ":"!
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A **named format** is a format that:
+A **named format** is a [named config](configs.md#named-configs) of the format
+[config kind](configs.md#config-kinds), which a `<named-format-reference>`
+references by its name, its **format name** (e.g., `:x` references `x`).
 
-- Is persisted in the app configuration.
-- Can be referenced via `<named-format-reference>`s.
-
-A **format name** matches the regex `^[-_0-9A-Za-z]+$`, as a [config
-name](configs.md#named-configs) does.
-
-If no named format exists for a referenced name, an error is reported.
+The format kind's [built-in
+standard](configs.md#immutable-built-in-named-configs) is `%i`, so, absent any
+custom one, the [`default`](configs.md#default-configs) named format is `%i`; it
+formats each [default field spec](fields.md#default-field-specs).
 
 If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,
 the referenced format's value must also have the 1st such transform's input

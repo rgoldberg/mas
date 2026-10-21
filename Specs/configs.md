@@ -75,9 +75,11 @@ context, e.g., [`mas`'s context stacks](mas.md#context-stacks).
 ## Config Kinds
 
 Each **config kind** has its own hierarchy: a config is only ever looked up,
-referenced, or extended among configs of its own kind. The kinds are:
+referenced, or extended among configs of its own kind, except that a fields
+config may also reference named formats. The kinds are:
 
 - [**Fields config**](fields.md#fields-configs): which fields are output & how.
+- [**Format**](fields-format.md#named-formats): a field spec's format.
 - [**Table config**](table.md#table-config): table output settings.
 - [**Key-value config**](key-value.md#key-value-config): key-value output
   settings.
@@ -104,6 +106,7 @@ A named config may be referenced:
 
 - On the command line
 - By other persisted configs of the same kind
+- For a named format, by a persisted fields config
 
 A named config is found by returning the 1st config of the given kind found with
 the given name while iterating through the context stack from a **starting
@@ -119,14 +122,16 @@ A kind may refine how a context matches a name, e.g., fields configs'
 A persisted fields config **extends** `none` if it is an
 [`<absolute-config>`](fields.md#absolute-config), else the fields config that
 its [`<base-fields-config-section>`](fields.md#base-fields-config-selection)
-names; a persisted config of any other kind extends `default`, as a persisted
-`<relative-config>` without a `<base-fields-config-section>` does.
+names; a persisted table, key-value, or JSON config extends `default`, as a
+persisted `<relative-config>` without a `<base-fields-config-section>` does; a
+named format extends no config.
 
-A persisted config that extends a config of its own name resolves that config
-from the next less specific context in the context stack, so a config may extend
-its nearest same-named ancestor. In the root context, which has no less specific
-context, a `default` that extends `default` extends the root context's
-`standard`. Any other cyclic chain of references is an error.
+A persisted config that references a config of its own name (e.g., by extending
+it) resolves that config from the next less specific context in the context
+stack, so a config may reference its nearest same-named ancestor. In the root
+context, which has no less specific context, a `default` that references
+`default` references the root context's `standard`. Any other cyclic chain of
+references is an error.
 
 ### Immutable Built-In Named Configs
 
@@ -154,7 +159,8 @@ leaf, over the leaf context's built-in standard (e.g., for `mas list`,
 
 Users may define & persist named configs.
 
-All configs are ultimately derived transitively from a built-in config.
+Every config that extends a config is ultimately derived transitively from a
+built-in config.
 
 ### Default Configs
 

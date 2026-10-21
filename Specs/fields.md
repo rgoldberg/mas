@@ -59,13 +59,13 @@ Regardless of a field spec's visibility:
 A **default field spec** for a field is visible & has:
 
 - Label: the field's name.
-- Format: [`%i`](fields-format.md#unconditional-placeholders).
+- Format: the [`default` named format](fields-format.md#named-formats).
 - Justification: [`<start-justify>`](fields-format.md#format-transforms).
 - No `<sort>`, so it is not a sort key.
 
 E.g., `--fields .+size`, when the base fields config has no field spec for
-`size`, outputs `size` labeled `size`, formatted as `%i`, start-justified & not
-sorting items.
+`size`, outputs `size` labeled `size`, formatted per the `default` named format
+(absent any custom one, as `%i`), start-justified & not sorting items.
 
 ## Fields Configs
 

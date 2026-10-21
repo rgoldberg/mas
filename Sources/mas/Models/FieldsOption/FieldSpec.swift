@@ -366,7 +366,7 @@ func resolveBaseFieldsConfig(
 	all: BaseIncludesAllFieldsConfig,
 	outputFormat: OutputFormat,
 ) throws(ParsingError) -> any FieldsConfig {
-	var stem = (rawName.isEmpty ? defaultFieldsConfigName : rawName)[...]
+	var stem = (rawName.isEmpty ? defaultConfigName : rawName)[...]
 	let isUnsuffixedVariant = stem.hasSuffix(unsuffixedVariantReferenceSuffix)
 	if isUnsuffixedVariant {
 		stem.removeLast(unsuffixedVariantReferenceSuffix.count)
@@ -388,7 +388,7 @@ func resolveBaseFieldsConfig(
 		switch stem {
 		case allFieldsConfigName:
 			allVariant
-		case defaultFieldsConfigName, standardFieldsConfigName:
+		case defaultConfigName, standardConfigName:
 			isMachineFacing ? allVariant : standard.including(hidden: allVariant.fieldSpecs)
 		case noneFieldsConfigName:
 			allVariant.hidingAll().disablingAllSorts()
@@ -1141,7 +1141,7 @@ private let outputFormatSuffixSet = Set(["json", "key-value", "table"] as [Subst
 private let outputFormatSuffixPrefix = Character("@")
 private let unsuffixedVariantReferenceSuffix = "@unsuffixed"
 
-let defaultFieldsConfigName = "default"
+let defaultConfigName = "default"
 let noneFieldsConfigName = "none"
 let allFieldsConfigName = "all"
-let standardFieldsConfigName = "standard"
+let standardConfigName = "standard"

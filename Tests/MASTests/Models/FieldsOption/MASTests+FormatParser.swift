@@ -107,6 +107,23 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			(":standard", JSON.Node.string("abc"), String?.some("abc")),
+			(":default", .string("abc"), "abc"),
+			(":default.uppercase", .string("abc"), "ABC"),
+			(":default.endJustify.uppercase", .string("abc"), "ABC"),
+			(":standard..round", .string("4.6"), "5"),
+			// A block's named format is evaluated against the field value, as `%i` is
+			("%.N:default+-+", .string("4.50"), "4.50"),
+			("%L:default.uppercase+", .string("abc"), "ABC"),
+		],
+	)
+	func `renders the standard & default named formats as %i`(format: String, value: JSON.Node?, expected: String?)
+	throws {
+		#expect(try rendered(format, value) == expected)
+	}
+
+	@Test(
+		arguments: [
 			("%.:,,,,,.*,.*:n", JSON.Node.string("US$1,234.50"), String?.some("US$1234.5")),
 			("%.:,,,,,.*,.*:N.round++", .string("US$1,234.50"), "US$1235"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("-3 MB"), "3 MB"),
@@ -584,6 +601,7 @@ private extension MASTests {
 			("%x", .invalidLetter("x")),
 			("%", .missingPredicate),
 			(":name", .unknownNamedFormat("name")),
+			(":default%i", .invalidFormatName("default%i")),
 			(":my-name_2", .unknownNamedFormat("my-name_2")),
 			(":a b", .invalidFormatName("a b")),
 			(":a\\.b", .invalidFormatName("a.b")),

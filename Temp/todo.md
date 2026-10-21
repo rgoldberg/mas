@@ -49,15 +49,16 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 ### Persisted Custom Named Formats & Configs
 
-1. Custom named formats: every reference to one reports `unknownNamedFormat` (or
-   `invalidFormatName` for an invalid format name).
+1. Custom named formats: every reference to a named format other than `standard`
+   & `default` (both `%i`) reports `unknownNamedFormat` (or `invalidFormatName`
+   for an invalid format name).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
-   kind:
+   kind, named formats included:
    1. Looking a name up through the [context
       stack](../Specs/configs.md#referencing-named-configs) from its starting
       context.
-   2. Resolving a config that extends its same-named ancestor, including a root
-      context `default` that extends `default`.
+   2. Resolving a config that references its same-named ancestor, including a
+      root context `default` that references `default`.
    3. A persisted table, key-value, or JSON config
       [extending](../Specs/configs.md#referencing-named-configs) `default`.
    4. Reporting reference cycles & a custom config named `standard` or any
@@ -75,7 +76,6 @@ only after `=` (e.g., `--json[=<json-config>]`).
    [table](../Specs/table.md#implied-settings) &
    [key-value](../Specs/key-value.md#implied-settings) settings' precedence over
    inherited ones has no effect yet.
-4. Per-context custom default formats.
 
 #### Custom Names Removal
 

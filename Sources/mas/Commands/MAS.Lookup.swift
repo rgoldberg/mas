@@ -66,7 +66,10 @@ private struct KeyValueOutputConfig: OutputConfig {
 						.placeholder(
 							.conditional(
 								.init(predicate: .date, coercion: nil),
-								.binary(success: .pipeline([.init(transform: .dateOnly, coercion: nil)]), failure: .empty),
+								.binary(
+									success: .pipeline(.init(calls: [.init(transform: .dateOnly, coercion: nil)])),
+									failure: .empty,
+								),
 							),
 						),
 					],
@@ -94,13 +97,15 @@ private struct KeyValueOutputConfig: OutputConfig {
 								.init(predicate: .number, coercion: .default),
 								.abortOnFailure(
 									success: .pipeline(
-										[
-											.init(
-												transform: .scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
-												coercion: nil,
-											),
-											.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),
-										],
+										.init(
+											calls: [
+												.init(
+													transform: .scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
+													coercion: nil,
+												),
+												.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),
+											],
+										),
 									),
 								),
 							),
