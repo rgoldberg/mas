@@ -105,19 +105,24 @@ private struct FormatParser {
 	}
 
 	/// Parses a `<named-format-reference>`, if present. No named formats exist
-	/// yet, so any reference reports an error, per fields-format.md.
+	/// yet, so any reference reports an error, per fields-format.md:
+	/// `invalidFormatName` for an invalid format name, else `unknownNamedFormat`.
 	private mutating func parseNamedFormatIfPresent(terminatorSet: Set<Character>) throws(ParsingError) {
 		guard input.first == namePrefix else {
 			return
 		}
 		input.removeFirst()
 		try forbidWhitespace(after: namePrefix)
+		let name = try parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored)
+		guard !name.isEmpty, name.allSatisfy(\.isNameCharacter) else {
+			throw .invalidFormatName(name)
+		}
 		// swiftlint:disable:next todo
 		// TODO: once persisted named formats exist, resolve the name to its format,
 		//  checking that its output has the input type of the 1st succeeding
 		//  `<value-transform>` in its pipeline, even after a
 		//  `<format-transform-pipeline>`
-		throw .unknownNamedFormat(try parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored))
+		throw .unknownNamedFormat(name)
 	}
 
 	/// Parses a `<*-transform-call>`, including its `<transform-call-prefix>`.

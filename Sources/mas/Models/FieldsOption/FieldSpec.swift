@@ -81,6 +81,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case forbiddenWhitespace(after: Character)
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
+	case invalidFormatName(String)
 	case invalidLetter(Character)
 	case invalidLocaleIdentifier(String)
 	case invalidModifier(Character)
@@ -132,6 +133,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
 			"Invalid character class: \(name)"
+		case let .invalidFormatName(name):
+			"Invalid format name: \(name)"
 		case let .invalidLetter(letter):
 			"Invalid <predicate>: \(letter)"
 		case let .invalidLocaleIdentifier(identifier):
@@ -376,7 +379,7 @@ func resolveBaseFieldsConfig(
 			throw .invalidBaseFieldsConfigName(rawName)
 		}
 	}
-	guard !stem.isEmpty, stem.allSatisfy(\.isConfigNameCharacter) else {
+	guard !stem.isEmpty, stem.allSatisfy(\.isNameCharacter) else {
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
 	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? outputFormat.isJSON)
@@ -395,10 +398,10 @@ func resolveBaseFieldsConfig(
 	return isMachineFacing ? config.machineFacingVariant() : config
 }
 
-private extension Character { // swiftlint:disable:this file_types_order
-	/// Whether this character may be in a config name's stem, per configs.md's
-	/// `^[-_0-9A-Za-z]+$`.
-	var isConfigNameCharacter: Bool {
+extension Character { // swiftlint:disable:this file_types_order
+	/// Whether this character may be in a config name's stem or in a format name,
+	/// per configs.md's & fields-format.md's `^[-_0-9A-Za-z]+$`.
+	var isNameCharacter: Bool {
 		isASCII && (isLetter || isNumber || self == "-" || self == "_")
 	}
 }
