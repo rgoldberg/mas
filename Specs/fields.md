@@ -847,7 +847,8 @@ character immediately precedes or follows it that is:
 - For `<unix-time>`: not whitespace (e.g., `at 1584553163 UTC` has a Unix time
   segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
-Absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic segments.
+Directly absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic
+segments.
 
 ##### Sort Boundaries
 
@@ -915,8 +916,8 @@ their group & over all non-boundary characters.
 
 `<uncollapsed-boundaries>` retains contiguous boundaries in input as separate
 boundaries; `<collapsed-boundaries>` collapses contiguous boundaries belonging
-to the same boundary group into one. Absent `<boundary-groups>` (e.g., `B:`),
-nothing is a boundary.
+to the same boundary group into one. Directly absent `<boundary-groups>` (e.g.,
+`B:`), nothing is a boundary.
 
 ##### Sort Nonconforming Values
 
