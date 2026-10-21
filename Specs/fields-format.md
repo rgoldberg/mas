@@ -330,10 +330,10 @@ scale-arguments =
   <argument-separator> <fractional-digits>
   <argument-fence>
 
-radix              = {integer from 2 to 36}  (* base for `<exponent>` & the rendered digits *)
-exponent           = {non-negative integer}  (* divides the input by `<radix>` to this power before rendering *)
-significant-digits = {integer from 1 to 100} (* rounds to this many total `<radix>` digits; absent: no rounding *)
-fractional-digits  = {integer from 0 to 100} (* exactly this many `<radix>` digits after the point; `0`: integer *)
+radix              = {integer from 2 to 36}  (* base for <exponent> & the rendered digits *)
+exponent           = {non-negative integer}  (* divides the input by <radix> to this power before rendering *)
+significant-digits = {integer from 1 to 100} (* rounds to this many total <radix> digits; absent: no rounding *)
+fractional-digits  = {integer from 0 to 100} (* exactly this many <radix> digits after the point; 0: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -393,9 +393,9 @@ affect it.
 A time-only value is rendered in the output time zone as if on the last
 `timeZone`'s `<reference-date>`, because a time zone's UTC offset can vary by
 date (e.g., for daylight saving time), or, absent `timeZone`, on the current
-date in the system time zone. Only a UTC offset `<time-zone-code>` has a fixed
-UTC offset: a Foundation time zone abbreviation identifies a time zone whose UTC
-offset can vary (e.g., `EST` identifies `America/New_York`).
+date in the system time zone. A UTC offset `<time-zone-code>` has a fixed UTC
+offset, but a Foundation time zone abbreviation may identify a time zone whose
+UTC offset varies (e.g., `EST` identifies `America/New_York`).
 
 ###### `timeZone`
 
@@ -405,7 +405,7 @@ offset can vary (e.g., `EST` identifies `America/New_York`).
 time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
 time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system"} (* default: "system" *)
-reference-date = {text: ISO-8601 extended-format date} (* default: {current date in the system time zone} *)
+reference-date = {text: ISO-8601 date-only} (* default: {current date in the system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -959,8 +959,8 @@ match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
 binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
 
-unary-match  = "m" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
-binary-match = "M" (* matches a branch in `<branches>`; output type: {matched branch value's type}; value: {matched branch value} *)
+unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
+binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 
 branches = <conditional-branch>+ <branch>
 branch   = <conditional-branch> | <unconditional-branch>
