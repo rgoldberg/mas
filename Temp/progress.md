@@ -865,3 +865,7 @@ unimplemented, as are all custom configs.
 Table output justifies each header cell as its column is & renders nothing, not
 even a header row or a separator line, without any item or any visible field
 spec, as already implemented.
+
+For the same output format, each mas built-in fields config's unsuffixed,
+`@table` & `@key-value` variants are identical, as already implemented
+(`resolveBaseFieldsConfig`).

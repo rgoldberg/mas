@@ -48,6 +48,9 @@ A `mas` built-in fields config has:
 - A user-facing `@key-value` variant.
 - A machine-facing `@json` variant.
 
+For the same output format, its unsuffixed, `@table` & `@key-value` variants are
+identical.
+
 The built-in standard's `@json` variant is a reference to `all@json`.
 
 Default labels & formats favor:
