@@ -5,7 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-/// A fully-parsed `--key-value`'s value (key-value.md).
+/// A fully-parsed `--key-value-config`'s value (key-value.md).
 struct KeyValueConfig: Equatable {
 	/// `<key-styling-setting>`: when keys are styled.
 	enum KeyStyling: Equatable {
@@ -44,9 +44,9 @@ struct KeyValueConfig: Equatable {
 	let itemSeparatorPattern: String?
 }
 
-/// Parses `--key-value`'s value (`key-value.md`'s `[ <key-value-config> ]`):
-/// `[ <key-value-setting>+ ]`, last wins per axis. Outer bare whitespace
-/// between settings is ignored.
+/// Parses `--key-value-config`'s value (`key-value.md`'s
+/// `[ <key-value-config> ]`): `[ <key-value-setting>+ ]`, last wins per axis.
+/// Outer bare whitespace between settings is ignored.
 func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> KeyValueConfig {
 	var keyStyleSpecifier = KeyValueConfig.default.keyStyleSpecifier
 	var keyStyling = KeyValueConfig.default.keyStyling
@@ -64,7 +64,7 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "k":
 			keyStyleSpecifier = ""
 		case "K":
-			// Unlike `--table`'s `H`, `K` requires a `<style-specifier>`
+			// Unlike `--table-config`'s `H`, `K` requires a `<style-specifier>`
 			let styleSpecifier = try parseStyleSpecifier(
 				&input,
 				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
@@ -143,7 +143,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	var description: String {
 		switch self {
 		case .danglingEscape:
-			"Escape prefix '\\' at the end of --key-value's value"
+			"Escape prefix '\\' at the end of --key-value-config's value"
 		case let .invalidItemSeparatorPattern(pattern):
 			"""
 			Invalid item separator pattern (a line terminator would split the item separator line): \
@@ -154,7 +154,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 		case let .invalidLeaderPattern(pattern):
 			"Invalid leader pattern (a line terminator would split each row): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
-			"Invalid --key-value <key-value-setting>: \(setting)"
+			"Invalid --key-value-config <key-value-setting>: \(setting)"
 		}
 	}
 }

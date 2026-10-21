@@ -11,7 +11,7 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `an empty --json value parses to all defaults`() throws {
+	func `an empty --json-config value parses to all defaults`() throws {
 		#expect(try parseJSONConfig("") == .default)
 	}
 

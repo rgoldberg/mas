@@ -5,7 +5,7 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-/// A fully-parsed `--json`'s value (json.md).
+/// A fully-parsed `--json-config`'s value (json.md).
 struct JSONConfig: Equatable {
 	/// `<non-ascii-setting>`: how each non-ASCII character is rendered.
 	enum NonASCIIRendering: Equatable {
@@ -34,7 +34,7 @@ struct JSONConfig: Equatable {
 	let nonASCIIRendering: NonASCIIRendering
 }
 
-/// Parses `--json`'s value (`json.md`'s `[ <json-config> ]`):
+/// Parses `--json-config`'s value (`json.md`'s `[ <json-config> ]`):
 /// `[ <json-setting>+ ]`, last wins per axis. Outer bare whitespace between
 /// settings is ignored.
 func parseJSONConfig(_ value: String) throws(JSONConfigParsingError) -> JSONConfig {
@@ -79,11 +79,11 @@ enum JSONConfigParsingError: Equatable, Error, CustomStringConvertible {
 	var description: String {
 		switch self {
 		case .danglingEscape:
-			"Escape prefix '\\' at the end of --json's value"
+			"Escape prefix '\\' at the end of --json-config's value"
 		case let .invalidIndentation(indentation):
 			"Invalid indentation (expected only spaces & tabs): \(indentation)"
 		case let .invalidSetting(setting):
-			"Invalid --json <json-setting>: \(setting)"
+			"Invalid --json-config <json-setting>: \(setting)"
 		}
 	}
 }

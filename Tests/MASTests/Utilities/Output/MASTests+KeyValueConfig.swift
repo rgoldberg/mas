@@ -12,7 +12,7 @@ internal import Testing
 
 private extension MASTests {
 	@Test
-	func `an empty --key-value value parses to all defaults`() throws {
+	func `an empty --key-value-config value parses to all defaults`() throws {
 		#expect(try parseKeyValueConfig("") == .default)
 	}
 

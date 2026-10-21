@@ -5,8 +5,8 @@
 // Copyright © 2026 mas-cli. All rights reserved.
 //
 
-/// A fully-parsed `--table`'s value (table.md). `nil` `header` / `separator`
-/// means neither is shown.
+/// A fully-parsed `--table-config`'s value (table.md). `nil` `header` /
+/// `separator` means neither is shown.
 struct TableConfig: Equatable {
 	/// The header row: field labels, styled per `styleSpecifier` (e.g., with the
 	/// default `StyleSequences`, `"1"` for bold, `"1;4"` for bold & underlined;
@@ -51,7 +51,7 @@ struct TableConfig: Equatable {
 	let columnSpacing: String
 }
 
-/// Parses `--table`'s value (`table.md`'s `[ <table-config> ]`):
+/// Parses `--table-config`'s value (`table.md`'s `[ <table-config> ]`):
 /// `[ <table-setting>+ ]`, last wins per axis. A defaulted (i.e., unset) axis
 /// with a prerequisite is filled in per `table.md`'s "Implied Settings": `b` /
 /// `u` imply a separator line (`S`, default `<separator-pattern>` `-`); any
@@ -149,7 +149,7 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	var description: String {
 		switch self {
 		case .danglingEscape:
-			"Escape prefix '\\' at the end of --table's value"
+			"Escape prefix '\\' at the end of --table-config's value"
 		case let .invalidColumnSpacing(spacing):
 			"Invalid column spacing (a line terminator would split each row): \(spacing.debugDescription)"
 		case let .invalidHeaderStyleSpecifier(styleSpecifier):
@@ -157,7 +157,7 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 		case let .invalidSeparatorPattern(pattern):
 			"Invalid separator pattern (a line terminator would split the separator line): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
-			"Invalid --table <table-setting>: \(setting)"
+			"Invalid --table-config <table-setting>: \(setting)"
 		}
 	}
 }

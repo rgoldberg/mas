@@ -21,7 +21,7 @@ private extension MASTests {
 	@Test
 	func `outputs an empty JSON array for unknown app ID with an item array`() async throws {
 		let actual = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(["1", "--json=a"])) { try $0.run(catalogApps: .init()) },
+			try await MAS.main(try MAS.Lookup.parse(["1", "--json-config=a"])) { try $0.run(catalogApps: .init()) },
 		)
 		let expected = Consequences(nil, "[]\n")
 		#expect(actual == expected)
@@ -83,33 +83,36 @@ private extension MASTests {
 		#expect(actual == expected)
 	}
 
-	@Test(arguments: ["--json", "--key-value", "--table"])
-	func `an empty output option value is equivalent to a bare output option`(option: String) async throws {
+	@Test(arguments: [("--json", "--json-config"), ("--key-value", "--key-value-config"), ("--table", "--table-config")])
+	func `an output format flag is equivalent to its option with an empty value`(flag: String, option: String)
+	async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
-		let bare = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", option]))) { command in
+		let flagged = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", flag]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
-		let emptyArguments = normalizingOutputOptions(in: ["1472954003", "\(option)="])
-		let empty = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(emptyArguments)) { try $0.run(catalogApps: catalogApps) },
-		)
-		#expect(!bare.stdout.isEmpty)
-		#expect(bare == empty)
+		for emptyArguments in [["1472954003", "\(option)="], ["1472954003", option, ""]] {
+			let empty = try await consequencesOf(
+				try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: emptyArguments))) { command in
+					try command.run(catalogApps: catalogApps)
+				},
+			)
+			#expect(empty == flagged)
+		}
+		#expect(!flagged.stdout.isEmpty)
 	}
 
 	@Test(arguments: ["--json", "--key-value", "--table"])
-	func `a bare optional-value output option never takes the next argument as its value`(option: String)
-	async throws {
+	func `an output format flag never takes the next argument as its value`(flag: String) async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
 		let preceding = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: [option, "1472954003"]))) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: [flag, "1472954003"]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
 		let succeeding = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", option]))) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", flag]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
@@ -117,16 +120,19 @@ private extension MASTests {
 		#expect(preceding == succeeding)
 	}
 
-	@Test
-	func `a required output option value separator is equivalent to whitespace`() async throws {
+	@Test(arguments: [("--fields", "name"), ("--json-config", "P"), ("--key-value-config", "s"), ("--table-config", "S")])
+	func `an option value separator is equivalent to whitespace`(option: String, value: String) async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
 		let separated = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(["1472954003", "--fields=name"])) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: [
+				"1472954003",
+				"\(option)=\(value)",
+			]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
 		let spaced = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(["1472954003", "--fields", "name"])) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", option, value]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
@@ -134,34 +140,48 @@ private extension MASTests {
 		#expect(separated == spaced)
 	}
 
-	@Test
-	func `an empty --fields value after = never takes the next argument as its value`() async throws {
+	@Test(arguments: [
+		("--fields", nil),
+		("--json-config", "--json"),
+		("--key-value-config", "--key-value"),
+		("--table-config", "--table"),
+	])
+	func `an empty value after = never takes the next argument as its value`(option: String, flag: String?)
+	async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
 		let empty = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["--fields=", "1472954003"]))) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["\(option)=", "1472954003"]))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
 		let absent = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(["1472954003"])) { try $0.run(catalogApps: catalogApps) },
+			try await MAS.main(try MAS.Lookup.parse(["1472954003"] + (flag.map { [$0] } ?? []))) { command in
+				try command.run(catalogApps: catalogApps)
+			},
 		)
 		#expect(!empty.stdout.isEmpty)
 		#expect(empty == absent)
 	}
 
-	@Test
-	func `the last output option overrides every preceding one`() async throws {
+	@Test(arguments: [
+		(["--json-config", "P", "--table"], ["--table"]),
+		(["--json-config=P", "--json"], ["--json"]),
+		(["--table", "--json-config", "P"], ["--json-config", "P"]),
+	])
+	func `the last output format flag or option overrides every preceding one`(arguments: [String], last: [String])
+	async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
-		let multipleArguments = normalizingOutputOptions(in: ["1472954003", "--json=P", "--table"])
 		let multiple = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(multipleArguments)) { try $0.run(catalogApps: catalogApps) },
-		)
-		let last = try await consequencesOf(
-			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003", "--table"]))) { command in
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003"] + arguments))) { command in
 				try command.run(catalogApps: catalogApps)
 			},
 		)
-		#expect(!last.stdout.isEmpty)
-		#expect(multiple == last)
+		let lastOnly = try await consequencesOf(
+			try await MAS.main(try MAS.Lookup.parse(normalizingOutputOptions(in: ["1472954003"] + last))) { command in
+				try command.run(catalogApps: catalogApps)
+			},
+		)
+		#expect(!lastOnly.stdout.isEmpty)
+		#expect(multiple == lastOnly)
 	}
 }

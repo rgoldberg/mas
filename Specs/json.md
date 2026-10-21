@@ -1,10 +1,10 @@
-# JSON Output Option
+# JSON Output Options
 
-`--json` is an optional option of every [display
+`--json` & `--json-config` are optional options of every [display
 command](configs.md#display-commands).
 
-It selects JSON output, configuring its pretty-printing, top-level structure &
-non-ASCII character rendering.
+Each selects JSON output; `--json-config` also configures its pretty-printing,
+top-level structure & non-ASCII character rendering.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
@@ -19,13 +19,13 @@ json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`--json`'s optional [value](configs.md#option-values), iff non-empty, is a
+`--json-config`'s [value](configs.md#option-values), iff non-empty, is a
 `<json-config>`.
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.
 
-`--json` output sources from the context stack's
+JSON output sources from the context stack's
 [`default`](configs.md#default-configs) JSON config; `<json-config>` is overlaid
 on it for the current command line only, without persistently affecting it. Each
 setting's default applies iff neither sets it.
@@ -108,16 +108,17 @@ json-setting-terminator = ":"
 end-of-json-config      = end
 ```
 
-E.g., in `--json=Pa`, `a` is interpreted as invalid `<indentation>` text, not as
-a separate `<top-level-structure-setting>`.
+E.g., in `--json-config Pa`, `a` is interpreted as invalid `<indentation>` text,
+not as a separate `<top-level-structure-setting>`.
 
 ## Examples
 
 - `--json`: 1 compact JSON object per item, 1 per line.
-- `--json=P`: 1 pretty-printed JSON object per item, indented by 2 spaces.
-- `--json=a`: a single compact JSON array of every item, on 1 line.
-- `--json=aP`: a single pretty-printed JSON array of every item, indented by 2
+- `--json-config P`: 1 pretty-printed JSON object per item, indented by 2
   spaces.
-- `--json=$'P\t:a'`: a single pretty-printed JSON array of every item, indented
-  by tabs.
-- `--json=e`: 1 compact, ASCII-only JSON object per item, 1 per line.
+- `--json-config a`: a single compact JSON array of every item, on 1 line.
+- `--json-config aP`: a single pretty-printed JSON array of every item, indented
+  by 2 spaces.
+- `--json-config $'P\t:a'`: a single pretty-printed JSON array of every item,
+  indented by tabs.
+- `--json-config e`: 1 compact, ASCII-only JSON object per item, 1 per line.

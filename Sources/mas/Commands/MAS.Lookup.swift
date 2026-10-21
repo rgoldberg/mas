@@ -83,9 +83,9 @@ private struct KeyValueOutputConfig: OutputConfig {
 				label: "Size",
 				// `%+.N.scale:10,6,,0:.numberFormat+ MB`: a byte count as whole,
 				// grouped decimal megabytes, with an appended " MB". JSON gets the raw
-				// byte count instead: `--json` resolves to the machine-facing `@json`
-				// variant (see `machineFacingVariant()`), which labels each field spec
-				// by its name & formats its output as `%i`, per mas.md
+				// byte count instead: JSON output resolves to the machine-facing
+				// `@json` variant (see `machineFacingVariant()`), which labels each
+				// field spec by its name & formats its output as `%i`, per mas.md
 				format: .template(
 					[
 						.placeholder(

@@ -1,6 +1,6 @@
 # Progress
 
-## Status (2026-10-19)
+## Status (2026-10-20)
 
 `Specs/*.md` are implemented (audited 2026-10-19, then implemented with each
 later spec change), except persisted named formats & custom named configs,
@@ -55,7 +55,7 @@ the [table spec's](../Specs/table.md) vocabulary (`<table-setting-termination>`,
 
 ### Key-Value Config (2026-10-02)
 
-`parseKeyValueConfig` parses [`--key-value`'s
+`parseKeyValueConfig` parses [`--key-value-config`'s
 value](../Specs/key-value.md#key-value-config) into `KeyValueConfig`, sharing
 `parseOutputConfigSettingPayload`, `parseStyleSpecifier` & `styled`
 (`OutputConfigSetting.swift`) with `parseTableConfig`; `K` requires a non-empty
@@ -69,8 +69,8 @@ leading spacing of `:`, if none is otherwise set.
 
 ### JSON Config (2026-10-02)
 
-`parseJSONConfig` parses [`--json`'s value](../Specs/json.md#json-config) into
-`JSONConfig`; `JSON.Node.rendered(jsonConfig:)` pretty-prints & escapes
+`parseJSONConfig` parses [`--json-config`'s value](../Specs/json.md#json-config)
+into `JSONConfig`; `JSON.Node.rendered(jsonConfig:)` pretty-prints & escapes
 non-ASCII characters (lowercase hex `\uXXXX`). For 0 items, `a` renders `[]`:
 `list` now outputs after its "Failed to find any installed apps" warning, while
 `search` still reports `noCatalogAppsFound`.
@@ -222,19 +222,20 @@ conventions, `<trivia-prefix-regex>` & `<trivia-suffix-regex>`), `numberFormat`
 
 ### Shell Completions & README (2026-09-25)
 
-`mas.fish` completes `--fields` (requiring a value), `--key-value` & `--table`
-alongside `--json`, each output format option excluding the others; option
-values are not completed. `mas.bash` only completes commands, so it is
-unchanged. The [output formats documentation](../README.md#output-formats) links
-the specs & gives verified `--fields` / `--table` examples.
+`mas.fish` completes `--fields`, `--json-config`, `--key-value-config` &
+`--table-config` (each requiring a value) alongside `--json`, `--key-value` &
+`--table`, each output format flag / option excluding the others; option values
+are not completed. `mas.bash` only completes commands, so it is unchanged. The
+[output formats documentation](../README.md#output-formats) links the specs &
+gives verified `--fields` / `--table-config` examples.
 
 ### Spec Compliance Audit (2026-10-01)
 
 Re-audited every spec against the code, fixing each divergence: input left over
 after a `<field-order-section>` (e.g., `/P,x`, `/Ia/dx`) reports
 `unexpectedCharacter`; a whitespace-only `<field-order-option-set>` reports
-`missingFieldOrderOptionSet`; `--table` ignores outer bare whitespace between
-settings & around a `<style-specifier>` (e.g., `h s`, `H 1;4 :`); &
+`missingFieldOrderOptionSet`; `--table-config` ignores outer bare whitespace
+between settings & around a `<style-specifier>` (e.g., `h s`, `H 1;4 :`); &
 `<locale-identifier>` accepts BCP 47 identifiers (e.g., `en-US`), as well as ICU
 ones.
 
@@ -616,9 +617,8 @@ forbids succeeding whitespace.
 Each output option's syntax is defined over its [option
 value](../Specs/configs.md#option-values) alone, which Swift Argument Parser
 takes from the rest of the option's command-line argument after an option value
-separator (e.g., `--fields=name`, `--table=`), or else, for a required option
-value (`--fields`'s), from the next command-line argument; a test confirms that
-both forms are equivalent.
+separator (e.g., `--fields=name`, `--table-config=`), or else from the next
+command-line argument; a test confirms that both forms are equivalent.
 
 ### 4th Spec Review Fixes (2026-10-20)
 
@@ -644,17 +644,19 @@ are simply unstyled, as already implemented.
 already did, instead of sharing `<header-styling-setting>`'s
 (`<header-terminal-only-styling>` & `<header-always-styling>`).
 
-`--table`, `--key-value` & `--json` take their optional value only after `=`
-(e.g., `--json=P`): before Swift Argument Parser parses the arguments,
-`normalizingOutputOptions(in:)` gives each one its value after `=` (empty, for a
-bare one), prefixed with a NUL, which no command-line argument can contain,
-because Swift Argument Parser takes an empty value after `=` as no value. So
-neither a bare one nor one with an empty value after `=` takes the next argument
-as its value (e.g., `mas lookup --json 497799835` looks up `497799835`).
-
-The last of `--table`, `--key-value` & `--json` overrides all preceding ones
-(e.g., `--json --table` outputs a table): `normalizingOutputOptions(in:)`
-removes every preceding one, instead of reporting an error.
+Each output format has a flag (`--table`, `--key-value` & `--json`) that selects
+it with its `default` config & an option (`--table-config`, `--key-value-config`
+& `--json-config`) that selects it with a config, instead of 1 option with an
+optional value, because Swift Argument Parser cannot accept an optional value
+only after `=` (apple/swift-argument-parser#992). The last of these flags &
+options overrides all preceding ones (e.g., `--json-config P --table` outputs a
+table): before Swift Argument Parser parses the arguments,
+`normalizingOutputOptions(in:)` removes every preceding one (with its value, iff
+that value is the next argument), instead of reporting an error. No mas option
+or argument uses a parsing strategy that can take an argument starting with `-`
+as a value, or skip ahead for a value, so each removed argument is a flag /
+option, never another option's value; a test confirms that every parsing
+strategy is `default`.
 
 Chronologic values have 2 types: date (a date-only or a datetime: `%d`'s output
 type & `dateOnly`'s input type) & time-only (`%c`'s output type), instead of 1
@@ -667,12 +669,13 @@ transforms are named for their date type (e.g., `<date-block>`,
 `TransformKind.date`), as `%c` & `%C`'s are for their time-only type.
 
 `--help` names each output option's value by its config (`<fields-config>`,
-`<json-config>`, `<key-value-config>` & `<table-config>`), and says that
-`--json`'s, `--key-value`'s & `--table`'s optional value is only after `=`.
+`<json-config>`, `<key-value-config>` & `<table-config>`).
 
-`normalizingOutputOptions(in:)` also prefixes a `--fields` value after `=` with
-a NUL, so `--fields=` is an empty `<fields-config>`, instead of no value, after
-which Swift Argument Parser took the next argument as the value (e.g.,
+`normalizingOutputOptions(in:)` prefixes each `--fields`, `--json-config`,
+`--key-value-config` & `--table-config` value after `=` with a NUL, which no
+command-line argument can contain, so an empty value after `=` (e.g.,
+`--fields=`) is an empty value, instead of no value, after which Swift Argument
+Parser took the next argument as the value (e.g.,
 `mas lookup --fields= 497799835` looks up `497799835`).
 
 Configs specify each context's `standard` (the root context's is the leaf

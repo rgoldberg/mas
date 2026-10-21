@@ -9,62 +9,54 @@ private import ArgumentParser
 internal import JSONAST
 
 struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
+	@Flag(name: .customLong("json"), help: "Output format: JSON (json.md)")
+	private var isJSON = false
 	@Option(
-		name: .customLong("json"),
-		defaultAsFlag: "",
-		parsing: .next,
+		name: .customLong("json-config"),
 		help: .init(
-			"""
-			Output format: JSON, optionally configuring (only after =) pretty-printing, an item array & non-ASCII escaping \
-			(json.md)
-			""",
+			"Output format: JSON, configuring pretty-printing, an item array & non-ASCII escaping (json.md)",
 			valueName: "json-config",
 		),
 	)
-	private var jsonOptionValue: String?
+	private var jsonConfigOptionValue: String?
+	@Flag(name: .customLong("key-value"), help: "Output format: key-value (key-value.md)")
+	private var isKeyValue = false
 	@Option(
-		name: .customLong("key-value"),
-		defaultAsFlag: "",
-		parsing: .next,
+		name: .customLong("key-value-config"),
 		help: .init(
-			"""
-			Output format: key-value, optionally configuring (only after =) keys, leaders, spacing & item separators \
-			(key-value.md)
-			""",
+			"Output format: key-value, configuring keys, leaders, spacing & item separators (key-value.md)",
 			valueName: "key-value-config",
 		),
 	)
-	private var keyValueOptionValue: String?
+	private var keyValueConfigOptionValue: String?
+	@Flag(name: .customLong("table"), help: "Output format: table (table.md)")
+	private var isTable = false
 	@Option(
-		name: .customLong("table"),
-		defaultAsFlag: "",
-		parsing: .next,
+		name: .customLong("table-config"),
 		help: .init(
-			"""
-			Output format: table, optionally configuring (only after =) headers, a separator line & column spacing \
-			(table.md)
-			""",
+			"Output format: table, configuring headers, a separator line & column spacing (table.md)",
 			valueName: "table-config",
 		),
 	)
-	private var tableOptionValue: String?
+	private var tableConfigOptionValue: String?
 	@Option(
 		name: .customLong("fields"),
 		help: .init("Select, order, label & format output fields & sort items (fields.md)", valueName: "fields-config"),
 	)
 	private var fieldsOptionValue = ""
 
-	/// Resolves `jsonOptionValue` / `keyValueOptionValue` / `tableOptionValue`
-	/// into a single `OutputFormat`, falling back to `Config.defaultFormat` iff
-	/// none was given (`normalizingOutputOptions(in:)` leaves at most 1, the last
-	/// one given). Re-derived (cheaply: each option value is tiny) on every
-	/// access, same as `fieldsOptionValue`, rather than stored, so there is only
-	/// 1 source of truth to validate.
+	/// Resolves the output format flags & options into a single `OutputFormat`,
+	/// falling back to `Config.defaultFormat` iff none was given
+	/// (`normalizingOutputOptions(in:)` leaves at most 1, the last one given). A
+	/// flag is equivalent to its option with an empty value. Re-derived (cheaply:
+	/// each option value is tiny) on every access, same as `fieldsOptionValue`,
+	/// rather than stored, so there is only 1 source of truth to validate.
 	private var outputFormat: OutputFormat {
 		get throws {
-			let json = try jsonOptionValue.map(attachedOptionValue).map(parseJSONConfig)
-			let keyValue = try keyValueOptionValue.map(attachedOptionValue).map(parseKeyValueConfig)
-			let table = try tableOptionValue.map(attachedOptionValue).map(parseTableConfig)
+			let json = try outputConfigOptionValue(jsonConfigOptionValue, isFlagged: isJSON).map(parseJSONConfig)
+			let keyValue =
+				try outputConfigOptionValue(keyValueConfigOptionValue, isFlagged: isKeyValue).map(parseKeyValueConfig)
+			let table = try outputConfigOptionValue(tableConfigOptionValue, isFlagged: isTable).map(parseTableConfig)
 			return if let json {
 				.json(json)
 			} else if let keyValue {
@@ -101,53 +93,74 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	}
 }
 
-/// The output options whose option value is optional.
-private let optionalValueOutputOptionNameSet: Set = ["--json", "--key-value", "--table"]
+/// The flags that each select an output format with its `default` config.
+private let outputFormatFlagNameSet: Set = ["--json", "--key-value", "--table"]
 
-/// The output option whose option value is required.
-private let fieldsOptionName = "--fields"
+/// The options that each select an output format with a config.
+private let outputFormatOptionNameSet: Set = ["--json-config", "--key-value-config", "--table-config"]
+
+/// The options whose value after `=` is prefixed with
+/// `attachedOptionValuePrefix`.
+private let prefixedOptionNameSet = outputFormatOptionNameSet.union(["--fields"])
 
 // swiftlint:disable:next todo
 // TODO: Temp/todo.md "Swift Argument Parser Empty Values": once a Swift
 // Argument Parser release includes apple/swift-argument-parser#961, remove
-// `attachedOptionValuePrefix` & `attachedOptionValue(_:)`, so that
-// `normalizingOutputOptions(in:)` still keeps only the last optional-value
-// output option, but gives it its value after `=` unprefixed (e.g., `--json`
-// becomes `--json=`) & leaves a `--fields` value as is
+// `prefixedOptionNameSet`, `attachedOptionValuePrefix` &
+// `attachedOptionValue(_:)`, so that `normalizingOutputOptions(in:)` only
+// removes every output format flag / option that a later one overrides
 
 // swiftlint:disable:next todo
 // TODO: Temp/todo.md "Swift Argument Parser Attached-Only Values": once a Swift
-// Argument Parser release resolves apple/swift-argument-parser#992, parse each
-// optional-value output option with its attached-only strategy, so that
-// `normalizingOutputOptions(in:)` stops giving a bare one a value after `=`
+// Argument Parser release resolves apple/swift-argument-parser#992, replace
+// each output format's flag & option (e.g., `--json` & `--json-config`) with 1
+// option whose optional value is accepted only after `=` (e.g.,
+// `--json[=<json-config>]`)
 
-/// Prefixes each output option value after `=` in a normalized command line, so
-/// that the value is never empty, because Swift Argument Parser takes an empty
-/// value after `=` (e.g., `--json=`) as no value, then takes the next
-/// command-line argument as the value. No command-line argument can contain a
-/// NUL, so the prefix never starts an actual value.
+/// Prefixes each `prefixedOptionNameSet` option value after `=` in a normalized
+/// command line, so that the value is never empty, because Swift Argument
+/// Parser takes an empty value after `=` (e.g., `--fields=`) as no value, then
+/// takes the next command-line argument as the value. No command-line argument
+/// can contain a NUL, so the prefix never starts an actual value.
 private let attachedOptionValuePrefix = "\0"
 
-/// `arguments` with only the last output option whose option value is optional
-/// before any `--` terminator, because it overrides the preceding ones
-/// (configs.md "Output Formats"). The last one is given its value after `=` (or
-/// an empty value, absent one), prefixed with `attachedOptionValuePrefix`
-/// (e.g., `--json` becomes `--json=\0` & `--json=P` becomes `--json=\0P`), so
-/// that such an option value is only ever the rest of its option's command-line
-/// argument after `=`, never the next command-line argument (configs.md "Option
-/// Values"). A `--fields` value after `=` is likewise prefixed (e.g.,
-/// `--fields=` becomes `--fields=\0`).
+/// `arguments` with only the last output format flag / option before any `--`
+/// terminator, because it overrides the preceding ones (configs.md "Output
+/// Formats"), and with each `prefixedOptionNameSet` option value after `=`
+/// prefixed with `attachedOptionValuePrefix` (e.g., `--fields=` becomes
+/// `--fields=\0`).
+///
+/// An overridden option is removed with its value, iff that value is the next
+/// command-line argument. An option whose next command-line argument is not a
+/// value is retained, so that Swift Argument Parser reports its missing value.
+/// Every removed command-line argument is an output format flag / option, never
+/// another option's value, because no mas option or argument uses a parsing
+/// strategy that takes a command-line argument starting with `-` as a value, or
+/// that skips ahead for a value.
 func normalizingOutputOptions(in arguments: some Sequence<String>) -> [String] {
 	let arguments = Array(arguments)
 	let terminatorIndex = arguments.firstIndex(of: "--") ?? arguments.endIndex
 	let options = arguments[..<terminatorIndex]
-	let lastOutputOptionIndex = options.lastIndex { optionalValueOutputOptionNameSet.contains(optionName(of: $0)) }
+	let outputFormatIndexRanges = options.indices.compactMap { index -> Range<Int>? in
+		let option = options[index]
+		return if
+			outputFormatFlagNameSet.contains(option)
+			|| option.contains("=") && outputFormatOptionNameSet.contains(optionName(of: option))
+		{
+			index..<(index + 1)
+		} else if outputFormatOptionNameSet.contains(option), index + 1 < options.endIndex, isValue(options[index + 1]) {
+			index..<(index + 2)
+		} else {
+			nil
+		}
+	}
+	let overriddenIndexSet = Set(outputFormatIndexRanges.dropLast().joined())
 	return options.indices.compactMap { index in
 		let option = options[index]
 		let name = optionName(of: option)
-		return if optionalValueOutputOptionNameSet.contains(name) {
-			index == lastOutputOptionIndex ? "\(name)=\(attachedOptionValuePrefix)\(option.dropFirst(name.count + 1))" : nil
-		} else if name == fieldsOptionName, option.count > name.count {
+		return if overriddenIndexSet.contains(index) {
+			nil
+		} else if prefixedOptionNameSet.contains(name), option.count > name.count {
 			"\(name)=\(attachedOptionValuePrefix)\(option.dropFirst(name.count + 1))"
 		} else {
 			option
@@ -161,7 +174,20 @@ private func optionName(of argument: String) -> String {
 	.init(argument.prefix { $0 != "=" })
 }
 
+/// Whether Swift Argument Parser takes `argument` as a value, rather than as an
+/// option or a terminator.
+private func isValue(_ argument: String) -> Bool {
+	argument == "-" || !argument.hasPrefix("-")
+}
+
 /// `value` without any `attachedOptionValuePrefix`.
 private func attachedOptionValue(_ value: String) -> String {
 	.init(value.trimmingPrefix(attachedOptionValuePrefix))
+}
+
+/// The value of an output format option, without any
+/// `attachedOptionValuePrefix`, else an empty value iff its flag was given,
+/// else `nil`.
+private func outputConfigOptionValue(_ optionValue: String?, isFlagged: Bool) -> String? {
+	optionValue.map(attachedOptionValue) ?? (isFlagged ? "" : nil)
 }
