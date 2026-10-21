@@ -79,7 +79,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 #### Custom Names Removal
 
-If an initial version is released before persistence is supported, then remove
+If a 1st version is released before persistence is supported, then remove
 persistence-based functionality from specs & code:
 
 1. Possibly vestigial after `1226-fields-no-custom-names` removes named formats

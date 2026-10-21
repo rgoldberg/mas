@@ -499,11 +499,11 @@ spec](#default-field-specs) for field `<reference-field-name>` (whereas a
 
 $previous$ is the location in the working fields config where the direct results
 of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
-the start of the working fields config. It is initially the start (i.e.,
-immediately before the 1st field spec in the working fields config). It locates
-a field spec, not an index, so moving another field spec does not change it
-(e.g., for `a,b,c,d`, `.c,%a` moves `a` immediately after `c`, giving
-`b,c,a,d`).
+the start of the working fields config. Before the 1st `<field-spec-edit>`, it
+is the start (i.e., immediately before the 1st field spec in the working fields
+config). It locates a field spec, not an index, so moving another field spec
+does not change it (e.g., for `a,b,c,d`, `.c,%a` moves `a` immediately after
+`c`, giving `b,c,a,d`).
 
 Field spec edits act as follows:
 
