@@ -770,3 +770,11 @@ unchanged.
 applies to a unary form's success pipeline (e.g., `%I.uppercase+`'s): when it is
 evaluated, its kind, what its transforms apply to & a placeholder's outcome; the
 implementation is unchanged.
+
+Specs clarify, as already implemented: a `<field-occurrence-index>` also counts
+the `null`s that replaced its field's removed field specs; each number segment
+is the longest one at the earliest position after the preceding typed segment; a
+text segment is a maximal sequence of non-boundary characters, not a run of
+non-boundary text; a Foundation time zone abbreviation's UTC offset may vary,
+while other `<time-zone-code>`s may also have a fixed one; & a
+`<reference-date>` is a date-only.

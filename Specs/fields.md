@@ -422,7 +422,7 @@ Each index references a position in a list of the reference fields config's
 field specs, in reference fields config order, filtered to include:
 
 - For `<field-occurrence-index>`: only the field specs for field
-  `<reference-field-name>`.
+  `<reference-field-name>`, or the `null`s that replaced them.
 - For `<field-spec-index>`: all field specs.
 
 E.g., in `x,a=aa,b,a=AA`:
@@ -637,8 +637,8 @@ A value is split into **segments**, in descending precedence:
 
 1. **Chronologic segments**, per `<chronologic-segments>`.
 2. **Number segments**, per `<number-segments>`.
-3. **Text segments**: each maximal run of the remaining
-   [non-boundary](#sort-boundaries) text.
+3. **Text segments**: each maximal sequence of the remaining
+   [non-boundary](#sort-boundaries) characters.
 
 A chronologic or number segment is a **typed segment**.
 
@@ -769,6 +769,10 @@ The number segments are:
   `1.2` in `(1.2)` & in `1.2.beta`), without a sign.
 - `<grouped-numeric>`: each **grouped number**, with a sign per
   `<number-signs>`.
+
+Each number segment is the longest one that starts at the earliest position
+after the preceding typed segment (e.g., `<versions>` finds 1 version, `1.2.3`,
+rather than `1.2` & `3`, in `1.2.3`).
 
 A grouped number is a run of digits split into [digit
 groups](fields-format.md#numberformat) by a digit group separator, optionally

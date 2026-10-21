@@ -432,8 +432,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 85. - segment: a part of a run of non-boundary text that sorting compares as 1
       element ([defined](../Specs/fields.md#sort-segments))
     - typed segment: a chronologic or number segment
-    - text segment: a maximal run of non-boundary text that is in no typed
-      segment
+    - text segment: a maximal sequence of non-boundary characters that is in no
+      typed segment
     - piece: a run of non-boundary text or a boundary, which sorting compares as
       1 element of a value ([defined](../Specs/fields.md#sort-segments))
     - REJECTED: chunk / token (for a segment) / trivia (for text segments)
