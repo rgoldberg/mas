@@ -51,13 +51,14 @@ struct TableConfig: Equatable {
 	let columnSpacing: String
 }
 
-/// Parses `--table-config`'s value (`table.md`'s `[ <table-config> ]`):
-/// `[ <table-setting>+ ]`, last wins per axis. A defaulted (i.e., unset) axis
-/// with a prerequisite is filled in per `table.md`'s "Implied Settings": `b` /
-/// `u` imply a separator line (`S`, default `<separator-pattern>` `-`); any
-/// separator line implies a header row (`H`, unstyled). A setting that
-/// explicitly sets an axis (even to "off") always overrides that axis's implied
-/// setting. Outer bare whitespace between settings is ignored.
+/// Parses `--table-config`'s value, which, iff non-empty, is `table.md`'s
+/// `<table-config>` (`<table-setting>+`), last wins per axis. A defaulted
+/// (i.e., unset) axis with a prerequisite is filled in per `table.md`'s
+/// "Implied Settings": `b` / `u` imply a separator line (`S`, default
+/// `<separator-pattern>` `-`); any separator line implies a header row (`H`,
+/// unstyled). A setting that explicitly sets an axis (even to "off") always
+/// overrides that axis's implied setting. Outer bare whitespace between
+/// settings is ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigAxis<String>.unset
 	var headerStyling = TableConfig.HeaderStyling.terminalOnly
