@@ -109,6 +109,12 @@ A reference with an output format suffix or `@unsuffixed` matches a context iff
 the context contains that variant (e.g., `x@json` skips a context that contains
 only `x`).
 
+A persisted fields config [extends a config of its own
+name](configs.md#referencing-named-configs) iff its reference's stem is its own
+stem, whatever either's suffix (e.g., for JSON output, a `default@json` in
+`mas.list` that extends `default` extends `mas`'s `default` variant for JSON
+output, instead of itself).
+
 #### Immutable Built-In Named Fields Configs
 
 For each [leaf context](configs.md#context-stacks):

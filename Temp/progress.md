@@ -843,3 +843,8 @@ An expression in the payload of a present modifier or option is directly absent
 even if the payload contains no token (e.g., `<locale-identifier>` in `N:`), as
 already implemented, instead of only in a present payload, which no payload
 without a token is.
+
+A persisted fields config extends a config of its own name iff its reference's
+stem is its own stem, whatever either's suffix, so, e.g., a `default@json` that
+extends `default` extends a less specific context's `default` variant, instead
+of itself; it is unimplemented, as are all custom configs.
