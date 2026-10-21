@@ -53,7 +53,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       AST node
     - present: concrete occurrence of a token or rule instance in input or parse
       trees
-    - exists: abstract state of availability or occurrence (e.g., "a field
+    - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
@@ -145,7 +145,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       text, boundary text)
     - string: the data type of a value (string fields, string transforms,
       `<string-block>`, empty strings)
-    - token: syntactic unit (literal or syntax) formed by text
+    - token: contiguous characters consumed together as 1 element: a syntax,
+      scalar, or text token ([defined](../Specs/ebnf.md#tokens))
     - occurrence: specific appearance of something
     - value: evaluated content bound to a nonterminal or field
     - content: substance as a whole (of a string, file, or expression)
@@ -175,7 +176,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - nonexistent: guaranteed not to exist in any input
       ([defined](../Specs/fields.md#nonexistent-fields))
     - REJECTED: nil / missing
-32. - literal: syntactic role functioning as data rather than an operator
+32. - literal text: a `"TEXT"` terminal, which syntax tokens match
+      ([defined](../Specs/ebnf.md#literal-text))
+    - literal: as-is data (e.g., "a literal tab character")
     - verbatim: exact character-for-character match without processing escapes
       or evaluation
 33. - overlay: merging specific modifiers or fields onto an existing base while
@@ -207,10 +210,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: delimiter / encloser / marker / signifier
 36. - evaluate / evaluation / evaluated: perform the process that returns the
       value of an expression
-    - evaluate against: the value a matcher or block is evaluated on
+    - evaluate against: evaluate a matcher or block relative to a value
     - calculate: derive a result from inputs
     - render: produce a value's output text
-    - output: emit
+    - output: write to standard output
     - display: a command's purpose
     - source from: take a config or setting from
     - REJECTED: decode / obtain / get / compute / make / resolve (in this sense;
@@ -517,7 +520,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        for a year outside 0000 to 9999
      - proleptic Gregorian calendar: the Gregorian calendar extended before
        1582-10-15, as ISO-8601 requires
-     - instant: a point in time, in milliseconds since 1970-01-01T00:00:00Z
+     - instant: a point in time
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
 102. - nullary: of a form, or of a lowercase predicate letter other than `m`,
