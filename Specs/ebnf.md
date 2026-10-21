@@ -620,7 +620,7 @@ NONTERMINAL "=" DEFINITION "(*" [ "input" | "output" ] "type:" TYPE "*)"
 
 `TYPE` is the type of `NONTERMINAL`'s input (iff `"input"` is present), value
 (iff `"output"` is present), or both (otherwise); a syntax defines the types &
-their use.
+how they apply.
 
 ##### Value Comments
 

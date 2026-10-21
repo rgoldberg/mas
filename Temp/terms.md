@@ -156,9 +156,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - compound
     - placeholder: only the defined `%…` fields-format term
     - rule: only a semantic rule in prose
-    - REJECTED: contents / instance / usage (except as in 105) / use / site /
-      construct / projection / rule (as a syntactic element) / placeholder (as a
-      generic term) / symbol
+    - REJECTED: contents / instance / usage (except as in 105) / use (as a noun)
+      / site / construct / projection / rule (as a syntactic element) /
+      placeholder (as a generic term) / symbol
 30. - meta-grammar: the notation the custom EBNF grammar is defined in
     - grammar: the custom EBNF grammar
     - syntax: a specific option's grammar, defined with the custom EBNF grammar
