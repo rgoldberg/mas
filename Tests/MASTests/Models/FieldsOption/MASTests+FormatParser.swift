@@ -91,7 +91,7 @@ private extension MASTests {
 			("%E(empty)+%i+", .string(""), "(empty)"),
 			("%W(blank)+%i+", .string(" \t"), "(blank)"),
 			("%W(blank)+%i+", .string(" a "), " a "),
-			// An absent block defaults to an empty string
+			// A directly absent block defaults to an empty string
 			("[%N+fail+]", .number(5), "[]"),
 			("[%N +fail+]", .number(5), "[]"),
 			("[%V+%i+]", .string("1.2"), "[]"),
@@ -623,7 +623,7 @@ private extension MASTests {
 	}
 
 	@Test(arguments: ["", "  "])
-	func `an absent format-block defaults to an empty string`(format: String) throws {
+	func `a directly absent format-block defaults to an empty string`(format: String) throws {
 		#expect(try parsedFieldSpec(format).format == .empty)
 		#expect(try rendered(format, .string("v"))?.isEmpty == true)
 	}

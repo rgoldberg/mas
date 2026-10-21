@@ -255,8 +255,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - descendant: transitive
     - REJECTED: enclosed / contained / nested (except for JSON) / sub
 46. - block
-    - absent block: a block or `<format-block>` that consumes no token, which
-      defaults to an empty string
+    - directly absent block: a [directly
+      absent](../Specs/ebnf.md#presence-states) block or `<format-block>` (e.g.,
+      in `name:`), which defaults to an empty string
     - REJECTED: scope / subformat / empty template
 47. - success
     - failure

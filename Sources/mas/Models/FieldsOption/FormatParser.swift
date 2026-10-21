@@ -46,7 +46,7 @@ private struct FormatParser {
 		skipWhitespace() // `<format-modifier>`'s `<format-block>` ignores preceding whitespace
 		let parsed: (format: Format, justification: Justification?) =
 			if isAtFormatBlockEnd {
-				(.empty, nil) // An absent `<format-block>` defaults to an empty string
+				(.empty, nil) // A directly absent `<format-block>` defaults to an empty string
 			} else if input.first == namePrefix || input.first == transformCallPrefix {
 				try parseFormatBlockPipeline()
 			} else {
@@ -287,7 +287,7 @@ private struct FormatParser {
 		skipWhitespace() // A block ignores preceding whitespace
 		let block: Format =
 			if input.first == blockTerminator {
-				.empty // An absent block defaults to an empty string
+				.empty // A directly absent block defaults to an empty string
 			} else if input.first == namePrefix || input.first == transformCallPrefix {
 				.pipeline(try parseBlockPipeline(kind: kind))
 			} else {

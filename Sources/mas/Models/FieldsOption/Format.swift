@@ -22,7 +22,8 @@ indirect enum Format: Equatable, Sendable {
 	/// A `<*-template>`'s elements.
 	case template([TemplateElement])
 
-	/// The default of an absent block or `<format-block>`: an empty string.
+	/// The default of a directly absent block or `<format-block>`: an empty
+	/// string.
 	static var empty: Self {
 		.template(.init())
 	}
