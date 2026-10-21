@@ -653,8 +653,9 @@ enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
 `%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
-which the field value is the [coerced value](#coercion) iff the matcher coerces
-(e.g., `%.n` evaluates to `4.5` for `"4.50"`).
+which the field value is the value against which the matcher is evaluated, as
+its [coerced value](#coercion) iff the matcher coerces (e.g., `%.n` evaluates to
+`4.5` for `"4.50"`, as does `%n` in `%.N%n++`).
 
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
