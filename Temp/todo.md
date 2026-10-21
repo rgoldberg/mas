@@ -9,6 +9,13 @@
 3. Manual accompanying specs
 4. Examples
 
+### Repeated Options
+
+Every mas flag & option other than an output format flag / option & `--fields`
+may be repeated without an error (e.g., `--bundle --bundle`); decide whether
+giving any of them more than once is an error, as it is for output format flags
+/ options & `--fields`.
+
 ### Swift Argument Parser Empty Values
 
 Awaiting an upstream release (not actionable until then): mas cannot be released
