@@ -173,7 +173,7 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 		direction: .ascending,
 		caseSensitivity: .sensitive,
 		locale: nil,
-		numberSegments: .lexicographic,
+		numberSegments: .ungroupedNumeric,
 		chronologicSegments: Set(ISO8601Form.allCases),
 		hasUnixTimeSegments: false,
 		boundaries: .uncollapsed(defaultBoundaryGroups),

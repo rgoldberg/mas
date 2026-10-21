@@ -787,3 +787,7 @@ Only an effective `<document-order>` is an error for table output, because
 `<document-order-option-set>`, rather than `<document-order>`, is only for JSON
 or key-value output, so an overridden one (e.g., in `/DP`) is supported, as
 already implemented.
+
+`<number-segments>` defaults to `<ungrouped-numeric>` (`SortOptionSet.default`),
+instead of `<lexicographic>`, so, e.g., a number value `2` precedes `10`, and
+`file2` precedes `file10`; mas's default sort options are unchanged.
