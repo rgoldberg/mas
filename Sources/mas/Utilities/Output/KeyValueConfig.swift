@@ -103,11 +103,19 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "l":
 			leadingSpacing = KeyValueConfig.default.leadingSpacing
 		case "L":
-			leadingSpacing = try parseKeyValueSettingText(&input)
+			let spacing = try parseKeyValueSettingText(&input)
+			guard !spacing.contains(where: \.isNewline) else {
+				throw .invalidLeadingSpacing(spacing)
+			}
+			leadingSpacing = spacing
 		case "r":
 			trailingSpacing = KeyValueConfig.default.trailingSpacing
 		case "R":
-			trailingSpacing = try parseKeyValueSettingText(&input)
+			let spacing = try parseKeyValueSettingText(&input)
+			guard !spacing.contains(where: \.isNewline) else {
+				throw .invalidTrailingSpacing(spacing)
+			}
+			trailingSpacing = spacing
 		case "s":
 			itemSeparatorPattern = nil
 		case "S":
@@ -138,7 +146,9 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case invalidItemSeparatorPattern(String)
 	case invalidKeyStyleSpecifier(String)
 	case invalidLeaderPattern(String)
+	case invalidLeadingSpacing(String)
 	case invalidSetting(Character)
+	case invalidTrailingSpacing(String)
 
 	var description: String {
 		switch self {
@@ -153,8 +163,12 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Invalid key style specifier (expected non-empty, escaping each ASCII letter, e.g., \"\\b\"): \(styleSpecifier)"
 		case let .invalidLeaderPattern(pattern):
 			"Invalid leader pattern (a line terminator would split each row): \(pattern.debugDescription)"
+		case let .invalidLeadingSpacing(spacing):
+			"Invalid leading spacing (a line terminator would split each row): \(spacing.debugDescription)"
 		case let .invalidSetting(setting):
 			"Invalid --key-value-config <key-value-setting>: \(setting)"
+		case let .invalidTrailingSpacing(spacing):
+			"Invalid trailing spacing (a line terminator would split each row): \(spacing.debugDescription)"
 		}
 	}
 }

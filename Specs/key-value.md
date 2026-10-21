@@ -185,7 +185,9 @@ leading-spacing = ^{text}^ (* default: {empty string} *)
 - `l`: 1 space after each key.
 - `L`: a literal custom spacing string after each key (e.g., `L:` for no leading
   spacing, `L<TAB>:` for a tab, where `<TAB>` is a literal tab character, e.g.,
-  `$'L\t:'` in zsh).
+  `$'L\t:'` in zsh). A `<leading-spacing>` that contains a [line
+  terminator](configs.md#line-terminators) is invalid, because it would split
+  each row.
 
 ## Trailing Spacing
 
@@ -204,7 +206,8 @@ trailing-spacing = ^{text}^ (* default: {empty string} *)
 
 - `r`: 1 space before each value.
 - `R`: a literal custom spacing string before each value (e.g., `R:` for no
-  trailing spacing).
+  trailing spacing). A `<trailing-spacing>` that contains a line terminator is
+  invalid, because it would split each row.
 
 ## Item Separator
 

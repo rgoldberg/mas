@@ -738,3 +738,7 @@ end-justified fields, as already implemented.
 A line terminator is defined once (a CRLF, or any other character from U+000A to
 U+000D, U+0085, U+2028, or U+2029), as already implemented
 (`Character.isNewline`).
+
+A `<leading-spacing>` or `<trailing-spacing>` that contains a line terminator
+reports `invalidLeadingSpacing` / `invalidTrailingSpacing`, as a
+`<leader-pattern>` already did, instead of splitting each row.
