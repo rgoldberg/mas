@@ -743,7 +743,7 @@ separator, a digit group size of 3 & a secondary digit group size of 0.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <lexicographic>; last wins *)
+number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <ungrouped-numeric>; last wins *)
 
 lexicographic     = "x" (* mnemonic: 3rd letter of lexicographic *)
 ungrouped-numeric = "u"

@@ -228,7 +228,8 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			// A number is a single number segment, unless lexicographic or versions
-			("1", JSON.Node.number(2), JSON.Node.number(10), ComparisonResult.orderedDescending),
+			("1", JSON.Node.number(2), JSON.Node.number(10), ComparisonResult.orderedAscending),
+			("1x", .number(2), .number(10), .orderedDescending),
 			("1u", .number(2), .number(10), .orderedAscending),
 			("1u-", .number(2), .number(10), .orderedDescending),
 			("1v", .number(2), .number(10), .orderedAscending),
@@ -307,7 +308,7 @@ private extension MASTests {
 			("1Ciso,unix-time:", "1584553163,", "2020-03-19", .orderedDescending),
 			("1Ciso,unix-time:", "v1584553163", "2020-03-19", .orderedDescending),
 			("1Cunix-time:", "1584553163", "2", .orderedDescending),
-			("1Cunix-time:B+punct+:", "(1584553163)", "(2)", .orderedAscending),
+			("1xCunix-time:B+punct+:", "(1584553163)", "(2)", .orderedAscending),
 			// Without <all-conforming>, a value without typed segments is
 			// nonconforming
 			("1N:", "Free", "$5", .orderedDescending),
@@ -321,7 +322,8 @@ private extension MASTests {
 			("1N:af-", "$4", "$5", .orderedDescending),
 			("1N:afr-", "Free", "$5", .orderedDescending),
 			("1N:a", .null, "Free", .orderedAscending),
-			("1a", "Free", "$5", .orderedDescending),
+			("1a", "Free", "$5", .orderedAscending),
+			("1xa", "Free", "$5", .orderedDescending),
 			// <text-order> orders text & typed segments
 			("1u", "File 10 a", "File 2 b", .orderedDescending),
 			("1uB:", "File 10 a", "File 2 b", .orderedDescending),
