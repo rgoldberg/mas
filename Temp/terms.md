@@ -156,7 +156,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - compound
     - placeholder: only the defined `%…` fields-format term
     - rule: only a semantic rule in prose
-    - REJECTED: contents / instance / usage (except as in 106) / use / site /
+    - REJECTED: contents / instance / usage (except as in 105) / use / site /
       construct / projection / rule (as a syntactic element) / placeholder (as a
       generic term) / symbol
 30. - meta-grammar: the notation the custom EBNF grammar is defined in
@@ -355,9 +355,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - UTC offset: [defined](../Specs/fields-format.md#timezone)
     - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
-70. - date-only: adjective
-    - time-only: adjective; also the type of a time-only value (`%c`'s output
-      type)
+70. - date-only: adjective & noun (e.g., "a date-only")
+    - time-only: adjective & noun (e.g., "a time-only"); also the type of a
+      time-only value (`%c`'s output type)
     - datetime: noun
     - date: the type of a date-only or a datetime (`%d`'s output type)
     - REJECTED: date-time / date time
@@ -382,8 +382,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - cleanup: noun
     - REJECTED: cleanup (as a verb)
 75. - positional order: field specs ordered by position (`<positional-order>`)
-    - document order: field specs ordered by their keys' order in an input JSON
-      object (`<document-order>`)
+    - document order: field specs ordered by their fields' order in an input
+      item (`<document-order>`)
     - REJECTED: base fields config order / listed order / original input order /
       source order
 76. - leader: the fill between a key & its value (`<leader-setting>`)
@@ -488,38 +488,34 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       components (e.g., seconds)
     - REJECTED: compact format (for basic format) / truncated (for reduced
       precision)
-97. - word-by-word sorting: sorting in which a word boundary (e.g., a space)
-      precedes every other character (e.g., `New York` before `Newark`)
-    - letter-by-letter sorting: sorting that ignores word boundaries
-    - REJECTED: word sort / letter sort
-98. - whitespace: any Unicode `White_Space` character
+97. - whitespace: any Unicode `White_Space` character
       ([defined](../Specs/ebnf.md#whitespace))
     - REJECTED: blank space / white space
-99. - collation: a locale's rules for comparing text
+98. - collation: a locale's rules for comparing text
     - CLDR root collation: the Unicode Collation Algorithm with CLDR's root
       collation order & settings, per which the canonical conventions compare
       text ([used](../Specs/fields.md#sort-locale))
     - REJECTED: code point order / Unicode order (for the canonical conventions'
       text comparison)
-100. - character class: a `<character-class-name>`'s characters, per UTS #18
-       Annex C's POSIX Compatible definitions
-       ([used](../Specs/fields.md#sort-boundaries))
-     - REJECTED: GNU Extended POSIX character class / bracket expression class
-101. - date block: `%D`'s block (`<date-block>`), whose pipeline's transforms
+99. - character class: a `<character-class-name>`'s characters, per UTS #18
+      Annex C's POSIX Compatible definitions
+      ([used](../Specs/fields.md#sort-boundaries))
+    - REJECTED: GNU Extended POSIX character class / bracket expression class
+100. - date block: `%D`'s block (`<date-block>`), whose pipeline's transforms
        can be only `dateOnly`s & `timeZone`s, or string transforms after
        coercing to a string
      - time-only block: `%C`'s block (`<time-only-block>`), whose pipeline's
        transforms can be only `timeZone`s, or string transforms after coercing
        to a string
      - REJECTED: clock block / time block
-102. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
+101. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999
      - proleptic Gregorian calendar: the Gregorian calendar extended before
        1582-10-15, as ISO-8601 requires
      - instant: a point in time, in milliseconds since 1970-01-01T00:00:00Z
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
-103. - nullary: of a form, or of a lowercase predicate letter other than `m`,
+102. - nullary: of a form, or of a lowercase predicate letter other than `m`,
        followed by no block
      - non-nullary: of an uppercase predicate letter other than `M`, followed by
        1 or more blocks
@@ -528,15 +524,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        not nullary
      - REJECTED: concise / verbose (the letters have equal length) / bare / full
        / block (for letter case) / nullary match / non-nullary match
-104. - success pipeline: a unary form's pipeline-only block
+103. - success pipeline: a unary form's pipeline-only block
        (`<success-pipeline>`), e.g., `%I…+`'s
        ([defined](../Specs/fields-format.md#success--failure))
      - success clause: a `<success-block>` or a `<success-pipeline>`
        (`<success-clause>`), evaluated iff its enclosing matcher succeeds
-105. - member: 1 of a field's name / value pairs in an item, of which there may
+104. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
-106. - option value: the rest of an option's command-line argument after `=`, or
+105. - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
        `-` ([defined](../Specs/configs.md#option-values))
      - option value separator: the `=` between a long option & its value (e.g.,
@@ -545,10 +541,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
        `[--json | --json-config <json-config> | …]`)
-107. - line terminator: a CRLF, or any other character from U+000A to U+000D,
+     - REJECTED: option-argument / option-argument separator (the specs use
+       "argument" for an argument list's elements)
+106. - line terminator: a CRLF, or any other character from U+000A to U+000D,
        U+0085, U+2028, or U+2029
        ([defined](../Specs/configs.md#line-terminators))
      - newline: the LF that ends an output line (e.g., after a JSON object)
      - REJECTED: line break / line ending / EOL (for a line terminator)
-     - REJECTED: option-argument / option-argument separator (the specs use
-       "argument" for an argument list's elements)

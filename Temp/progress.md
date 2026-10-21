@@ -106,8 +106,8 @@ implement [formatting](../Specs/fields-format.md#formatting): a `<format-block>`
 is a `<pipeline>` (whose `<format-transform-pipeline>` becomes
 `FieldSpec.justification`, inherited iff absent) or a `<format-template>` (at
 least 1 placeholder); blocks are `+`-terminated (`<block-terminator>`) with
-kinds per matcher (string, boolean, number, chronologic, any, unconditional) &
-may contain placeholders; placeholders support `<abort-on-success>`,
+kinds per matcher (string, boolean, number, date, time-only, any, unconditional)
+& may contain placeholders; placeholders support `<abort-on-success>`,
 `<abort-on-failure>`, `<coercion>` / `<number-coercion>` (with trivia), block
 placeholders & match placeholders with `<branch-negation>` & unconditional
 branches; template-text whitespace follows the [escaping
@@ -194,8 +194,8 @@ trailing `,` in a `<field-spec-edits-section>` is an error.
 ### Per-Item Document Order (2026-09-25)
 
 `<document-order>` orders each item's fields independently by its own key order
-(`FieldOrder.itemFieldSpecs(_:for:)`) for JSON & key-value output, and is an
-error for table output.
+(`FieldOrder.itemMembers(_:for:)`) for JSON & key-value output, and is an error
+for table output.
 
 ### Nonexistent Fields (2026-09-25)
 
@@ -324,7 +324,7 @@ saturates at `Int.max`. `scale` renders `0` without calculating `<radix>` to the
 power of `<exponent>` for a huge `<exponent>`.
 
 A Unix time is chronologic iff its whole milliseconds, rounded down, fit in a
-signed 64-bit integer, as `unixTimeDate` already implemented.
+signed 64-bit integer, as `unixTimeInstant(_:)` already implemented.
 
 A value that `scale` would render with more than 100 digits before the radix
 point does not conform to its input type, so `Transform.applied(to:)` returns
@@ -791,3 +791,7 @@ already implemented.
 `<number-segments>` defaults to `<ungrouped-numeric>` (`SortOptionSet.default`),
 instead of `<lexicographic>`, so, e.g., a number value `2` precedes `10`, and
 `file2` precedes `file10`; mas's default sort options are unchanged.
+
+`Temp/` no longer names removed identifiers or block kinds, nor an unused term,
+and its terms define date-only & time-only as nouns too & document order
+independently of the input format.
