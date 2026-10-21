@@ -528,7 +528,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			reversingPositions(iff: optionSet.direction == .descending)
 		case (positionalOrderOption, _, _): // `<field-order-tiebreaker>` is only for a field order other than `P`
 			throw .tiebreakerUnsupportedForPositionalOrder
-		case (_, .table, _): // `<document-order>` is `(* only for: JSON or key-value output *)`
+		case (_, .table, _): // `<document-order-option-set>` is `(* only for: JSON or key-value output *)`
 			throw .documentOrderUnsupportedForTable
 		default:
 			.document(optionSet, tiebreakDirection: tiebreakDirection ?? .ascending)

@@ -434,6 +434,14 @@ private extension MASTests {
 	}
 
 	@Test
+	func `an overridden document-order is supported for table output`() throws {
+		let overridden = try parseFieldsConfig("/D-P")
+		let positional = try parseFieldsConfig("/-P")
+		#expect(overridden.fieldOrder == positional.fieldOrder)
+		#expect(overridden.fieldSpecs == positional.fieldSpecs)
+	}
+
+	@Test
 	func `field order sort-option-set defaults source to output`() throws {
 		guard case let .byLabel(sortSpec, _) = try parseFieldsConfig("/-").fieldOrder else {
 			Issue.record("Expected .byLabel")

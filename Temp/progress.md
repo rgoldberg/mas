@@ -782,3 +782,8 @@ while other `<time-zone-code>`s may also have a fixed one; & a
 A grouped number may start with its decimal separator (e.g., `.5` compares as
 `0.5`), as a number coercion's number may (`groupedNumberPrefix(of:)`), instead
 of requiring a leading digit, after which `.` was text.
+
+Only an effective `<document-order>` is an error for table output, because
+`<document-order-option-set>`, rather than `<document-order>`, is only for JSON
+or key-value output, so an overridden one (e.g., in `/DP`) is supported, as
+already implemented.
