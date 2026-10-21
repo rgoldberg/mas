@@ -167,7 +167,7 @@ leader-pattern = ^{text: no line terminators}^ (* default: "▁" *)
   the 1st character that would exceed that width; spaces fill any remaining
   width (e.g., when that character is wide, such as `中`). A leader's width is
   the width of its item's widest key, less the width of its own key, plus the
-  width of `<leader-pattern>`, so the widest key's leader is a single
+  width of `<leader-pattern>`, so the widest key's leader is 1
   `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is printed
   once, because no number of repetitions can fill any width. A
   `<leader-pattern>` that contains a [line

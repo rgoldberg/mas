@@ -162,8 +162,8 @@ formats valid.
 
 ### Structured Value Operations
 
-1. Nested field references via the `.` [reserved in field
-   names](../Specs/fields.md#appendix-escaping) (e.g., `a.b` for member `b` of
+1. Field references into structured values via the `.` [reserved in field
+   names](../Specs/fields.md#appendix-escaping) (e.g., `a.b` for key `b` of
    field `a`'s object, `a.0` for element `0` of field `a`'s array).
 2. Array & object type predicates.
 3. Array & object transforms.
