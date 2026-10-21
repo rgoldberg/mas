@@ -290,8 +290,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       synonyms for custom)
 53. - because
     - REJECTED: since / due to / as (causal)
-54. - as per: according to
-    - per: for each
+54. - per: according to (e.g., "per `<text-order>`"), or for each (e.g., "1 per
+      line")
+    - REJECTED: as per
 55. - resolve: map a name to its referent (resolved fields config)
     - find: search outcome ("if no match is found")
     - look up / lookup: search a context stack for a named config (name lookup)
@@ -404,7 +405,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - style suffix: follows a style specifier (`<style-suffix>`)
     - style reset: follows a styled string (`<style-reset>`)
     - REJECTED: style terminator / style end
-79. - width: text's terminal display width (as per `wcwidth`)
+79. - width: text's terminal display width (per `wcwidth`)
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - space-fill: fill any remaining width with spaces
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)

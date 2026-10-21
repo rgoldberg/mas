@@ -122,7 +122,7 @@ For each [leaf context](configs.md#context-stacks):
 - `none`: Every field spec is [hidden](#visibility) & its sort is
   [disabled](#sort-priority).
 - `all`: Every field spec is visible. Absent a built-in field order: field specs
-  are sorted by label (`<output>`), while other `<sort-option>`s are as per the
+  are sorted by label (`<output>`), while other `<sort-option>`s are per the
   app's default sort options for labels for the current output format.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
   select list of field specs is visible.

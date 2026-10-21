@@ -220,10 +220,10 @@ overridden.
 The input's start & end are treated as deferring sides that ignore outer bare
 whitespace.
 
-Outer bare whitespace is treated as per its 2 adjacent sides: the preceding
-token's end & the following token's start, the following token being the one
-that would start after the whitespace if it were ignored (or at the whitespace,
-iff a text token starts there). Of those 2 sides:
+Outer bare whitespace is treated per its 2 adjacent sides: the preceding token's
+end & the following token's start, the following token being the one that would
+start after the whitespace if it were ignored (or at the whitespace, iff a text
+token starts there). Of those 2 sides:
 
 - If both defer: the higher-precedence treatment applies, in descending
   precedence:
