@@ -113,7 +113,12 @@ Because every `<success-block>` alternative's syntax includes
 ```ebnf
 transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> | <format-transform-pipeline> (* non-structural *)
 
-value-transform-pipeline = <string-transform-pipeline> | <number-transform-pipeline> | <number-to-string-transform-pipeline> | <date-transform-pipeline>
+value-transform-pipeline =
+  <string-transform-pipeline>
+  | <number-transform-pipeline>
+  | <number-to-string-transform-pipeline>
+  | <date-transform-pipeline>
+  | <time-only-transform-pipeline>
 
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <string-transform-pipeline> ]
 
@@ -124,7 +129,7 @@ transform-call-prefix = "."!
 argument-fence     = ":" (* fences an argument list *)
 argument-separator = "," (* separates an argument list's arguments *)
 
-value-transform = <string-transform> | <number-transform> | <number-to-string-transform> | <date-transform> (* non-structural *)
+value-transform = <string-transform> | <number-transform> | <number-to-string-transform> | <date-transform> | <time-only-transform> (* non-structural *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -373,7 +378,7 @@ time-only-transform          = <time-only-time-zone> (* type: time-only *)
 
 date-only           = "dateOnly"
 date-time-zone      = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
-time-only-time-zone = "timeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
+time-only-time-zone = "timeOnlyTimeZone" [ <time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -382,22 +387,23 @@ A `<date-transform-pipeline>`'s or `<time-only-transform-pipeline>`'s transforms
 jointly set how its value is rendered, regardless of where `dateOnly` appears:
 
 - `dateOnly`: renders only the date, in the output time zone.
-- `timeZone`: sets the output time zone to the one that its `<time-zone-code>`
-  identifies.
+- `timeZone` (for a date) & `timeOnlyTimeZone` (for a time-only): set the output
+  time zone to the one that their `<time-zone-code>` identifies.
 
-Absent `timeZone`, the output time zone is the system time zone.
+Absent `timeZone` & `timeOnlyTimeZone`, the output time zone is the system time
+zone.
 
 A date-only value's date is independent of time zones, so `timeZone` does not
 affect it.
 
 A time-only value is rendered in the output time zone as if on the last
-`timeZone`'s `<reference-date>`, because a time zone's UTC offset can vary by
-date (e.g., for daylight saving time), or, absent `timeZone`, on the current
-date in the system time zone. A UTC offset `<time-zone-code>` has a fixed UTC
-offset, but a Foundation time zone abbreviation may identify a time zone whose
-UTC offset varies (e.g., `EST` identifies `America/New_York`).
+`timeOnlyTimeZone`'s `<reference-date>`, because a time zone's UTC offset can
+vary by date (e.g., for daylight saving time), or, absent `timeOnlyTimeZone`, on
+the current date in the system time zone. A UTC offset `<time-zone-code>` has a
+fixed UTC offset, but a Foundation time zone abbreviation may identify a time
+zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 
-###### `timeZone`
+###### `timeZone` & `timeOnlyTimeZone`
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -911,18 +917,20 @@ Each of their fields must be in range:
 - Minute: `00` to `59`, including a UTC offset's.
 - Second: `00` to `59` (e.g., the leap second `23:59:60` is invalid, because
   Unix time ignores leap seconds).
-- UTC offset: at most 18 hours from UTC, as for [`timeZone`](#timezone).
+- UTC offset: at most 18 hours from UTC, as for
+  [`timeZone`](#timezone--timeonlytimezone).
 
 No other ISO-8601 representation is detected (e.g., basic format, ordinal dates,
 week dates, or reduced precision other than a datetime without seconds).
 
 A datetime or time-only without a UTC offset is in the system time zone.
 
-A time-only value has no date, so `%C`'s block cannot apply `dateOnly` to it,
-and elsewhere, it does not conform to `dateOnly`'s input type, so [value
-coercion](#value-coercion) applies (e.g., `.dateOnly` reports an error for
-`17:39:23`, while `..dateOnly` aborts formatting); `%D.dateOnly+-+` outputs `-`
-for `17:39:23`.
+A time-only value has no date, so `%C`'s block cannot apply `dateOnly` or
+`timeZone` to it, and elsewhere, it does not conform to their input type, so
+[value coercion](#value-coercion) applies (e.g., `.dateOnly` reports an error
+for `17:39:23`, while `..dateOnly` aborts formatting); `%D.dateOnly+-+` outputs
+`-` for `17:39:23`. Likewise, a date does not conform to `timeOnlyTimeZone`'s
+input type (e.g., `.timeOnlyTimeZone:UTC:` reports an error for `2020-03-18`).
 
 Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
 year `0000` is 1 BCE, and `1500-02-29` does not exist).

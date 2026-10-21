@@ -352,7 +352,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - time-zone: compound adjective (`time-zone-dependent`)
     - system time zone: the time zone of the system running mas
     - output time zone: the time zone a chronologic value is rendered in
-    - UTC offset: [defined](../Specs/fields-format.md#timezone)
+    - UTC offset:
+      [defined](../Specs/fields-format.md#timezone--timeonlytimezone)
     - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
 70. - date-only: adjective & noun (e.g., "a date-only")
@@ -505,8 +506,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        can be only `dateOnly`s & `timeZone`s, or string transforms after
        coercing to a string
      - time-only block: `%C`'s block (`<time-only-block>`), whose pipeline's
-       transforms can be only `timeZone`s, or string transforms after coercing
-       to a string
+       transforms can be only `timeOnlyTimeZone`s, or string transforms after
+       coercing to a string
      - REJECTED: clock block / time block
 101. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999

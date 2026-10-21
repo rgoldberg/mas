@@ -137,8 +137,10 @@ private struct FormatParser {
 				try parseNumberFormatArgumentsIfPresent()
 			case scaleName:
 				try parseScaleArguments()
+			case timeOnlyTimeZoneName:
+				try parseTimeZoneArgumentsIfPresent(for: timeOnlyTimeZoneName, Transform.timeOnlyTimeZone)
 			case timeZoneName:
-				try parseTimeZoneArgumentsIfPresent()
+				try parseTimeZoneArgumentsIfPresent(for: timeZoneName, Transform.timeZone)
 			default:
 				valueTransformByName[name]! // swiftlint:disable:this force_unwrapping
 			}
@@ -201,11 +203,15 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses `timeZone`'s optional `<time-zone-arguments>`, whose
-	/// `<time-zone-code>` defaults to `system` & whose absent `<reference-date>`
-	/// is `nil`.
-	private mutating func parseTimeZoneArgumentsIfPresent() throws(ParsingError) -> Transform {
-		let invalidArgumentsError = ParsingError.invalidTransformArguments(name: timeZoneName)
+	/// Parses `timeZone`'s or `timeOnlyTimeZone`'s (named `transformName`)
+	/// optional `<time-zone-arguments>`, whose `<time-zone-code>` defaults to
+	/// `system` & whose absent `<reference-date>` is `nil`, into the transform
+	/// that `transform` makes.
+	private mutating func parseTimeZoneArgumentsIfPresent(
+		for transformName: String,
+		_ transform: (TimeZone, CivilDate?) -> Transform,
+	) throws(ParsingError) -> Transform {
+		let invalidArgumentsError = ParsingError.invalidTransformArguments(name: transformName)
 		let afterWhitespace = input.drop(while: \.isWhitespace)
 		var arguments = [String?](repeating: nil, count: 2)
 		if afterWhitespace.first == argumentFence {
@@ -216,14 +222,14 @@ private struct FormatParser {
 				terminator: argumentFence,
 				isLastArgumentSeparatorTerminated: false,
 			)
-			try parseArgumentFence(for: timeZoneName)
+			try parseArgumentFence(for: transformName)
 		}
 		guard let timeZone = timeZone(forCode: arguments[0] ?? systemTimeZoneCode) else {
 			throw invalidArgumentsError
 		}
-		return .timeZone(
+		return transform(
 			timeZone,
-			referenceDate: try arguments[1].map { argument throws(ParsingError) in
+			try arguments[1].map { argument throws(ParsingError) in
 				guard let referenceDate = CivilDate(iso8601Text: argument) else {
 					throw invalidArgumentsError
 				}
@@ -742,13 +748,7 @@ private extension [TransformCall] {
 		case .string:
 			allSatisfy { $0.transform.kind == .string }
 		case .timeOnly:
-			allSatisfy { call in
-				if case .timeZone = call.transform {
-					true
-				} else {
-					false
-				}
-			}
+			allSatisfy { $0.transform.kind == .timeOnly }
 		case .unconditional:
 			first.coercion != nil && allSatisfy { $0.transform.kind == .string }
 		}
@@ -800,6 +800,7 @@ private let blockTemplateTextTerminatorSet = Set([placeholderPrefix, blockTermin
 
 private let numberFormatName = "numberFormat"
 private let scaleName = "scale"
+private let timeOnlyTimeZoneName = "timeOnlyTimeZone"
 private let timeZoneName = "timeZone"
 
 private let systemTimeZoneCode = "system"
@@ -820,7 +821,12 @@ private let justificationByName = [
 	"startJustify": .start,
 ]
 private let transformNames =
-	Set(valueTransformByName.keys).union(justificationByName.keys).union([numberFormatName, scaleName, timeZoneName])
+	Set(valueTransformByName.keys).union(justificationByName.keys).union([
+		numberFormatName,
+		scaleName,
+		timeOnlyTimeZoneName,
+		timeZoneName,
+	])
 
 /// The shapes of a `<value-transform-pipeline>`'s `<*-transform-call>`s.
-private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .date])
+private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .date, .timeOnly])

@@ -845,19 +845,25 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
 		switch call.transform.kind {
-		case .date:
+		case .date, .timeOnly:
 			guard case let .chronologic(chronologic, style)? = try coercedChronologic(for: call) else {
 				return nil
 			}
-			// A time-only value has no date, so it does not conform to `dateOnly`'s
-			// input type
-			guard case .time = chronologic, call.transform == .dateOnly else {
-				return .chronologic(chronologic, style: style.applying(call.transform))
+			// A time-only value has no date, so it conforms only to a time-only
+			// transform's input type, while a date conforms only to a date
+			// transform's
+			let isTimeOnly = if case .time = chronologic {
+				true
+			} else {
+				false
 			}
-			guard call.coercion != nil else {
-				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			guard isTimeOnly == (call.transform.kind == .timeOnly) else {
+				guard call.coercion != nil else {
+					throw .transformInputTypeMismatch(transform: call.transform, input: string)
+				}
+				return nil
 			}
-			return nil
+			return .chronologic(chronologic, style: style.applying(call.transform))
 		case .number, .numberToString:
 			guard case let .number(number, triviaPrefix, triviaSuffix)? = try coercedNumber(for: call) else {
 				return nil
@@ -974,19 +980,19 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 
 	var isDateOnly = false
 	var timeZone = TimeZone?.none
-	/// The last `timeZone`'s `<reference-date>`, iff any; else the current date
-	/// in the system time zone.
+	/// The last `timeZone`'s or `timeOnlyTimeZone`'s `<reference-date>`, iff any;
+	/// else the current date in the system time zone.
 	var referenceDate = CivilDate?.none
 
 	/// This style modified by a chronologic `transform`: `dateOnly` renders only
-	/// the date; `timeZone` sets the output time zone & the reference date (the
-	/// last one wins).
+	/// the date; `timeZone` & `timeOnlyTimeZone` set the output time zone & the
+	/// reference date (the last one wins).
 	func applying(_ transform: Transform) -> Self {
 		var style = self
 		switch transform {
 		case .dateOnly:
 			style.isDateOnly = true
-		case let .timeZone(timeZone, referenceDate):
+		case let .timeOnlyTimeZone(timeZone, referenceDate), let .timeZone(timeZone, referenceDate):
 			style.timeZone = timeZone
 			style.referenceDate = referenceDate
 		default:
