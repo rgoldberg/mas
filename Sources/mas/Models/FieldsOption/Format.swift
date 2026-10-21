@@ -486,11 +486,11 @@ struct TimeOfDay: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// system time zone).
 	let timeZone: TimeZone?
 
-	/// Its milliseconds since midnight UTC, normalized to UTC via its UTC offset
-	/// (as UTC iff it has none) & wrapped into a single day.
+	/// Its milliseconds since midnight UTC, wrapped into a single day, after
+	/// normalizing it to UTC via its UTC offset, else via the system time zone's
+	/// as if on the current date in the system time zone.
 	var utcMillisecondOfDay: Int {
-		let milliseconds = (localMillisecondOfDay - (timeZone?.secondsFromGMT() ?? 0) * 1000)
-		return (milliseconds % millisecondsPerDay + millisecondsPerDay) % millisecondsPerDay
+		instant(on: ChronologicStyle.currentDay).map { floorQuotientAndRemainder($0, millisecondsPerDay).remainder } ?? 0
 	}
 
 	/// Its milliseconds since midnight, in its own time zone.
@@ -931,7 +931,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 /// date.
 private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// The current date in the system time zone.
-	private static var currentDay: CivilDate {
+	static var currentDay: CivilDate {
 		let now = Int((Environment.current.now().timeIntervalSince1970 * 1000).rounded(.down))
 		return local(now, in: Environment.current.systemTimeZone).day
 	}
