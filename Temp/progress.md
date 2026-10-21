@@ -7,7 +7,8 @@ later spec change), except persisted named formats & custom named configs,
 including context stack lookup, as described by [their open
 issues](todo.md#persisted-custom-named-formats--configs) & by `// TODO:`s in
 `Format.swift`, `FieldSpec.swift` & `FormatParser.swift`: every
-`<named-format-reference>` reports `unknownNamedFormat`.
+`<named-format-reference>` reports `unknownNamedFormat` (or `invalidFormatName`
+for an invalid format name).
 
 ## History
 
@@ -869,3 +870,7 @@ spec, as already implemented.
 For the same output format, each mas built-in fields config's unsuffixed,
 `@table` & `@key-value` variants are identical, as already implemented
 (`resolveBaseFieldsConfig`).
+
+A format name matches the regex `^[-_0-9A-Za-z]+$`, as a config name does, so an
+invalid one (e.g., `:a b`) reports `invalidFormatName` (`isNameCharacter`),
+instead of `unknownNamedFormat`, as any valid one still does.

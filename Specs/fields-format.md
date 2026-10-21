@@ -93,6 +93,9 @@ A **named format** is a format that:
 - Is persisted in the app configuration.
 - Can be referenced via `<named-format-reference>`s.
 
+A **format name** matches the regex `^[-_0-9A-Za-z]+$`, as a [config
+name](configs.md#named-configs) does.
+
 If no named format exists for a referenced name, an error is reported.
 
 If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,

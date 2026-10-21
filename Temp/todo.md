@@ -49,7 +49,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 ### Persisted Custom Named Formats & Configs
 
-1. Custom named formats: every reference to one reports `unknownNamedFormat`.
+1. Custom named formats: every reference to one reports `unknownNamedFormat` (or
+   `invalidFormatName` for an invalid format name).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind:
    1. Looking a name up through the [context
