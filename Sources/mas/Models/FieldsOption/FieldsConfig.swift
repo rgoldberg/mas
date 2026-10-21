@@ -197,8 +197,8 @@ extension FieldOrder {
 
 extension BaseIncludesAllFieldsConfig {
 	/// `all`'s own default field order, absent a built-in field order: sorted by
-	/// label (`<output>`), while other `<sort-option>`s are as per the defaults
-	/// for string fields for `outputFormat`. Applied only if a command has not
+	/// label (`<output>`), while other `<sort-option>`s are per the defaults for
+	/// string fields for `outputFormat`. Applied only if a command has not
 	/// already customized `all`'s `fieldOrder` (i.e., it is still `.inherited`).
 	func withDefaultFieldOrder(outputFormat: OutputFormat) -> Self {
 		var optionSet = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
