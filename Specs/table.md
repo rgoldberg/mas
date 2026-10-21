@@ -159,9 +159,9 @@ separator-pattern = ^{text}^ (* default: "-" *)
   the 1st character that would exceed that width; spaces fill any remaining
   width (e.g., when that character is wide, such as `中`). A 0-width
   `<separator-pattern>` (e.g., a tab) is printed once, because no number of
-  repetitions can fill any width. A `<separator-pattern>` that contains a line
-  terminator (e.g., LF or CR) is invalid, because it would split the separator
-  line.
+  repetitions can fill any width. A `<separator-pattern>` that contains a [line
+  terminator](configs.md#line-terminators) is invalid, because it would split
+  the separator line.
 
 ## Broken
 
@@ -196,7 +196,7 @@ column-spacing = ^{text}^ (* default: {empty string} *)
 - `C`: a literal custom spacing string between adjacent columns (e.g., `C:` for
   no spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a literal tab
   character, e.g., `$'C\t:'` in zsh). A `<column-spacing>` that contains a line
-  terminator (e.g., LF or CR) is invalid, because it would split each row.
+  terminator is invalid, because it would split each row.
 
 ## Table Setting Termination
 

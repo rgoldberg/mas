@@ -543,5 +543,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
        `[--json | --json-config <json-config> | …]`)
+107. - line terminator: a CRLF, or any other character from U+000A to U+000D,
+       U+0085, U+2028, or U+2029
+       ([defined](../Specs/configs.md#line-terminators))
+     - newline: the LF that ends an output line (e.g., after a JSON object)
+     - REJECTED: line break / line ending / EOL (for a line terminator)
      - REJECTED: option-argument / option-argument separator (the specs use
        "argument" for an argument list's elements)

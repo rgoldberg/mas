@@ -734,3 +734,7 @@ any, so `hS` renders it 1st, as already implemented.
 
 [mas's specs](../Specs/mas.md) name its version fields, its path field & its
 end-justified fields, as already implemented.
+
+A line terminator is defined once (a CRLF, or any other character from U+000A to
+U+000D, U+0085, U+2028, or U+2029), as already implemented
+(`Character.isNewline`).

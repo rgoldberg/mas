@@ -163,8 +163,9 @@ leader-pattern = ^{text}^ (* default: "▁" *)
   width of `<leader-pattern>`, so the widest key's leader is a single
   `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is printed
   once, because no number of repetitions can fill any width. A
-  `<leader-pattern>` that contains a line terminator (e.g., LF or CR) is
-  invalid, because it would split each row.
+  `<leader-pattern>` that contains a [line
+  terminator](configs.md#line-terminators) is invalid, because it would split
+  each row.
 
 ## Leading Spacing
 
