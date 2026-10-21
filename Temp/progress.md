@@ -713,3 +713,6 @@ A persisted table, key-value, or JSON config extends `default`, as a persisted
 fields config without a `<base-fields-config-section>` does, so each context's
 `standard` layers custom `default`s for every kind; it is unimplemented, as are
 all custom configs.
+
+A custom config must not be named `standard` or any built-in config's name
+(e.g., `all`); reporting one is unimplemented, as are all custom configs.
