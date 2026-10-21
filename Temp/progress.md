@@ -848,3 +848,7 @@ A persisted fields config extends a config of its own name iff its reference's
 stem is its own stem, whatever either's suffix, so, e.g., a `default@json` that
 extends `default` extends a less specific context's `default` variant, instead
 of itself; it is unimplemented, as are all custom configs.
+
+$previous$ locates a field spec (or the start of the working fields config), not
+an index, so moving a field spec from before it does not change it (e.g., for
+`a,b,c,d`, `.c,%a` gives `b,c,a,d`), as already implemented.

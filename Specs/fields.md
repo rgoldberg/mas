@@ -495,33 +495,37 @@ spec](#default-field-specs) for field `<reference-field-name>` (whereas a
 `<disable-all-sorts>` disables an inserted copy's sort (e.g., in
 `@all//0.+name`).
 
-The $previous$ index is the index in the working fields config where the direct
-results of the immediately preceding `<field-spec-edit>` were effected. It is
-initially set to `0` (i.e., immediately before the 1st field spec in the working
-fields config).
+$previous$ is the location in the working fields config where the direct results
+of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
+the start of the working fields config. It is initially the start (i.e.,
+immediately before the 1st field spec in the working fields config). It locates
+a field spec, not an index, so moving another field spec does not change it
+(e.g., for `a,b,c,d`, `.c,%a` moves `a` immediately after `c`, giving
+`b,c,a,d`).
 
 Field spec edits act as follows:
 
 - `<field-spec-insertion>`:
   - Inserts a new visible field spec, a copy of `source`, immediately after
     $previous$, then overlays its `<field-modifiers>` onto the copy.
-  - Sets $previous$ to the new field spec's index in the working fields config.
+  - Sets $previous$ to the new field spec.
 - `<field-spec-overlay>`:
   - Overlays its `<field-modifiers>` onto `source` & unhides it.
-  - Sets $previous$ to `source`'s index in the working fields config.
+  - Sets $previous$ to `source`.
 - `<field-spec-move>`:
-  - Moves `source` to immediately after $previous$ & unhides it.
-  - Sets $previous$ to `source`'s new index in the working fields config.
+  - Moves `source` to immediately after $previous$ (unless `source` is
+    $previous$) & unhides it.
+  - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
   - If its `<named-field-spec-reference>`'s `<reference-field-name>` names no
     field spec, or its `<field-spec-reference>` resolves to a `null`, inserts a
     new field spec (as `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
-  - Sets $previous$ to `source`'s index in the working fields config.
+  - Sets $previous$ to `source`.
 - `<field-spec-removal>`:
-  - Sets $previous$ to the index immediately before `source`'s index in the
-    working fields config.
+  - Sets $previous$ to the field spec immediately before `source` in the working
+    fields config, or, if none precedes `source`, to its start.
   - Removes `source` from the working fields config.
   - Replaces `source` with `null` in the reference fields config.
 
