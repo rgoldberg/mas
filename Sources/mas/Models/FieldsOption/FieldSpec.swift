@@ -344,7 +344,8 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// `<base-fields-config-section-prefix>`, empty if absent) against the built-in
 /// named fields configs, whose variants are selected by an output format suffix
 /// (`@json` / `@key-value` / `@table`), the `@unsuffixed` reference suffix (the
-/// unsuffixed variant), or, absent both, `outputFormat`:
+/// unsuffixed variant, valid only directly after a stem), or, absent both,
+/// `outputFormat`:
 ///
 /// - `none`: `all` with every field spec hidden & its sort disabled.
 /// - `all`: every field spec visible.
@@ -371,7 +372,7 @@ func resolveBaseFieldsConfig(
 	if let atIndex = stem.lastIndex(of: outputFormatSuffixPrefix) {
 		outputFormatSuffix = stem[stem.index(after: atIndex)...]
 		stem = stem[..<atIndex]
-		guard outputFormatSuffix.map(outputFormatSuffixSet.contains) == true else {
+		guard !isUnsuffixedVariant, outputFormatSuffix.map(outputFormatSuffixSet.contains) == true else {
 			throw .invalidBaseFieldsConfigName(rawName)
 		}
 	}
