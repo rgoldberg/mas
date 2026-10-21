@@ -204,3 +204,19 @@ Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values &
 persisted configs of their kinds each select a named config of its kind to
 [extend](../Specs/configs.md#referencing-named-configs) other than `default`
 (e.g., via a `<base-table-config-name>`).
+
+### Multi-Line Rows
+
+Let a line terminator in a table header or data cell, or in a key-value key,
+continue its row on a new line, instead of rendering as `⏎`: each line
+terminator terminates the current line of its cell or key, the row's other cells
+continue to the row's end, then the row's next line holds each cell's or key's
+next line, so a row is as many lines as its most-lined cell or key. This needs:
+
+1. Whether multi-line rows replace `⏎` or are a setting (e.g., for line-oriented
+   consumers, such as `cut`, which need 1 line per row).
+2. Whether a continuation line is marked (e.g., as `psql` marks one with `+`),
+   because it can otherwise be mistaken for the next row.
+3. How each line is justified, styled (e.g., a style reset per header line) &
+   measured (e.g., column widths & separator lines per widest line).
+4. Whether a line terminator in a style, pattern, or spacing remains invalid.
