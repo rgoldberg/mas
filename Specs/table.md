@@ -187,7 +187,7 @@ broken   = "b"
 unbroken = "u"
 ```
 
-- `b`: the [separator line](#separator) is broken into 1 independently-filled
+- `b`: the [separator line](#separator) is broken into 1 independently filled
   segment per column, joined by the same column spacing as every other row.
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
   table width.
