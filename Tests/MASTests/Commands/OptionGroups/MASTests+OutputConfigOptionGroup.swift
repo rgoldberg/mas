@@ -55,6 +55,16 @@ private extension MASTests {
 		#expect(normalizingOutputOptions(in: ["--json", "--", "--table"]) == ["--json", "--", "--table"])
 	}
 
+	@Test(arguments: [["--fields=-x", "1"], ["--fields", "-", "1"]])
+	func `an option takes a value that starts with - only after = or as -`(arguments: [String]) throws {
+		_ = try MAS.Lookup.parse(normalizingOutputOptions(in: arguments))
+	}
+
+	@Test
+	func `an option never takes a next argument that starts with - as its value`() {
+		#expect(throws: (any Error).self) { try MAS.Lookup.parse(normalizingOutputOptions(in: ["--fields", "-x", "1"])) }
+	}
+
 	@Test
 	func `no option or argument uses a parsing strategy that could take another option as its value`() {
 		let parsingStrategySet = Set(
