@@ -244,7 +244,7 @@ private extension MASTests {
 			// fields-format.md's examples
 			(".numberFormat:de:", .number(1234.5), "1.234,5"),
 			(".numberFormat:de,,,,:", .number(1234.5), "1.234,5"),
-			(".numberFormat:en,\\,,3,2:", .number(12_345_678), "1,23,45,678"),
+			(".numberFormat:canonical,,3,2:", .number(12_345_678), "1,23,45,678"),
 			(".numberFormat:en,,0,2:", .number(12_345_678), "12345678"),
 			(".numberFormat:en,,4:", .number(12_345_678), "1234,5678"),
 			(".numberFormat:en,.,,,,:", .number(-1234.5), "-1.234,5"),
