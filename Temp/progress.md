@@ -861,3 +861,7 @@ A persisted `<absolute-config>` extends `none`, as its equivalent
 `<relative-config>` does, instead of `default`, which a persisted
 `<relative-config>` without a `<base-fields-config-section>` extends; it is
 unimplemented, as are all custom configs.
+
+Table output justifies each header cell as its column is & renders nothing, not
+even a header row or a separator line, without any item or any visible field
+spec, as already implemented.

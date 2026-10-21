@@ -42,6 +42,9 @@ Each [line terminator](configs.md#line-terminators) in a header or data cell is
 rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
 render as `a⏎b`).
 
+A table without any item or any visible field spec renders nothing, not even a
+header row or a separator line.
+
 ## Header
 
 <!--editorconfig-checker-disable-->
@@ -58,9 +61,10 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 <!--editorconfig-checker-enable-->
 
 - `h`: no header row.
-- `H`: a header row of field labels. `<style-specifier>`, if given, styles the
-  entire header row, which is then preceded by
-  [`<style-prefix>`](#style-prefix), `<style-specifier>` &
+- `H`: a header row of field labels, each justified as its column is (per its
+  field spec's [`<justify>`](fields-format.md#format-transforms)).
+  `<style-specifier>`, if given, styles the entire header row, which is then
+  preceded by [`<style-prefix>`](#style-prefix), `<style-specifier>` &
   [`<style-suffix>`](#style-suffix), and followed by
   [`<style-reset>`](#style-reset) (e.g., with their defaults, `1` for bold,
   `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header row
