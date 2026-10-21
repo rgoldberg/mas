@@ -217,8 +217,8 @@ text, not as a separate `<broken-setting>`.
   separate a header from the data.
 
 A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
-overrides an axis's implied default, regardless of where in `<table-config>` it
-appears.
+overrides that axis's implied setting, regardless of where in `<table-config>`
+it appears.
 
 A setting implied by `<table-config>` overrides inherited settings.
 

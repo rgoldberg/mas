@@ -20,7 +20,7 @@ private extension MASTests {
 	func `h & s explicitly turn off a header / separator that would otherwise be implied`() throws {
 		#expect(try parseTableConfig("h").header == nil)
 		#expect(try parseTableConfig("s").separator == nil)
-		// Explicit off wins over an otherwise-implied default, regardless of order
+		// Explicit off overrides an otherwise-implied setting, regardless of order
 		#expect(try parseTableConfig("bh").header == nil)
 		#expect(try parseTableConfig("hb").header == nil)
 	}

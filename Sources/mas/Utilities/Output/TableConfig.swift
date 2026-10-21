@@ -56,8 +56,8 @@ struct TableConfig: Equatable {
 /// with a prerequisite is filled in per `table.md`'s "Implied Settings": `b` /
 /// `u` imply a separator line (`S`, default `<separator-pattern>` `-`); any
 /// separator line implies a header row (`H`, unstyled). A setting that
-/// explicitly sets an axis (even to "off") always overrides an implied default
-/// for that axis. Outer bare whitespace between settings is ignored.
+/// explicitly sets an axis (even to "off") always overrides that axis's implied
+/// setting. Outer bare whitespace between settings is ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigAxis<String>.unset
 	var headerStyling = TableConfig.HeaderStyling.terminalOnly
