@@ -102,7 +102,7 @@ header-style-prefix-setting = <header-style-prefix-default> | <header-style-pref
 header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
 
-style-prefix = ^{text}^ (* default: {empty string} *)
+style-prefix = ^{text: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -123,7 +123,7 @@ header-style-suffix-setting = <header-style-suffix-default> | <header-style-suff
 header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
 header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: suffix *)
 
-style-suffix = ^{text}^ (* default: {empty string} *)
+style-suffix = ^{text: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -143,7 +143,7 @@ header-style-reset-setting = <header-style-reset-default> | <header-style-reset-
 header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
 
-style-reset = ^{text}^ (* default: {empty string} *)
+style-reset = ^{text: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -163,7 +163,7 @@ separator-setting = <separator-off> | <separator-on> (* default: <separator-off>
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
 
-separator-pattern = ^{text}^ (* default: "-" *)
+separator-pattern = ^{text: no line terminators}^ (* default: "-" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -202,7 +202,7 @@ column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* d
 column-spacing-default = "c" (* default column-spacing: "  " *)
 column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>
 
-column-spacing = ^{text}^ (* default: {empty string} *)
+column-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
