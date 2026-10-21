@@ -57,6 +57,10 @@ Default labels & formats favor:
   - Label is the field name.
   - Output is formatted as `%i`.
 
+Field specs for `adamID` & `fileSizeBytes` are
+[end-justified](fields-format.md#format-transforms); all others are
+start-justified.
+
 ## Price Sorting
 
 `formattedPrice`'s default sort options compare [grouped
@@ -70,6 +74,9 @@ locale is the locale of the App Store region that mas guesses from the macOS
 region.
 
 ## Default Sort Options
+
+The **version fields** are `minimumOSVersion`, `newVersion` & `version`. `path`
+is the sole field whose string content is a path.
 
 Field names' & labels' default sort options are those of non-path string
 content.

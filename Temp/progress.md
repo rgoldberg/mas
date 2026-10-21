@@ -731,3 +731,6 @@ rendering), which sorting links, as already implemented.
 
 A table's separator line is before the 1st data row, after the header row, if
 any, so `hS` renders it 1st, as already implemented.
+
+[mas's specs](../Specs/mas.md) name its version fields, its path field & its
+end-justified fields, as already implemented.
