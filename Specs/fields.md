@@ -21,11 +21,9 @@ Each index has an **effective index**:
 - If negative $index$: $length + 1 + index$ (where $length$ is the list's
   length).
 
-Index `0` represents a pseudo-position that precedes all list elements.
-
 Accessing an invalid position is an error. Invalid positions are:
 
-- Non-positive positions (despite non-positive indices being valid).
+- Non-positive positions.
 - Positions that are greater than a list's length.
 
 A negative index may be used to _reference_ an element, but the index _of_ an
