@@ -288,7 +288,8 @@ relative-config = [ <base-fields-config-section> ] [ <field-order-section> ] [ <
 <!--editorconfig-checker-enable-->
 
 The resolved fields config is sourced from the base fields config as modified by
-`<relative-config>`.
+`<relative-config>`'s present sections, so, e.g., `@x.name` retains `x`'s field
+order & item-sort `<direction>`.
 
 #### Base Fields Config Selection
 

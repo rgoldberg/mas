@@ -305,7 +305,7 @@ func resolvedFieldsConfig(
 	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
 	let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
-	let tiebreakDirection = try builder.parseItemSortSection(&input)
+	let tiebreakDirection = try builder.parseItemSortSection(&input, inheriting: base.itemSort.tiebreakDirection)
 	try builder.parseFieldSpecEditsSection(&input)
 	guard input.isEmpty else {
 		throw .unexpectedCharacter(input.first ?? " ")
@@ -544,10 +544,14 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
 	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
 	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort tiebreak
-	/// (input order / reverse input order).
-	mutating func parseItemSortSection(_ input: inout Substring) throws(ParsingError) -> SortOptionSet.Direction {
+	/// (input order / reverse input order). An absent section retains
+	/// `inheritedDirection`.
+	mutating func parseItemSortSection(
+		_ input: inout Substring,
+		inheriting inheritedDirection: SortOptionSet.Direction,
+	) throws(ParsingError) -> SortOptionSet.Direction {
 		guard input.hasPrefix(itemSortSectionPrefix) else {
-			return .ascending
+			return inheritedDirection
 		}
 		input.removeFirst(itemSortSectionPrefix.count)
 		var shouldDisableAllSorts = false
