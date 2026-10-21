@@ -96,8 +96,10 @@ Applies to every key & every string value.
 
 - `v`: each non-ASCII character is rendered verbatim, encoded as UTF-8.
 - `e`: each non-ASCII character is rendered as a JSON `\uXXXX` escape sequence
-  (a UTF-16 surrogate pair of them for a character outside the Basic
-  Multilingual Plane), so the output contains only ASCII characters.
+  with lowercase hex digits (e.g., `\u00e9` for `é`), or, for a character
+  outside the Basic Multilingual Plane, as an escape sequence for each of its
+  UTF-16 surrogates (e.g., `\ud83d\ude00` for `😀`), so the output contains only
+  ASCII characters.
 
 ## JSON Setting Termination
 
