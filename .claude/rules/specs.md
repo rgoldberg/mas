@@ -82,3 +82,6 @@ In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload
 (e.g., off, or the default), uppercase for the one with a payload (e.g., `h` /
 `H`).
+
+In `Specs/ebnf.md`, keep the **Required** (`&`) outer bare whitespace treatment,
+even while no syntax uses it.
