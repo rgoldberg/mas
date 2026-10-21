@@ -249,9 +249,13 @@ or JSON output.
 
 ## Fields Option
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-fields-config = ( <absolute-config> | <relative-config> )- (* default: "" *)
+fields-config = ( <absolute-config> | <relative-config> )- (* default: <relative-config> *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 `--fields`'s [value](configs.md#option-values) is a `<fields-config>`. Giving
 `--fields` more than once is an error.
