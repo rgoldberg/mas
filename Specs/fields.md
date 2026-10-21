@@ -104,6 +104,10 @@ preferring the former, so any variant in a more specific context overrides every
 variant in a less specific one (e.g., for table output, `x` in `mas.list`
 overrides `x@table` in `mas`).
 
+A reference with an output format suffix or `@unsuffixed` matches a context iff
+the context contains that variant (e.g., `x@json` skips a context that contains
+only `x`).
+
 #### Immutable Built-In Named Fields Configs
 
 For each [leaf context](configs.md#context-stacks):
