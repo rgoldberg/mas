@@ -108,7 +108,8 @@ A kind may refine how a context matches a name, e.g., fields configs'
 
 A persisted fields config **extends** the fields config that its
 [`<base-fields-config-section>`](fields.md#base-fields-config-selection) names;
-a config of any other kind extends no config.
+a persisted config of any other kind extends `default`, as a persisted fields
+config without a `<base-fields-config-section>` does.
 
 A persisted config that extends a config of its own name resolves that config
 from the next less specific context in the context stack, so a config may extend
