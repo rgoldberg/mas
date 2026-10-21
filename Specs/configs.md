@@ -126,9 +126,7 @@ A persisted config that extends a config of its own name resolves that config
 from the next less specific context in the context stack, so a config may extend
 its nearest same-named ancestor. In the root context, which has no less specific
 context, a `default` that extends `default` extends the root context's
-`standard`, as it would in a less specific context without a custom `default`,
-so `@default` is equivalent to an absent `<base-fields-config-section>`. Any
-other cyclic chain of references is an error.
+`standard`. Any other cyclic chain of references is an error.
 
 ### Immutable Built-In Named Configs
 
