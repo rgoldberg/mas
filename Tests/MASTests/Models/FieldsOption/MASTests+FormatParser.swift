@@ -378,7 +378,7 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(".endJustify%N..scale:10,6,,0:+?+ MB", JSON.Node.number(1_500_000), "2 MB"),
+			(".endJustify%N.scale:10,6,,0:+?+ MB", JSON.Node.number(1_500_000), "2 MB"),
 			(".endJustify  (%i)", .number(5), "(5)"), // Preceding whitespace is ignored
 			(".endJustify\\.%i", .number(5), ".5"),
 			(".endJustify:%i", .number(5), ":5"),
