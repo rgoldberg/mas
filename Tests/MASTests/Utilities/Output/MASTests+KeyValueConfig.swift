@@ -190,6 +190,30 @@ private extension MASTests {
 	}
 
 	@Test
+	func `key-value indents each non-empty later line of a value to its start & fills an item separator to it`()
+	throws {
+		let items = [JSON.Object([("name", .string("Slack")), ("version", .string("4.0\r\n\u{2028}be\\nta"))]), twoItems[1]]
+		#expect(
+			try keyValue(of: items, keyValueConfig: try parseKeyValueConfig("fL=:R:S-"))
+				== "Name=Slack\nVersion=4.0\n\n        be\\nta\n--------------\nName=X\nVersion=1",
+		)
+	}
+
+	@Test
+	func `key-value renders each line terminator in a key as a return symbol, aligning by its width`() throws {
+		let keyValue = try [JSON.Object([("name", .string("Slack")), ("version", .string("4.0"))])]
+			.keyValue(
+				fieldSpecs: [
+					.init(name: "name", label: "N\na", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "version", label: "Ver", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				fieldOrder: .positional,
+				keyValueConfig: try parseKeyValueConfig("F.:"),
+			)
+		#expect(keyValue == "N⏎a . Slack\nVer . 4.0")
+	}
+
+	@Test
 	func `key-value space-fills an item separator line's width that a wide pattern character would exceed`() throws {
 		#expect(
 			try keyValue(of: twoItems, keyValueConfig: try parseKeyValueConfig("fL=:R:S中"))
