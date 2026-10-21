@@ -1,10 +1,10 @@
-# Table Output Option
+# Table Output Options
 
-`--table` is an optional option of every [display
+`--table` & `--table-config` are optional options of every [display
 command](configs.md#display-commands).
 
-It selects table output, configuring its header row, separator line & column
-spacing.
+Each selects table output; `--table-config` also configures its header row,
+separator line & column spacing.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
@@ -23,13 +23,13 @@ table-setting =
   | <column-spacing-setting>
 ```
 
-`--table`'s optional [value](configs.md#option-values), iff non-empty, is a
+`--table-config`'s [value](configs.md#option-values), iff non-empty, is a
 `<table-config>`.
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.
 
-`--table` output sources from the context stack's
+Table output sources from the context stack's
 [`default`](configs.md#default-configs) table config; `<table-config>` is
 overlaid on it for the current command line only, without persistently affecting
 it. Each setting's default applies iff neither sets it.
@@ -61,7 +61,7 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
   `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header row
   is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so that a
   mistyped setting is not silently consumed as `<style-specifier>` text (e.g.,
-  `--table=Hb`); escape it to include it (e.g., `--table=H\b`).
+  `--table-config Hb`); escape it to include it (e.g., `--table-config H\b`).
 
 ## Header Styling
 
@@ -206,8 +206,8 @@ table-setting-terminator = ":"
 end-of-table-config      = end
 ```
 
-E.g., in `--table=Hb`, `b` is interpreted as invalid `<style-specifier>` text,
-not as a separate `<broken-setting>`.
+E.g., in `--table-config Hb`, `b` is interpreted as invalid `<style-specifier>`
+text, not as a separate `<broken-setting>`.
 
 ## Implied Settings
 
@@ -217,25 +217,26 @@ not as a separate `<broken-setting>`.
   separate a header from the data.
 
 A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
-overrides an axis's implied default, regardless of where in `--table`'s value it
+overrides an axis's implied default, regardless of where in `<table-config>` it
 appears.
 
 A setting implied by `<table-config>` overrides inherited settings.
 
 ## Examples
 
-- `--table=H1:`: a bold header row (SGR `1`) iff standard output is a terminal,
-  no separator.
-- `--table=H1:a`: a bold header row (SGR `1`) regardless of standard output, no
-  separator.
-- `--table=$'H1:O\e[22m:'` (in zsh): a bold header row (SGR `1`) iff standard
-  output is a terminal, reset to normal intensity (SGR `22`) instead of via a
-  full reset, no separator.
-- `--table=S`: a header row (implied) & a dashed (`-`) separator line.
-- `--table=b`: a header row (implied) & a dashed (`-`), broken separator line.
-- `--table=S-+:b`: a header row (implied) & a `-+`-patterned, broken separator
+- `--table-config H1:`: a bold header row (SGR `1`) iff standard output is a
+  terminal, no separator.
+- `--table-config H1:a`: a bold header row (SGR `1`) regardless of standard
+  output, no separator.
+- `--table-config $'H1:O\e[22m:'` (in zsh): a bold header row (SGR `1`) iff
+  standard output is a terminal, reset to normal intensity (SGR `22`) instead of
+  via a full reset, no separator.
+- `--table-config S`: a header row (implied) & a dashed (`-`) separator line.
+- `--table-config b`: a header row (implied) & a dashed (`-`), broken separator
   line.
-- `--table=C....`: no header, no separator, `....` between columns.
+- `--table-config S-+:b`: a header row (implied) & a `-+`-patterned, broken
+  separator line.
+- `--table-config C....`: no header, no separator, `....` between columns.
 
 ## Appendix: Escaping
 

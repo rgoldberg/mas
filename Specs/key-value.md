@@ -1,10 +1,10 @@
-# Key-Value Output Option
+# Key-Value Output Options
 
-`--key-value` is an optional option of every [display
+`--key-value` & `--key-value-config` are optional options of every [display
 command](configs.md#display-commands).
 
-It selects key-value output, configuring its key styling, leader, leading
-spacing, trailing spacing & item separator line.
+Each selects key-value output; `--key-value-config` also configures its key
+styling, leader, leading spacing, trailing spacing & item separator line.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
@@ -24,13 +24,13 @@ key-value-setting =
   | <item-separator-setting>
 ```
 
-`--key-value`'s optional [value](configs.md#option-values), iff non-empty, is a
+`--key-value-config`'s [value](configs.md#option-values), iff non-empty, is a
 `<key-value-config>`.
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.
 
-`--key-value` output sources from the context stack's
+Key-value output sources from the context stack's
 [`default`](configs.md#default-configs) key-value config; `<key-value-config>`
 is overlaid on it for the current command line only, without persistently
 affecting it. Each setting's default applies iff neither sets it.
@@ -244,8 +244,8 @@ end-of-key-value-config      = end
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-E.g., in `--key-value=Fs`, `s` is interpreted as `<leader-pattern>` text, not as
-a separate `<item-separator-setting>`.
+E.g., in `--key-value-config Fs`, `s` is interpreted as `<leader-pattern>` text,
+not as a separate `<item-separator-setting>`.
 
 ## Implied Settings
 
@@ -253,25 +253,27 @@ a separate `<item-separator-setting>`.
   so each row is `key: value`.
 
 A setting that explicitly sets an axis (e.g., `l`) always overrides an axis's
-implied default, regardless of where in `--key-value`'s value it appears.
+implied default, regardless of where in `<key-value-config>` it appears.
 
 A setting implied by `<key-value-config>` overrides inherited settings.
 
 ## Examples
 
-- `--key-value=K1:`: bold keys (SGR `1`) iff standard output is a terminal.
-- `--key-value=K1:a`: bold keys (SGR `1`) regardless of standard output.
-- `--key-value='K\b:P<:X>:O</b>:a'`: keys wrapped in `<b>` & `</b>` tags
+- `--key-value-config K1:`: bold keys (SGR `1`) iff standard output is a
+  terminal.
+- `--key-value-config K1:a`: bold keys (SGR `1`) regardless of standard output.
+- `--key-value-config 'K\b:P<:X>:O</b>:a'`: keys wrapped in `<b>` & `</b>` tags
   regardless of standard output.
-- `--key-value=F.:`: values aligned by a dotted (`.`) leader.
-- `--key-value='F :L:R:'`: values aligned by spaces, with 1 space after each
-  item's widest key.
-- `--key-value='L\::F :R:'`: `key:` rows with values aligned by spaces, with 1
-  space after each item's widest `key:`.
-- `--key-value=f`: `key: value` rows (implied leading spacing).
-- `--key-value=fL=:R:`: `key=value` rows, with a blank line between items.
-- `--key-value=S=`: a `=`-patterned line between items.
-- `--key-value=s`: no line between items.
+- `--key-value-config F.:`: values aligned by a dotted (`.`) leader.
+- `--key-value-config 'F :L:R:'`: values aligned by spaces, with 1 space after
+  each item's widest key.
+- `--key-value-config 'L\::F :R:'`: `key:` rows with values aligned by spaces,
+  with 1 space after each item's widest `key:`.
+- `--key-value-config f`: `key: value` rows (implied leading spacing).
+- `--key-value-config fL=:R:`: `key=value` rows, with a blank line between
+  items.
+- `--key-value-config S=`: a `=`-patterned line between items.
+- `--key-value-config s`: no line between items.
 
 ## Appendix: Escaping
 

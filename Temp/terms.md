@@ -103,7 +103,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: could
 21. - allow: permit or enable, with a to-infinitive ("allows a matcher to also
       match")
-    - let: enable, with a bare infinitive ("let `--table`'s value select")
+    - let: enable, with a bare infinitive ("let `--table-config`'s value
+      select")
     - support: feature availability ("supports escape sequences", "not supported
       for table output")
     - include: membership
@@ -533,9 +534,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
 106. - option value: the rest of an option's command-line argument after `=`, or
-       else, iff required, the next command-line argument
+       else the next command-line argument
        ([defined](../Specs/configs.md#option-values))
      - option value separator: the `=` between a long option & its value (e.g.,
        in `--fields=name`)
+     - flag: an option without a value (e.g., `--json`)
+       ([defined](../Specs/configs.md#option-values))
      - REJECTED: option-argument / option-argument separator (the specs use
        "argument" for an argument list's elements)

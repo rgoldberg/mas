@@ -170,38 +170,39 @@ until the algorithm is updated.
 
 ### Output Formats
 
-Display commands support 3 output formats, each selectable via an option (the
-last one given overriding any preceding ones) with an optional format-specific
-value after `=` (e.g., `--json=P`), pursuant to [mas-specific overrides &
-defaults](Specs/mas.md):
+Display commands support 3 output formats, each selectable via either a flag
+(e.g., `--json`) or an option with a format-specific value (e.g.,
+`--json-config P`), the last one given overriding any preceding ones, pursuant
+to [mas-specific overrides & defaults](Specs/mas.md):
 
-- **Table** (`--table`): Row per item, column per selected field (if an item has
-  multiple values for a field, the last value is used). [The optional value
-  configures table output's header row, separator line & column
-  spacing](Specs/table.md). Default for:
+- **Table** (`--table` / `--table-config`): Row per item, column per selected
+  field (if an item has multiple values for a field, the last value is used).
+  [The value of `--table-config` configures table output's header row, separator
+  line & column spacing](Specs/table.md). Default for:
   - `list`
   - `outdated`
   - `search`
-- **Key-Value** (`--key-value`): Key-value pair on its own row per selected
-  field, blank line between items (if an item has multiple values for a field,
-  each value is output on its own row, in input order). [The optional value
-  configures key-value output's key styling, leader, leading spacing, trailing
-  spacing & item separator line](Specs/key-value.md). Default for:
+- **Key-Value** (`--key-value` / `--key-value-config`): Key-value pair on its
+  own row per selected field, blank line between items (if an item has multiple
+  values for a field, each value is output on its own row, in input order). [The
+  value of `--key-value-config` configures key-value output's key styling,
+  leader, leading spacing, trailing spacing & item separator
+  line](Specs/key-value.md). Default for:
   - `config`
   - `lookup`
-- **JSON** (`--json`): Streamed JSON object per item, key-value pair per each
-  field (if an item has multiple values for a field, all values are output with
-  their relative input order preserved in the output). Key-value pairs are
-  sorted by key by default. [The optional value configures JSON output's
-  pretty-printing, top-level structure & non-ASCII character
-  rendering](Specs/json.md).
+- **JSON** (`--json` / `--json-config`): Streamed JSON object per item,
+  key-value pair per each field (if an item has multiple values for a field, all
+  values are output with their relative input order preserved in the output).
+  Key-value pairs are sorted by key by default. [The value of `--json-config`
+  configures JSON output's pretty-printing, top-level structure & non-ASCII
+  character rendering](Specs/json.md).
 
 For all output formats, `--fields` [selects, orders, labels & formats output
 fields & sorts items](Specs/fields.md), e.g.:
 
-- `mas list --fields 'name=App,version/1-' --table=S`: only the name (labeled
-  `App`) & version fields, sorted by descending version, with a header row & a
-  separator line
+- `mas list --fields 'name=App,version/1-' --table-config S`: only the name
+  (labeled `App`) & version fields, sorted by descending version, with a header
+  row & a separator line
 - `mas list --fields '.name:.uppercase,+path'`: the standard fields, with
   uppercased names & with paths inserted after them
 - `mas list --fields '@none.name,version'`: only the name & version fields

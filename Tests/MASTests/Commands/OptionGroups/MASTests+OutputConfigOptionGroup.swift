@@ -10,53 +10,69 @@ private import ArgumentParser
 internal import Testing
 
 private extension MASTests {
-	@Test(arguments: [("--json", "--json=\0"), ("--key-value=", "--key-value=\0"), ("--table=P", "--table=\0P")])
-	func `normalizing gives an optional-value output option its value after = with a NUL prefix`(
-		option: String,
-		normalized: String,
-	) {
+	@Test(arguments: [
+		("--fields=", "--fields=\0"),
+		("--fields=name", "--fields=\0name"),
+		("--json-config=", "--json-config=\0"),
+		("--key-value-config=s", "--key-value-config=\0s"),
+		("--table-config=S", "--table-config=\0S"),
+	])
+	func `normalizing prefixes a value after = with a NUL`(option: String, normalized: String) {
 		#expect(normalizingOutputOptions(in: [option, "1"]) == [normalized, "1"])
 	}
 
 	@Test
 	func `normalizing retains other options`() {
-		#expect(
-			normalizingOutputOptions(in: ["--json", "1", "--fields", "name"]) == ["--json=\0", "1", "--fields", "name"],
-		)
-	}
-
-	@Test(arguments: [("--fields=", "--fields=\0"), ("--fields=name", "--fields=\0name")])
-	func `normalizing prefixes a --fields value after = with a NUL`(option: String, normalized: String) {
-		#expect(normalizingOutputOptions(in: [option, "1"]) == [normalized, "1"])
+		#expect(normalizingOutputOptions(in: ["--json", "1", "--fields", "name"]) == ["--json", "1", "--fields", "name"])
 	}
 
 	@Test
-	func `normalizing removes every output option that a later one overrides`() {
+	func `normalizing removes every output format flag & option that a later one overrides`() {
 		#expect(
-			normalizingOutputOptions(in: ["--json=P", "1", "--table", "--json=a"]) == ["1", "--json=\0a"],
+			normalizingOutputOptions(in: ["--json-config", "P", "1", "--table", "--key-value-config=s", "--json"])
+				== ["1", "--json"],
 		)
+	}
+
+	@Test
+	func `normalizing removes an overridden option's next argument iff Swift Argument Parser takes it as a value`() {
+		#expect(normalizingOutputOptions(in: ["--json-config", "-", "--table"]) == ["--table"])
+		#expect(normalizingOutputOptions(in: ["--json-config", "--fields", "name", "--table"]) == [
+			"--json-config",
+			"--fields",
+			"name",
+			"--table",
+		])
+	}
+
+	@Test(arguments: [["--json-config", "--table"], ["--json-config"], ["--json=P", "--table"]])
+	func `normalizing retains an invalid output format flag or option`(arguments: [String]) {
+		#expect(normalizingOutputOptions(in: arguments) == arguments)
 	}
 
 	@Test
 	func `normalizing retains every argument after a -- terminator`() {
-		#expect(normalizingOutputOptions(in: ["--json", "--", "--table"]) == ["--json=\0", "--", "--table"])
+		#expect(normalizingOutputOptions(in: ["--json", "--", "--table"]) == ["--json", "--", "--table"])
+	}
+
+	@Test
+	func `no option or argument uses a parsing strategy that could take another option as its value`() {
+		let parsingStrategySet = Set(
+			MAS._dumpHelp().matches(of: /"parsingStrategy" *: *"(\w+)"/).map { String($0.output.1) },
+		)
+		#expect(parsingStrategySet == ["default"])
 	}
 
 	@Test(arguments: [
-		"--json [<json-config>]",
-		"--key-value [<key-value-config>]",
-		"--table [<table-config>]",
-		"--fields <fields-config>",
+		"[--json]",
+		"[--json-config <json-config>]",
+		"[--key-value]",
+		"[--key-value-config <key-value-config>]",
+		"[--table]",
+		"[--table-config <table-config>]",
+		"[--fields <fields-config>]",
 	])
-	func `help names each output option value by its config`(usage: String) {
-		#expect(MAS.Lookup.helpMessage().contains(usage))
-	}
-
-	@Test(arguments: ["JSON", "key-value", "table"])
-	func `help says that an optional output option value is only after =`(outputFormat: String) {
-		#expect(
-			MAS.Lookup.helpMessage(columns: 1000)
-				.contains("Output format: \(outputFormat), optionally configuring (only after =)"),
-		)
+	func `help shows each output option's usage`(usage: String) {
+		#expect(MAS.Lookup.helpMessage(columns: 1000).contains(usage))
 	}
 }

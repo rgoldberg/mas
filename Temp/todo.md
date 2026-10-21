@@ -14,9 +14,10 @@
 Awaiting an upstream release (not actionable until then): once a Swift Argument
 Parser release includes [apple/swift-argument-parser#961](
   https://github.com/apple/swift-argument-parser/pull/961
-), which makes an empty value after `=` (e.g., `--json=`) an empty value instead
-of no value, remove the NUL prefix that `normalizingOutputOptions(in:)` gives
-each output option value after `=`.
+), which makes an empty value after `=` (e.g., `--fields=`) an empty value
+instead of no value, remove the NUL prefix that `normalizingOutputOptions(in:)`
+gives each `--fields`, `--json-config`, `--key-value-config` & `--table-config`
+value after `=`.
 
 ### Swift Argument Parser Attached-Only Values
 
@@ -24,9 +25,9 @@ Awaiting an upstream release (not actionable until then): once a Swift Argument
 Parser release resolves [apple/swift-argument-parser#992](
   https://github.com/apple/swift-argument-parser/issues/992
 ) with a `defaultAsFlag` parsing strategy that accepts a value only after `=`,
-parse `--json`, `--key-value` & `--table` with it, so that their help usage
-shows the value only after `=` (e.g., `--json[=<json-config>]`), and stop
-`normalizingOutputOptions(in:)` from giving a bare one a value after `=`.
+replace each output format's flag & option (e.g., `--json` &
+`--json-config <json-config>`) with 1 option whose optional value is accepted
+only after `=` (e.g., `--json[=<json-config>]`).
 
 ## ASAP Version, But Massive Effort
 
@@ -48,8 +49,8 @@ shows the value only after `=` (e.g., `--json[=<json-config>]`), and stop
       matching a stem per context & `default` variants.
    6. A persisted fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
-3. Inherited `--table` / `--key-value` / `--json` settings: they currently apply
-   only on top of `standard`, so implied
+3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
+   they currently apply only on top of `standard`, so implied
    [table](../Specs/table.md#implied-settings) &
    [key-value](../Specs/key-value.md#implied-settings) settings' precedence over
    inherited ones has no effect yet.
@@ -189,7 +190,7 @@ with fields that the 1st item lacks after the others, in position order.
 
 ### Base Output Config Names
 
-Let `--table`'s, `--key-value`'s & `--json`'s values each select a named config
-of its kind other than the context stack's `default` (e.g., via a
-`<base-table-config-name>`), which a persisted config of that kind would then
-[extend](../Specs/configs.md#referencing-named-configs).
+Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values each
+select a named config of its kind other than the context stack's `default`
+(e.g., via a `<base-table-config-name>`), which a persisted config of that kind
+would then [extend](../Specs/configs.md#referencing-named-configs).

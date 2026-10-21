@@ -29,20 +29,21 @@ Output configuration applies to every output format unless otherwise specified.
 
 Each display command has a default output format.
 
-Each output format has an option that selects it. If multiple such options are
-given, the last one overrides all preceding ones (e.g., `--json --table` outputs
-a table; `--json=P --json=a` is equivalent to `--json=a`), as with POSIX `ls`'s
-output format options (e.g., `ls -l -1`).
+Each output format has a flag that selects it with its
+[`default`](#default-configs) config (e.g., `--json`) & an option that selects
+it with a config overlaid on its `default` config (e.g., `--json-config P`). If
+multiple such flags and/or options are given, the last one overrides all
+preceding ones (e.g., `--json-config P --table` outputs a table;
+`--json-config P --json` outputs JSON per its `default` config), as with POSIX
+`ls`'s output format options (e.g., `ls -l -1`).
 
 ## Option Values
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,
-`--fields=name`), or else, iff the value is required, the next command-line
-argument (e.g., `--fields name`). An optional value is given only after `=`
-(e.g., `--json=P`), as for GNU `getopt_long`'s optional arguments, so that an
-option without `=` never takes the next command-line argument as its value
-(e.g., `mas lookup --json 497799835` looks up `497799835`). Each spec defines an
-option's syntax over its value alone.
+`--fields=name`), or else the next command-line argument (e.g.,
+`--fields name`). Each spec defines an option's syntax over its value alone.
+
+A **flag** is an option without a value (e.g., `--json`).
 
 ## Command Lists
 
