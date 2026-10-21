@@ -50,6 +50,11 @@ private extension MASTests {
 		#expect(throws: (any Error).self) { try MAS.Lookup.parse(["--fields", "-x", "1"]) }
 	}
 
+	@Test
+	func `an option without a next argument has no value, which is an error`() {
+		#expect(throws: (any Error).self) { try MAS.Lookup.parse(["1", "--fields"]) }
+	}
+
 	@Test(arguments: [
 		(MAS.Config.helpMessage(columns: 1000), "mas config \(outputConfigUsage)\n"),
 		(MAS.List.helpMessage(columns: 1000), "mas list \(outputConfigUsage) [--bundle] [<app-id> ...]\n"),
