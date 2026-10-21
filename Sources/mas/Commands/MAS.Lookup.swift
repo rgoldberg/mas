@@ -85,11 +85,11 @@ private struct KeyValueOutputConfig: OutputConfig {
 			.init(
 				name: "fileSizeBytes",
 				label: "Size",
-				// `%+.N.scale:10,6,,0:.numberFormat+ MB`: a byte count as whole,
-				// grouped decimal megabytes, with an appended " MB". JSON gets the raw
-				// byte count instead: JSON output resolves to the machine-facing
-				// `@json` variant (see `machineFacingVariant()`), which labels each
-				// field spec by its name & formats its output as `%i`, per mas.md
+				// `%+.N.scale:6,,0:.numberFormat+ MB`: a byte count as whole, grouped
+				// decimal megabytes, with an appended " MB". JSON gets the raw byte
+				// count instead: JSON output resolves to the machine-facing `@json`
+				// variant (see `machineFacingVariant()`), which labels each field spec
+				// by its name & formats its output as `%i`, per mas.md
 				format: .template(
 					[
 						.placeholder(
@@ -100,7 +100,7 @@ private struct KeyValueOutputConfig: OutputConfig {
 										.init(
 											calls: [
 												.init(
-													transform: .scale(radix: 10, exponent: 6, significantDigits: nil, fractionalDigits: 0),
+													transform: .scale(exponent: 6, significantDigits: nil, fractionalDigits: 0),
 													coercion: nil,
 												),
 												.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),

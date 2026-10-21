@@ -206,29 +206,22 @@ private struct FormatParser {
 		try parseArgumentFence(for: scaleName)
 		let arguments = try parseArguments(
 			&input,
-			count: 4,
+			count: 3,
 			terminator: argumentFence,
 			isLastArgumentSeparatorTerminated: true,
 		)
 		try parseArgumentFence(for: scaleName)
 		let integers = arguments.map { $0.map { nonNegativeInteger($0) ?? -1 } }
 		guard
-			let radix = integers[0],
-			(2...36).contains(radix),
-			let exponent = integers[1],
+			let exponent = integers[0],
 			exponent >= 0,
-			integers[2].map((1...100).contains) ?? true,
-			let fractionalDigits = integers[3],
+			integers[1].map((1...100).contains) ?? true,
+			let fractionalDigits = integers[2],
 			(0...100).contains(fractionalDigits)
 		else {
 			throw .invalidTransformArguments(name: scaleName)
 		}
-		return .scale(
-			radix: radix,
-			exponent: exponent,
-			significantDigits: integers[2],
-			fractionalDigits: fractionalDigits,
-		)
+		return .scale(exponent: exponent, significantDigits: integers[1], fractionalDigits: fractionalDigits)
 	}
 
 	/// Parses `timeZone`'s `<date-time-zone-arguments>` or `timeOnlyTimeZone`'s

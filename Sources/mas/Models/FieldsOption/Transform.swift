@@ -21,11 +21,11 @@ enum Transform: Hashable {
 
 	case absoluteValue
 	case round
-	/// Divides the field's value by `radix^exponent`, optionally rounds it to
-	/// `significantDigits` total `radix` digits, then renders it in positional
-	/// notation, base `radix`, with exactly `fractionalDigits` digits after the
-	/// radix point. See `<scale>` in fields-format.md for full semantics.
-	case scale(radix: Int, exponent: Int, significantDigits: Int?, fractionalDigits: Int)
+	/// Divides the field's value by `10^exponent`, optionally rounds it to
+	/// `significantDigits` total digits, then renders it in positional notation
+	/// with exactly `fractionalDigits` digits after the decimal point. See
+	/// `<scale>` in fields-format.md for full semantics.
+	case scale(exponent: Int, significantDigits: Int?, fractionalDigits: Int)
 
 	/// Inserts the conventions' digit group separator between the digit groups of
 	/// the field's integer part & replaces its `.` with the conventions' decimal
@@ -77,12 +77,11 @@ enum Transform: Hashable {
 			conventions.formatted(string)
 		case .round:
 			rounded(string) ?? string
-		case let .scale(radix, exponent, significantDigits, fractionalDigits):
+		case let .scale(exponent, significantDigits, fractionalDigits):
 			DecimalNumber(string).flatMap { number in
-				radixScaled(
+				scaled(
 					number,
 					isPlusSigned: string.hasPrefix("+"),
-					radix: radix,
 					exponent: exponent,
 					significantDigits: significantDigits,
 					fractionalDigits: fractionalDigits,
@@ -227,52 +226,39 @@ private nonisolated(unsafe) let utcOffsetRegex =
 /// `Transform.scale`), computed exactly, a leading `+` retained iff
 /// `isPlusSigned` & a leading `-` iff the result is nonzero; `nil` iff the
 /// rendering would have more than `maxScaledIntegerDigitCount` digits before
-/// the radix point.
-private func radixScaled(
+/// the decimal point.
+private func scaled(
 	_ number: DecimalNumber,
 	isPlusSigned: Bool,
-	radix: Int,
 	exponent: Int,
 	significantDigits: Int?,
 	fractionalDigits: Int,
 ) -> String? {
-	// log_radix(|number| / radix^exponent), from |number| being at least
-	// 10^(number.exponent - 1) & less than 10^number.exponent, to within `error`,
-	// so that a result that is too large, or that renders as 0, is known without
-	// computing it. Clamping number.exponent keeps the estimate finite without
-	// changing either outcome
-	let radixDigitsPerDecimalDigit = log(10) / log(Double(radix))
-	let decimalMagnitude = min(max(Double(number.exponent), -1e300), 1e300)
-	let estimate = (decimalMagnitude - 0.5) * radixDigitsPerDecimalDigit - Double(exponent)
-	let error = 0.5 * radixDigitsPerDecimalDigit + 1 + (abs(decimalMagnitude) * 4 + Double(exponent)) * 1e-15
-	guard estimate - error < Double(maxScaledIntegerDigitCount) else {
+	// |number| / 10^exponent = 0.digits × 10^magnitudeExponent, so a nonzero
+	// one's integer part has magnitudeExponent digits iff that is positive, which
+	// rounding cannot reduce
+	let magnitudeExponent = number.exponent - BigInt(exponent)
+	guard number.digits.isEmpty || magnitudeExponent <= maxScaledIntegerDigitCount else {
 		return nil
 	}
-	let magnitude = ScaledMagnitude(
-		number,
-		dividedByRadix: radix,
-		toThe: exponent,
-		digitCount: maxScaledIntegerDigitCount + fractionalDigits + (significantDigits ?? 0) + 16,
-	)
-	let isZero = number.digits.isEmpty || estimate + error < Double(-2 - fractionalDigits)
-	// The 1st rounding is to a multiple of radix^-unitExponent: per
+	let significand = BigInt(number.digits.isEmpty ? "0" : number.digits) ?? 0
+	// The 1st rounding is to a multiple of 10^unitExponent: per
 	// `significantDigits`, else per `fractionalDigits`
-	let unitExponent = isZero
-		? fractionalDigits
-		: significantDigits.map { $0 - 1 - magnitude.radixMagnitude(atLeast: Int((estimate - error).rounded(.down))) }
-			?? fractionalDigits
-	let roundedMagnitude = isZero ? 0 : BigInt(magnitude.rounded(timesRadixToThe: BigInt(unitExponent)))
-	let radix = BigInt(radix)
-	let (integerPart, fractionalPart) = (
-		fractionalDigits >= unitExponent
-			? roundedMagnitude * radix.power(fractionalDigits - unitExponent)
-			: roundedQuotient(roundedMagnitude, radix.power(unitExponent - fractionalDigits)),
+	let unitExponent = significantDigits.map { magnitudeExponent - BigInt($0) } ?? BigInt(-fractionalDigits)
+	let (integerPart, fractionalPart) = roundedMultiple(
+		roundedMultiple(
+			significand,
+			timesPowerOf10: magnitudeExponent - BigInt(number.digits.count),
+			toMultipleOfPowerOf10: unitExponent,
+		),
+		timesPowerOf10: unitExponent,
+		toMultipleOfPowerOf10: BigInt(-fractionalDigits),
 	)
-	.quotientAndRemainder(dividingBy: radix.power(fractionalDigits))
-	let integerDigits = String(integerPart, radix: Int(radix))
+	.quotientAndRemainder(dividingBy: BigInt(10).power(fractionalDigits))
+	let integerDigits = integerPart.description
 	let integerText = (number.isNegative && (integerPart != 0 || fractionalPart != 0) ? "-" : isPlusSigned ? "+" : "")
 		+ integerDigits
-	let fractionalText = String(fractionalPart, radix: Int(radix))
+	let fractionalText = fractionalPart.description
 	return integerDigits.count > maxScaledIntegerDigitCount
 		? nil
 		: fractionalDigits > 0
@@ -280,7 +266,26 @@ private func radixScaled(
 			: integerText
 }
 
-/// The most digits that `scale` renders before the radix point.
+/// `significand × 10^power`, for a non-negative `significand`, rounded to the
+/// nearest multiple of `10^unitExponent` (halves away from 0), divided by
+/// `10^unitExponent`. `power - unitExponent`, iff non-negative, must be small
+/// enough for `10^(power - unitExponent)` to be computed.
+private func roundedMultiple(
+	_ significand: BigInt,
+	timesPowerOf10 power: BigInt,
+	toMultipleOfPowerOf10 unitExponent: BigInt,
+) -> BigInt {
+	let shift = power - unitExponent
+	// A value less than 10^(unitExponent - 1) rounds to 0, which also avoids
+	// computing 10^-shift for a huge -shift
+	return shift >= 0
+		? significand * BigInt(10).power(Int(shift))
+		: -shift > significand.description.count
+			? 0
+			: roundedQuotient(significand, BigInt(10).power(Int(-shift)))
+}
+
+/// The most digits that `scale` renders before the decimal point.
 private let maxScaledIntegerDigitCount = 100
 
 /// `numerator / denominator`, both non-negative, rounded to the nearest
@@ -311,10 +316,10 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			"""
 		case .round:
 			"round"
-		case let .scale(radix, exponent, significantDigits, fractionalDigits):
+		case let .scale(exponent, significantDigits, fractionalDigits):
 			"""
-			scale(radix: \(radix), exponent: \(exponent), significantDigits: \(significantDigits, default: "nil"), \
-			fractionalDigits: \(fractionalDigits))
+			scale(exponent: \(exponent), significantDigits: \(significantDigits, default: "nil"), fractionalDigits: \
+			\(fractionalDigits))
 			"""
 		case .dateOnly:
 			"dateOnly"

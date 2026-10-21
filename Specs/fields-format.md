@@ -151,8 +151,8 @@ An argument ignores its outer bare whitespace, which must be escaped to be
 consumed (e.g., `.numberFormat:,\ ,3:` separates digit groups with a space).
 
 An argument that is empty after ignoring its outer bare whitespace is absent,
-which is an error iff the argument is required (e.g., `.scale:,6,,0:` is an
-error, but `.scale:10,6, ,0:` omits `<significant-digits>`).
+which is an error iff the argument is required (e.g., `.scale:,,0:` is an error,
+but `.scale:6, ,0:` omits `<significant-digits>`).
 
 ###### Value Coercion
 
@@ -304,7 +304,7 @@ parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
 `numberFormat` retains scientific notation, applying to its significand &
 rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
 renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
-it (e.g., `.scale:10,0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
+it (e.g., `.scale:0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
 
 Number format arguments whose digit group separator equals their decimal
 separator, each after defaulting to the base conventions, are an error, whether
@@ -332,39 +332,35 @@ present):
 <!--markdownlint-disable line-length-->
 ```ebnf
 scale-arguments =
-  <argument-fence> <radix>
-  <argument-separator> <exponent>
+  <argument-fence> <exponent>
   <argument-separator> [ <significant-digits> ]
   <argument-separator> <fractional-digits>
   <argument-fence>
 
-radix              = {integer from 2 to 36}  (* base for <exponent> & the rendered digits *)
-exponent           = {non-negative integer}  (* divides the input by <radix> to this power before rendering *)
-significant-digits = {integer from 1 to 100} (* rounds to this many total <radix> digits; absent: no rounding *)
-fractional-digits  = {integer from 0 to 100} (* exactly this many <radix> digits after the point; 0: integer *)
+exponent           = {non-negative integer}  (* divides the input by 10 to this power before rendering *)
+significant-digits = {integer from 1 to 100} (* rounds to this many total digits; absent: no rounding *)
+fractional-digits  = {integer from 0 to 100} (* exactly this many digits after the point; 0: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`scale` divides its input by `<radix>` to the power of `<exponent>`, optionally
-rounds it to `<significant-digits>` total `<radix>` digits, then renders it in
-positional notation, base `<radix>`, with exactly `<fractional-digits>` digits
-after the radix point.
+`scale` divides its input by 10 to the power of `<exponent>`, optionally rounds
+it to `<significant-digits>` total digits, then renders it in positional
+notation with exactly `<fractional-digits>` digits after the decimal point.
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
-- A `<fractional-digits>` of `0` renders a plain integer, with no radix point.
-- For a `<radix>` greater than 10, digits beyond `9` are lowercase `a` to `z`.
+- A `<fractional-digits>` of `0` renders a plain integer, with no decimal point.
 - `0` renders as `0`, followed, iff `<fractional-digits>` is positive, by a
-  radix point & `<fractional-digits>` `0`s.
+  decimal point & `<fractional-digits>` `0`s.
 - A leading `+` is retained, while a leading `-` is retained iff the result is
-  nonzero (e.g., `.scale:10,0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as
-  for `round`.
-- A value that would render with more than 100 digits before the radix point
+  nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
+  `round`.
+- A value that would render with more than 100 digits before the decimal point
   does not conform to `scale`'s input type, so [value coercion](#value-coercion)
-  applies (e.g., `.scale:10,0,,0:` reports an error for `1e100`, while
-  `..scale:10,0,,0:` aborts formatting).
-- E.g., a byte count as integer decimal megabytes: `.scale:10,6,,0:`.
+  applies (e.g., `.scale:0,,0:` reports an error for `1e100`, while
+  `..scale:0,,0:` aborts formatting).
+- E.g., a byte count as integer megabytes: `.scale:6,,0:`.
 
 ###### Chronologic Transforms
 
@@ -467,7 +463,7 @@ output column alignment. It therefore does not affect the field's rendered
 value: it is a no-op for JSON / key-value output (which have no columns to
 align); it accepts a value of any type & does not modify it, unlike every
 `<value-transform>`. A `<format-transform-pipeline>` may thus also precede a
-`<format-template>` (e.g., `.endJustify%N.scale:10,6,,0:+?+ MB`).
+`<format-template>` (e.g., `.endJustify%N.scale:6,,0:+?+ MB`).
 
 `centerStartJustify` & `centerEndJustify` differ only when the value's remaining
 column width is odd: `centerStartJustify` puts the extra space after the value

@@ -121,6 +121,12 @@ patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
 
 E.g., `%16n`.
 
+### `scale` Radix
+
+Restore `scale`'s `<radix>` argument (the `radix` branch's sole commit), which
+needs semantics for a number whose text is not decimal (e.g., `ff`) in every
+later number transform, in sorting & in JSON output.
+
 ### Meaningful Number Units
 
 E.g., SI prefixes.

@@ -90,7 +90,7 @@ private extension MASTests {
 		expected: String,
 	) {
 		#expect(
-			Transform.scale(radix: 10, exponent: 0, significantDigits: nil, fractionalDigits: fractionalDigits)
+			Transform.scale(exponent: 0, significantDigits: nil, fractionalDigits: fractionalDigits)
 				.applied(to: input)
 				== expected,
 		)

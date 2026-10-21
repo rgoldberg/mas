@@ -82,19 +82,19 @@ following visible field specs, at the given positions:
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Field                       | Label         | Format                                 | `list` | `lookup` | `outdated` | `search` |
-|:----------------------------|:--------------|:---------------------------------------|-------:|---------:|-----------:|---------:|
-| `adamID`                    | `ADAM ID`     | `%i`                                   |      1 |        2 |          1 |        1 |
-| `name`                      | `Name`        | `%i`                                   |      2 |        1 |          2 |        2 |
-| `version`                   | `Version`     | `%i`                                   |      3 |        4 |          3 |        3 |
-| `newVersion`                | `New Version` | `%i`                                   |        |          |          4 |          |
-| `bundleID`                  | `Bundle ID`   | `%i`                                   |        |        3 |            |          |
-| `formattedPrice`            | `Price`       | `%i`                                   |        |        5 |            |          |
-| `sellerName`                | `By`          | `%i`                                   |        |        6 |            |          |
-| `currentVersionReleaseDate` | `Released`    | `%D.dateOnly++`                        |        |        7 |            |          |
-| `minimumOSVersion`          | `Minimum OS`  | `%i`                                   |        |        8 |            |          |
-| `fileSizeBytes`             | `Size`        | `%+.N.scale:10,6,,0:.numberFormat+ MB` |        |        9 |            |          |
-| `appStorePageURL`           | `From`        | `%i`                                   |        |       10 |            |          |
+| Field                       | Label         | Format                              | `list` | `lookup` | `outdated` | `search` |
+|:----------------------------|:--------------|:------------------------------------|-------:|---------:|-----------:|---------:|
+| `adamID`                    | `ADAM ID`     | `%i`                                |      1 |        2 |          1 |        1 |
+| `name`                      | `Name`        | `%i`                                |      2 |        1 |          2 |        2 |
+| `version`                   | `Version`     | `%i`                                |      3 |        4 |          3 |        3 |
+| `newVersion`                | `New Version` | `%i`                                |        |          |          4 |          |
+| `bundleID`                  | `Bundle ID`   | `%i`                                |        |        3 |            |          |
+| `formattedPrice`            | `Price`       | `%i`                                |        |        5 |            |          |
+| `sellerName`                | `By`          | `%i`                                |        |        6 |            |          |
+| `currentVersionReleaseDate` | `Released`    | `%D.dateOnly++`                     |        |        7 |            |          |
+| `minimumOSVersion`          | `Minimum OS`  | `%i`                                |        |        8 |            |          |
+| `fileSizeBytes`             | `Size`        | `%+.N.scale:6,,0:.numberFormat+ MB` |        |        9 |            |          |
+| `appStorePageURL`           | `From`        | `%i`                                |        |       10 |            |          |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
