@@ -341,7 +341,7 @@ fixed-absent-fields    = "f"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The working fields config's field specs are ordered per
+The **field order**, in which each item's fields are output, is per
 `<field-order-option-set>`:
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
@@ -372,6 +372,8 @@ only:
 
 - Which field spec an `<index>` references.
 - Tiebreaking the field order.
+- Sort precedence among sort keys with the same
+  [`<sort-priority>`](#sort-priority).
 
 `<document-order-option-set>` is not supported for table output because items
 may each have different fields, or the same fields in different orders, so a
@@ -593,7 +595,8 @@ A field spec with a `<sort>`:
 - Otherwise, takes sort precedence over field specs:
   - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
     priority).
-  - Succeeding it with the same `<sort-priority>`.
+  - With the same `<sort-priority>` that succeed it in the order of the field
+    specs in the resolved fields config, regardless of the field order.
 
 ##### Sort Options
 

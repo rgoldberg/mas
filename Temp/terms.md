@@ -384,7 +384,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 74. - clean up: verb
     - cleanup: noun
     - REJECTED: cleanup (as a verb)
-75. - positional order: field specs ordered by position (`<positional-order>`)
+75. - field order: the order in which each item's fields are output, per
+      `<field-order-option-set>` ([defined](../Specs/fields.md#field-order))
+    - positional order: field specs ordered by position (`<positional-order>`)
     - document order: field specs ordered by their fields' order in an input
       item (`<document-order>`)
     - REJECTED: base fields config order / listed order / original input order /
