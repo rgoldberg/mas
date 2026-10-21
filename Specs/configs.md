@@ -41,7 +41,9 @@ preceding ones (e.g., `--json-config P --table` outputs a table;
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,
 `--fields=name`), or else the next command-line argument (e.g.,
-`--fields name`). Each spec defines an option's syntax over its value alone.
+`--fields name`), iff that argument is `-` or does not start with `-`, so a
+value that starts with `-` must follow `=` (e.g., `--fields=-x`). Each spec
+defines an option's syntax over its value alone.
 
 A **flag** is an option without a value (e.g., `--json`).
 
