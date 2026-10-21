@@ -157,18 +157,18 @@ segment (`unixTimeSegment(at:in:value:)`).
 
 `resolveBaseFieldsConfig` validates config names [per
 spec](../Specs/configs.md#named-configs) (`^[-_0-9A-Za-z]+$` plus an optional
-output format suffix & an optional `@unsuffixed` reference suffix), reports a
-nonexistent name & selects variants per suffix or, absent one, the output
-format: `@json` is machine-facing (`machineFacingVariant()`: label = name,
-format = `%i`), `@unsuffixed` / `@table` / `@key-value` user-facing &
-`standard@json` is `all@json`. [Per
-spec](../Specs/mas.md#built-in-named-fields-configs), every field is in each of
-built-in `none`, `all` & `standard`: `none` is `all` with every field spec
-hidden & its sort disabled; user-facing `standard` is its own field specs
-followed by `all`'s other field specs, hidden, so an overlay may select any
-field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames` fully parses
-the value against the static base (fetching every field for a reference to a
-field not yet discovered), excluding hidden field specs that do not sort items.
+output format suffix or `@unsuffixed` reference suffix), reports a nonexistent
+name & selects variants per suffix or, absent one, the output format: `@json` is
+machine-facing (`machineFacingVariant()`: label = name, format = `%i`),
+`@unsuffixed` / `@table` / `@key-value` user-facing & `standard@json` is
+`all@json`. [Per spec](../Specs/mas.md#built-in-named-fields-configs), every
+field is in each of built-in `none`, `all` & `standard`: `none` is `all` with
+every field spec hidden & its sort disabled; user-facing `standard` is its own
+field specs followed by `all`'s other field specs, hidden, so an overlay may
+select any field (e.g., `@none.name,version`, `.bundleID`). `fetchFieldNames`
+fully parses the value against the static base (fetching every field for a
+reference to a field not yet discovered), excluding hidden field specs that do
+not sort items.
 
 ### mas Defaults (2026-09-25)
 
@@ -815,3 +815,7 @@ zone's UTC offset as if on the current date in the system time zone
 (`TimeOfDay.utcMillisecondOfDay`), as rendering does absent `timeOnlyTimeZone`,
 instead of as UTC, so, e.g., in `America/New_York`, `09:00:00` follows
 `12:00:00Z`.
+
+`@unsuffixed` may directly follow only a stem in a fields config reference
+(`resolveBaseFieldsConfig`), so, e.g., `@standard@json@unsuffixed` reports
+`invalidBaseFieldsConfigName`, instead of resolving to the unsuffixed variant.

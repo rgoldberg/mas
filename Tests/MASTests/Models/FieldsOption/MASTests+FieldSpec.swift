@@ -713,6 +713,8 @@ private extension MASTests {
 			("@a b", .invalidBaseFieldsConfigName("a b")),
 			("@@json", .invalidBaseFieldsConfigName("@json")),
 			("@standard@none", .invalidBaseFieldsConfigName("standard@none")),
+			("@standard@json@unsuffixed", .invalidBaseFieldsConfigName("standard@json@unsuffixed")),
+			("@standard@unsuffixed@unsuffixed", .invalidBaseFieldsConfigName("standard@unsuffixed@unsuffixed")),
 		],
 	)
 	func `reports an invalid or nonexistent base fields config name`(value: String, error: ParsingError) {

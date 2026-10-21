@@ -93,9 +93,10 @@ reference to the stem alone.
 Fields configs that share the same stem within the same context are
 **variants**.
 
-An additional suffix matching the regex `@unsuffixed$` may be appended to a
-reference to a fields config name (not to a name itself), which resolves to the
-unsuffixed variant, regardless of the current output format.
+In a reference to a fields config (not in a name itself), `@unsuffixed` may
+directly follow a stem in place of an output format suffix, which resolves to
+the unsuffixed variant, regardless of the current output format (e.g.,
+`x@unsuffixed`, but not `x@json@unsuffixed`, which is an error).
 
 While a reference to a stem is [looked
 up](configs.md#referencing-named-configs), a context matches it iff it contains
