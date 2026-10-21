@@ -211,8 +211,8 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
   character, per [ICU's default titlecasing index adjustment](
     https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/stringoptions_8h.html#a4975f537b9960f0330b233061ef0608d
   ). Titlecasing leaves an uncased number, symbol, or private-use character
-  unchanged, but titlecases a cased one (e.g., `"hello"` becomes `"Hello"` &
-  `ⓐbc` becomes `Ⓐbc`, but `1st` & `$abc` are unaffected).
+  unchanged, but titlecases a cased one (e.g., `hello` becomes `Hello` & `ⓐbc`
+  becomes `Ⓐbc`, but `1st` & `$abc` are unaffected).
 - `lowercase`: lowercases every character.
 - `trimWhitespace`: removes leading & trailing
   [whitespace](ebnf.md#whitespace).
