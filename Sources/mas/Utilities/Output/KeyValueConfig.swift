@@ -44,9 +44,9 @@ struct KeyValueConfig: Equatable {
 	let itemSeparatorPattern: String?
 }
 
-/// Parses `--key-value-config`'s value (`key-value.md`'s
-/// `[ <key-value-config> ]`): `[ <key-value-setting>+ ]`, last wins per axis.
-/// Outer bare whitespace between settings is ignored.
+/// Parses `--key-value-config`'s value, which, iff non-empty, is
+/// `key-value.md`'s `<key-value-config>` (`<key-value-setting>+`), last wins
+/// per axis. Outer bare whitespace between settings is ignored.
 func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> KeyValueConfig {
 	var keyStyleSpecifier = KeyValueConfig.default.keyStyleSpecifier
 	var keyStyling = KeyValueConfig.default.keyStyling
