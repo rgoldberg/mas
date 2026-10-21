@@ -299,7 +299,7 @@ order & item-sort `<direction>`.
 base-fields-config-section        = <base-fields-config-section-prefix> <base-fields-config-name>
 base-fields-config-section-prefix = "@"
 
-base-fields-config-name = {text: fields config name} (* default: "default" *)
+base-fields-config-name = {text: fields config name, or a stem followed by "@unsuffixed"} (* default: "default" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
