@@ -224,6 +224,7 @@ A setting implied by `<table-config>` overrides inherited settings.
 
 ## Examples
 
+- `--table`: no header, no separator, 2 spaces between columns.
 - `--table-config H1:`: a bold header row (SGR `1`) iff standard output is a
   terminal, no separator.
 - `--table-config H1:a`: a bold header row (SGR `1`) regardless of standard

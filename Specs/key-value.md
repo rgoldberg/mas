@@ -259,6 +259,8 @@ A setting implied by `<key-value-config>` overrides inherited settings.
 
 ## Examples
 
+- `--key-value`: unstyled keys, values aligned by a `▁`-patterned leader (with 1
+  space on each side) & a blank line between items.
 - `--key-value-config K1:`: bold keys (SGR `1`) iff standard output is a
   terminal.
 - `--key-value-config K1:a`: bold keys (SGR `1`) regardless of standard output.
