@@ -311,7 +311,7 @@ field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <direction>+ ]
-document-order-option-set   = [ <document-order-option>+ ] <document-order> [ <document-order-trailing-option>+ ]
+document-order-option-set   = [ <document-order-option>+ ] <document-order> [ <document-order-trailing-option>+ ] (* only for: JSON or key-value output *)
 
 order-option                   = <order> | <direction>
 document-order-option          = <order-option> | <absent-field-comparison> | <absent-field-placement>
@@ -320,7 +320,7 @@ document-order-trailing-option = <direction> | <absent-field-comparison> | <abse
 order = <positional-order> | <document-order> (* last wins *)
 
 positional-order = "P"
-document-order   = "D" (* only for: JSON or key-value output *)
+document-order   = "D"
 
 absent-field-comparison = <absent-fields-least> | <absent-fields-greatest> (* default: <absent-fields-greatest>; last wins *)
 absent-field-placement  = <relative-absent-fields> | <fixed-absent-fields> (* default: <relative-absent-fields>; last wins *)
@@ -365,10 +365,11 @@ only:
 - Which field spec an `<index>` references.
 - Tiebreaking the field order.
 
-`<document-order>` is not supported for table output because items may each have
-different fields, or the same fields in different orders, so a table's rows
-share no document order; key-value & JSON output can order each item's fields
-independently.
+`<document-order-option-set>` is not supported for table output because items
+may each have different fields, or the same fields in different orders, so a
+table's rows share no document order; key-value & JSON output can order each
+item's fields independently. An overridden `<document-order>` (e.g., in `/DP`)
+is supported for every output format, because it orders nothing.
 
 #### Item Sorting
 
