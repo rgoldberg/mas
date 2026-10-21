@@ -181,8 +181,8 @@ An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
 option omitted from a present payload without any mutually exclusive options
 (e.g., `<direction>` from `name/1Ii`) thus retains the working fields config's
 value, while an absent modifier payload or option payload (e.g., from `name=`,
-`name:`, `name/`, `L:`, `B:`, `N:`) resets the value to its direct or implicit
-default.
+`name:`, `name/`, `L:`, `B:`, `N:`) resets the value to its default for the
+directly absent state.
 
 ## Nonexistent Fields
 
