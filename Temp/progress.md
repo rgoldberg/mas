@@ -720,3 +720,7 @@ A custom config must not be named `standard` or any built-in config's name
 A reference with an output format suffix or `@unsuffixed` matches a context iff
 the context contains that variant; it is unimplemented, as are all custom
 configs.
+
+`<date-transform>` references `<time-zone>` instead of `<time-only-transform>`,
+whose time-only type contradicted `<date-transform>`'s date type; the
+implementation is unchanged.
