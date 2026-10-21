@@ -774,17 +774,18 @@ Each number segment is the longest one that starts at the earliest position
 after the preceding typed segment (e.g., `<versions>` finds 1 version, `1.2.3`,
 rather than `1.2` & `3`, in `1.2.3`).
 
-A grouped number is a run of digits split into [digit
-groups](fields-format.md#numberformat) by a digit group separator, optionally
-followed by a decimal separator & a fractional part, then optionally by an
-exponent indicator (`e` or `E`) & an optionally signed integer exponent (e.g.,
-`1.5e3` compares as `1500`), so it compares as a single number (e.g., `1,234` as
-`1234`) rather than being broken into smaller ones by the separator. Its group
-sizes & separators come from its [number format
+A grouped number is a run of ASCII digits split into [digit
+groups](fields-format.md#numberformat) by a digit group separator, a decimal
+separator followed by a fractional part, or both, in that order (e.g., `.5`
+compares as `0.5`, as a [number coercion](fields-format.md#coercion) parses it),
+then optionally an exponent indicator (`e` or `E`) & an optionally signed
+integer exponent (e.g., `1.5e3` compares as `1500`), so it compares as a single
+number (e.g., `1,234` as `1234`) rather than being broken into smaller ones by
+the separator. Its group sizes & separators come from its [number format
 arguments](fields-format.md#numberformat), each absent one defaulting to the
 base conventions; a `<digit-group-size>` of `0` allows groups of any size.
 
-A `-` or `+` immediately preceding a number segment's 1st digit is its sign:
+A `-` or `+` immediately preceding a number segment is its sign:
 
 - `<word-initial-signs>`: iff it starts the value or follows
   [whitespace](ebnf.md#whitespace) (e.g., in `-5` & `a -5`, but not in `a-5`).

@@ -250,6 +250,8 @@ private extension MASTests {
 			("1N,,0:", "1,2345", "999", .orderedDescending),
 			("1N:", "1,2345", "999", .orderedAscending),
 			("1N:", "1.5e3", "999", .orderedDescending),
+			("1N:", ".5", ".25", .orderedDescending),
+			("1N:", "-.5", "-.25", .orderedAscending),
 			// A sign is word-initial by default, or per <number-signs>
 			("1N:", "-5", "3", .orderedAscending),
 			("1N:", "a -5", "a 3", .orderedAscending),

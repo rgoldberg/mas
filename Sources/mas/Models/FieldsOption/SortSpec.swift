@@ -795,7 +795,6 @@ extension SortOptionSet {
 		let start = sign == nil ? index : value.index(after: index)
 		guard
 			start < value.endIndex,
-			value[start].isASCIIDigit,
 			sign == nil || isSign(at: index, in: value, signs: signs),
 			let number = unsignedNumberPrefix(of: value[start...])
 		else {

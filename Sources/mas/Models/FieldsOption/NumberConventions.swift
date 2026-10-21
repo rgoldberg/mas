@@ -112,16 +112,19 @@ extension NumberConventions {
 	}
 
 	/// The value & end of the grouped number at the start of `string` (a run of
-	/// digits split into digit groups by `digitGroupSeparator`, optionally
-	/// followed by `decimalSeparator` & a fractional part, then optionally by an
-	/// exponent); else `nil`. See `<grouped-numeric>` in fields.md.
+	/// digits split into digit groups by `digitGroupSeparator`,
+	/// `decimalSeparator` followed by a fractional part, or both, in that order,
+	/// then optionally an exponent); else `nil`. See `<grouped-numeric>` in
+	/// fields.md.
 	func groupedNumberPrefix(of string: Substring) -> (number: DecimalNumber, end: Substring.Index)? {
-		integerPart(of: string).flatMap { integerPart in
-			let fractionalPart = fractionalPart(of: string[integerPart.end...])
-			let exponent = exponent(of: string[(fractionalPart?.endIndex ?? integerPart.end)...])
-			return DecimalNumber(integerPart.digits + (fractionalPart.map { "." + $0 } ?? "") + (exponent ?? ""))
-				.map { number in (number, exponent?.endIndex ?? fractionalPart?.endIndex ?? integerPart.end) }
-		}
+		let integerPart = integerPart(of: string)
+		let integerEnd = integerPart?.end ?? string.startIndex
+		let fractionalPart = fractionalPart(of: string[integerEnd...])
+		let exponent = exponent(of: string[(fractionalPart?.endIndex ?? integerEnd)...])
+		return integerPart == nil && fractionalPart == nil
+			? nil
+			: DecimalNumber((integerPart?.digits ?? "") + (fractionalPart.map { "." + $0 } ?? "") + (exponent ?? ""))
+				.map { number in (number, exponent?.endIndex ?? fractionalPart?.endIndex ?? integerEnd) }
 	}
 
 	/// `digits` with `digitGroupSeparator` between its digit groups, counting
