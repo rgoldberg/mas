@@ -724,3 +724,7 @@ configs.
 `<date-transform>` references `<time-zone>` instead of `<time-only-transform>`,
 whose time-only type contradicted `<date-transform>`'s date type; the
 implementation is unchanged.
+
+[Value coercion](../Specs/fields-format.md#value-coercion) specifies every
+type's string form once (including a number's trivia & a date's or time-only's
+rendering), which sorting links, as already implemented.
