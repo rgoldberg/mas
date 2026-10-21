@@ -671,12 +671,12 @@ transforms are named for their date type (e.g., `<date-block>`,
 `--help` names each output option's value by its config (`<fields-config>`,
 `<json-config>`, `<key-value-config>` & `<table-config>`).
 
-`normalizingOutputOptions(in:)` prefixes each `--fields`, `--json-config`,
-`--key-value-config` & `--table-config` value after `=` with a NUL, which no
-command-line argument can contain, so an empty value after `=` (e.g.,
-`--fields=`) is an empty value, instead of no value, after which Swift Argument
-Parser took the next argument as the value (e.g.,
-`mas lookup --fields= 497799835` looks up `497799835`).
+mas depends on Swift Argument Parser's main branch at
+apple/swift-argument-parser#961's merge commit, instead of on 1.8.2, so an empty
+value after `=` (e.g., `--fields=`) is an empty value, instead of no value,
+after which Swift Argument Parser took the next argument as the value (e.g.,
+`mas lookup --fields= 497799835` looked up `497799835`); mas cannot be released
+until a Swift Argument Parser release includes #961.
 
 An option takes the next argument as its value iff that argument is `-` or does
 not start with `-`, so a value that starts with `-` must follow `=` (e.g.,
