@@ -167,8 +167,9 @@ line has been parsed; it is used to render output.
 except that an expression that contains no token, but that is neither an
 alternative of a present choice nor an element of a present repetition, is:
 
-- Directly absent iff it is in a present [payload](#payloads) (e.g., `<label>`
-  in `name=`, or `<locale-identifier>` in `N:`).
+- Directly absent iff it is in the [payload](#payloads) of a present modifier or
+  option, even if the payload contains no token (e.g., `<label>` in `name=`, or
+  `<locale-identifier>` in `N:`).
 - Otherwise, transitively absent (e.g., `<sort-modifier>` in `name=x`).
 
 The following is inserted before all other cases in the [absent variable
