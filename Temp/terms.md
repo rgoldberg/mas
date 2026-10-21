@@ -156,9 +156,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - compound
     - placeholder: only the defined `%…` fields-format term
     - rule: only a semantic rule in prose
-    - REJECTED: contents / instance / usage / use / site / construct /
-      projection / rule (as a syntactic element) / placeholder (as a generic
-      term) / symbol
+    - REJECTED: contents / instance / usage (except as in 106) / use / site /
+      construct / projection / rule (as a syntactic element) / placeholder (as a
+      generic term) / symbol
 30. - meta-grammar: the notation the custom EBNF grammar is defined in
     - grammar: the custom EBNF grammar
     - syntax: a specific option's grammar, defined with the custom EBNF grammar
@@ -302,8 +302,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - when: runtime condition
 58. - retain / retained
     - remain / remaining
-    - preserve: only in "type-preserving"
     - REJECTED: keep (except in `<all-conforming>`'s mnemonic) / kept / maintain
+      / preserve
 59. - define: bind a meaning
     - specify: state a rule
     - set: assign a value
@@ -505,12 +505,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        Annex C's POSIX Compatible definitions
        ([used](../Specs/fields.md#sort-boundaries))
      - REJECTED: GNU Extended POSIX character class / bracket expression class
-101. - date block: `%d` / `%D`'s block (`<date-block>`), whose pipeline's
-       transforms can be only `dateOnly`s & `timeZone`s, or string transforms
-       after coercing to a string
-     - time-only block: `%c` / `%C`'s block (`<time-only-block>`), whose
-       pipeline's transforms can be only `timeZone`s, or string transforms after
+101. - date block: `%D`'s block (`<date-block>`), whose pipeline's transforms
+       can be only `dateOnly`s & `timeZone`s, or string transforms after
        coercing to a string
+     - time-only block: `%C`'s block (`<time-only-block>`), whose pipeline's
+       transforms can be only `timeZone`s, or string transforms after coercing
+       to a string
      - REJECTED: clock block / time block
 102. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999
@@ -541,5 +541,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        in `--fields=name`)
      - flag: an option that takes no value (e.g., `--json`)
        ([defined](../Specs/configs.md#option-values))
+     - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
+       `[--json | --json-config <json-config> | …]`)
      - REJECTED: option-argument / option-argument separator (the specs use
        "argument" for an argument list's elements)
