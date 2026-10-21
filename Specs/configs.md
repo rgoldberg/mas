@@ -116,10 +116,11 @@ reference's starting context is:
 A kind may refine how a context matches a name, e.g., fields configs'
 [variants](fields.md#output-format-specific-named-fields-configs).
 
-A persisted fields config **extends** the fields config that its
-[`<base-fields-config-section>`](fields.md#base-fields-config-selection) names;
-a persisted config of any other kind extends `default`, as a persisted fields
-config without a `<base-fields-config-section>` does.
+A persisted fields config **extends** `none` if it is an
+[`<absolute-config>`](fields.md#absolute-config), else the fields config that
+its [`<base-fields-config-section>`](fields.md#base-fields-config-selection)
+names; a persisted config of any other kind extends `default`, as a persisted
+`<relative-config>` without a `<base-fields-config-section>` does.
 
 A persisted config that extends a config of its own name resolves that config
 from the next less specific context in the context stack, so a config may extend
