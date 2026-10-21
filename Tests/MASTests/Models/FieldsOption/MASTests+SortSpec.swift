@@ -243,6 +243,7 @@ private extension MASTests {
 			// Grouped number segments are grouped numbers
 			("1N:", "1.5", "1.25", .orderedDescending),
 			("1N:", "v1.5 b", "v1.50 a", .orderedDescending),
+			("1N:", "007.50 b", "7.5 a", .orderedDescending),
 			("1N:", "1,234", "999", .orderedDescending),
 			("1N:", "1.234", "999", .orderedAscending),
 			("1L de_DE :N:", "1.234", "999", .orderedDescending),

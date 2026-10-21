@@ -790,14 +790,16 @@ Each number segment is the longest one that starts at the 1st position, after
 the preceding typed segment, at which one starts (e.g., `<versions>` finds 1
 version, `1.2.3`, rather than `1.2` & `3`, in `1.2.3`).
 
-A grouped number is a run of ASCII digits split into [digit
-groups](fields-format.md#numberformat) by a digit group separator, a decimal
-separator followed by a fractional part, or both, in that order (e.g., `.5`
-compares as `0.5`, as a [number coercion](fields-format.md#coercion) parses it),
-then optionally an exponent indicator (`e` or `E`) & an optionally signed
-integer exponent (e.g., `1.5e3` compares as `1500`), so it compares as a single
-number (e.g., `1,234` as `1234`) rather than being broken into smaller ones by
-the separator. Its group sizes & separators come from its [number format
+A grouped number is an integer part (a run of ASCII digits, optionally split
+into [digit groups](fields-format.md#numberformat) by digit group separators)
+and/or a decimal separator preceding a fractional part (a run of ASCII digits),
+in that order (e.g., `.5` compares as `0.5`, as a [number
+coercion](fields-format.md#coercion) parses it), then optionally an exponent
+indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `1.5e3`
+compares as `1500`), so it compares as a single number (e.g., `1,234` as `1234`)
+rather than being broken into smaller ones by the separator. Its integer part
+may have leading `0`s & its fractional part trailing `0`s (e.g., `007.50`
+compares as `7.5`). Its group sizes & separators come from its [number format
 arguments](fields-format.md#numberformat), each absent one defaulting to the
 base conventions; a `<digit-group-size>` of `0` allows groups of any size.
 
