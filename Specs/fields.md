@@ -773,9 +773,9 @@ The number segments are:
 - `<grouped-numeric>`: each **grouped number**, with a sign per
   `<number-signs>`.
 
-Each number segment is the longest one that starts at the earliest position
-after the preceding typed segment (e.g., `<versions>` finds 1 version, `1.2.3`,
-rather than `1.2` & `3`, in `1.2.3`).
+Each number segment is the longest one that starts at the 1st position, after
+the preceding typed segment, at which one starts (e.g., `<versions>` finds 1
+version, `1.2.3`, rather than `1.2` & `3`, in `1.2.3`).
 
 A grouped number is a run of ASCII digits split into [digit
 groups](fields-format.md#numberformat) by a digit group separator, a decimal
