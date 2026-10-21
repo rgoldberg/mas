@@ -834,3 +834,7 @@ A `<value-transform>` that follows a `<named-format-reference>` after a
 `<format-transform-pipeline>` (e.g., `:name.endJustify.round`) applies to the
 named format's value, which must have its input type, as one that immediately
 follows the reference does; it is unimplemented, as are all named formats.
+
+A coercing matcher's value is its coerced value (e.g., `%.n` evaluates to `4.5`
+for `"4.50"`), as already implemented, instead of being given as the field
+value.
