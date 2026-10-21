@@ -996,6 +996,7 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<template-text>` starting a `<block>`                               | `:` `.`         | `%` `+`                 | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`                 | consumed           | consumed iff before `%` |
 | `<decimal-separator>` in `<number-format>`                           |                 | `:`                     | ignored            | ignored                 |
+| `<time-zone-code>` in `<date-time-zone-arguments>`                   |                 | `:`                     | ignored            | ignored                 |
 | `<reference-date>`                                                   |                 | `:`                     | ignored            | ignored                 |
 | `<trivia-suffix-regex>`                                              |                 | `:`                     | ignored            | ignored                 |
 | Any other text argument                                              |                 | `,` `:`                 | ignored            | ignored                 |

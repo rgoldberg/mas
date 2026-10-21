@@ -79,7 +79,7 @@ non-ASCII characters (lowercase hex `\uXXXX`). For 0 items, `a` renders `[]`:
 
 Placeholder letters match the [placeholders
 spec](../Specs/fields-format.md#placeholders) (`%i`, `%l`, `%k`, `%c`, `%m`,
-`%b`, `%v`, etc.). `timeZone<time-zone-arguments>` (e.g.,
+`%b`, `%v`, etc.). `timeZone<date-time-zone-arguments>` (e.g.,
 `.timeZone:Asia/Tokyo:`, `:UTC:`, `:-05\:30:`, `:system:`) sets the output time
 zone (last wins); it matches IANA Time Zone Database identifiers, Foundation
 time zone abbreviations & `system` case-insensitively, reports
@@ -401,8 +401,9 @@ A `<trivia-suffix-regex>` is the last argument of `<number-coercion-arguments>`,
 so a bare `,` in it is part of it instead of an error (e.g., `%.:,,,,,,,.*:n`
 matches `"5,x"`).
 
-`timeZone`'s `<time-zone-arguments>` are optional, as `numberFormat`'s are,
-because every argument has a default (e.g., `.timeZone` ≡ `.timeZone::`).
+`<date-time-zone-arguments>` & `<time-only-time-zone-arguments>` are optional,
+as `numberFormat`'s arguments are, because every argument has a default (e.g.,
+`.timeZone` ≡ `.timeZone::`).
 
 [Chronologic rendering](../Specs/fields-format.md#chronologic-formatting) is
 specified, as already implemented: seconds always render & a UTC offset renders
@@ -800,3 +801,9 @@ The time-only time zone transform is named `timeOnlyTimeZone`
 whose text differs from a `<date-transform-pipeline>`'s: e.g.,
 `.timeOnlyTimeZone:UTC:` renders a time-only field value in UTC, while
 `.timeZone:UTC:` is an error for one, instead of rendering it.
+
+`timeZone` takes only a `<time-zone-code>` (`<date-time-zone-arguments>`), while
+`timeOnlyTimeZone` also takes a `<reference-date>`
+(`<time-only-time-zone-arguments>`), because a date's own date fixes its UTC
+offset, so `timeZone` ignored its `<reference-date>`; e.g.,
+`.timeZone:UTC,2020-01-01:` is an error.
