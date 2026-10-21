@@ -614,11 +614,8 @@ If a format modifies an input value, `<input>` sorts by the input, while
 value](fields-format.md#value-types), so it sorts identically for every output
 format.
 
-A value is compared as a string: a string as is, `null` & an [absent
-value](#absent-values) as an empty string, a [structured
-value](fields-format.md#value-types) as its [compact JSON
-text](fields-format.md#value-coercion), a boolean as `true` or `false` & a
-number as its text (e.g., `1.50`), except that a number is a single
+A value is compared as a string, a non-string being [coerced to a
+string](fields-format.md#value-coercion), except that a number is a single
 [segment](#sort-segments):
 
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &

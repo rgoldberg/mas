@@ -162,11 +162,18 @@ to the coerced input; otherwise, formatting [aborts](#success--failure).
 A number or number-to-string transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`).
 
-Coercing any value to a string always succeeds (`null` becomes the empty string,
-and a [structured value](#value-types) becomes its compact JSON text, with
-non-ASCII characters verbatim, e.g., `["é",{"a":null}]`), so an
+Coercing any value to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, which starts with a
-`<coerced-string-transform-call>`, cannot fail.
+`<coerced-string-transform-call>`, cannot fail. A value coerced to a string is:
+
+- `null` or [absent](fields.md#absent-values): an empty string.
+- A boolean: `true` or `false`.
+- A number: its trivia prefix, its text, then its trivia suffix (e.g., `1.50`,
+  or, with [trivia](#coercion), `$1.50`).
+- A date or time-only: its [rendering](#chronologic-formatting) (e.g.,
+  `2020-03-18T17:39:23Z`).
+- A [structured value](#value-types): its compact JSON text, with non-ASCII
+  characters verbatim (e.g., `["é",{"a":null}]`).
 
 ###### String Transforms
 
