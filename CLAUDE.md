@@ -8,6 +8,9 @@ to the files that its `paths` front matter matches, so Claude loads it only when
 working on them. Read this file before making repository changes, and read each
 applicable rule file before changing a matching file.
 
+Record each convention that a change settles in this file or in the applicable
+rule file, in the same change.
+
 ## Minimum Versions
 
 - **Swift:** 6.4
@@ -32,7 +35,7 @@ applicable rule file before changing a matching file.
 - `main` is the trunk
 - Branch topics from `main`
 - Before committing:
-  1. Add or edit tests for all non-trivial changes
+  1. Add or edit tests for all new or changed behavior
   2. Repeatedly run `Scripts/format` until no modifications are made, reviewing
      each run's modifications before the next run (each run stops after the 1st
      tool that modifies any file, so that no 2 tools modify files in the same
@@ -40,7 +43,8 @@ applicable rule file before changing a matching file.
   3. Repeatedly run `Scripts/lint` & fix all violations until no violations are
      reported (to conserve tokens & to save time, agents should run
      `Scripts/lint -A` instead)
-  4. Manually check rules that linters do not enforce: Oxford commas; `second` &
+  4. Run `Scripts/build` & `Scripts/test`, fixing every failure
+  5. Manually check rules that linters do not enforce: Oxford commas; `second` &
      adjective `one` written as digits; & judgment-based rules (e.g., 1 `return`
      per function, `if` / `switch` expressions)
 - **Commit messages:** Follow [commit message conventions](
@@ -169,6 +173,10 @@ change, so that each:
 - Describes the current implementation state accurately.
 - Omits issues that the change resolves & includes issues that it raises but
   does not resolve.
+
+Add each term that a change introduces to `Temp/terms.md` in the same change. A
+term that `Temp/terms.md` rejects may still be used for a use case that no
+existing term covers; document that use case in `Temp/terms.md`.
 
 ## Refactoring Rules
 

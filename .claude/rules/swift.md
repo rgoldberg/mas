@@ -275,7 +275,7 @@ Within this section & all subsections, `X` is a placeholder for any type name.
 
 ## Testing Requirements
 
-- Add or edit tests for all non-trivial changes
+- Add or edit tests for all new or changed behavior
 - Implement in [Swift Testing](https://github.com/swiftlang/swift-testing)
 - Derive test file paths from source file paths:
   - replace the `Sources/mas` source path folder prefix with `Tests/MASTests`
