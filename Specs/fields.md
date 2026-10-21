@@ -914,7 +914,7 @@ Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
 
 `<uncollapsed-boundaries>` retains contiguous boundaries in input as separate
-characters; `<collapsed-boundaries>` collapses contiguous boundaries belonging
+boundaries; `<collapsed-boundaries>` collapses contiguous boundaries belonging
 to the same boundary group into one. Absent `<boundary-groups>` (e.g., `B:`),
 nothing is a boundary.
 
