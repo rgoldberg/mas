@@ -41,8 +41,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       name", "parsed by the engine")
     - with: structural attributes, settings, or parameters accompanying an item
       (e.g., "defined with modifiers")
-    - through: iteration or traversal across a sequence
-    - over: iteration or traversal across the elements of a sequence
+    - through: iteration or traversal of a sequence
+    - over: iteration or traversal of the elements of a sequence
     - REJECTED: across
 11. - iteration / iterate: sequential processing through linear structures
     - traversal / traverse: structural navigation through non-linear structures
@@ -131,7 +131,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - indices: plural
     - located at position
     - location: relative placement without an exact position
-    - REJECTED: place / indexes
+    - REJECTED: place (except in the idiom "in place", e.g., `<text-in-place>`)
+      / indexes
 27. - put: verb
     - locate: verb
     - position: verb
@@ -302,7 +303,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 58. - retain / retained
     - remain / remaining
     - preserve: only in "type-preserving"
-    - REJECTED: keep / kept / maintain
+    - REJECTED: keep (except in `<all-conforming>`'s mnemonic) / kept / maintain
 59. - define: bind a meaning
     - specify: state a rule
     - set: assign a value
