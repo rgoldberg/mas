@@ -19,7 +19,7 @@ func parseOutputConfigSettingPayload<E: Error>(_ input: inout Substring, danglin
 
 /// Parses a `<style-specifier>` payload (table.md) through its setting
 /// termination via `parseOutputConfigSettingPayloadCharacters`, ignoring its
-/// outer bare whitespace; a bare ASCII letter in it throws
+/// outer bare whitespace; a bare ASCII letter or a line terminator in it throws
 /// `invalidStyleSpecifierError` of the payload's text.
 func parseStyleSpecifier<E: Error>(
 	_ input: inout Substring,
@@ -27,10 +27,7 @@ func parseStyleSpecifier<E: Error>(
 	invalidStyleSpecifierError: (String) -> E,
 ) throws(E) -> String {
 	let characters = try parseOutputConfigSettingPayloadCharacters(&input, danglingEscapeError: danglingEscapeError)
-	guard !characters.contains(where: { $0.isBare && $0.character.isASCII && $0.character.isLetter }) else {
-		throw invalidStyleSpecifierError(String(characters.map(\.character)))
-	}
-	return String(
+	let styleSpecifier = String(
 		characters
 			.drop { $0.isBare && $0.character.isWhitespace }
 			.reversed()
@@ -38,6 +35,29 @@ func parseStyleSpecifier<E: Error>(
 			.reversed()
 			.map(\.character),
 	)
+	guard
+		!characters.contains(where: { $0.isBare && $0.character.isASCII && $0.character.isLetter }),
+		!styleSpecifier.contains(where: \.isNewline)
+	else {
+		throw invalidStyleSpecifierError(String(characters.map(\.character)))
+	}
+	return styleSpecifier
+}
+
+/// Parses a `<style-prefix>`, `<style-suffix>`, or `<style-reset>` payload
+/// (table.md) via `parseOutputConfigSettingPayload`; one that contains a line
+/// terminator, which would split each row that it styles, throws
+/// `invalidStyleSequenceError` of it.
+func parseStyleSequence<E: Error>(
+	_ input: inout Substring,
+	danglingEscapeError: E,
+	invalidStyleSequenceError: (String) -> E,
+) throws(E) -> String {
+	let styleSequence = try parseOutputConfigSettingPayload(&input, danglingEscapeError: danglingEscapeError)
+	guard !styleSequence.contains(where: \.isNewline) else {
+		throw invalidStyleSequenceError(styleSequence)
+	}
+	return styleSequence
 }
 
 /// Wraps `string` in `sequences` around `specifier` iff `specifier` is not

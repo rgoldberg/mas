@@ -51,7 +51,7 @@ header-setting = <header-off> | <header-on> (* default: <header-off>; last wins 
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
 
-style-specifier = {text: terminal-specific styling text with no bare ASCII letters}
+style-specifier = {text: terminal-specific styling text with no bare ASCII letters & no line terminators}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -65,7 +65,10 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
   `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header row
   is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so that a
   mistyped setting is not silently consumed as `<style-specifier>` text (e.g.,
-  `--table-config Hb`); escape it to include it (e.g., `--table-config H\b`).
+  `--table-config Hb`); escape it to include it (e.g., `--table-config H\b`). A
+  `<style-specifier>` that contains a [line
+  terminator](configs.md#line-terminators) is invalid, because it would split
+  each row that it styles.
 
 ## Header Styling
 
@@ -102,7 +105,8 @@ style-prefix = ^{text}^ (* default: {empty string} *)
 - `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
   precedes `<style-specifier>`.
 - `P`: a literal custom string precedes `<style-specifier>` (e.g., `P:` for
-  none).
+  none). A `<style-prefix>` that contains a line terminator is invalid, because
+  it would split each row that it styles.
 
 ## Style Suffix
 
@@ -121,7 +125,8 @@ style-suffix = ^{text}^ (* default: {empty string} *)
 
 - `x`: `m` (the ANSI SGR final character) follows `<style-specifier>`.
 - `X`: a literal custom string follows `<style-specifier>` (e.g., `X:` for
-  none).
+  none). A `<style-suffix>` that contains a line terminator is invalid, because
+  it would split each row that it styles.
 
 ## Style Reset
 
@@ -140,7 +145,8 @@ style-reset = ^{text}^ (* default: {empty string} *)
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows the styled header row.
 - `O`: a literal custom string follows the styled header row (e.g., `O:` for
-  none).
+  none). A `<style-reset>` that contains a line terminator is invalid, because
+  it would split each row that it styles.
 
 ## Separator
 
