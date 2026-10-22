@@ -530,8 +530,7 @@ commentary.
 ##### Default Comments
 
 Default comments specify explicit defaults applicable to absent variable
-nonterminals; default comments cannot supply default values for constant
-nonterminals.
+nonterminals; they cannot specify defaults for constant nonterminals.
 
 `DEFAULT` is one of:
 
