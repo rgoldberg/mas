@@ -184,13 +184,16 @@ expression value algorithm](ebnf.md#defaults-for-absent-expressions):
 - If transitively absent & it sets a property of the field spec that its
   `<field-modifiers>` modify (e.g., its label, format, justification, or a sort
   option): that property's value in the working fields config, if any.
+- If transitively absent & it is an `<item-sort-option>`'s `<direction>`: the
+  working fields config's item-sort `<direction>`.
 
 An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
 option omitted from a present payload without any mutually exclusive options
 (e.g., `<direction>` from `name/1Ii`) thus retains the working fields config's
-value, while an absent modifier payload or option payload (e.g., from `name=`,
-`name:`, `name/`, `L:`, `B:`, `N:`) resets the value to its default for the
-directly absent state.
+value, as does an item-sort `<direction>` omitted from a present
+`<item-sort-section>` (e.g., from `//0`), while an absent modifier payload or
+option payload (e.g., from `name=`, `name:`, `name/`, `L:`, `B:`, `N:`) resets
+the value to its default for the directly absent state.
 
 ## Nonexistent Fields
 
@@ -404,7 +407,9 @@ subsequent `<field-spec-edit>` may re-enable a field spec's sort.
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
-solely by this tiebreak.
+solely by this tiebreak. An absent `<direction>` retains the base fields
+config's (e.g., if `x` has `//-`, then `@x//0` tiebreaks by reverse input
+order).
 
 #### Field Spec References
 

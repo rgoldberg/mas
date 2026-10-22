@@ -263,8 +263,8 @@ private extension MASTests {
 		#expect(config.itemSort.tiebreakDirection == .descending)
 	}
 
-	@Test(arguments: ["", ".adamID", "/P"])
-	func `an absent item-sort section retains the base fields config's item-sort direction`(value: String) throws {
+	@Test(arguments: ["", ".adamID", "/P", "//0", "//0.adamID"])
+	func `an absent item-sort direction retains the base fields config's item-sort direction`(value: String) throws {
 		let config = try resolvedFieldsConfig(
 			from: value,
 			standard: SelectedFieldsConfig(

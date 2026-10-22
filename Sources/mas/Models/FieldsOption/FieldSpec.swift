@@ -544,8 +544,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
 	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
 	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort tiebreak
-	/// (input order / reverse input order). An absent section retains
-	/// `inheritedDirection`.
+	/// (input order / reverse input order). An absent section or `<direction>`
+	/// retains `inheritedDirection`.
 	mutating func parseItemSortSection(
 		_ input: inout Substring,
 		inheriting inheritedDirection: SortOptionSet.Direction,
@@ -573,7 +573,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			fieldSpecs = fieldSpecs.map(\.withSortDisabled)
 			referenceFieldSpecs = referenceFieldSpecs.map { $0?.withSortDisabled }
 		}
-		return direction ?? .ascending
+		return direction ?? inheritedDirection
 	}
 
 	mutating func parseFieldSpecEditsSection(_ input: inout Substring) throws(ParsingError) {
