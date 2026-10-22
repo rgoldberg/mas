@@ -410,7 +410,9 @@ zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 date-time-zone-arguments      = <argument-fence> [ <time-zone-code> ] <argument-fence>
 time-only-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
-time-zone-code = {text: case-insensitive IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system"} (* default: "system" *)
+time-zone-code =
+  {text: IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system", each case-insensitive}
+  (* default: "system" *)
 reference-date = {text: ISO-8601 date-only} (* default: {current date in the system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
