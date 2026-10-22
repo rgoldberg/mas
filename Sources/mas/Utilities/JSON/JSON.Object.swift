@@ -274,7 +274,8 @@ private extension String {
 /// spaces (table.md & key-value.md: a separator line's or leader's repetition
 /// cuts off immediately, even mid-character-group, rather than rounding to a
 /// whole number of repetitions). Returns a 0-width `pattern` (e.g., a tab)
-/// once, since no number of repetitions can fill any width.
+/// once, with no space-fill, because no number of repetitions can fill any
+/// width.
 private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> String {
 	guard pattern.terminalWidth > 0 else {
 		return pattern
