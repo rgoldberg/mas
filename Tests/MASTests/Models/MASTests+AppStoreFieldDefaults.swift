@@ -49,6 +49,43 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("bundleID", "Bundle ID", Justification.start),
+			("fileSizeBytes", "Size", .end),
+			("adamID", "ADAM ID", .end),
+			("trackName", "trackName", .start),
+		],
+	)
+	func `a built-in field spec is labeled & justified per mas.md`(
+		fieldName: String,
+		label: String,
+		justification: Justification,
+	) {
+		let fieldSpec = builtInFieldSpec(forFieldNamed: fieldName)
+		#expect(fieldSpec.label == label)
+		#expect(fieldSpec.justification == justification)
+		#expect(fieldSpec.sortSpec == nil)
+	}
+
+	@Test
+	func `an unlisted field's built-in field spec is formatted as %i`() {
+		#expect(builtInFieldSpec(forFieldNamed: "trackName").format == .default(fieldName: "trackName"))
+	}
+
+	@Test
+	func `only newVersion's built-in field spec is synthesized`() {
+		#expect(builtInFieldSpec(forFieldNamed: "newVersion").isSynthesized)
+		#expect(!builtInFieldSpec(forFieldNamed: "version").isSynthesized)
+	}
+
+	@Test
+	func `all's dynamic field specs are built-in field specs`() {
+		let all = BaseIncludesAllFieldsConfig()
+			.mergingDynamicFields(from: [JSON.Object([("bundleID", .string("a.b")), ("trackName", .string("A"))])])
+		#expect(all.fieldSpecs.map(\.label) == ["Bundle ID", "trackName"])
+	}
+
+	@Test(
+		arguments: [
 			(JSON.Node.string("Free"), JSON.Node.string("$5"), ComparisonResult.orderedAscending),
 			(.string("$10"), .string("$5"), .orderedDescending),
 			(.string("US$1,299.99"), .string("US$999"), .orderedDescending),

@@ -40,89 +40,18 @@ private struct KeyValueOutputConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.keyValue(.default)
 	static let standardFieldsConfig = SelectedFieldsConfig(
 		fieldSpecs: [
-			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			.init(
-				name: "adamID",
-				label: "ADAM ID",
-				format: .default(fieldName: "adamID"),
-				sortSpec: nil,
-				justification: defaultJustification(forFieldNamed: "adamID"),
-			),
-			.init(name: "bundleID", label: "Bundle ID", format: .default(fieldName: "bundleID"), sortSpec: nil),
-			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-			.init(
-				name: "formattedPrice",
-				label: "Price",
-				format: .default(fieldName: "formattedPrice"),
-				sortSpec: nil,
-			),
-			.init(name: "sellerName", label: "By", format: .default(fieldName: "sellerName"), sortSpec: nil),
-			.init(
-				name: "currentVersionReleaseDate",
-				label: "Released",
-				// `%D.dateOnly++`: the release date, date-only, in the system time zone
-				format: .template(
-					[
-						.placeholder(
-							.conditional(
-								.init(predicate: .date, coercion: nil),
-								.binary(
-									success: .pipeline(.init(calls: [.init(transform: .dateOnly, coercion: nil)])),
-									failure: .empty,
-								),
-							),
-						),
-					],
-				),
-				sortSpec: nil,
-			),
-			.init(
-				name: "minimumOSVersion",
-				label: "Minimum OS",
-				format: .default(fieldName: "minimumOSVersion"),
-				sortSpec: nil,
-			),
-			.init(
-				name: "fileSizeBytes",
-				label: "Size",
-				// `%+.N.scale:6,,0:.numberFormat+ MB`: a byte count as whole, grouped
-				// decimal megabytes, with an appended " MB". JSON gets the raw byte
-				// count instead: JSON output resolves to the machine-facing `@json`
-				// variant (see `machineFacingVariant()`), which labels each field spec
-				// by its name & formats its output as `%i`, per mas.md
-				format: .template(
-					[
-						.placeholder(
-							.conditional(
-								.init(predicate: .number, coercion: .default),
-								.abortOnFailure(
-									success: .pipeline(
-										.init(
-											calls: [
-												.init(
-													transform: .scale(exponent: 6, significantDigits: nil, fractionalDigits: 0),
-													coercion: nil,
-												),
-												.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),
-											],
-										),
-									),
-								),
-							),
-						),
-						.text(" MB"),
-					],
-				),
-				sortSpec: nil,
-				justification: defaultJustification(forFieldNamed: "fileSizeBytes"),
-			),
-			.init(
-				name: "appStorePageURL",
-				label: "From",
-				format: .default(fieldName: "appStorePageURL"),
-				sortSpec: nil,
-			),
-		],
+			"name",
+			"adamID",
+			"bundleID",
+			"version",
+			"formattedPrice",
+			"sellerName",
+			"currentVersionReleaseDate",
+			"minimumOSVersion",
+			"fileSizeBytes",
+			"appStorePageURL",
+		]
+			.map(builtInFieldSpec(forFieldNamed:)),
 	)
 	/// The field set is open-ended (dynamically-discovered API fields);
 	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort

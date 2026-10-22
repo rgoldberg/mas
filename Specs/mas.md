@@ -55,7 +55,8 @@ The built-in standard's `@json` variant is a reference to `all@json`.
 
 Default labels & formats favor:
 
-- If user-facing: readability.
+- If user-facing: readability, per the [built-in field
+  specs](#built-in-field-specs).
 - If machine-facing: precision & parsability:
   - Label is the field name.
   - Output is formatted as `%i`.
@@ -97,6 +98,10 @@ following visible field specs, at the given positions:
 | `appStorePageURL`           | `From`        | `%i`                                |        |       10 |            |          |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+In every `mas` built-in fields config's user-facing variants, a field spec for a
+field that the table above lists has that row's label & format, and a field spec
+for any other field is labeled by its field name & formatted as `%i`.
 
 ## Price Sorting
 

@@ -31,26 +31,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 
 private struct TableOutputConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.table(.default)
-	static let standardFieldsConfig = SelectedFieldsConfig(
-		fieldSpecs: [
-			.init(
-				name: "adamID",
-				label: "ADAM ID",
-				format: .default(fieldName: "adamID"),
-				sortSpec: nil, // no default item sort: preserve today's natural (unsorted) output order unless requested
-				justification: defaultJustification(forFieldNamed: "adamID"),
-			),
-			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
-			.init(
-				name: "newVersion",
-				label: "New Version",
-				format: .default(fieldName: "newVersion"),
-				sortSpec: nil,
-				isSynthesized: true,
-			),
-		],
-	)
+	static let standardFieldsConfig =
+		SelectedFieldsConfig(fieldSpecs: ["adamID", "name", "version", "newVersion"].map(builtInFieldSpec(forFieldNamed:)))
 	/// The field set is open-ended (dynamically-discovered Spotlight attributes);
 	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort
 	/// alphabetically by label) applies here, absent a user-requested order,

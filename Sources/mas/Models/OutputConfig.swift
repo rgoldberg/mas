@@ -118,7 +118,7 @@ enum OutputError: Error, CustomStringConvertible { // swiftlint:disable:this one
 
 extension BaseIncludesAllFieldsConfig {
 	/// Finishes what `all` means for a schemaless data source: appends a
-	/// bare-default `FieldSpec` (label = name, no sort) for every real JSON key
+	/// `builtInFieldSpec(forFieldNamed:)` (no sort) for every real JSON key
 	/// across `objects` not already named in `fieldSpecs`, in 1st-seen order
 	/// (each item's own `JSON.Object` is normalized, i.e., renamed, but not
 	/// reordered, so this is each object's own original key order).
@@ -128,14 +128,7 @@ extension BaseIncludesAllFieldsConfig {
 		for object in objects {
 			for field in object.fields where !seenNameSet.contains(field.key.rawValue) {
 				seenNameSet.insert(field.key.rawValue)
-				extra.append(
-					.init(
-						name: field.key.rawValue,
-						label: field.key.rawValue,
-						format: .default(fieldName: field.key.rawValue),
-						sortSpec: nil,
-					),
-				)
+				extra.append(builtInFieldSpec(forFieldNamed: field.key.rawValue))
 			}
 		}
 		return .init(fieldSpecs: fieldSpecs + extra, fieldOrder: fieldOrder, itemSort: itemSort)

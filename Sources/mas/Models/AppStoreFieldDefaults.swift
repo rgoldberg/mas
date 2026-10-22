@@ -82,3 +82,84 @@ func defaultJustification(forFieldNamed fieldName: String) -> Justification {
 }
 
 private let endJustifiedFieldNameSet = Set(["adamID", "fileSizeBytes"])
+
+/// `fieldName`'s field spec in every mas built-in fields config's user-facing
+/// variants, per mas.md's "Built-In Field Specs": its table row's label &
+/// format iff the table lists `fieldName`, else labeled by `fieldName` &
+/// formatted as `%i`; justified per `defaultJustification(forFieldNamed:)`.
+func builtInFieldSpec(forFieldNamed fieldName: String) -> FieldSpec {
+	let (label, format) = listedLabelAndFormatByFieldName[fieldName] ?? (fieldName, .default(fieldName: fieldName))
+	return .init(
+		name: fieldName,
+		label: label,
+		format: format,
+		sortSpec: nil,
+		isSynthesized: synthesizedFieldNameSet.contains(fieldName),
+		justification: defaultJustification(forFieldNamed: fieldName),
+	)
+}
+
+/// mas.md's "Built-In Field Specs" table's labels & formats, by field name.
+private let listedLabelAndFormatByFieldName = [
+	"adamID": ("ADAM ID", Format.default(fieldName: "adamID")),
+	"appStorePageURL": ("From", .default(fieldName: "appStorePageURL")),
+	"bundleID": ("Bundle ID", .default(fieldName: "bundleID")),
+	"currentVersionReleaseDate": (
+		"Released",
+		// `%D.dateOnly++`: the release date, date-only, in the system time zone
+		.template(
+			[
+				.placeholder(
+					.conditional(
+						.init(predicate: .date, coercion: nil),
+						.binary(
+							success: .pipeline(.init(calls: [.init(transform: .dateOnly, coercion: nil)])),
+							failure: .empty,
+						),
+					),
+				),
+			],
+		),
+	),
+	"fileSizeBytes": (
+		"Size",
+		// `%+.N.scale:6,,0:.numberFormat+ MB`: a byte count as whole, grouped
+		// decimal megabytes, with an appended " MB". JSON gets the raw byte count
+		// instead: JSON output resolves to the machine-facing `@json` variant (see
+		// `machineFacingVariant()`), which labels each field spec by its name &
+		// formats its output as `%i`, per mas.md
+		.template(
+			[
+				.placeholder(
+					.conditional(
+						.init(predicate: .number, coercion: .default),
+						.abortOnFailure(
+							success: .pipeline(
+								.init(
+									calls: [
+										.init(
+											transform: .scale(exponent: 6, significantDigits: nil, fractionalDigits: 0),
+											coercion: nil,
+										),
+										.init(transform: .numberFormat(.init(locale: .current)), coercion: nil),
+									],
+								),
+							),
+						),
+					),
+				),
+				.text(" MB"),
+			],
+		),
+	),
+	"formattedPrice": ("Price", .default(fieldName: "formattedPrice")),
+	"minimumOSVersion": ("Minimum OS", .default(fieldName: "minimumOSVersion")),
+	"name": ("Name", .default(fieldName: "name")),
+	"newVersion": ("New Version", .default(fieldName: "newVersion")),
+	"sellerName": ("By", .default(fieldName: "sellerName")),
+	"version": ("Version", .default(fieldName: "version")),
+]
+
+/// The fields whose values are computed after a display command's own fetch
+/// (see `FieldSpec.isSynthesized`).
+private let synthesizedFieldNameSet = Set(["newVersion"])
