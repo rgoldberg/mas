@@ -210,6 +210,13 @@ private extension MASTests {
 		#expect(!specs[0].isHidden)
 	}
 
+	@Test(arguments: ["@all.+size@1", "@all.+size@-1", "@all._size@1"])
+	func `a field occurrence index for an unknown name is an error`(value: String) {
+		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "size")) {
+			try parseFieldSpecs(value)
+		}
+	}
+
 	@Test
 	func `parses sort spec without numeric priority`() throws {
 		let specs = try parseFieldSpecs(".adamID/+")

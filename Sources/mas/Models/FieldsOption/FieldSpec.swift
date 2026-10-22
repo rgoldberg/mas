@@ -776,19 +776,15 @@ private extension FieldSpecsBuilder {
 			)
 		}
 		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
-		let positions = referencePositions(forName: name)
-		guard !positions.isEmpty else {
-			throw .nonexistentFieldSpec(forName: name)
-		}
-		return .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1])
+		return try namedReference(name: name, index: index, positions: referencePositions(forName: name))
 	}
 
 	/// Parses a `<field-spec-reference>` for a
 	/// `<baseline-sourced-field-spec-edit>` & resolves its `source` from the
 	/// baseline fields config (as in the reference fields config, except that a
-	/// `<named-field-spec-reference>` whose `<reference-field-name>` names no
-	/// field spec selects the default field spec for field
-	/// `<reference-field-name>`).
+	/// `<named-field-spec-reference>` without a `<field-occurrence-index>` whose
+	/// `<reference-field-name>` names no field spec selects the default field
+	/// spec for field `<reference-field-name>`).
 	private func parseBaselineSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != fieldSpecIndexPrefix else {
 			return baselineFieldSpecs[try effectivePosition(
@@ -798,17 +794,19 @@ private extension FieldSpecsBuilder {
 		}
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
-		return positions.isEmpty
-			? try defaultFieldSpec(forName: name)
-			: baselineFieldSpecs[positions[try effectivePosition(forIndex: index, length: positions.count) - 1] - 1]
+		guard !positions.isEmpty || index != nil else {
+			return try defaultFieldSpec(forName: name)
+		}
+		return baselineFieldSpecs[try namedReference(name: name, index: index, positions: positions).position - 1]
 	}
 
 	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
 	/// reference & its `source` from the reference fields config; or, iff a
-	/// `<named-field-spec-reference>`'s `<reference-field-name>` names no field
-	/// spec, or the reference resolves to a `null` (a field spec removed earlier
-	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
-	/// would copy from the baseline fields config.
+	/// `<named-field-spec-reference>` without a `<field-occurrence-index>` has a
+	/// `<reference-field-name>` that names no field spec, or the reference
+	/// resolves to a `null` (a field spec removed earlier in this section), `nil`
+	/// & the field spec that a `<field-spec-insertion>` would copy from the
+	/// baseline fields config.
 	private func parseHideReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
 		guard input.first != fieldSpecIndexPrefix else {
@@ -816,11 +814,22 @@ private extension FieldSpecsBuilder {
 		}
 		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
-		guard !positions.isEmpty else {
+		guard !positions.isEmpty || index != nil else {
 			return (nil, try defaultFieldSpec(forName: name))
 		}
-		return hideSource(
-			for: .init(name: name, position: positions[try effectivePosition(forIndex: index, length: positions.count) - 1]),
+		return hideSource(for: try namedReference(name: name, index: index, positions: positions))
+	}
+
+	/// The reference to the field spec for field `name` at `index` (`nil` iff
+	/// absent, meaning `1`) among `positions`, the positions of field `name`'s
+	/// field specs in the reference fields config.
+	private func namedReference(name: String, index: Int?, positions: [Int]) throws(ParsingError) -> Reference {
+		guard !positions.isEmpty else {
+			throw .nonexistentFieldSpec(forName: name)
+		}
+		return .init(
+			name: name,
+			position: positions[try effectivePosition(forIndex: index ?? 1, length: positions.count) - 1],
 		)
 	}
 
@@ -851,18 +860,18 @@ private extension FieldSpecsBuilder {
 
 	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
 	/// a character in `nameTerminatorSet` & optional
-	/// `<field-occurrence-index-prefix>` `<field-occurrence-index>` (default
-	/// `1`).
+	/// `<field-occurrence-index-prefix>` `<field-occurrence-index>` (`nil` iff
+	/// absent).
 	private func parseNameAndIndex(
 		_ input: inout Substring,
 		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
-	) throws(ParsingError) -> (name: String, index: Int) {
+	) throws(ParsingError) -> (name: String, index: Int?) {
 		let name = try parseFieldName(&input, terminatorSet: nameTerminatorSet)
 		return (
 			name,
 			input.first == fieldOccurrenceIndexPrefix
 				? try parseIndex(&input, ifMissing: .missingFieldOccurrenceIndex)
-				: 1,
+				: nil,
 		)
 	}
 

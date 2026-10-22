@@ -495,11 +495,12 @@ inserted field spec cannot be modified by another field spec edit.
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the
-reference fields config, except that a `<named-field-spec-reference>` whose
-`<reference-field-name>` names no field spec selects a [default field
-spec](#default-field-specs) for field `<reference-field-name>` (whereas a
-`<field-occurrence-index>` beyond its field's field specs is an error). Thus,
-`<disable-all-sorts>` disables an inserted copy's sort (e.g., in
+reference fields config, except that a `<named-field-spec-reference>` without a
+`<field-occurrence-index>` whose `<reference-field-name>` names no field spec
+selects a [default field spec](#default-field-specs) for field
+`<reference-field-name>` (whereas a present `<field-occurrence-index>` beyond
+its field's field specs is an error, e.g., `+x@1` when `x` has no field spec).
+Thus, `<disable-all-sorts>` disables an inserted copy's sort (e.g., in
 `@all//0.+name`).
 
 $previous$ is the location in the working fields config where the direct results
@@ -524,9 +525,10 @@ Field spec edits act as follows:
     $previous$) & unhides it.
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
-  - If its `<named-field-spec-reference>`'s `<reference-field-name>` names no
-    field spec, or its `<field-spec-reference>` resolves to a `null`, inserts a
-    new field spec (as `<field-spec-insertion>` would) as `source`.
+  - If its `<named-field-spec-reference>` has no `<field-occurrence-index>` &
+    its `<reference-field-name>` names no field spec, or its
+    `<field-spec-reference>` resolves to a `null`, inserts a new field spec (as
+    `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`.
