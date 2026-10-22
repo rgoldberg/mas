@@ -122,7 +122,8 @@ For each [leaf context](configs.md#context-stacks):
   are sorted by label (`<output>`), while other `<sort-option>`s are per the
   app's default sort options for labels for the current output format.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
-  select list of field specs is visible.
+  select list of field specs is visible. Absent a built-in field order: field
+  specs are ordered by `<positional-order>`.
 
 A built-in fields config:
 
