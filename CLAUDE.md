@@ -11,6 +11,10 @@ applicable rule file before changing a matching file.
 Record each convention that a change settles in this file or in the applicable
 rule file, in the same change.
 
+Before changing anything, check its history (e.g., `git log -S`), so that no
+change reverts an earlier one (e.g., changing A to B, then to C, then back to
+A), unless the change says why the earlier one was wrong.
+
 ## Minimum Versions
 
 - **Swift:** 6.4
