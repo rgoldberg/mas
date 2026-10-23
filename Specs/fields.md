@@ -192,7 +192,8 @@ option omitted from a present payload (e.g., `<direction>` from `name/1Ii`) thus
 retains the working fields config's value, as does an item-sort `<direction>`
 omitted from a present `<item-sort-section>` (e.g., from `//0`), while an absent
 modifier payload or option payload (e.g., from `name=`, `name:`, `name/`, `L:`,
-`B:`, `N:`) resets the value to its default for the directly absent state.
+`B:`, `N:`) resets the value to its default for the directly absent state (e.g.,
+`name/` removes the field spec's `<sort>`).
 
 ## Nonexistent Fields
 
