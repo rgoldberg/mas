@@ -354,12 +354,13 @@ The **field order**, in which each item's fields are output, is per
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
   input JSON object, each [member](#members) at its own position. A field spec
-  whose field an item lacks (which outputs anything only per a format that
-  renders an absent value, e.g., `%N%n+none+`) has no document position, so it
-  compares as less (`a`) or greater (`z`) than every member. Per
-  `<absent-field-placement>`, `<descending>` also reverses its location
-  (`<relative-absent-fields>`, e.g., `D-` puts it 1st) or does not
-  (`<fixed-absent-fields>`, e.g., `D-f` puts it last).
+  whose field an item lacks (which outputs anything only per a format whose
+  formatted value for an absent field is not [absent](#absent-values), e.g.,
+  `%N%n+none+`) has no document position, so it compares as less (`a`) or
+  greater (`z`) than every member. Per `<absent-field-placement>`,
+  `<descending>` also reverses its location (`<relative-absent-fields>`, e.g.,
+  `D-` puts it 1st) or does not (`<fixed-absent-fields>`, e.g., `D-f` puts it
+  last).
 - `<positional-order>`: ordered by position.
 - `<sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.
