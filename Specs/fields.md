@@ -407,7 +407,7 @@ subsequent `<field-spec-edit>` may re-enable a field spec's sort.
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
-solely by this tiebreak. An absent `<direction>` retains the base fields
+solely by this tiebreak. An absent `<direction>` retains the working fields
 config's (e.g., if `x` has `//-`, then `@x//0` tiebreaks by reverse input
 order).
 
