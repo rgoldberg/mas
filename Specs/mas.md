@@ -128,7 +128,7 @@ Version fields' default sort options compare
 [App Store locale's conventions as `N`'s base conventions & include
 `a`](#price-sorting), but they otherwise match the following:
 
-| Format            | String Content | Default              |
+| Output Format     | String Content | Default              |
 |:------------------|:---------------|:---------------------|
 | Table / Key-Value | Non-path       | `I+iL:N:`            |
 | Table / Key-Value | Path           | `I+iL:N:B/_+space+:` |
