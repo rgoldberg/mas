@@ -11,7 +11,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      implicitly
    - REJECTED: end (as a verb) / finish
 4. - character
-   - single: emphatic adjective; as one unit, not as a count ("a single value",
+   - single: emphatic adjective; as a unit, not as a count ("a single value",
      "as a single element", "compares as a single number")
    - REJECTED: single character / single (as a count)
 5. - only for: restrict scope or target applicability
@@ -73,7 +73,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 17. - last: positional element located at the end of a sequence or collection
       (pairs with 1st)
     - REJECTED: rightmost / final / terminal (as synonyms for last)
-18. - precede: positional relation in a sequence where one element comes before
+18. - precede: positional relation in a sequence where an element comes before
       another
     - leading: adjective for characters / elements positioned at the start of a
       token or line (e.g., "leading whitespace")
@@ -81,7 +81,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - earlier: relative order by index, time, or priority
     - former: 1st of 2 explicitly mentioned items
     - immediately: adjacency
-19. - succeed: positional relation in a sequence where one element comes after
+19. - succeed: positional relation in a sequence where an element comes after
       another (direct antonym of precede)
     - subsequent
     - after
