@@ -32,8 +32,8 @@ process.
 
 ## Built-In Named Fields Configs
 
-For the same `mas` leaf context & output format suffix, every field is in each
-of `all`, `none` & the [built-in
+For the same `mas` leaf context & output format suffix (or its absence), every
+field is in each of `all`, `none` & the [built-in
 standard](configs.md#immutable-built-in-named-configs):
 
 - `all`: Every field spec is visible.
