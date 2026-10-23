@@ -61,8 +61,8 @@ extension JSON.Object {
 	/// leading spacing, its leader (iff any), its trailing spacing, then its
 	/// value. A leader's width is the item's widest key's width, less its own
 	/// key's width, plus the leader pattern's width. Each line terminator in a
-	/// key renders as `⏎`, while a value continues on a new line after each of
-	/// its line terminators, each such non-empty line indented by spaces to the
+	/// key renders as `⏎`, while each in a value renders as a newline (e.g., a
+	/// CRLF as 1 LF), each such non-empty later line indented by spaces to the
 	/// value's start. Each row's width is that of its widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
