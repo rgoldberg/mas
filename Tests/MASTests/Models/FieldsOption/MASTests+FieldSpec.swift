@@ -579,7 +579,6 @@ private extension MASTests {
 			(".adamID@", ParsingError.missingFieldOccurrenceIndex),
 			(".@", .missingFieldSpecIndex),
 			(".+adamID@x", .missingFieldOccurrenceIndex),
-			(".-adamID=x", .nonexistentFieldSpec(forName: "adamID=x")),
 			("@all.adamID@3", .invalidPosition("3")),
 			("@all.adamID@+3", .invalidPosition("3")),
 			("@all.+adamID@3", .invalidPosition("3")),
@@ -648,11 +647,69 @@ private extension MASTests {
 		#expect(try fieldSpec.keyValueRow(for: object[nodeKey: "tags"])?.value == #"["é",{"a":null}]"#)
 	}
 
+	@Test(arguments: [".size", ".%size", "._size"])
+	func `an edit naming no field spec inserts its default field spec`(value: String) throws {
+		let specs = try parseFieldSpecs(value)
+		#expect(specs.map(\.name) == ["size", "adamID", "bundleID"])
+		#expect(specs[0].label == "size")
+		#expect(specs[0].isHidden == value.hasPrefix("._"))
+	}
+
 	@Test
-	func `throws error for nonexistent field edit`() {
-		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "nonexistentField")) {
-			try parseFieldSpecs(".nonexistentField")
+	func `a removal naming no field spec only lists its field`() throws {
+		let config = try parseFieldsConfig("@all.-size")
+		#expect(config.fieldSpecs.map(\.name) == ["adamID", "bundleID"])
+		#expect(config.unlistedFieldSpecs(in: [JSON.Object([("size", .number(1)), ("rating", .number(2))])])
+			.map(\.name) == ["rating"])
+	}
+
+	@Test(arguments: [".size", ".-size", "size"])
+	func `an edit naming a nonexistent field is an error`(value: String) {
+		#expect(throws: ParsingError.nonexistentField("size")) {
+			try resolvedFieldsConfig(
+				from: value,
+				standard: standardFixture,
+				all: allFixture,
+				outputFormat: .table(.default),
+				fieldNameSet: ["adamID", "bundleID"],
+			)
 		}
+	}
+
+	@Test(
+		arguments: [
+			("@all", ["rating", "size"]),
+			("@all.+size", ["rating"]),
+			("@all.-adamID", ["rating", "size"]),
+			("@standard", []),
+			("@none", []),
+			("adamID", []),
+			("@standard@unsuffixed", []),
+		],
+	)
+	func `only an all-derived fields config outputs its unlisted fields`(value: String, names: [String]) throws {
+		let objects = [JSON.Object([("adamID", .number(1)), ("rating", .number(2))]), .init([("size", .number(3))])]
+		#expect(try parseFieldsConfig(value).unlistedFieldSpecs(in: objects).map(\.name) == names)
+	}
+
+	@Test
+	func `a machine-facing unlisted field's field spec is labeled by its name`() throws {
+		let objects = [JSON.Object([("bundleID", .string("a.b"))])]
+		let all = BaseIncludesAllFieldsConfig(fieldSpecs: [adamIDFieldSpec])
+		let userFacing = try resolvedFieldsConfig(
+			from: "@all",
+			standard: standardFixture,
+			all: all,
+			outputFormat: .table(.default),
+		)
+		let machineFacing = try resolvedFieldsConfig(
+			from: "",
+			standard: standardFixture,
+			all: all,
+			outputFormat: .json(.default),
+		)
+		#expect(userFacing.unlistedFieldSpecs(in: objects).map(\.label) == ["Bundle ID"])
+		#expect(machineFacing.unlistedFieldSpecs(in: objects).map(\.label) == ["bundleID"])
 	}
 
 	@Test
@@ -745,15 +802,24 @@ private extension MASTests {
 	}
 
 	@Test
-	func `fetchFieldNames fetches every field for a reference to a field not yet discovered`() throws {
+	func `fetchFieldNames fetches a field that an edit names without a field spec`() throws {
+		#expect(
+			try fetchFieldNames(for: ".size", standard: standardFixture, all: allFixture, outputFormat: .table(.default))
+				.sorted()
+				== ["adamID", "size"],
+		)
+	}
+
+	@Test
+	func `fetchFieldNames fetches only a none-derived base's visible fields`() throws {
 		#expect(
 			try fetchFieldNames(
-				for: ".undiscovered",
+				for: "@none.+size",
 				standard: standardFixture,
 				all: allFixture,
 				outputFormat: .table(.default),
 			)
-			.isEmpty,
+				== ["size"],
 		)
 	}
 

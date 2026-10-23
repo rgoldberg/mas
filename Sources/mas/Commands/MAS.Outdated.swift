@@ -33,9 +33,10 @@ private struct TableOutputConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.table(.default)
 	static let standardFieldsConfig =
 		SelectedFieldsConfig(fieldSpecs: ["adamID", "name", "version", "newVersion"].map(builtInFieldSpec(forFieldNamed:)))
-	/// The field set is open-ended (dynamically-discovered Spotlight attributes);
+	/// The field set is open-ended (Spotlight attributes), so every field without
+	/// a field spec here is unlisted (fields.md "Unlisted Fields");
 	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort
 	/// alphabetically by label) applies here, absent a user-requested order,
-	/// rather than showing them in their arbitrary discovery order.
+	/// rather than showing fields in their arbitrary discovery order.
 	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

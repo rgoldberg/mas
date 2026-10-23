@@ -72,6 +72,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
       a variant extending its own stem.
    7. A persisted fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
+   8. A fields config [listing](../Specs/fields.md#unlisted-fields) each field
+      that a field name in an extended persisted fields config's
+      `<fields-config>` names.
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
    they currently apply only on top of `standard`, so implied
    [table](../Specs/table.md#implied-settings) &
@@ -239,3 +242,19 @@ next line, so a row is as many lines as its most-lined cell or key. This needs:
 3. How each line is justified, styled (e.g., a style reset per header line) &
    measured (e.g., column widths & separator lines per widest line).
 4. Whether a line terminator in a style, pattern, or spacing remains invalid.
+
+### Streaming Output
+
+mas obtains every item before outputting any. Let key-value & JSON output output
+each item as soon as it is obtained, unless item sorting reorders items, which
+[unlisted fields](../Specs/fields.md#unlisted-fields) allow. This needs:
+
+1. Each item to output only its own unlisted fields: mas gives every item a
+   field spec for each unlisted field of any item, which outputs the same only
+   while the `default` named format renders an absent field as nothing.
+
+### Unlisted Field Visibility Syntax
+
+Let a `<fields-config>` set whether its [unlisted
+fields](../Specs/fields.md#unlisted-fields) are visible (e.g., to output them
+with `standard`'s field specs, or to hide them with `all`'s).

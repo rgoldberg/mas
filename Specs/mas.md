@@ -32,14 +32,20 @@ process.
 
 ## Built-In Named Fields Configs
 
+`mas` [lists](fields.md#unlisted-fields) every field of `config`'s item, and,
+for any other command, each field for which its built-in standard's user-facing
+variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
+`mas list`).
+
 For the same `mas` leaf context & output format suffix (or its absence), every
-field is in each of `all`, `none` & the [built-in
+listed field is in each of `all`, `none` & the [built-in
 standard](configs.md#immutable-built-in-named-configs):
 
-- `all`: Every field spec is visible.
-- `none`: `all`, with every field spec hidden & its sort disabled.
+- `all`: Every field spec is visible, as are unlisted fields.
+- `none`: `all`, with every field spec hidden & its sort disabled, and with
+  unlisted fields hidden.
 - Built-in standard: Its own visible field specs, followed by hidden copies of
-  `all`'s field specs for every other field.
+  `all`'s field specs for every other field, with unlisted fields hidden.
 
 A `mas` built-in fields config has:
 
@@ -100,8 +106,10 @@ following visible field specs, at the given positions:
 <!--editorconfig-checker-enable-->
 
 In every `mas` built-in fields config's user-facing variants, a field spec for a
-field that the table above lists has that row's label & format, and a field spec
-for any other field is labeled by its field name & formatted as `%i`.
+field that the table above lists has that row's label & format, as does such a
+field's default field spec (e.g., for an unlisted field) wherever one of those
+variants is the base fields config; any other field's field spec is labeled by
+its field name & formatted as `%i`.
 
 ## Price Sorting
 

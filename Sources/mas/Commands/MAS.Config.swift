@@ -52,8 +52,8 @@ extension MAS { // swiftlint:disable:this file_types_order
 private struct KeyValueOutputConfig: OutputConfig {
 	static let defaultFormat = OutputFormat.keyValue(.default)
 	/// `config`'s field set is fully static & fully known, so `standard` is
-	/// itself all-inclusive: there is no separate dynamic component to merge at
-	/// render time (unlike `list` / `search` / `outdated` / `lookup`).
+	/// itself all-inclusive: it lists every field, so no field is unlisted
+	/// (unlike for `list` / `search` / `outdated` / `lookup`).
 	static let standardFieldsConfig = allFieldsConfig
 	static let allFieldsConfig = BaseIncludesAllFieldsConfig(
 		fieldSpecs: [

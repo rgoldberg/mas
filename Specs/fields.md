@@ -66,6 +66,35 @@ E.g., `--fields .+size`, when the base fields config has no field spec for
 `size`, outputs `size` labeled `size`, formatted per the `default` named format
 (absent any custom one, as `%i` & start-justified) & not sorting items.
 
+### Unlisted Fields
+
+A fields config **lists** a field iff the app lists it, or a
+`<reference-field-name>` or an `<absolute-field-name>` names it in the fields
+config's `<fields-config>` or in that of any fields config that it
+[extends](configs.md#referencing-named-configs) (e.g., `foo` in `@all.-foo`). An
+app lists each field that it knows before obtaining any input (e.g., each field
+of an input format that specifies all potential input fields up front, per
+[nonexistent fields](#nonexistent-fields)).
+
+An item's field is **unlisted** iff the fields config does not list it. A
+[built-in fields config](#immutable-built-in-named-fields-configs)'s unlisted
+fields are visible or hidden as it specifies; any other fields config's are
+visible iff those of the fields config that it extends are (e.g., visible for
+`@all.-foo`, but hidden for an `<absolute-config>`, which extends `none`).
+
+Each visible unlisted field is output per a [default field
+spec](#default-field-specs) that has no position, so no index references it. The
+field order orders it as if it were a field spec positioned after every field
+spec, among unlisted fields in order of their 1st occurrence in the input (e.g.,
+`<positional-order>` puts it after every field spec, while `<document-order>`
+puts it at its own document position). For table output, each visible unlisted
+field of any item has a column; for key-value & JSON output, each item outputs
+only its own unlisted fields.
+
+Because unlisted fields have no positions, neither a fields config nor its
+positions depend on the input, so key-value & JSON output can output each item
+as soon as it is obtained, unless item sorting reorders items.
+
 ## Fields Configs
 
 A **fields config** specifies which fields are included in the output, along
@@ -117,13 +146,15 @@ output, instead of itself).
 For each [leaf context](configs.md#context-stacks):
 
 - `none`: Every field spec is [hidden](#visibility) & its sort is
-  [disabled](#sort-priority).
-- `all`: Every field spec is visible. Absent a built-in field order: field specs
-  are sorted by label (`<output>`), while other `<sort-option>`s are per the
-  app's default sort options for labels for the current output format.
+  [disabled](#sort-priority), and [unlisted fields](#unlisted-fields) are
+  hidden.
+- `all`: A visible field spec for each field that the app lists, and visible
+  unlisted fields. Absent a built-in field order: field specs are sorted by
+  label (`<output>`), while other `<sort-option>`s are per the app's default
+  sort options for labels for the current output format.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
-  select list of field specs is visible. Absent a built-in field order: field
-  specs are ordered by `<positional-order>`.
+  select list of field specs is visible, and unlisted fields are hidden. Absent
+  a built-in field order: field specs are ordered by `<positional-order>`.
 
 A built-in fields config:
 
@@ -509,6 +540,15 @@ For a given `<reference-sourced-field-spec-edit>` `fs`, its `source` is the
 field spec from the reference fields config referenced by `fs`. Thus, an
 inserted field spec cannot be modified by another field spec edit.
 
+A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
+no `<field-occurrence-index>` & whose `<reference-field-name>` names no field
+spec (e.g., one for an [unlisted field](#unlisted-fields)) has no such `source`:
+a `<field-spec-removal>` then does nothing, though it lists its field, while any
+other one 1st inserts a new field spec (as `<field-spec-insertion>` would) as
+its `source` (e.g., for an unlisted `foo`, `@all.foo=Foo` inserts a visible
+field spec & `@all._foo` a hidden one, while `@all.-foo` lists `foo`, so `all`
+does not output it).
+
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the
 reference fields config, except that a `<named-field-spec-reference>` without a
@@ -541,10 +581,8 @@ Field spec edits act as follows:
     $previous$) & unhides it.
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
-  - If its `<named-field-spec-reference>` has no `<field-occurrence-index>` &
-    its `<reference-field-name>` names no field spec, or its
-    `<field-spec-reference>` resolves to a `null`, inserts a new field spec (as
-    `<field-spec-insertion>` would) as `source`.
+  - If its `<field-spec-reference>` resolves to a `null`, inserts a new field
+    spec (as `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`.

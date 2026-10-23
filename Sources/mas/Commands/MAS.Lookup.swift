@@ -53,9 +53,10 @@ private struct KeyValueOutputConfig: OutputConfig {
 		]
 			.map(builtInFieldSpec(forFieldNamed:)),
 	)
-	/// The field set is open-ended (dynamically-discovered API fields);
+	/// The field set is open-ended (API fields), so every field without a field
+	/// spec here is unlisted (fields.md "Unlisted Fields");
 	/// `resolveBaseFieldsConfig(...)`'s generic default for `all` (sort
 	/// alphabetically by label) applies here, absent a user-requested order,
-	/// rather than showing them in their arbitrary discovery order.
+	/// rather than showing fields in their arbitrary discovery order.
 	static let allFieldsConfig = BaseIncludesAllFieldsConfig(fieldSpecs: standardFieldsConfig.fieldSpecs)
 }

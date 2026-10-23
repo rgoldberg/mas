@@ -365,8 +365,8 @@ private func unsortedInstalledApps(matching appIDs: [AppID], fields: [String]) a
 /// regardless of what is being displayed). Returns `nil` (meaning "fetch
 /// everything") for an empty `fields`, or if any requested name is not a
 /// Spotlight attribute this handles: there is no complete reverse mapping for
-/// arbitrary dynamic `all` field names; fetching everything is always correct,
-/// just potentially slower.
+/// arbitrary unlisted field names; fetching everything is always correct, just
+/// potentially slower.
 private func spotlightAttributeKeys(for fields: [String]) -> [String]? {
 	guard !fields.isEmpty else { // swiftlint:disable:previous discouraged_optional_collection
 		return nil

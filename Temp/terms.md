@@ -559,3 +559,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 107. - negated: the form of a non-nullary branch with `<branch-negation>`
        (`-…`), whose `<unconditional-block>` is evaluated iff its matcher fails
        ([defined](../Specs/fields-format.md#success--failure))
+108. - list: verb; an app lists each field that it knows before obtaining any
+       input, while a fields config lists those & each field that a field name
+       in its `<fields-config>` names
+       ([defined](../Specs/fields.md#unlisted-fields))
+     - unlisted field: an item's field that the fields config does not list,
+       output iff visible, per a default field spec without a position
+       ([defined](../Specs/fields.md#unlisted-fields))
+     - REJECTED: dynamic field / discovered field / unknown field (for an
+       unlisted field)

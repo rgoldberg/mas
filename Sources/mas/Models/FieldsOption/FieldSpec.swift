@@ -213,13 +213,12 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 
 // MARK: - Entry points
 
-/// Phase 1 (pre-fetch): the field names a display command needs to fetch for
-/// `fieldsOptionValue` to be fully resolvable, given `standard`'s & `all`'s
-/// _selected_ field specs (not yet merged with any dynamically-discovered
-/// data): every field spec's that is visible or sorts items. Never includes a
-/// synthesized field's name (see `FieldSpec.isSynthesized`), since fetching it
-/// would be meaningless. Empty means "fetch everything", as for a base fields
-/// config derived from `all`, whose dynamically-discovered fields are unknown
+/// Phase 1 (pre-fetch): the field names a display command needs to fetch to
+/// output per `fieldsOptionValue`: every field spec's that is visible or sorts
+/// items. Never includes a synthesized field's name (see
+/// `FieldSpec.isSynthesized`), since fetching it would be meaningless. Empty
+/// means "fetch everything", as for a base fields config derived from `all`,
+/// whose visible unlisted fields (fields.md "Unlisted Fields") are unknown
 /// until fetched.
 func fetchFieldNames(
 	for fieldsOptionValue: String,
@@ -230,51 +229,40 @@ func fetchFieldNames(
 ) throws(ParsingError) -> [String] {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
 	if isRelativeConfig(input) {
-		guard
-			!(
-				try resolveBaseFieldsConfig(
-					named: try parseBaseFieldsConfigSection(&input),
-					standard: standard,
-					all: all,
-					outputFormat: outputFormat,
-				)
-			)
-			.baseIncludesAllFields
-		else {
-			return .init()
-		}
-	}
-	let resolved: any FieldsConfig
-	do {
-		resolved = try resolvedFieldsConfig(
-			from: fieldsOptionValue,
+		let (base, _) = try resolveBaseFieldsConfig(
+			named: try parseBaseFieldsConfigSection(&input),
 			standard: standard,
 			all: all,
 			outputFormat: outputFormat,
-			fieldNameSet: fieldNameSet,
 		)
-	} catch .nonexistentFieldSpec {
-		return .init() // It may reference a field that is only discovered once every field is fetched
+		guard !base.baseIncludesAllFields else {
+			return .init()
+		}
 	}
 	return .init(
 		Set(
-			resolved
-				.fieldSpecs
-				.compactMap { fieldSpec in
-					fieldSpec.isSynthesized || fieldSpec.isHidden && (fieldSpec.sortSpec?.priority ?? 0) == 0
-						? nil
-						: fieldSpec.name
-				},
+			try resolvedFieldsConfig(
+				from: fieldsOptionValue,
+				standard: standard,
+				all: all,
+				outputFormat: outputFormat,
+				fieldNameSet: fieldNameSet,
+			)
+			.fieldSpecs
+			.compactMap { fieldSpec in
+				fieldSpec.isSynthesized || fieldSpec.isHidden && (fieldSpec.sortSpec?.priority ?? 0) == 0
+					? nil
+					: fieldSpec.name
+			},
 		),
 	)
 }
 
-/// Phase 2 (post-fetch): the fully-resolved `FieldsConfig` for
-/// `fieldsOptionValue`. `all` should already have any dynamically-discovered
-/// fields merged into its `fieldSpecs` by the caller (this function treats it
-/// as static). If `fieldsOptionValue` does not specify its own
-/// `<field-order-section>`, the resolved base fields config's own `fieldOrder`
-/// is used instead of a bare `.inherited`.
+/// The fully-resolved `FieldsConfig` for `fieldsOptionValue`, which, like its
+/// positions, is independent of every item, because unlisted fields (fields.md
+/// "Unlisted Fields") have no positions. If `fieldsOptionValue` does not
+/// specify its own `<field-order-section>`, the resolved base fields config's
+/// own `fieldOrder` is used instead of a bare `.inherited`.
 func resolvedFieldsConfig(
 	from fieldsOptionValue: String,
 	standard: some FieldsConfig,
@@ -286,9 +274,14 @@ func resolvedFieldsConfig(
 	guard isRelativeConfig(input) else {
 		// An `<absolute-config>` is equivalent to `@none/P` followed by a
 		// `<field-spec-insertion>` per field spec
-		let none =
+		let (none, isMachineFacing) =
 			try resolveBaseFieldsConfig(named: noneFieldsConfigName, standard: standard, all: all, outputFormat: outputFormat)
-		var builder = FieldSpecsBuilder(fieldSpecs: none.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
+		var builder = FieldSpecsBuilder(
+			fieldSpecs: none.fieldSpecs,
+			outputFormat: outputFormat,
+			isMachineFacing: isMachineFacing,
+			fieldNameSet: fieldNameSet,
+		)
 		try builder.parseAbsoluteConfig(&input)
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
@@ -296,13 +289,18 @@ func resolvedFieldsConfig(
 			itemSort: .init(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: .ascending),
 		)
 	}
-	let base = try resolveBaseFieldsConfig(
+	let (base, isMachineFacing) = try resolveBaseFieldsConfig(
 		named: try parseBaseFieldsConfigSection(&input),
 		standard: standard,
 		all: all,
 		outputFormat: outputFormat,
 	)
-	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
+	var builder = FieldSpecsBuilder(
+		fieldSpecs: base.fieldSpecs,
+		outputFormat: outputFormat,
+		isMachineFacing: isMachineFacing,
+		fieldNameSet: fieldNameSet,
+	)
 	let parsedFieldOrder = try builder.parseFieldOrderSection(&input, inheriting: base.fieldOrder)
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 	let tiebreakDirection = try builder.parseItemSortSection(&input, inheriting: base.itemSort.tiebreakDirection)
@@ -312,7 +310,15 @@ func resolvedFieldsConfig(
 	}
 	let itemSort = ItemSort(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: tiebreakDirection)
 	return base.baseIncludesAllFields
-		? BaseIncludesAllFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
+		? BaseIncludesAllFieldsConfig(
+			fieldSpecs: builder.fieldSpecs,
+			fieldOrder: fieldOrder,
+			itemSort: itemSort,
+			listedFieldNameSet: all.listedFieldNameSet
+				.union(builder.fieldSpecs.map(\.name))
+				.union(builder.removedUnmatchedFieldNameSet),
+			isMachineFacing: isMachineFacing,
+		)
 		: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
 }
 
@@ -350,11 +356,13 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// unsuffixed variant, valid only directly after a stem), or, absent both,
 /// `outputFormat`:
 ///
-/// - `none`: `all` with every field spec hidden & its sort disabled.
-/// - `all`: every field spec visible.
+/// - `none`: `all` with every field spec hidden & its sort disabled, and with
+///   unlisted fields hidden.
+/// - `all`: every field spec visible, as are unlisted fields.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
-///   hidden, so `none`, `all` & `standard` differ only in which field specs are
-///   hidden; `standard@json` is a reference to `all@json`.
+///   hidden, so `none`, `all` & `standard` differ only in which field specs &
+///   whether unlisted fields are hidden; `standard@json` is a reference to
+///   `all@json`.
 /// - `default`: `standard`, absent a persisted custom `default`.
 ///
 /// The `@json` variant is machine-facing (see `machineFacingVariant()`); the
@@ -365,7 +373,7 @@ func resolveBaseFieldsConfig(
 	standard: some FieldsConfig,
 	all: BaseIncludesAllFieldsConfig,
 	outputFormat: OutputFormat,
-) throws(ParsingError) -> any FieldsConfig {
+) throws(ParsingError) -> (config: any FieldsConfig, isMachineFacing: Bool) {
 	var stem = (rawName.isEmpty ? defaultConfigName : rawName)[...]
 	let isUnsuffixedVariant = stem.hasSuffix(unsuffixedVariantReferenceSuffix)
 	if isUnsuffixedVariant {
@@ -391,11 +399,17 @@ func resolveBaseFieldsConfig(
 		case defaultConfigName, standardConfigName:
 			isMachineFacing ? allVariant : standard.including(hidden: allVariant.fieldSpecs)
 		case noneFieldsConfigName:
-			allVariant.hidingAll().disablingAllSorts()
+			SelectedFieldsConfig(
+				fieldSpecs: allVariant.fieldSpecs,
+				fieldOrder: allVariant.fieldOrder,
+				itemSort: allVariant.itemSort,
+			)
+			.hidingAll()
+			.disablingAllSorts()
 		default:
 			throw .nonexistentFieldsConfig(.init(stem))
 		}
-	return isMachineFacing ? config.machineFacingVariant() : config
+	return (isMachineFacing ? config.machineFacingVariant() : config, isMachineFacing)
 }
 
 extension Character { // swiftlint:disable:this file_types_order
@@ -448,7 +462,16 @@ private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_f
 private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per_file
 	private(set) var fieldSpecs: [FieldSpec]
 
+	/// The field names of `<field-spec-removal>`s whose `<reference-field-name>`
+	/// named no field spec, each of which only lists its field (fields.md
+	/// "Unlisted Fields").
+	private(set) var removedUnmatchedFieldNameSet = Set<String>()
+
 	private let outputFormat: OutputFormat
+	/// Whether the base fields config is a machine-facing variant, whose default
+	/// field specs are labeled by name, else per
+	/// `builtInFieldSpec(forFieldNamed:)`.
+	private let isMachineFacing: Bool
 	/// Every field that may exist in any input, iff determinable up front (see
 	/// fields.md's "Nonexistent Fields"); `nil` iff not.
 	private let fieldNameSet: Set<String>? // swiftlint:disable:this discouraged_optional_collection
@@ -464,9 +487,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	private var previousIndex = -1
 
 	// swiftlint:disable:next discouraged_optional_collection
-	init(fieldSpecs: [FieldSpec], outputFormat: OutputFormat, fieldNameSet: Set<String>?) {
+	init(fieldSpecs: [FieldSpec], outputFormat: OutputFormat, isMachineFacing: Bool, fieldNameSet: Set<String>?) {
 		self.fieldSpecs = fieldSpecs
 		self.outputFormat = outputFormat
+		self.isMachineFacing = isMachineFacing
 		self.fieldNameSet = fieldNameSet
 		workingTags = Array(fieldSpecs.indices)
 		baselineFieldSpecs = fieldSpecs
@@ -619,10 +643,13 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .overlay:
-				let reference = try parseFieldSpecReference(&input)
-				let existing = try resolvedReferenceFieldSpec(reference)
+				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
+				// no field spec inserts a new field spec (as `<field-spec-insertion>`
+				// would) as `source`, as for each `<reference-sourced-field-spec-edit>`
+				// other than `<field-spec-removal>`
+				let (reference, existing) = try parseInsertingReference(&input)
 				try apply(
-					.overlay(reference, isHidden: false),
+					reference.map { .overlay($0, isHidden: false) } ?? .insert(isHidden: false),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -630,10 +657,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .move:
-				let reference = try parseFieldSpecReference(&input)
-				let existing = try resolvedReferenceFieldSpec(reference)
+				let (reference, existing) = try parseInsertingReference(&input)
 				try apply(
-					.move(reference),
+					reference.map(ResolvedStrategy.move) ?? .insert(isHidden: false),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -641,10 +667,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .hide:
-				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
-				// no field spec, or a `<field-spec-reference>` that resolves to a
-				// `null`, inserts a new field spec (as `<field-spec-insertion>` would)
-				// as `source`
+				// A `<field-spec-reference>` that resolves to a `null` also inserts a
+				// new field spec (as `<field-spec-insertion>` would) as `source`
 				let (reference, existing) = try parseHideReference(&input)
 				try apply(
 					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
@@ -657,12 +681,14 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			case .removal:
 				// A `<field-spec-removal>`'s `<reference-field-name>` has no modifiers
 				// to terminate it
-				let reference = try parseFieldSpecReference(
-					&input,
-					nameTerminatorSet: [fieldOccurrenceIndexPrefix, fieldSpecSeparator],
-				)
-				_ = try resolvedReferenceFieldSpec(reference) // Validates existence
-				remove(reference)
+				switch try parseReference(&input, nameTerminatorSet: [fieldOccurrenceIndexPrefix, fieldSpecSeparator]) {
+				case let .resolved(reference):
+					_ = try resolvedReferenceFieldSpec(reference) // Validates existence
+					remove(reference)
+				case let .unmatched(name):
+					_ = try defaultFieldSpec(forName: name) // Validates that it is not a nonexistent field
+					removedUnmatchedFieldNameSet.insert(name)
+				}
 			}
 			input = input.drop(while: \.isWhitespace)
 			guard input.first == fieldSpecSeparator else {
@@ -777,6 +803,13 @@ private func orderOptionSetOrder(_ input: Substring) -> Character? {
 // MARK: Private: field-spec-reference resolution
 
 private extension FieldSpecsBuilder {
+	private enum ParsedReference {
+		case resolved(Reference)
+		/// A `<named-field-spec-reference>` without a `<field-occurrence-index>`
+		/// whose `<reference-field-name>` names no field spec.
+		case unmatched(name: String)
+	}
+
 	private struct Reference {
 		let name: String?
 		let position: Int
@@ -820,24 +853,51 @@ private extension FieldSpecsBuilder {
 		return baselineFieldSpecs[try namedReference(name: name, index: index, positions: positions).position - 1]
 	}
 
+	/// Parses a `<reference-sourced-field-spec-edit>`'s `<field-spec-reference>`:
+	/// its resolved reference, or, iff it is a `<named-field-spec-reference>`
+	/// without a `<field-occurrence-index>` whose `<reference-field-name>` names
+	/// no field spec (e.g., for an unlisted field), that name.
+	private func parseReference(
+		_ input: inout Substring,
+		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
+	) throws(ParsingError) -> ParsedReference {
+		guard input.first != fieldSpecIndexPrefix else {
+			return .resolved(try parseFieldSpecReference(&input))
+		}
+		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
+		let positions = referencePositions(forName: name)
+		return !positions.isEmpty || index != nil
+			? .resolved(try namedReference(name: name, index: index, positions: positions))
+			: .unmatched(name: name)
+	}
+
+	/// Parses a `<field-spec-overlay>`'s or a `<field-spec-move>`'s
+	/// `<field-spec-reference>`: the resolved reference & its `source` from the
+	/// reference fields config; or, iff it names no field spec, `nil` & the
+	/// default field spec that a `<field-spec-insertion>` would insert.
+	private func parseInsertingReference(_ input: inout Substring)
+	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
+		switch try parseReference(&input) {
+		case let .resolved(reference):
+			(reference, try resolvedReferenceFieldSpec(reference))
+		case let .unmatched(name):
+			(nil, try defaultFieldSpec(forName: name))
+		}
+	}
+
 	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
-	/// reference & its `source` from the reference fields config; or, iff a
-	/// `<named-field-spec-reference>` without a `<field-occurrence-index>` has a
-	/// `<reference-field-name>` that names no field spec, or the reference
-	/// resolves to a `null` (a field spec removed earlier in this section), `nil`
-	/// & the field spec that a `<field-spec-insertion>` would copy from the
-	/// baseline fields config.
+	/// reference & its `source` from the reference fields config; or, iff it
+	/// names no field spec, or the reference resolves to a `null` (a field spec
+	/// removed earlier in this section), `nil` & the field spec that a
+	/// `<field-spec-insertion>` would copy from the baseline fields config.
 	private func parseHideReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
-		guard input.first != fieldSpecIndexPrefix else {
-			return hideSource(for: try parseFieldSpecReference(&input))
+		switch try parseReference(&input) {
+		case let .resolved(reference):
+			hideSource(for: reference)
+		case let .unmatched(name):
+			(nil, try defaultFieldSpec(forName: name))
 		}
-		let (name, index) = try parseNameAndIndex(&input)
-		let positions = referencePositions(forName: name)
-		guard !positions.isEmpty || index != nil else {
-			return (nil, try defaultFieldSpec(forName: name))
-		}
-		return hideSource(for: try namedReference(name: name, index: index, positions: positions))
 	}
 
 	/// The reference to the field spec for field `name` at `index` (`nil` iff
@@ -862,12 +922,14 @@ private extension FieldSpecsBuilder {
 	}
 
 	/// The default field spec for field `name`, which must not be a nonexistent
-	/// field.
+	/// field: labeled by name & formatted as `%i` for a machine-facing base
+	/// fields config, else per `builtInFieldSpec(forFieldNamed:)` (mas.md
+	/// "Built-In Field Specs").
 	private func defaultFieldSpec(forName name: String) throws(ParsingError) -> FieldSpec {
 		guard fieldNameSet?.contains(name) != false else {
 			throw .nonexistentField(name)
 		}
-		return .default(forName: name)
+		return isMachineFacing ? .default(forName: name) : builtInFieldSpec(forFieldNamed: name)
 	}
 
 	/// The 1-based positions in the reference fields config of field specs for

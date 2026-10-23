@@ -10,9 +10,9 @@ internal import JSONAST
 /// A display command's `--fields` configuration: its `standard` fields
 /// (selected, static; the `standardFieldsConfig` associated type varies per
 /// command since some commands' `standard` is itself all-inclusive, e.g.,
-/// `config`'s) & its `all` fields (selected entries only; the dynamic field
-/// set, for schemaless data sources, is merged in from the actual fetched data
-/// at render time, see `mergingDynamicFields(from:)`).
+/// `config`'s) & its `all` fields (a field spec per listed field; every other
+/// field of an item is unlisted, see fields.md's "Unlisted Fields" &
+/// `FieldsConfig.unlistedFieldSpecs(in:)`).
 protocol OutputConfig {
 	associatedtype Standard: FieldsConfig
 
@@ -46,7 +46,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 			resolved = try resolvedFieldsConfig(
 				from: fieldsOptionValue,
 				standard: standardFieldsConfig,
-				all: allFieldsConfig.mergingDynamicFields(from: objects),
+				all: allFieldsConfig,
 				outputFormat: outputFormat,
 				fieldNameSet: fieldNameSet,
 			)
@@ -75,7 +75,9 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		let sortedObjects = resolved.itemSort
 			.sortedIndices(count: objects.count) { index, keyIndex in sortValues[keyIndex][index] }
 			.map { objects[$0] }
-		let displayFieldSpecs = resolved.fieldOrder.applied(to: resolved.fieldSpecs).filter { !$0.isHidden }
+		let displayFieldSpecs = resolved.fieldOrder
+			.applied(to: resolved.fieldSpecs + resolved.unlistedFieldSpecs(in: objects))
+			.filter { !$0.isHidden }
 		switch outputFormat {
 		case let .json(jsonConfig):
 			MAS.printer.info(
@@ -113,24 +115,5 @@ enum OutputError: Error, CustomStringConvertible { // swiftlint:disable:this one
 		case let .parsing(error):
 			error.description
 		}
-	}
-}
-
-extension BaseIncludesAllFieldsConfig {
-	/// Finishes what `all` means for a schemaless data source: appends a
-	/// `builtInFieldSpec(forFieldNamed:)` (no sort) for every real JSON key
-	/// across `objects` not already named in `fieldSpecs`, in 1st-seen order
-	/// (each item's own `JSON.Object` is normalized, i.e., renamed, but not
-	/// reordered, so this is each object's own original key order).
-	func mergingDynamicFields(from objects: [JSON.Object]) -> Self {
-		var seenNameSet = Set(fieldSpecs.map(\.name))
-		var extra = [FieldSpec]()
-		for object in objects {
-			for field in object.fields where !seenNameSet.contains(field.key.rawValue) {
-				seenNameSet.insert(field.key.rawValue)
-				extra.append(builtInFieldSpec(forFieldNamed: field.key.rawValue))
-			}
-		}
-		return .init(fieldSpecs: fieldSpecs + extra, fieldOrder: fieldOrder, itemSort: itemSort)
 	}
 }

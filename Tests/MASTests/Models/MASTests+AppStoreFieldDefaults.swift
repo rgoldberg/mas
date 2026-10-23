@@ -78,10 +78,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `all's dynamic field specs are built-in field specs`() {
-		let all = BaseIncludesAllFieldsConfig()
-			.mergingDynamicFields(from: [JSON.Object([("bundleID", .string("a.b")), ("trackName", .string("A"))])])
-		#expect(all.fieldSpecs.map(\.label) == ["Bundle ID", "trackName"])
+	func `a user-facing unlisted field's field spec is its built-in field spec`() {
+		let unlistedFieldSpecs = BaseIncludesAllFieldsConfig()
+			.unlistedFieldSpecs(in: [JSON.Object([("bundleID", .string("a.b")), ("trackName", .string("A"))])])
+		#expect(unlistedFieldSpecs.map(\.label) == ["Bundle ID", "trackName"])
 	}
 
 	@Test(
