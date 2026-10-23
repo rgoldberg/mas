@@ -509,6 +509,36 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("/I-", "/i", "/I-i"),
+			("/I-/-", "/+", "/I+/-"),
+			("/D-a/-", "/Df", "/D-af/-"),
+			("/D-", "/PD", "/D-"),
+			("/D-", "/i", "/i"),
+			("/I-", "/D", "/D"),
+			("/I-", "/P", "/P"),
+		],
+	)
+	func `a field order section retains the working field order's options iff of the same alternative`(
+		base: String,
+		value: String,
+		equivalent: String,
+	) throws {
+		let standard = SelectedFieldsConfig(
+			fieldSpecs: standardFixture.fieldSpecs,
+			fieldOrder: try parseFieldsConfig(base, outputFormat: .json(.default)).fieldOrder,
+		)
+		let fieldOrder = try resolvedFieldsConfig(
+			from: "@default@unsuffixed" + value, // `standard@json` would be `all@json`
+			standard: standard,
+			all: allFixture,
+			outputFormat: .json(.default),
+		)
+		.fieldOrder
+		#expect(fieldOrder == (try parseFieldsConfig(equivalent, outputFormat: .json(.default)).fieldOrder))
+	}
+
+	@Test(
+		arguments: [
 			("D", ["2", "1", "4", "3", "5"]),
 			("D/-", ["2", "4", "1", "5", "3"]),
 			("D-", ["3", "5", "1", "4", "2"]),

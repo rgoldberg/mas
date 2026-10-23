@@ -303,7 +303,7 @@ func resolvedFieldsConfig(
 		outputFormat: outputFormat,
 	)
 	var builder = FieldSpecsBuilder(fieldSpecs: base.fieldSpecs, outputFormat: outputFormat, fieldNameSet: fieldNameSet)
-	let parsedFieldOrder = try builder.parseFieldOrderSection(&input)
+	let parsedFieldOrder = try builder.parseFieldOrderSection(&input, inheriting: base.fieldOrder)
 	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
 	let tiebreakDirection = try builder.parseItemSortSection(&input, inheriting: base.itemSort.tiebreakDirection)
 	try builder.parseFieldSpecEditsSection(&input)
@@ -482,8 +482,12 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// (whose `<source>` defaults to `<output>`, i.e., sorted by label), the
 	/// latter 2 followed by an optional `<field-order-tiebreaker>`. The
 	/// alternatives are disjoint: each but `<sort-option-set>` contains an
-	/// `<order>` letter, which is no `<sort-option>`.
-	mutating func parseFieldOrderSection(_ input: inout Substring) throws(ParsingError) -> FieldOrder {
+	/// `<order>` letter, which is no `<sort-option>`. Each option that a
+	/// `<document-order-option-set>` or a `<sort-option-set>` omits, including
+	/// its tiebreak direction, retains `inheritedFieldOrder`'s iff that is also
+	/// `.document` or also sorts, respectively.
+	mutating func parseFieldOrderSection(_ input: inout Substring, inheriting inheritedFieldOrder: FieldOrder)
+	throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
 			return .inherited
 		}
@@ -497,11 +501,21 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			throw .missingFieldOrderOptionSet
 		}
 		guard let order = orderOptionSetOrder(input) else {
+			let inherited: (optionSet: SortOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
+				switch inheritedFieldOrder {
+				case let .byLabel(optionSet, tiebreakDirection), let .byName(optionSet, tiebreakDirection):
+					(optionSet, tiebreakDirection)
+				case .document, .inherited, .positional:
+					nil
+				}
 			var defaults = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
 			defaults.source = .output // `<field-order-option-set>`'s `default source: <output>`
-			let optionSet =
-				try SortOptionSet.parsed(&input, terminatorSet: itemSortAndFieldSpecEditsPrefixSet, defaults: defaults)
-			let tiebreakDirection = try parseFieldOrderTiebreaker(&input) ?? .ascending
+			let optionSet = try SortOptionSet.parsed(
+				&input,
+				terminatorSet: itemSortAndFieldSpecEditsPrefixSet,
+				defaults: inherited?.optionSet ?? defaults,
+			)
+			let tiebreakDirection = try parseFieldOrderTiebreaker(&input) ?? inherited?.tiebreakDirection ?? .ascending
 			return switch optionSet.source {
 			case .input:
 				.byName(optionSet, tiebreakDirection: tiebreakDirection)
@@ -509,7 +523,13 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				.byLabel(optionSet, tiebreakDirection: tiebreakDirection)
 			}
 		}
-		var optionSet = DocumentOrderOptionSet()
+		let inherited: (optionSet: DocumentOrderOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
+			if order == documentOrderOption, case let .document(optionSet, tiebreakDirection) = inheritedFieldOrder {
+				(optionSet, tiebreakDirection)
+			} else {
+				nil
+			}
+		var optionSet = inherited?.optionSet ?? .init()
 		var absentFieldOption = Character?.none
 		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			if let direction = SortOptionSet.Direction(rawValue: char) {
@@ -536,7 +556,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		case (_, .table, _): // `<document-order-option-set>` is `(* only for: JSON or key-value output *)`
 			throw .documentOrderUnsupportedForTable
 		default:
-			.document(optionSet, tiebreakDirection: tiebreakDirection ?? .ascending)
+			.document(optionSet, tiebreakDirection: tiebreakDirection ?? inherited?.tiebreakDirection ?? .ascending)
 		}
 	}
 
