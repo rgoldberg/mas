@@ -274,8 +274,9 @@ An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does, and is
 
 Output depends on the formatted value, not on the field value:
 
-- **Table**: A cell is output for each visible field spec, regardless of whether
-  its formatted value is absent, which is output as an empty string.
+- **Table**: A cell is output for each column (each visible field spec & each
+  visible unlisted field of any item), regardless of whether its formatted value
+  is absent, which is output as an empty string.
 - **Key-Value**: A key-value pair is output for the field label & formatted
   value iff the formatted value is neither absent nor `null`.
 - **JSON**: A key-value pair is output for the field label & formatted value iff

@@ -42,8 +42,8 @@ Each [line terminator](configs.md#line-terminators) in a header or data cell is
 rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
 render as `a⏎b`).
 
-A table without any item or any visible field spec renders nothing, not even a
-header row or a separator line.
+A table without any item or any column renders nothing, not even a header row or
+a separator line.
 
 ## Header
 
