@@ -70,9 +70,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
    5. A custom `default` (currently always `standard`) & each context's
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
-   6. Custom [variants](../Specs/fields.md#named-fields-configs), including
-      matching a stem or a suffixed reference per context, `default` variants &
-      a variant extending its own stem.
+   6. Custom [variants](
+        ../Specs/fields.md#output-format-specific-named-fields-configs
+      ), including matching a stem or a suffixed reference per context,
+      `default` variants & a variant extending its own stem.
    7. A persisted fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
    8. A fields config [listing](../Specs/fields.md#unlisted-fields) each field
