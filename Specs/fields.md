@@ -225,9 +225,9 @@ expression value algorithm](ebnf.md#defaults-for-absent-expressions):
   working fields config's item-sort `<direction>`.
 - If transitively absent & it is an option of a `<positional-order-option-set>`,
   a `<document-order-option-set>`, or a `<sort-option-set>` in
-  `<field-order-option-set>`, or the `<direction>` of the
-  `<field-order-tiebreaker>` that follows it: the working fields config's value,
-  iff its field order is also per the same one of those 3 nonterminals.
+  `<field-order-option-set>`, or `<field-order-tiebreaker>`'s `<direction>` that
+  follows it: the working fields config's value, iff its field order is also per
+  the same one of those 3 nonterminals.
 
 An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
 option omitted from a present payload (e.g., `<direction>` from `name/1Ii`) thus
