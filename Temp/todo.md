@@ -218,7 +218,8 @@ Unicode `Ps` & `Pe`), separately from sort boundaries.
 Let `<document-order>` order a table's columns by the 1st item's document order
 (e.g., the key order of the 1st input JSON object), because rows otherwise share
 no document order; every later item's fields would follow the 1st item's order,
-with fields that the 1st item lacks after the others, in position order.
+with fields that the 1st item lacks after the others, as `<positional-order>`
+orders them.
 
 ### Base Output Config Names
 
