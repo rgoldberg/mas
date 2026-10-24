@@ -146,9 +146,9 @@ output, instead of itself).
 
 For each [leaf context](configs.md#context-stacks):
 
-- `none`: Every field spec is [hidden](#visibility) & its sort is
-  [disabled](#sort-priority), and [unlisted fields](#unlisted-fields) are
-  hidden.
+- `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
+  field spec with a [disabled](#sort-priority) sort for each field that the app
+  lists.
 - `all`: A visible field spec for each field that the app lists, and visible
   unlisted fields. Absent a built-in field order: field specs are sorted by
   label (`<output>`), while other `<sort-option>`s are per the app's default
