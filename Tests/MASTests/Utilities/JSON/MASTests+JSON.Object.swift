@@ -61,7 +61,7 @@ private extension MASTests {
 				== [nil, "none", nil, nil, nil, nil],
 		)
 		#expect(
-			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).fields.map(\.key.rawValue)
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional(.init())).fields.map(\.key.rawValue)
 				== ["b", "d", "f"],
 		)
 	}
@@ -80,14 +80,14 @@ private extension MASTests {
 		#expect(
 			try object.keyValueRows(
 				fieldSpecs: fieldSpecs,
-				fieldOrder: .positional,
+				fieldOrder: .positional(.init()),
 				keyValueConfig: parseKeyValueConfig("fL=:R:"),
 			)
 			.map(\.row)
 			== ["a=X", "a=Z", "b=y"],
 		)
 		#expect(
-			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).description
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional(.init())).description
 				== #"{"a":"X","a":"Z","b":"y"}"#,
 		)
 		#expect(object[lastNodeKey: "a"]?.stringValue == "z")
@@ -120,7 +120,8 @@ private extension MASTests {
 		.fieldSpecs
 		let object = JSON.Object([("name", .string("A")), ("version", .string("1"))])
 		#expect(
-			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional).description == #"{"x":"A","x":"1"}"#,
+			try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: .positional(.init()))
+				.description == #"{"x":"A","x":"1"}"#,
 		)
 	}
 }

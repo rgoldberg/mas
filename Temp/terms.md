@@ -372,13 +372,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       [defined](../Specs/configs.md#configs))
     - REJECTED: application / program
 72. - least: compares less than all others (`<nonconforming-least>`,
-      `<absent-fields-least>`)
+      `<unpositioned-fields-least>`)
     - greatest: compares greater than all others (`<nonconforming-greatest>`,
-      `<absent-fields-greatest>`)
+      `<unpositioned-fields-greatest>`)
     - relative: of a location that `<direction>` reverses
-      (`<relative-nonconforming>`, `<relative-absent-fields>`)
+      (`<relative-nonconforming>`, `<relative-unpositioned-fields>`)
     - fixed: of a location that `<direction>` does not affect
-      (`<fixed-nonconforming>`, `<fixed-absent-fields>`)
+      (`<fixed-nonconforming>`, `<fixed-unpositioned-fields>`)
     - REJECTED: lowest / highest / smallest / largest / minimum / maximum /
       pinned / anchored / directional (for relative or fixed)
 73. - code span: backtick-delimited inline code (CommonMark)
@@ -569,3 +569,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields.md#unlisted-fields))
      - REJECTED: dynamic field / discovered field / unknown field (for an
        unlisted field)
+109. - unpositioned field: a field without a position in the field order, which
+       compares as less or greater than every positioned one: for
+       `<document-order>`, the field of a field spec whose field an item lacks;
+       for `<positional-order>`, a visible unlisted field
+       ([defined](../Specs/fields.md#field-order))
+     - REJECTED: absent field (for an unpositioned field)

@@ -398,10 +398,19 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("/P", FieldOrder.positional),
-			("/-P", .positional),
-			("/P-", .positional),
-			("/DP", .positional),
+			("/P", FieldOrder.positional(.init())),
+			("/-P", .positional(.init(direction: .descending))),
+			("/P-", .positional(.init(direction: .descending))),
+			("/DP", .positional(.init())),
+			("/zP", .positional(.init())),
+			(
+				"/aDPf-",
+				.positional(.init(
+					direction: .descending,
+					unpositionedFieldComparison: .least,
+					unpositionedFieldPlacement: .fixed,
+				)),
+			),
 			("/D", .document(.init(), tiebreakDirection: .ascending)),
 			("/D-", .document(.init(direction: .descending), tiebreakDirection: .ascending)),
 			("/D/-", .document(.init(), tiebreakDirection: .descending)),
@@ -409,10 +418,10 @@ private extension MASTests {
 			("/PD/-", .document(.init(), tiebreakDirection: .descending)),
 			("/D / -", .document(.init(), tiebreakDirection: .descending)),
 			("/D//-", .document(.init(), tiebreakDirection: .ascending)),
-			("/aD", .document(.init(absentFieldComparison: .least), tiebreakDirection: .ascending)),
+			("/aD", .document(.init(unpositionedFieldComparison: .least), tiebreakDirection: .ascending)),
 			(
 				"/PaD f-z",
-				.document(.init(direction: .descending, absentFieldPlacement: .fixed), tiebreakDirection: .ascending),
+				.document(.init(direction: .descending, unpositionedFieldPlacement: .fixed), tiebreakDirection: .ascending),
 			),
 		],
 	)
@@ -456,9 +465,24 @@ private extension MASTests {
 		#expect(fieldOrder.itemMembers(fieldSpecs, for: object).map(\.fieldSpec.name) == expected)
 	}
 
-	@Test(arguments: [("/zP", Character("z")), ("/DPf", "f"), ("/aDP-", "a")])
-	func `absent-field options are unsupported for positional-order`(value: String, option: Character) {
-		#expect(throws: ParsingError.unsupportedAbsentFieldOption(option)) { try parseFieldSpecs(value) }
+	@Test(
+		arguments: [
+			("P", ["adamID", "bundleID", "rating", "size"]),
+			("P-", ["size", "rating", "bundleID", "adamID"]),
+			("Pf-", ["bundleID", "adamID", "size", "rating"]),
+			("aP", ["rating", "size", "adamID", "bundleID"]),
+			("aP-", ["bundleID", "adamID", "size", "rating"]),
+			("Paf-", ["size", "rating", "bundleID", "adamID"]),
+		],
+	)
+	func `positional-order orders visible unlisted fields as unpositioned fields`(order: String, names: [String])
+	throws {
+		let config = try parseFieldsConfig("@all/" + order)
+		let objects = [JSON.Object([("adamID", .number(1)), ("rating", .number(2))]), .init([("size", .number(3))])]
+		#expect(
+			config.fieldOrder.applied(to: config.fieldSpecs, unlisted: config.unlistedFieldSpecs(in: objects)).map(\.name)
+				== names,
+		)
 	}
 
 	@Test(arguments: ["/D", "/-D"])
@@ -516,7 +540,7 @@ private extension MASTests {
 	) throws {
 		let fieldSpecs = [("a", "1"), ("b", "2"), ("a", "3")].map(fieldSpec(name:label:))
 		let fieldOrder = try parseFieldsConfig("/" + options).fieldOrder
-		#expect(fieldOrder.applied(to: fieldSpecs).map(\.label) == expectedLabels)
+		#expect(fieldOrder.applied(to: fieldSpecs, unlisted: .init()).map(\.label) == expectedLabels)
 	}
 
 	@Test(

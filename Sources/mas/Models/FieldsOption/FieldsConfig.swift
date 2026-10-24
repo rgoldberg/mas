@@ -129,66 +129,80 @@ enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
 	/// renames keys, never reorders them), per `optionSet` &
 	/// `itemMembers(_:for:)`, ties ordered per `tiebreakDirection`.
-	case document(DocumentOrderOptionSet, tiebreakDirection: SortOptionSet.Direction)
+	case document(OrderOptionSet, tiebreakDirection: SortOptionSet.Direction)
 	/// `<field-order-section>` absent: substituted, by
 	/// `resolvedFieldsConfig(from:standard:all:outputFormat:)`, with the resolved
 	/// base fields config's own `fieldOrder`.
 	case inherited
 	/// `<positional-order>` (`"P"`): the working fields config's field specs by
-	/// position. Its `<descending>` reverses their positions while parsing,
-	/// before `<field-spec-edits-section>`, so it needs no direction here.
-	case positional
+	/// position, per `optionSet`. Its `<descending>` reverses their positions
+	/// while parsing, before `<field-spec-edits-section>`, but also orders
+	/// unpositioned (i.e., visible unlisted) fields; see `applied(to:unlisted:)`.
+	case positional(OrderOptionSet)
 }
 
-/// A `<document-order-option-set>`'s options other than its `<order>`s.
-struct DocumentOrderOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_file
-	/// `<absent-field-comparison>`.
-	enum AbsentFieldComparison: Character {
-		/// `<absent-fields-greatest>`.
+/// A `<positional-order-option-set>`'s or a `<document-order-option-set>`'s
+/// options other than its `<order>`s.
+struct OrderOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `<unpositioned-field-comparison>`.
+	enum UnpositionedFieldComparison: Character {
+		/// `<unpositioned-fields-greatest>`.
 		case greatest = "z"
-		/// `<absent-fields-least>`.
+		/// `<unpositioned-fields-least>`.
 		case least = "a"
 	}
 
-	/// `<absent-field-placement>`: whether `<descending>` reverses the location
-	/// of a field spec whose field an item lacks.
-	enum AbsentFieldPlacement: Character {
-		/// `<fixed-absent-fields>`.
+	/// `<unpositioned-field-placement>`: whether `<descending>` reverses the
+	/// location of an unpositioned field.
+	enum UnpositionedFieldPlacement: Character {
+		/// `<fixed-unpositioned-fields>`.
 		case fixed = "f"
-		/// `<relative-absent-fields>`.
+		/// `<relative-unpositioned-fields>`.
 		case relative = "r"
 	}
 
 	var direction = SortOptionSet.Direction.ascending
-	var absentFieldComparison = AbsentFieldComparison.greatest
-	var absentFieldPlacement = AbsentFieldPlacement.relative
+	var unpositionedFieldComparison = UnpositionedFieldComparison.greatest
+	var unpositionedFieldPlacement = UnpositionedFieldPlacement.relative
 
-	/// Whether a field spec whose field an item lacks precedes every member.
-	var isAbsentFieldFirst: Bool {
-		(absentFieldComparison == .least) != (absentFieldPlacement == .relative && direction == .descending)
+	/// Whether an unpositioned field precedes every positioned one.
+	var isUnpositionedFieldFirst: Bool {
+		(unpositionedFieldComparison == .least) != (unpositionedFieldPlacement == .relative && direction == .descending)
 	}
 }
 
 extension FieldOrder {
-	/// Reorders `fieldSpecs` per this order. `.inherited`, `.document` (which
-	/// orders each item's fields independently; see `itemMembers(_:for:)`) &
-	/// `.positional` are identity. `.byName` / `.byLabel` sort per their
-	/// `<sort-option-set>` (direction included: `SortOptionSet.compare(_:_:)`
-	/// already accounts for it), ordering ties by position, or by reverse
-	/// position iff `tiebreakDirection` is `.descending`.
-	func applied(to fieldSpecs: [FieldSpec]) -> [FieldSpec] {
+	/// Reorders `fieldSpecs`, followed by `unlisted` (the field specs of visible
+	/// unlisted fields, in order of their 1st occurrence in the input), per this
+	/// order. `.inherited` & `.document` (which orders each item's fields
+	/// independently; see `itemMembers(_:for:)`) are identity. `.positional`
+	/// orders `unlisted`, as unpositioned fields, reversed iff `.descending`, 1st
+	/// iff `isUnpositionedFieldFirst`, else last. `.byName` / `.byLabel` sort per
+	/// their `<sort-option-set>` (direction included:
+	/// `SortOptionSet.compare(_:_:)` already accounts for it), ordering ties by
+	/// position, or by reverse position iff `tiebreakDirection` is `.descending`.
+	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec]) -> [FieldSpec] {
 		switch self {
-		case .document, .inherited, .positional:
-			fieldSpecs
+		case .document, .inherited:
+			fieldSpecs + unlisted
+		case let .positional(optionSet) where optionSet.isUnpositionedFieldFirst:
+			unlisted.ordered(optionSet.direction) + fieldSpecs
+		case let .positional(optionSet):
+			fieldSpecs + unlisted.ordered(optionSet.direction)
 		case let .byName(optionSet, tiebreakDirection):
-			fieldSpecs.sorted(by: \.name, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
+			(fieldSpecs + unlisted).sorted(by: \.name, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
 		case let .byLabel(optionSet, tiebreakDirection):
-			fieldSpecs.sorted(by: \.label, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
+			(fieldSpecs + unlisted).sorted(by: \.label, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
 		}
 	}
 }
 
 private extension [FieldSpec] {
+	/// These field specs, reversed iff `direction` is `.descending`.
+	func ordered(_ direction: SortOptionSet.Direction) -> Self {
+		direction == .ascending ? self : reversed()
+	}
+
 	func sorted(
 		by keyPath: KeyPath<FieldSpec, String>,
 		optionSet: SortOptionSet,
@@ -215,8 +229,8 @@ extension FieldOrder {
 	/// its absent value once), each field spec's members in input order: for
 	/// `<document-order>`, each member at its own position among `object`'s keys,
 	/// reversed iff `.descending`, and field specs for absent fields 1st iff
-	/// `isAbsentFieldFirst`, else last, ties ordered by position, or by reverse
-	/// position iff `tiebreakDirection` is `.descending`; otherwise, in
+	/// `isUnpositionedFieldFirst`, else last, ties ordered by position, or by
+	/// reverse position iff `tiebreakDirection` is `.descending`; otherwise, in
 	/// `fieldSpecs`' order.
 	func itemMembers(_ fieldSpecs: [FieldSpec], for object: JSON.Object)
 	-> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
@@ -243,7 +257,7 @@ extension FieldOrder {
 			}
 			.map(\.member)
 		let absentMembers = members.filter { $0.documentPosition == nil }.sorted { isTiebrokenBefore($0.offset, $1.offset) }
-		return (optionSet.isAbsentFieldFirst ? absentMembers + presentMembers : presentMembers + absentMembers)
+		return (optionSet.isUnpositionedFieldFirst ? absentMembers + presentMembers : presentMembers + absentMembers)
 			.map { ($0.fieldSpec, $0.value) }
 	}
 }

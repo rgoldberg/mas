@@ -76,7 +76,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 			.sortedIndices(count: objects.count) { index, keyIndex in sortValues[keyIndex][index] }
 			.map { objects[$0] }
 		let displayFieldSpecs = resolved.fieldOrder
-			.applied(to: resolved.fieldSpecs + resolved.unlistedFieldSpecs(in: objects))
+			.applied(to: resolved.fieldSpecs, unlisted: resolved.unlistedFieldSpecs(in: objects))
 			.filter { !$0.isHidden }
 		switch outputFormat {
 		case let .json(jsonConfig):

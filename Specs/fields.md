@@ -84,11 +84,12 @@ visible iff those of the fields config that it extends are (e.g., visible for
 `@all.-foo`, but hidden for an `<absolute-config>`, which extends `none`).
 
 Each visible unlisted field is output per a [default field
-spec](#default-field-specs) that has no position, so no index references it. The
-field order orders it as if it were a field spec positioned after every field
-spec, among unlisted fields in order of their 1st occurrence in the input (e.g.,
-`<positional-order>` puts it after every field spec, while `<document-order>`
-puts it at its own document position). For table output, each visible unlisted
+spec](#default-field-specs) that has no position, so no index references it.
+`<positional-order>` orders it as an [unpositioned field](#field-order), while
+`<document-order>` orders it at its own document position. A field order that
+ties it with a field spec or with another unlisted field orders it as if it were
+a field spec positioned after every field spec, among unlisted fields in order
+of their 1st occurrence in the input. For table output, each visible unlisted
 field of any item has a column; for key-value & JSON output, each item outputs
 only its own unlisted fields.
 
@@ -365,25 +366,24 @@ field-order-option-set        =
 field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
-positional-order-option-set = [ <order-option>+ ] <positional-order> [ <direction>+ ]
-document-order-option-set   = [ <document-order-option>+ ] <document-order> [ <document-order-trailing-option>+ ] (* only for: JSON or key-value output *)
+positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
+document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: JSON or key-value output *)
 
-order-option                   = <order> | <direction>
-document-order-option          = <order-option> | <absent-field-comparison> | <absent-field-placement>
-document-order-trailing-option = <direction> | <absent-field-comparison> | <absent-field-placement>
+order-option          = <order> | <order-trailing-option>
+order-trailing-option = <direction> | <unpositioned-field-comparison> | <unpositioned-field-placement>
 
 order = <positional-order> | <document-order> (* last wins *)
 
 positional-order = "P"
 document-order   = "D"
 
-absent-field-comparison = <absent-fields-least> | <absent-fields-greatest> (* default: <absent-fields-greatest>; last wins *)
-absent-field-placement  = <relative-absent-fields> | <fixed-absent-fields> (* default: <relative-absent-fields>; last wins *)
+unpositioned-field-comparison = <unpositioned-fields-least> | <unpositioned-fields-greatest> (* default: <unpositioned-fields-greatest>; last wins *)
+unpositioned-field-placement  = <relative-unpositioned-fields> | <fixed-unpositioned-fields> (* default: <relative-unpositioned-fields>; last wins *)
 
-absent-fields-least    = "a" (* mnemonic: 1st letter, so least *)
-absent-fields-greatest = "z" (* mnemonic: last letter, so greatest *)
-relative-absent-fields = "r"
-fixed-absent-fields    = "f"
+unpositioned-fields-least    = "a" (* mnemonic: 1st letter, so least *)
+unpositioned-fields-greatest = "z" (* mnemonic: last letter, so greatest *)
+relative-unpositioned-fields = "r"
+fixed-unpositioned-fields    = "f"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -395,15 +395,20 @@ The **field order**, in which each item's fields are output, is per
   input JSON object, each [member](#members) at its own position. A field spec
   whose field an item lacks (which outputs anything only per a format whose
   formatted value for an absent field is not [absent](#absent-values), e.g.,
-  `%N%n+none+`) has no document position, so it compares as less (`a`) or
-  greater (`z`) than every member. Per `<absent-field-placement>`,
-  `<descending>` also reverses its location (`<relative-absent-fields>`, e.g.,
-  `D-` puts it 1st) or does not (`<fixed-absent-fields>`, e.g., `D-f` puts it
-  last).
-- `<positional-order>`: ordered by position.
+  `%N%n+none+`) has no document position, so its field is **unpositioned**.
+- `<positional-order>`: ordered by position. Each visible [unlisted
+  field](#unlisted-fields) has no position, so it is **unpositioned**;
+  unpositioned fields are ordered among themselves by their 1st occurrence in
+  the input, reversed iff `<descending>`.
 - `<sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.
   - `<output>`: sorted by label.
+
+An unpositioned field compares as less (`a`) or greater (`z`) than every
+positioned one. Per `<unpositioned-field-placement>`, `<descending>` also
+reverses its location (`<relative-unpositioned-fields>`, e.g., `D-` or `P-` puts
+it 1st) or does not (`<fixed-unpositioned-fields>`, e.g., `D-f` or `P-f` puts it
+last).
 
 `<descending>` reverses `<order>`'s field order. For `<positional-order>`, it
 does so by reversing the positions of the working fields config's field specs
