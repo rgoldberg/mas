@@ -435,8 +435,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/fields.md#field-spec-references))
     - field spec index: `<field-spec-index>`, an index into all field specs
     - REJECTED: named field spec index / indexed field spec index
-84. - default field spec: the field spec selected for a field that the base
-      fields config lacks ([defined](../Specs/fields.md#default-field-specs))
+84. - default field spec: the field spec selected for a field that has no field
+      spec in the baseline fields config, or for an unlisted field
+      ([defined](../Specs/fields.md#default-field-specs))
     - REJECTED: field spec with default settings
 85. - segment: a part of a run of non-boundary text that sorting compares as 1
       element ([defined](../Specs/fields.md#sort-segments))
