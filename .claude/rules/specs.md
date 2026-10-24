@@ -27,8 +27,9 @@ In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
 make its references optional instead, since an expression that consumes no token
 is never present.
 
-In specs, make every block reference optional & give every block a direct
-default of `{empty string}`.
+In specs, make every block reference optional & give every block not marked
+`(* non-structural *)` a direct default of `{empty string}`, because no syntax
+references a non-structural block, so none can omit it.
 
 In specs, give an empty-string default for a block or a text terminal as
 `{empty string}` (a value), never as the literal text `""`, which neither a
