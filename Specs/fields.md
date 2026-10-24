@@ -149,7 +149,9 @@ For each [leaf context](configs.md#context-stacks):
 
 - `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
   field spec with a [disabled](#sort-priority) sort for each field that the app
-  lists.
+  lists. Absent a built-in field order: field specs are ordered by
+  `<positional-order>`, so a fields config that extends it outputs its inserted
+  field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
   (`<output>`), while other `<sort-option>`s are per the app's default sort
@@ -320,11 +322,10 @@ absolute-field-name = {text: field name with no bare "."}
 ```
 
 An `<absolute-config>` is equivalent to a `<relative-config>` with base fields
-config `none`, field order `<positional-order>` & a `<field-spec-insertion>` for
-each of its field specs, e.g.:
+config `none` & a `<field-spec-insertion>` for each of its field specs, e.g.:
 
-- `version=Ver,size` ≡ `@none/P.+version=Ver,+size`
-- `name,name` ≡ `@none/P.+name,+name`
+- `version=Ver,size` ≡ `@none.+version=Ver,+size`
+- `name,name` ≡ `@none.+name,+name`
 
 ### Relative Config
 

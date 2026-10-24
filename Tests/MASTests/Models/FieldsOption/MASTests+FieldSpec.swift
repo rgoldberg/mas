@@ -337,9 +337,22 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an absolute config is equivalent to none with positional order & an insertion per field spec`() throws {
+	func `none orders its field specs by position`() throws {
+		let config = try parseFieldsConfig("@none.+bundleID=B,+adamID=A")
+		#expect(config.fieldOrder == .positional(.init()))
+		#expect(config.fieldOrder
+			.applied(to: config.fieldSpecs, unlisted: .init())
+			.filter { !$0.isHidden }
+			.map(\.label) == [
+				"B",
+				"A",
+			])
+	}
+
+	@Test
+	func `an absolute config is equivalent to none with an insertion per field spec`() throws {
 		let absolute = try parseFieldsConfig("bundleID=B,adamID,bundleID")
-		let relative = try parseFieldsConfig("@none/P.+bundleID=B,+adamID,+bundleID")
+		let relative = try parseFieldsConfig("@none.+bundleID=B,+adamID,+bundleID")
 		#expect(absolute.fieldSpecs == relative.fieldSpecs.filter { !$0.isHidden })
 		#expect(absolute.fieldOrder == relative.fieldOrder)
 		#expect(absolute.itemSort == relative.itemSort)

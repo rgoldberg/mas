@@ -269,7 +269,7 @@ func resolvedFieldsConfig(
 ) throws(ParsingError) -> any FieldsConfig {
 	var input = fieldsOptionValue[...].drop(while: \.isWhitespace)
 	guard isRelativeConfig(input) else {
-		// An `<absolute-config>` is equivalent to `@none/P` followed by a
+		// An `<absolute-config>` is equivalent to `@none` followed by a
 		// `<field-spec-insertion>` per field spec
 		let (none, isMachineFacing) =
 			try resolveBaseFieldsConfig(named: noneFieldsConfigName, standard: standard, all: all, outputFormat: outputFormat)
@@ -354,7 +354,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// `outputFormat`:
 ///
 /// - `none`: `all` with every field spec's sort disabled & with every field
-///   spec & unlisted field hidden.
+///   spec & unlisted field hidden, ordered by `<positional-order>`.
 /// - `all`: every field spec visible, as are unlisted fields.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs &
@@ -398,7 +398,7 @@ func resolveBaseFieldsConfig(
 		case noneFieldsConfigName:
 			SelectedFieldsConfig(
 				fieldSpecs: allVariant.fieldSpecs,
-				fieldOrder: allVariant.fieldOrder,
+				fieldOrder: .positional(.init()),
 				itemSort: allVariant.itemSort,
 			)
 			.hidingAll()

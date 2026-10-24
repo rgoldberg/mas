@@ -76,8 +76,8 @@ start-justified.
 No built-in field spec has a `<sort>`, so no built-in fields config sorts items
 (e.g., `mas list` outputs apps in input order). No built-in fields config has a
 built-in field order, so `all` orders its field specs [by
-label](fields.md#immutable-built-in-named-fields-configs), while each built-in
-standard's user-facing variants order theirs by `<positional-order>`.
+label](fields.md#immutable-built-in-named-fields-configs), while `none` & each
+built-in standard's user-facing variants order theirs by `<positional-order>`.
 
 `config`'s built-in standard's user-facing variants have a visible field spec
 for every field, in order, `mas`, `slice`, `slices`, `dist`, `origin`, `rev`,
