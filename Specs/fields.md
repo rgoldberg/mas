@@ -514,7 +514,7 @@ While a field spec's position in the reference fields config cannot be modified:
 
 - Its `<field-modifiers>` may be modified.
 - A `null` may replace it in its position, which does not modify any other field
-  spec's position.
+  spec's position, and a field spec may replace that `null` in turn.
 
 When accessing a field spec position via an index:
 
@@ -556,7 +556,8 @@ field-spec-separator = ","
 
 For a given `<reference-sourced-field-spec-edit>` `fs`, its `source` is the
 field spec from the reference fields config referenced by `fs`. Thus, an
-inserted field spec cannot be modified by another field spec edit.
+inserted field spec cannot be modified by another field spec edit, unless it
+replaced a `null`.
 
 A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
 no `<field-occurrence-index>` & whose `<reference-field-name>` names neither a
@@ -571,7 +572,9 @@ it lists its field, while any other one 1st inserts a new field spec (as
 A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
 whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
 field spec (as `<field-spec-insertion>` would, copying the baseline fields
-config's field spec) as its `source` (e.g., `-a,a=X` restores `a`, labeled `X`).
+config's field spec) as its `source`, which replaces the `null` in the reference
+fields config, so that a later field spec edit modifies it (e.g., `-a,a=X`
+restores `a`, labeled `X`, while `-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the

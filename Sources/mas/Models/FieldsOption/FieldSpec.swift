@@ -453,9 +453,10 @@ private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_f
 /// _working_ list's order do change. `workingTags` runs parallel to
 /// `fieldSpecs`, remembering each working entry's index into
 /// `referenceFieldSpecs` (`nil` for entries inserted during this section,
-/// which, per spec, cannot be referenced by later entries in the same section),
-/// so a reference's _current_ working position can always be found again after
-/// earlier inserts / moves / removals have shifted things around.
+/// which, per spec, cannot be referenced by later entries in the same section,
+/// except one that replaced a `null`), so a reference's _current_ working
+/// position can always be found again after earlier inserts / moves / removals
+/// have shifted things around.
 private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per_file
 	private(set) var fieldSpecs: [FieldSpec]
 
@@ -640,11 +641,12 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
 				// no field spec, or a `<field-spec-reference>` that resolves to a
 				// `null`, inserts a new field spec (as `<field-spec-insertion>` would)
-				// as `source`, as for each `<reference-sourced-field-spec-edit>` other
-				// than `<field-spec-removal>`
-				let (reference, existing) = try parseInsertingReference(&input)
+				// as `source`, replacing any such `null`, as for each
+				// `<reference-sourced-field-spec-edit>` other than
+				// `<field-spec-removal>`
+				let (reference, restored, existing) = try parseInsertingReference(&input)
 				try apply(
-					reference.map { .overlay($0, isHidden: false) } ?? .insert(isHidden: false),
+					reference.map { .overlay($0, isHidden: false) } ?? .insert(isHidden: false, restoring: restored),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -652,9 +654,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .move:
-				let (reference, existing) = try parseInsertingReference(&input)
+				let (reference, restored, existing) = try parseInsertingReference(&input)
 				try apply(
-					reference.map(ResolvedStrategy.move) ?? .insert(isHidden: false),
+					reference.map(ResolvedStrategy.move) ?? .insert(isHidden: false, restoring: restored),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -662,9 +664,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .hide:
-				let (reference, existing) = try parseInsertingReference(&input)
+				let (reference, restored, existing) = try parseInsertingReference(&input)
 				try apply(
-					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
+					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true, restoring: restored),
 					name: existing.name,
 					existing: existing,
 					label: try parseLabel(&input),
@@ -876,15 +878,16 @@ private extension FieldSpecsBuilder {
 	/// spec, or the reference resolves to a `null` (a field spec removed earlier
 	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
 	/// would insert (copied from the baseline fields config, or a default field
-	/// spec).
+	/// spec), with, iff a `null`, its reference as `restored`, so the inserted
+	/// field spec replaces the `null`.
 	private func parseInsertingReference(_ input: inout Substring)
-	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
+	throws(ParsingError) -> (reference: Reference?, restored: Reference?, source: FieldSpec) {
 		switch try parseReference(&input) {
 		case let .resolved(reference):
-			referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
-				?? (nil, baselineFieldSpecs[reference.position - 1])
+			referenceFieldSpecs[reference.position - 1].map { (reference, nil, $0) }
+				?? (nil, reference, baselineFieldSpecs[reference.position - 1])
 		case let .unmatched(name):
-			(nil, try defaultFieldSpec(forName: name))
+			(nil, nil, try defaultFieldSpec(forName: name))
 		}
 	}
 
@@ -975,7 +978,9 @@ private extension FieldSpecsBuilder {
 
 private extension FieldSpecsBuilder {
 	private enum ResolvedStrategy {
-		case insert(isHidden: Bool)
+		/// Inserts a field spec, which replaces the `null` at `restoring`'s
+		/// position in the reference fields config iff non-`nil`.
+		case insert(isHidden: Bool, restoring: Reference? = nil)
 		case move(Reference)
 		case overlay(Reference, isHidden: Bool)
 	}
@@ -989,7 +994,7 @@ private extension FieldSpecsBuilder {
 		sortModifierInput input: inout Substring,
 	) throws(ParsingError) {
 		let isHidden = switch strategy {
-		case let .insert(isHidden), let .overlay(_, isHidden):
+		case let .insert(isHidden, _), let .overlay(_, isHidden):
 			isHidden
 		case .move:
 			false
@@ -1005,10 +1010,13 @@ private extension FieldSpecsBuilder {
 			justification: format?.justification ?? existing?.justification ?? .start,
 		)
 		switch strategy {
-		case .insert:
+		case let .insert(_, restored):
 			let newIndex = previousIndex + 1
 			fieldSpecs.insert(merged, at: newIndex)
-			workingTags.insert(nil, at: newIndex)
+			workingTags.insert(restored.map { $0.position - 1 }, at: newIndex)
+			if let restored {
+				referenceFieldSpecs[restored.position - 1] = merged
+			}
 			previousIndex = newIndex
 		case let .overlay(reference, _):
 			referenceFieldSpecs[reference.position - 1] = merged

@@ -194,6 +194,22 @@ private extension MASTests {
 		#expect(adamID.sortSpec?.priority == 1000)
 	}
 
+	@Test(
+		arguments: [
+			("@all.-adamID,adamID=X,adamID=Y", ["adamID", "bundleID"]),
+			("@all.-adamID,_adamID=X,%adamID=Y", ["adamID", "bundleID"]),
+			("@all.-adamID,adamID=X,bundleID,%adamID=Y", ["bundleID", "adamID"]),
+			("@all.-adamID,adamID=Y,-adamID,adamID=Y", ["adamID", "bundleID"]),
+		],
+	)
+	func `a field spec that replaced a null in the section can be edited again`(value: String, names: [String]) throws {
+		let specs = try parseFieldSpecs(value)
+		#expect(specs.map(\.name) == names)
+		let adamID = try #require(specs.first { $0.name == "adamID" })
+		#expect(!adamID.isHidden)
+		#expect(adamID.label == "Y")
+	}
+
 	@Test
 	func `removing a field spec removed earlier in the section is an error`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "adamID")) {
