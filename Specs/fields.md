@@ -272,7 +272,9 @@ because an absent value remains unchanged through every
 An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does, and is
 [coerced to a string](fields-format.md#value-coercion) as an empty string.
 
-Output depends on the formatted value, not on the field value:
+Output depends on the formatted value, not on the field value, except that
+key-value & JSON output omit each [unlisted field](#unlisted-fields) that an
+item lacks:
 
 - **Table**: A cell is output for each column (each visible field spec & each
   visible unlisted field of any item), regardless of whether its formatted value
