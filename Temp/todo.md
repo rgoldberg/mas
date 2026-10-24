@@ -9,7 +9,7 @@
 3. Manual accompanying specs, which, unlike the specs, explains consequences of
    the grammar, e.g.:
    1. A `<format-block>` that is a template needs a placeholder (e.g.,
-      `name:N/A` is an error, while `name:` outputs an empty string).
+      `name:none` is an error, while `name:` outputs an empty string).
 4. Examples
 
 ### Repeated Options
