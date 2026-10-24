@@ -223,12 +223,11 @@ expression value algorithm](ebnf.md#defaults-for-absent-expressions):
   option): that property's value in the working fields config, if any.
 - If transitively absent & it is an `<item-sort-option>`'s `<direction>`: the
   working fields config's item-sort `<direction>`.
-- If transitively absent & it is an option of a `<document-order-option-set>` or
-  a `<sort-option-set>` in `<field-order-option-set>`, the `<direction>` of the
-  `<field-order-tiebreaker>` that follows it, or an option other than
-  `<direction>` of a `<positional-order-option-set>`: the working fields
-  config's value, iff its field order is also per the same one of those 3
-  nonterminals.
+- If transitively absent & it is an option of a `<positional-order-option-set>`,
+  a `<document-order-option-set>`, or a `<sort-option-set>` in
+  `<field-order-option-set>`, or the `<direction>` of the
+  `<field-order-tiebreaker>` that follows it: the working fields config's value,
+  iff its field order is also per the same one of those 3 nonterminals.
 
 An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
 option omitted from a present payload (e.g., `<direction>` from `name/1Ii`) thus
@@ -419,7 +418,11 @@ last).
 does so by reversing the positions of the working fields config's field specs
 before `<field-spec-edits-section>`, so its edits & each `<index>` (including a
 `<baseline-sourced-field-spec-edit>`'s) apply to the reversed positions (e.g.,
-in `@all/P-.+@1`, `@1` references `all`'s last field spec).
+in `@all/P-.+@1`, `@1` references `all`'s last field spec). A
+`<positional-order-option-set>`'s `<direction>` reverses those positions iff it
+differs from the working fields config's `<direction>`, which is `<ascending>`
+unless its field order is `<positional-order>` (e.g., if `x` has `/P-`, each of
+`@x/P-` & `@x/P` outputs `x`'s field order, while `@x/P+` reverses it).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
@@ -429,8 +432,7 @@ An option omitted from a present `<field-order-section>` may retain the working
 fields config's value, [as specified](#defaults-for-absent-expressions) (e.g.,
 if `x` has `/I-`, `@x/i` sorts by name, descending, while `@x/D` & `@x/P` are
 ascending; if `x` has `/D-`, `@x/PD`, being a `<document-order-option-set>`, is
-descending; if `x` has `/aP-`, `@x/P` retains `a`, but is ascending, because
-`x`'s `<descending>` already reversed its positions).
+descending; if `x` has `/aP-`, `@x/P` retains `a` & `<descending>`).
 
 Unless the field order is `<positional-order>`, a field spec's position affects
 only:

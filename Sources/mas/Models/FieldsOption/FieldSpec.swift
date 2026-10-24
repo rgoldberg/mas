@@ -507,9 +507,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<sort-option>`. Each option that a `<document-order-option-set>` or a
 	/// `<sort-option-set>` omits, including its tiebreak direction, retains
 	/// `inheritedFieldOrder`'s iff that is also `.document` or also sorts,
-	/// respectively; each option other than `<direction>` that a
-	/// `<positional-order-option-set>` omits retains `inheritedFieldOrder`'s iff
-	/// that is also `.positional`.
+	/// respectively; each option that a `<positional-order-option-set>` omits
+	/// retains `inheritedFieldOrder`'s iff that is also `.positional`.
 	mutating func parseFieldOrderSection(_ input: inout Substring, inheriting inheritedFieldOrder: FieldOrder)
 	throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
@@ -551,14 +550,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			if order == documentOrderOption, case let .document(optionSet, tiebreakDirection) = inheritedFieldOrder {
 				(optionSet, tiebreakDirection)
 			} else if order == positionalOrderOption, case let .positional(optionSet) = inheritedFieldOrder {
-				// The inherited `<direction>` already reversed the positions
-				(
-					.init(
-						unpositionedFieldComparison: optionSet.unpositionedFieldComparison,
-						unpositionedFieldPlacement: optionSet.unpositionedFieldPlacement,
-					),
-					.ascending,
-				)
+				(optionSet, .ascending)
 			} else {
 				nil
 			}
@@ -576,7 +568,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		let tiebreakDirection = try parseFieldOrderTiebreaker(&input)
 		return switch (order, outputFormat, tiebreakDirection) {
 		case (positionalOrderOption, _, nil):
-			reversingPositions(optionSet)
+			reversingPositions(optionSet, inheritedDirection: inherited?.optionSet.direction ?? .ascending)
 		case (positionalOrderOption, _, _): // `<field-order-tiebreaker>` is only for a field order other than `P`
 			throw .tiebreakerUnsupportedForPositionalOrder
 		case (_, .table, _): // `<document-order-option-set>` is `(* only for: JSON or key-value output *)`
@@ -740,13 +732,17 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	}
 
 	/// `.positional(optionSet)`, after reversing the positions of the working &
-	/// reference field specs iff `optionSet`'s direction is `.descending`
-	/// (`<positional-order>`'s `<descending>`), before
-	/// `<field-spec-edits-section>`, so its edits & each `<index>` apply to the
-	/// reversed positions. No edit precedes `<field-order-section>`, so
+	/// reference field specs iff `optionSet`'s direction differs from
+	/// `inheritedDirection` (the working fields config's `<positional-order>`
+	/// `<direction>`, which already reversed its positions iff `.descending`),
+	/// before `<field-spec-edits-section>`, so its edits & each `<index>` apply
+	/// to the reversed positions. No edit precedes `<field-order-section>`, so
 	/// `workingTags` remains the identity mapping.
-	private mutating func reversingPositions(_ optionSet: OrderOptionSet) -> FieldOrder {
-		if optionSet.direction == .descending {
+	private mutating func reversingPositions(
+		_ optionSet: OrderOptionSet,
+		inheritedDirection: SortOptionSet.Direction,
+	) -> FieldOrder {
+		if optionSet.direction != inheritedDirection {
 			fieldSpecs.reverse()
 			referenceFieldSpecs.reverse()
 		}

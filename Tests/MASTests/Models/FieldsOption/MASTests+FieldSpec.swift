@@ -476,6 +476,26 @@ private extension MASTests {
 		#expect(try parseFieldSpecs(value).map(\.name) == names)
 	}
 
+	@Test(arguments: [("/P-", ["bundleID", "adamID"]), ("/P", ["bundleID", "adamID"]), ("/P+", ["adamID", "bundleID"])])
+	func `positional-order reverses positions iff its direction differs from the working field order's`(
+		value: String,
+		names: [String],
+	) throws {
+		let standard = SelectedFieldsConfig(
+			fieldSpecs: [bundleIDFieldSpec, adamIDFieldSpec], // Already reversed by `/P-`
+			fieldOrder: .positional(.init(direction: .descending)),
+		)
+		let fieldSpecs =
+			try resolvedFieldsConfig(
+				from: "@default" + value,
+				standard: standard,
+				all: allFixture,
+				outputFormat: .table(.default),
+			)
+			.fieldSpecs
+		#expect(fieldSpecs.map(\.name) == names)
+	}
+
 	@Test(
 		arguments: [
 			("D", ["b", "a", "c"]),
@@ -583,7 +603,7 @@ private extension MASTests {
 			("/I-", "/D", "/D"),
 			("/I-", "/P", "/P"),
 			("/aPf", "/P", "/aPf"),
-			("/aP-", "/P", "/aP"),
+			("/aP-", "/P", "/aP-"),
 			("/aPf", "/zP", "/zPf"),
 			("/aP", "/D", "/D"),
 			("/aD", "/P", "/P"),
