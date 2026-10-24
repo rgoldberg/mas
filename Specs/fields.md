@@ -220,9 +220,11 @@ expression value algorithm](ebnf.md#defaults-for-absent-expressions):
 - If transitively absent & it is an `<item-sort-option>`'s `<direction>`: the
   working fields config's item-sort `<direction>`.
 - If transitively absent & it is an option of a `<document-order-option-set>` or
-  a `<sort-option-set>` in `<field-order-option-set>`, or the `<direction>` of
-  the `<field-order-tiebreaker>` that follows it: the working fields config's
-  value, iff its field order is also per the same one of those 2 nonterminals.
+  a `<sort-option-set>` in `<field-order-option-set>`, the `<direction>` of the
+  `<field-order-tiebreaker>` that follows it, or an option other than
+  `<direction>` of a `<positional-order-option-set>`: the working fields
+  config's value, iff its field order is also per the same one of those 3
+  nonterminals.
 
 An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
 option omitted from a present payload (e.g., `<direction>` from `name/1Ii`) thus
@@ -424,7 +426,8 @@ An option omitted from a present `<field-order-section>` may retain the working
 fields config's value, [as specified](#defaults-for-absent-expressions) (e.g.,
 if `x` has `/I-`, `@x/i` sorts by name, descending, while `@x/D` & `@x/P` are
 ascending; if `x` has `/D-`, `@x/PD`, being a `<document-order-option-set>`, is
-descending).
+descending; if `x` has `/aP-`, `@x/P` retains `a`, but is ascending, because
+`x`'s `<descending>` already reversed its positions).
 
 Unless the field order is `<positional-order>`, a field spec's position affects
 only:

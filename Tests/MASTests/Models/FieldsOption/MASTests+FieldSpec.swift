@@ -552,6 +552,11 @@ private extension MASTests {
 			("/D-", "/i", "/i"),
 			("/I-", "/D", "/D"),
 			("/I-", "/P", "/P"),
+			("/aPf", "/P", "/aPf"),
+			("/aP-", "/P", "/aP"),
+			("/aPf", "/zP", "/zPf"),
+			("/aP", "/D", "/D"),
+			("/aD", "/P", "/P"),
 		],
 	)
 	func `a field order section retains the working field order's options iff of the same alternative`(

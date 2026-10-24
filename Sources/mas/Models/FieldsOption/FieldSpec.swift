@@ -507,7 +507,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<sort-option>`. Each option that a `<document-order-option-set>` or a
 	/// `<sort-option-set>` omits, including its tiebreak direction, retains
 	/// `inheritedFieldOrder`'s iff that is also `.document` or also sorts,
-	/// respectively.
+	/// respectively; each option other than `<direction>` that a
+	/// `<positional-order-option-set>` omits retains `inheritedFieldOrder`'s iff
+	/// that is also `.positional`.
 	mutating func parseFieldOrderSection(_ input: inout Substring, inheriting inheritedFieldOrder: FieldOrder)
 	throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
@@ -548,6 +550,15 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		let inherited: (optionSet: OrderOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
 			if order == documentOrderOption, case let .document(optionSet, tiebreakDirection) = inheritedFieldOrder {
 				(optionSet, tiebreakDirection)
+			} else if order == positionalOrderOption, case let .positional(optionSet) = inheritedFieldOrder {
+				// The inherited `<direction>` already reversed the positions
+				(
+					.init(
+						unpositionedFieldComparison: optionSet.unpositionedFieldComparison,
+						unpositionedFieldPlacement: optionSet.unpositionedFieldPlacement,
+					),
+					.ascending,
+				)
 			} else {
 				nil
 			}
