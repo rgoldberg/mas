@@ -84,6 +84,13 @@ private extension MASTests {
 		#expect(unlistedFieldSpecs.map(\.label) == ["Bundle ID", "trackName"])
 	}
 
+	@Test
+	func `a user-facing unlisted fileSizeBytes's field spec is end-justified`() {
+		let unlistedFieldSpecs = BaseIncludesAllFieldsConfig()
+			.unlistedFieldSpecs(in: [JSON.Object([("fileSizeBytes", .string("1")), ("trackName", .string("A"))])])
+		#expect(unlistedFieldSpecs.map(\.justification) == [.end, .start])
+	}
+
 	@Test(
 		arguments: [
 			(JSON.Node.string("Free"), JSON.Node.string("$5"), ComparisonResult.orderedAscending),
