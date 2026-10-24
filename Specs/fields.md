@@ -149,10 +149,10 @@ For each [leaf context](configs.md#context-stacks):
 - `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
   field spec with a [disabled](#sort-priority) sort for each field that the app
   lists.
-- `all`: A visible field spec for each field that the app lists, and visible
-  unlisted fields. Absent a built-in field order: field specs are sorted by
-  label (`<output>`), while other `<sort-option>`s are per the app's default
-  sort options for labels for the current output format.
+- `all`: Visible unlisted fields & a visible field spec for each field that the
+  app lists. Absent a built-in field order: field specs are sorted by label
+  (`<output>`), while other `<sort-option>`s are per the app's default sort
+  options for labels for the current output format.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
   select list of field specs is visible, and unlisted fields are hidden. Absent
   a built-in field order: field specs are ordered by `<positional-order>`.

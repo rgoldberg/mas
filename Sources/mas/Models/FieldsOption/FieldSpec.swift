@@ -356,8 +356,8 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// unsuffixed variant, valid only directly after a stem), or, absent both,
 /// `outputFormat`:
 ///
-/// - `none`: `all` with every field spec hidden & its sort disabled, and with
-///   unlisted fields hidden.
+/// - `none`: `all` with every field spec's sort disabled & with every field
+///   spec & unlisted field hidden.
 /// - `all`: every field spec visible, as are unlisted fields.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs &
