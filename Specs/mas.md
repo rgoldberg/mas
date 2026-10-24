@@ -44,8 +44,8 @@ standard](configs.md#immutable-built-in-named-configs):
 - `all`: Every field spec is visible, as are unlisted fields.
 - `none`: `all`, with every field spec hidden & its sort disabled, and with
   unlisted fields hidden.
-- Built-in standard: Its own visible field specs, followed by hidden copies of
-  `all`'s field specs for every other field, with unlisted fields hidden.
+- Built-in standard's user-facing variants: Every field spec is visible, while
+  unlisted fields are hidden.
 
 A `mas` built-in fields config has:
 
