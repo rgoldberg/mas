@@ -71,10 +71,11 @@ E.g., `--fields .+size`, when the base fields config has no field spec for
 A fields config **lists** a field iff the app lists it, or a
 `<reference-field-name>` or an `<absolute-field-name>` names it in the fields
 config's `<fields-config>` or in that of any fields config that it
-[extends](configs.md#referencing-named-configs) (e.g., `foo` in `@all.-foo`). An
-app lists each field that it knows before obtaining any input (e.g., each field
-of an input format that specifies all potential input fields up front, per
-[nonexistent fields](#nonexistent-fields)).
+[extends](configs.md#referencing-named-configs) (e.g., `foo` in `@all.-foo`),
+the resolved fields config extending its base fields config. An app lists each
+field that it knows before obtaining any input (e.g., each field of an input
+format that specifies all potential input fields up front, per [nonexistent
+fields](#nonexistent-fields)).
 
 An item's field is **unlisted** iff the fields config does not list it. A
 [built-in fields config](#immutable-built-in-named-fields-configs)'s unlisted
