@@ -607,8 +607,8 @@ Field spec edits act as follows:
   - Overlays its `<field-modifiers>` onto `source` & unhides it.
   - Sets $previous$ to `source`.
 - `<field-spec-move>`:
-  - Moves `source` to immediately after $previous$ (unless `source` is
-    $previous$) & unhides it.
+  - Overlays its `<field-modifiers>` onto `source`, moves it to immediately
+    after $previous$ (unless `source` is $previous$) & unhides it.
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
