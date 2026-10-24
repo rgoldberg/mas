@@ -38,6 +38,11 @@ private extension MASTests {
 	}
 
 	@Test
+	func `none gives no sort to a field spec that has none, so a sort without a priority is an error`() {
+		#expect(throws: ParsingError.missingSortPriority) { try parseFieldsConfig("@none.bundleID/I") }
+	}
+
+	@Test
 	func `parses standalone field spec`() throws {
 		let specs = try parseFieldSpecs("adamID=ID,bundleID")
 		#expect(specs.count == 2)

@@ -42,8 +42,8 @@ listed field is in each of `all`, `none` & the [built-in
 standard](configs.md#immutable-built-in-named-configs):
 
 - `all`: Every field spec is visible, as are unlisted fields.
-- `none`: `all`, with every field spec's sort disabled & with every field spec &
-  unlisted field hidden.
+- `none`: `all`, with every field spec's `<sort>`, if any, disabled & with every
+  field spec & unlisted field hidden.
 - Built-in standard's user-facing variants: Every field spec is visible, while
   unlisted fields are hidden.
 

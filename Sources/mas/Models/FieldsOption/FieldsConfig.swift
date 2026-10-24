@@ -316,7 +316,7 @@ extension FieldsConfig {
 		)
 	}
 
-	/// This fields config with every field spec's sort disabled.
+	/// This fields config with every field spec's `<sort>`, if any, disabled.
 	func disablingAllSorts() -> Self {
 		.init(
 			fieldSpecs: fieldSpecs.map(\.withSortDisabled),
