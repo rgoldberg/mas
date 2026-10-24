@@ -210,6 +210,31 @@ private extension MASTests {
 		#expect(adamID.label == "Y")
 	}
 
+	@Test(
+		arguments: [
+			("@all.size=X,size=Y", ["size", "adamID", "bundleID"], "Y"),
+			("@all._size=X,%size=Y", ["size", "adamID", "bundleID"], "Y"),
+			("@all.size=X,adamID,%size=Y", ["adamID", "size", "bundleID"], "Y"),
+			("@all.size=X,-size,-size", ["adamID", "bundleID"], nil),
+			("@all.size=X,-size,size=Y", ["size", "adamID", "bundleID"], "Y"),
+		],
+	)
+	func `a field spec that an edit inserted for an unlisted field can be edited again`(
+		value: String,
+		names: [String],
+		label: String?,
+	) throws {
+		let specs = try parseFieldSpecs(value)
+		#expect(specs.map(\.name) == names)
+		#expect(specs.first { $0.name == "size" }.map(\.label) == label)
+		#expect(specs.allSatisfy { !$0.isHidden })
+	}
+
+	@Test
+	func `a field spec index does not reference a field spec that an edit inserted for an unlisted field`() {
+		#expect(throws: ParsingError.invalidPosition("3")) { try parseFieldSpecs("@all.size,@3=X") }
+	}
+
 	@Test
 	func `removing a field spec removed earlier in the section is an error`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "adamID")) {

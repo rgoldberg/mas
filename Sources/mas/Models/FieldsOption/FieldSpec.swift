@@ -454,9 +454,9 @@ private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_f
 /// `fieldSpecs`, remembering each working entry's index into
 /// `referenceFieldSpecs` (`nil` for entries inserted during this section,
 /// which, per spec, cannot be referenced by later entries in the same section,
-/// except one that replaced a `null`), so a reference's _current_ working
-/// position can always be found again after earlier inserts / moves / removals
-/// have shifted things around.
+/// except one that a `<reference-sourced-field-spec-edit>` inserted as its
+/// `source`), so a reference's _current_ working position can always be found
+/// again after earlier inserts / moves / removals have shifted things around.
 private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per_file
 	private(set) var fieldSpecs: [FieldSpec]
 
@@ -479,7 +479,15 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// immediately before `<field-spec-edits-section>`): the `source` of a
 	/// `<baseline-sourced-field-spec-edit>` (i.e., a `<field-spec-insertion>`).
 	private var baselineFieldSpecs: [FieldSpec]
+	/// The reference fields config's field specs, followed by each field spec
+	/// that a `<reference-sourced-field-spec-edit>` inserted for a field that
+	/// names no field spec in the reference fields config (at
+	/// `unmatchedReferencePositionByName`), which no index references.
 	private var referenceFieldSpecs: [FieldSpec?]
+	/// The 1-based position in `referenceFieldSpecs` of the field spec that a
+	/// `<reference-sourced-field-spec-edit>` inserted for each field that names
+	/// no field spec in the reference fields config, `nil` there once removed.
+	private var unmatchedReferencePositionByName = [String: Int]()
 	/// "$previous$": the working index after which the next insert / move's
 	/// direct result lands. `-1` = before the 1st field spec.
 	private var previousIndex = -1
@@ -825,7 +833,7 @@ private extension FieldSpecsBuilder {
 				name: nil,
 				position: try effectivePosition(
 					forIndex: parseIndex(&input, ifMissing: .missingFieldSpecIndex),
-					length: referenceFieldSpecs.count,
+					length: baselineFieldSpecs.count,
 				),
 			)
 		}
@@ -857,7 +865,9 @@ private extension FieldSpecsBuilder {
 	/// Parses a `<reference-sourced-field-spec-edit>`'s `<field-spec-reference>`:
 	/// its resolved reference, or, iff it is a `<named-field-spec-reference>`
 	/// without a `<field-occurrence-index>` whose `<reference-field-name>` names
-	/// no field spec (e.g., for an unlisted field), that name.
+	/// no field spec (e.g., for an unlisted field), the reference to the field
+	/// spec that an earlier `<reference-sourced-field-spec-edit>` inserted for
+	/// that name, if not since removed, else that name.
 	private func parseReference(
 		_ input: inout Substring,
 		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
@@ -867,9 +877,16 @@ private extension FieldSpecsBuilder {
 		}
 		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
 		let positions = referencePositions(forName: name)
-		return !positions.isEmpty || index != nil
-			? .resolved(try namedReference(name: name, index: index, positions: positions))
-			: .unmatched(name: name)
+		return if !positions.isEmpty || index != nil {
+			.resolved(try namedReference(name: name, index: index, positions: positions))
+		} else if
+			let position = unmatchedReferencePositionByName[name],
+			referenceFieldSpecs[position - 1] != nil
+		{
+			.resolved(.init(name: name, position: position))
+		} else {
+			.unmatched(name: name)
+		}
 	}
 
 	/// Parses a `<field-spec-overlay>`'s, a `<field-spec-move>`'s, or a
@@ -878,17 +895,31 @@ private extension FieldSpecsBuilder {
 	/// spec, or the reference resolves to a `null` (a field spec removed earlier
 	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
 	/// would insert (copied from the baseline fields config, or a default field
-	/// spec), with, iff a `null`, its reference as `restored`, so the inserted
-	/// field spec replaces the `null`.
-	private func parseInsertingReference(_ input: inout Substring)
+	/// spec), with the reference to the `null`, or to a new `null` for that name
+	/// in `referenceFieldSpecs`, as `restored`, so the inserted field spec
+	/// replaces the `null`.
+	private mutating func parseInsertingReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, restored: Reference?, source: FieldSpec) {
 		switch try parseReference(&input) {
 		case let .resolved(reference):
 			referenceFieldSpecs[reference.position - 1].map { (reference, nil, $0) }
 				?? (nil, reference, baselineFieldSpecs[reference.position - 1])
 		case let .unmatched(name):
-			(nil, nil, try defaultFieldSpec(forName: name))
+			(nil, unmatchedReference(forName: name), try defaultFieldSpec(forName: name))
 		}
+	}
+
+	/// The reference to the `null` in `referenceFieldSpecs` for field `name`,
+	/// which names no field spec in the reference fields config, appending one
+	/// iff no earlier `<reference-sourced-field-spec-edit>` inserted a field spec
+	/// for it.
+	private mutating func unmatchedReference(forName name: String) -> Reference {
+		let position = unmatchedReferencePositionByName[name] ?? referenceFieldSpecs.count + 1
+		if position > referenceFieldSpecs.count {
+			referenceFieldSpecs.append(nil)
+			unmatchedReferencePositionByName[name] = position
+		}
+		return .init(name: name, position: position)
 	}
 
 	/// The reference to the field spec for field `name` at `index` (`nil` iff

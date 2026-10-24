@@ -556,8 +556,8 @@ field-spec-separator = ","
 
 For a given `<reference-sourced-field-spec-edit>` `fs`, its `source` is the
 field spec from the reference fields config referenced by `fs`. Thus, an
-inserted field spec cannot be modified by another field spec edit, unless it
-replaced a `null`.
+inserted field spec cannot be modified by another field spec edit, unless a
+`<reference-sourced-field-spec-edit>` inserted it as its `source`.
 
 A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
 no `<field-occurrence-index>` & whose `<reference-field-name>` names neither a
@@ -567,7 +567,10 @@ field spec nor a `null` in the reference fields config (e.g., one for an
 it lists its field, while any other one 1st inserts a new field spec (as
 `<field-spec-insertion>` would) as its `source` (e.g., for an unlisted `foo`,
 `@all.foo=Foo` inserts a visible field spec & `@all._foo` a hidden one, while
-`@all.-foo` lists `foo`, so `all` does not output it).
+`@all.-foo` lists `foo`, so `all` does not output it). Until a
+`<field-spec-removal>` removes that inserted field spec, each later such
+`<named-field-spec-reference>` for its field references it, though no index does
+(e.g., `@all.foo=X,foo=Y` outputs 1 `foo`, labeled `Y`).
 
 A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
 whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
