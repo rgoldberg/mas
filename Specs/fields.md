@@ -506,8 +506,9 @@ While a field spec's position in the reference fields config cannot be modified:
 When accessing a field spec position via an index:
 
 - If the position access reports an error, or if a `null` is present at the
-  effective index in the list (unless `<field-spec-hide>` specifies otherwise),
-  an error is reported.
+  effective index in the list (except for a
+  `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`, as
+  [specified](#relative-field-specs)), an error is reported.
 - Otherwise, the field spec at the effective index in the list is the referenced
   field spec.
 
@@ -545,13 +546,19 @@ field spec from the reference fields config referenced by `fs`. Thus, an
 inserted field spec cannot be modified by another field spec edit.
 
 A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
-no `<field-occurrence-index>` & whose `<reference-field-name>` names no field
-spec (e.g., one for an [unlisted field](#unlisted-fields)) has no such `source`:
-a `<field-spec-removal>` then does nothing (leaving $previous$ unchanged),
-though it lists its field, while any other one 1st inserts a new field spec (as
+no `<field-occurrence-index>` & whose `<reference-field-name>` names neither a
+field spec nor a `null` in the reference fields config (e.g., one for an
+[unlisted field](#unlisted-fields)) has no such `source`: a
+`<field-spec-removal>` then does nothing (leaving $previous$ unchanged), though
+it lists its field, while any other one 1st inserts a new field spec (as
 `<field-spec-insertion>` would) as its `source` (e.g., for an unlisted `foo`,
 `@all.foo=Foo` inserts a visible field spec & `@all._foo` a hidden one, while
 `@all.-foo` lists `foo`, so `all` does not output it).
+
+A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
+whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
+field spec (as `<field-spec-insertion>` would, copying the baseline fields
+config's field spec) as its `source` (e.g., `-a,a=X` restores `a`, labeled `X`).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the
@@ -585,8 +592,6 @@ Field spec edits act as follows:
     $previous$) & unhides it.
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
-  - If its `<field-spec-reference>` resolves to a `null`, inserts a new field
-    spec (as `<field-spec-insertion>` would) as `source`.
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
     sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`.

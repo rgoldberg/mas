@@ -177,10 +177,22 @@ private extension MASTests {
 		#expect(specs[0].sortSpec?.priority == 1000)
 	}
 
+	@Test(arguments: ["@all.-adamID,adamID=X", "@all.-@1,@1=X", "@all.-adamID,bundleID,%adamID=X"])
+	func `overlaying or moving a field spec removed earlier in the section inserts a copy of its baseline field spec`(
+		value: String,
+	) throws {
+		let specs = try parseFieldSpecs(value)
+		#expect(specs.map(\.name) == (value.contains("%") ? ["bundleID", "adamID"] : ["adamID", "bundleID"]))
+		let adamID = try #require(specs.first { $0.name == "adamID" })
+		#expect(!adamID.isHidden)
+		#expect(adamID.label == "X")
+		#expect(adamID.sortSpec?.priority == 1000)
+	}
+
 	@Test
-	func `a named reference to a field spec removed earlier in the section is an error`() {
+	func `removing a field spec removed earlier in the section is an error`() {
 		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "adamID")) {
-			try parseFieldSpecs("@all.-adamID,adamID")
+			try parseFieldSpecs("@all.-adamID,-adamID")
 		}
 	}
 

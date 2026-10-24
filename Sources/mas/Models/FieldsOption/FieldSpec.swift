@@ -644,9 +644,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				)
 			case .overlay:
 				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
-				// no field spec inserts a new field spec (as `<field-spec-insertion>`
-				// would) as `source`, as for each `<reference-sourced-field-spec-edit>`
-				// other than `<field-spec-removal>`
+				// no field spec, or a `<field-spec-reference>` that resolves to a
+				// `null`, inserts a new field spec (as `<field-spec-insertion>` would)
+				// as `source`, as for each `<reference-sourced-field-spec-edit>` other
+				// than `<field-spec-removal>`
 				let (reference, existing) = try parseInsertingReference(&input)
 				try apply(
 					reference.map { .overlay($0, isHidden: false) } ?? .insert(isHidden: false),
@@ -667,9 +668,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					sortModifierInput: &input,
 				)
 			case .hide:
-				// A `<field-spec-reference>` that resolves to a `null` also inserts a
-				// new field spec (as `<field-spec-insertion>` would) as `source`
-				let (reference, existing) = try parseHideReference(&input)
+				let (reference, existing) = try parseInsertingReference(&input)
 				try apply(
 					reference.map { .overlay($0, isHidden: true) } ?? .insert(isHidden: true),
 					name: existing.name,
@@ -871,30 +870,19 @@ private extension FieldSpecsBuilder {
 			: .unmatched(name: name)
 	}
 
-	/// Parses a `<field-spec-overlay>`'s or a `<field-spec-move>`'s
-	/// `<field-spec-reference>`: the resolved reference & its `source` from the
-	/// reference fields config; or, iff it names no field spec, `nil` & the
-	/// default field spec that a `<field-spec-insertion>` would insert.
+	/// Parses a `<field-spec-overlay>`'s, a `<field-spec-move>`'s, or a
+	/// `<field-spec-hide>`'s `<field-spec-reference>`: the resolved reference &
+	/// its `source` from the reference fields config; or, iff it names no field
+	/// spec, or the reference resolves to a `null` (a field spec removed earlier
+	/// in this section), `nil` & the field spec that a `<field-spec-insertion>`
+	/// would insert (copied from the baseline fields config, or a default field
+	/// spec).
 	private func parseInsertingReference(_ input: inout Substring)
 	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
 		switch try parseReference(&input) {
 		case let .resolved(reference):
-			(reference, try resolvedReferenceFieldSpec(reference))
-		case let .unmatched(name):
-			(nil, try defaultFieldSpec(forName: name))
-		}
-	}
-
-	/// Parses a `<field-spec-hide>`'s `<field-spec-reference>`: the resolved
-	/// reference & its `source` from the reference fields config; or, iff it
-	/// names no field spec, or the reference resolves to a `null` (a field spec
-	/// removed earlier in this section), `nil` & the field spec that a
-	/// `<field-spec-insertion>` would copy from the baseline fields config.
-	private func parseHideReference(_ input: inout Substring)
-	throws(ParsingError) -> (reference: Reference?, source: FieldSpec) {
-		switch try parseReference(&input) {
-		case let .resolved(reference):
-			hideSource(for: reference)
+			referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
+				?? (nil, baselineFieldSpecs[reference.position - 1])
 		case let .unmatched(name):
 			(nil, try defaultFieldSpec(forName: name))
 		}
@@ -911,14 +899,6 @@ private extension FieldSpecsBuilder {
 			name: name,
 			position: positions[try effectivePosition(forIndex: index ?? 1, length: positions.count) - 1],
 		)
-	}
-
-	/// `reference` & its `source` from the reference fields config; or, iff it
-	/// resolves to a `null`, `nil` & its field spec in the baseline fields
-	/// config.
-	private func hideSource(for reference: Reference) -> (reference: Reference?, source: FieldSpec) {
-		referenceFieldSpecs[reference.position - 1].map { (reference, $0) }
-			?? (nil, baselineFieldSpecs[reference.position - 1])
 	}
 
 	/// The default field spec for field `name`, which must not be a nonexistent
