@@ -67,9 +67,10 @@ Default labels & formats favor:
   - Label is the field name.
   - Output is formatted as `%i`.
 
-Field specs, including default field specs, for `adamID` & `fileSizeBytes` are
-[end-justified](fields-format.md#format-transforms); all others are
-start-justified.
+Built-in field specs for `adamID` & `fileSizeBytes` are
+[end-justified](fields-format.md#format-transforms), as are their default field
+specs, absent a `default` named format that sets a justification; all other
+built-in field specs are start-justified.
 
 ## Built-In Field Specs
 
