@@ -106,15 +106,15 @@ private let listedLabelAndFormatByFieldName = [
 	"bundleID": ("Bundle ID", .default(fieldName: "bundleID")),
 	"currentVersionReleaseDate": (
 		"Released",
-		// `%D.dateOnly++`: the release date, date-only, in the system time zone
+		// `%+D.dateOnly+`: the release date, date-only, in the system time zone;
+		// formatting aborts for a non-date
 		.template(
 			[
 				.placeholder(
 					.conditional(
 						.init(predicate: .date, coercion: nil),
-						.binary(
+						.abortOnFailure(
 							success: .pipeline(.init(calls: [.init(transform: .dateOnly, coercion: nil)])),
-							failure: .empty,
 						),
 					),
 				),

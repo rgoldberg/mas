@@ -71,6 +71,12 @@ private extension MASTests {
 		#expect(builtInFieldSpec(forFieldNamed: "trackName").format == .default(fieldName: "trackName"))
 	}
 
+	@Test(arguments: [JSON.Node?.none, .string("x")])
+	func `the built-in currentVersionReleaseDate field spec outputs no key-value pair for a non-date`(value: JSON.Node?)
+	throws {
+		#expect(try builtInFieldSpec(forFieldNamed: "currentVersionReleaseDate").keyValueRow(for: value) == nil)
+	}
+
 	@Test
 	func `only newVersion's built-in field spec is synthesized`() {
 		#expect(builtInFieldSpec(forFieldNamed: "newVersion").isSynthesized)
