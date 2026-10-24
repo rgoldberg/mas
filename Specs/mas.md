@@ -79,6 +79,10 @@ built-in field order, so `all` orders its field specs [by
 label](fields.md#immutable-built-in-named-fields-configs), while `none` & each
 built-in standard's user-facing variants order theirs by `<positional-order>`.
 
+Every variant of `all` & of `none` positions its field specs as the built-in
+standard's user-facing variants do (e.g., `mas list --fields @none.version,name`
+outputs `name`, then `version`).
+
 `config`'s built-in standard's user-facing variants have a visible field spec
 for every field, in order, `mas`, `slice`, `slices`, `dist`, `origin`, `rev`,
 `swift`, `driver`, `store`, `region`, `macos`, `build`, `mac`, `cpu` & `arch`,

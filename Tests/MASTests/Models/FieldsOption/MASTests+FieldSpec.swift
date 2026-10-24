@@ -350,6 +350,18 @@ private extension MASTests {
 	}
 
 	@Test
+	func `none positions its field specs as all does`() throws {
+		let config = try parseFieldsConfig("@none.bundleID,adamID")
+		#expect(config.fieldOrder
+			.applied(to: config.fieldSpecs, unlisted: .init())
+			.filter { !$0.isHidden }
+			.map(\.name) == [
+				"adamID",
+				"bundleID",
+			])
+	}
+
+	@Test
 	func `an absolute config is equivalent to none with an insertion per field spec`() throws {
 		let absolute = try parseFieldsConfig("bundleID=B,adamID,bundleID")
 		let relative = try parseFieldsConfig("@none.+bundleID=B,+adamID,+bundleID")
