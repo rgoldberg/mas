@@ -663,6 +663,11 @@ private extension MASTests {
 			.map(\.name) == ["rating"])
 	}
 
+	@Test
+	func `a removal naming no field spec leaves $previous$ unchanged`() throws {
+		#expect(try parseFieldSpecs("@all.bundleID,-size,%adamID").map(\.name) == ["bundleID", "adamID"])
+	}
+
 	@Test(arguments: [".size", ".-size", "size"])
 	func `an edit naming a nonexistent field is an error`(value: String) {
 		#expect(throws: ParsingError.nonexistentField("size")) {

@@ -547,11 +547,11 @@ inserted field spec cannot be modified by another field spec edit.
 A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
 no `<field-occurrence-index>` & whose `<reference-field-name>` names no field
 spec (e.g., one for an [unlisted field](#unlisted-fields)) has no such `source`:
-a `<field-spec-removal>` then does nothing, though it lists its field, while any
-other one 1st inserts a new field spec (as `<field-spec-insertion>` would) as
-its `source` (e.g., for an unlisted `foo`, `@all.foo=Foo` inserts a visible
-field spec & `@all._foo` a hidden one, while `@all.-foo` lists `foo`, so `all`
-does not output it).
+a `<field-spec-removal>` then does nothing (leaving $previous$ unchanged),
+though it lists its field, while any other one 1st inserts a new field spec (as
+`<field-spec-insertion>` would) as its `source` (e.g., for an unlisted `foo`,
+`@all.foo=Foo` inserts a visible field spec & `@all._foo` a hidden one, while
+`@all.-foo` lists `foo`, so `all` does not output it).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the
