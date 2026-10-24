@@ -34,10 +34,10 @@ setting's default applies iff neither sets it.
 The [built-in standard](configs.md#immutable-built-in-named-configs) JSON config
 sets every `<json-setting>` to its default.
 
-A key-value pair is output for each [member](fields.md#members) of each visible
-field spec's field & of each visible unlisted field, even if its key repeats
-another's (e.g., `--fields name=x,version=x` outputs 2 `x` keys), because JSON
-does not forbid repeated keys, though some consumers retain only 1 of them.
+A key-value pair is output even if its key repeats another's (e.g.,
+`--fields name=x,version=x` outputs 2 `x` keys, as does a field with 2
+[members](fields.md#members)), because JSON does not forbid repeated keys,
+though some consumers retain only 1 of them.
 
 ## Pretty-Printing
 
