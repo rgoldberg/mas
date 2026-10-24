@@ -216,6 +216,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - output: write to standard output
     - display: a command's purpose
     - source from: take a config or setting from
+    - read: take in input (e.g., an item) from its source
     - REJECTED: decode / obtain / get / compute / make / resolve (in this sense;
       see 55) / interpolate / interpolation / receives / evaluate on / evaluate
       for
@@ -559,7 +560,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 107. - negated: the form of a non-nullary branch with `<branch-negation>`
        (`-…`), whose `<unconditional-block>` is evaluated iff its matcher fails
        ([defined](../Specs/fields-format.md#success--failure))
-108. - list: verb; an app lists each field that it knows before obtaining any
+108. - list: verb; an app lists each field that it knows before reading any
        input, while a fields config lists those & each field that a field name
        in its `<fields-config>` names
        ([defined](../Specs/fields.md#unlisted-fields))

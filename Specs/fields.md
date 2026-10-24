@@ -73,7 +73,7 @@ A fields config **lists** a field iff the app lists it, or a
 config's `<fields-config>` or in that of any fields config that it
 [extends](configs.md#referencing-named-configs) (e.g., `foo` in `@all.-foo`),
 the resolved fields config extending its base fields config. An app lists each
-field that it knows before obtaining any input (e.g., each field of an input
+field that it knows before reading any input (e.g., each field of an input
 format that specifies all potential input fields up front, per [nonexistent
 fields](#nonexistent-fields)).
 
@@ -94,7 +94,7 @@ only its own unlisted fields.
 
 Because unlisted fields have no positions, neither a fields config nor its
 positions depend on the input, so key-value & JSON output can output each item
-as soon as it is obtained, unless item sorting reorders items.
+as soon as it is read, unless item sorting reorders items.
 
 ## Fields Configs
 
