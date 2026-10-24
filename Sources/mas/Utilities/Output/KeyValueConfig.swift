@@ -22,7 +22,7 @@ struct KeyValueConfig: Equatable {
 		leaderPattern: defaultLeaderPattern,
 		leadingSpacing: " ",
 		trailingSpacing: " ",
-		itemSeparatorPattern: "",
+		itemSeparatorLine: "",
 	)
 
 	/// Styles each key (e.g., with the default `StyleSequences`, `"1"` for bold,
@@ -38,10 +38,9 @@ struct KeyValueConfig: Equatable {
 	let leadingSpacing: String
 	/// Before each value, after its leader (iff any).
 	let trailingSpacing: String
-	/// Repeated (truncating mid-repetition if needed, then space-filling any
-	/// remaining width) to fill the line between each pair of adjacent items;
-	/// empty means a blank line; `nil` means no line.
-	let itemSeparatorPattern: String?
+	/// The line between each pair of adjacent items, output as is; empty means a
+	/// blank line; `nil` means no line.
+	let itemSeparatorLine: String?
 }
 
 /// Parses `--key-value-config`'s value, which, iff non-empty, is
@@ -56,7 +55,7 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 	var leaderPattern = KeyValueConfig.default.leaderPattern
 	var leadingSpacing = String?.none
 	var trailingSpacing = KeyValueConfig.default.trailingSpacing
-	var itemSeparatorPattern = KeyValueConfig.default.itemSeparatorPattern
+	var itemSeparatorLine = KeyValueConfig.default.itemSeparatorLine
 	var input = value[...]
 	while case let trimmed = input.drop(while: \.isWhitespace), let setting = trimmed.first {
 		input = trimmed.dropFirst()
@@ -129,13 +128,13 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			}
 			trailingSpacing = spacing
 		case "s":
-			itemSeparatorPattern = nil
+			itemSeparatorLine = nil
 		case "S":
-			let pattern = try parseKeyValueSettingText(&input)
-			guard !pattern.contains(where: \.isNewline) else {
-				throw .invalidItemSeparatorPattern(pattern)
+			let line = try parseKeyValueSettingText(&input)
+			guard !line.contains(where: \.isNewline) else {
+				throw .invalidItemSeparatorLine(line)
 			}
-			itemSeparatorPattern = pattern
+			itemSeparatorLine = line
 		default:
 			throw .invalidSetting(setting)
 		}
@@ -148,14 +147,14 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		// `f` implies a leading spacing of `:`, if none is otherwise set
 		leadingSpacing: leadingSpacing ?? (leaderPattern == nil ? ":" : KeyValueConfig.default.leadingSpacing),
 		trailingSpacing: trailingSpacing,
-		itemSeparatorPattern: itemSeparatorPattern,
+		itemSeparatorLine: itemSeparatorLine,
 	)
 }
 
 // swiftlint:disable:next one_declaration_per_file
 enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
-	case invalidItemSeparatorPattern(String)
+	case invalidItemSeparatorLine(String)
 	case invalidKeyStylePrefix(String)
 	case invalidKeyStyleReset(String)
 	case invalidKeyStyleSpecifier(String)
@@ -169,11 +168,8 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 		switch self {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --key-value-config's value"
-		case let .invalidItemSeparatorPattern(pattern):
-			"""
-			Invalid item separator pattern (a line terminator would split the item separator line): \
-			\(pattern.debugDescription)
-			"""
+		case let .invalidItemSeparatorLine(line):
+			"Invalid item separator line (a line terminator would split it): \(line.debugDescription)"
 		case let .invalidKeyStylePrefix(stylePrefix):
 			"Invalid key style prefix (a line terminator would split each row): \(stylePrefix.debugDescription)"
 		case let .invalidKeyStyleReset(styleReset):
@@ -199,8 +195,8 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 
 /// Parses an uppercase `<key-value-setting>`'s `{text}` payload
 /// (`<leader-pattern>`, `<leading-spacing>`, `<trailing-spacing>`, or
-/// `<item-separator-pattern>`) through its `<key-value-setting-termination>`
-/// via `parseOutputConfigSettingPayload`.
+/// `<item-separator-line>`) through its `<key-value-setting-termination>` via
+/// `parseOutputConfigSettingPayload`.
 private func parseKeyValueSettingText(_ input: inout Substring) throws(KeyValueConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: KeyValueConfigParsingError.danglingEscape)
 }

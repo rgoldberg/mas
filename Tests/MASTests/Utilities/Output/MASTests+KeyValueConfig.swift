@@ -38,8 +38,8 @@ private extension MASTests {
 			("F-\\", .danglingEscape),
 			("F-\n", .invalidLeaderPattern("-\n")),
 			("F\r:", .invalidLeaderPattern("\r")),
-			("S=\n=", .invalidItemSeparatorPattern("=\n=")),
-			("S\u{2028}:", .invalidItemSeparatorPattern("\u{2028}")),
+			("S=\n=", .invalidItemSeparatorLine("=\n=")),
+			("S\u{2028}:", .invalidItemSeparatorLine("\u{2028}")),
 			("L\r\n:", .invalidLeadingSpacing("\r\n")),
 			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
 		],
@@ -109,11 +109,11 @@ private extension MASTests {
 	}
 
 	@Test(arguments: [("s", String?.none), ("S", ""), ("S:", ""), ("S=", "="), ("S-+:s", nil)])
-	func `s removes the item separator line; S sets its pattern, blank by default`(
+	func `s removes the item separator line; S sets it, blank by default`(
 		value: String,
-		itemSeparatorPattern: String?,
+		itemSeparatorLine: String?,
 	) throws {
-		#expect(try parseKeyValueConfig(value).itemSeparatorPattern == itemSeparatorPattern)
+		#expect(try parseKeyValueConfig(value).itemSeparatorLine == itemSeparatorLine)
 	}
 
 	@Test(arguments: [(" f s ", "fs"), ("K 1 : a", "K1:a"), ("F.: L=: s", "F.:L=:s"), ("F. :", "F.\\ :")])
@@ -161,7 +161,7 @@ private extension MASTests {
 					leaderPattern: pattern,
 					leadingSpacing: " ",
 					trailingSpacing: " ",
-					itemSeparatorPattern: "",
+					itemSeparatorLine: "",
 				),
 			)
 				== "Name \(pattern) Slack\nVersion \(pattern) 4.0\n\nName \(pattern) X\nVersion \(pattern) 1",
@@ -185,21 +185,32 @@ private extension MASTests {
 		)
 	}
 
-	@Test
-	func `key-value fills an item separator line to the width of the widest row of any item`() throws {
+	@Test(arguments: ["-+", "中", "\t", "\u{301}"])
+	func `key-value outputs an item separator line as is, regardless of any item's width`(line: String) throws {
 		#expect(
-			try keyValue(of: twoItems, keyValueConfig: try parseKeyValueConfig("fL=:R:S-+"))
-				== "Name=Slack\nVersion=4.0\n-+-+-+-+-+-\nName=X\nVersion=1",
+			try keyValue(
+				of: twoItems,
+				keyValueConfig: .init(
+					keyStyleSpecifier: "",
+					keyStyling: .terminalOnly,
+					keyStyleSequences: .default,
+					leaderPattern: nil,
+					leadingSpacing: "=",
+					trailingSpacing: "",
+					itemSeparatorLine: line,
+				),
+			)
+				== "Name=Slack\nVersion=4.0\n\(line)\nName=X\nVersion=1",
 		)
 	}
 
 	@Test
-	func `key-value indents each non-empty later line of a value to its start & fills an item separator to it`()
+	func `key-value indents each non-empty later line of a value to its start`()
 	throws {
 		let items = [JSON.Object([("name", .string("Slack")), ("version", .string("4.0\r\n\u{2028}be\\nta"))]), twoItems[1]]
 		#expect(
 			try keyValue(of: items, keyValueConfig: try parseKeyValueConfig("fL=:R:S-"))
-				== "Name=Slack\nVersion=4.0\n\n        be\\nta\n--------------\nName=X\nVersion=1",
+				== "Name=Slack\nVersion=4.0\n\n        be\\nta\n-\nName=X\nVersion=1",
 		)
 	}
 
@@ -215,33 +226,6 @@ private extension MASTests {
 				keyValueConfig: try parseKeyValueConfig("F.:"),
 			)
 		#expect(keyValue == "N⏎a . Slack\nVer . 4.0")
-	}
-
-	@Test
-	func `key-value space-fills an item separator line's width that a wide pattern character would exceed`() throws {
-		#expect(
-			try keyValue(of: twoItems, keyValueConfig: try parseKeyValueConfig("fL=:R:S中"))
-				== "Name=Slack\nVersion=4.0\n中中中中中 \nName=X\nVersion=1",
-		)
-	}
-
-	@Test(arguments: ["\t", "\u{301}"])
-	func `key-value prints a 0-width item separator pattern once`(pattern: String) throws {
-		#expect(
-			try keyValue(
-				of: twoItems,
-				keyValueConfig: .init(
-					keyStyleSpecifier: "",
-					keyStyling: .terminalOnly,
-					keyStyleSequences: .default,
-					leaderPattern: nil,
-					leadingSpacing: "=",
-					trailingSpacing: "",
-					itemSeparatorPattern: pattern,
-				),
-			)
-				== "Name=Slack\nVersion=4.0\n\(pattern)\nName=X\nVersion=1",
-		)
 	}
 
 	@Test
@@ -266,7 +250,7 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			("fL=:R:s", "Name=Slack\nVersion=4.0\nName=X\nVersion=1"),
-			("fL=:R:S-", "Name=Slack\nVersion=4.0\n-----------\n-----------\nName=X\nVersion=1"),
+			("fL=:R:S-", "Name=Slack\nVersion=4.0\n-\n-\nName=X\nVersion=1"),
 		],
 	)
 	func `key-value outputs no line for an item without rows, only its adjacent item separator lines`(

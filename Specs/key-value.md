@@ -225,22 +225,18 @@ trailing-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
 item-separator-setting = <item-separator-off> | <item-separator-on> (* default: <item-separator-on>; last wins *)
 
 item-separator-off = "s"
-item-separator-on  = "S" [ <item-separator-pattern> ] <key-value-setting-termination>
+item-separator-on  = "S" [ <item-separator-line> ] <key-value-setting-termination>
 
-item-separator-pattern = ^{text: no line terminators}^ (* default: {empty string} *)
+item-separator-line = ^{text: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `s`: no item separator line; each item's 1st row immediately follows the
   previous item's last row.
-- `S`: a line between each pair of adjacent items. `<item-separator-pattern>` is
-  repeated to fill the width of the widest line of any item's rows, truncated
-  before the 1st character that would exceed that width; spaces fill any
-  remaining width (e.g., when that character is wide, such as `中`). A 0-width
-  `<item-separator-pattern>` (e.g., a tab) is printed once, with no space-fill,
-  because no number of repetitions can fill any width, so an empty
-  `<item-separator-pattern>` renders a blank line. An `<item-separator-pattern>`
+- `S`: `<item-separator-line>`, output as is, between each pair of adjacent
+  items (e.g., `S---:` outputs `---`), so its width depends on no item, and an
+  empty `<item-separator-line>` renders a blank line. An `<item-separator-line>`
   that contains a line terminator is invalid, because it would split the item
   separator line.
 
@@ -287,7 +283,7 @@ A setting implied by `<key-value-config>` overrides inherited settings.
 - `--key-value-config f`: `key: value` rows (implied leading spacing).
 - `--key-value-config fL=:R:`: `key=value` rows, with a blank line between
   items.
-- `--key-value-config S=`: a `=`-patterned line between items.
+- `--key-value-config S===`: a `===` line between items.
 - `--key-value-config s`: no line between items.
 
 ## Appendix: Escaping
@@ -304,13 +300,13 @@ consumed as any character in a text token consumed by the given text terminal.
 Leading & trailing outer bare whitespace is ignored by `<style-specifier>` &
 consumed by every other text terminal.
 
-| `{text}`                   | Any                 |
-|:---------------------------|:--------------------|
-| `<style-specifier>`        | `:` & ASCII letters |
-| `<style-prefix>`           | `:`                 |
-| `<style-suffix>`           | `:`                 |
-| `<style-reset>`            | `:`                 |
-| `<leader-pattern>`         | `:`                 |
-| `<leading-spacing>`        | `:`                 |
-| `<trailing-spacing>`       | `:`                 |
-| `<item-separator-pattern>` | `:`                 |
+| `{text}`                | Any                 |
+|:------------------------|:--------------------|
+| `<style-specifier>`     | `:` & ASCII letters |
+| `<style-prefix>`        | `:`                 |
+| `<style-suffix>`        | `:`                 |
+| `<style-reset>`         | `:`                 |
+| `<leader-pattern>`      | `:`                 |
+| `<leading-spacing>`     | `:`                 |
+| `<trailing-spacing>`    | `:`                 |
+| `<item-separator-line>` | `:`                 |
