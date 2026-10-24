@@ -550,7 +550,7 @@ success-block =
   | <any-block>
   | <unconditional-block>
   (* non-structural *)
-failure-block = <unconditional-block>
+failure-block = <unconditional-block> (* direct default: {empty string} *)
 
 success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
