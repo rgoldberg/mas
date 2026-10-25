@@ -124,7 +124,8 @@ key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination
 
 `<style-suffix>` is as [defined for table output](table.md#style-suffix):
 
-- `x`: `m` (the ANSI SGR final character) follows `<style-specifier>`.
+- `x`: `m` (the ANSI SGR control sequence's final byte) follows
+  `<style-specifier>`.
 - `X`: a literal custom string follows `<style-specifier>` (e.g., `X:` for
   none).
 

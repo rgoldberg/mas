@@ -128,7 +128,8 @@ style-suffix = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `x`: `m` (the ANSI SGR final character) follows `<style-specifier>`.
+- `x`: `m` (the ANSI SGR control sequence's final byte) follows
+  `<style-specifier>`.
 - `X`: a literal custom string follows `<style-specifier>` (e.g., `X:` for
   none). A `<style-suffix>` that contains a line terminator is invalid, because
   it would split each row that it styles.

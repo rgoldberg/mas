@@ -410,7 +410,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - style prefix: precedes a style specifier (`<style-prefix>`)
     - style suffix: follows a style specifier (`<style-suffix>`)
     - style reset: follows a styled string (`<style-reset>`)
-    - REJECTED: style terminator / style end
+    - final byte: ECMA-48's term for the character that terminates a control
+      sequence (e.g., SGR's `m`)
+    - REJECTED: style terminator / style end / final character
 79. - width: text's terminal display width
       ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
