@@ -112,9 +112,10 @@ following visible field specs, at the given positions:
 
 In every `mas` built-in fields config's user-facing variants, a field spec for a
 field that the table above lists has that row's label & format, as does such a
-field's default field spec (e.g., for an unlisted field) wherever one of those
-variants is the base fields config; any other field's field spec is labeled by
-its field name & formatted as `%i`.
+field's default field spec (e.g., for an unlisted field) wherever the base
+fields config is, or transitively
+[extends](configs.md#referencing-named-configs), one of those variants; any
+other field's field spec is labeled by its field name & formatted as `%i`.
 
 ## Price Sorting
 
