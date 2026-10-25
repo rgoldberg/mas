@@ -205,9 +205,11 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 
 extension SortSpec { // swiftlint:disable:this file_types_order
 	/// Parses a `<sort-modifier>`'s payload (after its `<sort-modifier-prefix>`):
-	/// `nil` iff `<sort>` is absent (its direct default). An option omitted from
-	/// a present `<sort-option-set>` retains `existing`'s value, or
-	/// `defaultOptionSet`'s absent `existing`.
+	/// `nil` iff `<sort>` is absent (its direct default). An omitted
+	/// `<sort-priority>` retains `existing`'s iff positive, else is
+	/// `defaultSortPriority`. An option omitted from a present
+	/// `<sort-option-set>` retains `existing`'s value, or `defaultOptionSet`'s
+	/// absent `existing`.
 	static func parsed(_ input: inout Substring, existing: Self?, defaultOptionSet: SortOptionSet)
 	throws(ParsingError) -> Self? {
 		skipWhitespace(&input)
@@ -215,9 +217,8 @@ extension SortSpec { // swiftlint:disable:this file_types_order
 			return nil // `<sort>`'s direct default
 		}
 		let priority = parseIntegerText(&input, isSigned: false).flatMap { BigUInt($0) }
-		guard let priority = priority ?? existing?.priority else {
-			throw .missingSortPriority
-		}
+			?? existing.flatMap { $0.priority == 0 ? nil : $0.priority }
+			?? defaultSortPriority
 		skipWhitespace(&input)
 		let optionSetDefaults = existing?.optionSet ?? defaultOptionSet
 		return .init(
@@ -1008,6 +1009,9 @@ private let symbolCategorySet = Set([
 
 // MARK: - Constants
 
+/// The `<sort-priority>` of a `<sort>` that omits it, absent a positive one in
+/// the working fields config.
+private let defaultSortPriority = BigUInt(100)
 private let sortOptionTerminator = Character(":")
 
 /// The CLDR root locale, whose collation the canonical conventions compare text

@@ -38,8 +38,9 @@ private extension MASTests {
 	}
 
 	@Test
-	func `none gives no sort to a field spec that has none, so a sort without a priority is an error`() {
-		#expect(throws: ParsingError.missingSortPriority) { try parseFieldsConfig("@none.bundleID/I") }
+	func `a sort without a priority enables none's sorts at the default priority, unless given 0`() throws {
+		#expect(try parseFieldsConfig("@none.adamID/I,bundleID/I").itemSort.keys.map(\.sortSpec.priority) == [100, 100])
+		#expect(try parseFieldsConfig("@none.adamID/0I,bundleID/0I").itemSort.keys.isEmpty)
 	}
 
 	@Test

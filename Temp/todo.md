@@ -197,6 +197,13 @@ member, `name@@-1` for the last), which needs:
    multiple is an error for table output.
 4. How `<document-order>` orders selected members.
 
+### Configurable Default Sort Priority
+
+Let the [default](../Specs/fields.md#sort-priority) `<sort-priority>` (currently
+`100`) be configured (e.g., via a `<fields-config>` setting, so that a persisted
+fields config can set it & a command line can override it, without a separate
+option).
+
 ### Configurable Absent Value Handling
 
 Configurable behavior per output format:

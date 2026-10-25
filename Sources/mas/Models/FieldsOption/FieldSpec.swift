@@ -102,7 +102,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingItemSortOptionSet
 	case missingPredicate
 	case missingSortOptionTerminator
-	case missingSortPriority
 	case nonexistentField(String)
 	case nonexistentFieldsConfig(String)
 	case nonexistentFieldSpec(forName: String)
@@ -174,8 +173,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected <predicate>"
 		case .missingSortOptionTerminator:
 			"Expected <sort-option-terminator> ':'"
-		case .missingSortPriority:
-			"Expected a numeric sort priority (only the field's existing sort options may be adjusted without one)"
 		case let .nonexistentFieldSpec(name):
 			"""
 			Expected existing field spec for field name: \(

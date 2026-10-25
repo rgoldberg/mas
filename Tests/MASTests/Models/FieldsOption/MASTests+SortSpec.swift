@@ -193,8 +193,7 @@ private extension MASTests {
 			("1c", .invalidSortOption("c")),
 			("1/", .invalidSortOption("/")),
 			("1/O", .invalidSortOption("/")),
-			("/-", .missingSortPriority),
-			("-", .missingSortPriority),
+			("/-", .invalidSortOption("/")),
 		],
 	)
 	func `reports a sort syntax error`(sort: String, error: ParsingError) {
@@ -217,6 +216,24 @@ private extension MASTests {
 		#expect(overlaid.priority == 1)
 		#expect(overlaid.optionSet.caseSensitivity == .insensitive)
 		#expect(overlaid.optionSet.direction == .ascending)
+	}
+
+	@Test(
+		arguments: [
+			("-", nil as BigUInt?, BigUInt(100)),
+			("-", 0, 100),
+			("-", 3, 3),
+			("0-", 3, 0),
+			("2-", 0, 2),
+		],
+	)
+	func `an omitted sort-priority retains a positive working value, else is the default`(
+		sort: String,
+		existingPriority: BigUInt?,
+		priority: BigUInt,
+	) throws {
+		let existing = existingPriority.map { SortSpec(priority: $0, optionSet: .default) }
+		#expect(try parsedSortSpec(sort, existing: existing).priority == priority)
 	}
 
 	@Test
@@ -493,7 +510,7 @@ private extension SortOptionSet {
 private func parsedSortSpec(_ sort: String, existing: SortSpec? = nil) throws(ParsingError) -> SortSpec {
 	var input = sort[...]
 	guard let sortSpec = try SortSpec.parsed(&input, existing: existing, defaultOptionSet: .default) else {
-		throw .missingSortPriority
+		preconditionFailure("Expected a <sort> in \(sort)")
 	}
 	guard input.isEmpty else {
 		throw .unexpectedCharacter(input.first ?? " ")

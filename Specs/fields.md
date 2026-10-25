@@ -149,11 +149,11 @@ For each [leaf context](configs.md#context-stacks):
 
 - `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
   field spec, whose `<sort>`, if any, is [disabled](#sort-priority), for each
-  field that the app lists (e.g., if no field spec for `b` has a `<sort>`,
-  `@none.b/I` is an error, because its `<sort>` has a `null` `<sort-priority>`).
-  Absent a built-in field order: field specs are ordered by
-  `<positional-order>`, so a fields config that extends it outputs its inserted
-  field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then `a`).
+  field that the app lists (e.g., `@none.b/I` sorts items by `b`, while
+  `@none.b/0I` does not). Absent a built-in field order: field specs are ordered
+  by `<positional-order>`, so a fields config that extends it outputs its
+  inserted field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then
+  `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
   (`<output>`), while other `<sort-option>`s are per the app's default sort
@@ -669,22 +669,30 @@ sort = <sort-priority> | [ <sort-priority> ] <sort-option-set>
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-sort-priority = {non-negative integer} (* default: {<sort-priority> for the corresponding field spec in the working fields config} *)
+sort-priority =
+  {non-negative integer}
+  (* default: {<sort-priority> for the corresponding field spec in the working fields config, iff positive; otherwise, 100} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 A field spec with a `<sort>`:
 
-- Requires a non-`null` `<sort-priority>`, otherwise an error is reported.
 - Has its sort **disabled** by a `<sort-priority>` of `0`: its `<sort-option>`s
   are retained, but do not sort items until a positive `<sort-priority>` enables
-  them, e.g., `_size/1` enables a hidden field spec's inherited `/0-`.
+  them, e.g., `_size/1` or `_size/I` enables a hidden field spec's inherited
+  `/0-`, while `_size/0I` changes its `<sort-option>`s, but keeps it disabled.
 - Otherwise, takes sort precedence over field specs:
   - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
     priority).
   - With the same `<sort-priority>` that succeed it in the order of the field
     specs in the resolved fields config, regardless of the field order.
+
+Thus, a `<sort-priority>` below `100` takes sort precedence over every sort that
+omits its `<sort-priority>` & inherits no positive one, while one above `100`
+cedes it (e.g., `--fields name/I,version/1I` sorts items by `version`, then by
+`name`, while `--fields name/I,version/101I` sorts them by `name`, then by
+`version`).
 
 ##### Sort Options
 
