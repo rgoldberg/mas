@@ -338,16 +338,17 @@ scale-arguments =
   <argument-separator> <fractional-digits>
   <argument-fence>
 
-exponent           = {non-negative integer}  (* divides the input by 10 to this power before rendering *)
+exponent           = {integer}              (* divides the input by 10 to this power before rendering *)
 significant-digits = {integer from 1 to 100} (* rounds to this many total digits; absent: no rounding *)
 fractional-digits  = {integer from 0 to 100} (* exactly this many digits after the point; 0: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`scale` divides its input by 10 to the power of `<exponent>`, optionally rounds
-it to `<significant-digits>` total digits, then renders it in positional
-notation with exactly `<fractional-digits>` digits after the decimal point.
+`scale` divides its input by 10 to the power of `<exponent>` (thus multiplying
+it iff `<exponent>` is negative), optionally rounds it to `<significant-digits>`
+total digits, then renders it in positional notation with exactly
+`<fractional-digits>` digits after the decimal point.
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
@@ -361,7 +362,8 @@ notation with exactly `<fractional-digits>` digits after the decimal point.
   does not conform to `scale`'s input type, so [value coercion](#value-coercion)
   applies (e.g., `.scale:0,,0:` reports an error for `1e100`, while
   `..scale:0,,0:` aborts formatting).
-- E.g., a byte count as integer megabytes: `.scale:6,,0:`.
+- E.g., a byte count as integer megabytes: `.scale:6,,0:`; a ratio as an integer
+  percentage: `.scale:-2,,0:` (e.g., `0.25` as `25`).
 
 ###### Chronologic Transforms
 

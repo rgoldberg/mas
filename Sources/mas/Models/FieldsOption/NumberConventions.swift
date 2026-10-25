@@ -242,6 +242,15 @@ func nonNegativeInteger(_ argument: String) -> Int? {
 	!argument.isEmpty && argument.allSatisfy(\.isASCIIDigit) ? Int(argument) ?? .max : nil
 }
 
+/// `argument` as an `{integer}`, saturated at `Int.min` & `Int.max` (which
+/// every caller treats as equivalent to any lesser & greater value,
+/// respectively); else `nil`.
+func integer(_ argument: String) -> Int? {
+	let isNegative = argument.first == "-"
+	return nonNegativeInteger(String(isNegative || argument.first == "+" ? argument.dropFirst() : argument[...]))
+		.map { isNegative ? Int(argument) ?? .min : $0 }
+}
+
 /// The conventions that `<number-format-arguments>`' `arguments` (absent ones
 /// being `nil`) give: each absent argument defaults to the base conventions:
 /// those that `<locale-identifier>` identifies, or, absent it,

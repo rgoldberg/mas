@@ -21,10 +21,11 @@ enum Transform: Hashable {
 
 	case absoluteValue
 	case round
-	/// Divides the field's value by `10^exponent`, optionally rounds it to
-	/// `significantDigits` total digits, then renders it in positional notation
-	/// with exactly `fractionalDigits` digits after the decimal point. See
-	/// `<scale>` in fields-format.md for full semantics.
+	/// Divides the field's value by `10^exponent` (thus multiplying it iff
+	/// `exponent` is negative), optionally rounds it to `significantDigits` total
+	/// digits, then renders it in positional notation with exactly
+	/// `fractionalDigits` digits after the decimal point. See `<scale>` in
+	/// fields-format.md for full semantics.
 	case scale(exponent: Int, significantDigits: Int?, fractionalDigits: Int)
 
 	/// Inserts the conventions' digit group separator between the digit groups of
@@ -236,9 +237,10 @@ private func scaled(
 ) -> String? {
 	// |number| / 10^exponent = 0.digits × 10^magnitudeExponent, so a nonzero
 	// one's integer part has magnitudeExponent digits iff that is positive, which
-	// rounding cannot reduce
-	let magnitudeExponent = number.exponent - BigInt(exponent)
-	guard number.digits.isEmpty || magnitudeExponent <= maxScaledIntegerDigitCount else {
+	// rounding cannot reduce; 0's is 0, whatever `exponent`, which avoids
+	// computing 10 to a huge power for a huge negative `exponent`
+	let magnitudeExponent = number.digits.isEmpty ? 0 : number.exponent - BigInt(exponent)
+	guard magnitudeExponent <= maxScaledIntegerDigitCount else {
 		return nil
 	}
 	let significand = BigInt(number.digits.isEmpty ? "0" : number.digits) ?? 0
