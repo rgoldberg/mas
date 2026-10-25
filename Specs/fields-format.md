@@ -174,7 +174,8 @@ Coercing any value to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, which starts with a
 `<coerced-string-transform-call>`, cannot fail. A value coerced to a string is:
 
-- `null` or [absent](fields.md#absent-values): an empty string.
+- `null` or [absent](fields.md#absent-values): an empty string, except as a
+  transform's input, through which it remains unchanged.
 - A boolean: `true` or `false`.
 - A number: its trivia prefix, its text, then its trivia suffix (e.g., `1.50`,
   or, with [trivia](#coercion), `$1.50`).
