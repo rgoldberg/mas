@@ -7,8 +7,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
    - REJECTED: begin / beginning
 2. - end: noun; also the `end` terminal ([defined](../Specs/ebnf.md#end))
    - REJECTED: finish
-3. - terminate: verb; an expression or token ends, explicitly at a terminator or
-     implicitly
+3. - terminate: verb; an expression or token reaches its end, explicitly at a
+     terminator or implicitly
    - REJECTED: end (as a verb) / finish
 4. - character
    - single: emphatic adjective; as a unit, not as a count ("a single value",
@@ -49,10 +49,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (e.g., trees & graphs)
 12. - given: explicitly specified input values or parameters from a caller or
       user
-    - attached: comments or metadata structurally bound to a production rule or
-      AST node
-    - present: concrete occurrence of a token or rule instance in input or parse
-      trees
+    - attached: comments or metadata structurally bound to a nonterminal
+      definition
+    - present: an occurrence of a token or an expression in the input
     - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
     - current: currently selected or governing state during evaluation
@@ -166,7 +165,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - spec: a `Specs/` document
     - REJECTED: language / specification / rules
 31. - null: absence of a scalar value
-    - empty: repetition containing 0 elements, or text containing 0 characters
+    - empty: a repetition of 0 elements, or text of 0 characters
     - absent: state of being omitted (union of directly absent & transitively
       absent); of a formatted value: omitted from key-value & JSON output
       ([defined](../Specs/fields.md#absent-values))
@@ -381,7 +380,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (`<fixed-nonconforming>`, `<fixed-unpositioned-fields>`)
     - REJECTED: lowest / highest / smallest / largest / minimum / maximum /
       pinned / anchored / directional (for relative or fixed)
-73. - code span: backtick-delimited inline code (CommonMark)
+73. - code span: inline code between backticks (CommonMark)
     - link text: the bracketed text of a Markdown link
     - inline HTML tag: an HTML tag inside a Markdown paragraph
     - REJECTED: inline code block / link anchor / anchor text
@@ -557,7 +556,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 106. - line terminator: a CRLF, or any other character from U+000A to U+000D,
        U+0085, U+2028, or U+2029
        ([defined](../Specs/configs.md#line-terminators))
-     - newline: the LF that ends an output line (e.g., after a JSON object)
+     - newline: the LF that terminates an output line (e.g., after a JSON
+       object)
      - REJECTED: line break / line ending / EOL (for a line terminator)
 107. - negated: the form of a non-nullary branch with `<branch-negation>`
        (`-…`), whose `<unconditional-block>` is evaluated iff its matcher fails
