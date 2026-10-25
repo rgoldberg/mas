@@ -71,6 +71,10 @@ or `non-nullary-` (uppercase: a success clause or 1 or more blocks follow),
 except name a letter that other syntax follows in its lowercase form too (e.g.,
 `m`'s `<branches>`) by its arity (e.g., `<unary-match>` & `<binary-match>`).
 
+In specs, write each example of a `<field-spec-edit>` with its
+`<field-spec-edits-section-prefix>` (e.g., `.-a,a=X`, not `-a,a=X`), because
+without it, the example is an `<absolute-config>` that means something else.
+
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 

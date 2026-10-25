@@ -576,8 +576,8 @@ A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
 whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
 field spec (as `<field-spec-insertion>` would, copying the baseline fields
 config's field spec) as its `source`, which replaces the `null` in the reference
-fields config, so that a later field spec edit modifies it (e.g., `-a,a=X`
-restores `a`, labeled `X`, while `-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
+fields config, so that a later field spec edit modifies it (e.g., `.-a,a=X`
+restores `a`, labeled `X`, while `.-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, resolved as in the
@@ -585,7 +585,7 @@ reference fields config, except that a `<named-field-spec-reference>` without a
 `<field-occurrence-index>` whose `<reference-field-name>` names no field spec
 selects a [default field spec](#default-field-specs) for field
 `<reference-field-name>` (whereas a present `<field-occurrence-index>` beyond
-its field's field specs is an error, e.g., `+x@1` when `x` has no field spec).
+its field's field specs is an error, e.g., `.+x@1` when `x` has no field spec).
 Thus, `<disable-all-sorts>` disables an inserted copy's sort (e.g., in
 `@all//0.+name`).
 
@@ -612,7 +612,7 @@ Field spec edits act as follows:
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
-    sort items without being output (e.g., `_size/1-`).
+    sort items without being output (e.g., `._size/1-`).
   - Sets $previous$ to `source`.
 - `<field-spec-removal>`:
   - Sets $previous$ to the field spec immediately before `source` in the working
@@ -681,8 +681,8 @@ A field spec with a `<sort>`:
 
 - Has its sort **disabled** by a `<sort-priority>` of `0`: its `<sort-option>`s
   are retained, but do not sort items until a positive `<sort-priority>` enables
-  them, e.g., `_size/1` or `_size/I` enables a hidden field spec's inherited
-  `/0-`, while `_size/0I` modifies its `<sort-option>`s, but its sort remains
+  them, e.g., `._size/1` or `._size/I` enables a hidden field spec's inherited
+  `/0-`, while `._size/0I` modifies its `<sort-option>`s, but its sort remains
   disabled.
 - Otherwise, takes sort precedence over field specs:
   - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
