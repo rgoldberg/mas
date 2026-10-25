@@ -27,7 +27,9 @@ In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
 make its references optional instead, since an expression that consumes no token
 is never present.
 
-In specs, make every block reference optional & give every block not marked
+In specs, make every block reference optional, except one that is a block's
+entire definition (e.g., `failure-block = <unconditional-block>`), which a
+single optional cannot define; give every block not marked
 `(* non-structural *)` a direct default of `{empty string}`, because no syntax
 references a non-structural block, so none can omit it.
 
