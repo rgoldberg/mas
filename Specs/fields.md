@@ -519,9 +519,9 @@ While a field spec's position in the reference fields config cannot be modified:
 When accessing a field spec position via an index:
 
 - If the position access reports an error, or if a `null` is present at the
-  effective index in the list (except for a
-  `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`, as
-  [specified](#relative-field-specs)), an error is reported.
+  effective index in the list for a `<field-spec-removal>` (any other
+  `<field-spec-edit>` acts on a `null` as [specified](#relative-field-specs)),
+  an error is reported.
 - Otherwise, the field spec at the effective index in the list is the referenced
   field spec.
 
