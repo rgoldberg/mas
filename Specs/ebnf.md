@@ -162,8 +162,9 @@ of the position immediately following it.
 
 A text token is the longest non-empty prefix starting at the current position
 that does not contain any candidate text terminator; it terminates immediately
-before the 1st such terminator, less any ignored outer bare whitespace; the
-terminator is then consumed as a syntax token.
+before the 1st such terminator, or at the end of the input absent one, less any
+ignored outer bare whitespace; that terminator, if any, is then consumed as a
+syntax token.
 
 ### Character Consumption
 
