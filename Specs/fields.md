@@ -122,8 +122,8 @@ Fields configs that share the same stem within the same context are
 **variants**.
 
 In a reference to a fields config (not in a name itself), `@unsuffixed` may
-directly follow a stem in place of an output format suffix, which resolves to
-the unsuffixed variant, regardless of the current output format (e.g.,
+directly follow a stem instead of an output format suffix, which resolves to the
+unsuffixed variant, regardless of the current output format (e.g.,
 `x@unsuffixed`, but not `x@json@unsuffixed`, which is an error).
 
 While a reference to a stem is [looked
