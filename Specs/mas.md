@@ -71,9 +71,8 @@ Default labels & formats favor:
   - Output is formatted as `%i`.
 
 Built-in field specs for `adamID` & `fileSizeBytes` are
-[end-justified](fields-format.md#format-transforms), as are their default field
-specs, absent a `default` named format that sets a justification; all other
-built-in field specs are start-justified.
+[end-justified](fields-format.md#format-transforms); all other built-in field
+specs are start-justified.
 
 ## Built-In Field Specs
 
@@ -114,12 +113,17 @@ following visible field specs, at the given positions:
 <!--editorconfig-checker-enable-->
 
 In every `mas` built-in fields config's user-facing variants, a field spec for a
-field that the table above lists has that row's label & format, as does such a
-field's default field spec (e.g., for an unlisted field) wherever the base
-fields config is, or transitively
-[extends](configs.md#referencing-named-configs), one of those variants; any
-other field's built-in field spec is labeled by its field name & formatted as
-`%i`.
+field that the table above lists has that row's label & format; any other
+field's built-in field spec is labeled by its field name & formatted as `%i`.
+
+Wherever the base fields config is, or transitively
+[extends](configs.md#referencing-named-configs), one of those variants, a
+field's [default field spec](fields.md#default-field-specs) (e.g., for an
+unlisted field) has its built-in field spec's label; it also has its built-in
+field spec's format & justification, absent a custom `default` named format,
+which otherwise sets both (e.g., for a custom `default` of
+`.centerStartJustify..uppercase`, `mas list --fields @all` outputs `bundleID`
+labeled `Bundle ID`, uppercased & center-justified).
 
 ## Price Sorting
 

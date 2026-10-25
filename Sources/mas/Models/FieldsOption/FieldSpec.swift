@@ -941,8 +941,8 @@ private extension FieldSpecsBuilder {
 			throw .nonexistentField(name)
 		}
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": justify
-		//  per a custom `default` named format's justification, if it sets one
+		// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": format &
+		//  justify per a custom `default` named format, if one exists
 		return isMachineFacing ? .default(forName: name) : builtInFieldSpec(forFieldNamed: name)
 	}
 
