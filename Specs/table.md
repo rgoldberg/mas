@@ -63,15 +63,15 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 - `h`: no header row.
 - `H`: a header row of field labels, each justified as its column is (per its
   field spec's [`<justify>`](fields-format.md#format-transforms)).
-  `<style-specifier>`, if given, styles the entire header row, which is then
-  preceded by [`<style-prefix>`](#style-prefix), `<style-specifier>` &
-  [`<style-suffix>`](#style-suffix), and followed by
-  [`<style-reset>`](#style-reset) (e.g., with their defaults, `1` for bold,
-  `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header row
-  is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so that a
-  mistyped setting is not silently consumed as `<style-specifier>` text (e.g.,
-  `--table-config Hb`); escape it to include it (e.g., `--table-config H\b`). A
-  `<style-specifier>` that contains a [line
+  `<style-specifier>`, if given, styles the entire header row:
+  [`<style-prefix>`](#style-prefix), `<style-specifier>` &
+  [`<style-suffix>`](#style-suffix) precede it, and
+  [`<style-reset>`](#style-reset) follows it (e.g., with their defaults, `1` for
+  bold, `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header
+  row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so
+  that a mistyped setting is not silently consumed as `<style-specifier>` text
+  (e.g., `--table-config Hb`); escape it to include it (e.g.,
+  `--table-config H\b`). A `<style-specifier>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
   each row that it styles.
 

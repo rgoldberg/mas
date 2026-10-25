@@ -276,7 +276,7 @@ is absent & the format evaluates to it (e.g., via `%i`, `%u`, or `.round`,
 because an absent value remains unchanged through every
 [transform](fields-format.md#value-coercion)).
 
-An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does, and is
+An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does; it is
 [coerced to a string](fields-format.md#value-coercion) as an empty string.
 
 Output depends on the formatted value, not on the field value, except that

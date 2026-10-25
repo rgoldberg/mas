@@ -57,10 +57,10 @@ indentation = ^{text: only spaces & tabs}^ (* default: "  " *)
 - `p`: each top-level JSON value is rendered on 1 line, with no whitespace
   outside strings.
 - `P`: each top-level JSON value is rendered with each object member & each
-  array element on its own line, indented by 1 `<indentation>` per nesting
-  level, and with 1 space after each `:` between a key & its value (e.g., `P:`
-  for 2 spaces, `P<TAB>:` for a tab, where `<TAB>` is a literal tab character,
-  e.g., `$'P\t:'` in zsh).
+  array element on its own line, indented by 1 `<indentation>` per nesting level
+  (e.g., `P:` for 2 spaces, `P<TAB>:` for a tab, where `<TAB>` is a literal tab
+  character, e.g., `$'P\t:'` in zsh); each `:` between a key & its value is
+  followed by 1 space.
 
 ## Top-Level Structure
 

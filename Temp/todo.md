@@ -119,7 +119,7 @@ patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
    alternative argument form, distinguished from `<number-format-arguments>`
    (which would remain valid) by a leading character that no locale identifier
    can contain.
-2. They overlap `round` & `scale`'s fraction digits, and are base 10 only.
+2. They overlap `round` & `scale`'s fraction digits, and they are base 10 only.
 3. They would also select an output notation (positional, `e`, or `E`), which is
    not supported: every number transform retains its input's notation, except
    `scale`, which always renders positional notation.
@@ -193,7 +193,7 @@ member, `name@@-1` for the last), which needs:
    doubles `/`), never `#`, which zsh's `EXTENDED_GLOB` interprets.
 2. Syntax for all members, or an absent member index meaning the default (each
    member for key-value & JSON output, the last for a table cell & a sort key).
-3. Which member a sort key uses if multiple are selected, and whether selecting
+3. Which member a sort key uses if multiple are selected & whether selecting
    multiple is an error for table output.
 4. How `<document-order>` orders selected members.
 
