@@ -259,8 +259,9 @@ not as a separate `<item-separator-setting>`.
 
 ## Implied Settings
 
-- `f` implies a leading spacing of `:` (i.e., `L\::`), if none is otherwise set,
-  so each row is `key: value`.
+- An `f` that no later `<leader-setting>` overrides implies a leading spacing of
+  `:` (i.e., `L\::`), if none is otherwise set, so each row is `key: value`
+  (e.g., `fF:` implies no leading spacing).
 
 A setting that explicitly sets an axis (e.g., `l`) always overrides that axis's
 implied setting, regardless of where in `<key-value-config>` it appears.
