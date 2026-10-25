@@ -226,9 +226,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 38. - multiple
     - 1 or more
     - REJECTED: two or more / 2 or more / several / one or more
-39. - order: sequence items, either manually ordered or sorted
+39. - order: arrange items, either manually or by sorting them
     - sort: order items by comparing them
-    - sequence: only the EBNF senses (escape sequence; juxtaposition)
+    - sequence: an EBNF sequence (juxtaposition), an escape sequence, or a
+      series of elements (e.g., "a maximal sequence of segments")
     - REJECTED: ordering / sequence (as a synonym for order)
 40. - numeric: adjective
     - number: noun
