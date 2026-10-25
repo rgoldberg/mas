@@ -250,7 +250,7 @@ for others.
 A reference to a nonexistent field is an error on the command line, but a
 persisted fields config, which may apply to multiple commands, ignores each
 `<absolute-field-spec>` & `<field-spec-edit>` that references one (e.g., a `mas`
-context `default` of `@standard.name=App` ignores `name=App` for `mas config`,
+context `default` of `@standard.name=App` ignores `.name=App` for `mas config`,
 whose item has no `name` field).
 
 ## Members
