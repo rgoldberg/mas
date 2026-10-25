@@ -681,7 +681,8 @@ A field spec with a `<sort>`:
 - Has its sort **disabled** by a `<sort-priority>` of `0`: its `<sort-option>`s
   are retained, but do not sort items until a positive `<sort-priority>` enables
   them, e.g., `_size/1` or `_size/I` enables a hidden field spec's inherited
-  `/0-`, while `_size/0I` changes its `<sort-option>`s, but keeps it disabled.
+  `/0-`, while `_size/0I` modifies its `<sort-option>`s, but its sort remains
+  disabled.
 - Otherwise, takes sort precedence over field specs:
   - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
     priority).
