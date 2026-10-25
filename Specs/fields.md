@@ -520,8 +520,8 @@ When accessing a field spec position via an index:
 
 - If the position access reports an error, or if a `null` is present at the
   effective index in the list for a `<field-spec-removal>` (any other
-  `<field-spec-edit>` acts on a `null` as [specified](#relative-field-specs)),
-  an error is reported.
+  `<field-spec-edit>` applies to a `null` as
+  [specified](#relative-field-specs)), an error is reported.
 - Otherwise, the field spec at the effective index in the list is the referenced
   field spec.
 
