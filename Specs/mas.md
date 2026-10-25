@@ -38,7 +38,7 @@ variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 `mas list`).
 
 For the same `mas` leaf context & output format suffix (or its absence), every
-listed field is in each of `all`, `none` & the [built-in
+listed field has a field spec in each of `all`, `none` & the [built-in
 standard](configs.md#immutable-built-in-named-configs):
 
 - `all`: Every field spec is visible, as are unlisted fields.
