@@ -507,8 +507,8 @@ field specs, in reference fields config order, filtered to include:
 
 E.g., if the baseline fields config's field specs are `x,a=aa,b,a=AA`:
 
-- `a@2` references `a=AA`.
-- `@2` references `a=aa`.
+- `a@2` in `.a@2` references `a=AA`.
+- `@2` in `.@2` references `a=aa`.
 
 While a field spec's position in the reference fields config cannot be modified:
 
