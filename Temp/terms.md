@@ -122,6 +122,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       reject / significant / insignificant (for whitespace)
 24. - disable
     - enable
+    - disabled sort prefix: a `0` that disables a sort
+      (`<disabled-sort-prefix>`)
 25. - disabled
     - invalid
     - REJECTED: inoperative / unused / unreachable / illegal

@@ -194,6 +194,7 @@ private extension MASTests {
 			("1/", .invalidSortOption("/")),
 			("1/O", .invalidSortOption("/")),
 			("/-", .invalidSortOption("/")),
+			("5 0", .invalidSortOption("0")),
 		],
 	)
 	func `reports a sort syntax error`(sort: String, error: ParsingError) {
@@ -202,13 +203,13 @@ private extension MASTests {
 
 	@Test
 	func `parses a sort-priority beyond every fixed-width integer's range`() throws {
-		#expect(try parsedSortSpec("0018446744073709551616").priority == BigUInt(1) << 64)
+		#expect(try parsedSortSpec("18446744073709551616").priority == BigUInt(1) << 64)
 	}
 
 	@Test
 	func `an omitted option retains the working value, and an omitted sort-option-set its whole working value`()
 	throws {
-		let existing = SortSpec(priority: 1, optionSet: try #require(.init(optionSetFrom: "i-")))
+		let existing = SortSpec(priority: 1, isEnabled: true, optionSet: try #require(.init(optionSetFrom: "i-")))
 		let retained = try parsedSortSpec("2", existing: existing)
 		#expect(retained.priority == 2)
 		#expect(retained.optionSet == existing.optionSet)
@@ -220,20 +221,26 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("-", nil as BigUInt?, BigUInt(100)),
-			("-", 0, 100),
-			("-", 3, 3),
-			("0-", 3, 0),
-			("2-", 0, 2),
+			("-", SortSpec?.none, BigUInt(100), true),
+			("-", .init(priority: 3, isEnabled: false, optionSet: .default), 3, true),
+			("0-", .init(priority: 3, isEnabled: true, optionSet: .default), 3, false),
+			("0", nil, 100, false),
+			("05-", .init(priority: 3, isEnabled: true, optionSet: .default), 5, false),
+			("005", nil, 5, false),
+			("0 0 5", nil, 5, false),
+			("2-", .init(priority: 3, isEnabled: false, optionSet: .default), 2, true),
+			("50", nil, 50, true),
 		],
 	)
-	func `an omitted sort-priority retains a positive working value, else is the default`(
+	func `an omitted sort-priority retains the working value, else is the default, & a 0 prefix disables the sort`(
 		sort: String,
-		existingPriority: BigUInt?,
+		existing: SortSpec?,
 		priority: BigUInt,
+		isEnabled: Bool,
 	) throws {
-		let existing = existingPriority.map { SortSpec(priority: $0, optionSet: .default) }
-		#expect(try parsedSortSpec(sort, existing: existing).priority == priority)
+		let sortSpec = try parsedSortSpec(sort, existing: existing)
+		#expect(sortSpec.priority == priority)
+		#expect(sortSpec.isEnabled == isEnabled)
 	}
 
 	@Test

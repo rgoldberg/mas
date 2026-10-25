@@ -457,12 +457,14 @@ item-sort-section-prefix = "//"
 item-sort-option-set = <item-sort-option>+
 item-sort-option     = <disable-all-sorts> | <direction>
 
-disable-all-sorts = "0" (* mnemonic: sort priority 0 *)
+disable-all-sorts = "0" (* mnemonic: as <disabled-sort-prefix> *)
 ```
 
-`<disable-all-sorts>` sets `<sort-priority>` to `0` for each field spec that has
-a `<sort>`, disabling all sorting without affecting any `<sort-option-set>`; a
-subsequent `<field-spec-edit>` may re-enable a field spec's sort.
+`<disable-all-sorts>` disables each field spec's `<sort>`, as
+`<disabled-sort-prefix>` does, retaining its `<sort-priority>` &
+`<sort-option-set>`; a subsequent `<field-spec-edit>` may re-enable a field
+spec's sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
+`<sort-priority>` of `5`).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
@@ -658,7 +660,10 @@ label = {text} (* direct default: {empty string} *)
 sort-modifier        = <sort-modifier-prefix> [ <sort> ]
 sort-modifier-prefix = "/"
 
-sort = <sort-priority> | [ <sort-priority> ] <sort-option-set>
+sort =
+  <disabled-sort-prefix>+ [ <sort-priority> ] [ <sort-option-set> ]
+  | <sort-priority> [ <sort-option-set> ]
+  | <sort-option-set>
 ```
 
 - A **sort key** is a field spec with an enabled `<sort>`, which affects item
@@ -670,31 +675,33 @@ sort = <sort-priority> | [ <sort-priority> ] <sort-option-set>
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
+disabled-sort-prefix = "0" (* mnemonic: 0, as off *)
+
 sort-priority =
-  {non-negative integer}
-  (* default: {<sort-priority> for the corresponding field spec in the working fields config, iff positive; otherwise, 100} *)
+  {positive integer without leading 0s}
+  (* default: {<sort-priority> of the corresponding field spec's <sort> in the working fields config, if any; otherwise, 100} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A field spec with a `<sort>`:
+A `<sort>` that starts with `<disabled-sort-prefix>` **disables** its field
+spec's sort (e.g., `05` disables a sort whose `<sort-priority>` is `5`, as does
+`005`): its `<sort-priority>` & `<sort-option>`s are retained, but do not sort
+items until a `<sort>` without `<disabled-sort-prefix>` enables them, e.g.,
+`._size/1` or `._size/I` enables a hidden field spec's inherited `/0-`, while
+`._size/0I` modifies its `<sort-option>`s, but its sort remains disabled.
 
-- Has its sort **disabled** by a `<sort-priority>` of `0`: its `<sort-option>`s
-  are retained, but do not sort items until a positive `<sort-priority>` enables
-  them, e.g., `._size/1` or `._size/I` enables a hidden field spec's inherited
-  `/0-`, while `._size/0I` modifies its `<sort-option>`s, but its sort remains
-  disabled.
-- Otherwise, takes sort precedence over field specs:
-  - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
-    priority).
-  - With the same `<sort-priority>` that succeed it in the order of the field
-    specs in the resolved fields config, regardless of the field order.
+A field spec with an enabled `<sort>` takes sort precedence over field specs:
+
+- With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
+  priority).
+- With the same `<sort-priority>` that succeed it in the order of the field
+  specs in the resolved fields config, regardless of the field order.
 
 Thus, a `<sort-priority>` below `100` takes sort precedence over every sort that
-omits its `<sort-priority>` & inherits no positive one, while one above `100`
-cedes it (e.g., `--fields name/I,version/1I` sorts items by `version`, then by
-`name`, while `--fields name/I,version/101I` sorts them by `name`, then by
-`version`).
+omits its `<sort-priority>` & inherits none, while one above `100` cedes it
+(e.g., `--fields name/I,version/1I` sorts items by `version`, then by `name`,
+while `--fields name/I,version/101I` sorts them by `name`, then by `version`).
 
 ##### Sort Options
 

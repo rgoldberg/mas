@@ -31,16 +31,19 @@ private extension MASTests {
 	func `parses none as all with every field spec hidden & its sort disabled, which an overlay unhides`() throws {
 		let none = try parseFieldsConfig("@none")
 		#expect(none.fieldSpecs.map(\.isHidden) == [true, true])
-		#expect(none.fieldSpecs.map(\.sortSpec?.priority) == [0, nil])
+		#expect(none.fieldSpecs.map(\.sortSpec?.priority) == [1000, nil])
+		#expect(none.fieldSpecs.map(\.sortSpec?.isEnabled) == [false, nil])
 		#expect(none.itemSort.keys.isEmpty)
 		let specs = try parseFieldSpecs("@none.bundleID")
 		#expect(specs.filter { !$0.isHidden }.map(\.name) == ["bundleID"])
 	}
 
 	@Test
-	func `a sort without a priority enables none's sorts at the default priority, unless given 0`() throws {
-		#expect(try parseFieldsConfig("@none.adamID/I,bundleID/I").itemSort.keys.map(\.sortSpec.priority) == [100, 100])
+	func `a sort without a priority enables none's sorts at their own priority, else the default, unless 0-prefixed`()
+	throws {
+		#expect(try parseFieldsConfig("@none.adamID/I,bundleID/I").itemSort.keys.map(\.sortSpec.priority) == [1000, 100])
 		#expect(try parseFieldsConfig("@none.adamID/0I,bundleID/0I").itemSort.keys.isEmpty)
+		#expect(try parseFieldsConfig("@none.adamID/05I").fieldSpecs[0].sortSpec?.priority == 5)
 	}
 
 	@Test
@@ -292,10 +295,11 @@ private extension MASTests {
 	}
 
 	@Test
-	func `item-sort disable-all-sorts sets priority to 0 but retains sort options`() throws {
+	func `item-sort disable-all-sorts disables every sort but retains its priority & sort options`() throws {
 		let config = try parseFieldsConfig("//0")
 		let sortSpec = try #require(config.fieldSpecs[0].sortSpec)
-		#expect(sortSpec.priority == 0)
+		#expect(!sortSpec.isEnabled)
+		#expect(sortSpec.priority == 1000)
 		#expect(sortSpec.optionSet.caseSensitivity == .sensitive) // Fixture default, retained
 		#expect(config.itemSort.keys.isEmpty)
 	}
@@ -307,11 +311,17 @@ private extension MASTests {
 		#expect(config.itemSort.keys.map(\.fieldSpec.name) == ["adamID"])
 	}
 
+	@Test
+	func `field spec edit without a priority re-enables a sort disabled by disable-all-sorts at its own priority`()
+	throws {
+		#expect(try parseFieldsConfig("//0.adamID/I").itemSort.keys.map(\.sortSpec.priority) == [1000])
+	}
+
 	@Test(arguments: ["//0.+adamID", "//0.-adamID,+adamID", "//0.-adamID,_adamID"])
 	func `disable-all-sorts disables the sort of a field spec copied from the baseline fields config`(value: String)
 	throws {
 		let config = try parseFieldsConfig(value)
-		#expect(config.fieldSpecs.compactMap(\.sortSpec).allSatisfy { $0.priority == 0 })
+		#expect(config.fieldSpecs.compactMap(\.sortSpec).allSatisfy { !$0.isEnabled })
 		#expect(config.itemSort.keys.isEmpty)
 	}
 
@@ -356,7 +366,7 @@ private extension MASTests {
 			name: "price",
 			label: "Price",
 			format: .default(fieldName: "price"),
-			sortSpec: .init(priority: 2, optionSet: .default),
+			sortSpec: .init(priority: 2, isEnabled: true, optionSet: .default),
 			justification: .end,
 		)
 		let all = BaseIncludesAllFieldsConfig(fieldSpecs: [price])
@@ -1047,7 +1057,7 @@ private let adamIDFieldSpec = FieldSpec(
 	name: "adamID",
 	label: "adamID",
 	format: .default(fieldName: "adamID"),
-	sortSpec: .init(priority: 1000, optionSet: .default),
+	sortSpec: .init(priority: 1000, isEnabled: true, optionSet: .default),
 )
 private let bundleIDFieldSpec =
 	FieldSpec(name: "bundleID", label: "bundleID", format: .default(fieldName: "bundleID"), sortSpec: nil)

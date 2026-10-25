@@ -54,13 +54,12 @@ struct ItemSortKey: Equatable { // swiftlint:disable:this one_declaration_per_fi
 }
 
 extension [FieldSpec] {
-	/// The sort keys of these field specs' enabled `<sort>`s: a `<sort-priority>`
-	/// of `0` disables a field spec's sort, retaining its `<sort-option-set>`
-	/// without sorting items.
+	/// The sort keys of these field specs' enabled `<sort>`s: a disabled sort
+	/// retains its `<sort-priority>` & `<sort-option-set>` without sorting items.
 	var enabledSortKeys: [ItemSortKey] {
 		compactMap { fieldSpec in
 			fieldSpec.sortSpec.flatMap { sortSpec in
-				sortSpec.priority == 0 ? nil : .init(fieldSpec: fieldSpec, sortSpec: sortSpec)
+				sortSpec.isEnabled ? .init(fieldSpec: fieldSpec, sortSpec: sortSpec) : nil
 			}
 		}
 	}
@@ -68,15 +67,15 @@ extension [FieldSpec] {
 
 extension FieldSpec {
 	/// This field spec unchanged if it has no `sortSpec` (nothing to disable);
-	/// otherwise, its `sortSpec`'s `<sort-priority>` set to `0` (disabled),
-	/// retaining its `<sort-option-set>`.
+	/// otherwise, its `sortSpec` disabled, retaining its `<sort-priority>` &
+	/// `<sort-option-set>`.
 	var withSortDisabled: Self {
 		sortSpec.map { sortSpec in
 			.init(
 				name: name,
 				label: label,
 				format: format,
-				sortSpec: sortSpec.withPriority(0),
+				sortSpec: sortSpec.disabled,
 				isHidden: isHidden,
 				isSynthesized: isSynthesized,
 				justification: justification,

@@ -13,14 +13,17 @@ internal import JSONAST
 
 /// A field spec's `<sort>`.
 struct SortSpec: Equatable {
-	/// `<sort-priority>`: `0` disables the sort.
+	/// `<sort-priority>`.
 	let priority: BigUInt
+	/// `false` iff `<sort>` starts with `<disabled-sort-prefix>`: a disabled sort
+	/// retains `priority` & `optionSet`, but does not sort items.
+	let isEnabled: Bool
 	/// `<sort-option-set>`.
 	let optionSet: SortOptionSet
 
-	/// A copy with `priority` replaced.
-	func withPriority(_ priority: BigUInt) -> Self {
-		.init(priority: priority, optionSet: optionSet)
+	/// A disabled copy.
+	var disabled: Self {
+		.init(priority: priority, isEnabled: false, optionSet: optionSet)
 	}
 }
 
@@ -205,24 +208,30 @@ struct SortOptionSet: Equatable { // swiftlint:disable:this one_declaration_per_
 
 extension SortSpec { // swiftlint:disable:this file_types_order
 	/// Parses a `<sort-modifier>`'s payload (after its `<sort-modifier-prefix>`):
-	/// `nil` iff `<sort>` is absent (its direct default). An omitted
-	/// `<sort-priority>` retains `existing`'s iff positive, else is
-	/// `defaultSortPriority`. An option omitted from a present
-	/// `<sort-option-set>` retains `existing`'s value, or `defaultOptionSet`'s
-	/// absent `existing`.
+	/// `nil` iff `<sort>` is absent (its direct default). 1 or more
+	/// `<disabled-sort-prefix>`es disable the sort. An omitted `<sort-priority>`
+	/// retains `existing`'s, if any, else is `defaultSortPriority`. An option
+	/// omitted from a present `<sort-option-set>` retains `existing`'s value, or
+	/// `defaultOptionSet`'s absent `existing`.
 	static func parsed(_ input: inout Substring, existing: Self?, defaultOptionSet: SortOptionSet)
 	throws(ParsingError) -> Self? {
 		skipWhitespace(&input)
 		guard let first = input.first, first != fieldSpecSeparator else {
 			return nil // `<sort>`'s direct default
 		}
+		let isEnabled = first != disabledSortPrefix
+		while input.first == disabledSortPrefix {
+			input.removeFirst()
+			skipWhitespace(&input)
+		}
 		let priority = parseIntegerText(&input, isSigned: false).flatMap { BigUInt($0) }
-			?? existing.flatMap { $0.priority == 0 ? nil : $0.priority }
+			?? existing?.priority
 			?? defaultSortPriority
 		skipWhitespace(&input)
 		let optionSetDefaults = existing?.optionSet ?? defaultOptionSet
 		return .init(
 			priority: priority,
+			isEnabled: isEnabled,
 			optionSet: isAtSortOptionSetEnd(input, terminatorSet: sortModifierTerminatorSet)
 				? optionSetDefaults
 				: try SortOptionSet.parsed(&input, terminatorSet: sortModifierTerminatorSet, defaults: optionSetDefaults),
@@ -1009,9 +1018,10 @@ private let symbolCategorySet = Set([
 
 // MARK: - Constants
 
-/// The `<sort-priority>` of a `<sort>` that omits it, absent a positive one in
-/// the working fields config.
+/// The `<sort-priority>` of a `<sort>` that omits it, absent one in the working
+/// fields config.
 private let defaultSortPriority = BigUInt(100)
+private let disabledSortPrefix = Character("0")
 private let sortOptionTerminator = Character(":")
 
 /// The CLDR root locale, whose collation the canonical conventions compare text

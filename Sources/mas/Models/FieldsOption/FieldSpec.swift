@@ -244,7 +244,7 @@ func fetchFieldNames(
 			)
 			.fieldSpecs
 			.compactMap { fieldSpec in
-				fieldSpec.isSynthesized || fieldSpec.isHidden && (fieldSpec.sortSpec?.priority ?? 0) == 0
+				fieldSpec.isSynthesized || fieldSpec.isHidden && fieldSpec.sortSpec?.isEnabled != true
 					? nil
 					: fieldSpec.name
 			},
@@ -586,10 +586,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 
 	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
 	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
-	/// `<disable-all-sorts>` sets each field spec's `<sort-priority>` to `0`,
-	/// retaining its `<sort-option-set>`; `<direction>` is the item-sort tiebreak
-	/// (input order / reverse input order). An absent section or `<direction>`
-	/// retains `inheritedDirection`.
+	/// `<disable-all-sorts>` disables each field spec's `<sort>`, retaining its
+	/// `<sort-priority>` & `<sort-option-set>`; `<direction>` is the item-sort
+	/// tiebreak (input order / reverse input order). An absent section or
+	/// `<direction>` retains `inheritedDirection`.
 	mutating func parseItemSortSection(
 		_ input: inout Substring,
 		inheriting inheritedDirection: SortOptionSet.Direction,

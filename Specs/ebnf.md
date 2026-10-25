@@ -322,12 +322,13 @@ their **lexical form**: the text that may denote them, whether valid or not
 (e.g., any run of digits for `{integer from 2 to 36}`).
 
 An **integer description** describes integers (e.g., `{integer}`,
-`{non-negative integer}`, or `{integer from 2 to 36}`). Its lexical form is 1 or
-more ASCII digits (`0` to `9`, leading `0`s allowed), preceded by an optional
-sign (`+` or `-`) iff it describes any negative integer. Its value is the
-decimal integer that the digits denote, negated iff the sign is `-` (e.g., `-0`
-is `0`), constrained by nothing but the description (e.g., `{integer}` has no
-minimum or maximum).
+`{non-negative integer}`, `{integer from 2 to 36}`, or
+`{positive integer without leading 0s}`). Its lexical form is 1 or more ASCII
+digits (`0` to `9`), the 1st of which is not `0` iff it describes integers
+without leading `0`s, preceded by an optional sign (`+` or `-`) iff it describes
+any negative integer. Its value is the decimal integer that the digits denote,
+negated iff the sign is `-` (e.g., `-0` is `0`), constrained by nothing but the
+description (e.g., `{integer}` has no minimum or maximum).
 
 `DESCRIPTION` must not:
 
