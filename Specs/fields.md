@@ -618,7 +618,8 @@ Field spec edits act as follows:
   - Sets $previous$ to the field spec immediately before `source` in the working
     fields config, or, if none precedes `source`, to its start.
   - Removes `source` from the working fields config.
-  - Replaces `source` with `null` in the reference fields config.
+  - Replaces `source` with `null` in the reference fields config, if it is
+    there.
 
 ### Field Modifiers
 
