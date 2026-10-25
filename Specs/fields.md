@@ -505,7 +505,7 @@ field specs, in reference fields config order, filtered to include:
   `<reference-field-name>`, or the `null`s that replaced them.
 - For `<field-spec-index>`: all field specs.
 
-E.g., in `x,a=aa,b,a=AA`:
+E.g., if the baseline fields config's field specs are `x,a=aa,b,a=AA`:
 
 - `a@2` references `a=AA`.
 - `@2` references `a=aa`.
