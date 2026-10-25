@@ -41,6 +41,11 @@ A **line terminator** is a CRLF (U+000D followed by U+000A, which is 1 line
 terminator), or any other character from U+000A to U+000D, U+0085, U+2028, or
 U+2029.
 
+## Width
+
+Text's **width** is its terminal display width: the sum of its characters'
+`wcwidth`s, each negative one (e.g., a tab's) counting as 0.
+
 ## Option Values
 
 An option's **value** is the rest of its command-line argument after `=` (e.g.,

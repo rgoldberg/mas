@@ -411,7 +411,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - style suffix: follows a style specifier (`<style-suffix>`)
     - style reset: follows a styled string (`<style-reset>`)
     - REJECTED: style terminator / style end
-79. - width: text's terminal display width (per `wcwidth`)
+79. - width: text's terminal display width
+      ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - space-fill: fill any remaining width with spaces
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)

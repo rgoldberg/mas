@@ -170,13 +170,14 @@ separator-pattern = ^{text: no line terminators}^ (* default: "-" *)
 
 - `s`: no separator line.
 - `S`: a line before the 1st data row, after the header row, if any.
-  `<separator-pattern>` is repeated to fill the line's width, truncated before
-  the 1st character that would exceed that width; spaces fill any remaining
-  width (e.g., when that character is wide, such as `中`). A 0-width
-  `<separator-pattern>` (e.g., a tab) is printed once, with no space-fill,
-  because no number of repetitions can fill any width. A `<separator-pattern>`
-  that contains a [line terminator](configs.md#line-terminators) is invalid,
-  because it would split the separator line.
+  `<separator-pattern>` is repeated to fill the line's
+  [width](configs.md#width), truncated before the 1st character that would
+  exceed that width; spaces fill any remaining width (e.g., when that character
+  is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
+  printed once, with no space-fill, because no number of repetitions can fill
+  any width. A `<separator-pattern>` that contains a [line
+  terminator](configs.md#line-terminators) is invalid, because it would split
+  the separator line.
 
 ## Broken
 

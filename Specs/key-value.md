@@ -164,11 +164,11 @@ leader-pattern = ^{text: no line terminators}^ (* default: "▁" *)
 - `f`: an empty leader, so an item's values are not aligned; it [implies a
   leading spacing](#implied-settings).
 - `F`: a leader between each key & its value, aligning all of an item's values.
-  `<leader-pattern>` is repeated to fill the leader's width, truncated before
-  the 1st character that would exceed that width; spaces fill any remaining
-  width (e.g., when that character is wide, such as `中`). A leader's width is
-  the width of its item's widest key, less the width of its own key, plus the
-  width of `<leader-pattern>`, so the widest key's leader is 1
+  `<leader-pattern>` is repeated to fill the leader's [width](configs.md#width),
+  truncated before the 1st character that would exceed that width; spaces fill
+  any remaining width (e.g., when that character is wide, such as `中`). A
+  leader's width is the width of its item's widest key, less the width of its
+  own key, plus the width of `<leader-pattern>`, so the widest key's leader is 1
   `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is printed
   once, with no space-fill, because no number of repetitions can fill any width.
   A `<leader-pattern>` that contains a [line
