@@ -57,7 +57,10 @@ A `mas` built-in fields config has:
 For the same output format, its unsuffixed, `@table` & `@key-value` variants are
 identical.
 
-The built-in standard's `@json` variant is a reference to `all@json`.
+The built-in standard's `@json` variant is a reference to `all@json`, so, unlike
+the [generic built-in
+standard](fields.md#immutable-built-in-named-fields-configs), it outputs
+unlisted fields & sorts its field specs by label.
 
 Default labels & formats favor:
 
