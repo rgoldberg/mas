@@ -263,7 +263,8 @@ each item as soon as it is read, unless item sorting reorders items, which
 
 1. Each item to output only its own unlisted fields: mas gives every item a
    field spec for each unlisted field of any item, which outputs the same only
-   while the `default` named format renders an absent field as nothing.
+   while every default field spec's format gives an absent field an absent
+   formatted value.
 
 ### Unlisted Field Visibility Syntax
 
