@@ -94,5 +94,9 @@ they take a payload 1 letter: lowercase for the alternative without a payload
 (e.g., off, or the default), uppercase for the one with a payload (e.g., `h` /
 `H`).
 
+In specs, call a setting that nothing overrides **effective** (e.g., "an
+effective `f`"), rather than describing it as not overridden (e.g., not "an `f`
+that no later `<leader-setting>` overrides").
+
 In `Specs/ebnf.md`, keep the **Required** (`&`) outer bare whitespace treatment,
 even while no syntax uses it.

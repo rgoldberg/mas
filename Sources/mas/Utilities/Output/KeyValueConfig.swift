@@ -144,7 +144,7 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		keyStyling: keyStyling,
 		keyStyleSequences: .init(prefix: keyStylePrefix, suffix: keyStyleSuffix, reset: keyStyleReset),
 		leaderPattern: leaderPattern,
-		// `f` implies a leading spacing of `:`, if none is otherwise set
+		// An effective `f` implies a `:` leading spacing, if none is otherwise set
 		leadingSpacing: leadingSpacing ?? (leaderPattern == nil ? ":" : KeyValueConfig.default.leadingSpacing),
 		trailingSpacing: trailingSpacing,
 		itemSeparatorLine: itemSeparatorLine,

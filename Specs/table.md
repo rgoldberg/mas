@@ -230,9 +230,9 @@ text, not as a separate `<broken-setting>`.
 ## Implied Settings
 
 - `b` / `u` imply a separator line, if none is otherwise set: `S`.
-- Any separator line (explicit or implied) implies a header row, if none is
+- An effective `S` (explicit or implied) implies a header row, if none is
   otherwise set: `H` (unstyled), because a separator line's sole purpose is to
-  separate a header from the data.
+  separate a header from the data (e.g., `Ss` implies none).
 
 A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
 overrides that axis's implied setting, regardless of where in `<table-config>`
