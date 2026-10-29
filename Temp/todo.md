@@ -69,7 +69,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
    2. Resolving a config that references its same-named ancestor, including a
       root context `default` that references `default`.
    3. A persisted table, key-value, or JSON config
-      [extending](../Specs/configs.md#referencing-named-configs) `default`.
+      [extending](../Specs/configs.md#referencing-named-configs) `default` &
+      applying its own [implied settings](../Specs/configs.md#implied-settings).
    4. Reporting reference cycles & a custom config named `standard` or any
       built-in config's name.
    5. A custom `default` (currently always `standard`) & each context's

@@ -184,8 +184,9 @@ overlays no setting (e.g., `--json-config=` ≡ `--json`).
 Output sources from the context stack's [`default`](#default-configs) output
 config of its output format's kind; an output config option's value is overlaid
 on it for the current command line only, without persistently affecting it. Each
-setting's [inherited value](ebnf.md#inherited-comments) is the `default`
-config's value for it.
+setting's [inherited value](ebnf.md#inherited-comments) is the value for it of
+the config that its output config extends: for an output config option's value,
+the `default` config.
 
 Each kind's [built-in standard](#immutable-built-in-named-configs) output config
 sets every setting to its default.
@@ -198,13 +199,14 @@ config).
 
 ### Implied Settings
 
-A kind may define **implied settings**, which settings in an output config
-option's value imply (e.g., a table's [implied
-settings](table.md#implied-settings)).
+A kind may define **implied settings**, which settings in an output config imply
+(e.g., a table's [implied settings](table.md#implied-settings)), whether that
+output config is persisted or an output config option's value (e.g., a persisted
+`default` table config of `b` implies `S`, which implies `H`).
 
 A setting that explicitly sets an axis, even to "off" (e.g., a table's `h`),
-always overrides that axis's implied setting, regardless of where in the output
-config option's value it appears.
+always overrides that axis's implied setting, regardless of where in its output
+config it appears.
 
 An implied setting overrides an inherited setting iff the inherited setting is
 payloadless, so an implied setting never overrides an inherited payload.
