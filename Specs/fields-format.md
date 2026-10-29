@@ -7,12 +7,9 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline> | [ <format-transform-pipeline> ] -<format-template> (* direct default: {empty string}; inherited *)
+format-block = <pipeline> | <format-template> (* direct default: {empty string}; inherited *)
 
-pipeline        =
-  <named-format>
-  | [ <named-format> ] <format-transform-pipeline>
-  | [ <named-format> ] [ <format-transform-pipeline> ] <value-transform-pipeline>
+pipeline        = <named-format> | [ <named-format> ] <value-transform-pipeline>
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
 
 template-text = ~^{text}^~
@@ -26,7 +23,7 @@ Each of the following evaluates to a value whose type is:
 
 - Block: its pipeline's or template's type.
 - Pipeline: its last value transform's output's type; absent any, its named
-  format's value's type, or else its input's type.
+  format's value's type.
 - Placeholder: its inserted value's type.
 - Template: if solely 1 placeholder, that placeholder's type; otherwise, string.
 - Template text: string.
@@ -66,12 +63,12 @@ unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-f
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-named-format               = <name-prefix> <format-name> (* only for: name of a format conforming to <format-block> *)
-named-string-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <string-block> *)
-named-number-format        = <name-prefix> <format-name> (* only for: name of a format conforming to <number-block> *)
-named-date-format          = <name-prefix> <format-name> (* only for: name of a format conforming to <date-block> *)
-named-time-only-format     = <name-prefix> <format-name> (* only for: name of a format conforming to <time-only-block> *)
-named-unconditional-format = <name-prefix> <format-name> (* only for: name of a format conforming to <unconditional-block> *)
+named-format               = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <format-block> *)
+named-string-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <string-block> *)
+named-number-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <number-block> *)
+named-date-format          = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <date-block> *)
+named-time-only-format     = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <time-only-block> *)
+named-unconditional-format = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <unconditional-block> *)
 
 named-format-reference =
   <named-format>
@@ -82,26 +79,21 @@ named-format-reference =
   | <named-unconditional-format>
   (* non-structural *)
 
-format-name = {text: format name}
 name-prefix = ":"!
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A **named format** is a [named config](configs.md#named-configs) of the format
-[config kind](configs.md#config-kinds), which a `<named-format-reference>`
-references by its name, its **format name** (e.g., `:x` references `x`).
-
-The format kind's [built-in
-standard](configs.md#immutable-built-in-named-configs) is `%i`, so, absent any
-custom one, the [`default`](configs.md#default-configs) named format is `%i`; it
-formats each [default field spec](fields.md#default-field-specs).
+A `<named-format-reference>` references the format of the
+[preset](fields.md#presets) that its `<preset-name>` names, its **named format**
+(e.g., `:x` references preset `x`'s format), which is `%i` if that preset sets
+no format; it applies none of the preset's other settings (e.g., its alignment).
 
 If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,
 the referenced format's value must also have the 1st such transform's input
-type, unless that transform call has a `<coercion>` (e.g., `:name.round` &
-`:name.endJustify.round` require `name`'s value to be a number, but
-`:name..round` does not). Otherwise, an error is reported.
+type, unless that transform call has a `<coercion>` (e.g., `:name.round`
+requires `name`'s format's value to be a number, but `:name..round` does not).
+Otherwise, an error is reported.
 
 Because every `<success-block>` alternative's syntax includes
 `<unconditional-block>`'s, a named unconditional format satisfies every
@@ -113,7 +105,7 @@ Because every `<success-block>` alternative's syntax includes
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> | <format-transform-pipeline> (* non-structural *)
+transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> (* non-structural *)
 
 value-transform-pipeline =
   <string-transform-pipeline>
@@ -137,8 +129,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 <!--editorconfig-checker-enable-->
 
 - A `<transform-pipeline>` `t` is a pipeline of transformations applied to:
-  - If a `<named-format-reference>` `n` precedes `t` in its pipeline
-    (immediately or after a `<format-transform-pipeline>`): `n`'s value.
+  - If a `<named-format-reference>` `n` immediately precedes `t` in its
+    pipeline: `n`'s value.
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,
     in a `<success-clause>`, the enclosing matcher's value; elsewhere, the field
     value).
@@ -443,44 +435,6 @@ A `GMT`-prefixed UTC offset is ahead of UTC for `+` & behind UTC for `-`, but
 the IANA Time Zone Database's signed `Etc/GMT` identifiers are the reverse, per
 POSIX (e.g., `GMT+5` is 5 hours ahead of UTC, while `Etc/GMT+5` is 5 hours
 behind).
-
-##### Format Transforms
-
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+
-format-transform          = <justify>
-
-justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: <start-justify>; last wins; inherited *)
-
-start-justify        = "startJustify"
-center-start-justify = "centerStartJustify"
-center-end-justify   = "centerEndJustify"
-end-justify          = "endJustify"
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-Unlike a `<value-transform>`, a `<format-transform>` does not transform any
-value; it sets a property of the field spec itself, currently just its table
-output column alignment. It therefore does not affect the field's rendered
-value: it is a no-op for JSON / key-value output (which have no columns to
-align); it accepts a value of any type & does not modify it, unlike every
-`<value-transform>`. A `<format-transform-pipeline>` may thus also precede a
-`<format-template>` (e.g., `.endJustify%N.scale:6,,0:+?+ MB`).
-
-`centerStartJustify` & `centerEndJustify` differ only when the value's remaining
-column width is odd: `centerStartJustify` puts the extra space after the value
-(leaving it nearer the column's start); `centerEndJustify` puts it before the
-value (leaving it nearer the column's end).
-
-A `<named-format-reference>` applies the justification that its referenced
-format sets, if any, as if that format's `<justify>` occurred immediately before
-the reference, in the [last-wins scope](ebnf.md#last-wins-comments) of any
-`<format-transform-pipeline>` that follows the reference (e.g., if `x` is
-`.endJustify%i`, `:x` is end-justified, but `:x.startJustify` is
-start-justified).
 
 ##### Placeholders
 

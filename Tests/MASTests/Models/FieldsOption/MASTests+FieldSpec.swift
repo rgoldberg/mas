@@ -275,7 +275,7 @@ private extension MASTests {
 		#expect(specs[0].name == "size")
 		#expect(specs[0].label == "size")
 		#expect(specs[0].format == .default(fieldName: "size"))
-		#expect(specs[0].justification == .start)
+		#expect(specs[0].alignment == .start)
 		#expect(specs[0].sortSpec == nil)
 		#expect(!specs[0].isHidden)
 	}
@@ -375,7 +375,7 @@ private extension MASTests {
 			label: "Price",
 			format: .default(fieldName: "price"),
 			sortSpec: .init(priority: 2, isEnabled: true, optionSet: .default),
-			justification: .end,
+			alignment: .end,
 		)
 		let all = BaseIncludesAllFieldsConfig(fieldSpecs: [price])
 		let fieldSpecs =
@@ -390,7 +390,7 @@ private extension MASTests {
 			fieldSpecs
 				== [
 					price.withSortDisabled,
-					.init(name: "price", label: "Cost", format: price.format, sortSpec: nil, justification: .end),
+					.init(name: "price", label: "Cost", format: price.format, sortSpec: nil, alignment: .end),
 					.default(forName: "size"),
 				],
 		)
@@ -456,16 +456,21 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(".adamID:.uppercase", Justification.end),
+			(".adamID:.uppercase", Alignment.end),
 			(".adamID:%i", .end),
 			(".adamID:", .end),
-			(".adamID:.startJustify..uppercase", .start),
+			(".adamID%start:..uppercase", .start),
+			(".adamID %start % centerEnd =ID", .centerEnd),
+			(".adamID%centerStart%default%standard", .centerStart),
+			(".+adamID%centerEnd", .centerEnd),
 			(".+size:.uppercase", .start),
+			(".+size%end", .end),
+			("size%end,adamID", .end),
 		],
 	)
-	func `an absent justify is inherited, or start-justify absent any to inherit`(
+	func `an alignment is retained unless a preset sets it, or is start absent any to retain`(
 		value: String,
-		justification: Justification,
+		alignment: Alignment,
 	) throws {
 		let fieldSpecs = try resolvedFieldsConfig(
 			from: value,
@@ -476,7 +481,7 @@ private extension MASTests {
 						label: "adamID",
 						format: .default(fieldName: "adamID"),
 						sortSpec: nil,
-						justification: .end,
+						alignment: .end,
 					),
 				],
 			),
@@ -484,7 +489,7 @@ private extension MASTests {
 			outputFormat: .table(.default),
 		)
 		.fieldSpecs
-		#expect(fieldSpecs[0].justification == justification)
+		#expect(fieldSpecs[0].alignment == alignment)
 	}
 
 	@Test(
@@ -997,8 +1002,27 @@ private extension MASTests {
 		#expect(throws: error) { try parseFieldSpecs(value) }
 	}
 
+	@Test(
+		arguments: [
+			(".bundleID%", ParsingError.invalidPresetName("")),
+			(".bundleID%a b", .invalidPresetName("a b")),
+			(".bundleID%bytes", .unknownPreset("bytes")),
+			(".bundleID%endJustify", .unknownPreset("endJustify")),
+			("bundleID%End", .unknownPreset("End")),
+		],
+	)
+	func `reports an invalid or unknown preset`(value: String, error: ParsingError) {
+		#expect(throws: error) { try parseFieldSpecs(value) }
+	}
+
 	@Test
-	func `table end-justifies a field per its field spec's justification; a start-justified last column is not padded`(
+	func `a field name must escape a preset-modifier-prefix`() throws {
+		let specs = try parseFieldSpecs("@all.+a\\%b")
+		#expect(specs[0].name == "a%b")
+	}
+
+	@Test
+	func `table end-aligns a field per its field spec's alignment; a start-aligned last column is not padded`(
 	) throws {
 		let table = try [
 			JSON.Object([("adamID", .number(7)), ("name", .string("Slack"))]),
@@ -1006,7 +1030,7 @@ private extension MASTests {
 		]
 			.table(
 				fieldSpecs: [
-					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, alignment: .end),
 					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
 				],
 				tableConfig: .default,
@@ -1016,7 +1040,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table pads even a end-justified last column`() throws {
+	func `table pads even a end-aligned last column`() throws {
 		let table = try [
 			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567))]),
 			.init([("name", .string("Slack")), ("adamID", .number(7))]),
@@ -1024,7 +1048,7 @@ private extension MASTests {
 			.table(
 				fieldSpecs: [
 					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, alignment: .end),
 				],
 				tableConfig: .default,
 			)
@@ -1033,7 +1057,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table still gaps a end-justified middle column from the column after it`() throws {
+	func `table still gaps a end-aligned middle column from the column after it`() throws {
 		let table = try [
 			JSON.Object([("name", .string("A")), ("adamID", .number(1_234_567)), ("version", .string("1.0"))]),
 			.init([("name", .string("Slack")), ("adamID", .number(7)), ("version", .string("2.0"))]),
@@ -1041,7 +1065,7 @@ private extension MASTests {
 			.table(
 				fieldSpecs: [
 					.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
-					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, justification: .end),
+					.init(name: "adamID", label: "ID", format: .default(fieldName: "adamID"), sortSpec: nil, alignment: .end),
 					.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
 				],
 				tableConfig: .default,

@@ -141,14 +141,14 @@ extension [JSON.Object] {
 				label: label,
 				cells: cells,
 				maxWidth: cells.map(\.terminalWidth).reduce(showsHeader ? label.terminalWidth : 0, Swift::max),
-				justification: fieldSpec.justification,
+				alignment: fieldSpec.alignment,
 			)
 		}
 		guard !columns.isEmpty else {
 			return nil
 		}
 		let columnSpacing = tableConfig.columnSpacing
-		let columnMetadata = columns.map { (maxWidth: $0.maxWidth, justification: $0.justification) }
+		let columnMetadata = columns.map { (maxWidth: $0.maxWidth, alignment: $0.alignment) }
 		var rows = [String]()
 		if let header = tableConfig.header {
 			let headerRow =
@@ -230,28 +230,28 @@ extension [JSON.Object] {
 	}
 }
 
-/// Justifies & joins 1 `table` row (header, separator, or data): each column's
+/// Aligns & joins 1 `table` row (header, separator, or data): each column's
 /// cell to its own width, gapped by `columnSpacing` applied as a literal suffix
-/// after each non-last column, never baked into a column's own justify width,
-/// since that only produces a real trailing gap for `.start` justification
-/// (`.end` / `.centerStart` / `.centerEnd` would place some or all of it as
-/// leading / split padding instead, eliminating or shrinking the visible gap).
-/// The last column is padded only if it is not `.start`-justified (matching
-/// every other column), since nothing follows it to gap from.
+/// after each non-last column, never baked into a column's own aligned width,
+/// since that only produces a real trailing gap for `.start` alignment (`.end`
+/// / `.centerStart` / `.centerEnd` would place some or all of it as leading /
+/// split padding instead, eliminating or shrinking the visible gap). The last
+/// column is padded only if it is not `.start`-aligned (matching every other
+/// column), since nothing follows it to gap from.
 private func renderedTableRow(
 	cells: [String],
-	columns: [(maxWidth: Int, justification: Justification)],
+	columns: [(maxWidth: Int, alignment: Alignment)],
 	columnSpacing: String,
 ) -> String {
 	guard let lastCell = cells.last, let lastColumn = columns.last else {
 		return ""
 	}
 	return zip(cells.dropLast(), columns.dropLast())
-		.map { cell, column in cell.terminalJustify(column.justification, to: column.maxWidth) + columnSpacing }
+		.map { cell, column in cell.terminalAlign(column.alignment, to: column.maxWidth) + columnSpacing }
 		.joined()
-		+ (lastColumn.justification == .start
+		+ (lastColumn.alignment == .start
 			? lastCell
-			: lastCell.terminalJustify(lastColumn.justification, to: lastColumn.maxWidth))
+			: lastCell.terminalAlign(lastColumn.alignment, to: lastColumn.maxWidth))
 }
 
 private extension String {

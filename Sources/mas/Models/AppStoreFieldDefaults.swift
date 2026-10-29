@@ -69,24 +69,24 @@ private let pathFieldNameSet = Set(["path"])
 /// translation of it, which equals 0) compare as less than its conforming ones.
 private let formattedPriceFieldName = "formattedPrice"
 
-/// Maps a field name directly to its default table-column justification (mas's
-/// own built-in `standard` / `all` fields configs' shared policy: a number, or
-/// a value with a fixed textual suffix that reads better end-aligned, e.g.,
-/// `fileSizeBytes`'s appended `" MB"`, is end-justified; everything else is
-/// start-justified). Consulted only by each display command's own field-spec
+/// Maps a field name directly to its default table-column alignment (mas's own
+/// built-in `standard` / `all` fields configs' shared policy: a number, or a
+/// value with a fixed textual suffix that reads better end-aligned, e.g.,
+/// `fileSizeBytes`'s appended `" MB"`, is end-aligned; everything else is
+/// start-aligned). Consulted only by each display command's own field-spec
 /// construction, not applied generically elsewhere; a user's own `--fields`
-/// justify transform (a `<format-transform-pipeline>`, see `parseFormat` in
+/// alignment preset (a `<preset-modifier>`, see `parsePresets` in
 /// `FieldSpec.swift`) overrides it per field spec.
-func defaultJustification(forFieldNamed fieldName: String) -> Justification {
-	endJustifiedFieldNameSet.contains(fieldName) ? .end : .start
+func defaultAlignment(forFieldNamed fieldName: String) -> Alignment {
+	endAlignedFieldNameSet.contains(fieldName) ? .end : .start
 }
 
-private let endJustifiedFieldNameSet = Set(["adamID", "fileSizeBytes"])
+private let endAlignedFieldNameSet = Set(["adamID", "fileSizeBytes"])
 
 /// `fieldName`'s field spec in every mas built-in fields config's user-facing
 /// variants, per mas.md's "Built-In Field Specs": its table row's label &
 /// format iff the table lists `fieldName`, else labeled by `fieldName` &
-/// formatted as `%i`; justified per `defaultJustification(forFieldNamed:)`.
+/// formatted as `%i`; aligned per `defaultAlignment(forFieldNamed:)`.
 func builtInFieldSpec(forFieldNamed fieldName: String) -> FieldSpec {
 	let (label, format) = listedLabelAndFormatByFieldName[fieldName] ?? (fieldName, .default(fieldName: fieldName))
 	return .init(
@@ -95,7 +95,7 @@ func builtInFieldSpec(forFieldNamed fieldName: String) -> FieldSpec {
 		format: format,
 		sortSpec: nil,
 		isSynthesized: synthesizedFieldNameSet.contains(fieldName),
-		justification: defaultJustification(forFieldNamed: fieldName),
+		alignment: defaultAlignment(forFieldNamed: fieldName),
 	)
 }
 

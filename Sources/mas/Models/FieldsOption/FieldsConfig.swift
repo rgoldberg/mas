@@ -102,9 +102,10 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 	/// original key order).
 	func unlistedFieldSpecs(in objects: [JSON.Object]) -> [FieldSpec] {
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Streaming Output": give each key-value & JSON output
-		//  item only its own unlisted fields (fields.md "Unlisted Fields"), because
-		//  a custom `default` named format may render an absent field as something
+		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": give each
+		//  key-value & JSON output item only its own unlisted fields (fields.md
+		//  "Unlisted Fields"), because a custom `default` preset may give an absent
+		//  field a formatted value that is not absent
 		var seenNameSet = listedFieldNameSet
 		return objects.flatMap(\.fields).compactMap { field in
 			seenNameSet.insert(field.key.rawValue).inserted
@@ -294,7 +295,7 @@ extension FieldsConfig {
 					sortSpec: fieldSpec.sortSpec,
 					isHidden: fieldSpec.isHidden,
 					isSynthesized: fieldSpec.isSynthesized,
-					justification: fieldSpec.justification,
+					alignment: fieldSpec.alignment,
 				)
 			},
 			fieldOrder: fieldOrder,
@@ -336,7 +337,7 @@ extension FieldsConfig {
 					sortSpec: fieldSpec.sortSpec,
 					isHidden: true,
 					isSynthesized: fieldSpec.isSynthesized,
-					justification: fieldSpec.justification,
+					alignment: fieldSpec.alignment,
 				)
 			},
 			fieldOrder: fieldOrder,

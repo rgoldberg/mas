@@ -7,7 +7,7 @@
 
 private import Darwin
 
-enum Justification: Equatable { // swiftlint:disable sorted_enum_cases
+enum Alignment: Equatable { // swiftlint:disable sorted_enum_cases
 	case start
 	case centerStart
 	case centerEnd
@@ -15,7 +15,7 @@ enum Justification: Equatable { // swiftlint:disable sorted_enum_cases
 }
 
 extension String { // swiftlint:disable:next function_default_parameter_at_end
-	func terminalJustify(_ justification: Justification = .start, with pad: Character = " ", to minimumWidth: Int)
+	func terminalAlign(_ alignment: Alignment = .start, with pad: Character = " ", to minimumWidth: Int)
 	-> Self {
 		precondition(pad.terminalWidth == 1)
 		let existingWidth = terminalWidth
@@ -23,7 +23,7 @@ extension String { // swiftlint:disable:next function_default_parameter_at_end
 			return self
 		}
 		let paddingWidth = minimumWidth - existingWidth
-		return switch justification {
+		return switch alignment {
 		case .start:
 			self + .init(repeating: pad, count: paddingWidth)
 		case .centerStart:

@@ -71,8 +71,8 @@ Default labels & formats favor:
   - Output is formatted as `%i`.
 
 Built-in field specs for `adamID` & `fileSizeBytes` are
-[end-justified](fields-format.md#format-transforms); all other built-in field
-specs are start-justified.
+[end-aligned](fields.md#alignment); all other built-in field specs are
+start-aligned.
 
 ## Built-In Field Specs
 
@@ -119,13 +119,11 @@ field's built-in field spec is labeled by its field name & formatted as `%i`.
 Wherever the base fields config is, or transitively
 [extends](configs.md#referencing-named-configs), one of those variants, a
 field's [default field spec](fields.md#default-field-specs) (e.g., for an
-unlisted field) has its built-in field spec's label; it also has its built-in
-field spec's format & justification, absent a custom `default` named format,
-which otherwise sets both, its justification being start-justified unless it
-sets one (e.g., for a custom `default` of `.centerStartJustify..uppercase`,
-`mas list --fields @all` outputs `bundleID` labeled `Bundle ID`, uppercased &
-center-justified, while for one of `..uppercase`, `mas search --fields @all`
-outputs `fileSizeBytes` start-justified).
+unlisted field) is its built-in field spec overlaid with the [`default`
+preset](fields.md#presets) (e.g., for a custom `default` of
+`%centerStart:..uppercase`, `mas list --fields @all` outputs `bundleID` labeled
+`Bundle ID`, uppercased & center-aligned, while for one of `:..uppercase`,
+`mas search --fields @all` outputs `fileSizeBytes` end-aligned).
 
 ## Price Sorting
 

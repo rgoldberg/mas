@@ -43,6 +43,7 @@ A **field spec** & its position define the configuration for an output field:
 - Order
 - Label (table header; key-value / JSON key)
 - Value format
+- Alignment (table column)
 - Item sorting
 
 ### Visibility
@@ -60,17 +61,18 @@ Regardless of a field spec's visibility:
 
 ### Default Field Specs
 
-A **default field spec** for a field is visible & has:
+A **default field spec** for a field is visible & has the following, overlaid
+with the [`default` preset](#presets):
 
 - Label: the field's name.
-- Format: the [`default` named format](fields-format.md#named-formats).
-- Justification: the `default` named format's, if it sets one; otherwise,
-  [`<start-justify>`](fields-format.md#format-transforms).
+- Format: `%i`.
+- Alignment: [`start`](#alignment).
 - No `<sort>`, so it is not a sort key.
 
 E.g., `--fields .+size`, when the base fields config has no field spec for
-`size`, outputs `size` labeled `size`, formatted per the `default` named format
-(absent any custom one, as `%i` & start-justified) & not sorting items.
+`size`, outputs `size` labeled `size`, formatted as `%i`, start-aligned & not
+sorting items, absent a custom `default` preset (e.g., one of `%end` would
+end-align it).
 
 ### Unlisted Fields
 
@@ -227,7 +229,7 @@ So an omitted modifier (e.g., `<sort-modifier>` in `name=x`) or option (e.g.,
 fields config's value, while an empty [payload](#payloads) (e.g., in `name=`,
 `name/`, `L:`, or `B:`) is directly absent, so it resets its value to its
 default (e.g., `name/` removes the field spec's `<sort>`, while `name:` empties
-its format, but retains its justification).
+its format, but retains its alignment).
 
 ## Nonexistent Fields
 
@@ -619,9 +621,17 @@ Field spec edits act as follows:
 
 ### Field Modifiers
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
+field-modifiers = [ <preset-modifier>+ ] [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
+
+Each `<preset-modifier>`, left to right, then `<label-modifier>`,
+`<format-modifier>` & `<sort-modifier>` overlay their settings onto the field
+spec, so a later one overrides an earlier one's setting.
 
 #### Payloads
 
@@ -629,6 +639,44 @@ A modifier's **payload** is the expression after its prefix (e.g., `<label>` in
 `<label-modifier>`); an option's **payload** is the expression between its
 letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 `<locale>`).
+
+#### Presets
+
+```ebnf
+preset-modifier        = <preset-modifier-prefix> <preset-name>
+preset-modifier-prefix = "%"
+
+preset-name = {text: preset name}
+```
+
+A **preset** is a [named config](configs.md#named-configs) of the preset [config
+kind](configs.md#config-kinds), whose syntax is `<field-modifiers>`, which a
+`<preset-modifier>` references by its `<preset-name>` (e.g., `%x` references
+preset `x`). A `<preset-modifier>` overlays onto the field spec the settings of
+its preset's `<field-modifiers>`, in their order (e.g., if preset `bytes` is
+`%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size` outputs `size` labeled
+`Size`, formatted per `bytes` & start-aligned).
+
+The preset kind's [built-in
+standard](configs.md#immutable-built-in-named-configs) sets nothing, so, absent
+any custom one, the [`default`](configs.md#default-configs) preset sets nothing;
+it is overlaid onto each [default field spec](#default-field-specs). The preset
+kind's other built-in presets each set only an [alignment](#alignment): `start`,
+`centerStart`, `centerEnd`, or `end`.
+
+##### Alignment
+
+A field spec's **alignment** aligns its label & its values in its table output
+column; key-value & JSON output, which have no columns, ignore it. A field
+spec's alignment is retained unless a preset sets it, which each built-in
+alignment preset does:
+
+- `start`: at the column's start.
+- `centerStart`: centered, with any odd remaining column width's extra space
+  after the value (leaving it nearer the column's start).
+- `centerEnd`: centered, with any odd remaining column width's extra space
+  before the value (leaving it nearer the column's end).
+- `end`: at the column's end.
 
 #### Labeling
 
@@ -1102,32 +1150,32 @@ trailing outer bare whitespace is consumed or ignored, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                             | 1st             | Any                     | Leading Whitespace | Trailing Whitespace     |
-|:---------------------------------------------------------------------|:----------------|:------------------------|:-------------------|:------------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@`             | `.` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |                 | `.` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<base-fields-config-name>`                                          |                 | `/` `.`                 | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-insertion>`                 |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `%` `_` `-` | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-move>`                      |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-hide>`                      |                 | `@` `.` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-removal>`                   |                 | `@` `.` `,`             | ignored            | ignored                 |
-| `<label>`                                                            |                 | `:` `/` `,`             | ignored            | ignored                 |
-| `<locale-identifier>` in `<locale>`                                  |                 | `:`                     | ignored            | ignored                 |
-| `<boundary-characters>`                                              |                 | `%` `+` `_` `:`         | ignored            | ignored                 |
-| `<multi-character-boundary-text>`                                    |                 | `%`                     | ignored            | ignored                 |
-| `<format-name>` in a `<format-block>`                                |                 | `.` `/` `,`             | ignored            | ignored                 |
-| `<template-text>` starting a `<format-block>`                        | `:` `.`         | `%` `/` `,`             | ignored            | consumed iff before `%` |
-| `<template-text>` after a `<format-transform-pipeline>`              | `.`             | `%` `/` `,`             | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>`                |                 | `%` `/` `,`             | consumed           | consumed iff before `%` |
-| `<format-name>` in a `<block>`                                       |                 | `.` `+`                 | ignored            | ignored                 |
-| `<template-text>` starting a `<block>`                               | `:` `.`         | `%` `+`                 | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>` in a `<block>` |                 | `%` `+`                 | consumed           | consumed iff before `%` |
-| `<decimal-separator>` in `<number-format>`                           |                 | `:`                     | ignored            | ignored                 |
-| `<time-zone-code>` in `<date-time-zone-arguments>`                   |                 | `:`                     | ignored            | ignored                 |
-| `<reference-date>`                                                   |                 | `:`                     | ignored            | ignored                 |
-| `<trivia-suffix-regex>`                                              |                 | `:`                     | ignored            | ignored                 |
-| Any other text argument                                              |                 | `,` `:`                 | ignored            | ignored                 |
+| `{text}`                                                             | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
+|:---------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
+| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<base-fields-config-name>`                                          |             | `/` `.`                     | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-insertion>`                 |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-move>`                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-hide>`                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<reference-field-name>` in `<field-spec-removal>`                   |             | `@` `.` `,`                 | ignored            | ignored                 |
+| `<preset-name>` in a `<preset-modifier>`                             |             | `%` `=` `:` `/` `,`         | ignored            | ignored                 |
+| `<label>`                                                            |             | `:` `/` `,`                 | ignored            | ignored                 |
+| `<locale-identifier>` in `<locale>`                                  |             | `:`                         | ignored            | ignored                 |
+| `<boundary-characters>`                                              |             | `%` `+` `_` `:`             | ignored            | ignored                 |
+| `<multi-character-boundary-text>`                                    |             | `%`                         | ignored            | ignored                 |
+| `<preset-name>` in a `<format-block>`                                |             | `.` `/` `,`                 | ignored            | ignored                 |
+| `<template-text>` starting a `<format-block>`                        | `:` `.`     | `%` `/` `,`                 | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a `<placeholder>`                |             | `%` `/` `,`                 | consumed           | consumed iff before `%` |
+| `<preset-name>` in a `<block>`                                       |             | `.` `+`                     | ignored            | ignored                 |
+| `<template-text>` starting a `<block>`                               | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a `<placeholder>` in a `<block>` |             | `%` `+`                     | consumed           | consumed iff before `%` |
+| `<decimal-separator>` in `<number-format>`                           |             | `:`                         | ignored            | ignored                 |
+| `<time-zone-code>` in `<date-time-zone-arguments>`                   |             | `:`                         | ignored            | ignored                 |
+| `<reference-date>`                                                   |             | `:`                         | ignored            | ignored                 |
+| `<trivia-suffix-regex>`                                              |             | `:`                         | ignored            | ignored                 |
+| Any other text argument                                              |             | `,` `:`                     | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 

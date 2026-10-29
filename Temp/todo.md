@@ -50,19 +50,19 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 ## ASAP Version, But Massive Effort
 
-### Persisted Custom Named Formats & Configs
+### Persisted Custom Presets & Configs
 
-1. Custom named formats: every reference to a named format other than `standard`
-   & `default` (both `%i`) reports `unknownNamedFormat` (or `invalidFormatName`
-   for an invalid format name), so no referenced format sets a
-   [justification](../Specs/fields-format.md#format-transforms) yet. Supporting
-   them also needs key-value & JSON output to omit each [unlisted
+1. Custom [presets](../Specs/fields.md#presets): every reference to a preset
+   other than a built-in one (`standard`, each alignment preset & `default`,
+   which is `standard`) reports `unknownPreset` (or `invalidPresetName` for an
+   invalid preset name), so no preset yet sets a label, a format, or a sort.
+   Supporting them also needs key-value & JSON output to omit each [unlisted
    field](../Specs/fields.md#unlisted-fields) that an item lacks, because mas
    gives every item a field spec for each unlisted field of any item, while a
-   custom `default` named format may give an absent field a formatted value that
-   is not absent (e.g., `%N%n+none+`).
+   custom `default` preset may give an absent field a formatted value that is
+   not absent (e.g., `:%N%n+none+`).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
-   kind, named formats included:
+   kind, presets included:
    1. Looking a name up through the [context
       stack](../Specs/configs.md#referencing-named-configs) from its starting
       context.
@@ -96,7 +96,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
 If a 1st version is released before persistence is supported, then remove
 persistence-based functionality from specs & code:
 
-1. Possibly vestigial after `1226-fields-no-custom-names` removes named formats
+1. Possibly vestigial after `1226-fields-no-custom-names` removes custom presets
    & custom configs; decide whether to remove each in
    `1226-fields-no-custom-names`:
    1. [`<string-pipeline>` &
@@ -257,7 +257,7 @@ next line, so a row is as many lines as its most-lined cell or key. This needs:
    consumers, such as `cut`, which need 1 line per row).
 2. Whether a continuation line is marked (e.g., as `psql` marks one with `+`),
    because it can otherwise be mistaken for the next row.
-3. How each line is justified, styled (e.g., a style reset per header line) &
+3. How each line is aligned, styled (e.g., a style reset per header line) &
    measured (e.g., column widths & separator lines per widest line).
 4. Whether a line terminator in a style, pattern, or spacing remains invalid.
 

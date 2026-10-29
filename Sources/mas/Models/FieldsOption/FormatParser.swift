@@ -13,12 +13,7 @@ internal import Foundation
 /// `<format-modifier-prefix>` up to (but not including) a
 /// `<sort-modifier-prefix>`, a `<field-spec-separator>`, or the end of the
 /// input.
-///
-/// - Returns: The format & the justification from its
-///   `<format-transform-pipeline>`, which is `nil` iff the working fields
-///   config's justification is inherited (i.e., `<justify>` is absent).
-func parseFormatBlock(_ input: inout Substring) throws(ParsingError)
--> (format: Format, justification: Justification?) {
+func parseFormatBlock(_ input: inout Substring) throws(ParsingError) -> Format {
 	var parser = FormatParser(input: input)
 	defer {
 		input = parser.input
@@ -28,13 +23,6 @@ func parseFormatBlock(_ input: inout Substring) throws(ParsingError)
 
 /// A recursive-descent parser for fields-format.md's syntax.
 private struct FormatParser {
-	/// A `<*-transform-call>`'s transform: a `<value-transform>` or a
-	/// `<format-transform>`.
-	private enum ParsedTransformCall {
-		case format(Justification)
-		case value(TransformCall)
-	}
-
 	var input: Substring
 
 	/// Whether the input is at the end of a `<format-block>`.
@@ -42,15 +30,15 @@ private struct FormatParser {
 		input.first.map(formatBlockTerminatorSet.contains) ?? true
 	}
 
-	mutating func parseFormatBlock() throws(ParsingError) -> (format: Format, justification: Justification?) {
+	mutating func parseFormatBlock() throws(ParsingError) -> Format {
 		skipWhitespace() // `<format-modifier>`'s `<format-block>` ignores preceding whitespace
-		let parsed: (format: Format, justification: Justification?) =
+		let parsed: Format =
 			if isAtFormatBlockEnd {
-				(.empty, nil) // A directly absent `<format-block>` defaults to an empty string
+				.empty // A directly absent `<format-block>` defaults to an empty string
 			} else if input.first == namePrefix || input.first == transformCallPrefix {
-				try parseFormatBlockPipeline()
+				.pipeline(try parseFormatBlockPipeline())
 			} else {
-				(.template(try parseFormatTemplate()), nil)
+				.template(try parseFormatTemplate())
 			}
 		skipWhitespace()
 		guard isAtFormatBlockEnd else {
@@ -59,32 +47,17 @@ private struct FormatParser {
 		return parsed
 	}
 
-	/// Parses a `<format-block>`'s `<pipeline>`, or its
-	/// `<format-transform-pipeline>` & `<format-template>`.
-	private mutating func parseFormatBlockPipeline()
-	throws(ParsingError) -> (format: Format, justification: Justification?) {
+	/// Parses a `<format-block>`'s `<pipeline>`.
+	private mutating func parseFormatBlockPipeline() throws(ParsingError) -> Pipeline {
 		let namedFormat = try parseNamedFormatIfPresent(terminatorSet: formatBlockNameTerminatorSet)
-		var justification = Justification?.none
 		var calls = [TransformCall]()
 		while skipWhitespace(), input.first == transformCallPrefix {
-			switch try parseTransformCall() {
-			case let .format(parsed):
-				guard calls.isEmpty else {
-					throw .invalidPipeline("<pipeline>")
-				}
-				justification = parsed // `<justify>` is `(* last wins *)`
-			case let .value(call):
-				calls.append(call)
-			}
+			calls.append(try parseTransformCall())
 		}
 		guard calls.isEmpty || valueTransformPipelineShapeSet.contains(where: calls.hasShape) else {
 			throw .invalidPipeline("<value-transform-pipeline>")
 		}
-		// An absent `<justify>` is inherited; a `<format-template>` may follow a
-		// `<format-transform-pipeline>`, ignoring preceding whitespace
-		return try namedFormat == nil && calls.isEmpty && !isAtFormatBlockEnd
-			? (.template(parseFormatTemplate()), justification)
-			: (.pipeline(.init(namedFormat: namedFormat, calls: calls)), justification)
+		return .init(namedFormat: namedFormat, calls: calls)
 	}
 
 	/// Parses a block's `<*-pipeline>`, whose kind `kind` selects the valid
@@ -93,10 +66,7 @@ private struct FormatParser {
 		let namedFormat = try parseNamedFormatIfPresent(terminatorSet: blockNameTerminatorSet)
 		var calls = [TransformCall]()
 		while skipWhitespace(), input.first == transformCallPrefix {
-			guard case let .value(call) = try parseTransformCall() else {
-				throw .invalidPipeline(kind.pipelineName)
-			}
-			calls.append(call)
+			calls.append(try parseTransformCall())
 		}
 		// A named format may form a pipeline alone
 		guard namedFormat != nil && calls.isEmpty || kind.pipelineShapeSet.contains(where: calls.hasShape) else {
@@ -105,36 +75,30 @@ private struct FormatParser {
 		return .init(namedFormat: namedFormat, calls: calls)
 	}
 
-	/// Parses a `<named-format-reference>`, if present, into its format. No
-	/// custom named formats exist yet, so only `standard` & `default` (which is
-	/// `standard` absent a custom `default`) exist; any other reference reports
-	/// an error: `invalidFormatName` for an invalid format name, else
-	/// `unknownNamedFormat`.
+	/// Parses a `<named-format-reference>`, if present, into its preset's named
+	/// format. No custom presets exist yet, so each existing preset (a built-in
+	/// one, or `default`, which is `standard` absent a custom `default`) sets no
+	/// format, so its named format is `%i`; any other reference reports an error:
+	/// `invalidPresetName` for an invalid preset name, else `unknownPreset`.
 	private mutating func parseNamedFormatIfPresent(terminatorSet: Set<Character>) throws(ParsingError) -> Format? {
 		guard input.first == namePrefix else {
 			return nil
 		}
 		input.removeFirst()
 		try forbidWhitespace(after: namePrefix)
-		let name = try parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored)
-		guard !name.isEmpty, name.allSatisfy(\.isNameCharacter) else {
-			throw .invalidFormatName(name)
-		}
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": once
-		//  custom named formats are persisted, look the name up through the context
-		//  stack from the reference's starting context, as configs.md specifies for
-		//  every config kind, checking that its output has the input type of the
-		//  1st succeeding `<value-transform>` in its pipeline, even after a
-		//  `<format-transform-pipeline>`
-		guard name == standardConfigName || name == defaultConfigName else {
-			throw .unknownNamedFormat(name)
-		}
+		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
+		//  presets are persisted, use the format of the preset that
+		//  `presetAlignment(named:)` resolves, checking that its output has the
+		//  input type of the 1st succeeding `<value-transform>` in its pipeline
+		_ = try presetAlignment(
+			named: parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored),
+		)
 		return .standard
 	}
 
 	/// Parses a `<*-transform-call>`, including its `<transform-call-prefix>`.
-	private mutating func parseTransformCall() throws(ParsingError) -> ParsedTransformCall {
+	private mutating func parseTransformCall() throws(ParsingError) -> TransformCall {
 		input.removeFirst()
 		try forbidWhitespace(after: transformCallPrefix)
 		let coercion = try parseCoercion()
@@ -143,12 +107,6 @@ private struct FormatParser {
 			throw .unknownTransform(.init(input.prefix(while: \.isLetter)))
 		}
 		input.removeFirst(name.count)
-		if let justification = justificationByName[name] {
-			guard coercion == nil else {
-				throw .coercionNotSupported(coercionPrefix)
-			}
-			return .format(justification)
-		}
 		let transform: Transform =
 			switch name {
 			case numberFormatName:
@@ -172,7 +130,7 @@ private struct FormatParser {
 		guard coercion?.hasArguments != true || transform.kind == .number || transform.kind == .numberToString else {
 			throw .numberCoercionArgumentsNotSupported(name)
 		}
-		return .value(.init(transform: transform, coercion: coercion?.coercion))
+		return .init(transform: transform, coercion: coercion?.coercion)
 	}
 
 	/// Parses `numberFormat`'s optional `<number-format-arguments>`, whose base
@@ -837,14 +795,8 @@ private let valueTransformByName = [
 	"trimWhitespace": .trimWhitespace,
 	"uppercase": .uppercase,
 ]
-private let justificationByName = [
-	"centerEndJustify": Justification.centerEnd,
-	"centerStartJustify": .centerStart,
-	"endJustify": .end,
-	"startJustify": .start,
-]
 private let transformNames =
-	Set(valueTransformByName.keys).union(justificationByName.keys).union([
+	Set(valueTransformByName.keys).union([
 		numberFormatName,
 		scaleName,
 		timeOnlyTimeZoneName,

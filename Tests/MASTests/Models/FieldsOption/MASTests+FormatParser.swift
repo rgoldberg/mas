@@ -110,15 +110,18 @@ private extension MASTests {
 			(":standard", JSON.Node.string("abc"), String?.some("abc")),
 			(":default", .string("abc"), "abc"),
 			(":default.uppercase", .string("abc"), "ABC"),
-			(":default.endJustify.uppercase", .string("abc"), "ABC"),
+			(":end.uppercase", .string("abc"), "ABC"), // A preset that sets no format
 			(":standard..round", .string("4.6"), "5"),
 			// A block's named format is evaluated against the field value, as `%i` is
 			("%.N:default+-+", .string("4.50"), "4.50"),
 			("%L:default.uppercase+", .string("abc"), "ABC"),
 		],
 	)
-	func `renders the standard & default named formats as %i`(format: String, value: JSON.Node?, expected: String?)
-	throws {
+	func `renders the named format of a preset that sets no format as %i`(
+		format: String,
+		value: JSON.Node?,
+		expected: String?,
+	) throws {
 		#expect(try rendered(format, value) == expected)
 	}
 
@@ -352,48 +355,13 @@ private extension MASTests {
 	}
 
 	@Test(
-		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat", ".endJustify.round"],
+		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat"],
 		[JSON.Node?.none, .null],
 	)
 	func `a null or absent value remains unchanged through every transform`(format: String, value: JSON.Node?)
 	throws {
 		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.description == value?
 			.description)
-	}
-
-	@Test(
-		arguments: [
-			(".endJustify", Justification.end),
-			(".startJustify.centerEndJustify", .centerEnd),
-			(".centerStartJustify..uppercase", .centerStart),
-			(".uppercase", .start),
-			(".endJustify%i", .end),
-			(".startJustify.centerEndJustify (%i)", .centerEnd),
-		],
-	)
-	func `extracts a format-transform-pipeline's justification`(format: String, justification: Justification) throws {
-		#expect(try parsedFieldSpec(format).justification == justification)
-	}
-
-	@Test(
-		arguments: [
-			(".endJustify%N.scale:6,,0:+?+ MB", JSON.Node.number(1_500_000), "2 MB"),
-			(".endJustify  (%i)", .number(5), "(5)"), // Preceding whitespace is ignored
-			(".endJustify\\.%i", .number(5), ".5"),
-			(".endJustify:%i", .number(5), ":5"),
-		],
-	)
-	func `a format-transform-pipeline may precede a format-template`(format: String, value: JSON.Node, expected: String)
-	throws {
-		#expect(try rendered(format, value) == expected)
-	}
-
-	@Test
-	func `a pipeline of only format transforms passes the value through`() throws {
-		#expect(try parsedFieldSpec(".endJustify")
-			.format
-			.rendered(value: .number(5), label: "L", name: "n")?
-			.isNumber(5) == true)
 	}
 
 	@Test(
@@ -599,21 +567,19 @@ private extension MASTests {
 			("%.m", .invalidModifier("m")),
 			("%x", .invalidLetter("x")),
 			("%", .missingPredicate),
-			(":name", .unknownNamedFormat("name")),
-			(":default%i", .invalidFormatName("default%i")),
-			(":my-name_2", .unknownNamedFormat("my-name_2")),
-			(":a b", .invalidFormatName("a b")),
-			(":a\\.b", .invalidFormatName("a.b")),
-			(":é", .invalidFormatName("é")),
+			(":name", .unknownPreset("name")),
+			(":default%i", .invalidPresetName("default%i")),
+			(":my-name_2", .unknownPreset("my-name_2")),
+			(":a b", .invalidPresetName("a b")),
+			(":a\\.b", .invalidPresetName("a.b")),
+			(":é", .invalidPresetName("é")),
 			(".bogus", .unknownTransform("bogus")),
 			(".initialUppercase", .unknownTransform("initialUppercase")),
 			(".sentenceCase", .unknownTransform("sentenceCase")),
 			(".numberFormat.round", .invalidPipeline("<value-transform-pipeline>")),
 			(".uppercase.round", .invalidPipeline("<value-transform-pipeline>")),
-			(".uppercase.endJustify", .invalidPipeline("<pipeline>")),
-			("..endJustify", .coercionNotSupported(".")),
+			(".endJustify", .unknownTransform("endJustify")),
 			(".uppercase%i", .unexpectedCharacter("%")),
-			(".endJustify x", .templateLacksPlaceholder),
 			("%N.uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%S.round++", .invalidPipeline("<string-pipeline>")),
 			("%I.uppercase+", .invalidPipeline("<unconditional-pipeline>")),

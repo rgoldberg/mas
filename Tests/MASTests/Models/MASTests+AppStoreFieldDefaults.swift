@@ -49,20 +49,20 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("bundleID", "Bundle ID", Justification.start),
+			("bundleID", "Bundle ID", Alignment.start),
 			("fileSizeBytes", "Size", .end),
 			("adamID", "ADAM ID", .end),
 			("trackName", "trackName", .start),
 		],
 	)
-	func `a built-in field spec is labeled & justified per mas.md`(
+	func `a built-in field spec is labeled & aligned per mas.md`(
 		fieldName: String,
 		label: String,
-		justification: Justification,
+		alignment: Alignment,
 	) {
 		let fieldSpec = builtInFieldSpec(forFieldNamed: fieldName)
 		#expect(fieldSpec.label == label)
-		#expect(fieldSpec.justification == justification)
+		#expect(fieldSpec.alignment == alignment)
 		#expect(fieldSpec.sortSpec == nil)
 	}
 
@@ -91,10 +91,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a user-facing unlisted fileSizeBytes's field spec is end-justified`() {
+	func `a user-facing unlisted fileSizeBytes's field spec is end-aligned`() {
 		let unlistedFieldSpecs = BaseIncludesAllFieldsConfig()
 			.unlistedFieldSpecs(in: [JSON.Object([("fileSizeBytes", .string("1")), ("trackName", .string("A"))])])
-		#expect(unlistedFieldSpecs.map(\.justification) == [.end, .start])
+		#expect(unlistedFieldSpecs.map(\.alignment) == [.end, .start])
 	}
 
 	@Test(

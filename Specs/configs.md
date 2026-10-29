@@ -81,10 +81,10 @@ context, e.g., [`mas`'s context stacks](mas.md#context-stacks).
 
 Each **config kind** has its own hierarchy: a config is only ever looked up,
 referenced, or extended among configs of its own kind, except that a fields
-config may also reference named formats. The kinds are:
+config may also reference presets. The kinds are:
 
 - [**Fields config**](fields.md#fields-configs): which fields are output & how.
-- [**Format**](fields-format.md#named-formats): a field spec's format.
+- [**Preset**](fields.md#presets): field spec settings (e.g., a format).
 - [**Table config**](table.md#table-config): table output settings.
 - [**Key-value config**](key-value.md#key-value-config): key-value output
   settings.
@@ -111,7 +111,7 @@ A named config may be referenced:
 
 - On the command line
 - By other persisted configs of the same kind
-- For a named format, by a persisted fields config
+- For a preset, by a persisted fields config
 
 A named config is found by returning the 1st config of the given kind found with
 the given name while iterating through the context stack from a **starting
@@ -129,7 +129,7 @@ A persisted fields config **extends** `none` if it is an
 its [`<base-fields-config-section>`](fields.md#base-fields-config-selection)
 names; a persisted table, key-value, or JSON config extends `default`, as a
 persisted `<relative-config>` without a `<base-fields-config-section>` does; a
-named format extends no config.
+preset extends no config.
 
 A persisted config that references a config of its own kind & name (e.g., by
 extending it) resolves that config from the next less specific context in the

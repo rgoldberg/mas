@@ -607,3 +607,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - output config option: an output format's option that selects it with a
        config overlaid on its `default` config (e.g., `--json-config`)
        ([defined](../Specs/configs.md#output-configs))
+111. - preset: a named config of `<field-modifiers>`, which a
+       `<preset-modifier>` overlays onto a field spec
+       ([defined](../Specs/fields.md#presets))
+     - named format: a preset's format, which a `<named-format-reference>`
+       references ([defined](../Specs/fields-format.md#named-formats))
+     - REJECTED: named spec (the specs use "spec" for a `Specs/` document) /
+       field style / template (for a preset)
+112. - alignment: where a field spec's label & values are in its table output
+       column (`start`, `centerStart`, `centerEnd`, or `end`;
+       [defined](../Specs/fields.md#alignment))
+     - align / aligned: verb & adjective
+     - REJECTED: justification / justify / justified

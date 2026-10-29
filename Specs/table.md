@@ -52,11 +52,10 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 <!--editorconfig-checker-enable-->
 
 - `h`: no header row.
-- `H`: a header row of field labels, each justified as its column is (per its
-  field spec's [`<justify>`](fields-format.md#format-transforms)).
-  `<style-specifier>`, if given, styles the entire header row:
-  [`<style-prefix>`](#style-prefix), `<style-specifier>` &
-  [`<style-suffix>`](#style-suffix) precede it, and
+- `H`: a header row of field labels, each aligned as its column is (per its
+  field spec's [alignment](fields.md#alignment)). `<style-specifier>`, if given,
+  styles the entire header row: [`<style-prefix>`](#style-prefix),
+  `<style-specifier>` & [`<style-suffix>`](#style-suffix) precede it, and
   [`<style-reset>`](#style-reset) follows it (e.g., with their defaults, `1` for
   bold, `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header
   row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so

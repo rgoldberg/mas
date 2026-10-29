@@ -11,12 +11,9 @@ internal import JSONAST
 // MARK: - Format (fields-format.md)
 
 /// A parsed `<format-block>`, `<success-block>`, or `<failure-block>`: either a
-/// pipeline of `<*-transform-call>`s or a template. A `<format-block>`'s
-/// `<format-transform-pipeline>` is not part of it: it is extracted into
-/// `FieldSpec.justification` at parse time.
+/// pipeline of `<*-transform-call>`s or a template.
 indirect enum Format: Equatable, Sendable {
-	/// A `<*-pipeline>`. Empty iff the pipeline consists solely of a
-	/// `<format-transform-pipeline>`.
+	/// A `<*-pipeline>`.
 	case pipeline(Pipeline)
 	/// A `<*-template>`'s elements.
 	case template([TemplateElement])
@@ -27,7 +24,7 @@ indirect enum Format: Equatable, Sendable {
 		.template(.init())
 	}
 
-	/// The built-in standard named format: `%i`.
+	/// The named format of a preset that sets no format: `%i`.
 	static var standard: Self {
 		.template([.placeholder(.unconditional(.input, pipeline: .init()))])
 	}
@@ -35,9 +32,10 @@ indirect enum Format: Equatable, Sendable {
 	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
 	// swiftlint:disable:next todo
-	// TODO: Temp/todo.md "Persisted Custom Named Formats & Configs": once custom
-	//  named formats are persisted, the `default` named format, looked up from
-	//  the starting context of the reference that selects the default field spec
+	// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
+	//  presets are persisted, the format of the `default` preset, if it sets one,
+	//  looked up from the starting context of the reference that selects the
+	//  default field spec
 	static func `default`(fieldName _: String) -> Self {
 		.standard
 	}
