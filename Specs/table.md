@@ -224,28 +224,17 @@ text, not as a separate `<broken-setting>`.
 
 ## Implied Settings
 
-```ebnf
-payloadless-table-setting =
-  <header-off>
-  | <header-style-prefix-default>
-  | <header-style-suffix-default>
-  | <header-style-reset-default>
-  | <separator-off>
-  | <column-spacing-default>
-  (* non-structural *)
-```
-
 - `b` / `u` imply a separator line, if none is otherwise set: `S`.
 - An effective `S` implies a header row, if none is otherwise set: `H`
   (unstyled), because a separator line's sole purpose is to separate a header
   from the data (e.g., `S` & `b` imply `H`, while `S:s` & `bs` imply none).
 
 An implied setting yields to an explicit setting of its axis & to an inherited
-payload, as [output configs specify](configs.md#implied-settings),
-`<payloadless-table-setting>` being the payloadless table settings (e.g., `S:h`
-implies no header row; with an inherited `H1:`, `S` retains the bold header row,
-while with an inherited `h`, `S` implies an unstyled one; with an inherited
-`S=:`, `b` breaks the `=`-patterned separator line).
+[payload](configs.md#output-configs), as [output configs
+specify](configs.md#implied-settings) (e.g., `S:h` implies no header row; with
+an inherited `H1:`, `S` retains the bold header row, while with an inherited
+`h`, `S` implies an unstyled one; with an inherited `S=:`, `b` breaks the
+`=`-patterned separator line).
 
 ## Examples
 

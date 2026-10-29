@@ -356,8 +356,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       setting's expression between its letter & its termination
       ([defined](../Specs/configs.md#output-configs))
     - payloadless: of a setting's lowercase alternative, which takes no payload,
-      unlike its uppercase one (`<payloadless-table-setting>`,
-      `<payloadless-key-value-setting>`;
+      unlike its uppercase one (e.g., a table's `h`;
       [defined](../Specs/configs.md#output-configs))
     - argument: an element of an argument list (a transform's, a number
       coercion's, `N`'s, or `C`'s)
