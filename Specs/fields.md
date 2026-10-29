@@ -15,7 +15,8 @@ List elements are located at 1-based integer **positions**.
 
 Positions are referenced via integer **indices**.
 
-Each index has a **normalized index**:
+Each index is normalized once into its **normalized index**, the position that
+it references:
 
 - If non-negative $index$: $index$.
 - If negative $index$: $length + 1 + index$ (where $length$ is the list's
@@ -25,6 +26,11 @@ Accessing an invalid position is an error. Invalid positions are:
 
 - Non-positive positions.
 - Positions that are greater than a list's length.
+
+A normalized index is never normalized again, nor reduced modulo $length$, so an
+index whose normalized index is invalid is an error (e.g., for a 3-element list,
+`-1` references position 3, while `0`, `4`, `-4` & `-5` are errors, `-5`'s
+normalized index being `-1`).
 
 A negative index may be used to _reference_ an element, but the index _of_ an
 element is always positive.

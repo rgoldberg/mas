@@ -732,6 +732,8 @@ private extension MASTests {
 			(".@", .missingFieldSpecIndex),
 			(".+adamID@x", .missingFieldOccurrenceIndex),
 			("@all.adamID@3", .invalidPosition("3")),
+			("@all.@-5", .invalidPosition("-5")),
+			("@all.@0", .invalidPosition("0")),
 			("@all.adamID@+3", .invalidPosition("3")),
 			("@all.+adamID@3", .invalidPosition("3")),
 			("@all._adamID@3", .invalidPosition("3")),

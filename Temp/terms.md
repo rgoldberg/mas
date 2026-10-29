@@ -134,8 +134,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: inoperative / unused / unreachable / illegal
 26. - position: a list position (1, 2, 3, etc.) that an index may reference
     - index: references a position
-    - normalized index: an index's non-negative equivalent
-      ([defined](../Specs/fields.md#positions--indices))
+    - normalized index: the position that an index references, which is an error
+      if invalid ([defined](../Specs/fields.md#positions--indices))
     - indices: plural
     - located at position
     - location: where something is relative to others, without an exact position
