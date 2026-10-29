@@ -352,7 +352,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: change / alter
 66. - payload: a modifier's expression after its prefix, or an option's
       expression between its letter & its `<sort-option-terminator>`
-      ([defined](../Specs/fields.md#payloads))
+      ([defined](../Specs/fields.md#payloads)); also a table, key-value, or JSON
+      setting's expression between its letter & its termination
+    - payloadless: of a setting's lowercase alternative, which takes no payload,
+      unlike its uppercase one (`<payloadless-table-setting>`,
+      `<payloadless-key-value-setting>`)
     - argument: an element of an argument list (a transform's, a number
       coercion's, `N`'s, or `C`'s)
     - REJECTED: body / argument (for other modifiers & options)

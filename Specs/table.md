@@ -234,6 +234,17 @@ text, not as a separate `<broken-setting>`.
 
 ## Implied Settings
 
+```ebnf
+payloadless-table-setting =
+  <header-off>
+  | <header-style-prefix-default>
+  | <header-style-suffix-default>
+  | <header-style-reset-default>
+  | <separator-off>
+  | <column-spacing-default>
+  (* non-structural *)
+```
+
 - `b` / `u` imply a separator line, if none is otherwise set: `S`.
 - An effective `S` implies a header row, if none is otherwise set: `H`
   (unstyled), because a separator line's sole purpose is to separate a header
@@ -243,7 +254,11 @@ A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
 overrides that axis's implied setting, regardless of where in `<table-config>`
 it appears.
 
-A setting implied by `<table-config>` overrides inherited settings.
+A setting implied by `<table-config>` overrides an inherited setting iff the
+inherited setting is a `<payloadless-table-setting>`, so an implied setting
+never overrides an inherited payload (e.g., with an inherited `H1:`, `S` retains
+the bold header row, while with an inherited `h`, `S` implies an unstyled one;
+with an inherited `S=:`, `b` breaks the `=`-patterned separator line).
 
 ## Examples
 

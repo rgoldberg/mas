@@ -265,6 +265,19 @@ not as a separate `<item-separator-setting>`.
 
 ## Implied Settings
 
+```ebnf
+payloadless-key-value-setting =
+  <unstyled-key>
+  | <key-style-prefix-default>
+  | <key-style-suffix-default>
+  | <key-style-reset-default>
+  | <leader-off>
+  | <leading-spacing-default>
+  | <trailing-spacing-default>
+  | <item-separator-off>
+  (* non-structural *)
+```
+
 - An effective `f` implies a leading spacing of `:` (i.e., `L\::`), if none is
   otherwise set, so each row is `key: value` (e.g., `fF:` implies none, so its
   leading spacing is `l`'s 1 space).
@@ -272,7 +285,11 @@ not as a separate `<item-separator-setting>`.
 A setting that explicitly sets an axis (e.g., `l`) always overrides that axis's
 implied setting, regardless of where in `<key-value-config>` it appears.
 
-A setting implied by `<key-value-config>` overrides inherited settings.
+A setting implied by `<key-value-config>` overrides an inherited setting iff the
+inherited setting is a `<payloadless-key-value-setting>`, so an implied setting
+never overrides an inherited payload (e.g., with an inherited `l`, `f` implies
+`key: value` rows, while with an inherited `L=:`, `f` retains `key= value`
+rows).
 
 ## Examples
 

@@ -85,10 +85,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
       that a field name in an extended persisted fields config's
       `<fields-config>` names.
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
-   they currently apply only on top of `standard`, so implied
-   [table](../Specs/table.md#implied-settings) &
-   [key-value](../Specs/key-value.md#implied-settings) settings' precedence over
-   inherited ones has no effect yet.
+   they currently apply only on top of `standard`, so no implied
+   [table](../Specs/table.md#implied-settings) or
+   [key-value](../Specs/key-value.md#implied-settings) setting yet meets an
+   inherited payload, which it would not override.
 
 #### Custom Names Removal
 
