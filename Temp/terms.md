@@ -189,9 +189,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - override: priority precedence where a higher-level rule prevails over a
       lower-level rule, including an app's behavior or default prevailing over a
       spec's
-    - effective: of a setting, not overridden (e.g., "an effective `f`"); of an
-      index, its non-negative equivalent
-      ([defined](../Specs/fields.md#positions--indices))
+    - effective: not overridden (e.g., "an effective `f`";
+      [defined](../Specs/ebnf.md#last-wins-comments)); of an index, its
+      non-negative equivalent ([defined](../Specs/fields.md#positions--indices))
     - precedence: order among peers
     - priority: `<sort-priority>`
     - wins: only in the `(* last wins *)` idiom
