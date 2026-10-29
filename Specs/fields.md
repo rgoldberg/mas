@@ -575,14 +575,15 @@ fields config, so that a later field spec edit modifies it (e.g., `.-a,a=X`
 restores `a`, labeled `X`, while `.-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
-spec from the baseline fields config referenced by `fs`, resolved as in the
-reference fields config, except that a `<named-field-spec-reference>` without a
-`<field-occurrence-index>` whose `<reference-field-name>` names no field spec
-selects a [default field spec](#default-field-specs) for field
-`<reference-field-name>` (whereas a present `<field-occurrence-index>` beyond
-its field's field specs is an error, e.g., `.+x@1` when `x` has no field spec).
-Thus, `<disable-all-sorts>` disables an inserted copy's sort (e.g., in
-`@all//0.+name`).
+spec from the baseline fields config referenced by `fs`, so
+`<disable-all-sorts>` disables an inserted copy's sort (e.g., if `x` has
+`name/I`, `@x//0.+name` inserts a copy of `name` whose sort is disabled).
+`source` is resolved as in the reference fields config, except that a
+`<named-field-spec-reference>` without a `<field-occurrence-index>` whose
+`<reference-field-name>` names no field spec selects a [default field
+spec](#default-field-specs) for field `<reference-field-name>` (whereas a
+present `<field-occurrence-index>` beyond its field's field specs is an error,
+e.g., `.+x@1` when `x` has no field spec).
 
 $previous$ is the location in the working fields config where the direct results
 of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
