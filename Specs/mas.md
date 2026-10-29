@@ -121,9 +121,11 @@ Wherever the base fields config is, or transitively
 field's [default field spec](fields.md#default-field-specs) (e.g., for an
 unlisted field) has its built-in field spec's label; it also has its built-in
 field spec's format & justification, absent a custom `default` named format,
-which otherwise sets both (e.g., for a custom `default` of
-`.centerStartJustify..uppercase`, `mas list --fields @all` outputs `bundleID`
-labeled `Bundle ID`, uppercased & center-justified).
+which otherwise sets both, its justification being start-justified unless it
+sets one (e.g., for a custom `default` of `.centerStartJustify..uppercase`,
+`mas list --fields @all` outputs `bundleID` labeled `Bundle ID`, uppercased &
+center-justified, while for one of `..uppercase`, `mas search --fields @all`
+outputs `fileSizeBytes` start-justified).
 
 ## Price Sorting
 
