@@ -29,7 +29,8 @@ kind.
 JSON output sources from the context stack's
 [`default`](configs.md#default-configs) JSON config; `<json-config>` is overlaid
 on it for the current command line only, without persistently affecting it. Each
-setting's default applies iff neither sets it.
+setting's [inherited value](ebnf.md#inherited-comments) is the `default`
+config's value for it.
 
 The [built-in standard](configs.md#immutable-built-in-named-configs) JSON config
 sets every `<json-setting>` to its default.
@@ -44,7 +45,7 @@ though some consumers retain only 1 of them.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; last wins *)
+pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; last wins; inherited *)
 
 compact        = "p" (* mnemonic: lowercase of P, as off *)
 pretty-printed = "P" [ <indentation> ] <json-setting-termination>
@@ -67,7 +68,7 @@ indentation = ^{text: only spaces & tabs}^ (* default: "  " *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-top-level-structure-setting = <item-stream> | <item-array> (* default: <item-stream>; last wins *)
+top-level-structure-setting = <item-stream> | <item-array> (* default: <item-stream>; last wins; inherited *)
 
 item-stream = "s"
 item-array  = "a"
@@ -85,7 +86,7 @@ item-array  = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-ascii-setting = <non-ascii-verbatim> | <non-ascii-escaped> (* default: <non-ascii-verbatim>; last wins *)
+non-ascii-setting = <non-ascii-verbatim> | <non-ascii-escaped> (* default: <non-ascii-verbatim>; last wins; inherited *)
 
 non-ascii-verbatim = "v"
 non-ascii-escaped  = "e"

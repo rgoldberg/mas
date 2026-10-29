@@ -33,7 +33,8 @@ kind.
 Table output sources from the context stack's
 [`default`](configs.md#default-configs) table config; `<table-config>` is
 overlaid on it for the current command line only, without persistently affecting
-it. Each setting's default applies iff neither sets it.
+it. Each setting's [inherited value](ebnf.md#inherited-comments) is the
+`default` config's value for it.
 
 The [built-in standard](configs.md#immutable-built-in-named-configs) table
 config sets every `<table-setting>` to its default.
@@ -50,7 +51,7 @@ a separator line.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-setting = <header-off> | <header-on> (* default: <header-off>; last wins *)
+header-setting = <header-off> | <header-on> (* default: <header-off>; last wins; inherited *)
 
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
@@ -80,7 +81,7 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-styling-setting = <header-terminal-only-styling> | <header-always-styling> (* default: <header-terminal-only-styling>; last wins *)
+header-styling-setting = <header-terminal-only-styling> | <header-always-styling> (* default: <header-terminal-only-styling>; last wins; inherited *)
 
 header-terminal-only-styling = "t"
 header-always-styling        = "a"
@@ -97,7 +98,7 @@ header-always-styling        = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-prefix-setting = <header-style-prefix-default> | <header-style-prefix-custom> (* default: <header-style-prefix-default>; last wins *)
+header-style-prefix-setting = <header-style-prefix-default> | <header-style-prefix-custom> (* default: <header-style-prefix-default>; last wins; inherited *)
 
 header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
@@ -118,7 +119,7 @@ style-prefix = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default>; last wins *)
+header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default>; last wins; inherited *)
 
 header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
 header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: suffix *)
@@ -139,7 +140,7 @@ style-suffix = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-reset-setting = <header-style-reset-default> | <header-style-reset-custom> (* default: <header-style-reset-default>; last wins *)
+header-style-reset-setting = <header-style-reset-default> | <header-style-reset-custom> (* default: <header-style-reset-default>; last wins; inherited *)
 
 header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
@@ -159,7 +160,7 @@ style-reset = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-separator-setting = <separator-off> | <separator-on> (* default: <separator-off>; last wins *)
+separator-setting = <separator-off> | <separator-on> (* default: <separator-off>; last wins; inherited *)
 
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
@@ -182,12 +183,16 @@ separator-pattern = ^{text: no line terminators}^ (* default: "-" *)
 
 ## Broken
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-broken-setting = <broken> | <unbroken> (* default: <unbroken>; last wins *)
+broken-setting = <broken> | <unbroken> (* default: <unbroken>; last wins; inherited *)
 
 broken   = "b"
 unbroken = "u"
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 - `b`: the [separator line](#separator) is broken into 1 independently filled
   segment per column, joined by the same column spacing as every other row.
@@ -199,7 +204,7 @@ unbroken = "u"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default>; last wins *)
+column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default>; last wins; inherited *)
 
 column-spacing-default = "c" (* default column-spacing: "  " *)
 column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>

@@ -671,7 +671,7 @@ disabled-sort-prefix = "0" (* mnemonic: 0, as off *)
 
 sort-priority =
   {positive integer without leading 0s}
-  (* default: {<sort-priority> of the corresponding field spec's <sort> in the working fields config, if any; otherwise, 100} *)
+  (* default: {<sort-priority> of the corresponding field spec's <sort> in the working fields config, if any; otherwise, 100}; inherited *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
