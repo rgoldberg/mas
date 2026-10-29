@@ -619,9 +619,8 @@ abort-on-failure = "+"!
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A **matcher** is a `<placeholder-prefix>` (in a placeholder), its `<modifiers>`
-& its `<predicate>`; a placeholder or branch is a matcher immediately followed
-by its success clause, blocks, or branches, which define the matcher's **form**:
+A placeholder or branch is a **matcher** (`<matcher>`) immediately followed by
+its success clause, blocks, or branches, which define the matcher's **form**:
 
 - **Nullary**: nothing.
 - **Unary**: a `<success-clause>`.
