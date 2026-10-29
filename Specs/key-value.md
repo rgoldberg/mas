@@ -241,6 +241,11 @@ item-separator-line = ^{text: no line terminators}^ (* default: {empty string} *
   that contains a line terminator is invalid, because it would split the item
   separator line.
 
+An item without any key-value pair has no rows, but is still an item, so the
+item separator lines on each side of it remain (e.g., with `S---:`, such an item
+between 2 others leaves 2 adjacent `---` lines), unless no item has a key-value
+pair, in which case nothing is rendered.
+
 ## Key-Value Setting Termination
 
 <!--editorconfig-checker-disable-->
