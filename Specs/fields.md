@@ -412,9 +412,10 @@ before `<field-spec-edits-section>`, so its edits & each `<index>` (including a
 `<baseline-sourced-field-spec-edit>`'s) apply to the reversed positions (e.g.,
 in `@all/P-.+@1`, `@1` references `all`'s last field spec). A
 `<positional-order-option-set>`'s `<direction>` reverses those positions iff it
-differs from the working fields config's `<direction>`, which is `<ascending>`
-unless its field order is `<positional-order>` (e.g., if `x` has `/P-`, each of
-`@x/P-` & `@x/P` outputs `x`'s field order, while `@x/P+` reverses it).
+differs from the working fields config's field order's `<direction>`, which is
+`<ascending>` unless that field order is `<positional-order>` (e.g., if `x` has
+`/P-`, each of `@x/P-` & `@x/P` outputs `x`'s field order, while `@x/P+`
+reverses it).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
