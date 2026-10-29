@@ -41,8 +41,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       name", "parsed by the engine")
     - with: structural attributes, settings, or parameters accompanying an item
       (e.g., "defined with modifiers")
-    - through: iteration or traversal of a sequence
-    - over: iteration or traversal of the elements of a sequence
+    - through: iteration through a sequence (e.g., "iterating through the
+      context stack")
+    - over: precedence or layering (e.g., "takes sort precedence over", "layers
+      … over")
     - REJECTED: across
 11. - iteration / iterate: sequential processing through linear structures
     - traversal / traverse: structural navigation through non-linear structures
