@@ -59,6 +59,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
 13. - inherited: from a base or working config
+    - inherited value: a transitively absent `(* inherited *)` nonterminal's
+      value from a config that the input modifies
+      ([defined](../Specs/ebnf.md#inherited-comments))
     - existing: already in the working fields config
     - previous: the immediately preceding one (`$previous$`)
     - REJECTED: prior / predefined

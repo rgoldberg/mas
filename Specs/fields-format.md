@@ -7,7 +7,7 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline> | [ <format-transform-pipeline> ] -<format-template> (* direct default: {empty string} *)
+format-block = <pipeline> | [ <format-transform-pipeline> ] -<format-template> (* direct default: {empty string}; inherited *)
 
 pipeline        =
   <named-format>
@@ -452,7 +452,7 @@ behind).
 format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+
 format-transform          = <justify>
 
-justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: <start-justify>; last wins *)
+justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: <start-justify>; last wins; inherited *)
 
 start-justify        = "startJustify"
 center-start-justify = "centerStartJustify"
@@ -474,9 +474,6 @@ align); it accepts a value of any type & does not modify it, unlike every
 column width is odd: `centerStartJustify` puts the extra space after the value
 (leaving it nearer the column's start); `centerEndJustify` puts it before the
 value (leaving it nearer the column's end).
-
-An absent `<justify>` is inherited from the working fields config; absent any
-justification to inherit, it is `<start-justify>`.
 
 A `<named-format-reference>` applies the justification that its referenced
 format sets, if any, as if that format's `<justify>` occurred immediately before

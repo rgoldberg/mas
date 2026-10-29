@@ -168,6 +168,14 @@ private extension MASTests {
 		#expect(!specs[1].isHidden)
 	}
 
+	@Test(arguments: [".adamID/-i,adamID/2", ".adamID/-i,adamID/02"])
+	func `a sort that omits its sort options retains the working fields config's`(value: String) throws {
+		let sortSpec = try #require(try parseFieldSpecs(value)[0].sortSpec)
+		#expect(sortSpec.priority == 2)
+		#expect(sortSpec.optionSet.direction == .descending)
+		#expect(sortSpec.optionSet.caseSensitivity == .insensitive)
+	}
+
 	@Test
 	func `hiding a nonexistent field inserts a hidden field spec`() throws {
 		let specs = try parseFieldSpecs("@all.adamID,_size/1-")
@@ -450,6 +458,7 @@ private extension MASTests {
 		arguments: [
 			(".adamID:.uppercase", Justification.end),
 			(".adamID:%i", .end),
+			(".adamID:", .end),
 			(".adamID:.startJustify..uppercase", .start),
 			(".+size:.uppercase", .start),
 		],

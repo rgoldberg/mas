@@ -204,38 +204,23 @@ config immediately before `<field-spec-edits-section>`.
 The **resolved fields config** is the working fields config after the command
 line has been parsed; it is used to render output.
 
-## Defaults for Absent Expressions
+## Inherited Values
 
-[Presence states](ebnf.md#presence-states) are as in the custom EBNF grammar,
-except that an expression that contains no token, but that is neither an
-alternative of a present choice nor an element of a present repetition, is:
+An [inherited](ebnf.md#inherited-comments) nonterminal's inherited value is the
+working fields config's value for the same setting, if any:
 
-- Directly absent iff it is in the [payload](#payloads) of a present modifier or
-  option, even if the payload contains no token (e.g., `<label>` in `name=`, or
-  `<locale-identifier>` in `N:`).
-- Otherwise, transitively absent (e.g., `<sort-modifier>` in `name=x`).
+- In `<field-modifiers>`: that of the field spec that they modify.
+- In `<item-sort-option>`: that of item sorting.
+- In `<field-order-option-set>`: that of the field order, iff it is also per the
+  same one of `<positional-order-option-set>`, `<document-order-option-set>` &
+  `<sort-option-set>`.
 
-The following is inserted before all other cases in the [absent variable
-expression value algorithm](ebnf.md#defaults-for-absent-expressions):
-
-- If transitively absent & it sets a property of the field spec that its
-  `<field-modifiers>` modify (e.g., its label, format, justification, or a sort
-  option): that property's value in the working fields config, if any.
-- If transitively absent & it is an `<item-sort-option>`'s `<direction>`: the
-  working fields config's item-sort `<direction>`.
-- If transitively absent & it is an option of a `<positional-order-option-set>`,
-  a `<document-order-option-set>`, or a `<sort-option-set>` in
-  `<field-order-option-set>`, or `<field-order-tiebreaker>`'s `<direction>` that
-  follows it: the working fields config's value, iff its field order is also per
-  the same one of those 3 nonterminals.
-
-An omitted modifier (e.g., `<sort-modifier>` from `name` or from `name=x`) or an
-option omitted from a present payload (e.g., `<direction>` from `name/1Ii`) thus
-retains the working fields config's value, as does an item-sort `<direction>`
-omitted from a present `<item-sort-section>` (e.g., from `//0`), while an absent
-modifier payload or option payload (e.g., from `name=`, `name:`, `name/`, `L:`,
-`B:`, `N:`) resets the value to its default for the directly absent state (e.g.,
-`name/` removes the field spec's `<sort>`).
+So an omitted modifier (e.g., `<sort-modifier>` in `name=x`) or option (e.g.,
+`<direction>` in `name/1`, in `name/1Ii`, or in `//0`) retains the working
+fields config's value, while an empty [payload](#payloads) (e.g., in `name=`,
+`name/`, `L:`, or `B:`) is directly absent, so it resets its value to its
+default (e.g., `name/` removes the field spec's `<sort>`, while `name:` empties
+its format, but retains its justification).
 
 ## Nonexistent Fields
 
@@ -381,8 +366,8 @@ order = <positional-order> | <document-order> (* last wins *)
 positional-order = "P"
 document-order   = "D"
 
-unpositioned-field-comparison = <unpositioned-fields-least> | <unpositioned-fields-greatest> (* default: <unpositioned-fields-greatest>; last wins *)
-unpositioned-field-placement  = <relative-unpositioned-fields> | <fixed-unpositioned-fields> (* default: <relative-unpositioned-fields>; last wins *)
+unpositioned-field-comparison = <unpositioned-fields-least> | <unpositioned-fields-greatest> (* default: <unpositioned-fields-greatest>; last wins; inherited *)
+unpositioned-field-placement  = <relative-unpositioned-fields> | <fixed-unpositioned-fields> (* default: <relative-unpositioned-fields>; last wins; inherited *)
 
 unpositioned-fields-least    = "a" (* mnemonic: 1st letter, so least *)
 unpositioned-fields-greatest = "z" (* mnemonic: last letter, so greatest *)
@@ -429,10 +414,10 @@ Field specs that the field order ties are ordered by position, reversed iff
 `<direction>` affects their order.
 
 An option omitted from a present `<field-order-section>` may retain the working
-fields config's value, [as specified](#defaults-for-absent-expressions) (e.g.,
-if `x` has `/I-`, `@x/i` sorts by name, descending, while `@x/D` & `@x/P` are
-ascending; if `x` has `/D-`, `@x/PD`, being a `<document-order-option-set>`, is
-descending; if `x` has `/aP-`, `@x/P` retains `a` & `<descending>`).
+fields config's value, [as specified](#inherited-values) (e.g., if `x` has
+`/I-`, `@x/i` sorts by name, descending, while `@x/D` & `@x/P` are ascending; if
+`x` has `/D-`, `@x/PD`, being a `<document-order-option-set>`, is descending; if
+`x` has `/aP-`, `@x/P` retains `a` & `<descending>`).
 
 Unless the field order is `<positional-order>`, a field spec's position affects
 only:
@@ -642,7 +627,7 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 label-modifier        = <label-modifier-prefix> [ <label> ]
 label-modifier-prefix = "="
 
-label = {text} (* direct default: {empty string} *)
+label = {text} (* direct default: {empty string}; inherited *)
 ```
 
 - A field spec's `<label>` is its:
@@ -664,6 +649,7 @@ sort =
   <disabled-sort-prefix>+ [ <sort-priority> ] [ <sort-option-set> ]
   | <sort-priority> [ <sort-option-set> ]
   | <sort-option-set>
+  (* inherited *)
 ```
 
 - A **sort key** is a field spec with an enabled `<sort>`, which affects item
@@ -725,7 +711,7 @@ sort-option-terminator = ":"
 ##### Sort Source
 
 ```ebnf
-source = <input> | <output> (* default: <input>; last wins *)
+source = <input> | <output> (* default: <input>; last wins; inherited *)
 
 input  = "I"
 output = "O"
@@ -812,19 +798,23 @@ per `<case-sensitivity>` & `<locale>`), e.g., `2.0b9` precedes `2.0b10`.
 
 ##### Sort Direction
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-direction = <ascending> | <descending> (* default: <ascending>; last wins *)
+direction = <ascending> | <descending> (* default: <ascending>; last wins; inherited *)
 
 ascending  = "+"
 descending = "-"
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 ##### Sort Case Sensitivity
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-case-sensitivity = <sensitive> | <insensitive> (* default: <sensitive>; last wins *)
+case-sensitivity = <sensitive> | <insensitive> (* default: <sensitive>; last wins; inherited *)
 
 sensitive   = "s"
 insensitive = "i"
@@ -840,7 +830,7 @@ does (e.g., `a` equals `A`, but `é` does not equal `e`).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: "canonical"; last wins *)
+locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: "canonical"; last wins; inherited *)
 
 locale-identifier = {text: locale identifier, "canonical", or "system"} (* default: "system" *)
 ```
@@ -865,7 +855,7 @@ separator, a digit group size of 3 & a secondary digit group size of 0.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <ungrouped-numeric>; last wins *)
+number-segments = <lexicographic> | <ungrouped-numeric> | <versions> | <grouped-numeric> (* default: <ungrouped-numeric>; last wins; inherited *)
 
 lexicographic     = "x" (* mnemonic: 3rd letter of lexicographic *)
 ungrouped-numeric = "u"
@@ -922,7 +912,7 @@ A `-` or `+` immediately preceding a number segment is its sign:
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: "iso"; last wins *)
+chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: "iso"; last wins; inherited *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
 chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time> | <unix-time>
@@ -962,7 +952,7 @@ segments.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+space+:"; last wins *)
+boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+space+:"; last wins; inherited *)
 
 uncollapsed-boundaries = "B" [ <boundary-groups> ] <sort-option-terminator>
 collapsed-boundaries   = "M" [ <boundary-groups> ] <sort-option-terminator> (* mnemonic: merged *)
@@ -1031,13 +1021,13 @@ to the same boundary group into one. Directly absent `<boundary-groups>` (e.g.,
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconforming-greatest> (* default: <all-conforming>; last wins *)
+nonconforming-comparison = <all-conforming> | <nonconforming-least> | <nonconforming-greatest> (* default: <all-conforming>; last wins; inherited *)
 
 all-conforming         = "k" (* mnemonic: keep in place *)
 nonconforming-least    = "a" (* mnemonic: 1st letter, so least *)
 nonconforming-greatest = "z" (* mnemonic: last letter, so greatest *)
 
-nonconforming-placement = <relative-nonconforming> | <fixed-nonconforming> (* default: <relative-nonconforming>; last wins *)
+nonconforming-placement = <relative-nonconforming> | <fixed-nonconforming> (* default: <relative-nonconforming>; last wins; inherited *)
 
 relative-nonconforming = "r"
 fixed-nonconforming    = "f"
@@ -1064,7 +1054,7 @@ With `<all-conforming>`, no value is nonconforming.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* default: <text-in-place>; last wins *)
+text-order = <text-first> | <text-last> | <text-in-place> | <text-excluded> (* default: <text-in-place>; last wins; inherited *)
 
 text-first    = "h" (* mnemonic: head *)
 text-last     = "t" (* mnemonic: tail *)

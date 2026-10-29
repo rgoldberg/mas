@@ -664,6 +664,17 @@ Anything that nothing overrides (e.g., an occurrence that no later one
 overrides, or a syntax's implied setting that no explicit one overrides) is
 **effective** (e.g., in `-P+`, `+` is effective, but `-` is not).
 
+##### Inherited Comments
+
+```ebnf
+NONTERMINAL = DEFINITION (* inherited *)
+```
+
+A transitively absent `NONTERMINAL` may have an **inherited value**, which a
+syntax defines (e.g., as the value of the same setting in a config that the
+input modifies). A directly absent `NONTERMINAL` has none, so its default
+applies.
+
 ##### Default Resolution
 
 ###### Explicit & Implicit Defaults
@@ -696,6 +707,7 @@ An absent constant expression's value is always its constant value.
 
 An absent variable expression `EXPRESSION`'s value is, in descending precedence:
 
+- `EXPRESSION`'s [inherited value](#inherited-comments), if any.
 - `DEFAULT` from the furthest ancestor from `EXPRESSION` that has an applicable
   descendant default comment whose `DESCENDANT` is `EXPRESSION`.
   - Ancestors further from `EXPRESSION` take precedence because they have more
