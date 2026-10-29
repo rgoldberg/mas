@@ -543,9 +543,9 @@ nonterminals; they cannot specify defaults for constant nonterminals.
   alternative of the choice that defines the nonterminal to which the default
   applies, directly or as a [grouping](#groupings)'s child (e.g.,
   `<relative-config>` for [`<fields-config>`](fields.md#fields-option)), it
-  selects that alternative, as if that alternative were present with every
-  descendant directly absent; otherwise, it evaluates to the referenced
-  nonterminal's global default for the directly absent state.
+  selects that alternative, as if that alternative were present but contained no
+  token; otherwise, it evaluates to the referenced nonterminal's global default
+  for the directly absent state.
 - [Literal text](#literal-text), consumed by the nonterminal to which the
   default applies.
 
