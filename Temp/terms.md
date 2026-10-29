@@ -350,13 +350,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 65. - edit: a `<field-spec-edit>`
     - modify: applied to a value or config
     - REJECTED: change / alter
-66. - payload: a modifier's expression after its prefix; an option's expression
-      between its letter & its `<sort-option-terminator>`; or a table,
-      key-value, or JSON setting's expression between its letter & its
-      termination ([defined](../Specs/fields.md#payloads))
+66. - payload: a modifier's expression after its prefix, or an option's
+      expression between its letter & its `<sort-option-terminator>`
+      ([defined](../Specs/fields.md#payloads)); also a table, key-value, or JSON
+      setting's expression between its letter & its termination
+      ([defined](../Specs/configs.md#output-configs))
     - payloadless: of a setting's lowercase alternative, which takes no payload,
       unlike its uppercase one (`<payloadless-table-setting>`,
-      `<payloadless-key-value-setting>`)
+      `<payloadless-key-value-setting>`;
+      [defined](../Specs/configs.md#output-configs))
     - argument: an element of an argument list (a transform's, a number
       coercion's, `N`'s, or `C`'s)
     - REJECTED: body / argument (for other modifiers & options)
@@ -497,6 +499,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - last-wins scope: the nearest enclosing occurrence (else the entire input)
       within which a `(* last wins *)` nonterminal's occurrences override each
       other ([defined](../Specs/ebnf.md#last-wins-comments))
+    - implied setting: a setting that settings in an output config option's
+      value imply ([defined](../Specs/configs.md#implied-settings))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
     - decimal number: a Unix time's text syntax
@@ -599,3 +603,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        for `<positional-order>`, a visible unlisted field
        ([defined](../Specs/fields.md#field-order))
      - REJECTED: absent field (for an unpositioned field)
+110. - output config: a table, key-value, or JSON config
+       ([defined](../Specs/configs.md#output-configs))
+     - output config option: an output format's option that selects it with a
+       config overlaid on its `default` config (e.g., `--json-config`)
+       ([defined](../Specs/configs.md#output-configs))

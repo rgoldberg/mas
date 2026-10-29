@@ -627,9 +627,7 @@ field-modifiers = [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 A modifier's **payload** is the expression after its prefix (e.g., `<label>` in
 `<label-modifier>`); an option's **payload** is the expression between its
 letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
-`<locale>`); a table, key-value, or JSON setting's **payload** is the expression
-between its letter & its termination (e.g., `<style-specifier>` in
-[`<header-on>`](table.md#header)).
+`<locale>`).
 
 #### Labeling
 

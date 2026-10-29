@@ -24,21 +24,11 @@ key-value-setting =
   | <item-separator-setting>
 ```
 
-`--key-value-config`'s [value](configs.md#option-values), iff it contains a
-non-[whitespace](ebnf.md#whitespace) character, is a `<key-value-config>`;
-otherwise, it overlays no setting (e.g., `--key-value-config=` ≡ `--key-value`).
+`--key-value-config` is key-value output's [output config
+option](configs.md#output-configs), whose syntax is `<key-value-config>`.
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.
-
-Key-value output sources from the context stack's
-[`default`](configs.md#default-configs) key-value config; `<key-value-config>`
-is overlaid on it for the current command line only, without persistently
-affecting it. Each setting's [inherited value](ebnf.md#inherited-comments) is
-the `default` config's value for it.
-
-The [built-in standard](configs.md#immutable-built-in-named-configs) key-value
-config sets every `<key-value-setting>` to its default.
 
 Each row of an item is its key, its leading spacing, its leader, its trailing
 spacing, then its value.
@@ -282,14 +272,12 @@ payloadless-key-value-setting =
   otherwise set, so each row is `key: value` (e.g., `fF:` implies none, so its
   leading spacing is `l`'s 1 space).
 
-A setting that explicitly sets an axis (e.g., `l`) always overrides that axis's
-implied setting, regardless of where in `<key-value-config>` it appears.
-
-A setting implied by `<key-value-config>` overrides an inherited setting iff the
-inherited setting is a `<payloadless-key-value-setting>`, so an implied setting
-never overrides an inherited [payload](fields.md#payloads) (e.g., with an
-inherited `l`, `f` implies `key: value` rows, while with an inherited `L=:`, `f`
-retains `key= value` rows).
+An implied setting yields to an explicit setting of its axis & to an inherited
+payload, as [output configs specify](configs.md#implied-settings),
+`<payloadless-key-value-setting>` being the payloadless key-value settings
+(e.g., `fl` has `l`'s leading spacing; with an inherited `l`, `f` implies
+`key: value` rows, while with an inherited `L=:`, `f` retains `key= value`
+rows).
 
 ## Examples
 

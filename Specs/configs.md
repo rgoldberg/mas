@@ -172,3 +172,39 @@ built-in config.
 A context's `default` is its custom config named `default` iff one exists;
 otherwise, [`standard`](#standard-configs) is substituted for `default`, so
 `default` is that context's `standard`.
+
+## Output Configs
+
+An **output config** is a table, key-value, or JSON config. Each output format's
+**output config option** (e.g., `--json-config`) takes a [value](#option-values)
+that, iff it contains a non-[whitespace](ebnf.md#whitespace) character, is its
+kind's syntax (e.g., [`<json-config>`](json.md#json-config)); otherwise, it
+overlays no setting (e.g., `--json-config=` ≡ `--json`).
+
+Output sources from the context stack's [`default`](#default-configs) output
+config of its output format's kind; an output config option's value is overlaid
+on it for the current command line only, without persistently affecting it. Each
+setting's [inherited value](ebnf.md#inherited-comments) is the `default`
+config's value for it.
+
+Each kind's [built-in standard](#immutable-built-in-named-configs) output config
+sets every setting to its default.
+
+A setting's **payload** is the expression between its letter & its termination
+(e.g., `<style-specifier>` in [`<header-on>`](table.md#header)). A
+**payloadless** setting is the lowercase alternative of a setting whose
+uppercase alternative takes a payload (e.g., `h`, but not `t`, in a table
+config).
+
+### Implied Settings
+
+A kind may define **implied settings**, which settings in an output config
+option's value imply (e.g., a table's [implied
+settings](table.md#implied-settings)).
+
+A setting that explicitly sets an axis, even to "off" (e.g., a table's `h`),
+always overrides that axis's implied setting, regardless of where in the output
+config option's value it appears.
+
+An implied setting overrides an inherited setting iff the inherited setting is
+payloadless, so an implied setting never overrides an inherited payload.

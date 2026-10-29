@@ -19,21 +19,11 @@ json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`--json-config`'s [value](configs.md#option-values), iff it contains a
-non-[whitespace](ebnf.md#whitespace) character, is a `<json-config>`; otherwise,
-it overlays no setting (e.g., `--json-config=` ≡ `--json`).
+`--json-config` is JSON output's [output config
+option](configs.md#output-configs), whose syntax is `<json-config>`.
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.
-
-JSON output sources from the context stack's
-[`default`](configs.md#default-configs) JSON config; `<json-config>` is overlaid
-on it for the current command line only, without persistently affecting it. Each
-setting's [inherited value](ebnf.md#inherited-comments) is the `default`
-config's value for it.
-
-The [built-in standard](configs.md#immutable-built-in-named-configs) JSON config
-sets every `<json-setting>` to its default.
 
 A key-value pair is output even if its key repeats another's (e.g.,
 `--fields name=x,version=x` outputs 2 `x` keys, as does a field with 2

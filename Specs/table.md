@@ -23,21 +23,11 @@ table-setting =
   | <column-spacing-setting>
 ```
 
-`--table-config`'s [value](configs.md#option-values), iff it contains a
-non-[whitespace](ebnf.md#whitespace) character, is a `<table-config>`;
-otherwise, it overlays no setting (e.g., `--table-config=` ≡ `--table`).
+`--table-config` is table output's [output config
+option](configs.md#output-configs), whose syntax is `<table-config>`.
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.
-
-Table output sources from the context stack's
-[`default`](configs.md#default-configs) table config; `<table-config>` is
-overlaid on it for the current command line only, without persistently affecting
-it. Each setting's [inherited value](ebnf.md#inherited-comments) is the
-`default` config's value for it.
-
-The [built-in standard](configs.md#immutable-built-in-named-configs) table
-config sets every `<table-setting>` to its default.
 
 Each [line terminator](configs.md#line-terminators) in a header or data cell is
 rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
@@ -250,16 +240,12 @@ payloadless-table-setting =
   (unstyled), because a separator line's sole purpose is to separate a header
   from the data (e.g., `S` & `b` imply `H`, while `S:s` & `bs` imply none).
 
-A setting that explicitly sets an axis, even to "off" (`h` / `s`), always
-overrides that axis's implied setting, regardless of where in `<table-config>`
-it appears.
-
-A setting implied by `<table-config>` overrides an inherited setting iff the
-inherited setting is a `<payloadless-table-setting>`, so an implied setting
-never overrides an inherited [payload](fields.md#payloads) (e.g., with an
-inherited `H1:`, `S` retains the bold header row, while with an inherited `h`,
-`S` implies an unstyled one; with an inherited `S=:`, `b` breaks the
-`=`-patterned separator line).
+An implied setting yields to an explicit setting of its axis & to an inherited
+payload, as [output configs specify](configs.md#implied-settings),
+`<payloadless-table-setting>` being the payloadless table settings (e.g., `S:h`
+implies no header row; with an inherited `H1:`, `S` retains the bold header row,
+while with an inherited `h`, `S` implies an unstyled one; with an inherited
+`S=:`, `b` breaks the `=`-patterned separator line).
 
 ## Examples
 
