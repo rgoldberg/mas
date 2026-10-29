@@ -256,9 +256,10 @@ it appears.
 
 A setting implied by `<table-config>` overrides an inherited setting iff the
 inherited setting is a `<payloadless-table-setting>`, so an implied setting
-never overrides an inherited payload (e.g., with an inherited `H1:`, `S` retains
-the bold header row, while with an inherited `h`, `S` implies an unstyled one;
-with an inherited `S=:`, `b` breaks the `=`-patterned separator line).
+never overrides an inherited [payload](fields.md#payloads) (e.g., with an
+inherited `H1:`, `S` retains the bold header row, while with an inherited `h`,
+`S` implies an unstyled one; with an inherited `S=:`, `b` breaks the
+`=`-patterned separator line).
 
 ## Examples
 

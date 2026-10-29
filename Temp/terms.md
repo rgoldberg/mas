@@ -350,10 +350,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 65. - edit: a `<field-spec-edit>`
     - modify: applied to a value or config
     - REJECTED: change / alter
-66. - payload: a modifier's expression after its prefix, or an option's
-      expression between its letter & its `<sort-option-terminator>`
-      ([defined](../Specs/fields.md#payloads)); also a table, key-value, or JSON
-      setting's expression between its letter & its termination
+66. - payload: a modifier's expression after its prefix; an option's expression
+      between its letter & its `<sort-option-terminator>`; or a table,
+      key-value, or JSON setting's expression between its letter & its
+      termination ([defined](../Specs/fields.md#payloads))
     - payloadless: of a setting's lowercase alternative, which takes no payload,
       unlike its uppercase one (`<payloadless-table-setting>`,
       `<payloadless-key-value-setting>`)

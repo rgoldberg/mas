@@ -287,9 +287,9 @@ implied setting, regardless of where in `<key-value-config>` it appears.
 
 A setting implied by `<key-value-config>` overrides an inherited setting iff the
 inherited setting is a `<payloadless-key-value-setting>`, so an implied setting
-never overrides an inherited payload (e.g., with an inherited `l`, `f` implies
-`key: value` rows, while with an inherited `L=:`, `f` retains `key= value`
-rows).
+never overrides an inherited [payload](fields.md#payloads) (e.g., with an
+inherited `l`, `f` implies `key: value` rows, while with an inherited `L=:`, `f`
+retains `key= value` rows).
 
 ## Examples
 
