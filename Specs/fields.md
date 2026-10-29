@@ -217,7 +217,7 @@ working fields config's value for the same setting, if any:
 
 - In `<field-modifiers>`: that of the field spec that they modify.
 - In `<item-sort-option>`: that of item sorting.
-- `<field-order-option-set>`: the field order.
+- `<field-order-option-set>` itself: the field order.
 - In `<field-order-option-set>`: that of the field order, iff it is also per the
   same one of `<positional-order-option-set>`, `<document-order-option-set>` &
   `<sort-option-set>`.
