@@ -133,7 +133,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - index: references a position
     - indices: plural
     - located at position
-    - location: relative placement without an exact position
+    - location: where something is relative to others, without an exact position
+    - placement: a setting that chooses a location (`<nonconforming-placement>`,
+      `<unpositioned-field-placement>`)
     - REJECTED: place (except in the idiom "in place", e.g., `<text-in-place>`)
       / indexes
 27. - put: verb
