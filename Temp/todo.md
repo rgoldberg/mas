@@ -55,7 +55,12 @@ only after `=` (e.g., `--json[=<json-config>]`).
 1. Custom named formats: every reference to a named format other than `standard`
    & `default` (both `%i`) reports `unknownNamedFormat` (or `invalidFormatName`
    for an invalid format name), so no referenced format sets a
-   [justification](../Specs/fields-format.md#format-transforms) yet.
+   [justification](../Specs/fields-format.md#format-transforms) yet. Supporting
+   them also needs key-value & JSON output to omit each [unlisted
+   field](../Specs/fields.md#unlisted-fields) that an item lacks, because mas
+   gives every item a field spec for each unlisted field of any item, while a
+   custom `default` named format may give an absent field a formatted value that
+   is not absent (e.g., `%N%n+none+`).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, named formats included:
    1. Looking a name up through the [context
