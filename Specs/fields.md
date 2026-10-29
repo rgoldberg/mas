@@ -15,7 +15,7 @@ List elements are located at 1-based integer **positions**.
 
 Positions are referenced via integer **indices**.
 
-Each index has an **effective index**:
+Each index has a **normalized index**:
 
 - If non-negative $index$: $index$.
 - If negative $index$: $length + 1 + index$ (where $length$ is the list's
@@ -521,11 +521,11 @@ While a field spec's position in the reference fields config cannot be modified:
 When accessing a field spec position via an index:
 
 - If the position access reports an error, or if a `null` is present at the
-  effective index in the list for a `<field-spec-removal>` (any other
+  normalized index in the list for a `<field-spec-removal>` (any other
   `<field-spec-edit>` applies to a `null` as
   [specified](#relative-field-specs)), an error is reported.
-- Otherwise, the field spec at the effective index in the list is the referenced
-  field spec.
+- Otherwise, the field spec at the normalized index in the list is the
+  referenced field spec.
 
 #### Relative Field Specs
 

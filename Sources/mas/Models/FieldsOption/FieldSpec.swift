@@ -419,7 +419,7 @@ extension Character { // swiftlint:disable:this file_types_order
 /// Translates an index (per fields.md's "Positions & Indices": non-negative ⇒
 /// itself; negative ⇒ `length + 1 + index`) into a validated 1-based position,
 /// throwing for non-positive or out-of-range positions.
-func effectivePosition(forIndex index: Int, length: Int) throws(ParsingError) -> Int {
+func normalizedPosition(forIndex index: Int, length: Int) throws(ParsingError) -> Int {
 	let position = index >= 0 ? index : length + 1 + index
 	guard position >= 1, position <= length else {
 		throw .invalidPosition(String(index))
@@ -828,7 +828,7 @@ private extension FieldSpecsBuilder {
 		guard input.first != fieldSpecIndexPrefix else {
 			return .init(
 				name: nil,
-				position: try effectivePosition(
+				position: try normalizedPosition(
 					forIndex: parseIndex(&input, ifMissing: .missingFieldSpecIndex),
 					length: baselineFieldSpecs.count,
 				),
@@ -846,7 +846,7 @@ private extension FieldSpecsBuilder {
 	/// spec for field `<reference-field-name>`).
 	private func parseBaselineSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != fieldSpecIndexPrefix else {
-			return baselineFieldSpecs[try effectivePosition(
+			return baselineFieldSpecs[try normalizedPosition(
 				forIndex: parseIndex(&input, ifMissing: .missingFieldSpecIndex),
 				length: baselineFieldSpecs.count,
 			) - 1]
@@ -928,7 +928,7 @@ private extension FieldSpecsBuilder {
 		}
 		return .init(
 			name: name,
-			position: positions[try effectivePosition(forIndex: index ?? 1, length: positions.count) - 1],
+			position: positions[try normalizedPosition(forIndex: index ?? 1, length: positions.count) - 1],
 		)
 	}
 

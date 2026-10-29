@@ -131,13 +131,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: inoperative / unused / unreachable / illegal
 26. - position: a list position (1, 2, 3, etc.) that an index may reference
     - index: references a position
+    - normalized index: an index's non-negative equivalent
+      ([defined](../Specs/fields.md#positions--indices))
     - indices: plural
     - located at position
     - location: where something is relative to others, without an exact position
     - placement: a setting that chooses a location (`<nonconforming-placement>`,
       `<unpositioned-field-placement>`)
     - REJECTED: place (except in the idiom "in place", e.g., `<text-in-place>`)
-      / indexes
+      / indexes / effective index (for a normalized index)
 27. - put: verb
     - locate: verb
     - position: verb
@@ -192,8 +194,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       lower-level rule, including an app's behavior or default prevailing over a
       spec's
     - effective: not overridden (e.g., "an effective `f`";
-      [defined](../Specs/ebnf.md#last-wins-comments)); of an index, its
-      non-negative equivalent ([defined](../Specs/fields.md#positions--indices))
+      [defined](../Specs/ebnf.md#last-wins-comments))
     - precedence: order among peers
     - priority: `<sort-priority>`
     - wins: only in the `(* last wins *)` idiom
