@@ -452,7 +452,7 @@ behind).
 format-transform-pipeline = ( <transform-call-prefix> <format-transform> )+
 format-transform          = <justify>
 
-justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: {inherited justify}; last wins *)
+justify = <start-justify> | <center-start-justify> | <center-end-justify> | <end-justify> (* default: <start-justify>; last wins *)
 
 start-justify        = "startJustify"
 center-start-justify = "centerStartJustify"
