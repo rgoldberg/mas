@@ -629,8 +629,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        [defined](../Specs/fields.md#alignment))
      - align / aligned: verb & adjective
      - REJECTED: justification / justify / justified
-113. - setting: a separate value of a field spec, which a `<field-modifiers>` or
-       an attached preset sets: a `<field-spec-setting>` alternative's value, or
-       its alignment ([defined](../Specs/fields.md#field-modifiers)); also a
-       table, key-value, or JSON config's `<table-setting>`,
-       `<key-value-setting>`, or `<json-setting>`
+113. - setting: a separate value of a field spec, per `(* inherited *)`
+       nonterminal in `<field-modifiers>` & its alignment
+       ([defined](../Specs/fields.md#field-modifiers)), or of an output config,
+       per `(* inherited *)` nonterminal in its kind's syntax
+       ([defined](../Specs/configs.md#output-configs))

@@ -183,6 +183,9 @@ that, iff it contains a non-[whitespace](ebnf.md#whitespace) character, is its
 kind's syntax (e.g., [`<json-config>`](json.md#json-config)); otherwise, it
 overlays no setting (e.g., `--json-config=` ≡ `--json`).
 
+An output config has a separate **setting** per `(* inherited *)` nonterminal in
+its kind's syntax (e.g., [`<header-setting>`](table.md#header)).
+
 Output sources from the context stack's [`default`](#default-configs) output
 config of its output format's kind; an output config option's value is overlaid
 on it for the current command line only, without persistently affecting it. Each

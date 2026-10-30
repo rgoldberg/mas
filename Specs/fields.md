@@ -630,30 +630,14 @@ Field spec edits act as follows:
 <!--markdownlint-disable line-length-->
 ```ebnf
 field-modifiers = [ <preset-modifier> ] [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
-
-field-spec-setting =
-  <label>
-  | <format-block>
-  | <sort>
-  | <sort-priority>
-  | <source>
-  | <direction>
-  | <case-sensitivity>
-  | <locale>
-  | <number-segments>
-  | <chronologic-segments>
-  | <boundaries>
-  | <nonconforming-comparison>
-  | <nonconforming-placement>
-  | <text-order>
-  (* non-structural *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A field spec has a separate **setting** per `<field-spec-setting>` alternative,
-plus its [alignment](#alignment). A `<field-modifiers>` **sets** each setting
-whose nonterminal does not retain its [inherited value](#inherited-values) in it
+A field spec has a separate **setting** per `(* inherited *)` nonterminal in
+`<field-modifiers>` (e.g., `<label>` or `<direction>`), plus its
+[alignment](#alignment). A `<field-modifiers>` **sets** each setting whose
+nonterminal does not retain its [inherited value](#inherited-values) in it
 (e.g., `/-` enables `<sort>` & sets `<direction>`, but no other sort option,
 while `/` removes `<sort>` & resets every setting within it).
 
@@ -718,17 +702,17 @@ detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
 
 Attaching a preset (including moving it to the end of the list) sets, at that
-point, each [setting](#field-modifiers) that its `<field-modifiers>` sets, in
-their order, retaining every other one (e.g., if preset `p` is `/-`,
-`@all.name/O,name%+p` sorts items by `name`'s formatted value, descending). Each
-setting of a field spec is thus the last value set, in order, by an explicit
-modifier or by an attached preset, else the value that the field spec otherwise
-has (e.g., a [default field spec](#default-field-specs)'s label is its field's
-name). Detaching a preset re-exposes the value that it overrode for each setting
-that it sets (e.g., if preset `p` sets label `P`, `@all.name=N,name%+p` labels
-`name` `P`, while a further `.name%-p` restores `N`). A copy of a field spec
-(e.g., by a `<field-spec-insertion>`) retains its attached presets & when each
-of its settings was set.
+point, each [setting](#field-modifiers) other than `<preset-list>` that its
+`<field-modifiers>` sets, in their order, retaining every other one (e.g., if
+preset `p` is `/-`, `@all.name/O,name%+p` sorts items by `name`'s formatted
+value, descending). Each setting of a field spec is thus the last value set, in
+order, by an explicit modifier or by an attached preset, else the value that the
+field spec otherwise has (e.g., a [default field spec](#default-field-specs)'s
+label is its field's name). Detaching a preset re-exposes the value that it
+overrode for each setting that it sets (e.g., if preset `p` sets label `P`,
+`@all.name=N,name%+p` labels `name` `P`, while a further `.name%-p` restores
+`N`). A copy of a field spec (e.g., by a `<field-spec-insertion>`) retains its
+attached presets & when each of its settings was set.
 
 E.g., if preset `bytes` is `%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size`
 outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
