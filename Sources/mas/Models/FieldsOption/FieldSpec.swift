@@ -607,7 +607,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
 	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
 	/// `<disable-all-sorts>` disables each field spec's `<sort>`, retaining its
-	/// `<sort-priority>` & `<sort-option-set>`; `<direction>` is the item-sort
+	/// `<sort-priority>` & `<sort-option>`s; `<direction>` is the item-sort
 	/// tiebreak (input order / reverse input order). An absent section or
 	/// `<direction>` retains `inheritedDirection`.
 	mutating func parseItemSortSection(

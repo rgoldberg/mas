@@ -465,8 +465,8 @@ disable-all-sorts = "0" (* mnemonic: as <disabled-sort-prefix> *)
 
 `<disable-all-sorts>` disables each field spec's `<sort>`, as
 `<disabled-sort-prefix>` does, retaining its `<sort-priority>` &
-`<sort-option-set>`; a subsequent `<field-spec-edit>` may re-enable a field
-spec's sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
+`<sort-option>`s; a subsequent `<field-spec-edit>` may re-enable a field spec's
+sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
 `<sort-priority>` of `5`). It disables a sort that an attached preset set, as it
 does an explicit one, while a preset attached afterward sets its own sort (e.g.,
 if preset `p` sets an enabled sort, `@x//0.name%+p` sorts by it).
