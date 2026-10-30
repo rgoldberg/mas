@@ -723,9 +723,9 @@ The preset kind's other built-in presets each set only an
 ##### Alignment
 
 A field spec's **alignment** aligns its label & its values in its table output
-column; key-value & JSON output, which have no columns, ignore it. A field
-spec's alignment is set only by an attached preset, as each built-in alignment
-preset sets it:
+column; key-value & JSON output, which have no columns, ignore it. No modifier
+other than a `<preset-modifier>` sets a field spec's alignment; each built-in
+alignment preset sets it:
 
 - `start`: at the column's start.
 - `centerStart`: centered, with any odd remaining column width's extra space
