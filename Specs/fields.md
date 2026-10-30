@@ -716,9 +716,9 @@ by an explicit modifier or by an attached preset, else the value that the field
 spec otherwise has (e.g., a [default field spec](#default-field-specs)'s label
 is its field's name). Detaching a preset re-exposes the value that it overrode
 for each setting that it sets (e.g., if preset `p` sets label `P`,
-`@all.name=N,name%+p` labels `name` `P`, while a further `.name%-p` restores
-`N`). A copy of a field spec (e.g., by a `<field-spec-insertion>`) retains its
-attached presets & when each of its settings was set.
+`@all.name=N,name%+p` labels `name` `P`, while `@all.name=N,name%+p,name%-p`
+labels it `N`). A copy of a field spec (e.g., by a `<field-spec-insertion>`)
+retains its attached presets & when each of its settings was set.
 
 E.g., if preset `bytes` is `%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size`
 outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
