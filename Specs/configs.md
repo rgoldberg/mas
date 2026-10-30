@@ -184,7 +184,9 @@ kind's syntax (e.g., [`<json-config>`](json.md#json-config)); otherwise, it
 overlays no setting (e.g., `--json-config=` ≡ `--json`).
 
 An output config has a separate **setting** per `(* inherited *)` nonterminal in
-its kind's syntax (e.g., [`<header-setting>`](table.md#header)).
+its kind's syntax (e.g., [`<header-setting>`](table.md#header)), each of whose
+**alternatives** (e.g., `<header-off>` & `<header-on>`) starts with its own
+letter.
 
 Output sources from the context stack's [`default`](#default-configs) output
 config of its output format's kind; an output config option's value is overlaid
@@ -196,22 +198,24 @@ the `default` config.
 Each kind's [built-in standard](#immutable-built-in-named-configs) output config
 sets every setting to its default.
 
-A setting's **payload** is the expression between its letter & its termination
-(e.g., `<style-specifier>` in [`<header-on>`](table.md#header)). A
-**payloadless** setting is the lowercase alternative of a setting whose
+An alternative's **payload** is the expression between its letter & its
+termination (e.g., `<style-specifier>` in [`<header-on>`](table.md#header)). A
+**payloadless** alternative is the lowercase alternative of a setting whose
 uppercase alternative takes a payload (e.g., `h`, but not `t`, in a table
 config).
 
-### Implied Settings
+### Implied Alternatives
 
-A kind may define **implied settings**, which settings in an output config imply
-(e.g., a table's [implied settings](table.md#implied-settings)), whether that
-output config is persisted or an output config option's value (e.g., a persisted
-`default` table config of `b` implies `S`, which implies `H`).
+A kind may define **implied alternatives**, which alternatives in an output
+config imply (e.g., a table's [implied
+alternatives](table.md#implied-alternatives)), whether that output config is
+persisted or an output config option's value (e.g., a persisted `default` table
+config of `b` implies `S`, which implies `H`).
 
-A setting that explicitly sets an axis, even to "off" (e.g., a table's `h`),
-always overrides that axis's implied setting, regardless of where in its output
+An explicit alternative of a setting, even "off" (e.g., a table's `h`), always
+overrides that setting's implied alternative, regardless of where in its output
 config it appears.
 
-An implied setting overrides an inherited setting iff the inherited setting is
-payloadless, so an implied setting never overrides an inherited payload.
+An implied alternative overrides an inherited alternative iff the inherited
+alternative is payloadless, so an implied alternative never overrides an
+inherited payload.

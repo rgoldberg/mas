@@ -52,21 +52,21 @@ struct TableConfig: Equatable {
 }
 
 /// Parses `--table-config`'s value, which, iff non-empty, is `table.md`'s
-/// `<table-config>` (`<table-setting>+`), last wins per axis. A defaulted
-/// (i.e., unset) axis with a prerequisite is filled in per `table.md`'s
-/// "Implied Settings": `b` / `u` imply a separator line (`S`, default
+/// `<table-config>` (`<table-setting>+`), last wins per setting. A defaulted
+/// (i.e., unset) setting with a prerequisite is filled in per `table.md`'s
+/// "Implied Alternatives": `b` / `u` imply a separator line (`S`, default
 /// `<separator-pattern>` `-`); any separator line implies a header row (`H`,
-/// unstyled). A setting that explicitly sets an axis (even to "off") always
-/// overrides that axis's implied setting. Outer bare whitespace between
+/// unstyled). An explicit alternative of a setting (even "off") always
+/// overrides that setting's implied alternative. Outer bare whitespace between
 /// settings is ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
-	var header = TableConfigAxis<String>.unset
+	var header = TableConfigSetting<String>.unset
 	var headerStyling = TableConfig.HeaderStyling.terminalOnly
 	var headerStylePrefix = TableConfig.default.headerStyleSequences.prefix
 	var headerStyleSuffix = TableConfig.default.headerStyleSequences.suffix
 	var headerStyleReset = TableConfig.default.headerStyleSequences.reset
-	var separatorPattern = TableConfigAxis<String>.unset
-	var broken = TableConfigAxis<Bool>.unset
+	var separatorPattern = TableConfigSetting<String>.unset
+	var broken = TableConfigSetting<Bool>.unset
 	var columnSpacing = String?.none
 	var input = value[...]
 	while case let trimmed = input.drop(while: \.isWhitespace), let setting = trimmed.first {
@@ -187,11 +187,11 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	}
 }
 
-/// An axis's parse state: not yet mentioned, explicitly off, or explicitly set
-/// to a value. Distinguishing `.unset` from `.off` is what lets an implied
-/// default apply only when an axis was never touched at all, per
+/// A setting's parse state: not yet mentioned, explicitly off, or explicitly
+/// set to a value. Distinguishing `.unset` from `.off` is what lets an implied
+/// default apply only when a setting was never touched at all, per
 /// `parseTableConfig(_:)`'s doc comment.
-private enum TableConfigAxis<Value> { // swiftlint:disable:this one_declaration_per_file
+private enum TableConfigSetting<Value> { // swiftlint:disable:this one_declaration_per_file
 	case off
 	case set(Value)
 	case unset

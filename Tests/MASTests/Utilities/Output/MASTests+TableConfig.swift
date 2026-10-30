@@ -20,7 +20,7 @@ private extension MASTests {
 	func `h & s explicitly turn off a header / separator that would otherwise be implied`() throws {
 		#expect(try parseTableConfig("h").header == nil)
 		#expect(try parseTableConfig("s").separator == nil)
-		// Explicit off overrides an otherwise-implied setting, regardless of order
+		// Explicit off overrides an implied alternative, regardless of order
 		#expect(try parseTableConfig("bh").header == nil)
 		#expect(try parseTableConfig("hb").header == nil)
 	}
@@ -146,7 +146,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `last one wins per axis, ad hoc order`() throws {
+	func `last one wins per setting, ad hoc order`() throws {
 		#expect(try parseTableConfig("bu").separator?.broken == false)
 		#expect(try parseTableConfig("ub").separator?.broken == true)
 		#expect(try parseTableConfig("H1:H2:").header == .init(styleSpecifier: "2"))

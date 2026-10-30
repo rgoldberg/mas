@@ -352,8 +352,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: change / alter
 66. - payload: a modifier's expression after its prefix, or an option's
       expression between its letter & its `<sort-option-terminator>`
-      ([defined](../Specs/fields.md#payloads)); also a table, key-value, or JSON
-      setting's expression between its letter & its termination
+      ([defined](../Specs/fields.md#payloads)); also an output config
+      alternative's expression between its letter & its termination
       ([defined](../Specs/configs.md#output-configs))
     - payloadless: of a setting's lowercase alternative, which takes no payload,
       unlike its uppercase one (e.g., a table's `h`;
@@ -492,14 +492,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - trailing run: the longest run of adjacent optionals & trailing-omissibles
       that includes an expression, through nonterminal references
     - REJECTED: omissible (for trailing-omissible)
-91. - axis: a concept that a setting sets (e.g., a header row), whose
-      `(* last wins *)` nonterminal (e.g., `<header-setting>`) overrides its
-      preceding occurrences
-    - last-wins scope: the nearest enclosing occurrence (else the entire input)
+91. - last-wins scope: the nearest enclosing occurrence (else the entire input)
       within which a `(* last wins *)` nonterminal's occurrences override each
       other ([defined](../Specs/ebnf.md#last-wins-comments))
-    - implied setting: a setting that settings in an output config imply
-      ([defined](../Specs/configs.md#implied-settings))
+    - implied alternative: an alternative that alternatives in an output config
+      imply ([defined](../Specs/configs.md#implied-alternatives))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
     - decimal number: a Unix time's text syntax
@@ -634,3 +631,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields.md#field-modifiers)), or of an output config,
        per `(* inherited *)` nonterminal in its kind's syntax
        ([defined](../Specs/configs.md#output-configs))
+     - alternative: one of the alternatives of an output config setting's
+       nonterminal, each starting with its own letter (e.g., `<header-off>`, as
+       `h`; [defined](../Specs/configs.md#output-configs))
+     - REJECTED: axis (for a setting)

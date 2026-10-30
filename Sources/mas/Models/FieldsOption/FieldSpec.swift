@@ -525,7 +525,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<positional-order-option-set>` / `<document-order-option-set>`
 	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
 	/// respectively, plus `<unpositioned-field-comparison>`s &
-	/// `<unpositioned-field-placement>`s, last wins per axis) or a
+	/// `<unpositioned-field-placement>`s, last wins per setting) or a
 	/// `<sort-option-set>` (whose `<source>` defaults to `<output>`, i.e., sorted
 	/// by label), the latter 2 followed by an optional
 	/// `<field-order-tiebreaker>`. The alternatives are disjoint: each but
@@ -605,7 +605,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	}
 
 	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
-	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per axis).
+	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per setting).
 	/// `<disable-all-sorts>` disables each field spec's `<sort>`, retaining its
 	/// `<sort-priority>` & `<sort-option>`s; `<direction>` is the item-sort
 	/// tiebreak (input order / reverse input order). An absent section or

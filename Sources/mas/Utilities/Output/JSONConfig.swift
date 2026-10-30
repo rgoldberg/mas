@@ -35,7 +35,7 @@ struct JSONConfig: Equatable {
 }
 
 /// Parses `--json-config`'s value, which, iff non-empty, is `json.md`'s
-/// `<json-config>` (`<json-setting>+`), last wins per axis. Outer bare
+/// `<json-config>` (`<json-setting>+`), last wins per setting. Outer bare
 /// whitespace between settings is ignored.
 func parseJSONConfig(_ value: String) throws(JSONConfigParsingError) -> JSONConfig {
 	var indentation = JSONConfig.default.indentation

@@ -75,7 +75,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
       root context `default` that references `default`.
    3. A persisted table, key-value, or JSON config
       [extending](../Specs/configs.md#referencing-named-configs) `default` &
-      applying its own [implied settings](../Specs/configs.md#implied-settings).
+      applying its own [implied
+      alternatives](../Specs/configs.md#implied-alternatives).
    4. Reporting reference cycles & a custom config named `standard` or any
       built-in config's name.
    5. A custom `default` (currently always `standard`) & each context's
@@ -92,9 +93,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
       `<fields-config>` names.
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
    they currently apply only on top of `standard`, so no implied
-   [table](../Specs/table.md#implied-settings) or
-   [key-value](../Specs/key-value.md#implied-settings) setting yet meets an
-   inherited payload, which it would not override.
+   [table](../Specs/table.md#implied-alternatives) or
+   [key-value](../Specs/key-value.md#implied-alternatives) alternative yet meets
+   an inherited payload, which it would not override.
 
 #### Custom Names Removal
 

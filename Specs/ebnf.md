@@ -661,7 +661,7 @@ override `-`, because `<field-order-tiebreaker>` is not within
 `<document-order-option-set>`.
 
 Anything that nothing overrides (e.g., an occurrence that no later one
-overrides, or a syntax's implied setting that no explicit one overrides) is
+overrides, or a syntax's implied alternative that no explicit one overrides) is
 **effective** (e.g., in `-P+`, `+` is effective, but `-` is not).
 
 ##### Inherited Comments

@@ -154,7 +154,7 @@ leader-pattern = ^{text: no line terminators}^ (* default: "▁" *)
 <!--editorconfig-checker-enable-->
 
 - `f`: an empty leader, so an item's values are not aligned; it [implies a
-  leading spacing](#implied-settings).
+  leading spacing](#implied-alternatives).
 - `F`: a leader between each key & its value, aligning all of an item's values.
   `<leader-pattern>` is repeated to fill the leader's [width](configs.md#width),
   truncated before the 1st character that would exceed that width; spaces fill
@@ -253,15 +253,15 @@ end-of-key-value-config      = end
 E.g., in `--key-value-config Fs`, `s` is interpreted as `<leader-pattern>` text,
 not as a separate `<item-separator-setting>`.
 
-## Implied Settings
+## Implied Alternatives
 
 - An effective `f` implies a leading spacing of `:` (i.e., `L\::`), if none is
   otherwise set, so each row is `key: value` (e.g., `fF:` implies none, so its
   leading spacing is `l`'s 1 space).
 
-An implied setting yields to an explicit setting of its axis & to an inherited
-[payload](configs.md#output-configs), as [output configs
-specify](configs.md#implied-settings) (e.g., `fl` has `l`'s leading spacing;
+An implied alternative yields to an explicit alternative of its setting & to an
+inherited [payload](configs.md#output-configs), as [output configs
+specify](configs.md#implied-alternatives) (e.g., `fl` has `l`'s leading spacing;
 with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 `L=:`, `f` retains `key= value` rows).
 
