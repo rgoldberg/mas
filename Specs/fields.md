@@ -221,9 +221,14 @@ working fields config's value for the same setting, if any:
 - In `<field-modifiers>`: that of the field spec that they modify.
 - In `<item-sort-option>`: that of item sorting.
 - `<field-order-option-set>` itself: the field order.
-- In `<field-order-option-set>`: that of the field order, iff it is also per the
-  same one of `<positional-order-option-set>`, `<document-order-option-set>` &
+- In `<field-order-option-set>`, outside `<field-order-tiebreaker>`: that of the
+  field order, iff it is also per the same one of
+  `<positional-order-option-set>`, `<document-order-option-set>` &
   `<sort-option-set>`.
+- In `<field-order-tiebreaker>`: that of the field order's
+  `<field-order-tiebreaker>`, iff the field order is also per the same one of
+  `<document-order-option-set>` & `<sort-option-set>` (e.g., if `x` has `/I+/-`,
+  `@x/I` tiebreaks descending, while `@x/D` tiebreaks ascending).
 
 So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
 `name=x`) or option (e.g., `<direction>` in `name/1`, in `name/1Ii`, or in
