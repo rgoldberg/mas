@@ -117,13 +117,14 @@ field that the table above lists has that row's label & format; any other
 field's built-in field spec is labeled by its field name & formatted as `%i`.
 
 Wherever the base fields config is, or transitively
-[extends](configs.md#referencing-named-configs), one of those variants, a
-field's [default field spec](fields.md#default-field-specs) (e.g., for an
-unlisted field) is its built-in field spec overlaid with the [`default`
-preset](fields.md#presets) (e.g., for a custom `default` of
-`%centerStart:..uppercase`, `mas list --fields @all` outputs `bundleID` labeled
-`Bundle ID`, uppercased & center-aligned, while for one of `:..uppercase`,
-`mas search --fields @all` outputs `fileSizeBytes` end-aligned).
+[extends](configs.md#referencing-named-configs), one of those variants, each of
+the variant's field specs & each field's [default field
+spec](fields.md#default-field-specs) (e.g., for an unlisted field) is the
+field's built-in field spec with the [`default` preset](fields.md#presets)
+attached (e.g., for a custom `default` of `%centerStart:..uppercase`,
+`mas list --fields @all` outputs `bundleID` labeled `Bundle ID`, uppercased &
+center-aligned, while for one of `:..uppercase`, `mas search --fields @all`
+outputs `fileSizeBytes` end-aligned).
 
 ## Price Sorting
 

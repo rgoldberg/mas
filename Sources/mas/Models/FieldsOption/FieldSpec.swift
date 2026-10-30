@@ -29,12 +29,20 @@ struct FieldSpec: Equatable {
 	/// fetch (e.g., `outdated`'s `newVersion`, from comparing the installed &
 	/// latest versions), so it is never itself something to fetch.
 	let isSynthesized: Bool
+	/// The names of the attached presets, in attachment order (see
+	/// `parsePresetModifier(_:attached:)` in `Preset.swift`).
+	let presetNames: [String]
+	/// The table-only column alignment absent any attached preset that sets one,
+	/// set directly by a display command's own `standard` / `all` fields config
+	/// (see `defaultAlignment(forFieldNamed:)` in `AppStoreFieldDefaults.swift`).
+	let baseAlignment: Alignment
+
 	/// Table-only column alignment (ignored by `json` / `keyValue` output, which
-	/// have no column to align). Set directly by a display command's own
-	/// `standard` / `all` fields config (see `defaultAlignment(forFieldNamed:)`
-	/// in `AppStoreFieldDefaults.swift`), or by a `--fields` `<preset-modifier>`
-	/// (see `parsePresets(_:)` below).
-	let alignment: Alignment
+	/// have no column to align): the alignment of the last attached preset that
+	/// sets one, else `baseAlignment`.
+	var alignment: Alignment {
+		presetNames.reversed().lazy.compactMap { alignmentByPresetName[$0] }.first ?? baseAlignment
+	}
 
 	init(
 		name: String,
@@ -43,6 +51,7 @@ struct FieldSpec: Equatable {
 		sortSpec: SortSpec?,
 		isHidden: Bool = false,
 		isSynthesized: Bool = false,
+		presetNames: [String] = [defaultConfigName],
 		alignment: Alignment = .start,
 	) {
 		self.name = name
@@ -51,7 +60,8 @@ struct FieldSpec: Equatable {
 		self.sortSpec = sortSpec
 		self.isHidden = isHidden
 		self.isSynthesized = isSynthesized
-		self.alignment = alignment
+		self.presetNames = presetNames
+		baseAlignment = alignment
 	}
 
 	/// Renders `value` (`nil` iff the field does not exist for this item) per
@@ -65,7 +75,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 	var description: String {
 		"""
 		FieldSpec(name: "\(name)", label: "\(label)", format: \(format), sortSpec: \(sortSpec, default: "nil"), \
-		isHidden: \(isHidden), alignment: \(alignment))
+		isHidden: \(isHidden), presetNames: \(presetNames), alignment: \(alignment))
 		"""
 	}
 }
@@ -101,6 +111,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingItemSortOptionSet
 	case missingPredicate
 	case missingSortOptionTerminator
+	case mixedAbsoluteAndRelativePresets
 	case nonexistentField(String)
 	case nonexistentFieldsConfig(String)
 	case nonexistentFieldSpec(forName: String)
@@ -172,6 +183,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected <predicate>"
 		case .missingSortOptionTerminator:
 			"Expected <sort-option-terminator> ':'"
+		case .mixedAbsoluteAndRelativePresets:
+			"<absolute-presets> & <relative-presets> cannot be mixed"
 		case let .nonexistentFieldSpec(name):
 			"""
 			Expected existing field spec for field name: \(
@@ -380,7 +393,7 @@ func resolveBaseFieldsConfig(
 			throw .invalidBaseFieldsConfigName(rawName)
 		}
 	}
-	guard !stem.isEmpty, stem.allSatisfy(\.isNameCharacter) else {
+	guard stem.isConfigName else {
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
 	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? outputFormat.isJSON)
@@ -407,9 +420,17 @@ func resolveBaseFieldsConfig(
 
 extension Character { // swiftlint:disable:this file_types_order
 	/// Whether this character may be in a config name's stem, or in a preset
-	/// name, per configs.md's `^[-_0-9A-Za-z]+$`.
+	/// name, per configs.md's `^[_0-9A-Za-z][-_0-9A-Za-z]*$`.
 	var isNameCharacter: Bool {
 		isASCII && (isLetter || isNumber || self == "-" || self == "_")
+	}
+}
+
+extension StringProtocol { // swiftlint:disable:this file_types_order
+	/// Whether this is a valid config name's stem, or a valid preset name, per
+	/// configs.md's `^[_0-9A-Za-z][-_0-9A-Za-z]*$`.
+	var isConfigName: Bool {
+		first.map { $0 != "-" } == true && allSatisfy(\.isNameCharacter)
 	}
 }
 
@@ -703,7 +724,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			let name = try parseFieldName(
 				&input,
 				terminatorSet: [
-					presetModifierPrefix,
+					presetPrefix,
 					labelModifierPrefix,
 					formatModifierPrefix,
 					sortModifierPrefix,
@@ -1014,7 +1035,7 @@ private extension FieldSpecsBuilder {
 		existing: FieldSpec?,
 		modifiersInput input: inout Substring,
 	) throws(ParsingError) {
-		let alignment = try parsePresets(&input)
+		let presetNames = try parsePresetModifier(&input, attached: existing?.presetNames ?? [defaultConfigName])
 		let label = try parseLabel(&input)
 		let format = try parseFormat(&input)
 		let isHidden = switch strategy {
@@ -1031,7 +1052,8 @@ private extension FieldSpecsBuilder {
 				try parseSortSpecModifier(&input, existing: existing?.sortSpec, fieldName: name, outputFormat: outputFormat),
 			isHidden: isHidden,
 			isSynthesized: existing?.isSynthesized ?? false,
-			alignment: alignment ?? existing?.alignment ?? .start,
+			presetNames: presetNames,
+			alignment: existing?.baseAlignment ?? .start,
 		)
 		switch strategy {
 		case let .insert(_, restored):
@@ -1108,39 +1130,6 @@ private func parseFieldName(_ input: inout Substring, terminatorSet: Set<Charact
 		throw .missingFieldName
 	}
 	return name
-}
-
-/// Parses any `<preset-modifier>`s: the alignment that the last one to set an
-/// alignment sets, else `nil` (retaining the field spec's).
-private func parsePresets(_ input: inout Substring) throws(ParsingError) -> Alignment? {
-	var alignment = Alignment?.none
-	input = input.drop(while: \.isWhitespace)
-	while input.first == presetModifierPrefix {
-		input.removeFirst()
-		alignment = try presetAlignment(named: parseEscapedText(&input, terminatorSet: presetNameTerminatorSet))
-			?? alignment
-		input = input.drop(while: \.isWhitespace)
-	}
-	return alignment
-}
-
-/// The alignment that the preset named `name` sets, else `nil`. No custom
-/// presets exist yet, so only the built-in ones & `default` (which is
-/// `standard` absent a custom `default`) exist; any other name reports an
-/// error: `invalidPresetName` for an invalid preset name, else `unknownPreset`.
-func presetAlignment(named name: String) throws(ParsingError) -> Alignment? {
-	guard !name.isEmpty, name.allSatisfy(\.isNameCharacter) else {
-		throw .invalidPresetName(name)
-	}
-	// swiftlint:disable:next todo
-	// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
-	//  presets are persisted, look the name up through the context stack from the
-	//  reference's starting context, as configs.md specifies for every config
-	//  kind, and overlay its label, format & sort, too
-	guard let alignment = alignmentByPresetName[name] else {
-		throw .unknownPreset(name)
-	}
-	return alignment
 }
 
 private func parseLabel(_ input: inout Substring) throws(ParsingError) -> String? {
@@ -1258,24 +1247,8 @@ let moveLiteral = Character("%")
 let hideLiteral = Character("_")
 let removeLiteral = Character("-")
 
-let presetModifierPrefix = Character("%")
 let labelModifierPrefix = Character("=")
 let sortModifierPrefix = Character("/")
-
-/// The characters that terminate a `<preset-name>` in a `<preset-modifier>`.
-private let presetNameTerminatorSet =
-	Set([presetModifierPrefix, labelModifierPrefix, formatModifierPrefix, sortModifierPrefix, fieldSpecSeparator])
-
-/// Each existing preset's alignment, by preset name (`nil` iff the preset sets
-/// no alignment).
-private let alignmentByPresetName = [
-	"centerEnd": Alignment?.some(.centerEnd),
-	"centerStart": .centerStart,
-	defaultConfigName: nil,
-	"end": .end,
-	standardConfigName: nil,
-	"start": .start,
-]
 
 let fieldOccurrenceIndexPrefix = Character("@")
 let fieldSpecIndexPrefix = Character("@")
@@ -1284,7 +1257,7 @@ let fieldSpecIndexPrefix = Character("@")
 /// followed by `<field-modifiers>`.
 private let modifiedFieldNameTerminatorSet = Set([
 	fieldOccurrenceIndexPrefix,
-	presetModifierPrefix,
+	presetPrefix,
 	labelModifierPrefix,
 	formatModifierPrefix,
 	sortModifierPrefix,

@@ -55,12 +55,15 @@ only after `=` (e.g., `--json[=<json-config>]`).
 1. Custom [presets](../Specs/fields.md#presets): every reference to a preset
    other than a built-in one (`standard`, each alignment preset & `default`,
    which is `standard`) reports `unknownPreset` (or `invalidPresetName` for an
-   invalid preset name), so no preset yet sets a label, a format, or a sort.
-   Supporting them also needs key-value & JSON output to omit each [unlisted
-   field](../Specs/fields.md#unlisted-fields) that an item lacks, because mas
-   gives every item a field spec for each unlisted field of any item, while a
-   custom `default` preset may give an absent field a formatted value that is
-   not absent (e.g., `:%N%n+none+`).
+   invalid preset name), so no preset yet sets a label, a format, or a sort,
+   attaches presets within it, or can be attached within itself. They also need
+   each field spec to record when each of its settings is set, by an explicit
+   modifier or by an attached preset, so that detaching a preset re-exposes each
+   value that it overrode. Supporting them also needs key-value & JSON output to
+   omit each [unlisted field](../Specs/fields.md#unlisted-fields) that an item
+   lacks, because mas gives every item a field spec for each unlisted field of
+   any item, while a custom `default` preset may give an absent field a
+   formatted value that is not absent (e.g., `:%N%n+none+`).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context

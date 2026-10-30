@@ -571,6 +571,7 @@ private extension MASTests {
 			(":default%i", .invalidPresetName("default%i")),
 			(":my-name_2", .unknownPreset("my-name_2")),
 			(":a b", .invalidPresetName("a b")),
+			(":-end", .invalidPresetName("-end")),
 			(":a\\.b", .invalidPresetName("a.b")),
 			(":é", .invalidPresetName("é")),
 			(".bogus", .unknownTransform("bogus")),

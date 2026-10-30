@@ -78,7 +78,8 @@ extension FieldSpec {
 				sortSpec: sortSpec.disabled,
 				isHidden: isHidden,
 				isSynthesized: isSynthesized,
-				alignment: alignment,
+				presetNames: presetNames,
+				alignment: baseAlignment,
 			)
 		}
 			?? self

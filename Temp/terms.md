@@ -52,7 +52,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 12. - given: explicitly specified input values or parameters from a caller or
       user
     - attached: comments or metadata structurally bound to a nonterminal
-      definition
+      definition; also a preset in a field spec's list of presets (see "preset")
     - present: an occurrence of a token or an expression in the input
     - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
@@ -608,8 +608,16 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        config overlaid on its `default` config (e.g., `--json-config`)
        ([defined](../Specs/configs.md#output-configs))
 111. - preset: a named config of `<field-modifiers>`, which a
-       `<preset-modifier>` overlays onto a field spec
+       `<preset-modifier>` attaches to a field spec
        ([defined](../Specs/fields.md#presets))
+     - attach / detach: add a preset to, or remove one from, a field spec's list
+       of presets, which sets its settings, or re-exposes the values that they
+       overrode
+     - absolute presets / relative presets: a `<preset-modifier>` that replaces
+       a field spec's attached presets / that applies `<preset-delta>`s to them
+       (as an absolute config / a relative config does to a fields config)
+     - preset delta: 1 preset's addition or removal in relative presets
+     - preset clearing: a bare `%`, which detaches every preset
      - named format: a preset's format, which a `<named-format-reference>`
        references ([defined](../Specs/fields-format.md#named-formats))
      - REJECTED: named spec (the specs use "spec" for a `Specs/` document) /

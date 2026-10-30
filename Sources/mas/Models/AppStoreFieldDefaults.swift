@@ -74,9 +74,9 @@ private let formattedPriceFieldName = "formattedPrice"
 /// value with a fixed textual suffix that reads better end-aligned, e.g.,
 /// `fileSizeBytes`'s appended `" MB"`, is end-aligned; everything else is
 /// start-aligned). Consulted only by each display command's own field-spec
-/// construction, not applied generically elsewhere; a user's own `--fields`
-/// alignment preset (a `<preset-modifier>`, see `parsePresets` in
-/// `FieldSpec.swift`) overrides it per field spec.
+/// construction, not applied generically elsewhere; an attached alignment
+/// preset (see `parsePresetModifier(_:attached:)` in `Preset.swift`) overrides
+/// it per field spec.
 func defaultAlignment(forFieldNamed fieldName: String) -> Alignment {
 	endAlignedFieldNameSet.contains(fieldName) ? .end : .start
 }

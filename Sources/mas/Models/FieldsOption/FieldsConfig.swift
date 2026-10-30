@@ -295,7 +295,8 @@ extension FieldsConfig {
 					sortSpec: fieldSpec.sortSpec,
 					isHidden: fieldSpec.isHidden,
 					isSynthesized: fieldSpec.isSynthesized,
-					alignment: fieldSpec.alignment,
+					presetNames: fieldSpec.presetNames,
+					alignment: fieldSpec.baseAlignment,
 				)
 			},
 			fieldOrder: fieldOrder,
@@ -337,7 +338,8 @@ extension FieldsConfig {
 					sortSpec: fieldSpec.sortSpec,
 					isHidden: true,
 					isSynthesized: fieldSpec.isSynthesized,
-					alignment: fieldSpec.alignment,
+					presetNames: fieldSpec.presetNames,
+					alignment: fieldSpec.baseAlignment,
 				)
 			},
 			fieldOrder: fieldOrder,

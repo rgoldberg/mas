@@ -61,8 +61,8 @@ Regardless of a field spec's visibility:
 
 ### Default Field Specs
 
-A **default field spec** for a field is visible & has the following, overlaid
-with the [`default` preset](#presets):
+A **default field spec** for a field is visible, has the [`default`
+preset](#presets) attached & otherwise has the following:
 
 - Label: the field's name.
 - Format: `%i`.
@@ -172,6 +172,7 @@ For each [leaf context](configs.md#context-stacks):
 
 A built-in fields config:
 
+- Has the [`default` preset](#presets) attached to each of its field specs.
 - May have built-in variants.
 - Cannot have custom variants.
 
@@ -459,7 +460,9 @@ disable-all-sorts = "0" (* mnemonic: as <disabled-sort-prefix> *)
 `<disabled-sort-prefix>` does, retaining its `<sort-priority>` &
 `<sort-option-set>`; a subsequent `<field-spec-edit>` may re-enable a field
 spec's sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
-`<sort-priority>` of `5`).
+`<sort-priority>` of `5`). It disables a sort that an attached preset set, as it
+does an explicit one, while a preset attached afterward sets its own sort (e.g.,
+if preset `p` sets an enabled sort, `@x//0.name%+p` sorts by it).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
@@ -624,14 +627,14 @@ Field spec edits act as follows:
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-field-modifiers = [ <preset-modifier>+ ] [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
+field-modifiers = [ <preset-modifier> ] [ <label-modifier> ] [ <format-modifier> ] [ <sort-modifier> ]
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Each `<preset-modifier>`, left to right, then `<label-modifier>`,
-`<format-modifier>` & `<sort-modifier>` overlay their settings onto the field
-spec, so a later one overrides an earlier one's setting.
+`<preset-modifier>`, then `<label-modifier>`, `<format-modifier>` &
+`<sort-modifier>` overlay their settings onto the field spec, so a later one
+overrides an earlier one's setting.
 
 #### Payloads
 
@@ -642,34 +645,85 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 
 #### Presets
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-preset-modifier        = <preset-modifier-prefix> <preset-name>
-preset-modifier-prefix = "%"
+preset-modifier = <absolute-presets> | <relative-presets> (* inherited *)
+
+absolute-presets = <preset-clearing> | <absolute-preset>+
+preset-clearing  = "%"
+absolute-preset  = <preset-prefix> <preset-name>
+preset-prefix    = "%"
+
+relative-presets = <preset-delta>+
+preset-delta     = <preset-prefix> ( <preset-addition> | <preset-removal> ) <preset-name>
+preset-addition  = "+"
+preset-removal   = "-"
 
 preset-name = {text: preset name}
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 A **preset** is a [named config](configs.md#named-configs) of the preset [config
 kind](configs.md#config-kinds), whose syntax is `<field-modifiers>`, which a
-`<preset-modifier>` references by its `<preset-name>` (e.g., `%x` references
-preset `x`). A `<preset-modifier>` overlays onto the field spec the settings of
-its preset's `<field-modifiers>`, in their order (e.g., if preset `bytes` is
-`%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size` outputs `size` labeled
-`Size`, formatted per `bytes` & start-aligned).
+`<preset-name>` references (e.g., `%x` references preset `x`). Each field spec
+has a list of **attached** presets, which its `<preset-modifier>` sets:
+
+- `<absolute-presets>`: replaces the list with the presets of its
+  `<absolute-preset>`s, in order (e.g., `name%p%q`), or, for
+  `<preset-clearing>`, with none (e.g., `name%`).
+- `<relative-presets>`: applies each `<preset-delta>` to the list, left to
+  right: `<preset-addition>` attaches its preset at the end of the list, moving
+  it there if it is already attached, while `<preset-removal>` **detaches** its
+  preset, if it is attached (e.g., `.name%-default%+end`, while `.name%-end`
+  changes nothing if `end` is not attached).
+
+A preset is attached at most once: an `<absolute-presets>` attaches a preset
+only at its last occurrence, which overrides every setting of any earlier one.
+Each `<preset-name>` must name an existing preset, even in a `<preset-removal>`
+that detaches nothing (e.g., `%-bytess` is an error absent a preset `bytes`).
+
+Attaching a preset (including moving it to the end of the list) sets its
+settings at that point, as its `<field-modifiers>` would, in their order. Each
+setting of a field spec is thus the last value set, in order, by an explicit
+modifier or by an attached preset, else the value that the field spec otherwise
+has (e.g., a [default field spec](#default-field-specs)'s label is its field's
+name). Detaching a preset re-exposes the value that each of its settings
+overrode (e.g., if preset `p` sets label `P`, `@all.name=N,name%+p` labels
+`name` `P`, while a further `.name%-p` restores `N`). A copy of a field spec
+(e.g., by a `<field-spec-insertion>`) retains its attached presets & when each
+of its settings was set.
+
+E.g., if preset `bytes` is `%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size`
+outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
+`.+size%+bytes` inserts a copy of `size` that also has its `default` preset
+attached.
+
+A preset's own `<preset-modifier>` sets the list of presets attached within it,
+which starts empty, not the list of any field spec to which it is attached. A
+preset that is attached within itself, directly or transitively, is an error, as
+is any other [reference cycle](configs.md#referencing-named-configs).
+
+A `<preset-name>` is looked up from the starting context of its reference, as
+configs.md [specifies](configs.md#referencing-named-configs) for every config
+kind; the `default` preset that a default field spec or a built-in fields
+config's field spec has attached is looked up from the starting context of the
+reference that selects the base fields config (e.g., `mas.list`'s `default`
+preset for `mas list --fields @all`).
 
 The preset kind's [built-in
 standard](configs.md#immutable-built-in-named-configs) sets nothing, so, absent
-any custom one, the [`default`](configs.md#default-configs) preset sets nothing;
-it is overlaid onto each [default field spec](#default-field-specs). The preset
-kind's other built-in presets each set only an [alignment](#alignment): `start`,
-`centerStart`, `centerEnd`, or `end`.
+any custom one, the [`default`](configs.md#default-configs) preset sets nothing.
+The preset kind's other built-in presets each set only an
+[alignment](#alignment): `start`, `centerStart`, `centerEnd`, or `end`.
 
 ##### Alignment
 
 A field spec's **alignment** aligns its label & its values in its table output
 column; key-value & JSON output, which have no columns, ignore it. A field
-spec's alignment is retained unless a preset sets it, which each built-in
-alignment preset does:
+spec's alignment is set only by an attached preset, as each built-in alignment
+preset sets it:
 
 - `start`: at the column's start.
 - `centerStart`: centered, with any odd remaining column width's extra space

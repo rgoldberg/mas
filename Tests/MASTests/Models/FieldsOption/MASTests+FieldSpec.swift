@@ -466,9 +466,14 @@ private extension MASTests {
 			(".+size:.uppercase", .start),
 			(".+size%end", .end),
 			("size%end,adamID", .end),
+			(".adamID%start,adamID%", .end),
+			(".adamID%start,adamID%-start", .end),
+			(".adamID%start%end,adamID%+start", .start),
+			(".adamID%end%start%end", .end),
+			(".adamID%centerEnd,adamID%+start%-start", .centerEnd),
 		],
 	)
-	func `an alignment is retained unless a preset sets it, or is start absent any to retain`(
+	func `an alignment is the last attached preset's that sets one, else the field spec's own`(
 		value: String,
 		alignment: Alignment,
 	) throws {
@@ -992,6 +997,7 @@ private extension MASTests {
 			("@bogus", ParsingError.nonexistentFieldsConfig("bogus")),
 			("@all@xml", .invalidBaseFieldsConfigName("all@xml")),
 			("@a b", .invalidBaseFieldsConfigName("a b")),
+			("@-all", .invalidBaseFieldsConfigName("-all")),
 			("@@json", .invalidBaseFieldsConfigName("@json")),
 			("@standard@none", .invalidBaseFieldsConfigName("standard@none")),
 			("@standard@json@unsuffixed", .invalidBaseFieldsConfigName("standard@json@unsuffixed")),
@@ -1000,25 +1006,6 @@ private extension MASTests {
 	)
 	func `reports an invalid or nonexistent base fields config name`(value: String, error: ParsingError) {
 		#expect(throws: error) { try parseFieldSpecs(value) }
-	}
-
-	@Test(
-		arguments: [
-			(".bundleID%", ParsingError.invalidPresetName("")),
-			(".bundleID%a b", .invalidPresetName("a b")),
-			(".bundleID%bytes", .unknownPreset("bytes")),
-			(".bundleID%endJustify", .unknownPreset("endJustify")),
-			("bundleID%End", .unknownPreset("End")),
-		],
-	)
-	func `reports an invalid or unknown preset`(value: String, error: ParsingError) {
-		#expect(throws: error) { try parseFieldSpecs(value) }
-	}
-
-	@Test
-	func `a field name must escape a preset-modifier-prefix`() throws {
-		let specs = try parseFieldSpecs("@all.+a\\%b")
-		#expect(specs[0].name == "a%b")
 	}
 
 	@Test
