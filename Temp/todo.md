@@ -108,11 +108,15 @@ persistence-based functionality from specs & code:
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).
-   3. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
+   3. The [named format](../Specs/fields-format.md#named-formats) nonterminals:
+      every built-in preset's format is `%i`.
+   4. The `default` [preset](../Specs/fields.md#presets): always `standard`,
+      which sets nothing.
+   5. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
       custom config lookup, but the [context stacks
       definition](../Specs/configs.md#context-stacks) links to it as its
       example.
-   4. "Immutable" in ["Immutable Built-In Named Fields
+   6. "Immutable" in ["Immutable Built-In Named Fields
       Configs"](../Specs/fields.md#immutable-built-in-named-fields-configs) &
       possibly in ["Immutable Built-In Named
       Configs"](../Specs/configs.md#immutable-built-in-named-configs).
