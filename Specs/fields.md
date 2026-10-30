@@ -156,12 +156,13 @@ output, instead of itself).
 For each [leaf context](configs.md#context-stacks):
 
 - `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
-  field spec, whose `<sort>`, if any, is [disabled](#sort-priority), for each
-  field that the app lists (e.g., `@none.b/I` sorts items by `b`, while
-  `@none.b/0I` does not). Absent a built-in field order: field specs are ordered
-  by `<positional-order>`, so a fields config that extends it outputs its
-  inserted field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then
-  `a`).
+  field spec for each field that the app lists, each of whose `<sort>`, if any,
+  is [disabled](#sort-priority) after its `default` preset is attached, as by
+  `<disable-all-sorts>` (e.g., `@none.b/I` sorts items by `b`, while
+  `@none.b/0I` does not, even if the `default` preset sets an enabled sort).
+  Absent a built-in field order: field specs are ordered by
+  `<positional-order>`, so a fields config that extends it outputs its inserted
+  field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
   (`<output>`), while other `<sort-option>`s are per the app's default sort

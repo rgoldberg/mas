@@ -43,7 +43,9 @@ standard](configs.md#immutable-built-in-named-configs):
 
 - `all`: Every field spec is visible, as are unlisted fields.
 - `none`: `all`, ordered by `<positional-order>`, with every field spec's
-  `<sort>`, if any, disabled & with every field spec & unlisted field hidden.
+  `<sort>`, if any,
+  [disabled](fields.md#immutable-built-in-named-fields-configs) & with every
+  field spec & unlisted field hidden.
 - Built-in standard's user-facing variants: Every field spec is visible, while
   unlisted fields are hidden.
 
@@ -76,9 +78,10 @@ start-aligned.
 
 ## Built-In Field Specs
 
-No built-in field spec has a `<sort>`, so no built-in fields config sorts items
-(e.g., `mas list` outputs apps in input order). No built-in fields config has a
-built-in field order, so `all` orders its field specs [by
+No built-in field spec has a `<sort>`, so only a custom `default` preset that
+sets an enabled sort makes a built-in fields config other than `none` sort items
+(e.g., absent one, `mas list` outputs apps in input order). No built-in fields
+config has a built-in field order, so `all` orders its field specs [by
 label](fields.md#immutable-built-in-named-fields-configs), while `none` & each
 built-in standard's user-facing variants order theirs by `<positional-order>`.
 
