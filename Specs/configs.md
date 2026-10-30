@@ -157,10 +157,10 @@ For a command list, the config named `standard` in:
 - The root context is the leaf context's built-in standard.
 - Any other context is its parent context's [`default`](#default-configs).
 
-`standard` thus layers each context's custom `default`, from the root to the
-leaf, over the leaf context's built-in standard (e.g., for `mas list`,
-`mas.list`'s `standard` is `mas`'s `default`, which, absent a custom one, is
-`mas`'s `standard`: `mas.list`'s built-in standard).
+A context's `standard` thus layers the custom `default` of each less specific
+context, from the root, over the leaf context's built-in standard (e.g., for
+`mas list`, `mas.list`'s `standard` is `mas`'s `default`, which, absent a custom
+one, is `mas`'s `standard`: `mas.list`'s built-in standard).
 
 ### Custom Named Configs
 
