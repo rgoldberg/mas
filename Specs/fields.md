@@ -675,15 +675,21 @@ has a list of **attached** presets, which its `<preset-list>` sets:
   `<absolute-preset>`s, in order (e.g., `name%p%q`), or, for
   `<preset-clearing>`, with none (e.g., `name%`).
 - `<relative-presets>`: applies each `<preset-delta>` to the list, left to
-  right: `<preset-addition>` attaches its preset at the end of the list, moving
-  it there if it is already attached, while `<preset-removal>` **detaches** its
-  preset, if it is attached (e.g., `.name%-default%+end`, while `.name%-end`
-  changes nothing if `end` is not attached).
+  right: `<preset-addition>` attaches its preset at the end of the list,
+  replacing any attached preset of its name, while `<preset-removal>`
+  **detaches** the attached preset of its name, if any (e.g.,
+  `.name%-default%+end`, while `.name%-end` changes nothing if `end` is not
+  attached).
 
-A preset is attached at most once, so an `<absolute-presets>` that names it more
-than once attaches it only at its last occurrence (e.g., `%p%q%p` ≡ `%q%p`).
-Each `<preset-name>` must name an existing preset, even in a `<preset-removal>`
-that detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
+Attached presets are identified by name, whichever context each was looked up
+from, so at most 1 preset of each name is attached: an `<absolute-presets>` that
+names a preset more than once attaches it only at its last occurrence (e.g.,
+`%p%q%p` ≡ `%q%p`), and a `<preset-delta>` matches an attached preset of its
+name, even one looked up from another context (e.g., for a fields config `x` of
+`@all.name%-default` in context `mas`, `mas list --fields @x` detaches from
+`name` the `default` preset that `all` attached from `mas.list`). Each
+`<preset-name>` must name an existing preset, even in a `<preset-removal>` that
+detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
 
 Attaching a preset (including moving it to the end of the list) sets its
