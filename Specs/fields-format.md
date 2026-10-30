@@ -86,8 +86,9 @@ name-prefix = ":"!
 
 A `<named-format-reference>` references the format of the
 [preset](fields.md#presets) that its `<preset-name>` names, its **named format**
-(e.g., `:x` references preset `x`'s format), which is `%i` if that preset sets
-no format; it applies none of the preset's other settings (e.g., its alignment).
+(e.g., `:x` references preset `x`'s format), which is the format that attaching
+that preset sets (including via the presets attached within it), or `%i` if it
+sets none; it applies none of the preset's other settings (e.g., its alignment).
 
 If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,
 the referenced format's value must also have the 1st such transform's input

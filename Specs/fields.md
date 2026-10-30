@@ -707,14 +707,15 @@ detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
 
 Attaching a preset (including moving it to the end of the list) sets, at that
-point, each [setting](#field-modifiers) other than `<preset-list>` that its
-`<field-modifiers>` sets, in their order, retaining every other one (e.g., if
-preset `p` is `/-`, `@all.name/O,name%+p` sorts items by `name`'s formatted
-value, descending). Each setting of a field spec is thus the last value set, in
-order, by an explicit modifier or by an attached preset, else the value that the
-field spec otherwise has (e.g., a [default field spec](#default-field-specs)'s
-label is its field's name). Detaching a preset re-exposes the value that it
-overrode for each setting that it sets (e.g., if preset `p` sets label `P`,
+point & in order, each [setting](#field-modifiers) that attaching each preset
+attached within it sets, then each one other than `<preset-list>` that its own
+`<field-modifiers>` sets, retaining every other one (e.g., if preset `p` is
+`/-`, `@all.name/O,name%+p` sorts items by `name`'s formatted value,
+descending). Each setting of a field spec is thus the last value set, in order,
+by an explicit modifier or by an attached preset, else the value that the field
+spec otherwise has (e.g., a [default field spec](#default-field-specs)'s label
+is its field's name). Detaching a preset re-exposes the value that it overrode
+for each setting that it sets (e.g., if preset `p` sets label `P`,
 `@all.name=N,name%+p` labels `name` `P`, while a further `.name%-p` restores
 `N`). A copy of a field spec (e.g., by a `<field-spec-insertion>`) retains its
 attached presets & when each of its settings was set.
@@ -725,9 +726,11 @@ outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
 attached.
 
 A preset's own `<preset-list>` sets the list of presets attached within it,
-which starts empty, not the list of any field spec to which it is attached. A
-preset that is attached within itself, directly or transitively, is an error, as
-is any other [reference cycle](configs.md#referencing-named-configs).
+which starts empty, not the list of any field spec to which it is attached,
+though attaching it sets what they set (e.g., if preset `mb` is `%bytes=Size`,
+`.size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
+A preset that is attached within itself, directly or transitively, is an error,
+as is any other [reference cycle](configs.md#referencing-named-configs).
 
 A `<preset-name>` is looked up from the starting context of its reference, as
 configs.md [specifies](configs.md#referencing-named-configs) for every config
