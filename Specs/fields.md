@@ -680,8 +680,8 @@ has a list of **attached** presets, which its `<preset-list>` sets:
   preset, if it is attached (e.g., `.name%-default%+end`, while `.name%-end`
   changes nothing if `end` is not attached).
 
-A preset is attached at most once: an `<absolute-presets>` attaches a preset
-only at its last occurrence, which overrides every setting of any earlier one.
+A preset is attached at most once, so an `<absolute-presets>` that names it more
+than once attaches it only at its last occurrence (e.g., `%p%q%p` ≡ `%q%p`).
 Each `<preset-name>` must name an existing preset, even in a `<preset-removal>`
 that detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
