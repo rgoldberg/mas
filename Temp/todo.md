@@ -53,8 +53,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
 ### Persisted Custom Presets & Configs
 
 1. Custom [presets](../Specs/fields.md#presets): every reference to a preset
-   other than a built-in one (`standard`, each alignment preset & `default`,
-   which is `standard`) reports `unknownPreset` (or `invalidPresetName` for an
+   other than a built-in one (`standard` or an alignment preset) or `default`,
+   which is `standard`, reports `unknownPreset` (or `invalidPresetName` for an
    invalid preset name), so no preset yet sets a label, a format, or a sort,
    attaches presets within it, or can be attached within itself. They also need
    each field spec to record when each of its settings is set, by an explicit
