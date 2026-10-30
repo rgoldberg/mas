@@ -613,8 +613,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - attach / detach: add a preset to, or remove one from, a field spec's list
        of presets, which sets its settings, or re-exposes the values that they
        overrode
-     - absolute presets / relative presets: a `<preset-modifier>` that replaces
-       a field spec's attached presets / that applies `<preset-delta>`s to them
+     - preset list: a field spec's list of attached presets, which its
+       `<preset-list>` sets
+     - absolute presets / relative presets: a `<preset-list>` that replaces a
+       field spec's attached presets / that applies `<preset-delta>`s to them
        (as an absolute config / a relative config does to a fields config)
      - preset delta: 1 preset's addition or removal in relative presets
      - preset clearing: a bare `%`, which detaches every preset

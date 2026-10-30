@@ -225,12 +225,12 @@ working fields config's value for the same setting, if any:
   same one of `<positional-order-option-set>`, `<document-order-option-set>` &
   `<sort-option-set>`.
 
-So an omitted modifier (e.g., `<sort-modifier>` in `name=x`) or option (e.g.,
-`<direction>` in `name/1`, in `name/1Ii`, or in `//0`) retains the working
-fields config's value, while an empty [payload](#payloads) (e.g., in `name=`,
-`name/`, `L:`, or `B:`) is directly absent, so it resets its value to its
-default (e.g., `name/` removes the field spec's `<sort>`, while `name:` empties
-its format, but retains its alignment).
+So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
+`name=x`) or option (e.g., `<direction>` in `name/1`, in `name/1Ii`, or in
+`//0`) retains the working fields config's value, while an empty
+[payload](#payloads) (e.g., in `name=`, `name/`, `L:`, or `B:`) is directly
+absent, so it resets its value to its default (e.g., `name/` removes the field
+spec's `<sort>`, while `name:` empties its format, but retains its alignment).
 
 ## Nonexistent Fields
 
@@ -648,7 +648,8 @@ letter & its `<sort-option-terminator>` (e.g., `<locale-identifier>` in
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-preset-modifier = <absolute-presets> | <relative-presets> (* inherited *)
+preset-modifier = <preset-list>
+preset-list     = <absolute-presets> | <relative-presets> (* inherited *)
 
 absolute-presets = <preset-clearing> | <absolute-preset>+
 preset-clearing  = "%"
@@ -668,7 +669,7 @@ preset-name = {text: preset name}
 A **preset** is a [named config](configs.md#named-configs) of the preset [config
 kind](configs.md#config-kinds), whose syntax is `<field-modifiers>`, which a
 `<preset-name>` references (e.g., `%x` references preset `x`). Each field spec
-has a list of **attached** presets, which its `<preset-modifier>` sets:
+has a list of **attached** presets, which its `<preset-list>` sets:
 
 - `<absolute-presets>`: replaces the list with the presets of its
   `<absolute-preset>`s, in order (e.g., `name%p%q`), or, for
@@ -700,7 +701,7 @@ outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
 `.+size%+bytes` inserts a copy of `size` that also has its `default` preset
 attached.
 
-A preset's own `<preset-modifier>` sets the list of presets attached within it,
+A preset's own `<preset-list>` sets the list of presets attached within it,
 which starts empty, not the list of any field spec to which it is attached. A
 preset that is attached within itself, directly or transitively, is an error, as
 is any other [reference cycle](configs.md#referencing-named-configs).
