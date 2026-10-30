@@ -683,7 +683,8 @@ has a list of **attached** presets, which its `<preset-list>` sets:
 A preset is attached at most once: an `<absolute-presets>` attaches a preset
 only at its last occurrence, which overrides every setting of any earlier one.
 Each `<preset-name>` must name an existing preset, even in a `<preset-removal>`
-that detaches nothing (e.g., `%-bytess` is an error absent a preset `bytes`).
+that detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
+preset `bytess`).
 
 Attaching a preset (including moving it to the end of the list) sets its
 settings at that point, as its `<field-modifiers>` would, in their order. Each
