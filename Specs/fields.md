@@ -91,8 +91,14 @@ fields are visible or hidden as it specifies; any other fields config's are
 visible iff those of the fields config that it extends are (e.g., visible for
 `@all.-foo`, but hidden for an `<absolute-config>`, which extends `none`).
 
-Each visible unlisted field is output per a [default field
-spec](#default-field-specs) that has no position, so no index references it.
+Each unlisted field has a [default field spec](#default-field-specs) that has no
+position, so no index references it. Its `<sort>`, if any, is
+[disabled](#sort-priority) after its `default` preset is attached, as by
+`<disable-all-sorts>`, so an unlisted field never sorts items (e.g., if the
+`default` preset sets an enabled sort, `@all` sorts items only by its listed
+fields).
+
+Each visible unlisted field is output per its default field spec;
 `<positional-order>` orders it as an [unpositioned field](#field-order), while
 `<document-order>` orders it at its own document position. A field order that
 ties it with a field spec or with another unlisted field orders it as if it were

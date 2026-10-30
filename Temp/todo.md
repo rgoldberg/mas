@@ -60,12 +60,13 @@ only after `=` (e.g., `--json[=<json-config>]`).
    each field spec to record when each of its
    [settings](../Specs/fields.md#field-modifiers) is set, by an explicit
    modifier or by an attached preset, so that detaching a preset re-exposes each
-   value that it overrode & so that `none` disables each sort that its `default`
-   preset sets. Supporting them also needs key-value & JSON output to omit each
-   [unlisted field](../Specs/fields.md#unlisted-fields) that an item lacks,
-   because mas gives every item a field spec for each unlisted field of any
-   item, while a custom `default` preset may give an absent field a formatted
-   value that is not absent (e.g., `:%N%n+none+`).
+   value that it overrode & so that each of `none`'s field specs & each unlisted
+   field's default field spec disables each sort that its `default` preset sets.
+   Supporting them also needs key-value & JSON output to omit each [unlisted
+   field](../Specs/fields.md#unlisted-fields) that an item lacks, because mas
+   gives every item a field spec for each unlisted field of any item, while a
+   custom `default` preset may give an absent field a formatted value that is
+   not absent (e.g., `:%N%n+none+`).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context
