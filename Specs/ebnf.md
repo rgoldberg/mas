@@ -672,8 +672,8 @@ NONTERMINAL = DEFINITION (* inherited *)
 
 A transitively absent `NONTERMINAL` may have an **inherited value**, which a
 syntax defines (e.g., as the value of the same setting in a config that the
-input modifies). A directly absent `NONTERMINAL` has none, so its default
-applies.
+input modifies). A directly absent `NONTERMINAL` has none, nor does any of its
+descendants, so each one's default applies.
 
 ##### Default Resolution
 
