@@ -270,6 +270,11 @@ private extension MASTests {
 	}
 
 	@Test
+	func `an index may contain escaped characters`() throws {
+		#expect(try parseFieldSpecs(#"@all.+@\-\1"#).map(\.name) == ["bundleID", "adamID", "bundleID"])
+	}
+
+	@Test
 	func `insertion of an unknown name selects its default field spec`() throws {
 		let specs = try parseFieldSpecs("@all.+size")
 		#expect(specs[0].name == "size")

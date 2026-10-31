@@ -48,7 +48,7 @@ func parseJSONConfig(_ value: String) throws(JSONConfigParsingError) -> JSONConf
 		case "p":
 			indentation = nil
 		case "P":
-			// `<indentation>` is a non-empty text token: absent, its default (2
+			// `<indentation>` is a non-empty variable token: absent, its default (2
 			// spaces) applies
 			let text = try parseOutputConfigSettingPayload(&input, danglingEscapeError: JSONConfigParsingError.danglingEscape)
 			guard text.allSatisfy({ $0 == " " || $0 == "\t" }) else {

@@ -17,9 +17,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 5. - only for: restrict scope or target applicability
    - for only: restrict numeric quantities or durations
 6. - restrict: narrow scope or applicability
-   - constrain: narrow permissible values (`{text: CONSTRAINTS}`)
+   - constrain: narrow permissible values (`{SUBTYPE: CONSTRAINTS}`)
    - describe: state valid values in prose (`{DESCRIPTION}`,
-     `{text: CONSTRAINTS}`)
+     `{SUBTYPE: CONSTRAINTS}`)
    - REJECTED: limit
 7. - bare character: `x`
    - escape prefix: `\`
@@ -155,7 +155,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - interpret / interpreted as: circumstance-dependent classification
     - treat as: apply a policy to (ebnf whitespace treatment)
     - REJECTED: considered / processed as / read as / functions as / counts as
-29. - text: character sequence in syntax (tokens, `{text}` terminals, template
+29. - text: character sequence in syntax (tokens, `{string}` terminals, template
       text, boundary text)
     - syntax text: the text that a syntax parses (e.g., an option value), as
       opposed to an app's input (e.g., its items)
@@ -163,10 +163,21 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
       `<string-block>`, empty strings)
-    - token: contiguous characters consumed together as 1 element: a literal,
-      scalar, or text token ([defined](../Specs/ebnf.md#tokens))
-    - REJECTED: syntax token / constant token (for a literal token) / ad hoc
-      text (for a text token's text)
+    - token: contiguous characters consumed together as 1 element: a literal or
+      variable token ([defined](../Specs/ebnf.md#tokens))
+    - typed terminal: a `{SUBTYPE}` or `{SUBTYPE: CONSTRAINTS}` terminal, which
+      consumes a variable token ([defined](../Specs/ebnf.md#typed-terminals))
+    - subtype: a typed terminal's `SUBTYPE` (e.g., `integer`), which determines
+      its value's type (e.g., number) & its lexical form
+    - accept: of a typed terminal, to allow text as its variable token
+    - free-form description: a `{DESCRIPTION}` that describes a value or a type
+      in prose in a semantic comment
+      ([defined](../Specs/ebnf.md#free-form-descriptions))
+    - REJECTED: syntax token / constant token (for a literal token) / scalar
+      token / text token (for a variable token) / ad hoc text (for a variable
+      token's text) / scalar description / text terminal / constrained text
+      terminal (for a typed terminal) / ad hoc description (for a free-form
+      description)
     - occurrence: specific appearance of something
     - value: evaluated content bound to a nonterminal or field
     - content: substance as a whole (of a string, file, or expression)
@@ -452,11 +463,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - space-fill: fill any remaining width with spaces
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)
-80. - maximal munch: consuming the longest syntax text that matches (e.g., a
-      scalar token)
-    - lexical form: the text that may denote a scalar description's values,
-      whether valid or not
-    - REJECTED: literal scalar (for a value)
+80. - maximal munch: consuming the longest syntax text that a typed terminal
+      accepts as a variable token
+    - lexical form: the text that denotes a subtype's values
+      ([defined](../Specs/ebnf.md#typed-terminals))
+    - candidate terminator: a candidate literal of the position immediately
+      following a variable token
+    - REJECTED: literal scalar (for a value) / candidate text terminator
     - REJECTED: greedy matching / longest match / how far a token extends
 81. - tuple: the multiplicity of a sequence's children's values
       ([defined](../Specs/ebnf.md#multiplicity))

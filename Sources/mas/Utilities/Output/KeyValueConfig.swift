@@ -104,8 +104,8 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "f":
 			leaderPattern = nil
 		case "F":
-			// `<leader-pattern>` is a non-empty text token: absent, its default `▁`
-			// applies
+			// `<leader-pattern>` is a non-empty variable token: absent, its default
+			// `▁` applies
 			let pattern = try parseKeyValueSettingText(&input)
 			guard !pattern.contains(where: \.isNewline) else {
 				throw .invalidLeaderPattern(pattern)
@@ -193,7 +193,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	}
 }
 
-/// Parses an uppercase `<key-value-setting>`'s `{text}` payload
+/// Parses an uppercase `<key-value-setting>`'s `{string}` payload
 /// (`<leader-pattern>`, `<leading-spacing>`, `<trailing-spacing>`, or
 /// `<item-separator-line>`) through its `<key-value-setting-termination>` via
 /// `parseOutputConfigSettingPayload`.

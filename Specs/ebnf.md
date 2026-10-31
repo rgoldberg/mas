@@ -75,7 +75,7 @@ possible occurrences, determined from the grammar instead of the syntax text:
 
 A **constant expression** consumes invariant text (e.g., a literal).
 
-A **variable expression** consumes variable text (e.g., a text terminal).
+A **variable expression** consumes variable text (e.g., a typed terminal).
 
 ### Compounds Vs. Terminals
 
@@ -92,16 +92,10 @@ element by the syntax.
 
 **Literal tokens** are bare tokens that match [literals](#literals) & are
 consumed by constant expressions; escaping any character within a token that
-would otherwise be a literal token renders it a text token.
+would otherwise be a literal token renders it a variable token.
 
-**Text tokens** are tokens consumed by [text terminals](#text-terminals) &
-[constrained text terminals](#constrained-text-terminals).
-
-**Scalar tokens** are bare tokens consumed by [scalar
-descriptions](#scalar-descriptions).
-
-**Variable tokens** (i.e., scalar & text tokens) are consumed by variable
-expressions.
+**Variable tokens** are tokens that [typed terminals](#typed-terminals) consume;
+each may contain both bare characters & escape sequences.
 
 #### Candidate Literals
 
@@ -115,9 +109,8 @@ text starting at that position), which includes the literals that:
 
 #### Consuming Tokens
 
-Syntax text is consumed as a token iff a literal token, a scalar token, or a
-text token, as specified below, matches the syntax text starting at the current
-position.
+Syntax text is consumed as a token iff a literal token or a variable token, as
+specified below, matches the syntax text starting at the current position.
 
 Consuming a token commits to the set of expressions that the token starts,
 continues, or closes; each subsequently consumed token narrows the set to the
@@ -137,31 +130,24 @@ Syntax text is consumed as a literal token iff a candidate literal matches the
 syntax text starting at the current position; if multiple match, the longest is
 consumed.
 
-##### Consuming Scalar Tokens
+##### Consuming Variable Tokens
 
-Syntax text is consumed as a scalar token iff a scalar description is available
-at the current position & the syntax text starting there matches its lexical
-form; the longest syntax text that matches it is consumed (i.e., maximal munch),
-then, iff its value is not a valid value of the scalar description (e.g., it is
-out of range), an error is reported.
+Syntax text is consumed as a variable token iff a typed terminal is available at
+the current position & no candidate literal matches the syntax text there.
 
-A syntax must ensure that no candidate literal of a position at which a scalar
-description is available matches the start of the scalar description's lexical
-form there.
-
-##### Consuming Text Tokens
-
-Syntax text is consumed as a text token iff a text token is available at the
-current position & no candidate literal matches the syntax text there.
-
-A text token's **candidate text terminators** are the candidate literals of the
+A variable token's **candidate terminators** are the candidate literals of the
 position immediately following it.
 
-A text token is the longest non-empty prefix starting at the current position
-that does not contain any candidate text terminator; it terminates immediately
-before the 1st such terminator, or at the end of the syntax text absent one,
-less any ignored outer bare whitespace; that terminator, if any, is then
-consumed as a literal token.
+A variable token is the longest non-empty prefix starting at the current
+position that contains no candidate terminator & that its typed terminal
+[accepts](#typed-terminals) (i.e., maximal munch; e.g., for
+`{integer: 1 to 100}`, `150` consumes `15`, leaving `0` for the next token),
+less any ignored outer bare whitespace; iff no such prefix exists, an error is
+reported.
+
+Iff multiple typed terminals are available at the current position (e.g., in
+`<a> | <b>`), the longest variable token that any of them accepts is consumed,
+committing to the expressions whose typed terminals accept it.
 
 ### Character Consumption
 
@@ -220,8 +206,8 @@ bare whitespace.
 
 Outer bare whitespace is treated per its 2 adjacent sides: the preceding token's
 end & the following token's start, the following token being the one that would
-start after the whitespace if it were ignored (or at the whitespace, iff a text
-token starts there). Of those 2 sides:
+start after the whitespace if it were ignored (or at the whitespace, iff a
+variable token starts there). Of those 2 sides:
 
 - If both defer: the higher-precedence treatment applies, in descending
   precedence:
@@ -309,56 +295,58 @@ A **literal**, which matches a [literal token](#tokens) of `TEXT`.
 
 Within `TEXT`, `""` denotes a `"`.
 
-#### Scalar Descriptions
+#### Typed Terminals
+
+Defined via a modified meta-grammar supporting [optionals](#optionals) &
+[literals](#literals):
 
 ```ebnf
-{DESCRIPTION}
+"{" SUBTYPE [ ":" CONSTRAINTS ] "}"
 ```
 
 Inherent scalar.
 
-`DESCRIPTION` describes valid values (e.g., `{non-negative integer}`) & their
-**lexical form**: the text that may denote them, whether valid or not (e.g., any
-run of digits for `{integer from 1 to 100}`).
+Consumes a [variable token](#tokens), whose value has `SUBTYPE`'s type:
 
-An **integer description** describes integers (e.g., `{integer}`,
-`{non-negative integer}`, `{integer from 1 to 100}`, or
-`{positive integer without leading 0s}`). Its lexical form is 1 or more ASCII
-digits (`0` to `9`), the 1st of which is not `0` iff it describes integers
-without leading `0`s, preceded by an optional sign (`+` or `-`) iff it describes
-any negative integer. Its value is the decimal integer that the digits denote,
-negated iff the sign is `-` (e.g., `-0` is `0`), constrained by nothing but the
-description (e.g., `{integer}` has no minimum or maximum).
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
+| `SUBTYPE`   | Type      | Lexical Form                                                                                                                                           |
+|:------------|:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `boolean`   | boolean   | `true` or `false`                                                                                                                                      |
+| `date`      | date      | An ISO-8601 date-only or datetime                                                                                                                      |
+| `integer`   | number    | 1 or more ASCII digits (`0` to `9`), optionally preceded by a sign (`+` or `-`)                                                                        |
+| `number`    | number    | `integer`'s lexical form, optionally followed by `.` & 1 or more ASCII digits, then optionally by `e` or `E` & an exponent in `integer`'s lexical form |
+| `regex`     | string    | A Swift Regex                                                                                                                                          |
+| `string`    | string    | Any characters                                                                                                                                         |
+| `time-only` | time-only | An ISO-8601 time-only                                                                                                                                  |
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
-`DESCRIPTION` must not:
+A `SUBTYPE`'s **lexical form** is the text that denotes its values, each escape
+sequence denoting its escaped character (e.g., `\5` denotes `5` for `integer`).
 
-- Be bare `text`.
-- Start with bare `text:`.
+`CONSTRAINTS` describes how its typed terminal narrows its lexical form, in
+prose (e.g., `{integer: 1 to 100}`, `{string: no line terminators}`), as a
+`/`-delimited Swift Regex that the whole value must match (e.g.,
+`{string: /[A-Y]+/}`, which consumes `ABY` from `ABYZ`), or both, separated by
+`,`.
 
-#### Text Terminals
+A typed terminal **accepts** text iff the text is in its lexical form &
+satisfies its `CONSTRAINTS`, unless only something outside the
+[app](configs.md#configs) (e.g., a terminal) can determine the value's validity,
+in which case the app accepts any text in its lexical form & passes the value
+through unchecked.
 
-```ebnf
-{text}
-```
+For an `integer` or a `number`:
 
-Inherent scalar.
-
-A [text token](#tokens) that supports [escape sequences](#escaping).
-
-#### Constrained Text Terminals
-
-```ebnf
-{text: CONSTRAINTS}
-```
-
-Inherent scalar.
-
-A [text token](#tokens) that supports [escape sequences](#escaping).
-
-`CONSTRAINTS` describes the valid values (or the text that evaluates to them,
-e.g., which characters may be bare). An invalid value is an error, unless only
-something outside the [app](configs.md#configs) (e.g., a terminal) can determine
-its validity, in which case the app passes it through unchecked.
+- Its value is the decimal number that its digits denote, negated iff its sign
+  is `-` (e.g., `-0` is `0`), constrained by nothing but its `CONSTRAINTS`
+  (e.g., `{integer}` has no minimum or maximum).
+- A sign is accepted iff a valid value can be negative, unless `CONSTRAINTS`
+  forbids `+` (e.g., `{integer: no "+"}`) or allows it (e.g.,
+  `{integer: non-negative, optional "+"}`).
+- Leading `0`s are accepted, unless `CONSTRAINTS` forbids them (e.g.,
+  `{integer: positive, no leading 0s}`).
 
 ### Nonterminals
 
@@ -529,6 +517,17 @@ A comment may hold multiple `;`-separated parts; each part that matches a
 semantic comment format is a semantic comment; any other part is ordinary
 commentary.
 
+##### Free-Form Descriptions
+
+```ebnf
+{DESCRIPTION}
+```
+
+A **free-form description** describes a value or a type in prose (e.g.,
+`{empty string}` or `{field value}`). Its 1st word must be followed by
+whitespace, so that it never matches a [typed terminal](#typed-terminals), even
+one of a future `SUBTYPE` (e.g., neither `{empty}` nor `{empty: string}`).
+
 ##### Default Comments
 
 Default comments specify explicit defaults applicable to absent variable
@@ -537,7 +536,7 @@ nonterminals; they cannot specify defaults for constant nonterminals.
 `DEFAULT` is one of:
 
 - `null` or `empty`.
-- A [scalar description](#scalar-descriptions) of the value.
+- A [free-form description](#free-form-descriptions) of the value.
 - A value (e.g., `100`).
 - A [nonterminal reference](#nonterminal-references): if it references an
   alternative of the choice that defines the nonterminal to which the default

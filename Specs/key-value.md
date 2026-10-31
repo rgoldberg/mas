@@ -146,7 +146,7 @@ leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
-leader-pattern = ^{text: no line terminators}^ (* default: "▁" *)
+leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -175,7 +175,7 @@ leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
 
-leading-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
+leading-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -197,7 +197,7 @@ trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom
 trailing-spacing-default = "r" (* default trailing-spacing: " "; mnemonic: right *)
 trailing-spacing-custom  = "R" [ <trailing-spacing> ] <key-value-setting-termination> (* mnemonic: right *)
 
-trailing-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
+trailing-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -217,7 +217,7 @@ item-separator-setting = <item-separator-off> | <item-separator-on> (* default: 
 item-separator-off = "s"
 item-separator-on  = "S" [ <item-separator-line> ] <key-value-setting-termination>
 
-item-separator-line = ^{text: no line terminators}^ (* default: {empty string} *)
+item-separator-line = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -285,19 +285,19 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a literal, 1 or
+[For a variable token to consume text that would otherwise match a literal, 1 or
 more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
-the next character.
+Throughout all variable tokens, a `\` is written `\\`, because `\` always
+escapes the next character.
 
 In each row of the table below, the given characters must be escaped to be
-consumed as any character in a text token consumed by the given text terminal.
-Leading & trailing outer bare whitespace is ignored by `<style-specifier>` &
-consumed by every other text terminal.
+consumed as any character in a variable token consumed by the given typed
+terminal. Leading & trailing outer bare whitespace is ignored by
+`<style-specifier>` & consumed by every other typed terminal.
 
-| `{text}`                | Any                 |
+| Nonterminal             | Any                 |
 |:------------------------|:--------------------|
 | `<style-specifier>`     | `:` & ASCII letters |
 | `<style-prefix>`        | `:`                 |

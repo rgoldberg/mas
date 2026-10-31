@@ -236,7 +236,7 @@ func parseArguments(
 	return arguments + [String?](repeating: nil, count: count - arguments.count)
 }
 
-/// `argument` as a `{non-negative integer}`, saturated at `Int.max` (which
+/// `argument` as an `{integer: non-negative}`, saturated at `Int.max` (which
 /// every caller treats as equivalent to any larger value); else `nil`.
 func nonNegativeInteger(_ argument: String) -> Int? {
 	!argument.isEmpty && argument.allSatisfy(\.isASCIIDigit) ? Int(argument) ?? .max : nil

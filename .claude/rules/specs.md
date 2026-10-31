@@ -33,9 +33,9 @@ single optional cannot define; give every block not marked
 `(* non-structural *)` a direct default of `{empty string}`, because no syntax
 references a non-structural block, so none can omit it.
 
-In specs, give an empty-string default for a block or a text terminal as
-`{empty string}` (a value), never as the literal `""`, which neither a block nor
-a text token can consume.
+In specs, give an empty-string default for a block or a typed terminal as
+`{empty string}` (a free-form description), never as the literal `""`, which
+neither a block nor a variable token can consume.
 
 In specs, when 2 constructs express the same concept with similarly complex
 syntax (e.g., a format's number coercion & a sort's grouped numbers), share 1

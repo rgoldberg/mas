@@ -40,7 +40,7 @@ pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; la
 compact        = "p" (* mnemonic: lowercase of P, as off *)
 pretty-printed = "P" [ <indentation> ] <json-setting-termination>
 
-indentation = ^{text: only spaces & tabs}^ (* default: "  " *)
+indentation = ^{string: only spaces & tabs}^ (* default: "  " *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -102,8 +102,8 @@ json-setting-terminator = ":"
 end-of-json-config      = end
 ```
 
-E.g., in `--json-config Pa`, `a` is interpreted as invalid `<indentation>` text,
-not as a separate `<top-level-structure-setting>`.
+E.g., in `--json-config Pa`, `a` is an error (because `<indentation>` cannot
+consume it), not a separate `<top-level-structure-setting>`.
 
 ## Examples
 

@@ -533,9 +533,9 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses a text token, consuming or ignoring its outer bare whitespace per
-	/// `leading` & `trailing`, up to (but not including) an unescaped character
-	/// in `terminatorSet`, or the end of the input.
+	/// Parses a variable token, consuming or ignoring its outer bare whitespace
+	/// per `leading` & `trailing`, up to (but not including) an unescaped
+	/// character in `terminatorSet`, or the end of the input.
 	private mutating func parseText(
 		terminatorSet: Set<Character>,
 		leading: WhitespaceTreatment,
@@ -599,16 +599,16 @@ private struct ParsedCoercion { // swiftlint:disable:this one_declaration_per_fi
 	let hasArguments: Bool
 }
 
-/// How outer bare whitespace preceding a text token is treated.
+/// How outer bare whitespace preceding a variable token is treated.
 private enum WhitespaceTreatment { // swiftlint:disable:this one_declaration_per_file
 	case consumed
 	case ignored
 }
 
-/// How outer bare whitespace succeeding a text token is treated.
+/// How outer bare whitespace succeeding a variable token is treated.
 private enum TrailingWhitespaceTreatment { // swiftlint:disable:this one_declaration_per_file
 	case consumed
-	/// Consumed iff the text token is succeeded by the given character.
+	/// Consumed iff the variable token is succeeded by the given character.
 	case consumedBefore(Character)
 	case ignored
 }

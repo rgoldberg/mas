@@ -46,7 +46,7 @@ header-setting = <header-off> | <header-on> (* default: <header-off>; last wins;
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
 
-style-specifier = {text: terminal-specific styling text with no bare ASCII letters & no line terminators}
+style-specifier = {string: terminal-specific styling text with no bare ASCII letters & no line terminators}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -92,7 +92,7 @@ header-style-prefix-setting = <header-style-prefix-default> | <header-style-pref
 header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
 
-style-prefix = ^{text: no line terminators}^ (* default: {empty string} *)
+style-prefix = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -113,7 +113,7 @@ header-style-suffix-setting = <header-style-suffix-default> | <header-style-suff
 header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
 header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: suffix *)
 
-style-suffix = ^{text: no line terminators}^ (* default: {empty string} *)
+style-suffix = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -134,7 +134,7 @@ header-style-reset-setting = <header-style-reset-default> | <header-style-reset-
 header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
 
-style-reset = ^{text: no line terminators}^ (* default: {empty string} *)
+style-reset = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -154,7 +154,7 @@ separator-setting = <separator-off> | <separator-on> (* default: <separator-off>
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
 
-separator-pattern = ^{text: no line terminators}^ (* default: "-" *)
+separator-pattern = ^{string: no line terminators}^ (* default: "-" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -202,7 +202,7 @@ column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* d
 column-spacing-default = "c" (* default column-spacing: "  " *)
 column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>
 
-column-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
+column-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -222,8 +222,8 @@ table-setting-terminator = ":"
 end-of-table-config      = end
 ```
 
-E.g., in `--table-config Hb`, `b` is interpreted as invalid `<style-specifier>`
-text, not as a separate `<broken-setting>`.
+E.g., in `--table-config Hb`, `b` is an error (because `<style-specifier>`
+cannot consume it), not a separate `<broken-setting>`.
 
 ## Implied Alternatives
 
@@ -258,19 +258,19 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a literal, 1 or
+[For a variable token to consume text that would otherwise match a literal, 1 or
 more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
-the next character.
+Throughout all variable tokens, a `\` is written `\\`, because `\` always
+escapes the next character.
 
 In each row of the table below, the given characters must be escaped to be
-consumed as any character in a text token consumed by the given text terminal.
-Leading & trailing outer bare whitespace is ignored by `<style-specifier>` &
-consumed by every other text terminal.
+consumed as any character in a variable token consumed by the given typed
+terminal. Leading & trailing outer bare whitespace is ignored by
+`<style-specifier>` & consumed by every other typed terminal.
 
-| `{text}`              | Any                 |
+| Nonterminal           | Any                 |
 |:----------------------|:--------------------|
 | `<style-specifier>`   | `:` & ASCII letters |
 | `<style-prefix>`      | `:`                 |

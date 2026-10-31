@@ -12,7 +12,7 @@ format-block = <pipeline> | <format-template> (* direct default: {empty string};
 pipeline        = <named-format> | [ <named-format> ] <value-transform-pipeline>
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
 
-template-text = ~^{text}^~
+template-text = ~^{string}^~
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -271,10 +271,10 @@ number-format-arguments =
   <argument-separator>? [ <secondary-digit-group-size> ]
   <argument-separator>? [ <decimal-separator> ]
 
-digit-group-separator      = {text}                 (* default: {base conventions' digit group separator} *)
-digit-group-size           = {non-negative integer} (* default: {base conventions' digit group size} *)
-secondary-digit-group-size = {non-negative integer} (* default: {base conventions' secondary digit group size} *)
-decimal-separator          = {text}                 (* default: {base conventions' decimal separator} *)
+digit-group-separator      = {string}                (* default: {base conventions' digit group separator} *)
+digit-group-size           = {integer: non-negative} (* default: {base conventions' digit group size} *)
+secondary-digit-group-size = {integer: non-negative} (* default: {base conventions' secondary digit group size} *)
+decimal-separator          = {string}                (* default: {base conventions' decimal separator} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -331,9 +331,9 @@ scale-arguments =
   <argument-separator> <fractional-digits>
   <argument-fence>
 
-exponent           = {integer}              (* divides the input by 10 to this power before rendering *)
-significant-digits = {integer from 1 to 100} (* rounds to this many total digits; absent: no rounding *)
-fractional-digits  = {integer from 0 to 100} (* exactly this many digits after the point; 0: integer *)
+exponent           = {integer}           (* divides the input by 10 to this power before rendering *)
+significant-digits = {integer: 1 to 100} (* rounds to this many total digits; absent: no rounding *)
+fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the point; 0: integer *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -407,9 +407,9 @@ date-time-zone-arguments      = <argument-fence> [ <time-zone-code> ] <argument-
 time-only-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
 time-zone-code =
-  {text: IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system", each case-insensitive}
+  {string: IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system", each case-insensitive}
   (* default: "system" *)
-reference-date = {text: ISO-8601 date-only} (* default: {current date in the system time zone} *)
+reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -774,8 +774,8 @@ number-coercion-arguments =
   <argument-separator>? [ <trivia-suffix-regex> ]
   <argument-fence>
 
-trivia-prefix-regex = {text: Swift Regex} (* default: {empty string} *)
-trivia-suffix-regex = {text: Swift Regex} (* default: {empty string} *)
+trivia-prefix-regex = {regex} (* default: {empty string} *)
+trivia-suffix-regex = {regex} (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -824,8 +824,8 @@ transforms & number-to-string transforms are applied to the number alone,
 retaining the trivia unchanged (e.g., `..:,,,,,[$]:numberFormat:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
-Because `\` escapes the next character in every text token, a regex's own `\` is
-written `\\` (e.g., `\\d` for the regex `\d` & `\\$` for `\$`), and
+Because `\` escapes the next character in every variable token, a regex's own
+`\` is written `\\` (e.g., `\\d` for the regex `\d` & `\\$` for `\$`), and
 `<trivia-prefix-regex>`'s `,` & `:` & `<trivia-suffix-regex>`'s `:` must be
 escaped.
 

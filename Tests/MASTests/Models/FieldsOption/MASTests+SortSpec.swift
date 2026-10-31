@@ -195,10 +195,18 @@ private extension MASTests {
 			("1/O", .invalidSortOption("/")),
 			("/-", .invalidSortOption("/")),
 			("5 0", .invalidSortOption("0")),
+			(#"\05"#, .invalidSortOption(#"\"#)),
 		],
 	)
 	func `reports a sort syntax error`(sort: String, error: ParsingError) {
 		#expect(throws: error) { try parsedSortSpec(sort) }
+	}
+
+	@Test(arguments: [(#"\5"#, BigUInt(5), true), (#"1\0"#, 10, true), (#"0\5"#, 5, false)])
+	func `parses a sort-priority that contains escaped digits`(sort: String, priority: BigUInt, isEnabled: Bool) throws {
+		let sortSpec = try parsedSortSpec(sort)
+		#expect(sortSpec.priority == priority)
+		#expect(sortSpec.isEnabled == isEnabled)
 	}
 
 	@Test

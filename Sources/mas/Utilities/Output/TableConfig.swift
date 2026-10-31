@@ -115,8 +115,8 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		case "s":
 			separatorPattern = .off
 		case "S":
-			// `<separator-pattern>` is a non-empty text token: absent, its default
-			// `-` applies
+			// `<separator-pattern>` is a non-empty variable token: absent, its
+			// default `-` applies
 			let pattern = try parseTableSettingText(&input)
 			guard !pattern.contains(where: \.isNewline) else {
 				throw .invalidSeparatorPattern(pattern)
@@ -217,7 +217,7 @@ private enum TableConfigSetting<Value> { // swiftlint:disable:this one_declarati
 	}
 }
 
-/// Parses an uppercase `<table-setting>`'s `{text}` payload
+/// Parses an uppercase `<table-setting>`'s `{string}` payload
 /// (`<separator-pattern>` or `<column-spacing>`) through its
 /// `<table-setting-termination>` via `parseOutputConfigSettingPayload`.
 private func parseTableSettingText(_ input: inout Substring) throws(TableConfigParsingError) -> String {

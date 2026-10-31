@@ -224,7 +224,7 @@ extension SortSpec { // swiftlint:disable:this file_types_order
 			input.removeFirst()
 			skipWhitespace(&input)
 		}
-		let priority = parseIntegerText(&input, isSigned: false).flatMap { BigUInt($0) }
+		let priority = parseIntegerText(&input, isSigned: false, allowsLeadingZeros: false).flatMap { BigUInt($0) }
 			?? existing?.priority
 			?? defaultSortPriority
 		skipWhitespace(&input)
@@ -438,8 +438,8 @@ private func skipWhitespace(_ input: inout Substring) -> Bool {
 	return true
 }
 
-/// Parses a text token whose outer bare whitespace is ignored, up to (but not
-/// including) an unescaped character in `terminatorSet`, or the end of the
+/// Parses a variable token whose outer bare whitespace is ignored, up to (but
+/// not including) an unescaped character in `terminatorSet`, or the end of the
 /// input.
 private func parseText(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
 	try parseEscapedText(&input, terminatorSet: terminatorSet)
@@ -447,7 +447,7 @@ private func parseText(_ input: inout Substring, terminatorSet: Set<Character>) 
 
 /// Parses the longest of `literals` that bare characters at the start of
 /// `input` match, ignoring its outer bare whitespace (an escaped character
-/// renders a token a text token, so it matches no literal); else `nil`,
+/// renders a token a variable token, so it matches no literal); else `nil`,
 /// consuming only that whitespace.
 private func parseLiteral(_ input: inout Substring, from literals: some Sequence<String>) -> String? {
 	skipWhitespace(&input)

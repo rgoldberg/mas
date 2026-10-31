@@ -1001,12 +1001,12 @@ private extension FieldSpecsBuilder {
 	throws(ParsingError) -> Int {
 		input.removeFirst()
 		input = input.drop(while: \.isWhitespace)
-		guard let text = parseIntegerText(&input, isSigned: true) else {
+		guard let text = parseIntegerText(&input, isSigned: true, allowsLeadingZeros: true) else {
 			throw missingError
 		}
 		// An index beyond `Int`'s range is beyond every position
 		guard let index = Int(text) else {
-			throw .invalidPosition(String(text))
+			throw .invalidPosition(text)
 		}
 		return index
 	}
@@ -1180,16 +1180,36 @@ private func parseSortSpecModifier(
 
 // MARK: - Shared parsing primitives
 
-/// Consumes & returns the longest integer scalar token (1 or more ASCII digits,
-/// preceded by an optional `+` or `-` iff `isSigned`) at the start of `input`;
-/// else `nil`, consuming nothing.
-func parseIntegerText(_ input: inout Substring, isSigned: Bool) -> Substring? {
-	let signCount = isSigned && (input.first == "+" || input.first == "-") ? 1 : 0
-	let text = input.prefix(signCount + input.dropFirst(signCount).prefix(while: \.isASCIIDigit).count)
+/// Consumes the longest integer variable token at the start of `input` (1 or
+/// more ASCII digits, the 1st of which is not `0` unless `allowsLeadingZeros`,
+/// preceded by an optional `+` or `-` iff `isSigned`; each bare or escaped),
+/// returning its value's text (sans escape prefixes); else `nil`, consuming
+/// nothing.
+func parseIntegerText(_ input: inout Substring, isSigned: Bool, allowsLeadingZeros: Bool) -> String? {
+	// The unescaped character that `text` starts with, with the count of
+	// characters that denote it
+	func unescapedFirst(_ text: Substring) -> (char: Character, count: Int)? {
+		text.first == escapePrefix ? text.dropFirst().first.map { ($0, 2) } : text.first.map { ($0, 1) }
+	}
+	var rest = input
+	var text = ""
+	if isSigned, let sign = unescapedFirst(rest), sign.char == "+" || sign.char == "-" {
+		text.append(sign.char)
+		rest.removeFirst(sign.count)
+	}
+	let signCount = text.count
+	while
+		let digit = unescapedFirst(rest),
+		digit.char.isASCIIDigit,
+		allowsLeadingZeros || text.count > signCount || digit.char != "0"
+	{
+		text.append(digit.char)
+		rest.removeFirst(digit.count)
+	}
 	guard text.count > signCount else {
 		return nil
 	}
-	input.removeFirst(text.count)
+	input = rest
 	return text
 }
 

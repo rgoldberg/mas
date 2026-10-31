@@ -7,7 +7,7 @@
 
 private import Foundation
 
-/// Parses an uppercase output config setting's `{text}` payload (e.g.,
+/// Parses an uppercase output config setting's `{string}` payload (e.g.,
 /// table.md's `<separator-pattern>`) through its setting termination via
 /// `parseOutputConfigSettingPayloadCharacters`, consuming its outer bare
 /// whitespace.
@@ -70,7 +70,7 @@ func styled(_ string: String, specifier: String, sequences: StyleSequences, isAl
 		: string
 }
 
-/// Parses an uppercase output config setting's `{text}` payload through its
+/// Parses an uppercase output config setting's `{string}` payload through its
 /// setting termination: up through (& excluding) a bare `:` setting terminator,
 /// else through the end of the config (so omitting the terminator anywhere but
 /// at the end swallows subsequent settings into this payload). A `\` in it

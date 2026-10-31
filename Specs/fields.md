@@ -334,7 +334,7 @@ fields configs.
 absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <absolute-field-name> <field-modifiers>
-absolute-field-name = {text: field name with no bare "."}
+absolute-field-name = {string: field name with no bare "."}
 ```
 
 An `<absolute-config>` is equivalent to a `<relative-config>` with base fields
@@ -370,7 +370,7 @@ order & item-sort `<direction>`.
 base-fields-config-section        = <base-fields-config-section-prefix> <base-fields-config-name>
 base-fields-config-section-prefix = "@"
 
-base-fields-config-name = {text: fields config name, or a stem followed by "@unsuffixed"} (* default: "default" *)
+base-fields-config-name = {string: fields config name, or a stem followed by "@unsuffixed"} (* default: "default" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -511,7 +511,7 @@ field-spec-reference = <named-field-spec-reference> | <indexed-field-spec-refere
 named-field-spec-reference   = <reference-field-name> [ <field-occurrence-index-prefix> <field-occurrence-index> ]
 indexed-field-spec-reference = <field-spec-index-prefix> <field-spec-index>
 
-reference-field-name = {text: field name with no bare "."}
+reference-field-name = {string: field name with no bare "."}
 
 field-occurrence-index-prefix = "@"
 field-occurrence-index        = <index> (* transitive default: 1 *)
@@ -699,7 +699,7 @@ preset-delta     = <preset-prefix> ( <preset-addition> | <preset-removal> ) <pre
 preset-addition  = "+"
 preset-removal   = "-"
 
-preset-name = {text: preset name}
+preset-name = {string: preset name}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -789,7 +789,7 @@ alignment preset sets it:
 label-modifier        = <label-modifier-prefix> [ <label> ]
 label-modifier-prefix = "="
 
-label = {text} (* direct default: {empty string}; inherited *)
+label = {string} (* direct default: {empty string}; inherited *)
 ```
 
 - A field spec's `<label>` is its:
@@ -824,15 +824,11 @@ sort =
 
 ##### Sort Priority
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
 disabled-sort-prefix = "0" (* mnemonic: 0, as off *)
 
-sort-priority = {positive integer without leading 0s} (* default: 100; inherited *)
+sort-priority = {integer: positive, no leading 0s} (* default: 100; inherited *)
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
 
 A `<sort>` that starts with `<disabled-sort-prefix>` **disables** its field
 spec's sort (e.g., `05` disables a sort whose `<sort-priority>` is `5`, as does
@@ -1002,7 +998,7 @@ does (e.g., `a` equals `A`, but `é` does not equal `e`).
 ```ebnf
 locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: "canonical"; last wins; inherited *)
 
-locale-identifier = {text: locale identifier, "canonical", or "system"} (* default: "system" *)
+locale-identifier = {string: locale identifier, "canonical", or "system"} (* default: "system" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -1133,11 +1129,11 @@ boundary-groups          = <boundary-group> … <boundary-group-separator>
 boundary-group-separator = "_"
 
 boundary-group      = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
-boundary-characters = {text}
+boundary-characters = {string}
 
 multi-character-boundary       = <multi-character-boundary-fence> <multi-character-boundary-text> <multi-character-boundary-fence>
 multi-character-boundary-fence = "%"
-multi-character-boundary-text  = {text}
+multi-character-boundary-text  = {string}
 
 character-class       = <character-class-fence> <character-class-name> <character-class-fence>
 character-class-fence = "+"
@@ -1248,25 +1244,25 @@ Each run of non-boundary text compares its [segments](#sort-segments) as:
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a literal, 1 or
+[For a variable token to consume text that would otherwise match a literal, 1 or
 more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
-the next character.
+Throughout all variable tokens, a `\` is written `\\`, because `\` always
+escapes the next character.
 
 [Outer bare whitespace is consumed, ignored, or
 forbidden](ebnf.md#outer-bare-whitespace-treatment); whitespace must be escaped
 to be consumed where bare whitespace is ignored or forbidden.
 
 In each row of the table below, the given characters must be escaped to be
-consumed as either the 1st character of, or any character in, a text token
-consumed by the given text terminal in the given syntactic context. Leading &
+consumed as either the 1st character of, or any character in, a variable token
+consumed by the given typed terminal in the given syntactic context. Leading &
 trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `{text}`                                                             | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
+| Nonterminal                                                          | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
 |:---------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
 | `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
 | `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
@@ -1291,7 +1287,7 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 | `<time-zone-code>` in `<date-time-zone-arguments>`                   |             | `:`                         | ignored            | ignored                 |
 | `<reference-date>`                                                   |             | `:`                         | ignored            | ignored                 |
 | `<trivia-suffix-regex>`                                              |             | `:`                         | ignored            | ignored                 |
-| Any other text argument                                              |             | `,` `:`                     | ignored            | ignored                 |
+| Any other argument                                                   |             | `,` `:`                     | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
