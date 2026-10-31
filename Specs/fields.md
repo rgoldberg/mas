@@ -1159,7 +1159,7 @@ character-class-name  =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Input outside [typed segments](#sort-segments) is tokenized by **boundaries**
+Input outside [typed segments](#sort-segments) is split by **boundaries**
 assigned to ordered sort precedence **boundary groups**, each defined by a
 `<boundary-group>`; each group's members share the same sort precedence.
 
