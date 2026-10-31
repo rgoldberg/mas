@@ -964,9 +964,9 @@ private extension FieldSpecsBuilder {
 		}
 		// swiftlint:disable:next todo
 		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": overlay a custom
-		//  `default` preset, if one exists, then disable its sort wherever the base
-		//  fields config is, or transitively extends, `none`, or after a
-		//  `<disable-all-sorts>`
+		//  `default` preset, if one exists, then disable its sort after a
+		//  `<disable-all-sorts>` in this or an extended fields config (including
+		//  the one that `none` ends with)
 		return isMachineFacing ? .default(forName: name) : builtInFieldSpec(forFieldNamed: name)
 	}
 

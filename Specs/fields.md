@@ -162,19 +162,14 @@ output, instead of itself).
 For each [leaf context](configs.md#context-stacks):
 
 - `none`: Hidden [unlisted fields](#unlisted-fields) & a [hidden](#visibility)
-  field spec for each field that the app lists, each of whose `<sort>`, if any,
-  is [disabled](#sort-priority) after its `default` preset is attached, as by
-  `<disable-all-sorts>` (e.g., `@none.b/I` sorts items by `b`, while
-  `@none.b/0I` does not, even if the `default` preset sets an enabled sort).
-  Wherever the base fields config is, or transitively extends, `none`, each
-  [default field spec](#default-field-specs) that a `<field-spec-edit>` selects
-  likewise has its `<sort>`, if any, disabled after its `default` preset is
-  attached, so `none` disables every field's sort, listed or not (e.g., if the
-  `default` preset sets an enabled sort, `name,foo` sorts items by neither, even
-  if the app does not list `foo`). Absent a built-in field order: field specs
-  are ordered by `<positional-order>`, so a fields config that extends it
-  outputs its inserted field specs in insertion order (e.g., `@none.+b,+a`
-  outputs `b`, then `a`).
+  field spec for each field that the app lists, as if `none` ended with
+  `<disable-all-sorts>`, so `none` [disables](#sort-priority) every field's
+  sort, listed or not (e.g., if the `default` preset sets an enabled sort,
+  `@none.b/I` sorts items by `b`, while neither `@none.b/0I` nor `name,foo`
+  sorts items, even if the app does not list `foo`). Absent a built-in field
+  order: field specs are ordered by `<positional-order>`, so a fields config
+  that extends it outputs its inserted field specs in insertion order (e.g.,
+  `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
   (`<output>`), while other `<sort-option>`s are per the app's default sort
@@ -494,10 +489,11 @@ sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
 does an explicit one, while a preset that a subsequent `<preset-modifier>`
 attaches sets its own sort (e.g., if preset `p` sets an enabled sort,
 `@x//0.name%+p` sorts by it). Each [default field spec](#default-field-specs)
-that a subsequent `<field-spec-edit>` selects likewise has its `<sort>`, if any,
-disabled after its `default` preset is attached (e.g., if the `default` preset
-sets an enabled sort & `x` has no field spec for `foo`, `@x//0.+foo` does not
-sort items by `foo`).
+that a subsequent `<field-spec-edit>`, in its own fields config or in one that
+extends it, selects likewise has its `<sort>`, if any, disabled after its
+`default` preset is attached (e.g., if the `default` preset sets an enabled sort
+& neither `x` nor `y` has a field spec for `foo`, neither `@x//0.+foo` nor, for
+a `y` of `@x//0`, `@y.+foo` sorts items by `foo`).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
