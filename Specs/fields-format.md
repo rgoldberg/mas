@@ -90,6 +90,10 @@ A `<named-format-reference>` references the format of the
 that preset sets (including via the presets attached within it), or `%i` if it
 sets none; it applies none of the preset's other settings (e.g., its alignment).
 
+A `<named-format-reference>` evaluates its named format against the value to
+which a `<transform-pipeline>` in its position would be applied (e.g., in
+`%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
+
 Because every `<success-block>` alternative's syntax includes
 `<unconditional-block>`'s, a named unconditional format satisfies every
 `<named-format-reference>`.
