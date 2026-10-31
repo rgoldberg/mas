@@ -31,7 +31,15 @@ kind.
 
 Each [line terminator](configs.md#line-terminators) in a header or data cell is
 rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
-render as `a⏎b`).
+render as `a⏎b`). Each other C0 control character (U+0000 to U+001F) & each DEL
+(U+007F) in a header or data cell is rendered as its [Control
+Pictures](https://www.unicode.org/charts/PDF/U2400.pdf) symbol (e.g., a tab as
+`␉` & an ESC as `␛`), and each other C1 control character (U+0080 to U+009F) as
+`␛` followed by its ECMA-48 7-bit equivalent, the character 64 code points below
+it (e.g., U+009B, an 8-bit CSI, as `␛[`), because each would otherwise misalign
+its column (e.g., a tab, whose [width](configs.md#width) is 0, but which a
+terminal renders up to its next tab stop) or modify the terminal's state (e.g.,
+an ESC, which starts an escape sequence).
 
 A table without any item or any column renders nothing, not even a header row or
 a separator line.

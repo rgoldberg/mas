@@ -677,3 +677,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        command modifies ([defined](../Specs/configs.md#named-configs))
      - persist: verb; save a custom config
      - REJECTED: persisted (as an adjective for a config) / saved / stored
+115. - C0 control character: a character from U+0000 to U+001F
+     - DEL: U+007F
+     - C1 control character: a character from U+0080 to U+009F
+     - 7-bit equivalent: ECMA-48's ESC-prefixed representation of a C1 control
+       character, the character 64 code points below it (e.g., `[` for U+009B)
+     - Control Pictures symbol: the symbol in Unicode's Control Pictures block
+       for a C0 control character or DEL (e.g., `␉` for a tab;
+       [used](../Specs/table.md#table-config))
+     - REJECTED: control code / control picture (for a Control Pictures symbol)

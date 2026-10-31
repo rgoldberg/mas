@@ -307,6 +307,16 @@ private extension MASTests {
 	}
 
 	@Test
+	func `table renders each other control character in a cell as Control Pictures symbols`() throws {
+		let table = try [JSON.Object([("notes", .string("a\tb\u{1B}[1mc\u{7F}\u{0}d\u{85}e\u{9B}2Jf\u{80}"))])]
+			.table(
+				fieldSpecs: [.init(name: "notes", label: "N\to", format: .default(fieldName: "notes"), sortSpec: nil)],
+				tableConfig: try parseTableConfig("H"),
+			)
+		#expect(table == "N␉o\na␉b␛[1mc␡␀d⏎e␛[2Jf␛@")
+	}
+
+	@Test
 	func `table renders no separator line without a header row`() throws {
 		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(

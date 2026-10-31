@@ -19,6 +19,13 @@ may be repeated without an error (e.g., `--bundle --bundle`); decide whether
 giving any of them more than once is an error, as it is for output format flags
 / options & `--fields`.
 
+### Control Characters in Key-Value Values
+
+Decide whether a key-value value renders each control character other than a
+line terminator as a [key](../Specs/key-value.md#key-value-config) does, because
+one in a value misaligns nothing (e.g., a tab), but can modify the terminal's
+state (e.g., an ESC).
+
 ### Release Process
 
 1. At the next release, update the homebrew-core `mas` formula's Swift & Xcode
@@ -262,6 +269,32 @@ Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values &
 persistent configs of their kinds each select a named config of its kind to
 [extend](../Specs/configs.md#referencing-named-configs) other than `default`
 (e.g., via a `<base-table-config-name>`).
+
+### Terminal Formatting in Table Cells
+
+Let a table cell contain terminal formatting (e.g., an SGR escape sequence from
+a format's template text or from a field value) instead of rendering its ESC as
+`␛`, which needs:
+
+1. Which escape sequences are formatting (e.g., only ECMA-48 SGR, `ESC[…m`) &
+   how to parse every escape sequence (e.g., CSI, OSC & DCS, with their
+   terminators & 8-bit introducers, such as U+009B), so that none consumes the
+   rest of its cell.
+2. Excluding each formatting escape sequence from its cell's width, so that its
+   column remains aligned.
+3. Whether formatting is output only iff standard output is a terminal (as `t`
+   styles a header row), being removed otherwise.
+4. Ending each cell's formatting (e.g., with an SGR reset), so that it styles
+   neither the column spacing nor the next cell.
+5. How a cell's formatting interacts with a styled header row's `<style-reset>`.
+6. Rendering each non-formatting escape sequence (e.g., OSC 52, which sets the
+   clipboard, or one that moves the cursor) as Control Pictures symbols, because
+   it would modify the terminal's state or misalign the table.
+7. Whether `<output>` sorts by a formatted value with or without its formatting.
+8. Whether key-value keys & values support the same formatting.
+9. Whether JSON output removes it.
+10. Destinations that do not render it (e.g., a terminal without SGR support, or
+    `less` without `-R`).
 
 ### Multi-Line Rows
 

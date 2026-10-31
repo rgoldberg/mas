@@ -60,16 +60,17 @@ extension JSON.Object {
 	/// (key-value.md): each row is its key (styled per `keyValueConfig`), its
 	/// leading spacing, its leader (iff any), its trailing spacing, then its
 	/// value. A leader's width is the item's widest key's width, less its own
-	/// key's width, plus the leader pattern's width. Each line terminator in a
-	/// key renders as `⏎`, while each in a value renders as a newline (e.g., a
-	/// CRLF as 1 LF), each such non-empty later line indented by spaces to the
-	/// value's start. Each row's width is that of its widest line.
+	/// key's width, plus the leader pattern's width. Each control character in a
+	/// key renders as in a table cell (e.g., a line terminator as `⏎`), while
+	/// each line terminator in a value renders as a newline (e.g., a CRLF as 1
+	/// LF), each such non-empty later line indented by spaces to the value's
+	/// start. Each row's width is that of its widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
 			.map { fieldSpec, value throws(FormattingError) in try fieldSpec.keyValueRow(for: value) }
 			.compactMap(\.self)
-			.map { label, value in (label: label.lineTerminatorsSymbolized, value: value) }
+			.map { label, value in (label: label.controlCharactersSymbolized, value: value) }
 		let maxLabelWidth = rows.map(\.label.terminalWidth).max() ?? 0
 		return rows.map { label, value in
 			let labelWidth = label.terminalWidth
@@ -124,18 +125,20 @@ extension [JSON.Object] {
 	/// table"). Every item gets a cell for every field, per fields.md's "Absent
 	/// Values" (absent ⇒ empty string, unless its format renders it otherwise,
 	/// e.g., via a `<failure-block>`). Each line terminator in a cell renders as
-	/// `⏎`, so each row is 1 line. `nil` iff there are no items or no field
-	/// specs, so there is nothing to output.
+	/// `⏎`, so each row is 1 line, while each other C0 control character or DEL
+	/// renders as its Control Pictures symbol & each other C1 control character
+	/// as `␛` followed by its ECMA-48 7-bit equivalent. `nil` iff there are no
+	/// items or no field specs, so there is nothing to output.
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String? {
 		guard !isEmpty else {
 			return nil
 		}
 		let showsHeader = tableConfig.header != nil
 		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
-			let label = fieldSpec.label.lineTerminatorsSymbolized
+			let label = fieldSpec.label.controlCharactersSymbolized
 			let cells = try map { object throws(FormattingError) in
 				try (fieldSpec.rendered(value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])?.stringValue ?? "")
-					.lineTerminatorsSymbolized
+					.controlCharactersSymbolized
 			}
 			return (
 				label: label,
@@ -257,9 +260,30 @@ private func renderedTableRow(
 
 private extension String {
 	/// This string with each line terminator (configs.md, e.g., a CRLF as a
-	/// whole) rendered as `⏎`, so it occupies 1 line.
-	var lineTerminatorsSymbolized: Self {
-		.init(map { character in character.isNewline ? "⏎" : character })
+	/// whole) rendered as `⏎`, so it occupies 1 line, each other C0 control
+	/// character or DEL rendered as its Control Pictures symbol (e.g., a tab as
+	/// `␉`) & each other C1 control character rendered as `␛` followed by its
+	/// ECMA-48 7-bit equivalent (e.g., U+009B as `␛[`), per table.md, so it
+	/// neither misaligns a column or a leader nor modifies the terminal's state.
+	var controlCharactersSymbolized: Self {
+		.init(
+			UnicodeScalarView(
+				String(map { character in character.isNewline ? "⏎" : character })
+					.unicodeScalars
+					.flatMap { scalar -> [Unicode.Scalar] in
+						switch scalar.value {
+						case 0..<0x20:
+							[Unicode.Scalar(0x2400 + scalar.value) ?? scalar]
+						case 0x7f:
+							["\u{2421}"]
+						case 0x80..<0xa0:
+							["\u{241B}", Unicode.Scalar(scalar.value - 0x40) ?? scalar]
+						default:
+							[scalar]
+						}
+					},
+			),
+		)
 	}
 }
 

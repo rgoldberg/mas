@@ -229,6 +229,20 @@ private extension MASTests {
 	}
 
 	@Test
+	func `key-value renders each other control character in a key as table cells do, aligning by its width`() throws {
+		let keyValue = try [JSON.Object([("name", .string("Slack")), ("version", .string("4.0"))])]
+			.keyValue(
+				fieldSpecs: [
+					.init(name: "name", label: "N\ta", format: .default(fieldName: "name"), sortSpec: nil),
+					.init(name: "version", label: "V\u{9B}r", format: .default(fieldName: "version"), sortSpec: nil),
+				],
+				fieldOrder: .positional(.init()),
+				keyValueConfig: try parseKeyValueConfig("F.:"),
+			)
+		#expect(keyValue == "N␉a .. Slack\nV␛[r . 4.0")
+	}
+
+	@Test
 	func `key-value without an item separator line puts adjacent items' rows on adjacent lines`() throws {
 		#expect(
 			try keyValue(of: twoItems, keyValueConfig: try parseKeyValueConfig("fL=:R:s"))
