@@ -153,8 +153,8 @@ leader-pattern = ^{text: no line terminators}^ (* default: "▁" *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `f`: an empty leader, so an item's values are not aligned; it [implies a
-  leading spacing](#implied-alternatives).
+- `f`: an empty leader, so an item's values are not aligned; an effective `f`
+  [implies a leading spacing](#implied-alternatives).
 - `F`: a leader between each key & its value, aligning all of an item's values.
   `<leader-pattern>` is repeated to fill the leader's [width](configs.md#width),
   truncated before the 1st character that would exceed that width; spaces fill
