@@ -166,9 +166,15 @@ For each [leaf context](configs.md#context-stacks):
   is [disabled](#sort-priority) after its `default` preset is attached, as by
   `<disable-all-sorts>` (e.g., `@none.b/I` sorts items by `b`, while
   `@none.b/0I` does not, even if the `default` preset sets an enabled sort).
-  Absent a built-in field order: field specs are ordered by
-  `<positional-order>`, so a fields config that extends it outputs its inserted
-  field specs in insertion order (e.g., `@none.+b,+a` outputs `b`, then `a`).
+  Wherever the base fields config is, or transitively extends, `none`, each
+  [default field spec](#default-field-specs) that a `<field-spec-edit>` selects
+  likewise has its `<sort>`, if any, disabled after its `default` preset is
+  attached, so `none` disables every field, listed or not (e.g., if the
+  `default` preset sets an enabled sort, `name,foo` sorts items by neither, even
+  if the app does not list `foo`). Absent a built-in field order: field specs
+  are ordered by `<positional-order>`, so a fields config that extends it
+  outputs its inserted field specs in insertion order (e.g., `@none.+b,+a`
+  outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
   (`<output>`), while other `<sort-option>`s are per the app's default sort
