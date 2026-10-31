@@ -51,7 +51,7 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `h`: no header row.
+- `h`: no header row, so no [separator line](#separator).
 - `H`: a header row of field labels, each aligned as its column is (per its
   field spec's [alignment](fields.md#alignment)). `<style-specifier>`, if given,
   styles the entire header row: [`<style-prefix>`](#style-prefix),
@@ -160,8 +160,12 @@ separator-pattern = ^{text: no line terminators}^ (* default: "-" *)
 <!--editorconfig-checker-enable-->
 
 - `s`: no separator line.
-- `S`: a line before the 1st data row, after the header row, if any.
-  `<separator-pattern>` is repeated to fill the line's
+- `S`: a line after the header row, before the 1st data row, rendered iff the
+  header row is, because a separator line's sole purpose is to separate a header
+  from the data; absent a header row, `S` is retained, but unrendered (e.g.,
+  `S:h` renders neither, while, for a persistent `default` table config of
+  `S=:h`, `--table-config H` renders a header row & a `=`-patterned separator
+  line). `<separator-pattern>` is repeated to fill the line's
   [width](configs.md#width), truncated before the 1st character that would
   exceed that width; spaces fill any remaining width (e.g., when that character
   is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
@@ -225,15 +229,15 @@ text, not as a separate `<broken-setting>`.
 
 - `b` / `u` imply a separator line: `S`.
 - An effective `S` implies a header row: `H` (unstyled), because a separator
-  line's sole purpose is to separate a header from the data (e.g., `S` & `b`
-  imply `H`, while `S:s` & `bs` imply none).
+  line is rendered only with a header row (e.g., `S` & `b` imply `H`, while
+  `S:s` & `bs` imply none).
 
 An implied alternative yields to an explicit alternative of its setting & to an
 inherited [payload](configs.md#output-configs), as [output configs
 specify](configs.md#implied-alternatives) (e.g., `S:h` implies no header row;
 with an inherited `H1:`, `S` retains the bold header row, while with an
-inherited `h`, `S` implies an unstyled one; with an inherited `S=:`, `b` breaks
-the `=`-patterned separator line).
+inherited `h`, `S` implies an unstyled one; with an inherited `S=:h`, `b` breaks
+the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Examples
 

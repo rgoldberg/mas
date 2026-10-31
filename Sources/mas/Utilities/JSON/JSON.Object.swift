@@ -118,14 +118,14 @@ extension JSON.Object {
 
 extension [JSON.Object] {
 	/// `table`, but driven by `--fields`-resolved field specs & `tableConfig`
-	/// (table.md): an optional header row of labels, an optional separator line,
-	/// then a cell per field per item, for its field's last member (fields.md
-	/// "Members"; label is a field spec's "Header for table"). Every item gets a
-	/// cell for every field, per fields.md's "Absent Values" (absent ⇒ empty
-	/// string, unless its format renders it otherwise, e.g., via a
-	/// `<failure-block>`). Each line terminator in a cell renders as `⏎`, so each
-	/// row is 1 line. `nil` iff there are no items or no field specs, so there is
-	/// nothing to output.
+	/// (table.md): an optional header row of labels, an optional separator line
+	/// (only with a header row), then a cell per field per item, for its field's
+	/// last member (fields.md "Members"; label is a field spec's "Header for
+	/// table"). Every item gets a cell for every field, per fields.md's "Absent
+	/// Values" (absent ⇒ empty string, unless its format renders it otherwise,
+	/// e.g., via a `<failure-block>`). Each line terminator in a cell renders as
+	/// `⏎`, so each row is 1 line. `nil` iff there are no items or no field
+	/// specs, so there is nothing to output.
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String? {
 		guard !isEmpty else {
 			return nil

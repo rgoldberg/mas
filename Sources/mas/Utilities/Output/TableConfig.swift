@@ -6,7 +6,8 @@
 //
 
 /// A fully-parsed `--table-config`'s value (table.md). `nil` `header` /
-/// `separator` means neither is shown.
+/// `separator` means neither is shown; `separator` is `nil` whenever `header`
+/// is, because a separator line is rendered iff a header row is.
 struct TableConfig: Equatable {
 	/// The header row: field labels, styled per `styleSpecifier` (e.g., with the
 	/// default `StyleSequences`, `"1"` for bold, `"1;4"` for bold & underlined;
@@ -57,8 +58,9 @@ struct TableConfig: Equatable {
 /// "Implied Alternatives": `b` / `u` imply a separator line (`S`, default
 /// `<separator-pattern>` `-`); any separator line implies a header row (`H`,
 /// unstyled). An explicit alternative of a setting (even "off") always
-/// overrides that setting's implied alternative. Outer bare whitespace between
-/// settings is ignored.
+/// overrides that setting's implied alternative. A separator line without a
+/// header row is not rendered. Outer bare whitespace between settings is
+/// ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigSetting<String>.unset
 	var headerStyling = TableConfig.HeaderStyling.terminalOnly
@@ -146,7 +148,9 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		header: header.setValue.map { .init(styleSpecifier: $0) },
 		headerStyling: headerStyling,
 		headerStyleSequences: .init(prefix: headerStylePrefix, suffix: headerStyleSuffix, reset: headerStyleReset),
-		separator: separatorPattern.setValue.map { .init(pattern: $0, broken: broken.setValue ?? false) },
+		separator: header.setValue == nil
+			? nil
+			: separatorPattern.setValue.map { .init(pattern: $0, broken: broken.setValue ?? false) },
 		columnSpacing: columnSpacing ?? TableConfig.default.columnSpacing,
 	)
 }

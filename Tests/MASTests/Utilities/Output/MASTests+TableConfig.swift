@@ -133,6 +133,11 @@ private extension MASTests {
 		#expect(try parseTableConfig("S:h").header == nil) // explicit "off" wins over the implied header, too
 	}
 
+	@Test(arguments: ["S:h", "S=:h", "hS", "hb", "bh"])
+	func `a separator line is shown only with a header row`(value: String) throws {
+		#expect(try parseTableConfig(value).separator == nil)
+	}
+
 	@Test
 	func `b & u each imply a dashed separator (not blank) iff none was already set & set broken-ness`() throws {
 		let broken = try parseTableConfig("b")
@@ -302,7 +307,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table renders a separator line before the 1st data row, even without a header row`() throws {
+	func `table renders no separator line without a header row`() throws {
 		let table = try [JSON.Object([("name", .string("A")), ("version", .string("1.0"))])]
 			.table(
 				fieldSpecs: [
@@ -311,7 +316,7 @@ private extension MASTests {
 				],
 				tableConfig: try parseTableConfig("hS"),
 			)
-		#expect(table == "------\nA  1.0")
+		#expect(table == "A  1.0")
 	}
 
 	@Test
