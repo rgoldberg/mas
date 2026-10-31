@@ -53,16 +53,16 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       user
     - attached: comments or metadata structurally bound to a nonterminal
       definition; also a preset in a field spec's list of presets (see "preset")
-    - present: an occurrence of a token or an expression in the input
+    - present: an occurrence of a token or an expression in the syntax text
     - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
-13. - inherited: from the config onto which parsed text is overlaid (e.g., the
+13. - inherited: from the config onto which syntax text is overlaid (e.g., the
       working fields config, or the `default` config for an output config
       option's value)
     - inherited value: a transitively absent `(* inherited *)` nonterminal's
-      value from the config onto which parsed text is overlaid
+      value from the config onto which syntax text is overlaid
       ([defined](../Specs/ebnf.md#inherited-comments))
     - existing: already in the working fields config
     - previous: the immediately preceding one (`$previous$`)
@@ -123,7 +123,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - forbid: grammar term (`Forbidden` treatment)
     - cannot: inability
     - omit: leave out
-    - consume: take input into a token
+    - consume: take syntax text into a token
     - ignore: disregard (outer bare whitespace)
     - exclude: leave out of a comparison (`<text-excluded>`)
     - REJECTED: disallow / prohibit / prevent / not allow / not let / may not /
@@ -157,8 +157,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: considered / processed as / read as / functions as / counts as
 29. - text: character sequence in syntax (tokens, `{text}` terminals, template
       text, boundary text)
-    - parsed text: the text that a syntax parses (e.g., an option value), as
+    - syntax text: the text that a syntax parses (e.g., an option value), as
       opposed to an app's input (e.g., its items)
+    - REJECTED: parsed text (too generic: an app's input is parsed too) / input
+      (for syntax text)
     - string: the data type of a value (string fields, string transforms,
       `<string-block>`, empty strings)
     - token: contiguous characters consumed together as 1 element: a syntax,
@@ -166,7 +168,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - occurrence: specific appearance of something
     - value: evaluated content bound to a nonterminal or field
     - content: substance as a whole (of a string, file, or expression)
-    - input: raw stream given to a parser or command
+    - input: data given to an app or a command (e.g., its items), as opposed to
+      syntax text
     - expression
     - nonterminal
     - terminal
@@ -444,8 +447,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - space-fill: fill any remaining width with spaces
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)
-80. - maximal munch: consuming the longest input that matches (e.g., a scalar
-      token)
+80. - maximal munch: consuming the longest syntax text that matches (e.g., a
+      scalar token)
     - lexical form: the text that may denote a scalar description's literal
       scalars, whether valid or not
     - REJECTED: greedy matching / longest match / how far a token extends
@@ -498,9 +501,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - trailing run: the longest run of adjacent optionals & trailing-omissibles
       that includes an expression, through nonterminal references
     - REJECTED: omissible (for trailing-omissible)
-91. - last-wins scope: the nearest enclosing occurrence (else the entire input)
-      within which a `(* last wins *)` nonterminal's occurrences override each
-      other ([defined](../Specs/ebnf.md#last-wins-comments))
+91. - last-wins scope: the nearest enclosing occurrence (else the entire syntax
+      text) within which a `(* last wins *)` nonterminal's occurrences override
+      each other ([defined](../Specs/ebnf.md#last-wins-comments))
     - implied alternative: an alternative that an output config's explicit
       alternatives imply, directly or via another implied alternative
       ([defined](../Specs/configs.md#implied-alternatives))

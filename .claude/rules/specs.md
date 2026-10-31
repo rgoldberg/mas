@@ -57,7 +57,7 @@ argument means none, while an empty scalar argument means its default.
 
 In specs, attach `(* inherited *)` to the definition of each nonterminal whose
 transitively absent occurrences retain the value of the same setting in the
-config onto which the parsed text is overlaid (e.g., `<label>`), rather than
+config onto which the syntax text is overlaid (e.g., `<label>`), rather than
 listing such nonterminals in prose.
 
 In specs, attach `(* last wins *)` to the definition of each nonterminal whose

@@ -23,8 +23,8 @@ When using this custom EBNF grammar to define a syntax:
 The **escape prefix** is `\`.
 
 An **escape sequence** is an escape prefix immediately followed by any
-character, the **escaped character**; an escape prefix at the end of the input
-is an error.
+character, the **escaped character**; an escape prefix at the end of the syntax
+text is an error.
 
 An escape sequence evaluates to its escaped character (e.g., `\n` evaluates to
 `n`).
@@ -63,7 +63,7 @@ An expression's multiplicity determines its occurrences' multiplicity:
   required by its context.
 
 An expression's **static multiplicity** is the multiplicity shared by all its
-possible occurrences, determined from the grammar instead of the input:
+possible occurrences, determined from the grammar instead of the syntax text:
 
 - Inherent scalar, repetition, or tuple: that multiplicity.
 - [Nonterminal reference](#nonterminal-references): its definition's static
@@ -109,9 +109,9 @@ descriptions](#scalar-descriptions).
 
 #### Candidate Syntax Literals
 
-The **candidate syntax literals** of a given position in the input are the
-literals that the syntax can consume at that position (regardless of the input
-starting at that position), which includes the literals that:
+The **candidate syntax literals** of a given position in the syntax text are the
+literals that the syntax can consume at that position (regardless of the syntax
+text starting at that position), which includes the literals that:
 
 - Start any choice available at that position.
 - Continue any enclosing sequence or repetition.
@@ -119,8 +119,9 @@ starting at that position), which includes the literals that:
 
 #### Consuming Tokens
 
-Input is consumed as a token iff a syntax token, a scalar token, or a text
-token, as specified below, matches the input starting at the current position.
+Syntax text is consumed as a token iff a syntax token, a scalar token, or a text
+token, as specified below, matches the syntax text starting at the current
+position.
 
 Consuming a token commits to the set of expressions that the token starts,
 continues, or closes; each subsequently consumed token narrows the set to the
@@ -129,24 +130,24 @@ expressions that consume it.
 A complete expression is **parsed** once it is the sole element in its set;
 disjoint choices guarantee that at most 1 expression per set is parsed.
 
-If a set ever becomes empty, or if the input is exhausted before every set's
-expression is parsed, an error is reported.
+If a set ever becomes empty, or if the syntax text is exhausted before every
+set's expression is parsed, an error is reported.
 
-Input is never reconsidered after it has been consumed.
+Syntax text is never reconsidered after it has been consumed.
 
 ##### Consuming Syntax Tokens
 
-Input is consumed as a syntax token iff a candidate syntax literal matches the
-input starting at the current position; if multiple match, the longest is
-consumed.
+Syntax text is consumed as a syntax token iff a candidate syntax literal matches
+the syntax text starting at the current position; if multiple match, the longest
+is consumed.
 
 ##### Consuming Scalar Tokens
 
-Input is consumed as a scalar token iff a scalar description is available at the
-current position & the input starting there matches its lexical form; the
-longest input that matches it is consumed (i.e., maximal munch), then, iff its
-value is not a valid literal scalar of the scalar description (e.g., it is out
-of range), an error is reported.
+Syntax text is consumed as a scalar token iff a scalar description is available
+at the current position & the syntax text starting there matches its lexical
+form; the longest syntax text that matches it is consumed (i.e., maximal munch),
+then, iff its value is not a valid literal scalar of the scalar description
+(e.g., it is out of range), an error is reported.
 
 A syntax must ensure that no candidate syntax literal of a position at which a
 scalar description is available matches the start of the scalar description's
@@ -154,17 +155,17 @@ lexical form there.
 
 ##### Consuming Text Tokens
 
-Input is consumed as a text token iff a text token is available at the current
-position & no candidate syntax literal matches the input there.
+Syntax text is consumed as a text token iff a text token is available at the
+current position & no candidate syntax literal matches the syntax text there.
 
 A text token's **candidate text terminators** are the candidate syntax literals
 of the position immediately following it.
 
 A text token is the longest non-empty prefix starting at the current position
 that does not contain any candidate text terminator; it terminates immediately
-before the 1st such terminator, or at the end of the input absent one, less any
-ignored outer bare whitespace; that terminator, if any, is then consumed as a
-syntax token.
+before the 1st such terminator, or at the end of the syntax text absent one,
+less any ignored outer bare whitespace; that terminator, if any, is then
+consumed as a syntax token.
 
 ### Character Consumption
 
@@ -218,8 +219,8 @@ Each side of an expression treats adjacent outer bare whitespace as one of:
 `~` **defers**, allowing the side's outer bare whitespace treatment to be
 overridden.
 
-The input's start & end are treated as deferring sides that ignore outer bare
-whitespace.
+The syntax text's start & end are treated as deferring sides that ignore outer
+bare whitespace.
 
 Outer bare whitespace is treated per its 2 adjacent sides: the preceding token's
 end & the following token's start, the following token being the one that would
@@ -276,7 +277,7 @@ null
 
 Context-dependent multiplicity.
 
-The absence of a value; matches no input.
+The absence of a value; matches no syntax text.
 
 #### Empty
 
@@ -286,8 +287,8 @@ empty
 
 Inherent repetition.
 
-A [repetition](#multiplicity) of 0 elements; matches no input. Distinct from
-`null` & from an empty string.
+A [repetition](#multiplicity) of 0 elements; matches no syntax text. Distinct
+from `null` & from an empty string.
 
 #### End
 
@@ -297,7 +298,8 @@ end
 
 Inherent scalar.
 
-A constant expression that matches no input, only at the end of the input.
+A constant expression that matches no syntax text, only at the end of the syntax
+text.
 
 #### Literal Text
 
@@ -653,7 +655,7 @@ Each occurrence of any of `DEFINITION`'s alternatives (a definition that is not
 a choice being its own sole alternative) overrides all preceding such
 occurrences that share its **last-wins scope**: its nearest enclosing occurrence
 of a nonterminal whose definition contains a repetition that, transitively,
-contains `NONTERMINAL`, or, absent one, the entire input.
+contains `NONTERMINAL`, or, absent one, the entire syntax text.
 
 E.g., per [`<direction>`](fields.md#sort-direction)'s last wins, the [field
 order](fields.md#field-order) `-P+` is ascending, but in `D-/+`, `+` does not
@@ -672,7 +674,7 @@ NONTERMINAL = DEFINITION (* inherited *)
 
 A transitively absent `NONTERMINAL` may have an **inherited value**, which a
 syntax defines (e.g., as the value of the same setting in the config onto which
-the parsed text is overlaid). A directly absent `NONTERMINAL` has none, nor does
+the syntax text is overlaid). A directly absent `NONTERMINAL` has none, nor does
 any of its descendants, so each one's default applies.
 
 ##### Default Resolution
