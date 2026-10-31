@@ -959,15 +959,15 @@ non-nullary-unconditional-branch =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `<branch>`s in `<branches>` are evaluated sequentially against the field
+- The branches in `<branches>` are evaluated sequentially against the field
   value, returning as `<match-placeholder>`'s value:
-  - If `<branch>` has `<branch-negation>`:
+  - If a branch has `<branch-negation>`:
     - If it fails: its `<unconditional-block>`'s evaluated value if it is
       non-nullary, otherwise the field value.
   - Otherwise:
     - If it succeeds: its block's evaluated value if it is non-nullary,
       otherwise its matcher's value.
-- If no `<branch>` returns a value:
+- If no branch returns a value:
   - For `%m`: the placeholder fails & aborts formatting.
   - For `%M`: returns its `<failure-block>`'s value.
 
