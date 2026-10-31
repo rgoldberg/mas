@@ -68,7 +68,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 14. - side
     - REJECTED: end (as a synonym for side)
 15. - 1st
-    - initial: only in `initialTitlecase` & its **initial character**
+    - initial: only in `initialTitlecase`, its **initial character** &
+      word-initial (see 87)
     - REJECTED: first (except in `<text-first>`) / leftmost / initial (in other
       senses) / earliest
 16. - sole: adjective (the sole element, its sole purpose)
