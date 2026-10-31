@@ -63,7 +63,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
    value that it overrode & so that each of `none`'s field specs, each unlisted
    field's default field spec & each default field spec that a field spec edit
    selects after a `<disable-all-sorts>` in its own fields config or in one that
-   it extends (including the one that `none` ends with) disables each sort that
+   it extends (including `none`'s last item-sort option) disables each sort that
    its `default` preset sets. Supporting them also needs key-value & JSON output
    to omit each [unlisted field](../Specs/fields.md#unlisted-fields) that an
    item lacks, because mas gives every item a field spec for each unlisted field

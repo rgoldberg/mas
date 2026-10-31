@@ -966,7 +966,7 @@ private extension FieldSpecsBuilder {
 		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": overlay a
 		//  custom `default` preset, if one exists, then disable its sort after a
 		//  `<disable-all-sorts>` in this or an extended fields config (including
-		//  the one that `none` ends with)
+		//  `none`'s last item-sort option)
 		return isMachineFacing ? .default(forName: name) : builtInFieldSpec(forFieldNamed: name)
 	}
 
