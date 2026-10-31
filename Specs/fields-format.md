@@ -90,12 +90,6 @@ A `<named-format-reference>` references the format of the
 that preset sets (including via the presets attached within it), or `%i` if it
 sets none; it applies none of the preset's other settings (e.g., its alignment).
 
-If a `<value-transform>` follows a `<named-format-reference>` in its pipeline,
-the referenced format's value must also have the 1st such transform's input
-type, unless that transform call has a `<coercion>` (e.g., `:name.round`
-requires `name`'s format's value to be a number, but `:name..round` does not).
-Otherwise, an error is reported.
-
 Because every `<success-block>` alternative's syntax includes
 `<unconditional-block>`'s, a named unconditional format satisfies every
 `<named-format-reference>`, except that `<named-format>` also requires a
