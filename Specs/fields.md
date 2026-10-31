@@ -467,11 +467,12 @@ only:
 may each have different fields, or the same fields in different orders, so a
 table's rows share no document order; key-value & JSON output can order each
 item's fields independently. Its applicability comment is checked only against
-the resolved fields config's field order, so for table output, only a
-`<document-order-option-set>` that sets that field order is an error, because
-any other one orders nothing (e.g., `/DP` is supported, because it is
-effectively `/P`, while `/PD` is an error; if `x` is `@all/D`, `@x/P` is
-supported, while `@x` is an error).
+the resolved fields config's field order, so for table output, a
+`<document-order-option-set>` is an error only if it sets that field order
+(e.g., if `x` is `@all/D`, `@x/P` is supported, while `@x` is an error). Because
+`<order>` is last wins, `/DP` is a `<positional-order-option-set>`, so it is
+supported, while `/PD` is a `<document-order-option-set>`, so it is an error for
+table output.
 
 #### Item Sorting
 
