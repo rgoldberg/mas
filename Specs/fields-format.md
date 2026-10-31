@@ -63,7 +63,7 @@ unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-f
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-named-format               = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <format-block> *)
+named-format               = <name-prefix> <preset-name>
 named-string-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <string-block> *)
 named-number-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <number-block> *)
 named-date-format          = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <date-block> *)
@@ -92,8 +92,7 @@ sets none; it applies none of the preset's other settings (e.g., its alignment).
 
 Because every `<success-block>` alternative's syntax includes
 `<unconditional-block>`'s, a named unconditional format satisfies every
-`<named-format-reference>`, except that `<named-format>` also requires a
-`<format-template>` to contain a placeholder.
+`<named-format-reference>`.
 
 ##### Transforms
 
