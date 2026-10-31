@@ -354,7 +354,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 // MARK: - Base fields config resolution
 
 // swiftlint:disable:next todo
-// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom named
+// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom named
 //  fields configs are persisted, look a name up through the command's context
 //  stack (most to least specific context), resolving a config that extends a
 //  config of its own name from the next less specific context, reporting any
@@ -375,7 +375,7 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs &
 ///   whether unlisted fields are hidden; `standard@json` is a reference to
 ///   `all@json`.
-/// - `default`: `standard`, absent a persisted custom `default`.
+/// - `default`: `standard`, absent a custom `default`.
 ///
 /// The `@json` variant is machine-facing (see `machineFacingVariant()`); the
 /// others are user-facing. Any other name is an error: no custom named fields
@@ -963,8 +963,8 @@ private extension FieldSpecsBuilder {
 			throw .nonexistentField(name)
 		}
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": overlay a custom
-		//  `default` preset, if one exists, then disable its sort after a
+		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": overlay a
+		//  custom `default` preset, if one exists, then disable its sort after a
 		//  `<disable-all-sorts>` in this or an extended fields config (including
 		//  the one that `none` ends with)
 		return isMachineFacing ? .default(forName: name) : builtInFieldSpec(forFieldNamed: name)

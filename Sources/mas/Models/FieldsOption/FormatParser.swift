@@ -87,7 +87,7 @@ private struct FormatParser {
 		input.removeFirst()
 		try forbidWhitespace(after: namePrefix)
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
+		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom
 		//  presets are persisted, use the format of the preset that
 		//  `presetAlignment(named:)` resolves, checking that its output has the
 		//  input type of the 1st succeeding `<value-transform>` in its pipeline

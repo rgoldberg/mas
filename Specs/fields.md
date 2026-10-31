@@ -151,7 +151,7 @@ A reference with an output format suffix or `@unsuffixed` matches a context iff
 the context contains that variant (e.g., `x@json` skips a context that contains
 only `x`).
 
-A persisted fields config [extends a config of its own
+A persistent fields config [extends a config of its own
 name](configs.md#referencing-named-configs) iff its reference's stem is its own
 stem, whatever either's suffix (e.g., for JSON output, a `default@json` in
 `mas.list` that extends `default` extends `mas`'s `default` variant for JSON
@@ -263,7 +263,7 @@ JSON schema, for which a field may exist for some JSON objects, but not exist
 for others.
 
 A reference to a nonexistent field is an error on the command line, but a
-persisted fields config, which may apply to multiple commands, ignores each
+persistent fields config, which may apply to multiple commands, ignores each
 `<absolute-field-spec>` & `<field-spec-edit>` that references one (e.g., a `mas`
 context `default` of `@standard.name=App` ignores `.name=App` for `mas config`,
 whose item has no `name` field).

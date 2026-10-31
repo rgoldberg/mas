@@ -1,7 +1,7 @@
 # Configs
 
 A [display command](#display-commands) sources its output configuration from
-persisted, named configs; each [config kind](#config-kinds) has its own
+persistent, named configs; each [config kind](#config-kinds) has its own
 per-[context](#contexts) lookup hierarchy.
 
 An **app** (software implementing these specs, e.g., mas) may override any
@@ -94,8 +94,9 @@ The rules below apply to every kind unless a kind specifies otherwise.
 
 ## Named Configs
 
-A **named config** has been persisted with a case-sensitive name that is unique
-for its kind within a context.
+A **named config** is **persistent** (i.e., no display command modifies it,
+whether it is built-in or custom) & has a case-sensitive name that is unique for
+its kind within a context.
 
 A config name is a stem matching the regex `^[_0-9A-Za-z][-_0-9A-Za-z]*$`, so
 that it never starts with `-`, which would make it ambiguous with a
@@ -112,8 +113,8 @@ configs' `none`).
 A named config may be referenced:
 
 - On the command line
-- By other persisted configs of the same kind
-- For a preset, by a persisted fields config
+- By other persistent configs of the same kind
+- For a preset, by a persistent fields config
 
 A named config is found by returning the 1st config of the given kind found with
 the given name while iterating through the context stack from a **starting
@@ -121,19 +122,19 @@ context** to the root context; if no match is found, an error is reported. A
 reference's starting context is:
 
 - On the command line: the leaf context.
-- In a persisted config: the context that contains that config.
+- In a persistent config: the context that contains that config.
 
 A kind may refine how a context matches a name, e.g., fields configs'
 [variants](fields.md#output-format-specific-named-fields-configs).
 
-A persisted fields config **extends** `none` if it is an
+A persistent fields config **extends** `none` if it is an
 [`<absolute-config>`](fields.md#absolute-config), else the fields config that
 its [`<base-fields-config-section>`](fields.md#base-fields-config-selection)
-names; a persisted table, key-value, or JSON config extends `default`, as a
-persisted `<relative-config>` without a `<base-fields-config-section>` does; a
+names; a persistent table, key-value, or JSON config extends `default`, as a
+persistent `<relative-config>` without a `<base-fields-config-section>` does; a
 preset extends no config.
 
-A persisted config that references a config of its own kind & name (e.g., by
+A persistent config that references a config of its own kind & name (e.g., by
 extending it) resolves that config from the next less specific context in the
 context stack, so a config may reference its nearest same-named ancestor. In the
 root context, which has no less specific context, a `default` that references
@@ -209,10 +210,10 @@ config).
 A kind may define **implied alternatives**, which an output config's explicit
 alternatives imply, directly or via another implied alternative (e.g., a table's
 [implied alternatives](table.md#implied-alternatives)), whether that output
-config is persisted or an output config option's value (e.g., a persisted
+config is persistent or an output config option's value (e.g., a persistent
 `default` table config of `b` implies `S`, which implies `H`). No inherited or
 default alternative implies one (e.g., `--table` implies no separator line from
-its default `u`, while, for a persisted `default` table config of `S:h`,
+its default `u`, while, for a persistent `default` table config of `S:h`,
 `--table-config c` implies no header row from its inherited `S`).
 
 An explicit alternative of a setting, even "off" (e.g., a table's `h`), always

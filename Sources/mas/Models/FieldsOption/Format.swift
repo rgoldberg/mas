@@ -32,7 +32,7 @@ indirect enum Format: Equatable, Sendable {
 	/// The standard default: `%i`. Fields needing a different one are configured
 	/// by their display command, at the `FieldSpec` level, instead.
 	// swiftlint:disable:next todo
-	// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
+	// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom
 	//  presets are persisted, the format of the `default` preset, if it sets one,
 	//  looked up from the starting context of the reference that selects the
 	//  default field spec

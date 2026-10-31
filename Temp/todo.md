@@ -50,7 +50,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 ## ASAP Version, But Massive Effort
 
-### Persisted Custom Presets & Configs
+### Persistent Custom Presets & Configs
 
 1. Custom [presets](../Specs/fields.md#presets): every reference to a preset
    other than a built-in one (`standard` or an alignment preset) or `default`,
@@ -76,7 +76,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
       context.
    2. Resolving a config that references its same-named ancestor, including a
       root context `default` that references `default`.
-   3. A persisted table, key-value, or JSON config
+   3. A persistent table, key-value, or JSON config
       [extending](../Specs/configs.md#referencing-named-configs) `default` &
       applying its own [implied
       alternatives](../Specs/configs.md#implied-alternatives).
@@ -89,10 +89,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
         ../Specs/fields.md#output-format-specific-named-fields-configs
       ), including matching a stem or a suffixed reference per context,
       `default` variants & a variant extending its own stem.
-   7. A persisted fields config [ignoring its references to nonexistent
+   7. A persistent fields config [ignoring its references to nonexistent
       fields](../Specs/fields.md#nonexistent-fields).
    8. A fields config [listing](../Specs/fields.md#unlisted-fields) each field
-      that a field name in an extended persisted fields config's
+      that a field name in an extended persistent fields config's
       `<fields-config>` names.
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
    they currently apply only on top of `standard`, so no implied
@@ -102,8 +102,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
 
 #### Custom Names Removal
 
-If a 1st version is released before persistence is supported, then remove
-persistence-based functionality from specs & code:
+If a 1st version is released before custom configs can be persisted, then remove
+the functionality that needs them from specs & code:
 
 1. Possibly vestigial after `1226-fields-no-custom-names` removes custom presets
    & custom configs; decide whether to remove each in
@@ -219,9 +219,9 @@ member, `name@@-1` for the last), which needs:
 ### Configurable Default Sort Priority
 
 Let the [default](../Specs/fields.md#sort-priority) `<sort-priority>` (currently
-`100`) be configured (e.g., via a `<fields-config>` setting, so that a persisted
-fields config can set it & a command line can override it, without a separate
-option).
+`100`) be configured (e.g., via a `<fields-config>` setting, so that a
+persistent fields config can set it & a command line can override it, without a
+separate option).
 
 ### Configurable Absent Value Handling
 
@@ -254,7 +254,7 @@ orders them.
 ### Base Output Config Names
 
 Let `--table-config`'s, `--key-value-config`'s & `--json-config`'s values &
-persisted configs of their kinds each select a named config of its kind to
+persistent configs of their kinds each select a named config of its kind to
 [extend](../Specs/configs.md#referencing-named-configs) other than `default`
 (e.g., via a `<base-table-config-name>`).
 

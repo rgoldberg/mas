@@ -102,7 +102,7 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 	/// original key order).
 	func unlistedFieldSpecs(in objects: [JSON.Object]) -> [FieldSpec] {
 		// swiftlint:disable:next todo
-		// TODO: Temp/todo.md "Persisted Custom Presets & Configs": give each
+		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": give each
 		//  key-value & JSON output item only its own unlisted fields (fields.md
 		//  "Unlisted Fields"), because a custom `default` preset may give an absent
 		//  field a formatted value that is not absent

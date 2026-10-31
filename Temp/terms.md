@@ -305,7 +305,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 52. - custom: a user-given alternative to a built-in, default, or locale-sourced
       value (e.g., a `<locale-identifier>`)
     - explicit: only in "explicit default" & in contrast with implied
-    - persisted: saved
     - REJECTED: user-configurable / user-defined / saved / manual / explicit (as
       synonyms for custom)
 53. - because
@@ -640,3 +639,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        nonterminal, each starting with its own letter (e.g., `<header-off>`, as
        `h`; [defined](../Specs/configs.md#output-configs))
      - REJECTED: axis (for a setting)
+114. - persistent: of a named config, built-in or custom, which no display
+       command modifies ([defined](../Specs/configs.md#named-configs))
+     - persist: verb; save a custom config
+     - REJECTED: persisted (as an adjective for a config) / saved / stored

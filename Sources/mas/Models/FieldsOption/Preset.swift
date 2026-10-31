@@ -48,7 +48,7 @@ func presetAlignment(named name: String) throws(ParsingError) -> Alignment? {
 		throw .invalidPresetName(name)
 	}
 	// swiftlint:disable:next todo
-	// TODO: Temp/todo.md "Persisted Custom Presets & Configs": once custom
+	// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom
 	//  presets are persisted, look the name up through the context stack from the
 	//  reference's starting context, as configs.md specifies for every config
 	//  kind, set its label, format & sort, too, when attached, recording when
