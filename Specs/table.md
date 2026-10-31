@@ -223,10 +223,10 @@ text, not as a separate `<broken-setting>`.
 
 ## Implied Alternatives
 
-- `b` / `u` imply a separator line, if none is otherwise set: `S`.
-- An effective `S` implies a header row, if none is otherwise set: `H`
-  (unstyled), because a separator line's sole purpose is to separate a header
-  from the data (e.g., `S` & `b` imply `H`, while `S:s` & `bs` imply none).
+- `b` / `u` imply a separator line: `S`.
+- An effective `S` implies a header row: `H` (unstyled), because a separator
+  line's sole purpose is to separate a header from the data (e.g., `S` & `b`
+  imply `H`, while `S:s` & `bs` imply none).
 
 An implied alternative yields to an explicit alternative of its setting & to an
 inherited [payload](configs.md#output-configs), as [output configs

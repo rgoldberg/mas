@@ -255,9 +255,9 @@ not as a separate `<item-separator-setting>`.
 
 ## Implied Alternatives
 
-- An effective `f` implies a leading spacing of `:` (i.e., `L\::`), if none is
-  otherwise set, so each row is `key: value` (e.g., `fF:` implies none, so its
-  leading spacing is `l`'s 1 space).
+- An effective `f` implies a leading spacing of `:` (i.e., `L\::`), so each row
+  is `key: value` (e.g., `fF:` implies none, so its leading spacing is `l`'s 1
+  space).
 
 An implied alternative yields to an explicit alternative of its setting & to an
 inherited [payload](configs.md#output-configs), as [output configs
