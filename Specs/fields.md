@@ -715,8 +715,8 @@ has a list of **attached** presets, which its `<preset-list>` sets:
   right: `<preset-addition>` attaches its preset at the end of the list,
   replacing any attached preset of its name, while `<preset-removal>`
   **detaches** the attached preset of its name, if any (e.g.,
-  `.name%-default%+end`, while `.name%-end` modifies nothing if `end` is not
-  attached).
+  `.name%-default%+end` detaches `default` from `name`, then attaches `end`,
+  while `.name%-end` modifies nothing if `end` is not attached).
 
 Attached presets are identified by name, whichever context each was looked up
 from, so at most 1 preset of each name is attached: an `<absolute-presets>` that
