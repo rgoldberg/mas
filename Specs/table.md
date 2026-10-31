@@ -61,7 +61,7 @@ style-specifier = {text: terminal-specific styling text with no bare ASCII lette
   row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so
   that a mistyped setting is not silently consumed as `<style-specifier>` text
   (e.g., `--table-config Hb`); escape it to include it (e.g.,
-  `--table-config H\b`). A `<style-specifier>` that contains a [line
+  `--table-config 'H\b'`). A `<style-specifier>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
   each row that it styles.
 
