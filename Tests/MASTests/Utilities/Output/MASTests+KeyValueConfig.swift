@@ -243,6 +243,17 @@ private extension MASTests {
 	}
 
 	@Test
+	func `key-value renders each control character in a value except a tab or a line terminator as keys do`() throws {
+		#expect(
+			try keyValue(
+				of: [JSON.Object([("name", .string("a\tb\u{1B}[1mc\u{8}\u{7F}d\ne\u{9B}2J"))])],
+				keyValueConfig: try parseKeyValueConfig("fL=:R:"),
+			)
+				== "Name=a\tb␛[1mc␈␡d\n     e␛[2J",
+		)
+	}
+
+	@Test
 	func `key-value without an item separator line puts adjacent items' rows on adjacent lines`() throws {
 		#expect(
 			try keyValue(of: twoItems, keyValueConfig: try parseKeyValueConfig("fL=:R:s"))

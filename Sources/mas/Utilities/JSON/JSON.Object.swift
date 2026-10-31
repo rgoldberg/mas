@@ -64,13 +64,14 @@ extension JSON.Object {
 	/// key renders as in a table cell (e.g., a line terminator as `⏎`), while
 	/// each line terminator in a value renders as a newline (e.g., a CRLF as 1
 	/// LF), each such non-empty later line indented by spaces to the value's
-	/// start. Each row's width is that of its widest line.
+	/// start. Each other control character in a value except a tab renders as in
+	/// a key (e.g., an ESC as `␛`). Each row's width is that of its widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
 			.map { fieldSpec, value throws(FormattingError) in try fieldSpec.keyValueRow(for: value) }
 			.compactMap(\.self)
-			.map { label, value in (label: label.controlCharactersSymbolized, value: value) }
+			.map { label, value in (label: label.controlCharactersSymbolized(), value: value) }
 		let maxLabelWidth = rows.map(\.label.terminalWidth).max() ?? 0
 		return rows.map { label, value in
 			let labelWidth = label.terminalWidth
@@ -84,6 +85,7 @@ extension JSON.Object {
 				+ keyValueConfig.trailingSpacing
 			let valueStartWidth = labelWidth + separation.terminalWidth
 			let valueLines = value.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+				.map { line in String(line).controlCharactersSymbolized(preservingTabs: true) }
 			let indentation = String(repeating: " ", count: valueStartWidth)
 			return (
 				styled(
@@ -93,7 +95,7 @@ extension JSON.Object {
 					isAlwaysStyled: keyValueConfig.keyStyling == .always,
 				)
 					+ separation
-					+ valueLines.dropFirst().reduce(into: String(valueLines[0])) { text, line in
+					+ valueLines.dropFirst().reduce(into: valueLines[0]) { text, line in
 						text += "\n" + (line.isEmpty ? "" : indentation + line)
 					},
 				valueStartWidth + (valueLines.map(\.terminalWidth).max() ?? 0),
@@ -135,10 +137,10 @@ extension [JSON.Object] {
 		}
 		let showsHeader = tableConfig.header != nil
 		let columns = try fieldSpecs.map { fieldSpec throws(FormattingError) in
-			let label = fieldSpec.label.controlCharactersSymbolized
+			let label = fieldSpec.label.controlCharactersSymbolized()
 			let cells = try map { object throws(FormattingError) in
 				try (fieldSpec.rendered(value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])?.stringValue ?? "")
-					.controlCharactersSymbolized
+					.controlCharactersSymbolized()
 			}
 			return (
 				label: label,
@@ -264,14 +266,18 @@ private extension String {
 	/// character or DEL rendered as its Control Pictures symbol (e.g., a tab as
 	/// `␉`) & each other C1 control character rendered as `␛` followed by its
 	/// ECMA-48 7-bit equivalent (e.g., U+009B as `␛[`), per table.md, so it
-	/// neither misaligns a column or a leader nor modifies the terminal's state.
-	var controlCharactersSymbolized: Self {
+	/// neither misaligns a column or a leader nor modifies the terminal's state;
+	/// each tab is kept iff `preservingTabs` (key-value.md: a tab in a value
+	/// misaligns nothing).
+	func controlCharactersSymbolized(preservingTabs: Bool = false) -> Self {
 		.init(
 			UnicodeScalarView(
 				String(map { character in character.isNewline ? "⏎" : character })
 					.unicodeScalars
 					.flatMap { scalar -> [Unicode.Scalar] in
 						switch scalar.value {
+						case 0x09 where preservingTabs:
+							[scalar]
 						case 0..<0x20:
 							[Unicode.Scalar(0x2400 + scalar.value) ?? scalar]
 						case 0x7f:

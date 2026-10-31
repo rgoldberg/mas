@@ -40,6 +40,12 @@ terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF), so the
 value continues on a new line, each such non-empty line indented by spaces to
 the value's start (e.g., with `fL=:R:`, the key `Notes` & a value of `a` & `b`
 separated by an LF render as `Notes=a`, then 6 spaces & `b` on the next line).
+Each other control character in a value, except a tab, is rendered as it is in a
+key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
+state (e.g., an ESC, which starts an escape sequence) or move the cursor back
+over the row (e.g., a backspace), while a tab, which only advances the cursor to
+its next tab stop, follows everything that a value's line must align with, so it
+misaligns nothing.
 
 ## Key
 

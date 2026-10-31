@@ -19,13 +19,6 @@ may be repeated without an error (e.g., `--bundle --bundle`); decide whether
 giving any of them more than once is an error, as it is for output format flags
 / options & `--fields`.
 
-### Control Characters in Key-Value Values
-
-Decide whether a key-value value renders each control character other than a
-line terminator as a [key](../Specs/key-value.md#key-value-config) does, because
-one in a value misaligns nothing (e.g., a tab), but can modify the terminal's
-state (e.g., an ESC).
-
 ### Release Process
 
 1. At the next release, update the homebrew-core `mas` formula's Swift & Xcode
