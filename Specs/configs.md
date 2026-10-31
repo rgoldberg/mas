@@ -44,7 +44,7 @@ U+2029.
 ## Width
 
 Text's **width** is its terminal display width: the sum of its characters'
-`wcwidth`s, each negative one (e.g., a tab's) counting as 0.
+`wcwidth`s, with 0 substituted for each negative one (e.g., a tab's).
 
 ## Option Values
 
