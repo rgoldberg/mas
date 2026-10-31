@@ -219,7 +219,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - terminator: syntactic token positioned strictly _after_ an element
     - fence: syntactic token surrounding an expression or list element (e.g.,
       `<argument-fence>`)
-    - boundary: sort tokenization term
+    - boundary: what splits a value's text outside typed segments into pieces
       ([defined](../Specs/fields.md#sort-boundaries))
     - exponent indicator: `e` or `E` in scientific notation
     - REJECTED: delimiter / encloser / marker / signifier
