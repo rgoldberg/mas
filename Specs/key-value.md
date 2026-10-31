@@ -259,8 +259,8 @@ not as a separate `<item-separator-setting>`.
   is `key: value` (e.g., `fF:` implies none, so its leading spacing is `l`'s 1
   space).
 
-An implied alternative yields to an explicit alternative of its setting & to an
-inherited [payload](configs.md#output-configs), as [output configs
+An implied alternative yields to an explicit alternative of its setting &
+retains an inherited [payload](configs.md#output-configs), as [output configs
 specify](configs.md#implied-alternatives) (e.g., `fl` has `l`'s leading spacing;
 with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 `L=:`, `f` retains `key= value` rows).

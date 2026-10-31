@@ -232,8 +232,8 @@ text, not as a separate `<broken-setting>`.
   line is rendered only with a header row (e.g., `S` & `b` imply `H`, while
   `S:s` & `bs` imply none).
 
-An implied alternative yields to an explicit alternative of its setting & to an
-inherited [payload](configs.md#output-configs), as [output configs
+An implied alternative yields to an explicit alternative of its setting &
+retains an inherited [payload](configs.md#output-configs), as [output configs
 specify](configs.md#implied-alternatives) (e.g., `S:h` implies no header row;
 with an inherited `H1:`, `S` retains the bold header row, while with an
 inherited `h`, `S` implies an unstyled one; with an inherited `S=:h`, `b` breaks

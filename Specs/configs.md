@@ -221,5 +221,7 @@ overrides that setting's implied alternative, regardless of where in its output
 config it appears.
 
 An implied alternative overrides an inherited alternative iff the inherited
-alternative is payloadless, so an implied alternative never overrides an
-inherited payload.
+alternative is payloadless; otherwise, it retains the inherited alternative's
+payload, so it never overrides an inherited payload, but remains effective
+(e.g., for a persistent `default` table config of `S=:h`, `--table-config b`
+implies `H` via an effective `S` that retains its inherited `=` payload).
