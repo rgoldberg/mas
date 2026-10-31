@@ -58,9 +58,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       config exists")
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
-13. - inherited: from a base or working config
+13. - inherited: from the config onto which parsed text is overlaid (e.g., the
+      working fields config, or the `default` config for an output config
+      option's value)
     - inherited value: a transitively absent `(* inherited *)` nonterminal's
-      value from a config that the input modifies
+      value from the config onto which parsed text is overlaid
       ([defined](../Specs/ebnf.md#inherited-comments))
     - existing: already in the working fields config
     - previous: the immediately preceding one (`$previous$`)
@@ -155,6 +157,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: considered / processed as / read as / functions as / counts as
 29. - text: character sequence in syntax (tokens, `{text}` terminals, template
       text, boundary text)
+    - parsed text: the text that a syntax parses (e.g., an option value), as
+      opposed to an app's input (e.g., its items)
     - string: the data type of a value (string fields, string transforms,
       `<string-block>`, empty strings)
     - token: contiguous characters consumed together as 1 element: a syntax,

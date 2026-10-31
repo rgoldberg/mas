@@ -56,9 +56,9 @@ terminate its arguments with its `<sort-option-terminator>`; an empty list
 argument means none, while an empty scalar argument means its default.
 
 In specs, attach `(* inherited *)` to the definition of each nonterminal whose
-transitively absent occurrences retain the value of the same setting in a config
-that the input modifies (e.g., `<label>`), rather than listing such nonterminals
-in prose.
+transitively absent occurrences retain the value of the same setting in the
+config onto which the parsed text is overlaid (e.g., `<label>`), rather than
+listing such nonterminals in prose.
 
 In specs, attach `(* last wins *)` to the definition of each nonterminal whose
 later occurrences override its earlier ones (e.g., `<direction>`), never to a
