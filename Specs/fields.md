@@ -1255,14 +1255,14 @@ or more of its characters must be escaped by prefixing it with a
 Throughout all text tokens, a literal `\` is written `\\`, because `\` always
 escapes the next character.
 
-[Outer bare whitespace is consumed or
-ignored](ebnf.md#outer-bare-whitespace-treatment); whitespace must be escaped to
-be consumed where bare whitespace is ignored.
+[Outer bare whitespace is consumed, ignored, or
+forbidden](ebnf.md#outer-bare-whitespace-treatment); whitespace must be escaped
+to be consumed where bare whitespace is ignored or forbidden.
 
 In each row of the table below, the given characters must be escaped to be
 consumed as either the 1st character of, or any character in, a text token
 consumed by the given text terminal in the given syntactic context. Leading &
-trailing outer bare whitespace is consumed or ignored, as given.
+trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -1281,10 +1281,10 @@ trailing outer bare whitespace is consumed or ignored, as given.
 | `<locale-identifier>` in `<locale>`                                  |             | `:`                         | ignored            | ignored                 |
 | `<boundary-characters>`                                              |             | `%` `+` `_` `:`             | ignored            | ignored                 |
 | `<multi-character-boundary-text>`                                    |             | `%`                         | ignored            | ignored                 |
-| `<preset-name>` in a `<format-block>`                                |             | `.` `/` `,`                 | ignored            | ignored                 |
+| `<preset-name>` in a `<format-block>`                                |             | `.` `/` `,`                 | forbidden          | ignored                 |
 | `<template-text>` starting a `<format-block>`                        | `:` `.`     | `%` `/` `,`                 | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a `<placeholder>`                |             | `%` `/` `,`                 | consumed           | consumed iff before `%` |
-| `<preset-name>` in a `<block>`                                       |             | `.` `+`                     | ignored            | ignored                 |
+| `<preset-name>` in a `<block>`                                       |             | `.` `+`                     | forbidden          | ignored                 |
 | `<template-text>` starting a `<block>`                               | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a `<placeholder>` in a `<block>` |             | `%` `+`                     | consumed           | consumed iff before `%` |
 | `<decimal-separator>` in `<number-format>`                           |             | `:`                         | ignored            | ignored                 |
