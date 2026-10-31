@@ -342,7 +342,7 @@ config `none` & a `<field-spec-insertion>` for each of its field specs, e.g.:
 - `version=Ver,size` ≡ `@none.+version=Ver,+size`
 - `name,name` ≡ `@none.+name,+name`
 
-Since `none`'s sorts are [disabled](#immutable-built-in-named-fields-configs),
+Because `none`'s sorts are [disabled](#immutable-built-in-named-fields-configs),
 an `<absolute-field-spec>` sorts items only if its `<field-modifiers>` enable
 its sort (e.g., if the `default` preset is `/I`, `name,version` does not sort
 items, while `name/1,version` sorts them by `name`'s input).
