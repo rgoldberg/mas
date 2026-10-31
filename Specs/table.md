@@ -242,11 +242,11 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 ## Examples
 
 - `--table`: no header, no separator, 2 spaces between columns.
-- `--table-config H1:`: a bold header row (SGR `1`) iff standard output is a
+- `--table-config H1:`: a header row, bold (SGR `1`) iff standard output is a
   terminal, no separator.
-- `--table-config H1:a`: a bold header row (SGR `1`) regardless of standard
+- `--table-config H1:a`: a header row, bold (SGR `1`) regardless of standard
   output, no separator.
-- `--table-config $'H1:O\e[22m:'` (in zsh): a bold header row (SGR `1`) iff
+- `--table-config $'H1:O\e[22m:'` (in zsh): a header row, bold (SGR `1`) iff
   standard output is a terminal, reset to normal intensity (SGR `22`) instead of
   via a full reset, no separator.
 - `--table-config S`: a header row (implied) & a dashed (`-`) separator line.
