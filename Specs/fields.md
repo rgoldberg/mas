@@ -997,8 +997,10 @@ locale-identifier = {text: locale identifier, "canonical", or "system"} (* defau
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A `<locale-identifier>` of `canonical` identifies the canonical conventions; of
-`system`, the system locale.
+A `<locale-identifier>` of:
+
+- `canonical` identifies the canonical conventions.
+- `system` identifies the system locale.
 
 The canonical conventions compare text per the [CLDR root collation](
   https://www.unicode.org/reports/tr35/tr35-collation.html#Root_Collation
