@@ -885,8 +885,8 @@ output = "O"
 
 If a format modifies an input value, `<input>` sorts by the input, while
 `<output>` sorts by the field spec's [formatted
-value](fields-format.md#value-types), so it sorts identically for every output
-format.
+value](fields-format.md#value-types), so the value that it sorts by is the same
+for every output format.
 
 A value is compared as a string, a non-string being [coerced to a
 string](fields-format.md#value-coercion), except that a number is a single
