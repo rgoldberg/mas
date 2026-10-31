@@ -222,6 +222,11 @@ line has been parsed; it is used to render output.
 
 ## Inherited Values
 
+A fields config's **settings** are each field spec's
+[settings](#field-modifiers), plus a separate setting per `(* inherited *)`
+nonterminal in `<field-order-section>` (`<field-order-tiebreaker>`'s
+`<direction>` being separate from the field order's) & in `<item-sort-section>`.
+
 An [inherited](ebnf.md#inherited-comments) nonterminal's inherited value is the
 working fields config's value for the same setting, if any:
 

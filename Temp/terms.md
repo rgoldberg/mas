@@ -628,7 +628,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - REJECTED: justification / justify / justified
 113. - setting: a separate value of a field spec, per `(* inherited *)`
        nonterminal in `<field-modifiers>` & its alignment
-       ([defined](../Specs/fields.md#field-modifiers)), or of an output config,
+       ([defined](../Specs/fields.md#field-modifiers)); of a fields config, per
+       field spec setting & per `(* inherited *)` nonterminal in
+       `<field-order-section>` & `<item-sort-section>`
+       ([defined](../Specs/fields.md#inherited-values)); or of an output config,
        per `(* inherited *)` nonterminal in its kind's syntax
        ([defined](../Specs/configs.md#output-configs))
      - alternative: one of the alternatives of an output config setting's
