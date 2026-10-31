@@ -236,8 +236,7 @@ extension [JSON.Object] {
 /// since that only produces a real trailing gap for `.start` alignment (`.end`
 /// / `.centerStart` / `.centerEnd` would place some or all of it as leading /
 /// split padding instead, eliminating or shrinking the visible gap). The last
-/// column is padded only if it is not `.start`-aligned (matching every other
-/// column), since nothing follows it to gap from.
+/// column's cell gets only its leading padding, since nothing follows it.
 private func renderedTableRow(
 	cells: [String],
 	columns: [(maxWidth: Int, alignment: Alignment)],
@@ -249,9 +248,11 @@ private func renderedTableRow(
 	return zip(cells.dropLast(), columns.dropLast())
 		.map { cell, column in cell.terminalAlign(column.alignment, to: column.maxWidth) + columnSpacing }
 		.joined()
-		+ (lastColumn.alignment == .start
-			? lastCell
-			: lastCell.terminalAlign(lastColumn.alignment, to: lastColumn.maxWidth))
+		+ String(
+			repeating: " ",
+			count: lastCell.terminalPaddingWidths(lastColumn.alignment, to: lastColumn.maxWidth).leading,
+		)
+		+ lastCell
 }
 
 private extension String {

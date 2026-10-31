@@ -18,20 +18,26 @@ extension String { // swiftlint:disable:next function_default_parameter_at_end
 	func terminalAlign(_ alignment: Alignment = .start, with pad: Character = " ", to minimumWidth: Int)
 	-> Self {
 		precondition(pad.terminalWidth == 1)
-		let existingWidth = terminalWidth
-		guard existingWidth < minimumWidth else {
-			return self
-		}
-		let paddingWidth = minimumWidth - existingWidth
+		let paddingWidths = terminalPaddingWidths(alignment, to: minimumWidth)
+		return .init(repeating: pad, count: paddingWidths.leading)
+			+ self
+			+ .init(repeating: pad, count: paddingWidths.trailing)
+	}
+
+	/// The widths of the leading & trailing padding that align this string per
+	/// `alignment` to `minimumWidth`, both 0 iff it is already at least that
+	/// wide.
+	func terminalPaddingWidths(_ alignment: Alignment, to minimumWidth: Int) -> (leading: Int, trailing: Int) {
+		let paddingWidth = Swift::max(0, minimumWidth - terminalWidth)
 		return switch alignment {
 		case .start:
-			self + .init(repeating: pad, count: paddingWidth)
+			(0, paddingWidth)
 		case .centerStart:
-			.init(repeating: pad, count: paddingWidth / 2) + self + .init(repeating: pad, count: 1 + (paddingWidth - 1) / 2)
+			(paddingWidth / 2, (paddingWidth + 1) / 2)
 		case .centerEnd:
-			.init(repeating: pad, count: 1 + (paddingWidth - 1) / 2) + self + .init(repeating: pad, count: paddingWidth / 2)
+			((paddingWidth + 1) / 2, paddingWidth / 2)
 		case .end:
-			.init(repeating: pad, count: paddingWidth) + self
+			(paddingWidth, 0)
 		}
 	}
 }

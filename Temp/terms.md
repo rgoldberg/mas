@@ -461,6 +461,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 79. - width: text's terminal display width
       ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
+    - column width: the width of a table column's widest cell, including its
+      header cell iff the header row is rendered
+      ([defined](../Specs/table.md#table-config))
+    - table width: the sum of a table's column widths, plus the column spacing's
+      width once per pair of adjacent columns
+      ([defined](../Specs/table.md#table-config))
     - space-fill: fill any remaining width with spaces
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)
 80. - maximal munch: consuming the longest syntax text that a typed terminal

@@ -36,6 +36,16 @@ render as `a⏎b`).
 A table without any item or any column renders nothing, not even a header row or
 a separator line.
 
+A column's **column width** is the [width](configs.md#width) of its widest cell,
+including its header cell iff the header row is rendered. Each header & data
+cell is aligned within its column width per its column's
+[alignment](fields.md#alignment), with spaces filling the rest of that width,
+except that no cell of the last column has trailing spaces (e.g., a
+center-aligned last column's cells have only leading spaces). Each pair of
+adjacent columns is joined by the column spacing, so the **table width** is the
+sum of the column widths, plus the column spacing's width once per pair of
+adjacent columns (e.g., 2 per pair for the default 2-space column spacing).
+
 ## Header
 
 <!--editorconfig-checker-disable-->

@@ -46,6 +46,42 @@ private extension MASTests {
 		)
 	}
 
+	@Test(
+		arguments: [
+			(Alignment.start, "id", "1", "333"),
+			(.centerStart, "id", " 1", "333"),
+			(.centerEnd, " id", " 1", "333"),
+			(.end, " id", "  1", "333"),
+		],
+	)
+	func `a table's last column has no trailing spaces, regardless of its alignment`(
+		alignment: Alignment,
+		headerCell: String,
+		dataCell1: String,
+		dataCell2: String,
+	) throws {
+		#expect(
+			try [
+				JSON.Object([("name", .string("xy")), ("id", .number(1))]),
+				.init([("name", .string("abc")), ("id", .number(333))]),
+			]
+				.table(
+					fieldSpecs: [
+						.init(name: "name", label: "name", format: .default(fieldName: "name"), sortSpec: nil),
+						.init(name: "id", label: "id", format: .default(fieldName: "id"), sortSpec: nil, alignment: alignment),
+					],
+					tableConfig: .init(
+						header: .init(styleSpecifier: ""),
+						headerStyling: .terminalOnly,
+						headerStyleSequences: .default,
+						separator: nil,
+						columnSpacing: "  ",
+					),
+				)
+				== "name  \(headerCell)\nxy    \(dataCell1)\nabc   \(dataCell2)",
+		)
+	}
+
 	@Test
 	func `key-value & JSON omit an absent formatted value, but not a fallback for an absent field`() throws {
 		let fieldSpecs = try resolvedFieldsConfig(
