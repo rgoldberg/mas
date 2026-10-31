@@ -206,11 +206,14 @@ config).
 
 ### Implied Alternatives
 
-A kind may define **implied alternatives**, which alternatives in an output
-config imply (e.g., a table's [implied
-alternatives](table.md#implied-alternatives)), whether that output config is
-persisted or an output config option's value (e.g., a persisted `default` table
-config of `b` implies `S`, which implies `H`).
+A kind may define **implied alternatives**, which an output config's explicit
+alternatives imply, directly or via another implied alternative (e.g., a table's
+[implied alternatives](table.md#implied-alternatives)), whether that output
+config is persisted or an output config option's value (e.g., a persisted
+`default` table config of `b` implies `S`, which implies `H`). No inherited or
+default alternative implies one (e.g., `--table` implies no separator line from
+its default `u`, while, for a persisted `default` table config of `S:h`,
+`--table-config c` implies no header row from its inherited `S`).
 
 An explicit alternative of a setting, even "off" (e.g., a table's `h`), always
 overrides that setting's implied alternative, regardless of where in its output

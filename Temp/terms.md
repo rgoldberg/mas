@@ -496,8 +496,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 91. - last-wins scope: the nearest enclosing occurrence (else the entire input)
       within which a `(* last wins *)` nonterminal's occurrences override each
       other ([defined](../Specs/ebnf.md#last-wins-comments))
-    - implied alternative: an alternative that alternatives in an output config
-      imply ([defined](../Specs/configs.md#implied-alternatives))
+    - implied alternative: an alternative that an output config's explicit
+      alternatives imply, directly or via another implied alternative
+      ([defined](../Specs/configs.md#implied-alternatives))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
     - decimal number: a Unix time's text syntax
