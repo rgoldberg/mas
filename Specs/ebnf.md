@@ -319,10 +319,10 @@ Inherent scalar.
 
 `DESCRIPTION` describes valid literal scalars (e.g., `{non-negative integer}`) &
 their **lexical form**: the text that may denote them, whether valid or not
-(e.g., any run of digits for `{integer from 2 to 36}`).
+(e.g., any run of digits for `{integer from 1 to 100}`).
 
 An **integer description** describes integers (e.g., `{integer}`,
-`{non-negative integer}`, `{integer from 2 to 36}`, or
+`{non-negative integer}`, `{integer from 1 to 100}`, or
 `{positive integer without leading 0s}`). Its lexical form is 1 or more ASCII
 digits (`0` to `9`), the 1st of which is not `0` iff it describes integers
 without leading `0`s, preceded by an optional sign (`+` or `-`) iff it describes
