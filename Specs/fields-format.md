@@ -143,7 +143,10 @@ but `.scale:6, ,0:` omits `<significant-digits>`).
 ###### Value Coercion
 
 A transform without `<coercion>` requires its input to already be of its input
-type; otherwise, an error is reported.
+type; otherwise, an error is reported. A value is of type date or time-only iff
+[`%d` or `%c`](#chronologic-formatting), respectively, matches it without
+`<coercion>` (e.g., `.dateOnly` accepts `"2020-03-18"` & `1584553163`, but not
+`"0"`).
 
 A `null` or [absent](fields.md#absent-values) value remains unchanged through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
