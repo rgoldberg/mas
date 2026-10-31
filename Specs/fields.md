@@ -316,7 +316,7 @@ or JSON output.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-fields-config = ( <absolute-config> | <relative-config> )- (* default: <relative-config> *)
+fields-config = <absolute-config> | <relative-config> (* default: <relative-config> *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
