@@ -839,7 +839,10 @@ A field spec with an enabled `<sort>` takes sort precedence over field specs:
 - With a numerically higher `<sort-priority>` (i.e., lower numbers have higher
   priority).
 - With the same `<sort-priority>` that succeed it in the order of the field
-  specs in the resolved fields config, regardless of the field order.
+  specs in the resolved fields config, regardless of the field order, though
+  `<positional-order>`'s `<descending>` reverses that order by reversing
+  positions (e.g., if `x` has `name/I,version/I`, `@x` sorts items by `name`,
+  then by `version`, while `@x/P-` sorts them by `version`, then by `name`).
 
 Thus, a `<sort-priority>` below `100` takes sort precedence over every sort that
 omits its `<sort-priority>` & inherits none, while one above `100` cedes it
