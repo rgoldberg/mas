@@ -772,7 +772,7 @@ private extension MASTests {
 			"@all._ @ 2=Bundle",
 		],
 	)
-	func `ignores whitespace around field-spec-edits' syntax tokens`(value: String) throws {
+	func `ignores whitespace around field-spec-edits' literal tokens`(value: String) throws {
 		#expect(try parseFieldSpecs(value).first { $0.name == "bundleID" }?.label == "Bundle")
 	}
 

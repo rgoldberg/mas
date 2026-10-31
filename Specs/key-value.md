@@ -97,8 +97,7 @@ key-style-prefix-custom  = "P" [ <style-prefix> ] <key-value-setting-termination
 
 - `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
   precedes `<style-specifier>`.
-- `P`: a literal custom string precedes `<style-specifier>` (e.g., `P:` for
-  none).
+- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none).
 
 ## Key Style Suffix
 
@@ -117,8 +116,7 @@ key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination
 
 - `x`: `m` (the ANSI SGR control sequence's final byte) follows
   `<style-specifier>`.
-- `X`: a literal custom string follows `<style-specifier>` (e.g., `X:` for
-  none).
+- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none).
 
 ## Key Style Reset
 
@@ -136,7 +134,7 @@ key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> 
 `<style-reset>` is as [defined for table output](table.md#style-reset):
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows each styled key.
-- `O`: a literal custom string follows each styled key (e.g., `O:` for none).
+- `O`: a custom string follows each styled key (e.g., `O:` for none).
 
 ## Leader
 
@@ -183,8 +181,8 @@ leading-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-enable-->
 
 - `l`: 1 space after each key.
-- `L`: a literal custom spacing string after each key (e.g., `L:` for no leading
-  spacing, `L<TAB>:` for a tab, where `<TAB>` is a literal tab character, e.g.,
+- `L`: a custom spacing string after each key (e.g., `L:` for no leading
+  spacing, `L<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
   `$'L\t:'` in zsh). A `<leading-spacing>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
   each row.
@@ -205,9 +203,9 @@ trailing-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-enable-->
 
 - `r`: 1 space before each value.
-- `R`: a literal custom spacing string before each value (e.g., `R:` for no
-  trailing spacing). A `<trailing-spacing>` that contains a line terminator is
-  invalid, because it would split each row.
+- `R`: a custom spacing string before each value (e.g., `R:` for no trailing
+  spacing). A `<trailing-spacing>` that contains a line terminator is invalid,
+  because it would split each row.
 
 ## Item Separator
 
@@ -287,12 +285,12 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a syntax literal, 1
-or more of its characters must be escaped by prefixing it with a
+[For a text token to consume text that would otherwise match a literal, 1 or
+more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a literal `\` is written `\\`, because `\` always
-escapes the next character.
+Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
+the next character.
 
 In each row of the table below, the given characters must be escaped to be
 consumed as any character in a text token consumed by the given text terminal.

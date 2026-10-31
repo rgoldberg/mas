@@ -1248,12 +1248,12 @@ Each run of non-boundary text compares its [segments](#sort-segments) as:
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a syntax literal, 1
-or more of its characters must be escaped by prefixing it with a
+[For a text token to consume text that would otherwise match a literal, 1 or
+more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a literal `\` is written `\\`, because `\` always
-escapes the next character.
+Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
+the next character.
 
 [Outer bare whitespace is consumed, ignored, or
 forbidden](ebnf.md#outer-bare-whitespace-treatment); whitespace must be escaped

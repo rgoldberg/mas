@@ -99,9 +99,9 @@ style-prefix = ^{text: no line terminators}^ (* default: {empty string} *)
 
 - `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
   precedes `<style-specifier>`.
-- `P`: a literal custom string precedes `<style-specifier>` (e.g., `P:` for
-  none). A `<style-prefix>` that contains a line terminator is invalid, because
-  it would split each row that it styles.
+- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none). A
+  `<style-prefix>` that contains a line terminator is invalid, because it would
+  split each row that it styles.
 
 ## Style Suffix
 
@@ -120,9 +120,9 @@ style-suffix = ^{text: no line terminators}^ (* default: {empty string} *)
 
 - `x`: `m` (the ANSI SGR control sequence's final byte) follows
   `<style-specifier>`.
-- `X`: a literal custom string follows `<style-specifier>` (e.g., `X:` for
-  none). A `<style-suffix>` that contains a line terminator is invalid, because
-  it would split each row that it styles.
+- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none). A
+  `<style-suffix>` that contains a line terminator is invalid, because it would
+  split each row that it styles.
 
 ## Style Reset
 
@@ -140,9 +140,9 @@ style-reset = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-enable-->
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows the styled header row.
-- `O`: a literal custom string follows the styled header row (e.g., `O:` for
-  none). A `<style-reset>` that contains a line terminator is invalid, because
-  it would split each row that it styles.
+- `O`: a custom string follows the styled header row (e.g., `O:` for none). A
+  `<style-reset>` that contains a line terminator is invalid, because it would
+  split each row that it styles.
 
 ## Separator
 
@@ -208,10 +208,10 @@ column-spacing = ^{text: no line terminators}^ (* default: {empty string} *)
 <!--editorconfig-checker-enable-->
 
 - `c`: 2 spaces between adjacent columns.
-- `C`: a literal custom spacing string between adjacent columns (e.g., `C:` for
-  no spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a literal tab
-  character, e.g., `$'C\t:'` in zsh). A `<column-spacing>` that contains a line
-  terminator is invalid, because it would split each row.
+- `C`: a custom spacing string between adjacent columns (e.g., `C:` for no
+  spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
+  `$'C\t:'` in zsh). A `<column-spacing>` that contains a line terminator is
+  invalid, because it would split each row.
 
 ## Table Setting Termination
 
@@ -258,12 +258,12 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Appendix: Escaping
 
-[For a text token to consume text that would otherwise match a syntax literal, 1
-or more of its characters must be escaped by prefixing it with a
+[For a text token to consume text that would otherwise match a literal, 1 or
+more of its characters must be escaped by prefixing it with a
 `\`.](ebnf.md#tokens)
 
-Throughout all text tokens, a literal `\` is written `\\`, because `\` always
-escapes the next character.
+Throughout all text tokens, a `\` is written `\\`, because `\` always escapes
+the next character.
 
 In each row of the table below, the given characters must be escaped to be
 consumed as any character in a text token consumed by the given text terminal.

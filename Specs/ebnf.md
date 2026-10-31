@@ -39,10 +39,6 @@ both evaluating to that same character.
 **Whitespace** is any Unicode `White_Space` character: Unicode general category
 `Z` characters, `U+0009` to `U+000D` & `U+0085`.
 
-### Ad Hoc Text
-
-**Ad hoc text** is data rather than syntax.
-
 ### Multiplicity
 
 A value's multiplicity is one of:
@@ -94,22 +90,22 @@ element by the syntax.
 
 **Bare tokens** contain only bare characters.
 
-**Text tokens** are ad hoc text.
+**Literal tokens** are bare tokens that match [literals](#literals) & are
+consumed by constant expressions; escaping any character within a token that
+would otherwise be a literal token renders it a text token.
 
-**Syntax tokens** are bare tokens matching [literal text](#literal-text);
-escaping any character within a token that would otherwise be a syntax token
-renders it a text token.
+**Text tokens** are tokens consumed by [text terminals](#text-terminals) &
+[constrained text terminals](#constrained-text-terminals).
 
 **Scalar tokens** are bare tokens consumed by [scalar
 descriptions](#scalar-descriptions).
 
-**Constant tokens** (e.g., syntax tokens) are consumed by constant expressions.
+**Variable tokens** (i.e., scalar & text tokens) are consumed by variable
+expressions.
 
-**Variable tokens** (e.g., text tokens) are consumed by variable expressions.
+#### Candidate Literals
 
-#### Candidate Syntax Literals
-
-The **candidate syntax literals** of a given position in the syntax text are the
+The **candidate literals** of a given position in the syntax text are the
 literals that the syntax can consume at that position (regardless of the syntax
 text starting at that position), which includes the literals that:
 
@@ -119,8 +115,8 @@ text starting at that position), which includes the literals that:
 
 #### Consuming Tokens
 
-Syntax text is consumed as a token iff a syntax token, a scalar token, or a text
-token, as specified below, matches the syntax text starting at the current
+Syntax text is consumed as a token iff a literal token, a scalar token, or a
+text token, as specified below, matches the syntax text starting at the current
 position.
 
 Consuming a token commits to the set of expressions that the token starts,
@@ -135,37 +131,37 @@ set's expression is parsed, an error is reported.
 
 Syntax text is never reconsidered after it has been consumed.
 
-##### Consuming Syntax Tokens
+##### Consuming Literal Tokens
 
-Syntax text is consumed as a syntax token iff a candidate syntax literal matches
-the syntax text starting at the current position; if multiple match, the longest
-is consumed.
+Syntax text is consumed as a literal token iff a candidate literal matches the
+syntax text starting at the current position; if multiple match, the longest is
+consumed.
 
 ##### Consuming Scalar Tokens
 
 Syntax text is consumed as a scalar token iff a scalar description is available
 at the current position & the syntax text starting there matches its lexical
 form; the longest syntax text that matches it is consumed (i.e., maximal munch),
-then, iff its value is not a valid literal scalar of the scalar description
-(e.g., it is out of range), an error is reported.
+then, iff its value is not a valid value of the scalar description (e.g., it is
+out of range), an error is reported.
 
-A syntax must ensure that no candidate syntax literal of a position at which a
-scalar description is available matches the start of the scalar description's
-lexical form there.
+A syntax must ensure that no candidate literal of a position at which a scalar
+description is available matches the start of the scalar description's lexical
+form there.
 
 ##### Consuming Text Tokens
 
 Syntax text is consumed as a text token iff a text token is available at the
-current position & no candidate syntax literal matches the syntax text there.
+current position & no candidate literal matches the syntax text there.
 
-A text token's **candidate text terminators** are the candidate syntax literals
-of the position immediately following it.
+A text token's **candidate text terminators** are the candidate literals of the
+position immediately following it.
 
 A text token is the longest non-empty prefix starting at the current position
 that does not contain any candidate text terminator; it terminates immediately
 before the 1st such terminator, or at the end of the syntax text absent one,
 less any ignored outer bare whitespace; that terminator, if any, is then
-consumed as a syntax token.
+consumed as a literal token.
 
 ### Character Consumption
 
@@ -182,18 +178,18 @@ includes:
 **Outer bare whitespace** exists immediately before the 1st, or immediately
 after the last:
 
-- Character consumed by a constant token.
+- Character consumed by a literal token.
 - Non-bare-whitespace character consumed by a variable token.
 
-A candidate syntax literal is matched before outer bare whitespace is processed,
-consuming any bare whitespace that matches its literal.
+A candidate literal is matched before outer bare whitespace is processed,
+consuming any bare whitespace that it matches.
 
 Unless otherwise specified, expressions do not consume outer bare whitespace.
 
 #### Outer Bare Whitespace Treatment
 
 Defined via a modified meta-grammar supporting [optionals](#optionals),
-[choices](#choices) & [literal text](#literal-text):
+[choices](#choices) & [literals](#literals):
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -301,13 +297,15 @@ Inherent scalar.
 A constant expression that matches no syntax text, only at the end of the syntax
 text.
 
-#### Literal Text
+#### Literals
 
 ```ebnf
 "TEXT"
 ```
 
 Inherent scalar.
+
+A **literal**, which matches a [literal token](#tokens) of `TEXT`.
 
 Within `TEXT`, `""` denotes a `"`.
 
@@ -319,9 +317,9 @@ Within `TEXT`, `""` denotes a `"`.
 
 Inherent scalar.
 
-`DESCRIPTION` describes valid literal scalars (e.g., `{non-negative integer}`) &
-their **lexical form**: the text that may denote them, whether valid or not
-(e.g., any run of digits for `{integer from 1 to 100}`).
+`DESCRIPTION` describes valid values (e.g., `{non-negative integer}`) & their
+**lexical form**: the text that may denote them, whether valid or not (e.g., any
+run of digits for `{integer from 1 to 100}`).
 
 An **integer description** describes integers (e.g., `{integer}`,
 `{non-negative integer}`, `{integer from 1 to 100}`, or
@@ -515,10 +513,10 @@ No multiplicity.
 NONTERMINAL = DEFINITION (* mnemonic: MNEMONIC *)
 ```
 
-`MNEMONIC` explains how `DEFINITION`'s literal text was chosen, iff that text
-contains a letter or a digit & that choice is non-obvious (e.g., the text is not
-the 1st letter of a word in `NONTERMINAL`), because punctuation is chosen from
-few candidates, so it rarely has a mnemonic. A mnemonic comment is not a
+`MNEMONIC` explains how `DEFINITION`'s literal was chosen, iff that literal
+contains a letter or a digit & that choice is non-obvious (e.g., the literal is
+not the 1st letter of a word in `NONTERMINAL`), because punctuation is chosen
+from few candidates, so it rarely has a mnemonic. A mnemonic comment is not a
 semantic comment; in a comment with multiple parts, it is the last part.
 
 #### Semantic Comments
@@ -540,7 +538,7 @@ nonterminals; they cannot specify defaults for constant nonterminals.
 
 - `null` or `empty`.
 - A [scalar description](#scalar-descriptions) of the value.
-- A literal scalar.
+- A value (e.g., `100`).
 - A [nonterminal reference](#nonterminal-references): if it references an
   alternative of the choice that defines the nonterminal to which the default
   applies, directly or as a [grouping](#groupings)'s child (e.g.,
@@ -548,15 +546,15 @@ nonterminals; they cannot specify defaults for constant nonterminals.
   selects that alternative, as if that alternative were present but contained no
   token; otherwise, it evaluates to the referenced nonterminal's global default
   for the directly absent state.
-- [Literal text](#literal-text), consumed by the nonterminal to which the
-  default applies.
+- A [literal](#literals), consumed by the nonterminal to which the default
+  applies.
 
 All defaults must be valid for the applicable nonterminal.
 
 ###### Self Default Comments
 
 Defined via a modified meta-grammar supporting [optionals](#optionals),
-[choices](#choices) & [literal text](#literal-text):
+[choices](#choices) & [literals](#literals):
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -579,7 +577,7 @@ is for `"transitive"`.
 ###### Descendant Default Comments
 
 Defined via a modified meta-grammar supporting [optionals](#optionals),
-[choices](#choices) & [literal text](#literal-text):
+[choices](#choices) & [literals](#literals):
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -617,7 +615,7 @@ an error is reported.
 ##### Type Comments
 
 Defined via a modified meta-grammar supporting [optionals](#optionals),
-[choices](#choices) & [literal text](#literal-text):
+[choices](#choices) & [literals](#literals):
 
 ```ebnf
 NONTERMINAL "=" DEFINITION "(*" [ "input" | "output" ] "type:" TYPE "*)"

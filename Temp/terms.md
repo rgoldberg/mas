@@ -163,8 +163,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
       `<string-block>`, empty strings)
-    - token: contiguous characters consumed together as 1 element: a syntax,
+    - token: contiguous characters consumed together as 1 element: a literal,
       scalar, or text token ([defined](../Specs/ebnf.md#tokens))
+    - REJECTED: syntax token / constant token (for a literal token) / ad hoc
+      text (for a text token's text)
     - occurrence: specific appearance of something
     - value: evaluated content bound to a nonterminal or field
     - content: substance as a whole (of a string, file, or expression)
@@ -196,9 +198,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - nonexistent: guaranteed not to exist in any input
       ([defined](../Specs/fields.md#nonexistent-fields))
     - REJECTED: nil / missing
-32. - literal text: a `"TEXT"` terminal, which syntax tokens match
-      ([defined](../Specs/ebnf.md#literal-text))
-    - literal: as-is data (e.g., "a literal tab character")
+32. - literal: a `"TEXT"` terminal, which literal tokens match
+      ([defined](../Specs/ebnf.md#literals))
+    - candidate literal: a literal that the syntax can consume at a given
+      position ([defined](../Specs/ebnf.md#candidate-literals))
+    - REJECTED: literal text (for a literal) / candidate syntax literal /
+      literal (as an adjective for as-is data, e.g., "a literal tab character")
     - verbatim: exact character-for-character match without processing escapes
       or evaluation
 33. - overlay: merging specific modifiers or fields onto an existing base while
@@ -449,8 +454,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: columns / cells (as units of width) / padding (for space-fill)
 80. - maximal munch: consuming the longest syntax text that matches (e.g., a
       scalar token)
-    - lexical form: the text that may denote a scalar description's literal
-      scalars, whether valid or not
+    - lexical form: the text that may denote a scalar description's values,
+      whether valid or not
+    - REJECTED: literal scalar (for a value)
     - REJECTED: greedy matching / longest match / how far a token extends
 81. - tuple: the multiplicity of a sequence's children's values
       ([defined](../Specs/ebnf.md#multiplicity))
