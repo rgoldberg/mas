@@ -52,7 +52,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 12. - given: explicitly specified input values or parameters from a caller or
       user
     - attached: comments or metadata structurally bound to a nonterminal
-      definition; also a preset in a field spec's list of presets (see "preset")
+      definition; also a preset in a field spec's list of presets (see 111)
     - present: an occurrence of a token or an expression in the syntax text
     - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
