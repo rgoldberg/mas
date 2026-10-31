@@ -69,6 +69,12 @@ struct FieldSpec: Equatable {
 	func rendered(value: JSON.Node?) throws(FormattingError) -> JSON.Node? {
 		try format.rendered(value: value, label: label, name: name)
 	}
+
+	/// `value`'s values for this field spec's sort key, rendering it iff `source`
+	/// is `<output>`.
+	func sortValues(input value: JSON.Node?, source: SortOptionSet.Source) throws(FormattingError) -> SortValues {
+		source == .output ? try format.sortValues(input: value, label: label, name: name) : .init(input: value, output: nil)
+	}
 }
 
 extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_types_order

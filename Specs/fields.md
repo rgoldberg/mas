@@ -881,14 +881,17 @@ format.
 
 A value is compared as a string, a non-string being [coerced to a
 string](fields-format.md#value-coercion), except that a number is a single
-[segment](#sort-segments):
+[segment](#sort-segments), between its [trivia](fields-format.md#coercion)
+prefix & suffix, each compared as a string (e.g., the trivia prefix `$` in
+`$10`):
 
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
   the number is a [chronologic Unix
   time](fields-format.md#chronologic-formatting).
 - Otherwise, a number segment, unless `<number-segments>` is `<lexicographic>`
-  or `<versions>`, either of which compares the number as its text (so, with
-  `<versions>`, its text's versions compare with other versions).
+  or `<versions>`, either of which compares the number as a string, its trivia
+  included (so, with `<versions>`, its text's versions compare with other
+  versions).
 
 E.g., for an input Unix time being output as an ISO date (without time):
 

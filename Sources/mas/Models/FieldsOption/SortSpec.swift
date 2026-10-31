@@ -465,14 +465,18 @@ private func parseLiteral(_ input: inout Substring, from literals: some Sequence
 struct SortValues { // swiftlint:disable:this one_declaration_per_file
 	/// The field's input value.
 	let input: JSON.Node?
-	/// The field's rendered value, iff `<sort-option-set>` has `<output>`.
+	/// The field's rendered value, iff `<sort-option-set>` has `<output>`, a
+	/// number without its trivia.
 	let output: JSON.Node?
+	/// `output`'s trivia prefix & suffix iff it is a number (both empty unless
+	/// coerced with a trivia regex).
+	var outputTrivia = (prefix: Substring(), suffix: Substring())
 }
 
 extension SortSpec {
 	/// Compares 2 items' values for this sort key, per `optionSet`.
 	func compare(_ lhs: SortValues, _ rhs: SortValues) -> ComparisonResult {
-		optionSet.compare(optionSet.value(of: lhs), optionSet.value(of: rhs))
+		optionSet.compare(lhs, rhs)
 	}
 }
 
@@ -526,17 +530,8 @@ extension SortOptionSet {
 		compare(pieces(of: lhs), pieces(of: rhs))
 	}
 
-	fileprivate func value(of values: SortValues) -> JSON.Node? {
-		switch source {
-		case .input:
-			values.input
-		case .output:
-			values.output
-		}
-	}
-
-	/// Compares 2 values per this option set.
-	fileprivate func compare(_ lhs: JSON.Node?, _ rhs: JSON.Node?) -> ComparisonResult {
+	/// Compares 2 items' values per this option set.
+	fileprivate func compare(_ lhs: SortValues, _ rhs: SortValues) -> ComparisonResult {
 		compare(pieces(of: lhs), pieces(of: rhs))
 	}
 
@@ -544,14 +539,39 @@ extension SortOptionSet {
 		direction == .ascending ? result : result.reversed
 	}
 
-	/// `value`'s pieces: a number is a single segment, per
-	/// `numberValueSegment(of:)`, if any; any other value is compared as a string
-	/// (`null` as an empty string).
-	private func pieces(of value: JSON.Node?) -> [Piece] {
-		if let segment = numberValueSegment(of: value) {
-			[.init(rank: boundaries.groups.count, segments: [segment])]
+	/// The pieces of `values`' value per `source`: a number is a single segment,
+	/// per `numberValueSegment(of:)`, if any, between its trivia, each compared
+	/// as a string; any other value, an output number's trivia included, is
+	/// compared as a string (`null` as an empty string).
+	private func pieces(of values: SortValues) -> [Piece] {
+		let (value, trivia) =
+			switch source {
+			case .input:
+				(values.input, (prefix: Substring(), suffix: Substring()))
+			case .output:
+				(values.output, values.outputTrivia)
+			}
+		return if let segment = numberValueSegment(of: value) {
+			concatenated(
+				pieces(of: String(trivia.prefix)),
+				[.init(rank: boundaries.groups.count, segments: [segment])],
+				pieces(of: String(trivia.suffix)),
+			)
 		} else {
-			pieces(of: value?.stringValue ?? "")
+			pieces(of: "\(trivia.prefix)\(value?.stringValue ?? "")\(trivia.suffix)")
+		}
+	}
+
+	/// `pieceLists` concatenated, merging each run of non-boundary text that
+	/// spans adjacent lists into 1 piece.
+	private func concatenated(_ pieceLists: [Piece]...) -> [Piece] {
+		let textRank = boundaries.groups.count
+		return pieceLists.joined().reduce(into: []) { pieces, piece in
+			if let last = pieces.last, last.rank == textRank, piece.rank == textRank {
+				pieces[pieces.count - 1] = .init(rank: textRank, segments: last.segments + piece.segments)
+			} else {
+				pieces.append(piece)
+			}
 		}
 	}
 

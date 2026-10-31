@@ -217,6 +217,23 @@ extension Format { // swiftlint:disable:this file_types_order
 		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node
 	}
 
+	/// `value`'s values for a sort key sourced from output: its output is its
+	/// rendered value, as `rendered(value:label:name:)` renders it, except that a
+	/// number renders without its trivia, which are kept apart (fields.md "Sort
+	/// Source").
+	func sortValues(input value: JSON.Node?, label: String, name: String) throws(FormattingError) -> SortValues {
+		let evaluated = try evaluated(in: .init(input: value, label: label, name: name, matched: nil))
+		return if case let .number(number, triviaPrefix, triviaSuffix)? = evaluated {
+			.init(
+				input: value,
+				output: FormatValue.number(number, triviaPrefix: "", triviaSuffix: "").node,
+				outputTrivia: (triviaPrefix, triviaSuffix),
+			)
+		} else {
+			.init(input: value, output: evaluated?.node)
+		}
+	}
+
 	/// The evaluated value, or `nil` iff formatting aborts.
 	fileprivate func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {

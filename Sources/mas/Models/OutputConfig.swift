@@ -65,10 +65,9 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		// Each sort key's values, per item
 		let sortValues = try resolved.itemSort.keys.map { key throws(FormattingError) in
 			try objects.map { object throws(FormattingError) in
-				let input = object[lastNodeKey: .init(rawValue: key.fieldSpec.name)]
-				return SortValues(
-					input: input,
-					output: key.sortSpec.optionSet.source == .output ? try key.fieldSpec.rendered(value: input) : nil,
+				try key.fieldSpec.sortValues(
+					input: object[lastNodeKey: .init(rawValue: key.fieldSpec.name)],
+					source: key.sortSpec.optionSet.source,
 				)
 			}
 		}

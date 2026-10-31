@@ -450,6 +450,29 @@ private extension MASTests {
 		)
 	}
 
+	@Test(
+		arguments: [
+			("[$€]", "1O", JSON.Node.string("$10"), JSON.Node.string("€5"), ComparisonResult.orderedAscending),
+			("[$€]", "1Ot", "$10", "€5", .orderedDescending),
+			("[$€]", "1Oe", "$10", "€5", .orderedDescending),
+			// A number, not its trivia, is a Unix time (else 1 < 2)
+			("v", "1OCunix-time:", "v1e19", "v2", .orderedDescending),
+		],
+	)
+	func `compares an output number's trivia as strings around its single segment`(
+		triviaPrefixRegex: String,
+		sort: String,
+		lhs: JSON.Node,
+		rhs: JSON.Node,
+		result: ComparisonResult,
+	) throws {
+		let fieldSpec = try parsedFieldSpec(format: "..:,,,,,\(triviaPrefixRegex):absoluteValue", sort: sort)
+		let sortSpec = try #require(fieldSpec.sortSpec)
+		#expect(
+			sortSpec.compare(try sortValues(lhs, fieldSpec: fieldSpec), try sortValues(rhs, fieldSpec: fieldSpec)) == result,
+		)
+	}
+
 	@Test
 	func `compares a structured value as its compact JSON text`() throws {
 		let fieldSpec = try parsedFieldSpec(format: "%i", sort: "1")
@@ -537,5 +560,5 @@ throws(ParsingError) -> FieldSpec {
 }
 
 private func sortValues(_ value: JSON.Node, fieldSpec: FieldSpec) throws -> SortValues {
-	.init(input: value, output: try fieldSpec.format.rendered(value: value, label: fieldSpec.label, name: fieldSpec.name))
+	try fieldSpec.format.sortValues(input: value, label: fieldSpec.label, name: fieldSpec.name)
 }
