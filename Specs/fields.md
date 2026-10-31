@@ -380,7 +380,7 @@ field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
-document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: JSON or key-value output *)
+document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: key-value or JSON output *)
 
 order-option          = <order> | <order-trailing-option>
 order-trailing-option = <direction> | <unpositioned-field-comparison> | <unpositioned-field-placement>
