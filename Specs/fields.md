@@ -1159,9 +1159,10 @@ character-class-name  =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Input outside [typed segments](#sort-segments) is split by **boundaries**
-assigned to ordered sort precedence **boundary groups**, each defined by a
-`<boundary-group>`; each group's members share the same sort precedence.
+A value's text outside [typed segments](#sort-segments) is split by
+**boundaries** assigned to ordered sort precedence **boundary groups**, each
+defined by a `<boundary-group>`; each group's members share the same sort
+precedence.
 
 Each of the following is itself a boundary:
 
@@ -1182,7 +1183,7 @@ with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).
 Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
 
-`<uncollapsed-boundaries>` retains contiguous boundaries in input as separate
+`<uncollapsed-boundaries>` retains a value's contiguous boundaries as separate
 boundaries; `<collapsed-boundaries>` collapses contiguous boundaries belonging
 to the same boundary group into one. Directly absent `<boundary-groups>` (e.g.,
 `B:`), nothing is a boundary.
