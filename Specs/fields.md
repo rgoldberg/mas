@@ -169,7 +169,7 @@ For each [leaf context](configs.md#context-stacks):
   Wherever the base fields config is, or transitively extends, `none`, each
   [default field spec](#default-field-specs) that a `<field-spec-edit>` selects
   likewise has its `<sort>`, if any, disabled after its `default` preset is
-  attached, so `none` disables every field, listed or not (e.g., if the
+  attached, so `none` disables every field's sort, listed or not (e.g., if the
   `default` preset sets an enabled sort, `name,foo` sorts items by neither, even
   if the app does not list `foo`). Absent a built-in field order: field specs
   are ordered by `<positional-order>`, so a fields config that extends it
