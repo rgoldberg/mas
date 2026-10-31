@@ -310,15 +310,15 @@ Consumes a [variable token](#tokens), whose value has `SUBTYPE`'s type:
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| `SUBTYPE`   | Type      | Lexical Form                                                                                                                                           |
-|:------------|:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `boolean`   | boolean   | `true` or `false`                                                                                                                                      |
-| `date`      | date      | An ISO-8601 date-only or datetime                                                                                                                      |
-| `integer`   | number    | 1 or more ASCII digits (`0` to `9`), optionally preceded by a sign (`+` or `-`)                                                                        |
-| `number`    | number    | `integer`'s lexical form, optionally followed by `.` & 1 or more ASCII digits, then optionally by `e` or `E` & an exponent in `integer`'s lexical form |
-| `regex`     | string    | A Swift Regex                                                                                                                                          |
-| `string`    | string    | Any characters                                                                                                                                         |
-| `time-only` | time-only | An ISO-8601 time-only                                                                                                                                  |
+| `SUBTYPE`   | Type      | Lexical Form                                                                                                                                                                             |
+|:------------|:----------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `boolean`   | boolean   | `true` or `false`                                                                                                                                                                        |
+| `date`      | date      | An ISO-8601 date-only or datetime                                                                                                                                                        |
+| `integer`   | number    | 1 or more ASCII digits (`0` to `9`), optionally preceded by a sign (`+` or `-`)                                                                                                          |
+| `number`    | number    | An optional sign (`+` or `-`), then 1 or more ASCII digits, a `.` & 1 or more ASCII digits, or both, in that order, then optionally `e` or `E` & an exponent in `integer`'s lexical form |
+| `regex`     | string    | A Swift Regex                                                                                                                                                                            |
+| `string`    | string    | Any characters                                                                                                                                                                           |
+| `time-only` | time-only | An ISO-8601 time-only                                                                                                                                                                    |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
