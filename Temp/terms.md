@@ -469,8 +469,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/ebnf.md#typed-terminals))
     - candidate terminator: a candidate literal of the position immediately
       following a variable token
-    - REJECTED: literal scalar (for a value) / candidate text terminator
-    - REJECTED: greedy matching / longest match / how far a token extends
+    - REJECTED: literal scalar (for a value) / candidate text terminator /
+      greedy matching / longest match / how far a token extends
 81. - tuple: the multiplicity of a sequence's children's values
       ([defined](../Specs/ebnf.md#multiplicity))
     - static multiplicity: the multiplicity shared by all of an expression's
