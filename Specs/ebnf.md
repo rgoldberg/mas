@@ -609,7 +609,9 @@ NONTERMINAL = DEFINITION (* only for: CONTEXT *)
 ```
 
 `NONTERMINAL` is valid only in the context that `CONTEXT` describes; elsewhere,
-an error is reported.
+an error is reported. A syntax may specify what `CONTEXT` is checked against
+(e.g., for [`<document-order-option-set>`](fields.md#field-order), only the
+resolved fields config's field order).
 
 ##### Type Comments
 
