@@ -5,6 +5,10 @@ paths:
 
 # Spec Grammar
 
+In specs, design each change for what is best for users, never merely as the
+smallest change that fits the existing spec (e.g., give transposed syntax, i.e.,
+the same tokens in another order, consistent semantics).
+
 In specs, terminate every single-letter option's / setting's payload with `:`.
 
 In specs, give each construct's constant syntax (e.g., a prefix) its own
