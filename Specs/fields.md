@@ -491,8 +491,13 @@ disable-all-sorts = "0" (* mnemonic: as <disabled-sort-prefix> *)
 `<sort-option>`s; a subsequent `<field-spec-edit>` may re-enable a field spec's
 sort (e.g., if `x` has `name/5I`, `@x//0.name/I` re-enables it with a
 `<sort-priority>` of `5`). It disables a sort that an attached preset set, as it
-does an explicit one, while a preset attached afterward sets its own sort (e.g.,
-if preset `p` sets an enabled sort, `@x//0.name%+p` sorts by it).
+does an explicit one, while a preset that a subsequent `<preset-modifier>`
+attaches sets its own sort (e.g., if preset `p` sets an enabled sort,
+`@x//0.name%+p` sorts by it). Each [default field spec](#default-field-specs)
+that a subsequent `<field-spec-edit>` selects likewise has its `<sort>`, if any,
+disabled after its `default` preset is attached (e.g., if the `default` preset
+sets an enabled sort & `x` has no field spec for `foo`, `@x//0.+foo` does not
+sort items by `foo`).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered

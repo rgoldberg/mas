@@ -62,13 +62,13 @@ only after `=` (e.g., `--json[=<json-config>]`).
    modifier or by an attached preset, so that detaching a preset re-exposes each
    value that it overrode & so that each of `none`'s field specs, each unlisted
    field's default field spec & each default field spec that a field spec edit
-   selects wherever the base fields config is, or transitively extends, `none`
-   disables each sort that its `default` preset sets. Supporting them also needs
-   key-value & JSON output to omit each [unlisted
-   field](../Specs/fields.md#unlisted-fields) that an item lacks, because mas
-   gives every item a field spec for each unlisted field of any item, while a
-   custom `default` preset may give an absent field a formatted value that is
-   not absent (e.g., `:%N%n+none+`).
+   selects wherever the base fields config is, or transitively extends, `none`,
+   or after a `<disable-all-sorts>`, disables each sort that its `default`
+   preset sets. Supporting them also needs key-value & JSON output to omit each
+   [unlisted field](../Specs/fields.md#unlisted-fields) that an item lacks,
+   because mas gives every item a field spec for each unlisted field of any
+   item, while a custom `default` preset may give an absent field a formatted
+   value that is not absent (e.g., `:%N%n+none+`).
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context
