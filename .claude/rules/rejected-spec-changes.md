@@ -28,3 +28,12 @@ what was meant, while an error reports it.
 In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `005`) or a
 repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
 contradictory.
+
+In specs, never forbid an empty `<field-spec-edits-section>` (e.g., `@x.`),
+because it is redundant, not contradictory, and it lets a script append edits
+that may be empty to a `<field-spec-edits-section-prefix>`.
+
+In specs, never forbid a `<chronologic-formats>` whose formats overlap (e.g.,
+`Ciso,iso:` or `Ciso,iso-date:`), because each is redundant, not contradictory,
+and detecting the overlap depends on what each format matches, not on the
+syntax.
