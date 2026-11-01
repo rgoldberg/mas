@@ -18,3 +18,13 @@ to the rule.
 
 Record a spec change deferred to a later version in `Temp/todo.md`, never here,
 because it is not rejected.
+
+In specs, never make `<all-conforming>` in a `<field-order-adjustment-set>` that
+is per `<positional-order-option-set>` or `<document-order-option-set>` a no-op,
+nor make `<all-conforming>` a `<non-adjustment-sort-option>` (so that `@none/k`
+sorts fields by label), because each silently accepts text that cannot express
+what was meant, while an error reports it.
+
+In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `005`) or a
+repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
+contradictory.
