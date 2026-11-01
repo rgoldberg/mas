@@ -534,7 +534,7 @@ indexed-field-spec-reference = <field-spec-index-prefix> <field-spec-index>
 reference-field-name = {string: field name with no bare "."}
 
 field-occurrence-index-prefix = "@"
-field-occurrence-index        = <index> (* transitive default: 1 *)
+field-occurrence-index        = <index> (* transitive default: {1 iff <reference-field-name> names a field spec or a null; null otherwise} *)
 
 field-spec-index-prefix = "@"
 field-spec-index        = <index>
