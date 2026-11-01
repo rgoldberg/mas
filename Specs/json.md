@@ -51,7 +51,9 @@ indentation = ^{string: only spaces & tabs}^ (* default: "  " *)
   array element on its own line, indented by 1 `<indentation>` per nesting level
   (e.g., `P:` for 2 spaces, `P<TAB>:` for a tab, where `<TAB>` is a tab
   character, e.g., `$'P\t:'` in zsh); each `:` between a key & its value is
-  followed by 1 space.
+  followed by 1 space; each empty object or array, which has no member or
+  element to put on its own line, is rendered as `{}` or `[]`, respectively
+  (e.g., an item without any key-value pair).
 
 ## Top-Level Structure
 
