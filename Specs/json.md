@@ -30,6 +30,16 @@ A key-value pair is output even if its key repeats another's (e.g.,
 [members](fields.md#members)), because JSON does not forbid repeated keys,
 though some consumers retain only 1 of them.
 
+In each key & each string value, each `"` & `\` is rendered as `\"` & `\\`, each
+backspace, tab, LF, form feed & CR as `\b`, `\t`, `\n`, `\f` & `\r`, and each
+other C0 control character (U+0000 to U+001F), each DEL (U+007F) & each C1
+control character (U+0080 to U+009F) as a `\uXXXX` escape sequence with
+lowercase hex digits (e.g., `\u001b` for an ESC & `\u009b` for U+009B), because
+JSON requires each C0 control character to be escaped, while a raw DEL would be
+invisible & a raw C1 control character would modify the terminal's state (e.g.,
+U+009B, an 8-bit CSI, which starts an escape sequence). Each other character,
+including `/`, is rendered verbatim, except as [`e`](#non-ascii) escapes it.
+
 ## Pretty-Printing
 
 <!--editorconfig-checker-disable-->
@@ -88,7 +98,8 @@ non-ascii-escaped  = "e"
 
 Applies to every key & every string value.
 
-- `v`: each non-ASCII character is rendered verbatim, encoded as UTF-8.
+- `v`: each non-ASCII character other than a C1 control character is rendered
+  verbatim, encoded as UTF-8.
 - `e`: each non-ASCII character is rendered as a JSON `\uXXXX` escape sequence
   with lowercase hex digits (e.g., `\u00e9` for `é`), or, for a character
   outside the Basic Multilingual Plane, as an escape sequence for each of its

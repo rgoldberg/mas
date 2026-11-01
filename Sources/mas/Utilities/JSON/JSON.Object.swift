@@ -325,53 +325,95 @@ private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> Str
 
 extension JSON.Node {
 	/// This node's JSON text per `jsonConfig` (json.md): compact or
-	/// pretty-printed, with non-ASCII characters verbatim or escaped.
+	/// pretty-printed, with each key & string value escaped per json.md "JSON
+	/// Config" & its non-ASCII characters verbatim or escaped.
 	func rendered(jsonConfig: JSONConfig) -> String {
-		let text = jsonConfig.indentation.map { prettyPrinted(indentation: $0, depth: 0) } ?? description
-		return switch jsonConfig.nonASCIIRendering {
-		case .escaped:
-			text.unicodeScalars.reduce(into: "") { result, scalar in
-				result += scalar.isASCII
-					? String(scalar)
-					: String(scalar)
+		rendered(
+			indentation: jsonConfig.indentation,
+			escapingNonASCII: jsonConfig.nonASCIIRendering == .escaped,
+			depth: 0,
+		)
+	}
+
+	/// This node's JSON text, at nesting level `depth`: compact iff `indentation`
+	/// is `nil`; otherwise, each non-empty object's members & each non-empty
+	/// array's elements on their own lines, indented by `indentation` per nesting
+	/// level, with 1 space after each `:` between a key & its value.
+	private func rendered(indentation: String?, escapingNonASCII: Bool, depth: Int) -> String {
+		let memberIndentation = indentation.map { "\n" + String(repeating: $0, count: depth + 1) } ?? ""
+		let closingIndentation = indentation.map { "\n" + String(repeating: $0, count: depth) } ?? ""
+		let keyValueSeparator = indentation == nil ? ":" : ": "
+		return switch self {
+		case let .array(array) where !array.elements.isEmpty:
+			"["
+				+ array.elements
+				.map { element in
+					memberIndentation
+						+ element.rendered(indentation: indentation, escapingNonASCII: escapingNonASCII, depth: depth + 1)
+				}
+				.joined(separator: ",")
+				+ closingIndentation
+				+ "]"
+		case let .object(object) where !object.fields.isEmpty:
+			"{"
+				+ object.fields
+				.map { key, value in
+					memberIndentation
+						+ key.rawValue.jsonStringLiteral(escapingNonASCII: escapingNonASCII)
+						+ keyValueSeparator
+						+ value.rendered(indentation: indentation, escapingNonASCII: escapingNonASCII, depth: depth + 1)
+				}
+				.joined(separator: ",")
+				+ closingIndentation
+				+ "}"
+		case let .string(string):
+			string.value.jsonStringLiteral(escapingNonASCII: escapingNonASCII)
+		default:
+			description
+		}
+	}
+}
+
+private extension String {
+	/// This string as a quoted JSON string (json.md "JSON Config"): each `"` &
+	/// `\` escaped by a `\`, each backspace, tab, LF, form feed & CR as its short
+	/// escape sequence (e.g., `\n`), and each other C0 control character, each
+	/// DEL, each C1 control character & (iff `escapingNonASCII`) each other
+	/// non-ASCII character as a `\u` escape sequence per UTF-16 code unit, with
+	/// lowercase hex digits (e.g., `\u009b` for U+009B).
+	func jsonStringLiteral(escapingNonASCII: Bool) -> Self {
+		"\""
+			+ unicodeScalars
+			.map { scalar in
+				switch scalar {
+				case "\"":
+					#"\""#
+				case "\\":
+					#"\\"#
+				case "\u{08}":
+					#"\b"#
+				case "\t":
+					#"\t"#
+				case "\n":
+					#"\n"#
+				case "\u{0C}":
+					#"\f"#
+				case "\r":
+					#"\r"#
+				case _ where scalar.value < 0x20 || (0x7f..<0xa0).contains(scalar.value) || escapingNonASCII && !scalar.isASCII:
+					String(scalar)
 						.utf16
 						.map { codeUnit in
 							let hexDigits = String(codeUnit, radix: 16)
 							return "\\u\(String(repeating: "0", count: 4 - hexDigits.count))\(hexDigits)"
 						}
 						.joined()
-			}
-		case .verbatim:
-			text
-		}
-	}
-
-	/// This node's pretty-printed JSON text, at nesting level `depth`: each
-	/// non-empty object's members & each non-empty array's elements on their own
-	/// lines, indented by `indentation` per nesting level, with 1 space after
-	/// each `:` between a key & its value.
-	private func prettyPrinted(indentation: String, depth: Int) -> String {
-		let memberIndentation = String(repeating: indentation, count: depth + 1)
-		let closingIndentation = String(repeating: indentation, count: depth)
-		return switch self {
-		case let .array(array) where !array.elements.isEmpty:
-			"[\n"
-				+ array.elements
-				.map { memberIndentation + $0.prettyPrinted(indentation: indentation, depth: depth + 1) }
-				.joined(separator: ",\n")
-				+ "\n\(closingIndentation)]"
-		case let .object(object) where !object.fields.isEmpty:
-			"{\n"
-				+ object.fields
-				.map { key, value in
-					"\(memberIndentation)\(Self.string(key.rawValue)): "
-						+ value.prettyPrinted(indentation: indentation, depth: depth + 1)
+				default:
+					String(scalar)
 				}
-				.joined(separator: ",\n")
-				+ "\n\(closingIndentation)}"
-		default:
-			description
-		}
+			}
+			.joined()
+			+ "\""
 	}
 }
 

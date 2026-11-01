@@ -127,6 +127,12 @@ private extension MASTests {
 	}
 
 	@Test
+	func `json escapes quotes, backslashes, control characters & DEL in keys & values, but not slashes`() {
+		let node = JSON.Node.object(.init([("\u{1B}k", .string("\"\\/\u{08}\t\n\u{0C}\r\u{01}\u{7F}\u{9B}é"))]))
+		#expect(node.rendered(jsonConfig: .default) == #"{"\u001bk":"\"\\/\b\t\n\f\r\u0001\u007f\u009bé"}"#)
+	}
+
+	@Test
 	func `json escapes non-ASCII characters in keys & values as UTF-16 code units iff e`() throws {
 		let node = JSON.Node.object(.init([("é", .string("ö😀\n"))]))
 		#expect(node.rendered(jsonConfig: try parseJSONConfig("e")) == #"{"\u00e9":"\u00f6\ud83d\ude00\n"}"#)
