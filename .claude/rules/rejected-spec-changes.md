@@ -15,3 +15,6 @@ rejecting it: …").
 
 When an overruling is declined, add its argument & the reason for declining it
 to the rule.
+
+Record a spec change deferred to a later version in `Temp/todo.md`, never here,
+because it is not rejected.
