@@ -151,7 +151,7 @@ field order's `<field-order-sort-option-set>` uses to choose between names &
 labels), are those of non-path string content.
 
 Version fields' default sort options compare
-[versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s use the
+[versions](fields.md#sort-number-segments) (`v`), and `formattedPrice`'s use the
 [App Store locale's conventions as `N`'s base conventions & include
 `a`](#price-sorting), but they otherwise match the following:
 
