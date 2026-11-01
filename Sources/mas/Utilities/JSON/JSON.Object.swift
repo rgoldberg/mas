@@ -59,13 +59,14 @@ extension JSON.Object {
 	/// fields.md's "Members") ordered by `fieldOrder` & `keyValueConfig`
 	/// (key-value.md): each row is its key (styled per `keyValueConfig`), its
 	/// leading spacing, its leader (iff any), its trailing spacing, then its
-	/// value. A leader's width is the item's widest key's width, less its own
-	/// key's width, plus the leader pattern's width. Each control character in a
-	/// key renders as in a table cell (e.g., a line terminator as `⏎`), while
-	/// each line terminator in a value renders as a newline (e.g., a CRLF as 1
-	/// LF), each such non-empty later line indented by spaces to the value's
-	/// start. Each other control character in a value except a tab renders as in
-	/// a key (e.g., an ESC as `␛`). Each row's width is that of its widest line.
+	/// value. A leader's width is the item's widest rendered key's width, less
+	/// its own key's width, plus the leader pattern's width. Each control
+	/// character in a key renders as in a table cell (e.g., a line terminator as
+	/// `⏎`), while each line terminator in a value renders as a newline (e.g., a
+	/// CRLF as 1 LF), each such non-empty later line indented by spaces to the
+	/// value's start. Each other control character in a value except a tab
+	/// renders as in a key (e.g., an ESC as `␛`). Each row's width is that of its
+	/// widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)

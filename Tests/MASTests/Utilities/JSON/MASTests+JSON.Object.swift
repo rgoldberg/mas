@@ -103,6 +103,21 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a leader's width is measured from its item's rendered keys, excluding omitted pairs' keys`() throws {
+		#expect(
+			try JSON.Object([("a", .string("1")), ("b", .null), ("c", .string("2"))])
+				.keyValueRows(
+					fieldSpecs: [("a", "a\t"), ("b", "bbbb"), ("c", "c")]
+						.map { .init(name: $0, label: $1, format: .default(fieldName: $0), sortSpec: nil) },
+					fieldOrder: .positional(.init()),
+					keyValueConfig: parseKeyValueConfig("F.:L:R:"),
+				)
+				.map(\.row)
+				== ["a␉.1", "c..2"],
+		)
+	}
+
+	@Test
 	func `table & sorting use a field's last member, while key-value & JSON output each member`() throws {
 		let object = JSON.Object([("a", .string("x")), ("b", .string("y")), ("a", .string("z"))])
 		let fieldSpecs = try resolvedFieldsConfig(
