@@ -33,8 +33,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 9. - entire
    - its entirety
    - whole match: a Swift Regex match of an entire string
-   - whole: integral (e.g., "its whole milliseconds")
-   - REJECTED: entirety of / whole (for entire)
+   - whole: integral (e.g., "its whole milliseconds"); also entire, of what a
+     Swift Regex must match (e.g., "that the whole value must match"), as in a
+     whole match
+   - REJECTED: entirety of / whole (for entire, except of what a Swift Regex
+     must match)
 10. - via: indirect mechanisms, routes, references, or syntactic pathways (e.g.,
       "referenced via index", "reached via rule")
     - by: operational agents, methods, or sorting criteria (e.g., "sorted by
