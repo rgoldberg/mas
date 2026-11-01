@@ -11,3 +11,5 @@ disable-model-invocation: true
    changes](../../rules/rejected-spec-changes.md).
 2. Report every problem in them, e.g.: typos, incorrectness, inconsistencies,
    clarity problems, missing functionality & overly complex functionality.
+3. Record each rejected fix, with its reason, as a rule in the rejected spec
+   changes.
