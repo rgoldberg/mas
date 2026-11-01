@@ -68,7 +68,11 @@ only after `=` (e.g., `--json[=<json-config>]`).
    to omit each [unlisted field](../Specs/fields.md#unlisted-fields) that an
    item lacks, because mas gives every item a field spec for each unlisted field
    of any item, while a custom `default` preset may give an absent field a
-   formatted value that is not absent (e.g., `:%N%n+none+`).
+   formatted value that is not absent (e.g., `:%N%n+none+`). Supporting them
+   also needs each [named format](../Specs/fields-format.md#named-formats) to be
+   checked per its error comment (e.g., that a `<named-string-format>`'s
+   preset's format conforms to `%S`'s `<conditional-block>`), since every
+   built-in preset's format is `%i`, which conforms to every block.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context

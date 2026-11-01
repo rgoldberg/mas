@@ -89,8 +89,8 @@ private struct FormatParser {
 		// swiftlint:disable:next todo
 		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom
 		//  presets are persisted, use the format of the preset that
-		//  `presetAlignment(named:)` resolves, checking that its output has the
-		//  input type of the 1st succeeding `<value-transform>` in its pipeline
+		//  `presetAlignment(named:)` resolves, checking that it conforms to the
+		//  block that its `<named-*-format>`'s error comment names
 		_ = try presetAlignment(
 			named: parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored),
 		)
