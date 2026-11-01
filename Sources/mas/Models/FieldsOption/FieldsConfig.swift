@@ -120,11 +120,11 @@ struct BaseIncludesAllFieldsConfig: FieldsConfig { // swiftlint:disable:this one
 // MARK: - Field ordering (fields.md)
 
 enum FieldOrder: Equatable { // swiftlint:disable:this one_declaration_per_file
-	/// `<source>` `"O"`: sorts by label, per the `<sort-option-set>`, ties
-	/// ordered per `tiebreakDirection`.
+	/// `<source>` `"O"`: sorts by label, per the `<field-order-sort-option-set>`,
+	/// ties ordered per `tiebreakDirection`.
 	case byLabel(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
-	/// `<source>` `"I"`: sorts by name, per the `<sort-option-set>`, ties ordered
-	/// per `tiebreakDirection`.
+	/// `<source>` `"I"`: sorts by name, per the `<field-order-sort-option-set>`,
+	/// ties ordered per `tiebreakDirection`.
 	case byName(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
 	/// `<document-order>` (`"D"`): each item's fields in the order of its own
 	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
@@ -179,7 +179,7 @@ extension FieldOrder {
 	/// independently; see `itemMembers(_:for:)`) are identity. `.positional`
 	/// orders `unlisted`, as unpositioned fields, reversed iff `.descending`, 1st
 	/// iff `isUnpositionedFieldFirst`, else last. `.byName` / `.byLabel` sort per
-	/// their `<sort-option-set>` (direction included:
+	/// their `<field-order-sort-option-set>` (direction included:
 	/// `SortOptionSet.compare(_:_:)` already accounts for it), ordering ties by
 	/// position, or by reverse position iff `tiebreakDirection` is `.descending`.
 	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec]) -> [FieldSpec] {

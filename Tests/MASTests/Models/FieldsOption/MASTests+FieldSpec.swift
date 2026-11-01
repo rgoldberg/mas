@@ -616,12 +616,15 @@ private extension MASTests {
 		#expect(throws: ParsingError.documentOrderUnsupportedForTable) { try parseFieldsConfig(value) }
 	}
 
-	@Test
-	func `an overridden document-order is supported for table output`() throws {
-		let overridden = try parseFieldsConfig("/D-P")
-		let positional = try parseFieldsConfig("/-P")
-		#expect(overridden.fieldOrder == positional.fieldOrder)
-		#expect(overridden.fieldSpecs == positional.fieldSpecs)
+	@Test(arguments: [("/D-P", "/-P"), ("@none/-", "@none/P-")])
+	func `an overridden document-order is supported for table output, as is a positional direction set`(
+		value: String,
+		equivalent: String,
+	) throws {
+		let config = try parseFieldsConfig(value)
+		let equivalentConfig = try parseFieldsConfig(equivalent)
+		#expect(config.fieldOrder == equivalentConfig.fieldOrder)
+		#expect(config.fieldSpecs == equivalentConfig.fieldSpecs)
 	}
 
 	@Test
@@ -685,6 +688,11 @@ private extension MASTests {
 			("/aPf", "/zP", "/zPf"),
 			("/aP", "/D", "/D"),
 			("/aD", "/P", "/P"),
+			("/aP", "/-", "/aP-"),
+			("/aP-", "/+", "/aP+"),
+			("/D-a/-", "/+", "/D+a/-"),
+			("/D", "/-/-", "/D-/-"),
+			("/Ii", "/-", "/Ii-"),
 		],
 	)
 	func `a field order section retains the working field order's options iff of the same alternative`(
@@ -731,6 +739,7 @@ private extension MASTests {
 			("/I+/", .missingFieldOrderTiebreakerDirection),
 			("/P/-", .tiebreakerUnsupportedForPositionalOrder),
 			("/DP/+", .tiebreakerUnsupportedForPositionalOrder),
+			("@none/-/+", .tiebreakerUnsupportedForPositionalOrder),
 		],
 	)
 	func `invalid field-order-tiebreaker is an error`(value: String, error: ParsingError) {

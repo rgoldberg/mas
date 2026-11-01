@@ -528,19 +528,24 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 
 	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
 	/// a required `<field-order-option-set>`, either a
+	/// `<field-order-direction-set>` (only `<direction>`s), a
 	/// `<positional-order-option-set>` / `<document-order-option-set>`
 	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
 	/// respectively, plus `<unpositioned-field-comparison>`s &
-	/// `<unpositioned-field-placement>`s, last wins per setting) or a
-	/// `<sort-option-set>` (whose `<source>` defaults to `<output>`, i.e., sorted
-	/// by label), the latter 2 followed by an optional
-	/// `<field-order-tiebreaker>`. The alternatives are disjoint: each but
-	/// `<sort-option-set>` contains an `<order>` letter, which is no
-	/// `<sort-option>`. Each option that a `<document-order-option-set>` or a
-	/// `<sort-option-set>` omits, including its tiebreak direction, retains
-	/// `inheritedFieldOrder`'s iff that is also `.document` or also sorts,
-	/// respectively; each option that a `<positional-order-option-set>` omits
-	/// retains `inheritedFieldOrder`'s iff that is also `.positional`.
+	/// `<unpositioned-field-placement>`s, last wins per setting), or a
+	/// `<field-order-sort-option-set>` (whose `<source>` defaults to `<output>`,
+	/// i.e., sorted by label), each but `<positional-order-option-set>` followed
+	/// by an optional `<field-order-tiebreaker>`. The alternatives are disjoint:
+	/// each but `<field-order-direction-set>` & `<field-order-sort-option-set>`
+	/// contains an `<order>` letter, which is no `<sort-option>`, while
+	/// `<field-order-sort-option-set>` contains a `<sort-option>` other than
+	/// `<direction>`. A `<field-order-direction-set>` is parsed as the same
+	/// alternative as `inheritedFieldOrder`, as if its `<order>` letter, if any,
+	/// preceded it. Each option that a `<document-order-option-set>` or a
+	/// `<field-order-sort-option-set>` omits, including its tiebreak direction,
+	/// retains `inheritedFieldOrder`'s iff that is also `.document` or also
+	/// sorts, respectively; each option that a `<positional-order-option-set>`
+	/// omits retains `inheritedFieldOrder`'s iff that is also `.positional`.
 	mutating func parseFieldOrderSection(_ input: inout Substring, inheriting inheritedFieldOrder: FieldOrder)
 	throws(ParsingError) -> FieldOrder {
 		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
@@ -555,7 +560,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		else {
 			throw .missingFieldOrderOptionSet
 		}
-		guard let order = orderOptionSetOrder(input) else {
+		guard let order = orderOptionSetOrder(input, inheriting: inheritedFieldOrder) else {
 			let inherited: (optionSet: SortOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
 				switch inheritedFieldOrder {
 				case let .byLabel(optionSet, tiebreakDirection), let .byName(optionSet, tiebreakDirection):
@@ -802,30 +807,40 @@ private func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingE
 /// is a `<positional-order-option-set>` / `<document-order-option-set>`: every
 /// top-level character is a `<direction>`, an
 /// `<unpositioned-field-comparison>`, an `<unpositioned-field-placement>`, or
-/// an `<order>`, with at least 1 `<order>` (last wins). `nil` means it is a
-/// `<sort-option-set>` instead: the alternatives share no valid text (a
-/// sequence with no `<order>` can only be `<sort-option-set>`), so checking
+/// an `<order>`, with at least 1 `<order>` (last wins); or iff it is a
+/// `<field-order-direction-set>` (every top-level character is a `<direction>`)
+/// & `inheritedFieldOrder` is `.positional` / `.document`, as whose alternative
+/// it is parsed. `nil` means it is a `<field-order-sort-option-set>`, or a
+/// `<field-order-direction-set>` parsed as one, instead: the alternatives share
+/// no valid text (a sequence with no `<order>` & a `<sort-option>` other than
+/// `<direction>` can only be `<field-order-sort-option-set>`), so checking
 /// without consuming `input` is safe.
-private func orderOptionSetOrder(_ input: Substring) -> Character? {
+private func orderOptionSetOrder(_ input: Substring, inheriting inheritedFieldOrder: FieldOrder) -> Character? {
 	var order = Character?.none
+	var isDirectionSet = true
 	for char in input {
 		if char == fieldSpecSeparator || itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			break
 		}
-		guard orderOptionSet.contains(char) else {
-			guard
-				char.isWhitespace
-				|| SortOptionSet.Direction(rawValue: char) != nil
-				|| OrderOptionSet.UnpositionedFieldComparison(rawValue: char) != nil
-				|| OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) != nil
-			else {
-				return nil
-			}
-			continue
+		if orderOptionSet.contains(char) {
+			order = char
+		} else if
+			OrderOptionSet.UnpositionedFieldComparison(rawValue: char) != nil
+			|| OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) != nil
+		{
+			isDirectionSet = false
+		} else if !char.isWhitespace, SortOptionSet.Direction(rawValue: char) == nil {
+			return nil
 		}
-		order = char
 	}
-	return order
+	return switch (order, inheritedFieldOrder) {
+	case (nil, .document) where isDirectionSet:
+		documentOrderOption
+	case (nil, .positional) where isDirectionSet:
+		positionalOrderOption
+	default:
+		order
+	}
 }
 
 // MARK: Private: field-spec-reference resolution

@@ -237,11 +237,13 @@ working fields config's value for the same setting, if any:
 - In `<field-order-option-set>`, outside `<field-order-tiebreaker>`: that of the
   field order, iff it is also per the same one of
   `<positional-order-option-set>`, `<document-order-option-set>` &
-  `<sort-option-set>`.
+  `<field-order-sort-option-set>` (as a
+  [`<field-order-direction-set>`](#field-order) always is).
 - In `<field-order-tiebreaker>`: that of the field order's
   `<field-order-tiebreaker>`, iff the field order is also per the same one of
-  `<document-order-option-set>` & `<sort-option-set>` (e.g., if `x` has `/I+/-`,
-  `@x/I` tiebreaks descending, while `@x/D` tiebreaks ascending).
+  `<document-order-option-set>` & `<field-order-sort-option-set>` (e.g., if `x`
+  has `/I+/-`, `@x/I` & `@x/+` tiebreak descending, while `@x/D` tiebreaks
+  ascending).
 
 So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
 `name=x`) or option (e.g., `<direction>` in `name/1`, in `name/1Ii`, or in
@@ -385,10 +387,13 @@ field-order-section-prefix = "/"
 
 field-order-option-set        =
   <positional-order-option-set>
-  | ( <document-order-option-set> | <sort-option-set> ) [ <field-order-tiebreaker> ]
+  | ( <field-order-direction-set> | <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
   (* default source: <output>; inherited *)
 field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
+
+field-order-direction-set   = <direction>+
+field-order-sort-option-set = [ <direction>+ ] <non-direction-sort-option> [ <sort-option>+ ]
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
 document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: key-value or JSON output *)
@@ -424,9 +429,19 @@ The **field order**, in which each item's fields are output, is per
   field](#unlisted-fields) has no position, so it is **unpositioned**;
   unpositioned fields are ordered among themselves by their 1st occurrence in
   the input, reversed iff `<descending>`.
-- `<sort-option-set>`: if `<source>` is:
+- `<field-order-sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.
   - `<output>`: sorted by label.
+- `<field-order-direction-set>`: per the same one of
+  `<positional-order-option-set>`, `<document-order-option-set>` &
+  `<field-order-sort-option-set>` as the working fields config's field order,
+  setting only its `<direction>`, because a direction alone is meant to reverse
+  or restore the working field order, not to replace it (e.g., if `x` has `/aP`,
+  `@x/-` ≡ `@x/P-`, retaining `a`; if `x` has `/D`, `@x/-` ≡ `@x/D-`; if `x` has
+  `/I`, `@x/-` sorts by name, descending). A `<field-order-tiebreaker>` after a
+  `<field-order-direction-set>` that is per `<positional-order-option-set>` is
+  an error, because `<positional-order-option-set>` takes none (e.g., if `x` has
+  `/P`, `@x/-/+` is an error).
 
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also
@@ -442,8 +457,8 @@ in `@all/P-.+@1`, `@1` references `all`'s last field spec). A
 `<positional-order-option-set>`'s `<direction>` reverses those positions iff it
 differs from the working fields config's field order's `<direction>`, which is
 `<ascending>` unless that field order is `<positional-order>` (e.g., if `x` has
-`/P-`, each of `@x/P-` & `@x/P` outputs `x`'s field order, while `@x/P+`
-reverses it).
+`/P-`, each of `@x/P-`, `@x/P` & `@x/-` outputs `x`'s field order, while each of
+`@x/P+` & `@x/+` reverses it).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
@@ -860,10 +875,10 @@ while `--fields name/I,version/101I` sorts them by `name`, then by `version`).
 ##### Sort Options
 
 ```ebnf
-sort-option-set = <sort-option>+
-sort-option     =
+sort-option-set           = <sort-option>+
+sort-option               = <direction> | <non-direction-sort-option>
+non-direction-sort-option =
   <source>
-  | <direction>
   | <case-sensitivity>
   | <locale>
   | <number-segments>

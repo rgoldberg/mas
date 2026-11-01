@@ -438,6 +438,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - positional order: field specs ordered by position (`<positional-order>`)
     - document order: field specs ordered by their fields' order in an input
       item (`<document-order>`)
+    - field-order direction set: only `<direction>`s, which set only the working
+      field order's direction (`<field-order-direction-set>`)
     - REJECTED: base fields config order / listed order / original input order /
       source order
 76. - leader: the fill between a key & its value (`<leader-setting>`)

@@ -147,8 +147,8 @@ The **version fields** are `minimumOSVersion`, `newVersion` & `version`. `path`
 is the sole field whose string content is a path.
 
 Field names' & labels' default sort options, other than `<source>` (which a
-field order's `<sort-option-set>` uses to choose between names & labels), are
-those of non-path string content.
+field order's `<field-order-sort-option-set>` uses to choose between names &
+labels), are those of non-path string content.
 
 Version fields' default sort options compare
 [versions](fields.md#sort-number-segments) (`v`) & `formattedPrice`'s use the
