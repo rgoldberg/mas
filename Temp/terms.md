@@ -64,7 +64,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - inherited value: a transitively absent `(* inherited *)` nonterminal's
       value from the config onto which syntax text is overlaid
       ([defined](../Specs/ebnf.md#inherited-comments))
-    - existing: already in the working fields config
+    - existing: that exists (e.g., "an existing preset"), or already in the
+      working fields config
     - previous: the immediately preceding one (`$previous$`)
     - REJECTED: prior / predefined
 14. - side
