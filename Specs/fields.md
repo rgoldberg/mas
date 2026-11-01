@@ -238,7 +238,7 @@ working fields config's value for the same setting, if any:
   field order, iff it is also per the same one of
   `<positional-order-option-set>`, `<document-order-option-set>` &
   `<field-order-sort-option-set>` (as a
-  [`<field-order-direction-set>`](#field-order) always is).
+  [`<field-order-adjustment-set>`](#field-order) always is).
 - In `<field-order-tiebreaker>`: that of the field order's
   `<field-order-tiebreaker>`, iff the field order is also per the same one of
   `<document-order-option-set>` & `<field-order-sort-option-set>` (e.g., if `x`
@@ -387,13 +387,16 @@ field-order-section-prefix = "/"
 
 field-order-option-set        =
   <positional-order-option-set>
-  | ( <field-order-direction-set> | <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
+  | ( <field-order-adjustment-set> | <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
   (* default source: <output>; inherited *)
 field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
 field-order-tiebreaker-prefix = "/"
 
-field-order-direction-set   = <direction>+
-field-order-sort-option-set = [ <direction>+ ] <non-direction-sort-option> [ <sort-option>+ ]
+field-order-adjustment-set  = <field-order-adjustment>+
+field-order-sort-option-set = [ <field-order-adjustment>+ ] <non-adjustment-sort-option> [ <sort-option>+ ]
+
+field-order-adjustment     = <direction> | <nonconforming-comparison> | <nonconforming-placement>
+non-adjustment-sort-option = <source> | <case-sensitivity> | <locale> | <number-segments> | <chronologic-segments> | <boundaries> | <text-order>
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
 document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: key-value or JSON output *)
@@ -432,16 +435,24 @@ The **field order**, in which each item's fields are output, is per
 - `<field-order-sort-option-set>`: if `<source>` is:
   - `<input>`: sorted by name.
   - `<output>`: sorted by label.
-- `<field-order-direction-set>`: per the same one of
+- `<field-order-adjustment-set>`: per the same one of
   `<positional-order-option-set>`, `<document-order-option-set>` &
   `<field-order-sort-option-set>` as the working fields config's field order,
-  setting only its `<direction>`, because a direction alone is meant to reverse
-  or restore the working field order, not to replace it (e.g., if `x` has `/aP`,
-  `@x/-` ≡ `@x/P-`, retaining `a`; if `x` has `/D`, `@x/-` ≡ `@x/D-`; if `x` has
-  `/I`, `@x/-` sorts by name, descending). A `<field-order-tiebreaker>` after a
-  `<field-order-direction-set>` that is per `<positional-order-option-set>` is
-  an error, because `<positional-order-option-set>` takes none (e.g., if `x` has
-  `/P`, `@x/-/+` is an error).
+  setting only its `<direction>` & its comparison & placement of the fields or
+  values that it cannot order (unpositioned fields or nonconforming values),
+  because an adjustment alone is meant to adjust the working field order, not to
+  replace it. Per `<positional-order-option-set>` or
+  `<document-order-option-set>`, each `<nonconforming-comparison>` &
+  `<nonconforming-placement>` sets `<unpositioned-field-comparison>` &
+  `<unpositioned-field-placement>`, respectively, to the alternative of its
+  letter, while `<all-conforming>` is an error, because no field order can order
+  an unpositioned field as a positioned one. E.g., if `x` has `/aP`, `@x/-` ≡
+  `@x/aP-` & `@x/f` ≡ `@x/aPf`; if `x` has `/D`, `@x/-` ≡ `@x/D-`; if `x` has
+  `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/k` is an
+  error. A `<field-order-tiebreaker>` after a `<field-order-adjustment-set>`
+  that is per `<positional-order-option-set>` is an error, because
+  `<positional-order-option-set>` takes none (e.g., if `x` has `/P`, `@x/-/+` is
+  an error).
 
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also

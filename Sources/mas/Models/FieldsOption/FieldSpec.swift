@@ -89,6 +89,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 // MARK: Errors
 
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	case allConformingUnsupported
 	case coercionNotSupported(Character)
 	case danglingEscape
 	case documentOrderUnsupportedForTable
@@ -133,6 +134,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 
 	var description: String {
 		switch self {
+		case .allConformingUnsupported:
+			"<all-conforming> 'k' is not supported for <positional-order> 'P' or <document-order> 'D'"
 		case let .coercionNotSupported(letter):
 			"<coercion> is not supported for: \(letter)"
 		case .danglingEscape:
@@ -528,7 +531,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 
 	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
 	/// a required `<field-order-option-set>`, either a
-	/// `<field-order-direction-set>` (only `<direction>`s), a
+	/// `<field-order-adjustment-set>` (only `<field-order-adjustment>`s), a
 	/// `<positional-order-option-set>` / `<document-order-option-set>`
 	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
 	/// respectively, plus `<unpositioned-field-comparison>`s &
@@ -536,12 +539,15 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `<field-order-sort-option-set>` (whose `<source>` defaults to `<output>`,
 	/// i.e., sorted by label), each but `<positional-order-option-set>` followed
 	/// by an optional `<field-order-tiebreaker>`. The alternatives are disjoint:
-	/// each but `<field-order-direction-set>` & `<field-order-sort-option-set>`
+	/// each but `<field-order-adjustment-set>` & `<field-order-sort-option-set>`
 	/// contains an `<order>` letter, which is no `<sort-option>`, while
-	/// `<field-order-sort-option-set>` contains a `<sort-option>` other than
-	/// `<direction>`. A `<field-order-direction-set>` is parsed as the same
-	/// alternative as `inheritedFieldOrder`, as if its `<order>` letter, if any,
-	/// preceded it. Each option that a `<document-order-option-set>` or a
+	/// `<field-order-sort-option-set>` contains a `<non-adjustment-sort-option>`.
+	/// A `<field-order-adjustment-set>` is parsed as the same alternative as
+	/// `inheritedFieldOrder`, as if its `<order>` letter, if any, preceded it,
+	/// its `<nonconforming-comparison>`s & `<nonconforming-placement>`s then
+	/// setting the same-letter `<unpositioned-field-comparison>` &
+	/// `<unpositioned-field-placement>`, except `<all-conforming>`, an error.
+	/// Each option that a `<document-order-option-set>` or a
 	/// `<field-order-sort-option-set>` omits, including its tiebreak direction,
 	/// retains `inheritedFieldOrder`'s iff that is also `.document` or also
 	/// sorts, respectively; each option that a `<positional-order-option-set>`
@@ -599,6 +605,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				optionSet.unpositionedFieldComparison = comparison
 			} else if let placement = OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) {
 				optionSet.unpositionedFieldPlacement = placement
+			} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
+				throw .allConformingUnsupported
 			}
 			input.removeFirst()
 		}
@@ -808,38 +816,42 @@ private func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingE
 /// top-level character is a `<direction>`, an
 /// `<unpositioned-field-comparison>`, an `<unpositioned-field-placement>`, or
 /// an `<order>`, with at least 1 `<order>` (last wins); or iff it is a
-/// `<field-order-direction-set>` (every top-level character is a `<direction>`)
-/// & `inheritedFieldOrder` is `.positional` / `.document`, as whose alternative
-/// it is parsed. `nil` means it is a `<field-order-sort-option-set>`, or a
-/// `<field-order-direction-set>` parsed as one, instead: the alternatives share
-/// no valid text (a sequence with no `<order>` & a `<sort-option>` other than
-/// `<direction>` can only be `<field-order-sort-option-set>`), so checking
-/// without consuming `input` is safe.
+/// `<field-order-adjustment-set>` (every top-level character is a
+/// `<field-order-adjustment>`: a `<direction>`, a `<nonconforming-comparison>`,
+/// or a `<nonconforming-placement>`) & `inheritedFieldOrder` is `.positional` /
+/// `.document`, as whose alternative it is parsed. `nil` means it is a
+/// `<field-order-sort-option-set>`, or a `<field-order-adjustment-set>` parsed
+/// as one, instead: the alternatives share no valid text (a sequence with no
+/// `<order>` & a `<non-adjustment-sort-option>` can only be
+/// `<field-order-sort-option-set>`, as can one with an `<order>` &
+/// `<all-conforming>`), so checking without consuming `input` is safe.
 private func orderOptionSetOrder(_ input: Substring, inheriting inheritedFieldOrder: FieldOrder) -> Character? {
 	var order = Character?.none
-	var isDirectionSet = true
+	var hasAllConforming = false
 	for char in input {
 		if char == fieldSpecSeparator || itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			break
 		}
 		if orderOptionSet.contains(char) {
 			order = char
+		} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
+			hasAllConforming = true
 		} else if
-			OrderOptionSet.UnpositionedFieldComparison(rawValue: char) != nil
-			|| OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) != nil
+			!char.isWhitespace,
+			SortOptionSet.Direction(rawValue: char) == nil,
+			OrderOptionSet.UnpositionedFieldComparison(rawValue: char) == nil,
+			OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) == nil
 		{
-			isDirectionSet = false
-		} else if !char.isWhitespace, SortOptionSet.Direction(rawValue: char) == nil {
 			return nil
 		}
 	}
 	return switch (order, inheritedFieldOrder) {
-	case (nil, .document) where isDirectionSet:
+	case (nil, .document):
 		documentOrderOption
-	case (nil, .positional) where isDirectionSet:
+	case (nil, .positional):
 		positionalOrderOption
 	default:
-		order
+		hasAllConforming ? nil : order
 	}
 }
 

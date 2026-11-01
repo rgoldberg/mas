@@ -577,8 +577,8 @@ private extension MASTests {
 		#expect(throws: ParsingError.documentOrderUnsupportedForTable) { try parseFieldsConfig(value) }
 	}
 
-	@Test(arguments: [("/D-P", "/-P"), ("@none/-", "@none/P-")])
-	func `an overridden document-order is supported for table output, as is a positional direction set`(
+	@Test(arguments: [("/D-P", "/-P"), ("@none/-", "@none/P-"), ("@none/af", "@none/aPf")])
+	func `an overridden document-order is supported for table output, as is a positional adjustment set`(
 		value: String,
 		equivalent: String,
 	) throws {
@@ -637,6 +637,12 @@ private extension MASTests {
 			("/D-a/-", "/+", "/D+a/-"),
 			("/D", "/-/-", "/D-/-"),
 			("/Ii", "/-", "/Ii-"),
+			("/aP", "/f", "/aPf"),
+			("/aP-", "/zr", "/zP-r"),
+			("/D-", "/a", "/D-a"),
+			("/D", "/af-/-", "/D-af/-"),
+			("/Ii", "/a", "/Iia"),
+			("/Iiz", "/kf", "/Iikf"),
 		],
 	)
 	func `a field order section retains the working field order's options iff of the same alternative`(
@@ -658,6 +664,22 @@ private extension MASTests {
 		#expect(fieldOrder == (try parseFieldsConfig(equivalent, outputFormat: .json(.default)).fieldOrder))
 	}
 
+	@Test(arguments: ["/P", "/D", "/aP-"])
+	func `all-conforming is an error in an adjustment set per positional-order or document-order`(base: String) throws {
+		let standard = SelectedFieldsConfig(
+			fieldSpecs: standardFixture.fieldSpecs,
+			fieldOrder: try parseFieldsConfig(base, outputFormat: .json(.default)).fieldOrder,
+		)
+		#expect(throws: ParsingError.allConformingUnsupported) {
+			try resolvedFieldsConfig(
+				from: "@default@unsuffixed/ak",
+				standard: standard,
+				all: allFixture,
+				outputFormat: .json(.default),
+			)
+		}
+	}
+
 	@Test(
 		arguments: [
 			("/D/", ParsingError.missingFieldOrderTiebreakerDirection),
@@ -666,6 +688,7 @@ private extension MASTests {
 			("/P/-", .tiebreakerUnsupportedForPositionalOrder),
 			("/DP/+", .tiebreakerUnsupportedForPositionalOrder),
 			("@none/-/+", .tiebreakerUnsupportedForPositionalOrder),
+			("@none/a/+", .tiebreakerUnsupportedForPositionalOrder),
 		],
 	)
 	func `invalid field-order-tiebreaker is an error`(value: String, error: ParsingError) {
