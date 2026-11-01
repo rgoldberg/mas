@@ -687,3 +687,41 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        for a C0 control character or DEL (e.g., `␉` for a tab;
        [used](../Specs/table.md#table-config))
      - REJECTED: control code / control picture (for a Control Pictures symbol)
+116. - reference fields config: a semi-mutable copy of the baseline fields
+       config, whose order of field specs `<field-spec-edits-section>` cannot
+       change, in which each removed field spec is replaced with `null`; each
+       `<field-spec-reference>` index references its field specs
+       ([defined](../Specs/fields.md#field-spec-references))
+117. - digit group: a run of digits of a number's integer part, between each 2
+       of which `numberFormat` inserts `<digit-group-separator>`
+       ([defined](../Specs/fields-format.md#numberformat))
+     - primary group: the least significant digit group, of `<digit-group-size>`
+       digits
+     - secondary group: each other digit group, of
+       `<secondary-digit-group-size>` digits
+     - base conventions: the conventions from which number format arguments
+       default: those that `<locale-identifier>` identifies, else those of the
+       system locale, the canonical conventions, or `<locale>`'s, per use
+       ([defined](../Specs/fields-format.md#numberformat))
+118. - abort: verb; of formatting, make the formatted value absent, ignoring the
+       rest of `<format-block>`
+       ([defined](../Specs/fields-format.md#success--failure))
+119. - coerced value: the value, at a matcher's type, that `<coercion>` parses
+       from a string, replacing the input
+       ([defined](../Specs/fields-format.md#coercion))
+     - trivia: the text around the number that a number coercion allows
+       ([defined](../Specs/fields-format.md#coercion))
+     - trivia prefix / trivia suffix: the trivia before / after the number
+120. - version: 1 or more `.`-separated components, each an ASCII digit followed
+       by any Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
+       `1.2.3-beta`; [defined](../Specs/fields-format.md#version-formatting))
+     - version fields: `minimumOSVersion`, `newVersion` & `version`
+       ([defined](../Specs/mas.md#default-sort-options))
+121. - App Store locale: the locale of the App Store region that mas guesses
+       from the macOS region, because the App Store's locale cannot be
+       determined programmatically ([defined](../Specs/mas.md#price-sorting))
+122. - display command: a command whose primary function is to display data
+       ([defined](../Specs/configs.md#display-commands))
+     - command list: the list of commands in the command line from root to leaf
+       (the command that actually runs)
+       ([defined](../Specs/configs.md#command-lists))
