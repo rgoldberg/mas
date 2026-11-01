@@ -129,8 +129,9 @@ extension [JSON.Object] {
 	/// e.g., via a `<failure-block>`). Each line terminator in a cell renders as
 	/// `⏎`, so each row is 1 line, while each other C0 control character or DEL
 	/// renders as its Control Pictures symbol & each other C1 control character
-	/// as `␛` followed by its ECMA-48 7-bit equivalent. `nil` iff there are no
-	/// items or no field specs, so there is nothing to output.
+	/// as its ECMA-48 7-bit equivalent, with that equivalent's ESC rendered as
+	/// `␛`. `nil` iff there are no items or no field specs, so there is nothing
+	/// to output.
 	func table(fieldSpecs: some Sequence<FieldSpec>, tableConfig: TableConfig) throws(FormattingError) -> String? {
 		guard !isEmpty else {
 			return nil
@@ -264,11 +265,11 @@ private extension String {
 	/// This string with each line terminator (configs.md, e.g., a CRLF as a
 	/// whole) rendered as `⏎`, so it occupies 1 line, each other C0 control
 	/// character or DEL rendered as its Control Pictures symbol (e.g., a tab as
-	/// `␉`) & each other C1 control character rendered as `␛` followed by its
-	/// ECMA-48 7-bit equivalent (e.g., U+009B as `␛[`), per table.md, so it
-	/// neither misaligns a column or a leader nor modifies the terminal's state;
-	/// each tab is kept iff `preservingTabs` (key-value.md: a tab in a value
-	/// misaligns nothing).
+	/// `␉`) & each other C1 control character rendered as its ECMA-48 7-bit
+	/// equivalent, with that equivalent's ESC rendered as `␛` (e.g., U+009B as
+	/// `␛[`), per table.md, so it neither misaligns a column or a leader nor
+	/// modifies the terminal's state; each tab is kept iff `preservingTabs`
+	/// (key-value.md: a tab in a value misaligns nothing).
 	func controlCharactersSymbolized(preservingTabs: Bool = false) -> Self {
 		.init(
 			UnicodeScalarView(
