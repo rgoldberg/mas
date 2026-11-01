@@ -64,11 +64,11 @@ unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-f
 <!--markdownlint-disable line-length-->
 ```ebnf
 named-format               = <name-prefix> <preset-name>
-named-string-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <string-block> *)
-named-number-format        = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <number-block> *)
-named-date-format          = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <date-block> *)
-named-time-only-format     = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <time-only-block> *)
-named-unconditional-format = <name-prefix> <preset-name> (* only for: name of a preset whose format conforms to <unconditional-block> *)
+named-string-format        = <name-prefix> <preset-name> (* error: its preset's format does not conform to <string-block> *)
+named-number-format        = <name-prefix> <preset-name> (* error: its preset's format does not conform to <number-block> *)
+named-date-format          = <name-prefix> <preset-name> (* error: its preset's format does not conform to <date-block> *)
+named-time-only-format     = <name-prefix> <preset-name> (* error: its preset's format does not conform to <time-only-block> *)
+named-unconditional-format = <name-prefix> <preset-name> (* error: its preset's format does not conform to <unconditional-block> *)
 
 named-format-reference =
   <named-format>
@@ -183,7 +183,9 @@ Coercing any value to a string always succeeds, so an
 <!--markdownlint-disable line-length-->
 ```ebnf
 string-transform-pipeline = <string-transform-call>+
-string-transform-call     = <transform-call-prefix> [ <coercion> ] <string-transform>
+string-transform-call     =
+  <transform-call-prefix> [ <coercion> ] <string-transform>
+  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
 string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
 initial-titlecase = "initialTitlecase"
@@ -220,8 +222,12 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 number-transform-pipeline           = <number-transform-call>+
 number-to-string-transform-pipeline = [ <number-transform-call>+ ] <number-to-string-transform-call>
 
-number-transform-call           = <transform-call-prefix> [ <number-coercion> ] <number-transform>
-number-to-string-transform-call = <transform-call-prefix> [ <number-coercion> ] <number-to-string-transform>
+number-transform-call           =
+  <transform-call-prefix> [ <number-coercion> ] <number-transform>
+  (* error: it lacks <number-coercion> & its input is not null, absent, or of its transform's input type *)
+number-to-string-transform-call =
+  <transform-call-prefix> [ <number-coercion> ] <number-to-string-transform>
+  (* error: it lacks <number-coercion> & its input is not null, absent, or of its transform's input type *)
 
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
@@ -270,6 +276,7 @@ number-format-arguments =
   <argument-separator>? [ <digit-group-size> ]
   <argument-separator>? [ <secondary-digit-group-size> ]
   <argument-separator>? [ <decimal-separator> ]
+  (* error: its digit group separator equals its decimal separator, each after defaulting to the base conventions *)
 
 digit-group-separator      = {string}                (* default: {base conventions' digit group separator} *)
 digit-group-size           = {integer: non-negative} (* default: {base conventions' digit group size} *)
@@ -364,11 +371,15 @@ total digits, then renders it in positional notation with exactly
 <!--markdownlint-disable line-length-->
 ```ebnf
 date-transform-pipeline = <date-transform-call>+
-date-transform-call     = <transform-call-prefix> [ <coercion> ] <date-transform>
+date-transform-call     =
+  <transform-call-prefix> [ <coercion> ] <date-transform>
+  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
 date-transform          = <date-only> | <date-time-zone> (* type: date *)
 
 time-only-transform-pipeline = <time-only-transform-call>+
-time-only-transform-call     = <transform-call-prefix> [ <coercion> ] <time-only-transform>
+time-only-transform-call     =
+  <transform-call-prefix> [ <coercion> ] <time-only-transform>
+  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
 time-only-transform          = <time-only-time-zone> (* type: time-only *)
 
 date-only           = "dateOnly"
@@ -539,32 +550,32 @@ block-placeholder =
 string-block-placeholder =
   <placeholder-prefix>
   ( <nullary-string> | <nullary-version> | ( <non-nullary-string> | <non-nullary-version> ) -<string-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 boolean-block-placeholder =
   <placeholder-prefix>
   ( <nullary-coercible-standard-predicate> | <non-nullary-coercible-standard-predicate> -<unconditional-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 number-block-placeholder =
   <placeholder-prefix>
   ( <nullary-number> | <non-nullary-number> -<number-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 date-block-placeholder =
   <placeholder-prefix>
   ( <nullary-date> | <non-nullary-date> -<date-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 time-only-block-placeholder =
   <placeholder-prefix>
   ( <nullary-time-only> | <non-nullary-time-only> -<time-only-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 any-block-placeholder =
   <placeholder-prefix>
   ( <nullary-blank-predicate> | <non-nullary-blank-predicate> -<unconditional-pipeline> <block-terminator> )
-  (* only for: enclosing matcher's <predicate>, nullary or non-nullary *)
+  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
 
 abort-on-success = "-"!
 abort-on-failure = "+"!

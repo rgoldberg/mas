@@ -345,7 +345,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - find: search outcome ("if no match is found")
     - look up / lookup: search a context stack for a named config (name lookup)
 56. - context: resolving named fields configs, formats, etc.; grammatical
-      position (`context-dependent` multiplicity, `(* only for: CONTEXT *)`)
+      position (`context-dependent` multiplicity)
     - circumstances: situation
     - REJECTED: situation
 57. - where: static location
@@ -458,9 +458,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (`<trailing-spacing>`)
     - REJECTED: padding / key-value spacing / before spacing / after spacing
 77. - default comment: a semantic comment specifying an explicit default
+    - error comment: a semantic comment specifying when its nonterminal is an
+      error (`(* error: CONDITION *)`;
+      [defined](../Specs/ebnf.md#error-comments))
     - virtual descendant: a descendant default comment's `DESCENDANT` that is
       not an actual descendant of its `NONTERMINAL`
-    - REJECTED: default value comment
+    - REJECTED: default value comment / applicability comment (for an error
+      comment)
 78. - style specifier: terminal-specific text styling a header row or a key
       (`<style-specifier>`)
     - style prefix: precedes a style specifier (`<style-prefix>`)

@@ -332,12 +332,16 @@ fields configs.
 
 ### Absolute Config
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
 absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <absolute-field-name> <field-modifiers>
-absolute-field-name = {string: field name with no bare "."}
+absolute-field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 An `<absolute-config>` is equivalent to a `<relative-config>` with base fields
 config `none` & a `<field-spec-insertion>` for each of its field specs, e.g.:
@@ -372,7 +376,9 @@ order & item-sort `<direction>`.
 base-fields-config-section        = <base-fields-config-section-prefix> <base-fields-config-name>
 base-fields-config-section-prefix = "@"
 
-base-fields-config-name = {string: fields config name, or a stem followed by "@unsuffixed"} (* default: "default" *)
+base-fields-config-name =
+  {string: fields config name, or a stem followed by "@unsuffixed"}
+  (* default: "default"; error: no fields config of its name is found *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -389,17 +395,23 @@ field-order-option-set        =
   <positional-order-option-set>
   | ( <field-order-adjustment-set> | <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
   (* default source: <output>; inherited *)
-field-order-tiebreaker        = <field-order-tiebreaker-prefix> <direction>
+field-order-tiebreaker        =
+  <field-order-tiebreaker-prefix> <direction>
+  (* error: it follows a <field-order-adjustment-set> that is per <positional-order-option-set> *)
 field-order-tiebreaker-prefix = "/"
 
-field-order-adjustment-set  = <field-order-adjustment>+
+field-order-adjustment-set  =
+  <field-order-adjustment>+
+  (* error: it contains <all-conforming> & is per <positional-order-option-set> or <document-order-option-set> *)
 field-order-sort-option-set = [ <field-order-adjustment>+ ] <non-adjustment-sort-option> [ <sort-option>+ ]
 
 field-order-adjustment     = <direction> | <nonconforming-comparison> | <nonconforming-placement>
 non-adjustment-sort-option = <source> | <case-sensitivity> | <locale> | <number-segments> | <chronologic-segments> | <boundaries> | <text-order>
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
-document-order-option-set   = [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ] (* only for: key-value or JSON output *)
+document-order-option-set   =
+  [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ]
+  (* error: for table output, it sets the resolved fields config's field order *)
 
 order-option          = <order> | <order-trailing-option>
 order-trailing-option = <direction> | <unpositioned-field-comparison> | <unpositioned-field-placement>
@@ -492,13 +504,12 @@ only:
 `<document-order-option-set>` is not supported for table output because items
 may each have different fields, or the same fields in different orders, so a
 table's rows share no document order; key-value & JSON output can order each
-item's fields independently. Its applicability comment is checked only against
-the resolved fields config's field order, so for table output, a
-`<document-order-option-set>` is an error only if it sets that field order
-(e.g., if `x` is `@all/D`, `@x/P` is supported, while `@x` is an error). Because
-`<order>` is last wins, `/DP` is a `<positional-order-option-set>`, so it is
-supported, while `/PD` is a `<document-order-option-set>`, so it is an error for
-table output.
+item's fields independently. Per its error comment, for table output, a
+`<document-order-option-set>` is an error only if it sets the resolved fields
+config's field order (e.g., if `x` is `@all/D`, `@x/P` is supported, while `@x`
+is an error). Because `<order>` is last wins, `/DP` is a
+`<positional-order-option-set>`, so it is supported, while `/PD` is a
+`<document-order-option-set>`, so it is an error for table output.
 
 #### Item Sorting
 
@@ -542,7 +553,7 @@ field-spec-reference = <named-field-spec-reference> | <indexed-field-spec-refere
 named-field-spec-reference   = <reference-field-name> [ <field-occurrence-index-prefix> <field-occurrence-index> ]
 indexed-field-spec-reference = <field-spec-index-prefix> <field-spec-index>
 
-reference-field-name = {string: field name with no bare "."}
+reference-field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
 
 field-occurrence-index-prefix = "@"
 field-occurrence-index        = <index> (* transitive default: {1 iff <reference-field-name> names a field spec or a null; null otherwise} *)
@@ -550,7 +561,7 @@ field-occurrence-index        = <index> (* transitive default: {1 iff <reference
 field-spec-index-prefix = "@"
 field-spec-index        = <index>
 
-index = {integer}
+index = {integer} (* error: its normalized index is invalid *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -604,7 +615,7 @@ field-spec-insertion = <insert> <field-spec-reference> <field-modifiers>
 field-spec-overlay   = <field-spec-reference> <field-modifiers>
 field-spec-move      = <move> <field-spec-reference> <field-modifiers>
 field-spec-hide      = <hide> <field-spec-reference> <field-modifiers>
-field-spec-removal   = <remove> <field-spec-reference>
+field-spec-removal   = <remove> <field-spec-reference> (* error: its <field-spec-reference> resolves to a null *)
 
 insert = "+"
 move   = "%"
@@ -730,7 +741,7 @@ preset-delta     = <preset-prefix> ( <preset-addition> | <preset-removal> ) <pre
 preset-addition  = "+"
 preset-removal   = "-"
 
-preset-name = {string: preset name}
+preset-name = {string: preset name} (* error: no preset of its name is found, or its preset is attached within itself, directly or transitively *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

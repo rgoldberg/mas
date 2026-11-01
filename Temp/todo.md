@@ -94,11 +94,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
    8. A fields config [listing](../Specs/fields.md#unlisted-fields) each field
       that a field name in an extended persistent fields config's
       `<fields-config>` names.
-   9. Checking `<document-order-option-set>`'s applicability comment only
-      against the resolved fields config's [field
-      order](../Specs/fields.md#field-order), not against each persistent fields
-      config that it extends (e.g., for table output, a `y` of `@x/P` for an `x`
-      of `@all/D`).
+   9. Checking `<document-order-option-set>`'s error comment only against the
+      resolved fields config's [field order](../Specs/fields.md#field-order),
+      not against each persistent fields config that it extends (e.g., for table
+      output, a `y` of `@x/P` for an `x` of `@all/D`).
 3. Inherited `--table-config` / `--key-value-config` / `--json-config` settings:
    they currently apply only on top of `standard`, so no implied
    [table](../Specs/table.md#implied-alternatives) or
