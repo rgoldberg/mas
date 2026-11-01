@@ -116,3 +116,16 @@ that no later `<leader-setting>` overrides").
 
 In `Specs/ebnf.md`, keep the **Required** (`&`) outer bare whitespace treatment,
 even while no syntax uses it.
+
+In specs, specify syntax according to the 1st of these that applies:
+
+1. Forbid it in the grammar: syntax that contradicts itself, or cannot mean what
+   it says, when the syntax text alone decides this (e.g., `%MbI++none+`, whose
+   `<failure-block>` is unreachable, or `%S%v++`).
+2. Attach an error comment: such syntax when only context outside the syntax
+   text decides it, or only a comparison of variable tokens' values (e.g., `k`
+   in a `<field-order-adjustment-set>` that is per
+   `<positional-order-option-set>`, or a digit group separator that equals the
+   decimal separator).
+3. Otherwise: allow it, even if it is redundant or has no effect (e.g., `005`,
+   `//00`, `@x.`, or `Ciso,iso:`).
