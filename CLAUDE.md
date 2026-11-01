@@ -168,6 +168,11 @@ with it.
 
 Follow the [spec grammar rules](.claude/rules/specs.md) in specs.
 
+Never propose or make a [rejected spec
+change](.claude/rules/rejected-spec-changes.md) unless the proposal rebuts the
+reason for rejecting it. Record each newly rejected spec change there, with its
+reason.
+
 Keep all prose about input (in specs, code comments, `Temp/*`, etc.)
 input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not
 "as its JSON text"), since input need not be JSON.
