@@ -11,7 +11,7 @@ internal import JSONAST
 // MARK: - Format (fields-format.md)
 
 /// A parsed `<format-block>`, `<success-block>`, or `<failure-block>`: either a
-/// pipeline of `<*-transform-call>`s or a template.
+/// pipeline of `<*transform-call>`s or a template.
 indirect enum Format: Equatable, Sendable {
 	/// A `<*-pipeline>`.
 	case pipeline(Pipeline)
@@ -49,7 +49,7 @@ struct Pipeline: Equatable { // swiftlint:disable:this one_declaration_per_file
 	var calls = [TransformCall]()
 }
 
-/// A `<*-transform-call>`: its `<value-transform>` & its `<coercion>` (or
+/// A `<*transform-call>`: its `<value-transform>` & its `<coercion>` (or
 /// `<number-coercion>`), if any.
 struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let transform: Transform

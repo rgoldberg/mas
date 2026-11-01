@@ -114,7 +114,8 @@ the functionality that needs them from specs & code:
    `1226-fields-no-custom-names`:
    1. [`<string-pipeline>` &
       `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): each is
-      only an alias of a single `<*-transform-pipeline>`.
+      only an alias of a single `<*-transform-pipeline>`, once its
+      `NAMED_FORMAT` is removed.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).

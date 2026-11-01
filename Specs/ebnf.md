@@ -63,7 +63,8 @@ possible occurrences, determined from the grammar instead of the syntax text:
 
 - Inherent scalar, repetition, or tuple: that multiplicity.
 - [Nonterminal reference](#nonterminal-references): its definition's static
-  multiplicity.
+  multiplicity, with each [parameter](#parameterized-nonterminals) replaced by
+  its actual parameter.
 - [Grouping](#groupings), [optional](#optionals), or
   [trailing-omissible](#trailing-omissibles): its child's static multiplicity.
 - [Sequence](#sequences) with exactly 1 variable child: that child's static
@@ -372,6 +373,34 @@ Expressions](#defaults-for-absent-expressions).
 Content-dependent multiplicity.
 
 References the nonterminal `NONTERMINAL`.
+
+#### Parameterized Nonterminals
+
+Defined via a modified meta-grammar supporting [repetitions with
+separators](#repetitions-with-separators-1-or-more) & [literals](#literals):
+
+```ebnf
+NONTERMINAL "(" PARAMETER … "," ")" "=" DEFINITION
+"<" NONTERMINAL "(" ACTUAL_PARAMETER … "," ")" ">"
+```
+
+Content-dependent multiplicity.
+
+A **parameterized nonterminal**'s definition names 1 or more **parameters**,
+each a word of uppercase letters, digits & `_` (as a metavariable is), which
+`DEFINITION` & its semantic comments reference bare (e.g., `PIPELINE`), not as
+nonterminal references.
+
+Each reference passes 1 **actual parameter** per parameter, in order, each an
+expression; it references `DEFINITION` with each parameter replaced by its
+actual parameter, grouped (e.g., given `pair(X) = X "," X`, `<pair("a" | "b")>`
+matches what `( "a" | "b" ) "," ( "a" | "b" )` matches, such as `a,b`). Each
+semantic comment attached to `DEFINITION` applies to every reference, with each
+parameter likewise replaced.
+
+A reference to a parameterized nonterminal without its actual parameters (e.g.,
+`<pair>`) references it with any actual parameters; only prose, comments &
+non-structural definitions may contain one.
 
 ### Groupings
 

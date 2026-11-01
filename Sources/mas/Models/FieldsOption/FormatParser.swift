@@ -97,7 +97,7 @@ private struct FormatParser {
 		return .standard
 	}
 
-	/// Parses a `<*-transform-call>`, including its `<transform-call-prefix>`.
+	/// Parses a `<*transform-call>`, including its `<transform-call-prefix>`.
 	private mutating func parseTransformCall() throws(ParsingError) -> TransformCall {
 		input.removeFirst()
 		try forbidWhitespace(after: transformCallPrefix)
@@ -285,7 +285,7 @@ private struct FormatParser {
 		return pipeline
 	}
 
-	/// Parses a `<*-template>` of a block of kind `kind`, up to its
+	/// Parses a `<block-template>` of a block of kind `kind`, up to its
 	/// `<block-terminator>`.
 	private mutating func parseBlockTemplate(kind: BlockKind, enclosingPredicate: Predicate?)
 	throws(ParsingError) -> [TemplateElement] {
@@ -307,7 +307,7 @@ private struct FormatParser {
 		return elements
 	}
 
-	/// Parses a placeholder in a block's `<*-template>`: an
+	/// Parses a placeholder in a `<block-template>`: an
 	/// `<unconditional-placeholder>` or a `<block-placeholder>` for
 	/// `enclosingPredicate`.
 	private mutating func parseBlockTemplatePlaceholder(kind: BlockKind, enclosingPredicate: Predicate?)
@@ -666,7 +666,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		}
 	}
 
-	/// The shapes of this kind's pipeline's `<*-transform-call>`s.
+	/// The shapes of this kind's pipeline's `<*transform-call>`s.
 	var pipelineShapeSet: Set<PipelineShape> {
 		switch self {
 		case .any, .boolean, .unconditional:
@@ -702,7 +702,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	}
 }
 
-/// The shape of a `<*-transform-pipeline>`'s `<*-transform-call>`s.
+/// The shape of a `<*-transform-pipeline>`'s `<*transform-call>`s.
 private enum PipelineShape { // swiftlint:disable:this one_declaration_per_file
 	/// A `<date-transform-pipeline>`.
 	case date
@@ -808,5 +808,5 @@ private let transformNames =
 		timeZoneName,
 	])
 
-/// The shapes of a `<value-transform-pipeline>`'s `<*-transform-call>`s.
+/// The shapes of a `<value-transform-pipeline>`'s `<*transform-call>`s.
 private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .date, .timeOnly])

@@ -7,9 +7,8 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline> | <format-template> (* direct default: {empty string}; inherited *)
+format-block = <pipeline(<named-format>, <value-transform-pipeline>)> | <format-template> (* direct default: {empty string}; inherited *)
 
-pipeline        = <named-format> | [ <named-format> ] <value-transform-pipeline>
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
 
 template-text = ~^{string}^~
@@ -43,17 +42,14 @@ otherwise, it renders it coerced to a string.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-string-pipeline = <named-string-format> | [ <named-string-format> ] <string-transform-pipeline>
+pipeline(NAMED_FORMAT, TRANSFORM_PIPELINE) = NAMED_FORMAT | [ NAMED_FORMAT ] TRANSFORM_PIPELINE
 
-number-pipeline =
-  <named-number-format>
-  | [ <named-number-format> ] ( <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline> )
-
-date-pipeline = <named-date-format> | [ <named-date-format> ] ( <date-transform-pipeline> | <unconditional-transform-pipeline> )
-
-time-only-pipeline = <named-time-only-format> | [ <named-time-only-format> ] ( <time-only-transform-pipeline> | <unconditional-transform-pipeline> )
-
-unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-format> ] <unconditional-transform-pipeline>
+string-pipeline        = <pipeline(<named-string-format>, <string-transform-pipeline>)>
+number-pipeline        =
+  <pipeline(<named-number-format>, <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline>)>
+date-pipeline          = <pipeline(<named-date-format>, <date-transform-pipeline> | <unconditional-transform-pipeline>)>
+time-only-pipeline     = <pipeline(<named-time-only-format>, <time-only-transform-pipeline> | <unconditional-transform-pipeline>)>
+unconditional-pipeline = <pipeline(<named-unconditional-format>, <unconditional-transform-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -63,12 +59,23 @@ unconditional-pipeline = <named-unconditional-format> | [ <named-unconditional-f
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-named-format               = <name-prefix> <preset-name>
-named-string-format        = <name-prefix> <preset-name> (* error: its preset's format does not conform to <string-block> *)
-named-number-format        = <name-prefix> <preset-name> (* error: its preset's format does not conform to <number-block> *)
-named-date-format          = <name-prefix> <preset-name> (* error: its preset's format does not conform to <date-block> *)
-named-time-only-format     = <name-prefix> <preset-name> (* error: its preset's format does not conform to <time-only-block> *)
-named-unconditional-format = <name-prefix> <preset-name> (* error: its preset's format does not conform to <unconditional-block> *)
+named-format = <name-prefix> <preset-name>
+
+named-string-format =
+  <name-prefix> <preset-name>
+  (* error: its preset's format does not conform to <conditional-block(<nullary-string>, <non-nullary-string>, <string-pipeline>)> *)
+named-number-format =
+  <name-prefix> <preset-name>
+  (* error: its preset's format does not conform to <conditional-block(<nullary-number>, <non-nullary-number>, <number-pipeline>)> *)
+named-date-format =
+  <name-prefix> <preset-name>
+  (* error: its preset's format does not conform to <conditional-block(<nullary-date>, <non-nullary-date>, <date-pipeline>)> *)
+named-time-only-format =
+  <name-prefix> <preset-name>
+  (* error: its preset's format does not conform to <conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)> *)
+named-unconditional-format =
+  <name-prefix> <preset-name>
+  (* error: its preset's format does not conform to <unconditional-block(<unconditional-pipeline>)> *)
 
 named-format-reference =
   <named-format>
@@ -94,9 +101,9 @@ A `<named-format-reference>` evaluates its named format against the value to
 which a `<transform-pipeline>` in its position would be applied (e.g., in
 `%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
 
-Because every `<success-block>` alternative's syntax includes
-`<unconditional-block>`'s, a named unconditional format satisfies every
-`<named-format-reference>`.
+Because every `<success-block>`'s syntax includes
+`<unconditional-block(<unconditional-pipeline>)>`'s, a named unconditional
+format satisfies every `<named-format-reference>`.
 
 ##### Transforms
 
@@ -115,6 +122,10 @@ value-transform-pipeline =
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <string-transform-pipeline> ]
 
 coerced-string-transform-call = <transform-call-prefix> <coercion> <string-transform>
+
+transform-call(COERCION, TRANSFORM) =
+  <transform-call-prefix> [ COERCION ] TRANSFORM
+  (* error: it lacks COERCION & its input is not null, absent, or of TRANSFORM's input type *)
 
 transform-call-prefix = "."!
 
@@ -182,10 +193,7 @@ Coercing any value to a string always succeeds, so an
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-string-transform-pipeline = <string-transform-call>+
-string-transform-call     =
-  <transform-call-prefix> [ <coercion> ] <string-transform>
-  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
+string-transform-pipeline = <transform-call(<coercion>, <string-transform>)>+
 string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
 initial-titlecase = "initialTitlecase"
@@ -219,15 +227,8 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-transform-pipeline           = <number-transform-call>+
-number-to-string-transform-pipeline = [ <number-transform-call>+ ] <number-to-string-transform-call>
-
-number-transform-call           =
-  <transform-call-prefix> [ <number-coercion> ] <number-transform>
-  (* error: it lacks <number-coercion> & its input is not null, absent, or of its transform's input type *)
-number-to-string-transform-call =
-  <transform-call-prefix> [ <number-coercion> ] <number-to-string-transform>
-  (* error: it lacks <number-coercion> & its input is not null, absent, or of its transform's input type *)
+number-transform-pipeline           = <transform-call(<number-coercion>, <number-transform>)>+
+number-to-string-transform-pipeline = [ <number-transform-pipeline> ] <transform-call(<number-coercion>, <number-to-string-transform>)>
 
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
@@ -370,16 +371,10 @@ total digits, then renders it in positional notation with exactly
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-transform-pipeline = <date-transform-call>+
-date-transform-call     =
-  <transform-call-prefix> [ <coercion> ] <date-transform>
-  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
+date-transform-pipeline = <transform-call(<coercion>, <date-transform>)>+
 date-transform          = <date-only> | <date-time-zone> (* type: date *)
 
-time-only-transform-pipeline = <time-only-transform-call>+
-time-only-transform-call     =
-  <transform-call-prefix> [ <coercion> ] <time-only-transform>
-  (* error: it lacks <coercion> & its input is not null, absent, or of its transform's input type *)
+time-only-transform-pipeline = <transform-call(<coercion>, <time-only-transform>)>+
 time-only-transform          = <time-only-time-zone> (* type: time-only *)
 
 date-only           = "dateOnly"
@@ -508,74 +503,22 @@ block-terminator = -"+"
 ```ebnf
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
-success-block =
-  <string-block>
-  | <boolean-block>
-  | <number-block>
-  | <date-block>
-  | <time-only-block>
-  | <any-block>
-  | <unconditional-block>
-  (* non-structural *)
-failure-block = <unconditional-block> (* direct default: {empty string} *)
+success-block = <conditional-block> | <unconditional-block> (* non-structural *)
+failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct default: {empty string} *)
 
 success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
-string-block        = <string-pipeline> | <string-template>               (* direct default: {empty string} *)
-boolean-block       = <unconditional-pipeline> | <boolean-template>       (* direct default: {empty string} *)
-number-block        = <number-pipeline> | <number-template>               (* direct default: {empty string} *)
-date-block          = <date-pipeline> | <date-template>                   (* direct default: {empty string} *)
-time-only-block     = <time-only-pipeline> | <time-only-template>         (* direct default: {empty string} *)
-any-block           = <unconditional-pipeline> | <any-template>           (* direct default: {empty string} *)
-unconditional-block = <unconditional-pipeline> | <unconditional-template> (* direct default: {empty string} *)
+non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -[ <conditional-block(NULLARY, NON_NULLARY, PIPELINE)> ]
 
-string-template        = <template-text> | [ <template-text> ] ( ( <string-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-boolean-template       = <template-text> | [ <template-text> ] ( ( <boolean-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-number-template        = <template-text> | [ <template-text> ] ( ( <number-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-date-template          = <template-text> | [ <template-text> ] ( ( <date-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-time-only-template     = <template-text> | [ <template-text> ] ( ( <time-only-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-any-template           = <template-text> | [ <template-text> ] ( ( <any-block-placeholder> | <unconditional-placeholder> ) [ <template-text> ] )+
-unconditional-template = <template-text> | [ <template-text> ] ( <unconditional-placeholder> [ <template-text> ] )+
+conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
+  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder>)>
+  (* direct default: {empty string} *)
+unconditional-block(PIPELINE) = PIPELINE | <block-template(<unconditional-placeholder>)> (* direct default: {empty string} *)
 
-block-placeholder =
-  <string-block-placeholder>
-  | <boolean-block-placeholder>
-  | <number-block-placeholder>
-  | <date-block-placeholder>
-  | <time-only-block-placeholder>
-  | <any-block-placeholder>
-  (* non-structural *)
+block-template(PLACEHOLDER) = <template-text> | [ <template-text> ] ( PLACEHOLDER [ <template-text> ] )+
 
-string-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-string> | <nullary-version> | ( <non-nullary-string> | <non-nullary-version> ) -<string-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
-
-boolean-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-coercible-standard-predicate> | <non-nullary-coercible-standard-predicate> -<unconditional-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
-
-number-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-number> | <non-nullary-number> -<number-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
-
-date-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-date> | <non-nullary-date> -<date-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
-
-time-only-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-time-only> | <non-nullary-time-only> -<time-only-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
-
-any-block-placeholder =
-  <placeholder-prefix>
-  ( <nullary-blank-predicate> | <non-nullary-blank-predicate> -<unconditional-pipeline> <block-terminator> )
-  (* error: its predicate's letter differs from its enclosing matcher's <predicate>'s, ignoring case *)
+block-placeholder(NULLARY, NON_NULLARY, PIPELINE) = <placeholder-prefix> ( NULLARY | NON_NULLARY -PIPELINE <block-terminator> )
 
 abort-on-success = "-"!
 abort-on-failure = "+"!
@@ -608,13 +551,15 @@ A `<success-clause>`'s kind follows the matched value's type; where that is
 boolean or can be any type, its pipeline must start, after any named format, by
 coercing to a string.
 
-`<unconditional-block>` differs from `<any-block>` only by forbidding
-`<block-placeholder>`s.
+`<unconditional-block>` differs from `<conditional-block>` with the same
+`PIPELINE` only by forbidding `<block-placeholder>`s.
 
-Within a `<success-block>`, a `<block-placeholder>` is evaluated against the
-enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
-/ `%I` are evaluated against the field value, at its original type (e.g.,
-`%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`).
+Within a `<conditional-block>`, a `<block-placeholder>` has its enclosing
+matcher's predicate's letter, ignoring case (e.g., in `%S…+`, `%s` or `%S…+`,
+but not `%v`), and is evaluated against the enclosing matcher's value (coerced,
+if it coerces), so it always succeeds; `%i` / `%I` are evaluated against the
+field value, at its original type (e.g., `%.N%n (%i)++` renders `"4.50"` as
+`4.5 (4.50)`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
@@ -707,9 +652,16 @@ nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | [ <coe
 non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | [ <coercion> ] <non-nullary-coercible-standard-predicate>
 
 non-nullary-standard-success =
-  <non-nullary-string> -[ <string-block> ]
-  | [ <coercion> ] <non-nullary-coercible-standard-predicate> -[ <boolean-block> ]
-  | <non-nullary-blank-predicate> -[ <any-block> ]
+  <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
+  | [ <coercion> ]
+    (
+      <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
+      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
+      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
+    )
+  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <unconditional-pipeline>)>
 
 nullary-incoercible-standard-predicate     = <nullary-blank-predicate> | <nullary-string>
 non-nullary-incoercible-standard-predicate = <non-nullary-blank-predicate> | <non-nullary-string>
@@ -744,7 +696,7 @@ non-nullary-string     = "S" (* is string;                                      
 ```ebnf
 nullary-number-matcher     = [ <number-coercion> ] <nullary-number>
 non-nullary-number-matcher = [ <number-coercion> ] <non-nullary-number>
-non-nullary-number-success = <non-nullary-number-matcher> -[ <number-block> ]
+non-nullary-number-success = [ <number-coercion> ] <non-nullary-success(<nullary-number>, <non-nullary-number>, <number-pipeline>)>
 
 nullary-number     = "n" (* is number; output type: number; value: {field value} *)
 non-nullary-number = "N" (* is number; output type: number; value: {field value} *)
@@ -757,7 +709,7 @@ non-nullary-number = "N" (* is number; output type: number; value: {field value}
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-nullary-version-success = <non-nullary-version> -[ <string-block> ]
+non-nullary-version-success = <non-nullary-success(<nullary-version>, <non-nullary-version>, <string-pipeline>)>
 
 nullary-version     = "v" (* is version; output type: string; value: {field value} *)
 non-nullary-version = "V" (* is version; output type: string; value: {field value} *)
@@ -847,8 +799,8 @@ escaped.
 ```ebnf
 nullary-date-matcher          = [ <coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
-non-nullary-date-success      = <non-nullary-date-matcher> -[ <date-block> ]
-non-nullary-time-only-success = <non-nullary-time-only> -[ <time-only-block> ]
+non-nullary-date-success      = [ <coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
+non-nullary-time-only-success = <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
 
 nullary-date          = "d" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
 non-nullary-date      = "D" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
@@ -961,13 +913,13 @@ unconditional-branch = <nullary-unconditional-predicate> | <non-nullary-uncondit
 nullary-conditional-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
 non-nullary-conditional-branch =
   <non-nullary-scalar-success> <block-terminator>
-  | <branch-negation> <non-nullary-scalar-matcher> -[ <unconditional-block> ] <block-terminator>
+  | <branch-negation> <non-nullary-scalar-matcher> -[ <unconditional-block(<unconditional-pipeline>)> ] <block-terminator>
 
 branch-negation = "-"!
 
 non-nullary-unconditional-branch =
-  <non-nullary-input> -[ <unconditional-block> ] <block-terminator>
-  | ( <non-nullary-label> | <non-nullary-name> ) -[ <string-block> ] <block-terminator>
+  <non-nullary-input> -[ <unconditional-block(<unconditional-pipeline>)> ] <block-terminator>
+  | ( <non-nullary-label> | <non-nullary-name> ) -[ <unconditional-block(<string-pipeline>)> ] <block-terminator>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

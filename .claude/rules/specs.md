@@ -32,10 +32,17 @@ make its references optional instead, since an expression that consumes no token
 is never present.
 
 In specs, make every block reference optional, except one that is a block's
-entire definition (e.g., `failure-block = <unconditional-block>`), which a
+entire definition (e.g.,
+`failure-block = <unconditional-block(<unconditional-pipeline>)>`), which a
 single optional cannot define; give every block not marked
 `(* non-structural *)` a direct default of `{empty string}`, because no syntax
 references a non-structural block, so none can omit it.
+
+In specs, define nonterminals whose definitions differ only in the expressions
+that they reference as 1 [parameterized
+nonterminal](../../Specs/ebnf.md#parameterized-nonterminals) (e.g.,
+`transform-call(COERCION, TRANSFORM)`), rather than repeating the definition,
+because the shared definition states the shared syntax & semantic comments once.
 
 In specs, give an empty-string default for a block or a typed terminal as
 `{empty string}` (a free-form description), never as the literal `""`, which

@@ -166,7 +166,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: parsed text (too generic: an app's input is parsed too) / input
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
-      `<string-block>`, empty strings)
+      `<string-pipeline>`, empty strings)
     - token: contiguous characters consumed together as 1 element: a literal or
       variable token ([defined](../Specs/ebnf.md#tokens))
     - typed terminal: a `{SUBTYPE}` or `{SUBTYPE: CONSTRAINTS}` terminal, which
@@ -463,8 +463,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       [defined](../Specs/ebnf.md#error-comments))
     - virtual descendant: a descendant default comment's `DESCENDANT` that is
       not an actual descendant of its `NONTERMINAL`
+    - parameterized nonterminal: a nonterminal whose definition names
+      parameters, each of which a reference replaces with its actual parameter
+      ([defined](../Specs/ebnf.md#parameterized-nonterminals))
+    - parameter / actual parameter: a parameterized nonterminal's
+      metavariable-like word / the expression that a reference passes for it
     - REJECTED: default value comment / applicability comment (for an error
-      comment)
+      comment) / argument (for an actual parameter; the specs use "argument" for
+      an argument list's elements)
 78. - style specifier: terminal-specific text styling a header row or a key
       (`<style-specifier>`)
     - style prefix: precedes a style specifier (`<style-prefix>`)
@@ -583,10 +589,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       Annex C's POSIX Compatible definitions
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
-100. - date block: `%D`'s block (`<date-block>`), whose pipeline's transforms
-       can be only `dateOnly`s & `timeZone`s, or string transforms after
-       coercing to a string
-     - time-only block: `%C`'s block (`<time-only-block>`), whose pipeline's
+100. - date block: `%D`'s `<conditional-block>`, whose pipeline's transforms can
+       be only `dateOnly`s & `timeZone`s, or string transforms after coercing to
+       a string
+     - time-only block: `%C`'s `<conditional-block>`, whose pipeline's
        transforms can be only `timeOnlyTimeZone`s, or string transforms after
        coercing to a string
      - REJECTED: clock block / time block
