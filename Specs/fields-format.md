@@ -583,7 +583,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 - **Negated** (`-…`, in a non-nullary branch): an `<unconditional-block>`,
   evaluated iff the matcher fails.
 - **Unary match** (`%m`): `<branches>`.
-- **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
+- **Binary match** (`%M`): `<conditional-branches>` & a `<failure-block>`.
 
 A matcher succeeds iff it matches the value against which it is evaluated.
 
@@ -935,13 +935,14 @@ the same form. A UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
 match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 
 unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
-binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
+binary-match-placeholder = <placeholder-prefix> <binary-match> <conditional-branches> <block-terminator> -[ <failure-block> ] <block-terminator>
 
 unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
-binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
+binary-match = "M" (* matches a branch in <conditional-branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 
-branches = <conditional-branch>+ <branch>
-branch   = <conditional-branch> | <unconditional-branch>
+branches             = <conditional-branch>+ <branch>
+conditional-branches = <conditional-branch> <conditional-branch>+
+branch               = <conditional-branch> | <unconditional-branch>
 
 conditional-branch   = <nullary-conditional-branch> | <non-nullary-conditional-branch>
 unconditional-branch = <nullary-unconditional-predicate> | <non-nullary-unconditional-branch>
@@ -960,8 +961,9 @@ non-nullary-unconditional-branch =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- The branches in `<branches>` are evaluated sequentially against the field
-  value, returning as `<match-placeholder>`'s value:
+- The branches in `<branches>` or `<conditional-branches>` are evaluated
+  sequentially against the field value, returning as `<match-placeholder>`'s
+  value:
   - If a branch has `<branch-negation>`:
     - If it fails: its `<unconditional-block>`'s evaluated value if it is
       non-nullary, otherwise the field value.
@@ -971,6 +973,10 @@ non-nullary-unconditional-branch =
 - If no branch returns a value:
   - For `%m`: the placeholder fails & aborts formatting.
   - For `%M`: returns its `<failure-block>`'s value.
+
+`%M`'s branches are all conditional, because a branch that always returns a
+value would make its `<failure-block>` unreachable, while `%m`'s last branch may
+be unconditional (e.g., `%mbI..uppercase++`, but not `%MbI++none+`).
 
 Examples:
 

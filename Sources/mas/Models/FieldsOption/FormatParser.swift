@@ -371,7 +371,7 @@ private struct FormatParser {
 			guard abortModifier == nil, coercion == nil else {
 				throw .invalidModifier(letter)
 			}
-			let branches = try parseBranches()
+			let branches = try parseBranches(isBinary: isNonNullary)
 			return .match(
 				branches,
 				isNonNullary
@@ -478,8 +478,10 @@ private struct FormatParser {
 		return modifier
 	}
 
-	/// Parses a `<match-placeholder>`'s `<branches>` & its `<block-terminator>`.
-	private mutating func parseBranches() throws(ParsingError) -> [Branch] {
+	/// Parses a `<match-placeholder>`'s `<branches>` (iff `<unary-match>`) or
+	/// `<conditional-branches>` (iff `<binary-match>`, as `isBinary`) & its
+	/// `<block-terminator>`.
+	private mutating func parseBranches(isBinary: Bool) throws(ParsingError) -> [Branch] {
 		var branches = [Branch]()
 		while skipWhitespace(), let first = input.first, first != blockTerminator {
 			if case .unconditional = branches.last {
@@ -496,6 +498,9 @@ private struct FormatParser {
 		}
 		guard case .conditional = branches[branches.count - 2] else {
 			throw .unconditionalBranchNotLast
+		}
+		if isBinary, case .unconditional = branches.last {
+			throw .unconditionalBranchInBinaryMatch
 		}
 		return branches
 	}

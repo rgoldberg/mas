@@ -594,6 +594,8 @@ private extension MASTests {
 			("%N+%n+", .invalidLetter("n")),
 			("%mn+", .singleBranch),
 			("%mi n+", .unconditionalBranchNotLast),
+			("%MbI++none+", .unconditionalBranchInBinaryMatch),
+			("%Mnk+none+", .unconditionalBranchInBinaryMatch),
 			("%mn-i+", .invalidModifier("i")),
 			("%mnm+", .invalidLetter("m")),
 			(".numberFormat:en,x,y:", .invalidTransformArguments(name: "numberFormat")),
