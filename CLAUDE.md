@@ -169,9 +169,10 @@ with it.
 Follow the [spec grammar rules](.claude/rules/specs.md) in specs.
 
 Never propose or make a [rejected spec
-change](.claude/rules/rejected-spec-changes.md) unless the proposal rebuts the
-reason for rejecting it. Record each newly rejected spec change there, with its
-reason.
+change](.claude/rules/rejected-spec-changes.md), except to propose overruling
+its rejection by arguing that its reason is wrong or outweighed; make an
+overruling change only with consent. Record each newly rejected spec change,
+each overruling & each declined overruling there, as it specifies.
 
 Keep all prose about input (in specs, code comments, `Temp/*`, etc.)
 input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not

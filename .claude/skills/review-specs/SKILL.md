@@ -10,6 +10,9 @@ disable-model-invocation: true
    rules](../../rules/specs.md) & the [rejected spec
    changes](../../rules/rejected-spec-changes.md).
 2. Report every problem in them, e.g.: typos, incorrectness, inconsistencies,
-   clarity problems, missing functionality & overly complex functionality.
-3. Record each rejected fix, with its reason, as a rule in the rejected spec
-   changes.
+   clarity problems, missing functionality & overly complex functionality,
+   weighing each fix against the rejected spec changes.
+3. Report each fix that would overrule a rejected spec change, with the argument
+   for overruling it, in its own section after every other problem.
+4. Record each rejected fix, each overruling & each declined overruling in the
+   rejected spec changes.
