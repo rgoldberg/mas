@@ -119,13 +119,18 @@ even while no syntax uses it.
 
 In specs, specify syntax according to the 1st of these that applies:
 
-1. Forbid it in the grammar: syntax that contradicts itself, or cannot mean what
-   it says, when the syntax text alone decides this (e.g., `%MbI++none+`, whose
-   `<failure-block>` is unreachable, or `%S%v++`).
-2. Attach an error comment: such syntax when only context outside the syntax
-   text decides it, or only a comparison of variable tokens' values (e.g., `k`
-   in a `<field-order-adjustment-set>` that is per
-   `<positional-order-option-set>`, or a digit group separator that equals the
-   decimal separator).
-3. Otherwise: allow it, even if it is redundant or has no effect (e.g., `005`,
-   `//00`, `@x.`, or `Ciso,iso:`).
+1. Allow it: an empty list, or a list element that repeats or overlaps another,
+   unless it makes the grammar ambiguous (e.g., `005`, `//00`, `@x.`, or
+   `Ciso,iso:`), because generated or edited syntax produces them.
+2. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
+   says, or has a modifier or wrapper that cannot affect what it means, when the
+   syntax text alone decides this (e.g., `%S%v++`, `K:`, whose keys are styled
+   by nothing, `%+s`, whose `<abort-on-failure>` changes nothing, since `%s`
+   already aborts on failure, or `%mN.round++`, whose `%m` matches only 1
+   branch).
+3. Attach an error comment: syntax that contradicts itself, or cannot mean what
+   it says, when only context outside the syntax text decides it, or only a
+   comparison of variable tokens' values (e.g., `k` in a
+   `<field-order-adjustment-set>` that is per `<positional-order-option-set>`,
+   or a digit group separator that equals the decimal separator).
+4. Otherwise: allow it.
