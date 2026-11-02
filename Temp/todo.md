@@ -116,10 +116,11 @@ the functionality that needs them from specs & code:
 1. Possibly vestigial after `1226-fields-no-custom-names` removes custom presets
    & custom configs; decide whether to remove each in
    `1226-fields-no-custom-names`:
-   1. [`<string-pipeline>` &
-      `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): each is
-      only an alias of a single `<*-transform-pipeline>`, once its
-      `NAMED_FORMAT_REFERENCE` is removed.
+   1. [`<pipeline>`, `<string-pipeline>` &
+      `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): once
+      `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline(…)>` is only its
+      `TRANSFORM_PIPELINE`, so each of the latter 2 is only an alias of a single
+      `<*-transform-pipeline>`.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).
