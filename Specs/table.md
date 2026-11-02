@@ -209,7 +209,10 @@ unbroken = "u"
 - `b`: the [separator line](#separator) is broken into 1 independently filled
   segment per column, joined by the same column spacing as every other row.
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
-  table width.
+  table width, except that it retains each tab of each column spacing in place,
+  filling each run between tabs independently, because a tab's rendered width
+  depends on the terminal's tab stops, which an app cannot determine (e.g., with
+  `$'C\t:S'`, the separator line of 2 3-wide columns is `---`, a tab & `---`).
 
 ## Column Spacing
 

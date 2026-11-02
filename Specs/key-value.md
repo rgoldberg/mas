@@ -37,9 +37,14 @@ Each [line terminator](configs.md#line-terminators) & each other control
 character in a key is rendered as it is in a [table cell](table.md#table-config)
 (e.g., a tab as `␉`), so each key is 1 line & aligns its leader. Each line
 terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF), so the
-value continues on a new line, each such non-empty line indented by spaces to
-the value's start (e.g., with `fL=:R:`, the key `Notes` & a value of `a` & `b`
-separated by an LF render as `Notes=a`, then 6 spaces & `b` on the next line).
+value continues on a new line, each such non-empty line indented to the value's
+start by its row's unstyled text before the value, with each tab retained & each
+other character replaced by as many spaces as its [width](configs.md#width), so
+each tab reaches the same tab stop as in the row, because a tab's rendered width
+depends on the terminal's tab stops, which an app cannot determine (e.g., with
+`fL=:R:`, the key `Notes` & a value of `a` & `b` separated by an LF render as
+`Notes=a`, then 6 spaces & `b` on the next line, while with `$'fL\t:R:'`, they
+render as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next line).
 Each other control character in a value, except a tab, is rendered as it is in a
 key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
 state (e.g., an ESC, which starts an escape sequence) or move the cursor back

@@ -46,6 +46,49 @@ private extension MASTests {
 		)
 	}
 
+	@Test(arguments: [("\t", "----\t--"), (" \t ", "-----\t---"), ("\t\t", "----\t\t--")])
+	func `an unbroken table separator retains each tab of each column spacing in place`(
+		columnSpacing: String,
+		separatorLine: String,
+	) throws {
+		#expect(
+			try [JSON.Object([("name", .string("xy")), ("id", .number(1))])]
+				.table(
+					fieldSpecs: ["name", "id"].map { .init(name: $0, label: $0, format: .default(fieldName: $0), sortSpec: nil) },
+					tableConfig: .init(
+						header: .init(styleSpecifier: ""),
+						headerStyling: .terminalOnly,
+						headerStyleSequences: .default,
+						separator: .init(pattern: "-", broken: false),
+						columnSpacing: columnSpacing,
+					),
+				)?
+				.split(separator: "\n")[1]
+				== separatorLine[...],
+		)
+	}
+
+	@Test(arguments: [
+		("fL=:R:", "Notes=a\n      b"),
+		("fL\t:R:", "Notes\ta\n     \tb"),
+		("F.:L\t:R:", "Notes\t.a\n     \t b"),
+	])
+	func `a value's later line is indented by its row's text before the value, retaining each tab`(
+		keyValueConfig: String,
+		row: String,
+	) throws {
+		#expect(
+			try JSON.Object([("notes", .string("a\nb"))])
+				.keyValueRows(
+					fieldSpecs: [.init(name: "notes", label: "Notes", format: .default(fieldName: "notes"), sortSpec: nil)],
+					fieldOrder: .positional(.init()),
+					keyValueConfig: parseKeyValueConfig(keyValueConfig),
+				)
+				.map(\.row)
+				== [row],
+		)
+	}
+
 	@Test(
 		arguments: [
 			(Alignment.start, "id", "1", "333"),

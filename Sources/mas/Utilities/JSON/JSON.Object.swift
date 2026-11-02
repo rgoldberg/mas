@@ -63,10 +63,13 @@ extension JSON.Object {
 	/// its own key's width, plus the leader pattern's width. Each control
 	/// character in a key renders as in a table cell (e.g., a line terminator as
 	/// `⏎`), while each line terminator in a value renders as a newline (e.g., a
-	/// CRLF as 1 LF), each such non-empty later line indented by spaces to the
-	/// value's start. Each other control character in a value except a tab
-	/// renders as in a key (e.g., an ESC as `␛`). Each row's width is that of its
-	/// widest line.
+	/// CRLF as 1 LF), each such non-empty later line indented to the value's
+	/// start by its row's unstyled text before the value, with each tab retained
+	/// & each other character replaced by as many spaces as its width, so each
+	/// tab reaches the same tab stop as in the row, whatever the terminal's tab
+	/// stops are. Each other control character in a value except a tab renders as
+	/// in a key (e.g., an ESC as `␛`). Each row's width is that of its widest
+	/// line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
@@ -87,7 +90,11 @@ extension JSON.Object {
 			let valueStartWidth = labelWidth + separation.terminalWidth
 			let valueLines = value.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
 				.map { line in String(line).controlCharactersSymbolized(preservingTabs: true) }
-			let indentation = String(repeating: " ", count: valueStartWidth)
+			let indentation = String(
+				(label + separation).flatMap { character in
+					character == "\t" ? "\t" : String(repeating: " ", count: String(character).terminalWidth)
+				},
+			)
 			return (
 				styled(
 					label,
@@ -177,10 +184,10 @@ extension [JSON.Object] {
 						columns: columnMetadata,
 						columnSpacing: columnSpacing,
 					)
-					: repeatedPattern(
-						separator.pattern,
-						toWidth: // swiftformat:disable:next indent
-							columnMetadata.map(\.maxWidth).reduce(0, +) + columnSpacing.terminalWidth * (columnMetadata.count - 1),
+					: continuousSeparatorLine(
+						pattern: separator.pattern,
+						columnWidths: columnMetadata.map(\.maxWidth),
+						columnSpacing: columnSpacing,
 					),
 			)
 		}
@@ -293,6 +300,28 @@ private extension String {
 			),
 		)
 	}
+}
+
+/// A `u` (unbroken) separator line: `pattern` repeated to fill the table width,
+/// except that each tab of each column spacing is retained in place, with each
+/// run between tabs filled independently (table.md "Broken"), because a tab's
+/// rendered width depends on the terminal's tab stops, which an app cannot
+/// determine.
+private func continuousSeparatorLine(pattern: String, columnWidths: [Int], columnSpacing: String) -> String {
+	columnWidths.dropFirst()
+		.reduce(into: [columnWidths.first ?? 0]) { runWidths, columnWidth in
+			for character in columnSpacing {
+				if character == "\t" {
+					runWidths.append(0)
+				} else {
+					runWidths[runWidths.count - 1] += String(character).terminalWidth
+				}
+			}
+			runWidths[runWidths.count - 1] += columnWidth
+		}
+		.lazy
+		.map { repeatedPattern(pattern, toWidth: $0) }
+		.joined(separator: "\t")
 }
 
 /// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition before
