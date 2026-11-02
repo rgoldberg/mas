@@ -57,3 +57,7 @@ In specs, never let a non-nullary unconditional placeholder take an empty
 pipeline or a template block (e.g., `%I+` or `%I(%i)+`), because `%I+` always
 outputs an empty string & `%I(%i)+` means what `(%i)` means, so its `%I` cannot
 affect what it means.
+
+In specs, never allow a binary placeholder whose `<success-block>` &
+`<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
+empty string, so its matcher cannot affect what it means.

@@ -90,6 +90,7 @@ extension FieldSpec: CustomStringConvertible { // swiftlint:disable:this file_ty
 
 enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
 	case allConformingUnsupported
+	case binaryPlaceholderLacksBlock
 	case coercionNotSupported(Character)
 	case danglingEscape
 	case documentOrderUnsupportedForTable
@@ -134,6 +135,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		switch self {
 		case .allConformingUnsupported:
 			"<all-conforming> 'k' is not supported for <positional-order> 'P' or <document-order> 'D'"
+		case .binaryPlaceholderLacksBlock:
+			"A binary placeholder requires a <success-block> or a <failure-block>"
 		case let .coercionNotSupported(letter):
 			"<coercion> is not supported for: \(letter)"
 		case .danglingEscape:

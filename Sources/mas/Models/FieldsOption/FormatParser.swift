@@ -393,14 +393,20 @@ private struct FormatParser {
 		case (_, false):
 			.conditional(matcher, .abortOnFailure(success: nil))
 		case (_, true):
-			.conditional(
-				matcher,
-				.binary(
-					success: try parseSuccessBlock(for: matcher),
-					failure: try parseBlock(kind: .unconditional, enclosingPredicate: nil),
-				),
-			)
+			.conditional(matcher, try parseBinaryBlocks(for: matcher))
 		}
+	}
+
+	/// Parses a binary placeholder's `<success-block>` & `<failure-block>`, each
+	/// with its `<block-terminator>`, at least 1 of which is present, because
+	/// both directly absent (e.g., `%S++`) would always insert an empty string.
+	private mutating func parseBinaryBlocks(for matcher: Matcher) throws(ParsingError) -> ConditionalForm {
+		let success = try parseSuccessBlock(for: matcher)
+		let failure = try parseBlock(kind: .unconditional, enclosingPredicate: nil)
+		guard success != .empty || failure != .empty else {
+			throw .binaryPlaceholderLacksBlock
+		}
+		return .binary(success: success, failure: failure)
 	}
 
 	/// Parses `matcher`'s `<success-block>` & its `<block-terminator>`.

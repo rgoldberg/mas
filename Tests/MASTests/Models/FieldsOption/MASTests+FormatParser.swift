@@ -83,7 +83,7 @@ private extension MASTests {
 			// Binary
 			("%N%n+fail+", .number(5), "5"),
 			("%N%n+fail+", .string("x"), "fail"),
-			("[%N++]", .string("x"), "[]"),
+			("[%N%n++]", .string("x"), "[]"),
 			("%S.uppercase++", .string("abc"), "ABC"),
 			("%.T%t+no+", .string("true"), "true"),
 			("%.T%t+no+", .string("false"), "no"),
@@ -590,6 +590,9 @@ private extension MASTests {
 			("%S%S+++", .invalidPipeline("<string-pipeline>")),
 			("%N", .missingBlockTerminator),
 			("%N+", .missingBlockTerminator),
+			("%N++", .binaryPlaceholderLacksBlock),
+			("%.N++", .binaryPlaceholderLacksBlock),
+			("%U + +", .binaryPlaceholderLacksBlock),
 			("%S<%n>++", .invalidLetter("n")),
 			("%N+%n+", .invalidLetter("n")),
 			("%mn+", .singleBranch),

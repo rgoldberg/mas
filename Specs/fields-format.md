@@ -496,7 +496,7 @@ failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct defaul
 success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
-non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -[ <conditional-block(NULLARY, NON_NULLARY, PIPELINE)> ]
+non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
 
 conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
   PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder>)>
@@ -518,7 +518,9 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 
 - **Nullary**: nothing.
 - **Unary**: a `<success-clause>`.
-- **Binary**: a `<success-block>` & a `<failure-block>`.
+- **Binary**: a `<success-block>` & a `<failure-block>`, at least 1 of which is
+  present, because a binary placeholder without either (e.g., `%S++`) would
+  always insert an empty string, so its matcher could not affect what it means.
 - **Abort-on-failure**: a `<success-block>`.
 - **Abort-on-success**: a `<failure-block>`.
 - **Negated** (`-…`, in a non-nullary branch): an `<unconditional-block>`,
@@ -609,7 +611,8 @@ nullary-scalar-conditional-placeholder     = <placeholder-prefix> [ <abort-on-su
 non-nullary-scalar-conditional-placeholder =
   <placeholder-prefix>
   (
-    <non-nullary-scalar-success> <block-terminator> -[ <failure-block> ] <block-terminator>
+    <non-nullary-scalar-blocked-success> <block-terminator> -[ <failure-block> ] <block-terminator>
+    | <non-nullary-scalar-blockless-success> <block-terminator> -<failure-block> <block-terminator>
     | <abort-on-success> <non-nullary-scalar-matcher> -[ <failure-block> ] <block-terminator>
     | <abort-on-failure> <non-nullary-scalar-success> <block-terminator>
   )
@@ -623,7 +626,9 @@ non-nullary-scalar-matcher =
   | <non-nullary-date-matcher>
   | <non-nullary-time-only>
 
-non-nullary-scalar-success =
+non-nullary-scalar-success           = <non-nullary-scalar-blocked-success> | <non-nullary-scalar-blockless-success>
+non-nullary-scalar-blockless-success = <non-nullary-scalar-matcher> (* default success-block: {empty string} *)
+non-nullary-scalar-blocked-success   =
   <non-nullary-standard-success>
   | <non-nullary-number-success>
   | <non-nullary-version-success>
