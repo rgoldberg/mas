@@ -435,9 +435,8 @@ A **UTC offset** is either:
   & a 2-digit minute (e.g., `+0530`), or a 1- or 2-digit hour, then, optionally,
   `:` followed by a 2-digit minute (e.g., `+5` or `+05:30`, which
   `.timeZone:+05\:30:` sets, escaping its `:`); each minute is from `00` to
-  `59`.
-
-A UTC offset of more than 18 hours from UTC is an error.
+  `59`, and the offset is at most 18 hours from UTC (e.g., `+18`, but not
+  `+18:01`).
 
 A `GMT`-prefixed UTC offset is ahead of UTC for `+` & behind UTC for `-`, but
 the IANA Time Zone Database's signed `Etc/GMT` identifiers are the reverse, per
