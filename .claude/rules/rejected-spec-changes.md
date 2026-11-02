@@ -37,3 +37,23 @@ In specs, never forbid a `<chronologic-formats>` whose formats overlap (e.g.,
 `Ciso,iso:` or `Ciso,iso-date:`), because each is redundant, not contradictory,
 and detecting the overlap depends on what each format matches, not on the
 syntax.
+
+In specs, never allow a `<match-placeholder>` with only 1 branch (e.g.,
+`%mN.round++` or `%MN.round++none+`), because it means what its branch's own
+placeholder means (e.g., `%+N.round+` or `%N.round+none+`), so its `%m` or `%M`
+cannot affect what it means.
+
+In specs, never allow `<abort-on-failure>` on a nullary conditional placeholder
+or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because
+the former already aborts on failure & the latter cannot fail, so it cannot
+affect what either means.
+
+In specs, never make `<styled-key>`'s `<style-specifier>` optional (e.g., `K:`),
+because `K:` would style keys by nothing, which contradicts `K` & means what `k`
+means, while `<header-on>`'s is optional because `H:` (an unstyled header row)
+means something other than `h` (no header row).
+
+In specs, never let a non-nullary unconditional placeholder take an empty
+pipeline or a template block (e.g., `%I+` or `%I(%i)+`), because `%I+` always
+outputs an empty string & `%I(%i)+` means what `(%i)` means, so its `%I` cannot
+affect what it means.
