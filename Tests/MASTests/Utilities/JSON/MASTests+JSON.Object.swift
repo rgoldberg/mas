@@ -71,7 +71,7 @@ private extension MASTests {
 	@Test(arguments: [
 		("fL=:R:", "Notes=a\n      b"),
 		("fL\t:R:", "Notes\ta\n     \tb"),
-		("F.:L\t:R:", "Notes\t.a\n     \t b"),
+		("F.:L:R\t:", "Notes.\ta\n      \tb"),
 	])
 	func `a value's later line is indented by its row's text before the value, retaining each tab`(
 		keyValueConfig: String,

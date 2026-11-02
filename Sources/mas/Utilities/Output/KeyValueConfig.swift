@@ -34,7 +34,8 @@ struct KeyValueConfig: Equatable {
 	/// remaining width) to fill each leader, aligning an item's values; never
 	/// empty; `nil` means no leader, leaving an item's values unaligned.
 	let leaderPattern: String?
-	/// After each key, before its leader (iff any).
+	/// After each key, before its leader (iff any); contains no tab while a
+	/// leader exists, because a tab would misalign the values that it aligns.
 	let leadingSpacing: String
 	/// Before each value, after its leader (iff any).
 	let trailingSpacing: String
@@ -139,6 +140,9 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			throw .invalidSetting(setting)
 		}
 	}
+	if leaderPattern != nil, let leadingSpacing, leadingSpacing.contains("\t") {
+		throw .misaligningLeadingSpacing(leadingSpacing)
+	}
 	return .init(
 		keyStyleSpecifier: keyStyleSpecifier,
 		keyStyling: keyStyling,
@@ -163,6 +167,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case invalidLeadingSpacing(String)
 	case invalidSetting(Character)
 	case invalidTrailingSpacing(String)
+	case misaligningLeadingSpacing(String)
 
 	var description: String {
 		switch self {
@@ -189,6 +194,8 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Invalid --key-value-config <key-value-setting>: \(setting)"
 		case let .invalidTrailingSpacing(spacing):
 			"Invalid trailing spacing (a line terminator would split each row): \(spacing.debugDescription)"
+		case let .misaligningLeadingSpacing(spacing):
+			"Invalid leading spacing (a tab would misalign the values that a leader aligns): \(spacing.debugDescription)"
 		}
 	}
 }

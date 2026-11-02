@@ -42,6 +42,8 @@ private extension MASTests {
 			("S\u{2028}:", .invalidItemSeparatorLine("\u{2028}")),
 			("L\r\n:", .invalidLeadingSpacing("\r\n")),
 			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
+			("L\t:", .misaligningLeadingSpacing("\t")),
+			("fL \t:F", .misaligningLeadingSpacing(" \t")),
 		],
 	)
 	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(

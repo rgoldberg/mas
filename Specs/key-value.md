@@ -187,17 +187,22 @@ leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
 
-leading-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
+leading-spacing = ^{string: no line terminators}^ (* default: {empty string}; error: it contains a tab & <leader-on> is effective *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `l`: 1 space after each key.
 - `L`: a custom spacing string after each key (e.g., `L:` for no leading
-  spacing, `L<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
-  `$'L\t:'` in zsh). A `<leading-spacing>` that contains a [line
-  terminator](configs.md#line-terminators) is invalid, because it would split
-  each row.
+  spacing, `fL<TAB>:` for a tab without a leader, where `<TAB>` is a tab
+  character, e.g., `$'fL\t:'` in zsh). A `<leading-spacing>` that contains a
+  [line terminator](configs.md#line-terminators) is invalid, because it would
+  split each row. A `<leading-spacing>` that contains a tab while `F` is
+  effective is invalid, because each such tab advances to whichever tab stop
+  follows its key, while the leader's width is measured from the keys' widths,
+  so the leader would misalign the values (e.g., with `$'L\t:'`, the keys `a` &
+  `abc` each reach the same tab stop, after which `a`'s leader is 2 wider than
+  `abc`'s).
 
 ## Trailing Spacing
 
