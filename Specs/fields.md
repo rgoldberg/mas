@@ -514,7 +514,7 @@ is an error). Because `<order>` is last wins, `/DP` is a
 #### Item Sorting
 
 ```ebnf
-item-sort-section        = <item-sort-section-prefix> <item-sort-option-set>
+item-sort-section        = <item-sort-section-prefix> [ <item-sort-option-set> ]
 item-sort-section-prefix = "//"
 
 item-sort-option-set = <item-sort-option>+
@@ -540,8 +540,8 @@ a `y` of `@x//0`, `@y.+foo` sorts items by `foo`).
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
 solely by this tiebreak. An absent `<direction>` retains the working fields
-config's (e.g., if `x` has `//-`, then `@x//0` tiebreaks by reverse input
-order).
+config's (e.g., if `x` has `//-`, then `@x//0` & `@x//` tiebreak by reverse
+input order).
 
 #### Field Spec References
 

@@ -345,7 +345,7 @@ private extension MASTests {
 		#expect(config.itemSort.tiebreakDirection == .descending)
 	}
 
-	@Test(arguments: ["", ".adamID", "/P", "//0", "//0.adamID"])
+	@Test(arguments: ["", ".adamID", "/P", "//", "//.adamID", "//0", "//0.adamID"])
 	func `an absent item-sort direction retains the base fields config's item-sort direction`(value: String) throws {
 		let config = try resolvedFieldsConfig(
 			from: value,
@@ -359,13 +359,14 @@ private extension MASTests {
 		#expect(config.itemSort.tiebreakDirection == .descending)
 	}
 
-	@Test(arguments: [
-		("//", ParsingError.missingItemSortOptionSet),
-		("//.adamID", .missingItemSortOptionSet),
-		("//x", .invalidSortOption("x")),
-	])
-	func `reports an item-sort-section error`(value: String, error: ParsingError) {
-		#expect(throws: error) { try parseFieldsConfig(value) }
+	@Test(arguments: ["//", "//.adamID"])
+	func `an empty item-sort section leaves inherited sorts alone`(value: String) throws {
+		#expect(try parseFieldsConfig(value).itemSort.keys.map(\.sortSpec.priority) == [1000])
+	}
+
+	@Test
+	func `reports an item-sort-section error`() {
+		#expect(throws: ParsingError.invalidSortOption("x")) { try parseFieldsConfig("//x") }
 	}
 
 	@Test(arguments: ["/", "/.adamID", "/ ", "/ .adamID"])

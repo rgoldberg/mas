@@ -115,7 +115,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case missingFieldOrderOptionSet
 	case missingFieldOrderTiebreakerDirection
 	case missingFieldSpecIndex
-	case missingItemSortOptionSet
 	case missingPredicate
 	case missingSortOptionTerminator
 	case mixedAbsoluteAndRelativePresets
@@ -187,8 +186,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Expected <direction> after <field-order-tiebreaker>'s <sort-modifier-prefix> '/'"
 		case .missingFieldSpecIndex:
 			"Expected <field-spec-index> after <field-spec-index-prefix> '@'"
-		case .missingItemSortOptionSet:
-			"Expected <item-sort-option-set> after <item-sort-section-prefix> '//'"
 		case .missingPredicate:
 			"Expected <predicate>"
 		case .missingSortOptionTerminator:
@@ -626,12 +623,12 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
-	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by
-	/// `<item-sort-option-set>` (`<item-sort-option>+`, last wins per setting).
-	/// `<disable-all-sorts>` disables each field spec's `<sort>`, retaining its
-	/// `<sort-priority>` & `<sort-option>`s; `<direction>` is the item-sort
-	/// tiebreak (input order / reverse input order). An absent section or
-	/// `<direction>` retains `inheritedDirection`.
+	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by an
+	/// optional `<item-sort-option-set>` (`<item-sort-option>+`, last wins per
+	/// setting). `<disable-all-sorts>` disables each field spec's `<sort>`,
+	/// retaining its `<sort-priority>` & `<sort-option>`s; `<direction>` is the
+	/// item-sort tiebreak (input order / reverse input order). An absent section
+	/// or `<direction>` retains `inheritedDirection`.
 	mutating func parseItemSortSection(
 		_ input: inout Substring,
 		inheriting inheritedDirection: SortOptionSet.Direction,
@@ -651,9 +648,6 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			} else if !option.isWhitespace {
 				throw .invalidSortOption(option)
 			}
-		}
-		guard direction != nil || shouldDisableAllSorts else {
-			throw .missingItemSortOptionSet
 		}
 		if shouldDisableAllSorts {
 			fieldSpecs = fieldSpecs.map(\.withSortDisabled)
