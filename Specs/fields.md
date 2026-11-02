@@ -172,8 +172,8 @@ For each [leaf context](configs.md#context-stacks):
   order (e.g., `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Absent a built-in field order: field specs are sorted by label
-  (`<output>`), while other `<sort-option>`s are per the app's default sort
-  options for labels for the current output format.
+  (`<output>`), while other `<sort-option>`s are per the app's [default sort
+  options](#sort-options) for labels for the current output format.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
   select list of field specs is visible, and unlisted fields are hidden. Absent
   a built-in field order: field specs are ordered by `<positional-order>`.
@@ -912,6 +912,16 @@ non-direction-sort-option =
 
 sort-option-terminator = ":"
 ```
+
+The app may set, per output format, **default sort options** for field names,
+for field labels & for each field's content, each of which replaces the default
+of its `<sort-option>` (e.g., [mas's](mas.md#default-sort-options) make
+`<insensitive>` the default `<case-sensitivity>` for table output of non-path
+string content, so `--fields name/I` sorts items by `name` case-insensitively).
+Each `<sort-option>` that is absent & inherits no value thus takes the default
+sort option for what its option set compares: a field spec's `<sort>` compares
+its field's content, while a `<field-order-sort-option-set>` compares field
+names or labels, per its `<source>`.
 
 ##### Sort Source
 

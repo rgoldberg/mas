@@ -508,6 +508,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 82. - tie & fall through: compare as equal for a sort key, leaving the order to
       the next sort key ([used](../Specs/fields.md#sort-source))
     - REJECTED: retain their input order
+    - default sort options: the app's per-output-format replacements for sort
+      options' defaults, for field names, field labels, or a field's content
+      ([defined](../Specs/fields.md#sort-options))
 83. - field occurrence index: `<field-occurrence-index>`, an index into only the
       field specs for 1 field
       ([defined](../Specs/fields.md#field-spec-references))
