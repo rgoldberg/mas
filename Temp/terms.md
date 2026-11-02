@@ -761,3 +761,54 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - command list: the list of commands in the command line from root to leaf
        (the command that actually runs)
        ([defined](../Specs/configs.md#command-lists))
+123. - metavariable: a word of uppercase letters, digits & `_` that stands for
+       an expression or text in the meta-grammar
+       ([defined](../Specs/ebnf.md#meta-grammar))
+     - constant expression / variable expression: an expression that consumes
+       invariant / variable text
+       ([defined](../Specs/ebnf.md#constant-vs-variable-expressions))
+     - bare token: a token of only bare characters
+       ([defined](../Specs/ebnf.md#tokens))
+124. - inherent scalar / inherent repetition / inherent tuple: of an expression
+       each of whose occurrences is a scalar / a repetition / a tuple
+       ([defined](../Specs/ebnf.md#multiplicity))
+     - content-dependent / context-dependent: of an expression each of whose
+       occurrences has its content's multiplicity / the multiplicity that its
+       context requires ([defined](../Specs/ebnf.md#multiplicity))
+125. - outer bare whitespace: bare whitespace immediately before the 1st, or
+       after the last, character that a literal token consumes, or
+       non-bare-whitespace character that a variable token consumes
+       ([defined](../Specs/ebnf.md#outer-bare-whitespace))
+     - inner bare whitespace: bare whitespace between a token's 1st & last
+       non-bare-whitespace characters
+       ([defined](../Specs/ebnf.md#character-consumption))
+     - defer: of a side of an expression, to let an adjacent side override its
+       outer bare whitespace treatment (`~`;
+       [defined](../Specs/ebnf.md#outer-bare-whitespace-treatment))
+126. - presence state: present, transitively absent, or directly absent
+       ([defined](../Specs/ebnf.md#presence-states))
+     - directly absent: not present, but not transitively absent (e.g.,
+       `<label>` in `name=`)
+     - transitively absent: of an expression an ancestor of which is absent, or
+       that no consumed token matches as an alternative of a present choice or
+       as an element of a present repetition
+127. - semantic comment: a comment part that matches a semantic comment format
+       ([defined](../Specs/ebnf.md#semantic-comments))
+     - mnemonic comment: a comment part that explains how a nonterminal's
+       literal was chosen ([defined](../Specs/ebnf.md#mnemonic-comments))
+     - non-structural: of a nonterminal that comments and/or prose reference,
+       but no structural definition does
+       ([defined](../Specs/ebnf.md#non-structural-comments))
+     - implicit default: the value of an expression to which no explicit default
+       applies ([defined](../Specs/ebnf.md#explicit--implicit-defaults))
+     - global default: an expression's applicable self default, else its
+       applicable implicit default ([defined](../Specs/ebnf.md#global-defaults))
+128. - matcher: a placeholder's or branch's `<placeholder-prefix>`, modifiers &
+       predicate (`<matcher>`), which succeeds iff it matches the value against
+       which it is evaluated
+       ([defined](../Specs/fields-format.md#success--failure))
+     - abort-on-failure / abort-on-success: the form of a matcher with
+       `<abort-on-failure>` / `<abort-on-success>`, which aborts formatting iff
+       the matcher fails / succeeds
+     - boundary group: a `<boundary-group>`'s boundaries, which share 1 sort
+       precedence ([defined](../Specs/fields.md#sort-boundaries))
