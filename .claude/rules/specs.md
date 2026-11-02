@@ -31,12 +31,18 @@ In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
 make its references optional instead, since an expression that consumes no token
 is never present.
 
-In specs, make every block reference optional, except one that is a block's
-entire definition (e.g.,
-`failure-block = <unconditional-block(<unconditional-pipeline>)>`), which a
-single optional cannot define; give every block not marked
-`(* non-structural *)` a direct default of `{empty string}`, because no syntax
-references a non-structural block, so none can omit it.
+In specs, make every block reference optional, except one that is:
+
+1. A block's entire definition (e.g.,
+   `failure-block = <unconditional-block(<unconditional-pipeline>)>`), which a
+   single optional cannot define.
+2. An actual parameter (e.g., `<conditional-block(…)>` in
+   `<format-name(<conditional-block(…)>)>`), whose parameterized nonterminal's
+   definition makes it optional wherever it consumes text.
+
+In specs, give every block not marked `(* non-structural *)` a direct default of
+`{empty string}`, because no syntax references a non-structural block, so none
+can omit it.
 
 In specs, define nonterminals whose definitions differ only in the expressions
 that they reference as 1 [parameterized
