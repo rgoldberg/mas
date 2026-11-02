@@ -90,7 +90,7 @@ private struct FormatParser {
 		// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once custom
 		//  presets are persisted, use the format of the preset that
 		//  `presetAlignment(named:)` resolves, checking that it conforms to the
-		//  block that its `<named-*-format>`'s error comment names
+		//  block that its `<*-format-name>`'s error comment names
 		_ = try presetAlignment(
 			named: parseText(terminatorSet: terminatorSet, leading: .ignored, trailing: .ignored),
 		)

@@ -70,9 +70,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
    of any item, while a custom `default` preset may give an absent field a
    formatted value that is not absent (e.g., `:%N%n+none+`). Supporting them
    also needs each [named format](../Specs/fields-format.md#named-formats) to be
-   checked per its error comment (e.g., that a `<named-string-format>`'s
-   preset's format conforms to `%S`'s `<conditional-block>`), since every
-   built-in preset's format is `%i`, which conforms to every block.
+   checked per its error comment (e.g., that a `<string-format-name>`'s preset's
+   format conforms to `%S`'s `<conditional-block>`), since every built-in
+   preset's format is `%i`, which conforms to every block.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context
@@ -119,7 +119,7 @@ the functionality that needs them from specs & code:
    1. [`<string-pipeline>` &
       `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): each is
       only an alias of a single `<*-transform-pipeline>`, once its
-      `NAMED_FORMAT` is removed.
+      `NAMED_FORMAT_REFERENCE` is removed.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).

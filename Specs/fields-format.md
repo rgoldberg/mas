@@ -7,7 +7,9 @@
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
-format-block = <pipeline(<named-format>, <value-transform-pipeline>)> | <format-template> (* direct default: {empty string}; inherited *)
+format-block =
+  <pipeline(<named-format-reference(<preset-name>)>, <value-transform-pipeline>)> | <format-template>
+  (* direct default: {empty string}; inherited *)
 
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
 
@@ -42,14 +44,17 @@ otherwise, it renders it coerced to a string.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-pipeline(NAMED_FORMAT, TRANSFORM_PIPELINE) = NAMED_FORMAT | [ NAMED_FORMAT ] TRANSFORM_PIPELINE
+pipeline(NAMED_FORMAT_REFERENCE, TRANSFORM_PIPELINE) = NAMED_FORMAT_REFERENCE | [ NAMED_FORMAT_REFERENCE ] TRANSFORM_PIPELINE
 
-string-pipeline        = <pipeline(<named-string-format>, <string-transform-pipeline>)>
+string-pipeline        = <pipeline(<named-format-reference(<string-format-name>)>, <string-transform-pipeline>)>
 number-pipeline        =
-  <pipeline(<named-number-format>, <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline>)>
-date-pipeline          = <pipeline(<named-date-format>, <date-transform-pipeline> | <unconditional-transform-pipeline>)>
-time-only-pipeline     = <pipeline(<named-time-only-format>, <time-only-transform-pipeline> | <unconditional-transform-pipeline>)>
-unconditional-pipeline = <pipeline(<named-unconditional-format>, <unconditional-transform-pipeline>)>
+  <pipeline(
+    <named-format-reference(<number-format-name>)>,
+    <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline>
+  )>
+date-pipeline          = <pipeline(<named-format-reference(<date-format-name>)>, <date-transform-pipeline> | <unconditional-transform-pipeline>)>
+time-only-pipeline     = <pipeline(<named-format-reference(<time-only-format-name>)>, <time-only-transform-pipeline> | <unconditional-transform-pipeline>)>
+unconditional-pipeline = <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -59,32 +64,15 @@ unconditional-pipeline = <pipeline(<named-unconditional-format>, <unconditional-
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-named-format = <name-prefix> <preset-name>
+named-format-reference(FORMAT_NAME) = <name-prefix> FORMAT_NAME
 
-named-string-format =
-  <name-prefix> <preset-name>
-  (* error: its preset's format does not conform to <conditional-block(<nullary-string>, <non-nullary-string>, <string-pipeline>)> *)
-named-number-format =
-  <name-prefix> <preset-name>
-  (* error: its preset's format does not conform to <conditional-block(<nullary-number>, <non-nullary-number>, <number-pipeline>)> *)
-named-date-format =
-  <name-prefix> <preset-name>
-  (* error: its preset's format does not conform to <conditional-block(<nullary-date>, <non-nullary-date>, <date-pipeline>)> *)
-named-time-only-format =
-  <name-prefix> <preset-name>
-  (* error: its preset's format does not conform to <conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)> *)
-named-unconditional-format =
-  <name-prefix> <preset-name>
-  (* error: its preset's format does not conform to <unconditional-block(<unconditional-pipeline>)> *)
+format-name(BLOCK) = <preset-name> (* error: its preset's format does not conform to BLOCK *)
 
-named-format-reference =
-  <named-format>
-  | <named-string-format>
-  | <named-number-format>
-  | <named-date-format>
-  | <named-time-only-format>
-  | <named-unconditional-format>
-  (* non-structural *)
+string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <string-pipeline>)>)>
+number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <number-pipeline>)>)>
+date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <date-pipeline>)>)>
+time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>)>
+unconditional-format-name = <format-name(<unconditional-block(<unconditional-pipeline>)>)>
 
 name-prefix = ":"!
 ```
@@ -103,7 +91,7 @@ which a `<transform-pipeline>` in its position would be applied (e.g., in
 
 Because every `<success-block>`'s syntax includes
 `<unconditional-block(<unconditional-pipeline>)>`'s, a named unconditional
-format satisfies every `<named-format-reference>`.
+format satisfies every `<format-name>`.
 
 ##### Transforms
 
