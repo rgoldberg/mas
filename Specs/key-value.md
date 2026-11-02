@@ -166,7 +166,7 @@ leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
-leader-pattern = ^{string: no line terminators}^ (* default: "▁"; error: it contains a tab & its width is greater than 0 *)
+leader-pattern = ^{string: no line terminators, no tab unless its width is 0}^ (* default: "▁" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
