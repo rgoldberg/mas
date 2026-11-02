@@ -636,8 +636,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 105. - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
        `-` ([defined](../Specs/configs.md#option-values))
-     - option value separator: the `=` between a long option & its value (e.g.,
-       in `--fields=name`)
+     - option value separator: the `=` or the command-line argument boundary
+       between a long option & its value (e.g., in `--fields=name` or
+       `--fields name`)
+     - command-line argument boundary: `_`, which matches between 2 adjacent
+       command-line arguments, iff the latter is `-` or does not start with `-`
+       ([defined](../Specs/ebnf.md#command-line-argument-boundaries))
+     - valued option: an option that takes a value, defined as a
+       `<valued-option(…)>` ([defined](../Specs/configs.md#option-values))
      - flag: an option that takes no value (e.g., `--json`)
        ([defined](../Specs/configs.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
@@ -765,9 +771,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - command list: the list of commands in the command line from root to leaf
        (the command that actually runs)
        ([defined](../Specs/configs.md#command-lists))
-123. - metavariable: a word of uppercase letters, digits & `_` that stands for
-       an expression or text in the meta-grammar
-       ([defined](../Specs/ebnf.md#meta-grammar))
+123. - metavariable: a word of uppercase letters, digits & `_` that starts with
+       an uppercase letter & stands for an expression or text in the
+       meta-grammar ([defined](../Specs/ebnf.md#meta-grammar))
      - constant expression / variable expression: an expression that consumes
        invariant / variable text
        ([defined](../Specs/ebnf.md#constant-vs-variable-expressions))

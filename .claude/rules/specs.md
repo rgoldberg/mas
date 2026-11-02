@@ -22,10 +22,12 @@ constant nonterminals (e.g., not `-"/"` for a following `/`), except on a
 terminator that terminates every expression that needs it, which would otherwise
 need many annotations (e.g., `block-terminator = -"+"`).
 
-In specs, define an option's syntax over its option value alone (e.g.,
-`<fields-config>`), never over its name or its option value separator, because
-Swift Argument Parser splits each option from its value (after `=` or as the
-next command-line argument), which whitespace treatments cannot model.
+In specs, define each option that takes a value as a `<valued-option(…)>` (e.g.,
+`fields-option = <valued-option("--fields", <fields-config>)>`), whose
+command-line argument boundary (`_`) models Swift Argument Parser's split of an
+option from its value as the next command-line argument, so that the grammar
+specifies each option's whole command-line syntax, including whether its value
+may be empty (e.g., `[ <json-config> ]`).
 
 In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
 make its references optional instead, because an expression that consumes no

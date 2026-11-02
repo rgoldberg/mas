@@ -318,13 +318,16 @@ or JSON output.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
+fields-option = <valued-option("--fields", <fields-config>)>
+
 fields-config = <absolute-config> | <relative-config> (* default: <relative-config> *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`--fields`'s [value](configs.md#option-values) is a `<fields-config>`. Giving
-`--fields` more than once is an error.
+`<fields-option>` is `--fields`, a [valued option](configs.md#option-values),
+whose value is a `<fields-config>`. Giving `--fields` more than once is an
+error.
 
 `<absolute-config>` & `<relative-config>` are overlaid on top of the base fields
 config for the current command line only; they do not persistently affect named

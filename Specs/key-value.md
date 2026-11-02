@@ -10,7 +10,11 @@ Uses the [custom EBNF grammar](ebnf.md).
 
 ## Key-Value Config
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
+key-value-config-option = <valued-option("--key-value-config", [ <key-value-config> ])>
+
 key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
@@ -23,10 +27,13 @@ key-value-setting =
   | <trailing-spacing-setting>
   | <item-separator-setting>
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 `<key-value-config>` is the key-value config kind's [output config
-syntax](configs.md#output-configs), and `--key-value-config` is key-value
-output's [output config option](configs.md#output-configs).
+syntax](configs.md#output-configs), and `<key-value-config-option>` is
+`--key-value-config`, key-value output's [output config
+option](configs.md#output-configs).
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.

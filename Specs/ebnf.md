@@ -5,8 +5,8 @@
 Within the definition of this custom EBNF grammar:
 
 - All text is case-sensitive.
-- A word of uppercase letters, digits & `_` is a **metavariable** for an
-  expression or text.
+- A word of uppercase letters, digits & `_` that starts with an uppercase letter
+  is a **metavariable** for an expression or text.
 - Whitespace separating tokens in the grammar is ignored.
 - All other characters are used verbatim.
 
@@ -283,6 +283,23 @@ Inherent scalar.
 
 A constant expression that matches no syntax text, only at the end of the syntax
 text.
+
+#### Command-Line Argument Boundaries
+
+```ebnf
+_
+```
+
+Inherent scalar.
+
+A **command-line argument boundary**: a constant expression that matches no
+syntax text, only between 2 adjacent command-line arguments, iff the latter is
+`-` or does not start with `-`, as an [option value](configs.md#option-values)
+requires (e.g., `"--fields" _ "x"` matches the arguments `--fields` & `x`, but
+`"--fields" _ "-x"` matches no arguments). Syntax text spans multiple
+command-line arguments only where a command-line argument boundary separates
+them. Each side of a command-line argument boundary treats outer bare whitespace
+as the syntax text's start & end do.
 
 #### Literals
 

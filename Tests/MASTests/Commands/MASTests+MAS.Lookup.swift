@@ -121,7 +121,10 @@ private extension MASTests {
 	}
 
 	@Test(arguments: [("--fields", "name"), ("--json-config", "P"), ("--key-value-config", "s"), ("--table-config", "S")])
-	func `an option value separator is equivalent to whitespace`(option: String, value: String) async throws {
+	func `an = option value separator is equivalent to a command-line argument boundary`(
+		option: String,
+		value: String,
+	) async throws {
 		let catalogApps = [try decode(CatalogApp.self, fromResource: "things-lookup")]
 		let separated = try await consequencesOf(
 			try await MAS.main(try MAS.Lookup.parse([

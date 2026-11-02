@@ -48,12 +48,20 @@ Text's **width** is its terminal display width: the sum of its characters'
 
 ## Option Values
 
-An option's **value** is the rest of its command-line argument after `=` (e.g.,
-`--fields=name`), or else the next command-line argument (e.g.,
-`--fields name`), iff that argument is `-` or does not start with `-`, so a
-value that starts with `-` must follow `=` (e.g., `--fields=-x`); otherwise, the
-option is an error (e.g., `--fields -x`). Each spec defines an option's syntax
-over its value alone.
+```ebnf
+valued-option(NAME, VALUE) = !NAME! ( "=" | _ ) VALUE
+```
+
+A **valued option** is an option that takes a value; each spec defines one as a
+`<valued-option(…)>` (e.g., [`<fields-option>`](fields.md#fields-option)).
+
+A valued option's **value** (`VALUE`) is the rest of its command-line argument
+after `=` (e.g., `--fields=name`), or else the next command-line argument (e.g.,
+`--fields name`), which a [command-line argument
+boundary](ebnf.md#command-line-argument-boundaries) separates from `NAME` iff
+that argument is `-` or does not start with `-`, so a value that starts with `-`
+must follow `=` (e.g., `--fields=-x`); otherwise, the option is an error (e.g.,
+`--fields -x`).
 
 A **flag** is an option that takes no value (e.g., `--json`).
 
@@ -188,11 +196,11 @@ its kind's output config syntax (e.g., [`<header-setting>`](table.md#header)),
 each of whose **alternatives** (e.g., `<header-off>` & `<header-on>`) starts
 with its own letter.
 
-Each output format's **output config option** (e.g., `--json-config`) takes a
-[value](#option-values) that, iff it contains a
-non-[whitespace](ebnf.md#whitespace) character, is in its output format's kind's
-output config syntax; otherwise, it overlays no settings (e.g., `--json-config=`
-≡ `--json`).
+Each output format's **output config option** (e.g.,
+[`<json-config-option>`](json.md#json-config)) takes an optional
+[value](#option-values) in its output format's kind's output config syntax, so
+an empty or [whitespace](ebnf.md#whitespace)-only one overlays no settings
+(e.g., `--json-config=` ≡ `--json`).
 
 A persistent output config's text is likewise optional (e.g.,
 `[ <json-config> ]`), because generated text may contain no setting, so an empty
