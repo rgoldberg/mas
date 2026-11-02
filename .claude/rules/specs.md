@@ -28,8 +28,8 @@ Swift Argument Parser splits each option from its value (after `=` or as the
 next command-line argument), which whitespace treatments cannot model.
 
 In specs, never define a nonterminal as a single optional (e.g., `x = [ <y> ]`);
-make its references optional instead, since an expression that consumes no token
-is never present.
+make its references optional instead, because an expression that consumes no
+token is never present.
 
 In specs, make every block reference optional, except one that is:
 
@@ -124,8 +124,8 @@ In specs, call an alternative that nothing overrides **effective** (e.g., "an
 effective `f`"), rather than describing it as not overridden (e.g., not "an `f`
 that no later `<leader-setting>` overrides").
 
-In `Specs/ebnf.md`, keep the **Required** (`&`) outer bare whitespace treatment,
-even while no syntax uses it.
+In `Specs/ebnf.md`, retain the **Required** (`&`) outer bare whitespace
+treatment, even while no syntax uses it.
 
 In specs, specify syntax according to the 1st of these that applies:
 
@@ -135,7 +135,7 @@ In specs, specify syntax according to the 1st of these that applies:
 2. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a modifier or wrapper that cannot affect what it means, when the
    syntax text alone decides this (e.g., `%S%v++`, `K:`, whose keys are styled
-   by nothing, `%+s`, whose `<abort-on-failure>` changes nothing, since `%s`
+   by nothing, `%+s`, whose `<abort-on-failure>` modifies nothing, because `%s`
    already aborts on failure, or `%mN.round++`, whose `%m` matches only 1
    branch).
 3. Attach an error comment: syntax that contradicts itself, or cannot mean what

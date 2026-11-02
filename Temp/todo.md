@@ -71,7 +71,7 @@ only after `=` (e.g., `--json[=<json-config>]`).
    formatted value that is not absent (e.g., `:%N%n+none+`). Supporting them
    also needs each [named format](../Specs/fields-format.md#named-formats) to be
    checked per its error comment (e.g., that a `<string-format-name>`'s preset's
-   format conforms to `%S`'s `<conditional-block>`), since every built-in
+   format conforms to `%S`'s `<conditional-block>`), because every built-in
    preset's format is `%i`, which conforms to every block.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:

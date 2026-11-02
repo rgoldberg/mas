@@ -551,7 +551,7 @@ Within a `<conditional-block>`, a `<block-placeholder>` has its enclosing
 matcher's predicate's letter, ignoring case (e.g., in `%S…+`, `%s` or `%S…+`,
 but not `%v`), and is evaluated against the enclosing matcher's value (coerced,
 if it coerces), so it always succeeds; `%i` / `%I` are evaluated against their
-format's **input**, which no block changes: in a field spec's format, the field
+format's **input**, which no block modifies: in a field spec's format, the field
 value, at its original type; in a named format, the value against which its
 `<named-format-reference>` evaluates it (e.g., `%.N%n (%i)++` renders `"4.50"`
 as `4.5 (4.50)`, while `%+.N:x+`, where preset `x` sets no format, renders it as
