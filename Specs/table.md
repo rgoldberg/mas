@@ -23,8 +23,9 @@ table-setting =
   | <column-spacing-setting>
 ```
 
-`--table-config` is table output's [output config
-option](configs.md#output-configs), whose syntax is `<table-config>`.
+`<table-config>` is the table config kind's [output config
+syntax](configs.md#output-configs), and `--table-config` is table output's
+[output config option](configs.md#output-configs).
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.

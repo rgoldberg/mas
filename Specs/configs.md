@@ -178,16 +178,21 @@ otherwise, [`standard`](#standard-configs) is substituted for `default`, so
 
 ## Output Configs
 
-An **output config** is a table, key-value, or JSON config. Each output format's
-**output config option** (e.g., `--json-config`) takes a [value](#option-values)
-that, iff it contains a non-[whitespace](ebnf.md#whitespace) character, is its
-kind's syntax (e.g., [`<json-config>`](json.md#json-config)); otherwise, it
-overlays no setting (e.g., `--json-config=` ≡ `--json`).
+An **output config** is a table, key-value, or JSON config.
+
+Each output config is specified in its kind's **output config syntax** (e.g.,
+[`<json-config>`](json.md#json-config) for a JSON config).
 
 An output config has a separate **setting** per `(* inherited *)` nonterminal in
-its kind's syntax (e.g., [`<header-setting>`](table.md#header)), each of whose
-**alternatives** (e.g., `<header-off>` & `<header-on>`) starts with its own
-letter.
+its kind's output config syntax (e.g., [`<header-setting>`](table.md#header)),
+each of whose **alternatives** (e.g., `<header-off>` & `<header-on>`) starts
+with its own letter.
+
+Each output format's **output config option** (e.g., `--json-config`) takes a
+[value](#option-values) that, iff it contains a
+non-[whitespace](ebnf.md#whitespace) character, is in its output format's kind's
+output config syntax; otherwise, it overlays no settings (e.g., `--json-config=`
+≡ `--json`).
 
 Output sources from the context stack's [`default`](#default-configs) output
 config of its output format's kind; an output config option's value is overlaid

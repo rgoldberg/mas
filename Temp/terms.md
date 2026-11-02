@@ -673,6 +673,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - output config option: an output format's option that selects it with a
        config overlaid on its `default` config (e.g., `--json-config`)
        ([defined](../Specs/configs.md#output-configs))
+     - output config syntax: the syntax of an output config kind's configs
+       (e.g., `<json-config>`) ([defined](../Specs/configs.md#output-configs))
 111. - preset: a named config of `<field-modifiers>`, which a
        `<preset-modifier>` attaches to a field spec
        ([defined](../Specs/fields.md#presets))
