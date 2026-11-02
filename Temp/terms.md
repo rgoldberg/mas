@@ -335,8 +335,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: hardcoded / predefined
 52. - custom: a user-given alternative to a built-in, default, or locale-sourced
       value (e.g., a `<locale-identifier>`)
-    - explicit: only in "explicit default", in contrast with implied & in
-      contrast with set by an attached preset (e.g., "an explicit modifier")
+    - explicit: of a default that a default comment specifies ("explicit
+      default"), of an alternative in contrast with an implied one ("an explicit
+      alternative"), or of a setting in contrast with one that an attached
+      preset sets ("an explicit modifier")
     - REJECTED: user-configurable / user-defined / saved / manual / explicit (as
       synonyms for custom)
 53. - because
