@@ -713,7 +713,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        field spec setting & per `(* inherited *)` nonterminal in
        `<field-order-section>` & `<item-sort-section>`
        ([defined](../Specs/fields.md#inherited-values)); or of an output config,
-       per `(* inherited *)` nonterminal in its kind's syntax
+       per `(* inherited *)` nonterminal in its kind's output config syntax
        ([defined](../Specs/configs.md#output-configs))
      - alternative: one of the alternatives of an output config setting's
        nonterminal, each starting with its own letter (e.g., `<header-off>`, as
