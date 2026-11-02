@@ -91,11 +91,12 @@ which a `<transform-pipeline>` in its position would be applied (e.g., in
 
 Because every `<success-block>`'s syntax includes
 `<unconditional-block(<unconditional-pipeline>)>`'s, a named unconditional
-format satisfies every `<format-name>`.
+format conforms to every `<format-name>`'s `BLOCK`.
 
 An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 `<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
-string, as it does (e.g., `%S:e+none+` inserts an empty string for a string).
+string, as an empty named format does (e.g., `%S:e+none+` inserts an empty
+string for a string).
 
 ##### Transforms
 
@@ -524,7 +525,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 - **Unary**: a `<success-clause>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`, at least 1 of which is
   present, because a binary placeholder without either (e.g., `%S++`) would
-  always insert an empty string, so its matcher could not affect what it means.
+  always insert an empty string, so its matcher cannot affect what it means.
 - **Abort-on-failure**: a `<success-block>`.
 - **Abort-on-success**: a `<failure-block>`.
 - **Negated** (`-…`, in a non-nullary branch): an `<unconditional-block>`,
