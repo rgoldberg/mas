@@ -112,9 +112,10 @@ private extension MASTests {
 			(":default.uppercase", .string("abc"), "ABC"),
 			(":end.uppercase", .string("abc"), "ABC"), // A preset that sets no format
 			(":standard..round", .string("4.6"), "5"),
-			// A block's named format is evaluated against the field value, as `%i` is
-			("%.N:default+-+", .string("4.50"), "4.50"),
-			("%L:default.uppercase+", .string("abc"), "ABC"),
+			// A block's named format is evaluated against its matcher's value, which
+			// is thus the format input that its `%i` inserts
+			("%.N:default+-+", .string("4.50"), "4.5"),
+			("%K:default.uppercase+", .string("abc"), "N"),
 		],
 	)
 	func `renders the named format of a preset that sets no format as %i`(

@@ -681,6 +681,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - preset clearing: a bare `%`, which detaches every preset
      - named format: a preset's format, which a `<named-format-reference>`
        references ([defined](../Specs/fields-format.md#named-formats))
+     - format input: the value against which a format is evaluated, which `%i` /
+       `%I` insert: for a field spec's format, the field value; for a named
+       format, the value that its `<named-format-reference>` evaluates it
+       against ([defined](../Specs/fields-format.md#success--failure))
      - REJECTED: named spec (the specs use "spec" for a `Specs/` document) /
        field style / template (for a preset)
 112. - alignment: where a field spec's label & values are in its table output

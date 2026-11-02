@@ -544,9 +544,12 @@ coercing to a string.
 Within a `<conditional-block>`, a `<block-placeholder>` has its enclosing
 matcher's predicate's letter, ignoring case (e.g., in `%S…+`, `%s` or `%S…+`,
 but not `%v`), and is evaluated against the enclosing matcher's value (coerced,
-if it coerces), so it always succeeds; `%i` / `%I` are evaluated against the
-field value, at its original type (e.g., `%.N%n (%i)++` renders `"4.50"` as
-`4.5 (4.50)`).
+if it coerces), so it always succeeds; `%i` / `%I` are evaluated against their
+format's **input**, which no block changes: in a field spec's format, the field
+value, at its original type; in a named format, the value against which its
+`<named-format-reference>` evaluates it (e.g., `%.N%n (%i)++` renders `"4.50"`
+as `4.5 (4.50)`, while `%+.N:x+`, where preset `x` sets no format, renders it as
+`4.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
@@ -585,8 +588,8 @@ non-nullary-unconditional-placeholder =
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>
 
-nullary-input     = "i" (* output type: any; value: {field value} *)
-non-nullary-input = "I" (* output type: any; value: {field value} *)
+nullary-input     = "i" (* output type: any; value: {format input} *)
+non-nullary-input = "I" (* output type: any; value: {format input} *)
 nullary-label     = "l" (* output type: string; value: {field label} *)
 non-nullary-label = "L" (* output type: string; value: {field label} *)
 nullary-name      = "k" (* output type: string; value: {field name}; mnemonic: key *)

@@ -211,7 +211,7 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// formatted value is absent (fields.md "Absent Values"): iff formatting
 	/// aborts, or iff `value` is `nil` & this format evaluates to it unchanged.
 	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node? {
-		try evaluated(in: .init(input: value, label: label, name: name, matched: nil))?.node
+		try evaluated(in: .init(input: .input(value), label: label, name: name, matched: nil))?.node
 	}
 
 	/// `value`'s values for a sort key sourced from output: its output is its
@@ -219,7 +219,7 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// number renders without its trivia, which are kept apart (fields.md "Sort
 	/// Source").
 	func sortValues(input value: JSON.Node?, label: String, name: String) throws(FormattingError) -> SortValues {
-		let evaluated = try evaluated(in: .init(input: value, label: label, name: name, matched: nil))
+		let evaluated = try evaluated(in: .init(input: .input(value), label: label, name: name, matched: nil))
 		return if case let .number(number, triviaPrefix, triviaSuffix)? = evaluated {
 			.init(
 				input: value,
@@ -236,8 +236,8 @@ extension Format { // swiftlint:disable:this file_types_order
 		switch self {
 		case let .pipeline(pipeline):
 			// A block's pipeline formats the enclosing matcher's value; a
-			// `<format-block>`'s, the field value
-			return try pipeline.evaluated(on: context.matched ?? .input(context.input), in: context)
+			// `<format-block>`'s, the format's input
+			return try pipeline.evaluated(on: context.matched ?? context.input, in: context)
 		case let .template(elements):
 			// A template that is solely 1 placeholder has that placeholder's value
 			if let element = elements.first, elements.count == 1, element.isPlaceholder {
@@ -257,10 +257,11 @@ extension Format { // swiftlint:disable:this file_types_order
 
 private extension Pipeline { // swiftlint:disable:this file_types_order
 	/// This pipeline's calls applied to its named format's value, if any, else to
-	/// `value`; `nil` iff formatting aborts.
+	/// `value`; `nil` iff formatting aborts. The named format is evaluated
+	/// against `value`, which is thus its format's input.
 	func evaluated(on value: FormatValue, in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		let input = if let namedFormat {
-			try namedFormat.evaluated(in: context)
+			try namedFormat.evaluated(in: context.inputting(value))
 		} else {
 			value
 		}
@@ -270,7 +271,14 @@ private extension Pipeline { // swiftlint:disable:this file_types_order
 
 /// The context a format is evaluated in.
 private struct FormatContext { // swiftlint:disable:this one_declaration_per_file
-	let input: JSON.Node?
+	/// The format's input: the field value, at its original type, for a field
+	/// spec's format; for a named format, the value that its reference evaluates
+	/// it against.
+	// swiftlint:disable:next todo
+	// TODO: Temp/todo.md "Persistent Custom Presets & Configs": once a named
+	//  format can hold a matcher, match `input` itself, rather than its `node`,
+	//  so that a coerced number keeps its trivia & a chronologic value its type
+	let input: FormatValue
 	let label: String
 	let name: String
 	/// The enclosing matcher's value, for a `<block-placeholder>`.
@@ -278,6 +286,10 @@ private struct FormatContext { // swiftlint:disable:this one_declaration_per_fil
 
 	func matching(_ matched: FormatValue) -> Self {
 		.init(input: input, label: label, name: name, matched: matched)
+	}
+
+	func inputting(_ input: FormatValue) -> Self {
+		.init(input: input, label: label, name: name, matched: nil)
 	}
 }
 
@@ -294,7 +306,7 @@ private extension TemplateElement { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .blockPlaceholder(pipeline):
-			try pipeline.evaluated(on: context.matched ?? .input(context.input), in: context)
+			try pipeline.evaluated(on: context.matched ?? context.input, in: context)
 		case let .placeholder(placeholder):
 			try placeholder.evaluated(in: context)
 		case let .text(text):
@@ -307,7 +319,7 @@ private extension Placeholder { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> FormatValue? {
 		switch self {
 		case let .conditional(matcher, form):
-			let matched = matcher.matched(context.input)
+			let matched = matcher.matched(context.input.node)
 			return switch form {
 			case let .abortOnFailure(success):
 				if let matched {
@@ -356,10 +368,10 @@ private enum BranchOutcome { // swiftlint:disable:this one_declaration_per_file
 
 private extension Branch { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> BranchOutcome {
-		let matched = matcher.matched(context.input)
+		let matched = matcher.matched(context.input.node)
 		return if isNegated {
 			matched == nil
-				? .value(try block.evaluatedBlock(in: context, nullaryValue: .input(context.input)))
+				? .value(try block.evaluatedBlock(in: context, nullaryValue: context.input))
 				: .noValue
 		} else if let matched {
 			.value(try block.evaluatedBlock(in: context.matching(matched), nullaryValue: matched))
@@ -386,7 +398,7 @@ private extension UnconditionalPredicate { // swiftlint:disable:this file_types_
 	func value(in context: FormatContext) -> FormatValue {
 		switch self {
 		case .input:
-			.input(context.input)
+			context.input
 		case .label:
 			.string(context.label)
 		case .name:
