@@ -29,6 +29,9 @@ struct KeyValueConfig: Equatable {
 	/// `"1;4"` for bold & underlined); empty means unstyled.
 	let keyStyleSpecifier: String
 	let keyStyling: KeyStyling
+	/// Its `reset` contains no tab while `keyStyleSpecifier` is not empty & a
+	/// leader whose pattern's width is greater than 0 exists, because a tab would
+	/// misalign the values that it aligns.
 	let keyStyleSequences: StyleSequences
 	/// Repeated (truncating mid-repetition if needed, then space-filling any
 	/// remaining width) to fill each leader, aligning an item's values; never
@@ -148,6 +151,9 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 	if let leaderPattern, leaderPattern.terminalWidth > 0, let leadingSpacing, leadingSpacing.contains("\t") {
 		throw .misaligningLeadingSpacing(leadingSpacing)
 	}
+	if !keyStyleSpecifier.isEmpty, let leaderPattern, leaderPattern.terminalWidth > 0, keyStyleReset.contains("\t") {
+		throw .misaligningKeyStyleReset(keyStyleReset)
+	}
 	return .init(
 		keyStyleSpecifier: keyStyleSpecifier,
 		keyStyling: keyStyling,
@@ -172,6 +178,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case invalidLeadingSpacing(String)
 	case invalidSetting(Character)
 	case invalidTrailingSpacing(String)
+	case misaligningKeyStyleReset(String)
 	case misaligningLeaderPattern(String)
 	case misaligningLeadingSpacing(String)
 
@@ -200,6 +207,8 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Invalid --key-value-config <key-value-setting>: \(setting)"
 		case let .invalidTrailingSpacing(spacing):
 			"Invalid trailing spacing (a line terminator would split each row): \(spacing.debugDescription)"
+		case let .misaligningKeyStyleReset(styleReset):
+			"Invalid key style reset (a tab would misalign the values that a leader aligns): \(styleReset.debugDescription)"
 		case let .misaligningLeaderPattern(pattern):
 			"Invalid leader pattern (a tab would misalign the values that it aligns): \(pattern.debugDescription)"
 		case let .misaligningLeadingSpacing(spacing):

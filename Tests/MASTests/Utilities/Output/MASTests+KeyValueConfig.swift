@@ -46,6 +46,8 @@ private extension MASTests {
 			("fL \t:F", .misaligningLeadingSpacing(" \t")),
 			("F.\t:", .misaligningLeaderPattern(".\t")),
 			("F\t\u{301}=:", .misaligningLeaderPattern("\t\u{301}=")),
+			("K1:O\t:", .misaligningKeyStyleReset("\t")),
+			("O\t:K1:a", .misaligningKeyStyleReset("\t")),
 		],
 	)
 	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
@@ -58,6 +60,11 @@ private extension MASTests {
 	@Test(arguments: [("K1:", KeyValueConfig.KeyStyling.terminalOnly), ("K1:a", .always), ("aK1:t", .terminalOnly)])
 	func `t & a set key styling, last wins`(value: String, keyStyling: KeyValueConfig.KeyStyling) throws {
 		#expect(try parseKeyValueConfig(value).keyStyling == keyStyling)
+	}
+
+	@Test(arguments: ["O\t:", "K1:fO\t:", "K1:F\t:O\t:", "K1:O\t:o", "K1:O\t:k"])
+	func `a key style reset tab is valid unless keys are styled & a leader wider than 0 aligns them`(value: String) {
+		#expect(throws: Never.self) { try parseKeyValueConfig(value) }
 	}
 
 	@Test(

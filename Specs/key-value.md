@@ -146,7 +146,9 @@ key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination
 key-style-reset-setting = <key-style-reset-default> | <key-style-reset-custom> (* default: <key-style-reset-default>; last wins; inherited *)
 
 key-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
-key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> (* mnemonic: off *)
+key-style-reset-custom  =
+  "O" [ <style-reset> ] <key-value-setting-termination>
+  (* error: its <style-reset> contains a tab while it, <styled-key> & a <leader-on> with a <leader-pattern> of positive width are effective; mnemonic: off *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -154,7 +156,14 @@ key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> 
 `<style-reset>` is as [defined for table output](table.md#style-reset):
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows each styled key.
-- `O`: a custom string follows each styled key (e.g., `O:` for none).
+- `O`: a custom string follows each styled key (e.g., `O:` for none). A
+  `<style-reset>` that contains a tab while `O`, `K` & `F` are effective, with a
+  `<leader-pattern>` whose width is greater than 0, is invalid, because each
+  such tab advances to whichever tab stop follows its key, so the leader would
+  misalign the values, as such a [`<leading-spacing>`](#leading-spacing) would
+  (e.g., `$'K1:O\e[0m\t:'` in zsh); it is invalid even while keys are unstyled
+  per `t`, so that whether a config is valid does not depend on whether standard
+  output is a terminal.
 
 ## Leader
 
