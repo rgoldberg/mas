@@ -93,6 +93,10 @@ Because every `<success-block>`'s syntax includes
 `<unconditional-block(<unconditional-pipeline>)>`'s, a named unconditional
 format satisfies every `<format-name>`.
 
+An empty named format (e.g., that of a preset `e` of `:`) conforms to every
+`<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
+string, as it does (e.g., `%S:e+none+` inserts an empty string for a string).
+
 ##### Transforms
 
 <!--editorconfig-checker-disable-->
