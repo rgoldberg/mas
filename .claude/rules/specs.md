@@ -36,7 +36,7 @@ In specs, make every block reference optional, except one that is:
 1. A block's entire definition (e.g.,
    `failure-block = <unconditional-block(<unconditional-pipeline>)>`), which a
    single optional cannot define.
-2. An actual parameter (e.g., `<conditional-block(…)>` in
+2. An argument (e.g., `<conditional-block(…)>` in
    `<format-name(<conditional-block(…)>)>`), whose parameterized nonterminal's
    definition makes it optional wherever it consumes text.
 3. One whose absence a sibling alternative, with a default for it, expresses

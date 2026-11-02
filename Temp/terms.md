@@ -393,7 +393,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       unlike its uppercase one (e.g., a table's `h`;
       [defined](../Specs/configs.md#output-configs))
     - argument: an element of an argument list (a transform's, a number
-      coercion's, `N`'s, or `C`'s)
+      coercion's, `N`'s, or `C`'s); also an expression that a parameterized
+      nonterminal's reference passes for a parameter
     - REJECTED: body / argument (for other modifiers & options)
 67. - titlecase: verb & adjective
     - uppercase: verb & adjective
@@ -469,13 +470,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - virtual descendant: a descendant default comment's `DESCENDANT` that is
       not an actual descendant of its `NONTERMINAL`
     - parameterized nonterminal: a nonterminal whose definition names
-      parameters, each of which a reference replaces with its actual parameter
+      parameters, each of which a reference replaces with its argument
       ([defined](../Specs/ebnf.md#parameterized-nonterminals))
-    - parameter / actual parameter: a parameterized nonterminal's
-      metavariable-like word / the expression that a reference passes for it
+    - parameter / argument: a parameterized nonterminal's metavariable-like word
+      / the expression that a reference passes for it (the standard pair of
+      terms; an argument list's element is an argument in the syntax, while this
+      is one in the grammar)
     - REJECTED: default value comment / applicability comment (for an error
-      comment) / argument (for an actual parameter; the specs use "argument" for
-      an argument list's elements)
+      comment) / actual parameter (for an argument)
 78. - style specifier: terminal-specific text styling a header row or a key
       (`<style-specifier>`)
     - style prefix: precedes a style specifier (`<style-prefix>`)

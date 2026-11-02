@@ -64,7 +64,7 @@ possible occurrences, determined from the grammar instead of the syntax text:
 - Inherent scalar, repetition, or tuple: that multiplicity.
 - [Nonterminal reference](#nonterminal-references): its definition's static
   multiplicity, with each [parameter](#parameterized-nonterminals) replaced by
-  its actual parameter.
+  its argument.
 - [Grouping](#groupings), [optional](#optionals), or
   [trailing-omissible](#trailing-omissibles): its child's static multiplicity.
 - [Sequence](#sequences) with exactly 1 variable child: that child's static
@@ -380,7 +380,7 @@ separators](#repetitions-with-separators-1-or-more) & [literals](#literals):
 
 ```ebnf
 NONTERMINAL "(" PARAMETER … "," ")" "=" DEFINITION
-"<" NONTERMINAL "(" ACTUAL_PARAMETER … "," ")" ">"
+"<" NONTERMINAL "(" ARGUMENT … "," ")" ">"
 ```
 
 Content-dependent multiplicity.
@@ -390,15 +390,15 @@ each a word of uppercase letters, digits & `_` (as a metavariable is), which
 `DEFINITION` & its semantic comments reference bare (e.g., `PIPELINE`), not as
 nonterminal references.
 
-Each reference passes 1 **actual parameter** per parameter, in order, each an
+Each reference passes 1 **argument** per parameter, in order, each an
 expression; it references `DEFINITION` with each parameter replaced by its
-actual parameter, grouped (e.g., given `pair(X) = X "," X`, `<pair("a" | "b")>`
-matches what `( "a" | "b" ) "," ( "a" | "b" )` matches, such as `a,b`). Each
-semantic comment attached to `DEFINITION` applies to every reference, with each
-parameter likewise replaced.
+argument, grouped (e.g., given `pair(X) = X "," X`, `<pair("a" | "b")>` matches
+what `( "a" | "b" ) "," ( "a" | "b" )` matches, such as `a,b`). Each semantic
+comment attached to `DEFINITION` applies to every reference, with each parameter
+likewise replaced.
 
-A reference to a parameterized nonterminal without its actual parameters (e.g.,
-`<pair>`) references it with any actual parameters; only prose, comments &
+A reference to a parameterized nonterminal without its arguments (e.g.,
+`<pair>`) references it with any arguments; only prose, comments &
 non-structural definitions may contain one.
 
 ### Groupings
