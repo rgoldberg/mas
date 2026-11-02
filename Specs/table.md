@@ -192,8 +192,9 @@ separator-pattern = ^{string: no line terminators, no tab unless its width is 0}
   [width](configs.md#width), truncated before the 1st character that would
   exceed that width; spaces fill any remaining width (e.g., when that character
   is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
-  printed once, with no space-fill, because no number of repetitions can fill
-  any width. A `<separator-pattern>` that contains a [line
+  printed once per segment of a [`b`](#broken) line, or per run between tabs of
+  a `u` line, with no space-fill, because no number of repetitions can fill any
+  width. A `<separator-pattern>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
   the separator line. A `<separator-pattern>` that contains a tab & has a width
   greater than 0 is invalid, because each repetition's tab advances to whichever
@@ -216,7 +217,9 @@ unbroken = "u"
 <!--editorconfig-checker-enable-->
 
 - `b`: the [separator line](#separator) is broken into 1 independently filled
-  segment per column, joined by the same column spacing as every other row.
+  segment per column, each aligned within its column width as a cell is (e.g., a
+  0-width segment is space-filled per its column's alignment), joined by the
+  same column spacing as every other row.
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
   table width, except that it retains each tab of each column spacing in place,
   filling each run between tabs independently, because a tab's rendered width
