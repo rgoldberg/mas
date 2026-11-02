@@ -44,6 +44,8 @@ private extension MASTests {
 			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
 			("L\t:", .misaligningLeadingSpacing("\t")),
 			("fL \t:F", .misaligningLeadingSpacing(" \t")),
+			("F.\t:", .misaligningLeaderPattern(".\t")),
+			("F\t\u{301}=:", .misaligningLeaderPattern("\t\u{301}=")),
 		],
 	)
 	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
@@ -83,6 +85,7 @@ private extension MASTests {
 		("Fs", "s"),
 		("fF.", "."),
 		("F.:f", nil),
+		("F\t\u{301}:", "\t\u{301}"),
 	])
 	func `f removes the leader; F sets its pattern, ▁ by default`(value: String, leaderPattern: String?) throws {
 		#expect(try parseKeyValueConfig(value).leaderPattern == leaderPattern)

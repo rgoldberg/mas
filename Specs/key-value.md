@@ -159,7 +159,7 @@ leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
-leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
+leader-pattern = ^{string: no line terminators}^ (* default: "▁"; error: it contains a tab & its width is greater than 0 *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -176,7 +176,11 @@ leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
   printed once, with no space-fill, because no number of repetitions can fill
   any width. A `<leader-pattern>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
-  each row.
+  each row. A `<leader-pattern>` that contains a tab & has a width greater than
+  0 is invalid, because each repetition's tab advances to whichever tab stop
+  follows it, while the leader's width is measured from the pattern's width, so
+  the leader would misalign the values (e.g., `F.<TAB>:`), while a 0-width one
+  (e.g., `F<TAB>:`) asks only for the next tab stop.
 
 ## Leading Spacing
 
