@@ -61,3 +61,8 @@ affect what it means.
 In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
 empty string, so its matcher cannot affect what it means.
+
+In specs, never remove a typed terminal subtype merely because no syntax uses it
+(e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
+(e.g., `%b`'s boolean), so a future syntax can use it without extending the
+grammar, while being unused alone does not make it worth removing.
