@@ -176,7 +176,7 @@ enum MatchForm: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case binary(failure: Format)
 }
 
-/// A `<branch>`: iff `isNegated`, returns `block` (the field value iff `nil`,
+/// A `<branch>`: iff `isNegated`, returns `block` (the format input iff `nil`,
 /// i.e., iff nullary) iff `matcher` fails; otherwise, returns `block`
 /// (`matcher`'s value iff `nil`) iff `matcher` succeeds.
 struct Branch: Equatable { // swiftlint:disable:this one_declaration_per_file

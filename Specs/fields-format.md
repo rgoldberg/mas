@@ -129,8 +129,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
   - If a `<named-format-reference>` `n` immediately precedes `t` in its
     pipeline: `n`'s value.
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,
-    in a `<success-clause>`, the enclosing matcher's value; elsewhere, the field
-    value).
+    in a `<success-clause>`, the enclosing matcher's value; elsewhere, the
+    [format input](#success--failure)).
 
 An **argument** is an element of an argument list: a transform's, a [number
 coercion's](#coercion), [`N`'s](fields.md#sort-number-segments), or
@@ -561,7 +561,7 @@ its [coerced value](#coercion) iff the matcher coerces (e.g., `%.n` evaluates to
   - If it is nullary, unary match, or binary match: the placeholder's value.
   - Otherwise: its `<success-clause>`'s evaluated value.
 - If a placeholder fails (e.g., `%u` is evaluated against a non-`null`):
-  - If it has `<abort-on-success>` & a nullary predicate: the field value.
+  - If it has `<abort-on-success>` & a nullary predicate: the format input.
   - If it is binary, binary match, or abort-on-success: its `<failure-block>`'s
     evaluated value.
   - Otherwise: formatting aborts.
@@ -906,11 +906,11 @@ branch-negation = "-"!
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- The branches in `<branches>` are evaluated sequentially against the field
-  value, returning as `<match-placeholder>`'s value:
+- The branches in `<branches>` are evaluated sequentially against the format
+  input, returning as `<match-placeholder>`'s value:
   - If a branch has `<branch-negation>`:
     - If it fails: its `<unconditional-block>`'s evaluated value if it is
-      non-nullary, otherwise the field value.
+      non-nullary, otherwise the format input.
   - Otherwise:
     - If it succeeds: its block's evaluated value if it is non-nullary,
       otherwise its matcher's value.
