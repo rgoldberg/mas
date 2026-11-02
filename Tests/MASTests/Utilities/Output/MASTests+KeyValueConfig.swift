@@ -91,7 +91,15 @@ private extension MASTests {
 		#expect(try parseKeyValueConfig(value).leaderPattern == leaderPattern)
 	}
 
-	@Test(arguments: [("l", " "), ("L", ""), ("L:", ""), ("L=", "="), ("L\\: :", ": "), ("L=:l", " ")])
+	@Test(arguments: [
+		("l", " "),
+		("L", ""),
+		("L:", ""),
+		("L=", "="),
+		("L\\: :", ": "),
+		("L=:l", " "),
+		("F\t:L\t:", "\t"),
+	])
 	func `l resets leading spacing to the built-in default; L sets a literal custom value, including empty`(
 		value: String,
 		leadingSpacing: String,

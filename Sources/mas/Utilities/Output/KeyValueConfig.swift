@@ -36,7 +36,8 @@ struct KeyValueConfig: Equatable {
 	/// item's values unaligned.
 	let leaderPattern: String?
 	/// After each key, before its leader (iff any); contains no tab while a
-	/// leader exists, because a tab would misalign the values that it aligns.
+	/// leader whose pattern's width is greater than 0 exists, because a tab would
+	/// misalign the values that it aligns.
 	let leadingSpacing: String
 	/// Before each value, after its leader (iff any).
 	let trailingSpacing: String
@@ -144,7 +145,7 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			throw .invalidSetting(setting)
 		}
 	}
-	if leaderPattern != nil, let leadingSpacing, leadingSpacing.contains("\t") {
+	if let leaderPattern, leaderPattern.terminalWidth > 0, let leadingSpacing, leadingSpacing.contains("\t") {
 		throw .misaligningLeadingSpacing(leadingSpacing)
 	}
 	return .init(
