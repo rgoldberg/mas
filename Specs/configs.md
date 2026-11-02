@@ -194,6 +194,11 @@ non-[whitespace](ebnf.md#whitespace) character, is in its output format's kind's
 output config syntax; otherwise, it overlays no settings (e.g., `--json-config=`
 ≡ `--json`).
 
+A persistent output config's text is likewise optional (e.g.,
+`[ <json-config> ]`), because generated text may contain no setting, so an empty
+or whitespace-only one sets no setting, inheriting each from the config that it
+extends.
+
 Output sources from the context stack's [`default`](#default-configs) output
 config of its output format's kind; an output config option's value is overlaid
 on it for the current command line only, without persistently affecting it. Each
