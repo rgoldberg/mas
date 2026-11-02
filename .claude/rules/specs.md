@@ -145,4 +145,5 @@ In specs, specify syntax according to the 1st of these that applies:
    comparison of variable tokens' values (e.g., `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`,
    or a digit group separator that equals the decimal separator).
-4. Otherwise: allow it.
+4. Otherwise: allow it, even if its output is merely misaligned (e.g., a tab in
+   a `<leader-pattern>`), because its output shows the misalignment.

@@ -177,7 +177,7 @@ separator-setting = <separator-off> | <separator-on> (* default: <separator-off>
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
 
-separator-pattern = ^{string: no line terminators, no tab unless its width is 0}^ (* default: "-" *)
+separator-pattern = ^{string: no line terminators}^ (* default: "-" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -196,12 +196,7 @@ separator-pattern = ^{string: no line terminators, no tab unless its width is 0}
   a `u` line, with no space-fill, because no number of repetitions can fill any
   width. A `<separator-pattern>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
-  the separator line. A `<separator-pattern>` that contains a tab & has a width
-  greater than 0 is invalid, because each repetition's tab advances to whichever
-  tab stop follows it, while the line is filled per the pattern's width, so the
-  line would misalign with the columns (e.g., `S-<TAB>:`, where `<TAB>` is a tab
-  character), while a 0-width one (e.g., `S<TAB>:`) asks only for the next tab
-  stop.
+  the separator line.
 
 ## Broken
 

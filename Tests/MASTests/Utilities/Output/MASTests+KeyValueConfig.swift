@@ -42,12 +42,6 @@ private extension MASTests {
 			("S\u{2028}:", .invalidItemSeparatorLine("\u{2028}")),
 			("L\r\n:", .invalidLeadingSpacing("\r\n")),
 			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
-			("L\t:", .misaligningLeadingSpacing("\t")),
-			("fL \t:F", .misaligningLeadingSpacing(" \t")),
-			("F.\t:", .misaligningLeaderPattern(".\t")),
-			("F\t\u{301}=:", .misaligningLeaderPattern("\t\u{301}=")),
-			("K1:O\t:", .misaligningKeyStyleReset("\t")),
-			("O\t:K1:a", .misaligningKeyStyleReset("\t")),
 		],
 	)
 	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
@@ -62,8 +56,8 @@ private extension MASTests {
 		#expect(try parseKeyValueConfig(value).keyStyling == keyStyling)
 	}
 
-	@Test(arguments: ["O\t:", "K1:fO\t:", "K1:F\t:O\t:", "K1:O\t:o", "K1:O\t:k"])
-	func `a key style reset tab is valid unless keys are styled & a leader wider than 0 aligns them`(value: String) {
+	@Test(arguments: ["K1:O\t:", "K1:F.\t:", "K1:L\t:", "K1:R\t:", "K1:S\t:"])
+	func `a tab is valid in every text payload, even if it misaligns the values`(value: String) {
 		#expect(throws: Never.self) { try parseKeyValueConfig(value) }
 	}
 

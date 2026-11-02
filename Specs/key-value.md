@@ -146,9 +146,7 @@ key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination
 key-style-reset-setting = <key-style-reset-default> | <key-style-reset-custom> (* default: <key-style-reset-default>; last wins; inherited *)
 
 key-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
-key-style-reset-custom  =
-  "O" [ <style-reset> ] <key-value-setting-termination>
-  (* error: its <style-reset> contains a tab while it, <styled-key> & a <leader-on> with a <leader-pattern> of positive width are effective; mnemonic: off *)
+key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> (* mnemonic: off *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -156,14 +154,7 @@ key-style-reset-custom  =
 `<style-reset>` is as [defined for table output](table.md#style-reset):
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows each styled key.
-- `O`: a custom string follows each styled key (e.g., `O:` for none). A
-  `<style-reset>` that contains a tab while `O`, `K` & `F` are effective, with a
-  `<leader-pattern>` whose width is greater than 0, is invalid, because each
-  such tab advances to whichever tab stop follows its key, so the leader would
-  misalign the values, as such a [`<leading-spacing>`](#leading-spacing) would
-  (e.g., `$'K1:O\e[0m\t:'` in zsh); it is invalid even while keys are unstyled
-  per `t`, so that whether a config is valid does not depend on whether standard
-  output is a terminal.
+- `O`: a custom string follows each styled key (e.g., `O:` for none).
 
 ## Leader
 
@@ -175,7 +166,7 @@ leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
-leader-pattern = ^{string: no line terminators, no tab unless its width is 0}^ (* default: "▁" *)
+leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -192,11 +183,7 @@ leader-pattern = ^{string: no line terminators, no tab unless its width is 0}^ (
   printed once, with no space-fill, because no number of repetitions can fill
   any width. A `<leader-pattern>` that contains a [line
   terminator](configs.md#line-terminators) is invalid, because it would split
-  each row. A `<leader-pattern>` that contains a tab & has a width greater than
-  0 is invalid, because each repetition's tab advances to whichever tab stop
-  follows it, while the leader's width is measured from the pattern's width, so
-  the leader would misalign the values (e.g., `F.<TAB>:`), while a 0-width one
-  (e.g., `F<TAB>:`) asks only for the next tab stop.
+  each row.
 
 ## Leading Spacing
 
@@ -208,9 +195,7 @@ leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
 
-leading-spacing =
-  ^{string: no line terminators}^
-  (* default: {empty string}; error: it contains a tab & an effective <leader-on>'s <leader-pattern> has a width greater than 0 *)
+leading-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -220,14 +205,7 @@ leading-spacing =
   spacing, `fL<TAB>:` for a tab without a leader, where `<TAB>` is a tab
   character, e.g., `$'fL\t:'` in zsh). A `<leading-spacing>` that contains a
   [line terminator](configs.md#line-terminators) is invalid, because it would
-  split each row. A `<leading-spacing>` that contains a tab while `F` is
-  effective with a `<leader-pattern>` whose width is greater than 0 is invalid,
-  because each such tab advances to whichever tab stop follows its key, while
-  the leader's width is measured from the keys' widths, so the leader would
-  misalign the values (e.g., with `$'L\t:'`, the keys `a` & `abc` each reach the
-  same tab stop, after which `a`'s leader is 2 wider than `abc`'s), while a
-  0-width `<leader-pattern>` is printed once, regardless of the keys' widths, so
-  a tab misaligns nothing (e.g., `$'F\t:L\t:'`).
+  split each row.
 
 ## Trailing Spacing
 

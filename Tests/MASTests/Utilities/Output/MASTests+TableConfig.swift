@@ -102,16 +102,9 @@ private extension MASTests {
 		#expect(throws: TableConfigParsingError.invalidSeparatorPattern(pattern)) { try parseTableConfig("S\(pattern):") }
 	}
 
-	@Test(arguments: ["-\t", "\t\u{301}="])
-	func `a separator pattern containing a tab whose width is greater than 0 is invalid`(pattern: String) {
-		#expect(throws: TableConfigParsingError.misaligningSeparatorPattern(pattern)) {
-			try parseTableConfig("S\(pattern):")
-		}
-	}
-
-	@Test
-	func `a 0-width separator pattern may contain a tab`() throws {
-		#expect(try parseTableConfig("S\t\u{301}:").separator?.pattern == "\t\u{301}")
+	@Test(arguments: ["\t", "-\t", "\t\u{301}="])
+	func `a separator pattern may contain a tab`(pattern: String) throws {
+		#expect(try parseTableConfig("S\(pattern):").separator?.pattern == pattern)
 	}
 
 	@Test(arguments: ["\n", " \r\n ", "\u{85}", "\u{2029}"])

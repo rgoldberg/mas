@@ -122,9 +122,6 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 			guard !pattern.contains(where: \.isNewline) else {
 				throw .invalidSeparatorPattern(pattern)
 			}
-			guard !pattern.contains("\t") || pattern.terminalWidth == 0 else {
-				throw .misaligningSeparatorPattern(pattern)
-			}
 			separatorPattern = .set(pattern.isEmpty ? "-" : pattern)
 		case "b":
 			broken = .set(true)
@@ -169,7 +166,6 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case invalidHeaderStyleSuffix(String)
 	case invalidSeparatorPattern(String)
 	case invalidSetting(Character)
-	case misaligningSeparatorPattern(String)
 
 	var description: String {
 		switch self {
@@ -192,8 +188,6 @@ enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 			"Invalid separator pattern (a line terminator would split the separator line): \(pattern.debugDescription)"
 		case let .invalidSetting(setting):
 			"Invalid --table-config <table-setting>: \(setting)"
-		case let .misaligningSeparatorPattern(pattern):
-			"Invalid separator pattern (a tab would misalign the separator line): \(pattern.debugDescription)"
 		}
 	}
 }
