@@ -78,8 +78,7 @@ enum Placeholder: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case unconditional(UnconditionalPredicate, pipeline: Pipeline)
 }
 
-/// An `<unconditional-placeholder>`'s or `<unconditional-branch>`'s predicate,
-/// by its nullary letter.
+/// An `<unconditional-placeholder>`'s predicate, by its nullary letter.
 enum UnconditionalPredicate: Character { // swiftlint:disable:this one_declaration_per_file
 	case input = "i"
 	case label = "l"
@@ -177,15 +176,13 @@ enum MatchForm: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case binary(failure: Format)
 }
 
-/// A `<branch>`.
-enum Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
-	/// A `<conditional-branch>`: iff `isNegated`, returns `block` (the field
-	/// value iff `nil`, i.e., iff nullary) iff the matcher fails; otherwise,
-	/// returns `block` (the matcher's value iff `nil`) iff the matcher succeeds.
-	case conditional(Matcher, isNegated: Bool, block: Format?)
-	/// An `<unconditional-branch>`, which always returns `block` (its predicate's
-	/// value iff `nil`, i.e., iff nullary).
-	case unconditional(UnconditionalPredicate, block: Format?)
+/// A `<branch>`: iff `isNegated`, returns `block` (the field value iff `nil`,
+/// i.e., iff nullary) iff `matcher` fails; otherwise, returns `block`
+/// (`matcher`'s value iff `nil`) iff `matcher` succeeds.
+struct Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
+	let matcher: Matcher
+	let isNegated: Bool
+	let block: Format?
 }
 
 // MARK: - Formatting errors
@@ -359,21 +356,15 @@ private enum BranchOutcome { // swiftlint:disable:this one_declaration_per_file
 
 private extension Branch { // swiftlint:disable:this file_types_order
 	func evaluated(in context: FormatContext) throws(FormattingError) -> BranchOutcome {
-		switch self {
-		case let .conditional(matcher, isNegated, block):
-			let matched = matcher.matched(context.input)
-			return if isNegated {
-				matched == nil
-					? .value(try block.evaluatedBlock(in: context, nullaryValue: .input(context.input)))
-					: .noValue
-			} else if let matched {
-				.value(try block.evaluatedBlock(in: context.matching(matched), nullaryValue: matched))
-			} else {
-				.noValue
-			}
-		case let .unconditional(predicate, block):
-			let value = predicate.value(in: context)
-			return .value(try block.evaluatedBlock(in: context.matching(value), nullaryValue: value))
+		let matched = matcher.matched(context.input)
+		return if isNegated {
+			matched == nil
+				? .value(try block.evaluatedBlock(in: context, nullaryValue: .input(context.input)))
+				: .noValue
+		} else if let matched {
+			.value(try block.evaluatedBlock(in: context.matching(matched), nullaryValue: matched))
+		} else {
+			.noValue
 		}
 	}
 }

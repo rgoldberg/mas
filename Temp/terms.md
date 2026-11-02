@@ -138,8 +138,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (`<disabled-sort-prefix>`)
 25. - disabled
     - invalid
-    - unreachable: of syntax that no evaluation can reach (e.g., `%M`'s
-      `<failure-block>` after a branch that always returns a value)
+    - unreachable: of syntax that no evaluation can reach (e.g., a
+      `<failure-block>` whose matcher always succeeds)
     - REJECTED: inoperative / unused / illegal
 26. - position: a list position (1, 2, 3, etc.) that an index may reference
     - index: references a position

@@ -371,7 +371,7 @@ private struct FormatParser {
 			guard abortModifier == nil, coercion == nil else {
 				throw .invalidModifier(letter)
 			}
-			let branches = try parseBranches(isBinary: isNonNullary)
+			let branches = try parseBranches()
 			return .match(
 				branches,
 				isNonNullary
@@ -478,15 +478,10 @@ private struct FormatParser {
 		return modifier
 	}
 
-	/// Parses a `<match-placeholder>`'s `<branches>` (iff `<unary-match>`) or
-	/// `<conditional-branches>` (iff `<binary-match>`, as `isBinary`) & its
-	/// `<block-terminator>`.
-	private mutating func parseBranches(isBinary: Bool) throws(ParsingError) -> [Branch] {
+	/// Parses a `<match-placeholder>`'s `<branches>` & its `<block-terminator>`.
+	private mutating func parseBranches() throws(ParsingError) -> [Branch] {
 		var branches = [Branch]()
 		while skipWhitespace(), let first = input.first, first != blockTerminator {
-			if case .unconditional = branches.last {
-				throw .unconditionalBranchNotLast
-			}
 			branches.append(try parseBranch())
 		}
 		guard !input.isEmpty else {
@@ -495,12 +490,6 @@ private struct FormatParser {
 		input.removeFirst()
 		guard branches.count >= 2 else {
 			throw .singleBranch
-		}
-		guard case .conditional = branches[branches.count - 2] else {
-			throw .unconditionalBranchNotLast
-		}
-		if isBinary, case .unconditional = branches.last {
-			throw .unconditionalBranchInBinaryMatch
 		}
 		return branches
 	}
@@ -513,24 +502,11 @@ private struct FormatParser {
 			throw .missingPredicate
 		}
 		input.removeFirst()
-		let lowercaseLetter = Character(letter.lowercased())
-		let isNonNullary = letter.isUppercase
-		if let predicate = UnconditionalPredicate(rawValue: lowercaseLetter) {
-			guard !isNegated, coercion == nil else {
-				throw .invalidModifier(letter)
-			}
-			return .unconditional(
-				predicate,
-				block: isNonNullary
-					? try parseBlock(kind: predicate == .input ? .unconditional : .string, enclosingPredicate: nil)
-					: nil,
-			)
-		}
 		let matcher = try parseMatcher(letter: letter, coercion: coercion)
-		return .conditional(
-			matcher,
+		return .init(
+			matcher: matcher,
 			isNegated: isNegated,
-			block: isNonNullary
+			block: letter.isUppercase
 				? isNegated
 					? try parseBlock(kind: .unconditional, enclosingPredicate: nil)
 					: try parseSuccessBlock(for: matcher)

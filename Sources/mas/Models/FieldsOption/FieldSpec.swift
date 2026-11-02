@@ -126,8 +126,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case singleBranch
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
-	case unconditionalBranchInBinaryMatch
-	case unconditionalBranchNotLast
 	case unexpectedCharacter(Character)
 	case unknownPreset(String)
 	case unknownTransform(String)
@@ -212,10 +210,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<format-template> requires at least 1 <placeholder>"
 		case .tiebreakerUnsupportedForPositionalOrder:
 			"<field-order-tiebreaker> is not supported for <positional-order> 'P'"
-		case .unconditionalBranchInBinaryMatch:
-			"A <binary-match> 'M' takes only <conditional-branches>"
-		case .unconditionalBranchNotLast:
-			"An <unconditional-branch> may only be the last <branch>, which must be preceded by a <conditional-branch>"
 		case let .unexpectedCharacter(character):
 			"Unexpected character: \(character)"
 		case let .unknownPreset(name):

@@ -536,7 +536,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 - **Negated** (`-…`, in a non-nullary branch): an `<unconditional-block>`,
   evaluated iff the matcher fails.
 - **Unary match** (`%m`): `<branches>`.
-- **Binary match** (`%M`): `<conditional-branches>` & a `<failure-block>`.
+- **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
 
 A matcher succeeds iff it matches the value against which it is evaluated.
 
@@ -897,35 +897,26 @@ the same form. A UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
 match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 
 unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
-binary-match-placeholder = <placeholder-prefix> <binary-match> <conditional-branches> <block-terminator> -[ <failure-block> ] <block-terminator>
+binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
 
 unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
-binary-match = "M" (* matches a branch in <conditional-branches>; output type: {matched branch value's type}; value: {matched branch value} *)
+binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 
-branches             = <conditional-branch>+ <branch>
-conditional-branches = <conditional-branch> <conditional-branch>+
-branch               = <conditional-branch> | <unconditional-branch>
+branches = <branch> <branch>+
+branch   = <nullary-branch> | <non-nullary-branch>
 
-conditional-branch   = <nullary-conditional-branch> | <non-nullary-conditional-branch>
-unconditional-branch = <nullary-unconditional-predicate> | <non-nullary-unconditional-branch>
-
-nullary-conditional-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
-non-nullary-conditional-branch =
+nullary-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
+non-nullary-branch =
   <non-nullary-scalar-success> <block-terminator>
   | <branch-negation> <non-nullary-scalar-matcher> -[ <unconditional-block(<unconditional-pipeline>)> ] <block-terminator>
 
 branch-negation = "-"!
-
-non-nullary-unconditional-branch =
-  <non-nullary-input> -[ <unconditional-block(<unconditional-pipeline>)> ] <block-terminator>
-  | ( <non-nullary-label> | <non-nullary-name> ) -[ <unconditional-block(<string-pipeline>)> ] <block-terminator>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- The branches in `<branches>` or `<conditional-branches>` are evaluated
-  sequentially against the field value, returning as `<match-placeholder>`'s
-  value:
+- The branches in `<branches>` are evaluated sequentially against the field
+  value, returning as `<match-placeholder>`'s value:
   - If a branch has `<branch-negation>`:
     - If it fails: its `<unconditional-block>`'s evaluated value if it is
       non-nullary, otherwise the field value.
@@ -936,17 +927,21 @@ non-nullary-unconditional-branch =
   - For `%m`: the placeholder fails & aborts formatting.
   - For `%M`: returns its `<failure-block>`'s value.
 
-`%M`'s branches are all conditional, because a branch that always returns a
-value would make its `<failure-block>` unreachable, while `%m`'s last branch may
-be unconditional (e.g., `%mbI..uppercase++`, but not `%MbI++none+`).
+Every branch is conditional, because an unconditional last branch would mean
+what a `%M` whose `<failure-block>` holds that branch as a placeholder means
+(e.g., `%MN.absoluteValue+b+%I..uppercase++`).
 
 Examples:
 
-- `%mN.absoluteValue+bI..uppercase++`:
+- `%mN.absoluteValue+b+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
-  - Otherwise, outputs the uppercased value.
+  - Otherwise, aborts formatting.
 - `%MN.absoluteValue+b+Status Unknown+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs `Status Unknown`.
+- `%MN.absoluteValue+b+%I..uppercase++`:
+  - If number, outputs the absolute value.
+  - If boolean, outputs the boolean value.
+  - Otherwise, outputs the uppercased value.

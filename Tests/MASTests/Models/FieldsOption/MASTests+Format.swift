@@ -97,22 +97,19 @@ private extension MASTests {
 			.conditional(stringMatcher, .abortOnSuccess(failure: abortingBlock)),
 			.conditional(stringMatcher, .binary(success: .empty, failure: abortingBlock)),
 			.match(
-				[.conditional(numberMatcher, isNegated: false, block: abortingBlock), .unconditional(.input, block: nil)],
+				[.init(matcher: numberMatcher, isNegated: false, block: abortingBlock), stringBranch],
 				.abortOnNoMatch,
 			),
 			.match(
-				[.conditional(stringMatcher, isNegated: true, block: abortingBlock), .unconditional(.input, block: nil)],
+				[.init(matcher: stringMatcher, isNegated: true, block: abortingBlock), stringBranch],
 				.abortOnNoMatch,
 			),
 			.match(
-				[.conditional(stringMatcher, isNegated: false, block: nil), .unconditional(.input, block: abortingBlock)],
+				[stringBranch, .init(matcher: numberMatcher, isNegated: false, block: abortingBlock)],
 				.abortOnNoMatch,
 			),
 			.match(
-				[
-					.conditional(stringMatcher, isNegated: false, block: nil),
-					.conditional(.init(predicate: .boolean, coercion: nil), isNegated: false, block: nil),
-				],
+				[stringBranch, .init(matcher: .init(predicate: .boolean, coercion: nil), isNegated: false, block: nil)],
 				.binary(failure: abortingBlock),
 			),
 		],
@@ -125,6 +122,7 @@ private extension MASTests {
 
 private let numberMatcher = Matcher(predicate: .number, coercion: nil)
 private let stringMatcher = Matcher(predicate: .string, coercion: nil)
+private let stringBranch = Branch(matcher: stringMatcher, isNegated: false, block: nil)
 
 /// A block that aborts for any non-`null` value.
 private let abortingBlock =
