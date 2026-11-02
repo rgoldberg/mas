@@ -129,8 +129,8 @@ style-prefix = ^{string: no line terminators}^ (* default: {empty string} *)
 ```ebnf
 header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default>; last wins; inherited *)
 
-header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
-header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: suffix *)
+header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
+header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: last letter of suffix *)
 
 style-suffix = ^{string: no line terminators}^ (* default: {empty string} *)
 ```

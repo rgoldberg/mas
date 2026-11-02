@@ -118,8 +118,8 @@ key-style-prefix-custom  = "P" [ <style-prefix> ] <key-value-setting-termination
 ```ebnf
 key-style-suffix-setting = <key-style-suffix-default> | <key-style-suffix-custom> (* default: <key-style-suffix-default>; last wins; inherited *)
 
-key-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: suffix *)
-key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination> (* mnemonic: suffix *)
+key-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
+key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination> (* mnemonic: last letter of suffix *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
