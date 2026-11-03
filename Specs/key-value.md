@@ -46,19 +46,21 @@ character in a key is rendered as it is in a [table cell](table.md#table-config)
 (e.g., a tab as `␉`), so each key is 1 line & aligns its leader. Each line
 terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF), so the
 value continues on a new line, each such non-empty line indented to the value's
-start by its row's unstyled text before the value, with each tab retained & each
-other character replaced by as many spaces as its [width](configs.md#width), so
-each tab reaches the same tab stop as in the row, because a tab's rendered width
-depends on the terminal's tab stops, which an app cannot determine (e.g., with
-`fL=:R:`, the key `Notes` & a value of `a` & `b` separated by an LF render as
-`Notes=a`, then 6 spaces & `b` on the next line, while with `$'fL\t:R:'`, they
-render as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next line).
-Each other control character in a value, except a tab, is rendered as it is in a
-key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
-state (e.g., an ESC, which starts an escape sequence) or move the cursor back
-over the row (e.g., a backspace), while a tab, which only advances the cursor to
-its next tab stop, follows everything that a value's line must align with, so it
-misaligns nothing.
+start by its row's unstyled text before the value, after that text's last line
+terminator, if any, with each tab retained & each other character replaced by as
+many spaces as its [width](configs.md#width), so each tab reaches the same tab
+stop as in the row, because a tab's rendered width depends on the terminal's tab
+stops, which an app cannot determine (e.g., with `fL=:R:`, the key `Notes` & a
+value of `a` & `b` separated by an LF render as `Notes=a`, then 6 spaces & `b`
+on the next line, while with `$'fL\t:R:'`, they render as `Notes`, a tab & `a`,
+then 5 spaces, a tab & `b` on the next line; with `$'fL\n:R  :'`, they render as
+`Notes`, then 2 spaces & `a` on the next line, then 2 spaces & `b` on the line
+after). Each other control character in a value, except a tab, is rendered as it
+is in a key (e.g., an ESC as `␛`), because each would otherwise modify the
+terminal's state (e.g., an ESC, which starts an escape sequence) or move the
+cursor back over the row (e.g., a backspace), while a tab, which only advances
+the cursor to its next tab stop, follows everything that a value's line must
+align with, so it misaligns nothing.
 
 ## Key
 
@@ -166,7 +168,7 @@ leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
 leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
 
-leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
+leader-pattern = ^{string}^ (* default: "▁" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -181,9 +183,7 @@ leader-pattern = ^{string: no line terminators}^ (* default: "▁" *)
   of its own key, plus the width of `<leader-pattern>`, so the widest key's
   leader is 1 `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is
   printed once, with no space-fill, because no number of repetitions can fill
-  any width. A `<leader-pattern>` that contains a [line
-  terminator](configs.md#line-terminators) is invalid, because it would split
-  each row.
+  any width.
 
 ## Leading Spacing
 
@@ -195,7 +195,7 @@ leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (
 leading-spacing-default = "l" (* default leading-spacing: " " *)
 leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
 
-leading-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
+leading-spacing = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -203,9 +203,7 @@ leading-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 - `l`: 1 space after each key.
 - `L`: a custom spacing string after each key (e.g., `L:` for no leading
   spacing, `fL<TAB>:` for a tab without a leader, where `<TAB>` is a tab
-  character, e.g., `$'fL\t:'` in zsh). A `<leading-spacing>` that contains a
-  [line terminator](configs.md#line-terminators) is invalid, because it would
-  split each row.
+  character, e.g., `$'fL\t:'` in zsh).
 
 ## Trailing Spacing
 
@@ -217,15 +215,14 @@ trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom
 trailing-spacing-default = "r" (* default trailing-spacing: " "; mnemonic: right *)
 trailing-spacing-custom  = "R" [ <trailing-spacing> ] <key-value-setting-termination> (* mnemonic: right *)
 
-trailing-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
+trailing-spacing = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `r`: 1 space before each value.
 - `R`: a custom spacing string before each value (e.g., `R:` for no trailing
-  spacing). A `<trailing-spacing>` that contains a line terminator is invalid,
-  because it would split each row.
+  spacing).
 
 ## Item Separator
 
@@ -237,7 +234,7 @@ item-separator-setting = <item-separator-off> | <item-separator-on> (* default: 
 item-separator-off = "s"
 item-separator-on  = "S" [ <item-separator-line> ] <key-value-setting-termination>
 
-item-separator-line = ^{string: no line terminators}^ (* default: {empty string} *)
+item-separator-line = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -246,9 +243,7 @@ item-separator-line = ^{string: no line terminators}^ (* default: {empty string}
   previous item's last row.
 - `S`: `<item-separator-line>`, output as is, between each pair of adjacent
   items (e.g., `S---:` outputs `---`), so its width depends on no item, and an
-  empty `<item-separator-line>` renders a blank line. An `<item-separator-line>`
-  that contains a line terminator is invalid, because it would split the item
-  separator line.
+  empty `<item-separator-line>` renders a blank line.
 
 An item without any key-value pair has no rows, but is still an item, so the
 item separator lines on each side of it remain (e.g., with `S---:`, such an item

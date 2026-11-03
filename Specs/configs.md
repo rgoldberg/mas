@@ -219,6 +219,8 @@ sets every setting to its default.
 
 An alternative's **payload** is the expression between its letter & its
 termination (e.g., `<style-specifier>` in [`<header-on>`](table.md#header)). A
+payload's tabs & [line terminators](#line-terminators) are output as is (e.g., a
+key-value config of `$'L\n:'` puts each value on the line after its key). A
 **payloadless** alternative is the lowercase alternative of a setting whose
 uppercase alternative takes a payload (e.g., `h`, but not `t`, in a table
 config).

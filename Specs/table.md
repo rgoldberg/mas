@@ -34,7 +34,7 @@ A **table config** is a [named config](configs.md#named-configs) of the table
 kind.
 
 Each [line terminator](configs.md#line-terminators) in a header or data cell is
-rendered as `⏎`, so each row is 1 line (e.g., `a` & `b` separated by an LF
+rendered as `⏎`, so each cell is 1 line (e.g., `a` & `b` separated by an LF
 render as `a⏎b`). Each other C0 control character (U+0000 to U+001F) & each DEL
 (U+007F) in a header or data cell is rendered as its [Control
 Pictures](https://www.unicode.org/charts/PDF/U2400.pdf) symbol (e.g., a tab as
@@ -69,7 +69,7 @@ header-setting = <header-off> | <header-on> (* default: <header-off>; last wins;
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <table-setting-termination>
 
-style-specifier = {string: terminal-specific styling text with no bare ASCII letters & no line terminators}
+style-specifier = {string: terminal-specific styling text with no bare ASCII letters}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -84,9 +84,7 @@ style-specifier = {string: terminal-specific styling text with no bare ASCII let
   row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so
   that a mistyped setting is not silently consumed as `<style-specifier>` text
   (e.g., `--table-config Hb`); escape it to include it (e.g.,
-  `--table-config 'H\b'`). A `<style-specifier>` that contains a [line
-  terminator](configs.md#line-terminators) is invalid, because it would split
-  each row that it styles.
+  `--table-config 'H\b'`).
 
 ## Header Styling
 
@@ -115,16 +113,14 @@ header-style-prefix-setting = <header-style-prefix-default> | <header-style-pref
 header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
 header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
 
-style-prefix = ^{string: no line terminators}^ (* default: {empty string} *)
+style-prefix = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
   precedes `<style-specifier>`.
-- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none). A
-  `<style-prefix>` that contains a line terminator is invalid, because it would
-  split each row that it styles.
+- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none).
 
 ## Style Suffix
 
@@ -136,16 +132,14 @@ header-style-suffix-setting = <header-style-suffix-default> | <header-style-suff
 header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
 header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: last letter of suffix *)
 
-style-suffix = ^{string: no line terminators}^ (* default: {empty string} *)
+style-suffix = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `x`: `m` (the ANSI SGR control sequence's final byte) follows
   `<style-specifier>`.
-- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none). A
-  `<style-suffix>` that contains a line terminator is invalid, because it would
-  split each row that it styles.
+- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none).
 
 ## Style Reset
 
@@ -157,15 +151,13 @@ header-style-reset-setting = <header-style-reset-default> | <header-style-reset-
 header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
 header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
 
-style-reset = ^{string: no line terminators}^ (* default: {empty string} *)
+style-reset = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `o`: `ESC[0m` (the ANSI SGR reset) follows the styled header row.
-- `O`: a custom string follows the styled header row (e.g., `O:` for none). A
-  `<style-reset>` that contains a line terminator is invalid, because it would
-  split each row that it styles.
+- `O`: a custom string follows the styled header row (e.g., `O:` for none).
 
 ## Separator
 
@@ -177,7 +169,7 @@ separator-setting = <separator-off> | <separator-on> (* default: <separator-off>
 separator-off = "s"
 separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
 
-separator-pattern = ^{string: no line terminators}^ (* default: "-" *)
+separator-pattern = ^{string}^ (* default: "-" *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -194,9 +186,7 @@ separator-pattern = ^{string: no line terminators}^ (* default: "-" *)
   is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
   printed once per segment of a [`b`](#broken) line, or per run between tabs of
   a `u` line, with no space-fill, because no number of repetitions can fill any
-  width. A `<separator-pattern>` that contains a [line
-  terminator](configs.md#line-terminators) is invalid, because it would split
-  the separator line.
+  width.
 
 ## Broken
 
@@ -231,7 +221,7 @@ column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* d
 column-spacing-default = "c" (* default column-spacing: "  " *)
 column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>
 
-column-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
+column-spacing = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -239,8 +229,7 @@ column-spacing = ^{string: no line terminators}^ (* default: {empty string} *)
 - `c`: 2 spaces between adjacent columns.
 - `C`: a custom spacing string between adjacent columns (e.g., `C:` for no
   spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
-  `$'C\t:'` in zsh). A `<column-spacing>` that contains a line terminator is
-  invalid, because it would split each row.
+  `$'C\t:'` in zsh).
 
 ## Table Setting Termination
 

@@ -64,12 +64,13 @@ extension JSON.Object {
 	/// character in a key renders as in a table cell (e.g., a line terminator as
 	/// `⏎`), while each line terminator in a value renders as a newline (e.g., a
 	/// CRLF as 1 LF), each such non-empty later line indented to the value's
-	/// start by its row's unstyled text before the value, with each tab retained
-	/// & each other character replaced by as many spaces as its width, so each
-	/// tab reaches the same tab stop as in the row, whatever the terminal's tab
-	/// stops are. Each other control character in a value except a tab renders as
-	/// in a key (e.g., an ESC as `␛`). Each row's width is that of its widest
-	/// line.
+	/// start by its row's unstyled text before the value, after that text's last
+	/// line terminator (e.g., from its leading spacing), if any, with each tab
+	/// retained & each other character replaced by as many spaces as its width,
+	/// so each tab reaches the same tab stop as in the row, whatever the
+	/// terminal's tab stops are. Each other control character in a value except a
+	/// tab renders as in a key (e.g., an ESC as `␛`). Each row's width is that of
+	/// its widest line.
 	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
 		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
@@ -87,14 +88,20 @@ extension JSON.Object {
 						?? ""
 				)
 				+ keyValueConfig.trailingSpacing
-			let valueStartWidth = labelWidth + separation.terminalWidth
 			let valueLines = value.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
 				.map { line in String(line).controlCharactersSymbolized(preservingTabs: true) }
+			let textBeforeValue = label + separation
+			let lastLineBeforeValue = textBeforeValue.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+				.last
+				?? textBeforeValue[...]
 			let indentation = String(
-				(label + separation).flatMap { character in
+				lastLineBeforeValue.flatMap { character in
 					character == "\t" ? "\t" : String(repeating: " ", count: String(character).terminalWidth)
 				},
 			)
+			let renderedValue = valueLines.dropFirst().reduce(into: valueLines[0]) { text, line in
+				text += "\n" + (line.isEmpty ? "" : indentation + line)
+			}
 			return (
 				styled(
 					label,
@@ -103,10 +110,12 @@ extension JSON.Object {
 					isAlwaysStyled: keyValueConfig.keyStyling == .always,
 				)
 					+ separation
-					+ valueLines.dropFirst().reduce(into: valueLines[0]) { text, line in
-						text += "\n" + (line.isEmpty ? "" : indentation + line)
-					},
-				valueStartWidth + (valueLines.map(\.terminalWidth).max() ?? 0),
+					+ renderedValue,
+				(textBeforeValue + renderedValue)
+					.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+					.map(\.terminalWidth)
+					.max()
+					?? 0,
 			)
 		}
 	}

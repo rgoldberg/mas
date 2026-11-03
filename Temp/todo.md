@@ -308,7 +308,6 @@ next line, so a row is as many lines as its most-lined cell or key. This needs:
    because it can otherwise be mistaken for the next row.
 3. How each line is aligned, styled (e.g., a style reset per header line) &
    measured (e.g., column widths & separator lines per widest line).
-4. Whether a line terminator in a style, pattern, or spacing remains invalid.
 
 ### Streaming Output
 

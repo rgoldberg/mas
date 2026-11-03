@@ -344,7 +344,7 @@ A `SUBTYPE`'s **lexical form** is the text that denotes its values, each escape
 sequence denoting its escaped character (e.g., `\5` denotes `5` for `integer`).
 
 `CONSTRAINTS` describes how its typed terminal narrows its lexical form, in
-prose (e.g., `{integer: 1 to 100}`, `{string: no line terminators}`), as a Swift
+prose (e.g., `{integer: 1 to 100}`, `{string: only spaces & tabs}`), as a Swift
 Regex literal that the whole value must match (e.g., `{string: /[A-Y]+/}`, which
 consumes `ABY` from `ABYZ`), or both, separated by `,`.
 

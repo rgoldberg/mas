@@ -80,61 +80,34 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 		case "p":
 			keyStylePrefix = KeyValueConfig.default.keyStyleSequences.prefix
 		case "P":
-			keyStylePrefix = try parseStyleSequence(
-				&input,
-				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
-				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStylePrefix,
-			)
+			keyStylePrefix = try parseKeyValueSettingText(&input)
 		case "x":
 			keyStyleSuffix = KeyValueConfig.default.keyStyleSequences.suffix
 		case "X":
-			keyStyleSuffix = try parseStyleSequence(
-				&input,
-				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
-				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStyleSuffix,
-			)
+			keyStyleSuffix = try parseKeyValueSettingText(&input)
 		case "o":
 			keyStyleReset = KeyValueConfig.default.keyStyleSequences.reset
 		case "O":
-			keyStyleReset = try parseStyleSequence(
-				&input,
-				danglingEscapeError: KeyValueConfigParsingError.danglingEscape,
-				invalidStyleSequenceError: KeyValueConfigParsingError.invalidKeyStyleReset,
-			)
+			keyStyleReset = try parseKeyValueSettingText(&input)
 		case "f":
 			leaderPattern = nil
 		case "F":
 			// `<leader-pattern>` is a non-empty variable token: absent, its default
 			// `▁` applies
 			let pattern = try parseKeyValueSettingText(&input)
-			guard !pattern.contains(where: \.isNewline) else {
-				throw .invalidLeaderPattern(pattern)
-			}
 			leaderPattern = pattern.isEmpty ? defaultLeaderPattern : pattern
 		case "l":
 			leadingSpacing = KeyValueConfig.default.leadingSpacing
 		case "L":
-			let spacing = try parseKeyValueSettingText(&input)
-			guard !spacing.contains(where: \.isNewline) else {
-				throw .invalidLeadingSpacing(spacing)
-			}
-			leadingSpacing = spacing
+			leadingSpacing = try parseKeyValueSettingText(&input)
 		case "r":
 			trailingSpacing = KeyValueConfig.default.trailingSpacing
 		case "R":
-			let spacing = try parseKeyValueSettingText(&input)
-			guard !spacing.contains(where: \.isNewline) else {
-				throw .invalidTrailingSpacing(spacing)
-			}
-			trailingSpacing = spacing
+			trailingSpacing = try parseKeyValueSettingText(&input)
 		case "s":
 			itemSeparatorLine = nil
 		case "S":
-			let line = try parseKeyValueSettingText(&input)
-			guard !line.contains(where: \.isNewline) else {
-				throw .invalidItemSeparatorLine(line)
-			}
-			itemSeparatorLine = line
+			itemSeparatorLine = try parseKeyValueSettingText(&input)
 		default:
 			throw .invalidSetting(setting)
 		}
@@ -154,48 +127,25 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 // swiftlint:disable:next one_declaration_per_file
 enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
-	case invalidItemSeparatorLine(String)
-	case invalidKeyStylePrefix(String)
-	case invalidKeyStyleReset(String)
 	case invalidKeyStyleSpecifier(String)
-	case invalidKeyStyleSuffix(String)
-	case invalidLeaderPattern(String)
-	case invalidLeadingSpacing(String)
 	case invalidSetting(Character)
-	case invalidTrailingSpacing(String)
 
 	var description: String {
 		switch self {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --key-value-config's value"
-		case let .invalidItemSeparatorLine(line):
-			"Invalid item separator line (a line terminator would split it): \(line.debugDescription)"
-		case let .invalidKeyStylePrefix(stylePrefix):
-			"Invalid key style prefix (a line terminator would split each row): \(stylePrefix.debugDescription)"
-		case let .invalidKeyStyleReset(styleReset):
-			"Invalid key style reset (a line terminator would split each row): \(styleReset.debugDescription)"
 		case let .invalidKeyStyleSpecifier(styleSpecifier):
-			"""
-			Invalid key style specifier (expected non-empty, with no line terminator, escaping each ASCII letter, e.g., \
-			"\\b"): \(styleSpecifier)
-			"""
-		case let .invalidKeyStyleSuffix(styleSuffix):
-			"Invalid key style suffix (a line terminator would split each row): \(styleSuffix.debugDescription)"
-		case let .invalidLeaderPattern(pattern):
-			"Invalid leader pattern (a line terminator would split each row): \(pattern.debugDescription)"
-		case let .invalidLeadingSpacing(spacing):
-			"Invalid leading spacing (a line terminator would split each row): \(spacing.debugDescription)"
+			"Invalid key style specifier (expected non-empty, escaping each ASCII letter, e.g., \"\\b\"): \(styleSpecifier)"
 		case let .invalidSetting(setting):
 			"Invalid --key-value-config <key-value-setting>: \(setting)"
-		case let .invalidTrailingSpacing(spacing):
-			"Invalid trailing spacing (a line terminator would split each row): \(spacing.debugDescription)"
 		}
 	}
 }
 
 /// Parses an uppercase `<key-value-setting>`'s `{string}` payload
-/// (`<leader-pattern>`, `<leading-spacing>`, `<trailing-spacing>`, or
-/// `<item-separator-line>`) through its `<key-value-setting-termination>` via
+/// (`<style-prefix>`, `<style-suffix>`, `<style-reset>`, `<leader-pattern>`,
+/// `<leading-spacing>`, `<trailing-spacing>`, or `<item-separator-line>`)
+/// through its `<key-value-setting-termination>` via
 /// `parseOutputConfigSettingPayload`.
 private func parseKeyValueSettingText(_ input: inout Substring) throws(KeyValueConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: KeyValueConfigParsingError.danglingEscape)

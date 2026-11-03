@@ -97,19 +97,23 @@ private extension MASTests {
 		#expect(try parseTableConfig(value).headerStyleSequences == headerStyleSequences)
 	}
 
-	@Test(arguments: ["\n", "-\r\n-", "\u{85}", "\u{2028}"])
-	func `a separator pattern containing a line terminator is invalid`(pattern: String) {
-		#expect(throws: TableConfigParsingError.invalidSeparatorPattern(pattern)) { try parseTableConfig("S\(pattern):") }
-	}
-
-	@Test(arguments: ["\t", "-\t", "\t\u{301}="])
-	func `a separator pattern may contain a tab`(pattern: String) throws {
+	@Test(arguments: ["\t", "-\t", "\t\u{301}=", "\n", "-\r\n-", "\u{85}", "\u{2028}"])
+	func `a separator pattern may contain a tab or a line terminator`(pattern: String) throws {
 		#expect(try parseTableConfig("S\(pattern):").separator?.pattern == pattern)
 	}
 
 	@Test(arguments: ["\n", " \r\n ", "\u{85}", "\u{2029}"])
-	func `a column spacing containing a line terminator is invalid`(spacing: String) {
-		#expect(throws: TableConfigParsingError.invalidColumnSpacing(spacing)) { try parseTableConfig("C\(spacing):") }
+	func `a column spacing may contain a line terminator`(spacing: String) throws {
+		#expect(try parseTableConfig("C\(spacing):").columnSpacing == spacing)
+	}
+
+	@Test
+	func `a header style specifier or sequence may contain a line terminator`() throws {
+		#expect(try parseTableConfig("H1\n2:").header?.styleSpecifier == "1\n2")
+		#expect(
+			try parseTableConfig("P\u{2028}:X\r:O\r\n:").headerStyleSequences
+				== .init(prefix: "\u{2028}", suffix: "\r", reset: "\r\n"),
+		)
 	}
 
 	@Test
@@ -174,15 +178,11 @@ private extension MASTests {
 		arguments: [
 			("Hbogus:", TableConfigParsingError.invalidHeaderStyleSpecifier("bogus")),
 			("Hb", .invalidHeaderStyleSpecifier("b")),
-			("H1\n2:", .invalidHeaderStyleSpecifier("1\n2")),
-			("P\u{2028}:", .invalidHeaderStylePrefix("\u{2028}")),
-			("X\r:", .invalidHeaderStyleSuffix("\r")),
-			("O\r\n:", .invalidHeaderStyleReset("\r\n")),
 			("z", .invalidSetting("z")),
 			("H1\\", .danglingEscape),
 		],
 	)
-	func `an invalid header style specifier or sequence, unknown setting, or dangling escape is a parse error`(
+	func `an invalid header style specifier, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: TableConfigParsingError,
 	) throws {

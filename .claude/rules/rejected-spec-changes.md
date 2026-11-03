@@ -67,7 +67,8 @@ In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `%b`'s boolean), so a future syntax can use it without extending the
 grammar, while being unused alone does not make it worth removing.
 
-In specs, never forbid a tab in an output config payload (e.g., `L\t:` while `F`
-is effective, `F.\t:`, `S-\t:`, or `O\t:` while `K` & `F` are effective),
-because it means what it says, a tab, and its output shows any misalignment that
-it causes, while forbidding it needs a special rule per payload.
+In specs, never forbid a tab or a line terminator in an output config payload
+(e.g., `L\t:` while `F` is effective, `F.\t:`, `S-\t:`, `O\t:` while `K` & `F`
+are effective, or `$'L\n:'`), because it means what it says, and its output
+shows any misalignment or line split that it causes, while forbidding it needs a
+special rule per payload.

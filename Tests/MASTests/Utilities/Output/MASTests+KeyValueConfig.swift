@@ -30,21 +30,11 @@ private extension MASTests {
 			("K:", .invalidKeyStyleSpecifier("")),
 			("K1S", .invalidKeyStyleSpecifier("1S")),
 			("Kb:", .invalidKeyStyleSpecifier("b")),
-			("K1\n2:", .invalidKeyStyleSpecifier("1\n2")),
-			("P\n:", .invalidKeyStylePrefix("\n")),
-			("X\u{85}:", .invalidKeyStyleSuffix("\u{85}")),
-			("O\u{2029}:", .invalidKeyStyleReset("\u{2029}")),
 			("z", .invalidSetting("z")),
 			("F-\\", .danglingEscape),
-			("F-\n", .invalidLeaderPattern("-\n")),
-			("F\r:", .invalidLeaderPattern("\r")),
-			("S=\n=", .invalidItemSeparatorLine("=\n=")),
-			("S\u{2028}:", .invalidItemSeparatorLine("\u{2028}")),
-			("L\r\n:", .invalidLeadingSpacing("\r\n")),
-			("R\u{85}:", .invalidTrailingSpacing("\u{85}")),
 		],
 	)
-	func `an invalid key style, pattern, or spacing, unknown setting, or dangling escape is a parse error`(
+	func `an invalid key style specifier, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: KeyValueConfigParsingError,
 	) throws {
@@ -56,8 +46,24 @@ private extension MASTests {
 		#expect(try parseKeyValueConfig(value).keyStyling == keyStyling)
 	}
 
-	@Test(arguments: ["K1:O\t:", "K1:F.\t:", "K1:L\t:", "K1:R\t:", "K1:S\t:"])
-	func `a tab is valid in every text payload, even if it misaligns the values`(value: String) {
+	@Test(arguments: [
+		"K1:O\t:",
+		"K1:F.\t:",
+		"K1:L\t:",
+		"K1:R\t:",
+		"K1:S\t:",
+		"K1\n2:",
+		"P\n:",
+		"X\u{85}:",
+		"O\u{2029}:",
+		"F-\n",
+		"F\r:",
+		"S=\n=",
+		"S\u{2028}:",
+		"L\r\n:",
+		"R\u{85}:",
+	])
+	func `a tab or line terminator is valid in every text payload, even if it misaligns the values`(value: String) {
 		#expect(throws: Never.self) { try parseKeyValueConfig(value) }
 	}
 
