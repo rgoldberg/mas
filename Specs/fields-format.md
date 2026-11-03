@@ -328,13 +328,13 @@ present):
 ```ebnf
 scale-arguments =
   <argument-fence> <exponent>
-  <argument-separator> [ <significant-digits> ]
-  <argument-separator> <fractional-digits>
+  <argument-separator>? [ <significant-digits> ]
+  <argument-separator>? [ <fractional-digits> ]
   <argument-fence>
 
 exponent           = {integer}           (* divides the input by 10 to this power before rendering *)
 significant-digits = {integer: 1 to 100} (* rounds to this many total digits; absent: no rounding *)
-fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the point; 0: integer *)
+fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the point; 0: integer; absent: exact *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -342,7 +342,10 @@ fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the p
 `scale` divides its input by 10 to the power of `<exponent>` (thus multiplying
 it iff `<exponent>` is negative), optionally rounds it to `<significant-digits>`
 total digits, then renders it in positional notation with exactly
-`<fractional-digits>` digits after the decimal point.
+`<fractional-digits>` digits after the decimal point, or, absent
+`<fractional-digits>`, with as few as render it exactly (e.g., `.scale:3:`
+renders `1500` as `1.5`, while `.scale:6,3:` renders `1234567` as `1.23` &
+`123456789` as `123`).
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
@@ -352,12 +355,14 @@ total digits, then renders it in positional notation with exactly
 - A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
   `round`.
-- A value that would render with more than 100 digits before the decimal point
-  does not conform to `scale`'s input type, so [value coercion](#value-coercion)
-  applies (e.g., `.scale:0,,0:` reports an error for `1e100`, while
+- A value that would render with more than 100 digits before the decimal point,
+  or, absent `<fractional-digits>`, after it, does not conform to `scale`'s
+  input type, so [value coercion](#value-coercion) applies (e.g., `.scale:0,,0:`
+  reports an error for `1e100`, as `.scale:0:` does for `1e-101`, while
   `..scale:0,,0:` aborts formatting).
-- E.g., a byte count as integer megabytes: `.scale:6,,0:`; a ratio as an integer
-  percentage: `.scale:-2,,0:` (e.g., `0.25` as `25`).
+- E.g., a byte count as integer megabytes: `.scale:6,,0:`, or as megabytes to 3
+  significant digits: `.scale:6,3:`; a ratio as an integer percentage:
+  `.scale:-2,,0:` (e.g., `0.25` as `25`).
 
 ###### Chronologic Transforms
 

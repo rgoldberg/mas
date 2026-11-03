@@ -173,12 +173,11 @@ private struct FormatParser {
 		guard
 			let exponent = arguments[0].flatMap(integer),
 			integers[0].map((1...100).contains) ?? true,
-			let fractionalDigits = integers[1],
-			(0...100).contains(fractionalDigits)
+			integers[1].map((0...100).contains) ?? true
 		else {
 			throw .invalidTransformArguments(name: scaleName)
 		}
-		return .scale(exponent: exponent, significantDigits: integers[0], fractionalDigits: fractionalDigits)
+		return .scale(exponent: exponent, significantDigits: integers[0], fractionalDigits: integers[1])
 	}
 
 	/// Parses `timeZone`'s `<date-time-zone-arguments>` or `timeOnlyTimeZone`'s

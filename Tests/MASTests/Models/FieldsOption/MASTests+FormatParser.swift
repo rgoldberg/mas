@@ -322,6 +322,33 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("..scale:3:", JSON.Node.string("1500"), String?.some("1.5")),
+			("..scale:3,:", .string("1234"), "1.234"),
+			("..scale:3,,:", .string("-1234"), "-1.234"),
+			("..scale:-3:", .string("1.5"), "1500"),
+			("..scale:6,3:", .string("1234567"), "1.23"),
+			("..scale:6,3:", .string("123456789"), "123"),
+			("..scale:0,2:", .string("9.96"), "10"),
+			("..scale:0,2:", .string("-0.0001234"), "-0.00012"),
+			("..scale:0:", .string("0"), "0"),
+			("..scale:0:", .string("0.50"), "0.5"),
+			("..scale:0:", .string("1e-100"), "0.\(String(repeating: "0", count: 99))1"),
+			("..scale:0,3:", .string("1.00e-98"), "0.\(String(repeating: "0", count: 97))1"),
+			("..scale:0:", .string("1e-101"), nil),
+			("..scale:0,3:", .string("1.23e-99"), nil),
+			("..scale:0,1:", .string("1e999999999999"), nil),
+		],
+	)
+	func `scale renders as few fractional digits as are exact absent fractional-digits`(
+		format: String,
+		value: JSON.Node,
+		expected: String?,
+	) throws {
+		#expect(try rendered(format, value) == expected)
+	}
+
+	@Test(
+		arguments: [
 			(".uppercase", JSON.Node.number(5)),
 			(".round", .string("5.6")),
 			(".dateOnly", .string("not a date")),
@@ -329,6 +356,7 @@ private extension MASTests {
 			(".timeZone:UTC:", .string("17:39:23")),
 			(".timeOnlyTimeZone:UTC:", .string("2020-03-18")),
 			(".scale:0,,0:", .number(1e100)),
+			(".scale:0:", .number(1e-101)),
 		],
 	)
 	func `an uncoerced transform on an input not of its input type is an error`(format: String, value: JSON.Node)

@@ -83,10 +83,20 @@ private extension MASTests {
 		#expect(Transform.round.applied(to: input) == expected)
 	}
 
-	@Test(arguments: [("+2.4", 0, "+2"), ("-2.4", 0, "-2"), ("-0.4", 0, "0"), ("+0.4", 0, "+0"), ("+0", 1, "+0.0")])
+	@Test(
+		arguments: [
+			("+2.4", Int?.some(0), "+2"),
+			("-2.4", 0, "-2"),
+			("-0.4", 0, "0"),
+			("+0.4", 0, "+0"),
+			("+0", 1, "+0.0"),
+			("+0.50", nil, "+0.5"),
+			("-0", nil, "0"),
+		],
+	)
 	func `scale retains a leading plus & a leading minus iff the result is nonzero`(
 		input: String,
-		fractionalDigits: Int,
+		fractionalDigits: Int?,
 		expected: String,
 	) {
 		#expect(
