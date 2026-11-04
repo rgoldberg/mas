@@ -482,7 +482,7 @@ block-terminator = -"+"
 ```ebnf
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
-success-block = <conditional-block> | <unconditional-block> (* non-structural *)
+success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct default: {empty string} *)
 
 success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
@@ -515,8 +515,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
   always insert an empty string, so its matcher cannot affect what it means.
 - **Abort-on-failure**: a `<success-block>`.
 - **Abort-on-success**: a `<failure-block>`.
-- **Negated** (`-…`, in a non-nullary branch): an `<unconditional-block>`,
-  evaluated iff the matcher fails.
+- **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
 - **Unary match** (`%m`): `<branches>`.
 - **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
 
@@ -526,7 +525,7 @@ Unconditional matchers always succeed.
 
 A `<success-clause>` is evaluated iff its enclosing matcher succeeds.
 
-A `<failure-block>` is evaluated iff its enclosing placeholder fails.
+A `<failure-block>` is evaluated iff its enclosing matcher fails.
 
 Within a `<conditional-block>`, a `<block-placeholder>` is evaluated against the
 enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
@@ -886,7 +885,7 @@ branch   = <nullary-branch> | <non-nullary-branch>
 nullary-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
 non-nullary-branch =
   <non-nullary-scalar-success> <block-terminator>
-  | <branch-negation> <non-nullary-scalar-matcher> -[ <unconditional-block(<unconditional-pipeline>)> ] <block-terminator>
+  | <branch-negation> <non-nullary-scalar-matcher> -[ <failure-block> ] <block-terminator>
 
 branch-negation = "-"!
 ```
@@ -896,8 +895,8 @@ branch-negation = "-"!
 - The branches in `<branches>` are evaluated sequentially against the format
   input, returning as `<match-placeholder>`'s value:
   - If a branch has `<branch-negation>`:
-    - If it fails: its `<unconditional-block>`'s evaluated value if it is
-      non-nullary, otherwise the format input.
+    - If it fails: its `<failure-block>`'s evaluated value if it is non-nullary,
+      otherwise the format input.
   - Otherwise:
     - If it succeeds: its block's evaluated value if it is non-nullary,
       otherwise its matcher's value.

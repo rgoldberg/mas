@@ -660,7 +660,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        object)
      - REJECTED: line break / line ending / EOL (for a line terminator)
 107. - negated: the form of a non-nullary branch with `<branch-negation>`
-       (`-…`), whose `<unconditional-block>` is evaluated iff its matcher fails
+       (`-…`), whose `<failure-block>` is evaluated iff its matcher fails
        ([defined](../Specs/fields-format.md#success--failure))
 108. - list: verb; an app lists each field that it knows before reading any
        input, while a fields config lists those & each field that a field name
