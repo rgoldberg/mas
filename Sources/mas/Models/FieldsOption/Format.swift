@@ -913,11 +913,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 			guard case let .number(number, triviaPrefix, triviaSuffix)? = try coercedNumber(for: call) else {
 				return nil
 			}
-			let transformed = call.transform.applied(to: number)
-			guard transformed != nil || call.coercion != nil else {
-				throw .transformInputTypeMismatch(transform: call.transform, input: string)
-			}
-			return transformed.map { transformed in
+			return call.transform.applied(to: number).map { transformed in
 				call.transform.kind == .numberToString
 					? .string(triviaPrefix + transformed + triviaSuffix)
 					: .number(transformed, triviaPrefix: triviaPrefix, triviaSuffix: triviaSuffix)

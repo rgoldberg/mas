@@ -99,3 +99,9 @@ In specs, never allow a `<date-transform>` call on a value of a
 `<time-only-transform>`, nor vice versa, even with a `<coercion>` (e.g.,
 `.dateOnly..timeOnlyTimeZone:UTC:`), because neither's rendering is ever a value
 of the other's type, so it would always abort.
+
+In specs, never let a `<coercion>` or an argument choose whether `scale` reports
+an error or aborts formatting for a value that it cannot render (e.g.,
+`.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
+converts it, while an argument would add syntax for a value that almost never
+occurs, and an aborted value shows its effect without failing other items.

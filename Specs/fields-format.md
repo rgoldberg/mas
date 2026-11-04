@@ -377,10 +377,10 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
   nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
   `round`.
 - A value that would render with more than 100 digits before the decimal point,
-  or, absent `<fractional-digits>`, after it, does not conform to `scale`'s
-  input type, so [value coercion](#value-coercion) applies (e.g., `.scale:0,,0:`
-  reports an error for `1e100`, as `.scale:0:` does for `1e-101`, while
-  `..scale:0,,0:` aborts formatting).
+  or, absent `<fractional-digits>`, after it, [aborts](#success--failure)
+  formatting, with or without `<coercion>`, because that limit is on rendering,
+  not on a number (e.g., `.scale:0,,0:` for `1e100`, or `.scale:0:` for
+  `1e-101`).
 - E.g., a byte count as integer megabytes: `.scale:6,,0:`, or as megabytes to 3
   significant digits: `.scale:6,3:`; a ratio as an integer percentage:
   `.scale:-2,,0:` (e.g., `0.25` as `25`).
