@@ -54,7 +54,7 @@ private struct FormatParser {
 		while skipWhitespace(), input.first == transformCallPrefix {
 			calls.append(try parseTransformCall())
 		}
-		guard calls.isEmpty || valueTransformPipelineShapeSet.contains(where: calls.hasShape) else {
+		guard calls.followsTypes(from: nil) else {
 			throw .invalidPipeline("<value-transform-pipeline>")
 		}
 		return .init(namedFormat: namedFormat, calls: calls)
@@ -69,7 +69,7 @@ private struct FormatParser {
 			calls.append(try parseTransformCall())
 		}
 		// A named format may form a pipeline alone
-		guard namedFormat != nil && calls.isEmpty || kind.pipelineShapeSet.contains(where: calls.hasShape) else {
+		guard calls.isEmpty ? namedFormat != nil : kind.isPipeline(calls, isNamed: namedFormat != nil) else {
 			throw .invalidPipeline(kind.pipelineName)
 		}
 		return .init(namedFormat: namedFormat, calls: calls)
@@ -342,7 +342,7 @@ private struct FormatParser {
 	/// `<block-terminator>`.
 	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate)
 	throws(ParsingError) -> Pipeline {
-		try parsePipelineBlock(kind: predicate == .input ? .unconditional : .string)
+		try parsePipelineBlock(kind: predicate == .input ? .unconditional : .unconditionalString)
 	}
 
 	/// Parses a `<format-template>`'s `<placeholder>`.
@@ -610,13 +610,15 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	case string
 	case timeOnly
 	case unconditional
+	/// A `%L` or `%K` pipeline's kind, which no block has.
+	case unconditionalString
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
 		case .any, .boolean, .date, .number, .string, .timeOnly:
 			true
-		case .unconditional:
+		case .unconditional, .unconditionalString:
 			false
 		}
 	}
@@ -624,7 +626,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a non-nullary `<block-placeholder>`'s pipeline block.
 	var blockPlaceholderPipelineKind: Self {
 		switch self {
-		case .any, .boolean, .unconditional:
+		case .any, .boolean, .unconditional, .unconditionalString:
 			.unconditional
 		case .date, .number, .string, .timeOnly:
 			self
@@ -644,22 +646,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<string-pipeline>"
 		case .timeOnly:
 			"<time-only-pipeline>"
-		}
-	}
-
-	/// The shapes of this kind's pipeline's `<*transform-call>`s.
-	var pipelineShapeSet: Set<PipelineShape> {
-		switch self {
-		case .any, .boolean, .unconditional:
-			[.unconditional]
-		case .date:
-			[.date, .unconditional]
-		case .number:
-			[.number, .numberToString, .unconditional]
-		case .string:
-			[.string]
-		case .timeOnly:
-			[.timeOnly, .unconditional]
+		case .unconditionalString:
+			"<unconditional-string-pipeline>"
 		}
 	}
 
@@ -681,44 +669,51 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.timeOnly
 			}
 	}
-}
 
-/// The shape of a `<*-transform-pipeline>`'s `<*transform-call>`s.
-private enum PipelineShape { // swiftlint:disable:this one_declaration_per_file
-	/// A `<date-transform-pipeline>`.
-	case date
-	/// A `<number-transform-pipeline>`.
-	case number
-	/// A `<number-to-string-transform-pipeline>`.
-	case numberToString
-	/// A `<string-transform-pipeline>`.
-	case string
-	/// A `<time-only-transform-pipeline>`.
-	case timeOnly
-	/// An `<unconditional-transform-pipeline>`.
-	case unconditional
+	/// Whether `calls`, which must be non-empty, form this kind's pipeline after
+	/// a `<named-format-reference>` iff `isNamed`, whose value's type only its
+	/// preset determines.
+	func isPipeline(_ calls: [TransformCall], isNamed: Bool) -> Bool {
+		switch self {
+		case .any, .boolean, .unconditional:
+			calls.first?.coercion != nil && calls.isStringTransformRun
+		case .date:
+			calls.followsTypes(from: isNamed ? nil : .date)
+		case .number:
+			calls.followsTypes(from: isNamed ? nil : .number)
+		case .string:
+			calls.followsTypes(from: isNamed ? nil : .string)
+		case .timeOnly:
+			calls.followsTypes(from: isNamed ? nil : .timeOnly)
+		case .unconditionalString:
+			(isNamed || calls.first?.coercion == nil) && calls.isStringTransformRun
+		}
+	}
 }
 
 private extension [TransformCall] {
-	/// Whether these calls, which must be non-empty, have `shape`.
-	func hasShape(_ shape: PipelineShape) -> Bool {
-		guard let first, let last else {
-			return false
+	/// Whether these calls are string transforms, none after the 1st coerced.
+	var isStringTransformRun: Bool {
+		allSatisfy { $0.transform.kind == .string } && dropFirst().allSatisfy { $0.coercion == nil }
+	}
+
+	/// Whether each of these calls follows the value type that it receives:
+	/// `type` (unknown iff `nil`) for the 1st, then its predecessor's output
+	/// type.
+	func followsTypes(from type: TransformValueType?) -> Bool {
+		zip([type] + map(\.transform.kind.outputType), self).allSatisfy { type, call in
+			type.map { call.follows($0) } ?? true
 		}
-		return switch shape {
-		case .date:
-			allSatisfy { $0.transform.kind == .date }
-		case .number:
-			allSatisfy { $0.transform.kind == .number }
-		case .numberToString:
-			last.transform.kind == .numberToString && dropLast().allSatisfy { $0.transform.kind == .number }
-		case .string:
-			allSatisfy { $0.transform.kind == .string }
-		case .timeOnly:
-			allSatisfy { $0.transform.kind == .timeOnly }
-		case .unconditional:
-			first.coercion != nil && allSatisfy { $0.transform.kind == .string }
-		}
+	}
+}
+
+private extension TransformCall {
+	/// Whether this call may receive a value of `type`: it takes a `<coercion>`
+	/// iff its input type differs, but a coercion cannot make a date a time-only,
+	/// nor a time-only a date, because neither renders as the other.
+	func follows(_ type: TransformValueType) -> Bool {
+		let inputType = transform.kind.inputType
+		return coercion == nil ? inputType == type : inputType != type && !(inputType.isChronologic && type.isChronologic)
 	}
 }
 
@@ -788,6 +783,3 @@ private let transformNames =
 		timeOnlyTimeZoneName,
 		timeZoneName,
 	])
-
-/// The shapes of a `<value-transform-pipeline>`'s `<*transform-call>`s.
-private let valueTransformPipelineShapeSet = Set([PipelineShape.string, .number, .numberToString, .date, .timeOnly])

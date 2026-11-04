@@ -288,6 +288,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 42. - transform
     - call: noun & verb, for transforms
     - run: noun & verb, for commands
+    - transform run: a `<transform-run>`'s contiguous calls of 1 value type
+      ([defined](../Specs/fields-format.md#transforms))
     - REJECTED: function (except in "primary function") / method / execution /
       execute / invocation / invoke
 43. - kind: config kinds; block kinds
@@ -602,12 +604,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       Annex C's POSIX Compatible definitions
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
-100. - date block: `%D`'s `<conditional-block>`, whose pipeline's transforms can
-       be only `dateOnly`s & `timeZone`s, or string transforms after coercing to
-       a string
-     - time-only block: `%C`'s `<conditional-block>`, whose pipeline's
-       transforms can be only `timeOnlyTimeZone`s, or string transforms after
-       coercing to a string
+100. - date block: `%D`'s `<conditional-block>`, whose pipeline's 1st call takes
+       no `<coercion>` iff it is a `dateOnly` or a `timeZone`
+     - time-only block: `%C`'s `<conditional-block>`, whose pipeline's 1st call
+       takes no `<coercion>` iff it is a `timeOnlyTimeZone`
      - REJECTED: clock block / time block
 101. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999

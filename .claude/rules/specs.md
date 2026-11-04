@@ -53,7 +53,7 @@ can omit it.
 In specs, define nonterminals whose definitions differ only in the expressions
 that they reference as 1 [parameterized
 nonterminal](../../Specs/ebnf.md#parameterized-nonterminals) (e.g.,
-`transform-call(COERCION, TRANSFORM)`), rather than repeating the definition,
+`transform-call(CALL_PREFIX, TRANSFORM)`), rather than repeating the definition,
 because the shared definition states the shared syntax & semantic comments once.
 
 In specs, give an empty-string default for a block or a typed terminal as

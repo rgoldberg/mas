@@ -356,4 +356,51 @@ enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 	case numberToString
 	case string
 	case timeOnly
+
+	/// This kind's input type, per its `<value-transform>` alternative's type
+	/// comment.
+	var inputType: TransformValueType {
+		switch self {
+		case .date:
+			.date
+		case .number, .numberToString:
+			.number
+		case .string:
+			.string
+		case .timeOnly:
+			.timeOnly
+		}
+	}
+
+	/// This kind's output type, per its `<value-transform>` alternative's type
+	/// comment.
+	var outputType: TransformValueType {
+		switch self {
+		case .date:
+			.date
+		case .number:
+			.number
+		case .numberToString, .string:
+			.string
+		case .timeOnly:
+			.timeOnly
+		}
+	}
+}
+
+/// A `<value-transform>`'s input or output type.
+enum TransformValueType { // swiftlint:disable:this one_declaration_per_file
+	case date
+	case number
+	case string
+	case timeOnly
+
+	var isChronologic: Bool {
+		switch self {
+		case .date, .timeOnly:
+			true
+		case .number, .string:
+			false
+		}
+	}
 }

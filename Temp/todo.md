@@ -120,7 +120,7 @@ the functionality that needs them from specs & code:
       `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): once
       `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline(…)>` is only its
       `TRANSFORM_PIPELINE`, so each of the latter 2 is only an alias of a single
-      `<*-transform-pipeline>`.
+      transform pipeline.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).
@@ -193,13 +193,6 @@ Coercion arguments for boolean coercion, e.g.:
 
 - Case: uppercase, lowercase, consistent case, or case-insensitive.
 - `0` & non-`0` numbers.
-
-### Heterogeneous Pipeline Types
-
-Let a pipeline mix value types, requiring only that each transform's input type
-accept its predecessor's output type (e.g., a transform that takes any input &
-outputs a number may precede one whose input type is number or any). This makes
-only currently invalid formats valid.
 
 ### Structured Value Operations
 

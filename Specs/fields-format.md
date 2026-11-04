@@ -1,22 +1,18 @@
 <!--markdownlint-disable-file first-line-heading-->
 #### Formatting
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
 format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
 format-block =
-  <pipeline(<named-format-reference(<preset-name>)>, <value-transform-pipeline>)> | <format-template>
+  <named-format-pipeline(<preset-name>)> | <format-template>
   (* direct default: {empty string}; inherited *)
 
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
 
 template-text = ~^{string}^~
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
 
 ##### Value Types
 
@@ -44,17 +40,22 @@ otherwise, it renders it coerced to a string.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-pipeline(NAMED_FORMAT_REFERENCE, TRANSFORM_PIPELINE) = NAMED_FORMAT_REFERENCE | [ NAMED_FORMAT_REFERENCE ] TRANSFORM_PIPELINE
+pipeline(NAMED_FORMAT_REFERENCE, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | NAMED_FORMAT_REFERENCE [ NAMED_TRANSFORM_PIPELINE ]
 
-string-pipeline        = <pipeline(<named-format-reference(<string-format-name>)>, <string-transform-pipeline>)>
-number-pipeline        =
+named-format-pipeline(FORMAT_NAME) = <pipeline(<named-format-reference(FORMAT_NAME)>, <value-transform-pipeline>, <value-transform-pipeline>)>
+
+string-pipeline               = <pipeline(<named-format-reference(<string-format-name>)>, <value-transform-pipeline>, <string-input-pipeline>)>
+number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
+date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
+time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
+unconditional-pipeline        =
+  <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
+unconditional-string-pipeline =
   <pipeline(
-    <named-format-reference(<number-format-name>)>,
-    <number-transform-pipeline> | <number-to-string-transform-pipeline> | <unconditional-transform-pipeline>
+    <named-format-reference(<unconditional-format-name>)>,
+    <uncoerced-string-transform-run> | <unconditional-transform-pipeline>,
+    <uncoerced-string-transform-run>
   )>
-date-pipeline          = <pipeline(<named-format-reference(<date-format-name>)>, <date-transform-pipeline> | <unconditional-transform-pipeline>)>
-time-only-pipeline     = <pipeline(<named-format-reference(<time-only-format-name>)>, <time-only-transform-pipeline> | <unconditional-transform-pipeline>)>
-unconditional-pipeline = <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -68,10 +69,10 @@ named-format-reference(FORMAT_NAME) = <name-prefix> FORMAT_NAME
 
 format-name(BLOCK) = <preset-name> (* error: its preset's format does not conform to BLOCK *)
 
-string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <string-pipeline>)>)>
-number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <number-pipeline>)>)>
-date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <date-pipeline>)>)>
-time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>)>
+string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <named-format-pipeline(<string-format-name>)>)>)>
+number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
+date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
+time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
 unconditional-format-name = <format-name(<unconditional-block(<unconditional-pipeline>)>)>
 
 name-prefix = ":"!
@@ -89,9 +90,9 @@ A `<named-format-reference>` evaluates its named format against the value to
 which a `<transform-pipeline>` in its position would be applied (e.g., in
 `%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
 
-Because every `<success-block>`'s syntax includes
-`<unconditional-block(<unconditional-pipeline>)>`'s, a named unconditional
-format conforms to every `<format-name>`'s `BLOCK`.
+Because every `<format-name>`'s `BLOCK` includes
+`<unconditional-block(<unconditional-pipeline>)>`'s syntax, a named
+unconditional format conforms to every one.
 
 An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 `<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
@@ -103,22 +104,49 @@ string for a string).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> (* non-structural *)
+transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> | <uncoerced-string-transform-run> (* non-structural *)
 
 value-transform-pipeline =
-  <string-transform-pipeline>
-  | <number-transform-pipeline>
-  | <number-to-string-transform-pipeline>
-  | <date-transform-pipeline>
-  | <time-only-transform-pipeline>
+  <string-chain(<transform-call-prefix>)>
+  | <number-chain(<transform-call-prefix>)>
+  | <date-chain(<transform-call-prefix>)>
+  | <time-only-chain(<transform-call-prefix>)>
+  | <coerced-string-chain>
+  | <coerced-number-chain>
+  | <coerced-date-chain>
+  | <coerced-time-only-chain>
 
-unconditional-transform-pipeline = <coerced-string-transform-call> [ <string-transform-pipeline> ]
+string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
+number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <after-chronologic-run>
+time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <after-chronologic-run>
 
-coerced-string-transform-call = <transform-call-prefix> <coercion> <string-transform>
+unconditional-transform-pipeline = <coerced-string-transform-call> [ <uncoerced-string-transform-run> ]
+uncoerced-string-transform-run   = <transform-run(<transform-call-prefix>, <string-transform>)>
+coerced-string-transform-call    = <transform-call(<transform-call-prefix> <coercion>, <string-transform>)>
 
-transform-call(COERCION, TRANSFORM) =
-  <transform-call-prefix> [ COERCION ] TRANSFORM
-  (* error: it lacks COERCION & its input is not null, absent, or of TRANSFORM's input type *)
+transform-chain(CALL_PREFIX, TRANSFORM, AFTER_RUN) = <transform-run(CALL_PREFIX, TRANSFORM)> [ AFTER_RUN ]
+
+string-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <string-transform>, <after-string-run>)>
+number-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <number-transform>, <after-number-run>)> | <number-to-string-chain(CALL_PREFIX)>
+number-to-string-chain(CALL_PREFIX) = <transform-call(CALL_PREFIX, <number-to-string-transform>)> [ <string-input-pipeline> ]
+date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-transform>, <after-chronologic-run>)>
+time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <after-chronologic-run>)>
+
+coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
+coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
+coerced-date-chain      = <date-chain(<transform-call-prefix> <coercion>)>
+coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
+
+after-string-run      = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+after-number-run      = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+after-chronologic-run = <coerced-string-chain> | <coerced-number-chain>
+
+transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
+
+transform-call(CALL_PREFIX, TRANSFORM) =
+  CALL_PREFIX TRANSFORM
+  (* error: CALL_PREFIX lacks a coercion & its input is not null, absent, or of TRANSFORM's input type *)
 
 transform-call-prefix = "."!
 
@@ -136,6 +164,19 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,
     in a `<success-clause>`, the enclosing matcher's value; elsewhere, the
     [format input](#success--failure)).
+
+A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
+`<coercion>` cannot affect what a call whose input type equals the type of the
+value that it receives means, so only a call whose input type differs takes one,
+or a call that a `<named-format-reference>` immediately precedes, whose value's
+type only its preset determines. No `<date-transform>` coerces a time-only
+value, nor any `<time-only-transform>` a date, because neither's rendering is
+ever a value of the other's type.
+
+A later `<coercion>` parses only the text rendered so far, using only its own
+arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
+`1235`, while `..numberFormat:de:..round` aborts formatting, because `1.234,5`
+is not a canonical number).
 
 An **argument** is an element of an argument list: a transform's, a [number
 coercion's](#coercion), [`N`'s](fields.md#sort-number-segments), or
@@ -166,8 +207,9 @@ A number or number-to-string transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`).
 
 Coercing any value to a string always succeeds, so an
-`<unconditional-transform-pipeline>`, which starts with a
-`<coerced-string-transform-call>`, cannot fail. A value coerced to a string is:
+`<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
+call, cannot fail, while each other `<coercion>` may. A value coerced to a
+string is:
 
 - `null` or [absent](fields.md#absent-values): an empty string, except as a
   transform's input, through which it remains unmodified.
@@ -184,8 +226,7 @@ Coercing any value to a string always succeeds, so an
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-string-transform-pipeline = <transform-call(<coercion>, <string-transform>)>+
-string-transform          = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
+string-transform = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
 initial-titlecase = "initialTitlecase"
 lowercase         = "lowercase"
@@ -218,9 +259,6 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-number-transform-pipeline           = <transform-call(<number-coercion>, <number-transform>)>+
-number-to-string-transform-pipeline = [ <number-transform-pipeline> ] <transform-call(<number-coercion>, <number-to-string-transform>)>
-
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
 
@@ -351,11 +389,8 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-transform-pipeline = <transform-call(<coercion>, <date-transform>)>+
-date-transform          = <date-only> | <date-time-zone> (* type: date *)
-
-time-only-transform-pipeline = <transform-call(<coercion>, <time-only-transform>)>+
-time-only-transform          = <time-only-time-zone> (* type: time-only *)
+date-transform      = <date-only> | <date-time-zone> (* type: date *)
+time-only-transform = <time-only-time-zone> (* type: time-only *)
 
 date-only           = "dateOnly"
 date-time-zone      = "timeZone" [ <date-time-zone-arguments> ] (* sets the output time zone; last wins *)
@@ -364,8 +399,8 @@ time-only-time-zone = "timeOnlyTimeZone" [ <time-only-time-zone-arguments> ] (* 
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A `<date-transform-pipeline>`'s or `<time-only-transform-pipeline>`'s transforms
-jointly set how its value is rendered, regardless of where `dateOnly` appears:
+A date or time-only transform run's transforms jointly set how its value is
+rendered, regardless of where `dateOnly` appears:
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone` (for a date) & `timeOnlyTimeZone` (for a time-only): set the output
@@ -485,7 +520,14 @@ block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct default: {empty string} *)
 
-success-pipeline = <string-pipeline> | <number-pipeline> | <date-pipeline> | <time-only-pipeline> | <unconditional-pipeline> (* non-structural *)
+success-pipeline =
+  <string-pipeline>
+  | <number-pipeline>
+  | <date-pipeline>
+  | <time-only-pipeline>
+  | <unconditional-pipeline>
+  | <unconditional-string-pipeline>
+  (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
@@ -567,7 +609,7 @@ unconditional-placeholder = <nullary-unconditional-placeholder> | <non-nullary-u
 nullary-unconditional-placeholder     = <placeholder-prefix> <nullary-unconditional-predicate>
 non-nullary-unconditional-placeholder =
   <placeholder-prefix>
-  ( <non-nullary-input> -<unconditional-pipeline> | ( <non-nullary-label> | <non-nullary-name> ) -<string-pipeline> )
+  ( <non-nullary-input> -<unconditional-pipeline> | ( <non-nullary-label> | <non-nullary-name> ) -<unconditional-string-pipeline> )
   <block-terminator>
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>

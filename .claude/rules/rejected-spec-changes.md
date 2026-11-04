@@ -84,3 +84,18 @@ unlike an empty `<item-sort-section>` or `<field-spec-edits-section>`, nothing
 can follow it reliably: `@x///0` would consume `//`, the longest candidate
 literal, leaving `/0`, which is an error, so generated syntax that appends a
 section to it would still fail.
+
+In specs, never allow a `<coercion>` on a call whose input type equals the type
+of the value that it receives, unless a `<named-format-reference>` immediately
+precedes it (e.g., `.round..round` or `%S..uppercase+`), because it cannot
+affect what the call means, nor require one on a call whose types match (e.g.,
+`.numberFormat.uppercase`), because it would add nothing.
+
+In specs, never let `<unconditional-pipeline>` or a `%L` or `%K` pipeline take a
+`<coercion>` that can fail (e.g., `%I..trimWhitespace..round+` or `%L..round+`),
+because `<failure-block>` & every unconditional placeholder must never abort.
+
+In specs, never allow a `<date-transform>` call on a value of a
+`<time-only-transform>`, nor vice versa, even with a `<coercion>` (e.g.,
+`.dateOnly..timeOnlyTimeZone:UTC:`), because neither's rendering is ever a value
+of the other's type, so it would always abort.
