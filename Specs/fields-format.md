@@ -150,11 +150,9 @@ but `.scale:6, ,0:` omits `<significant-digits>`).
 
 ###### Value Coercion
 
-A transform without `<coercion>` requires its input to already be of its input
-type; otherwise, an error is reported. A value is of type date or time-only iff
-[`%d` or `%c`](#chronologic-formatting), respectively, matches it without
-`<coercion>` (e.g., `.dateOnly` accepts `"2020-03-18"` & `1584553163`, but not
-`"0"`).
+A value is of type date or time-only iff [`%d` or
+`%c`](#chronologic-formatting), respectively, matches it without `<coercion>`
+(e.g., `.dateOnly` accepts `"2020-03-18"` & `1584553163`, but not `"0"`).
 
 A `null` or [absent](fields.md#absent-values) value remains unmodified through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
@@ -280,9 +278,7 @@ decimal-separator          = {string}                (* default: {base conventio
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The **number format arguments** are those of `<number-format-arguments>`, which
-[number coercion's](#coercion) & [`N`'s](fields.md#sort-number-segments)
-argument lists start with.
+The **number format arguments** are those of `<number-format-arguments>`.
 
 `numberFormat` inserts `<digit-group-separator>` between the **digit groups** of
 its input's integer part, counting from its least significant digit: the least
@@ -301,25 +297,16 @@ rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
 renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
 it (e.g., `.scale:0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
 
-Number format arguments whose digit group separator equals their decimal
-separator, each after defaulting to the base conventions, are an error, whether
-they are `numberFormat`'s, a number coercion's, or `N`'s.
-
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.
 
 The **base conventions** are those that
-[`<locale-identifier>`](fields.md#sort-locale) identifies, or, if
-`<locale-identifier>` is absent (even if other number format arguments are
-present):
-
-- For `numberFormat`: the system locale's, because rendered output is for
-  people.
-- For a [number coercion](#coercion): the [canonical](fields.md#sort-locale)
-  conventions, because parsed input is data, which, like sorting's default
-  canonical conventions, must not depend on the system.
-- For [`<grouped-numeric>`](fields.md#sort-number-segments): those that
-  `<locale>`'s `<locale-identifier>` identifies.
+[`<locale-identifier>`](fields.md#sort-locale) identifies, per its default if it
+is absent, even if other number format arguments are present. `numberFormat`'s
+default is the system locale, because rendered output is for people, while a
+[number coercion's](#coercion) is the [canonical](fields.md#sort-locale)
+conventions, because parsed input is data, which, like sorting's default
+canonical conventions, must not depend on the system.
 
 ###### `scale`
 
@@ -339,17 +326,12 @@ fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the p
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`scale` divides its input by 10 to the power of `<exponent>` (thus multiplying
-it iff `<exponent>` is negative), optionally rounds it to `<significant-digits>`
-total digits, then renders it in positional notation with exactly
-`<fractional-digits>` digits after the decimal point, or, absent
-`<fractional-digits>`, with as few as render it exactly (e.g., `.scale:3:`
-renders `1500` as `1.5`, while `.scale:6,3:` renders `1234567` as `1.23` &
-`123456789` as `123`).
+`scale` applies its arguments in order, then renders its result in positional
+notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
+`1234567` as `1.23` & `123456789` as `123`).
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
-- A `<fractional-digits>` of `0` renders a plain integer, with no decimal point.
 - `0` renders as `0`, followed, iff `<fractional-digits>` is positive, by a
   decimal point & `<fractional-digits>` `0`s.
 - A leading `+` is retained, while a leading `-` is retained iff the result is
@@ -546,22 +528,13 @@ A `<success-clause>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing placeholder fails.
 
-A `<success-clause>`'s kind follows the matched value's type; where that is
-boolean or can be any type, its pipeline must start, after any named format, by
-coercing to a string.
-
-`<unconditional-block>` differs from `<conditional-block>` with the same
-`PIPELINE` only by forbidding `<block-placeholder>`s.
-
-Within a `<conditional-block>`, a `<block-placeholder>` has its enclosing
-matcher's predicate's letter, ignoring case (e.g., in `%S…+`, `%s` or `%S…+`,
-but not `%v`), and is evaluated against the enclosing matcher's value (coerced,
-if it coerces), so it always succeeds; `%i` / `%I` are evaluated against their
-format's **input**, which no block modifies: in a field spec's format, the field
-value, at its original type; in a named format, the value against which its
-`<named-format-reference>` evaluates it (e.g., `%.N%n (%i)++` renders `"4.50"`
-as `4.5 (4.50)`, while `%+.N:x+`, where preset `x` sets no format, renders it as
-`4.5`).
+Within a `<conditional-block>`, a `<block-placeholder>` is evaluated against the
+enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
+/ `%I` are evaluated against their format's **input**, which no block modifies:
+in a field spec's format, the field value, at its original type; in a named
+format, the value against which its `<named-format-reference>` evaluates it
+(e.g., `%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`, while `%+.N:x+`, where
+preset `x` sets no format, renders it as `4.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
@@ -756,13 +729,12 @@ as the matcher's type, instead of requiring the input's type to match (e.g.,
 A boolean coercion parses only `true` & `false`, verbatim.
 
 A number coercion parses a number's separators & digit group sizes per its
-number format arguments, with defaults from the [base
-conventions](#numberformat) (e.g., `%.:de:n` matches `"1.234,56"`, coercing it
-to `1234.56`). A digit group separator is accepted only between digit groups of
-the given sizes; a `<digit-group-size>` of `0` accepts groups of any size. A
-digit group separator adjacent to a digit group of any other size thus
-terminates the number before that separator (e.g., `%.:,,,,,,.*:n` matches
-`"1,2345"` as the number `1` followed by the trivia suffix `,2345`).
+number format arguments (e.g., `%.:de:n` matches `"1.234,56"`, coercing it to
+`1234.56`). A digit group separator is accepted only between digit groups of the
+given sizes; a `<digit-group-size>` of `0` accepts groups of any size. A digit
+group separator adjacent to a digit group of any other size thus terminates the
+number before that separator (e.g., `%.:,,,,,,.*:n` matches `"1,2345"` as the
+number `1` followed by the trivia suffix `,2345`).
 
 A number coercion accepts both positional & scientific notation (an exponent
 indicator, `e` or `E`, followed by an optionally signed integer exponent). The

@@ -26,9 +26,8 @@ table-setting =
 ```
 
 `<table-config>` is the table config kind's [output config
-syntax](configs.md#output-configs), and `<table-config-option>` is
-`--table-config`, table output's [output config
-option](configs.md#output-configs).
+syntax](configs.md#output-configs), and `<table-config-option>` is table
+output's [output config option](configs.md#output-configs).
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.

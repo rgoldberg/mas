@@ -147,7 +147,7 @@ extending it) resolves that config from the next less specific context in the
 context stack, so a config may reference its nearest same-named ancestor. In the
 root context, which has no less specific context, a `default` that references
 `default` references the root context's `standard`. Any other cyclic chain of
-references is an error.
+references is a **reference cycle**, which is an error.
 
 ### Immutable Built-In Named Configs
 
@@ -196,11 +196,10 @@ its kind's output config syntax (e.g., [`<header-setting>`](table.md#header)),
 each of whose **alternatives** (e.g., `<header-off>` & `<header-on>`) starts
 with its own letter.
 
-Each output format's **output config option** (e.g.,
-[`<json-config-option>`](json.md#json-config)) takes an optional
-[value](#option-values) in its output format's kind's output config syntax, so
-an empty or [whitespace](ebnf.md#whitespace)-only one overlays no settings
-(e.g., `--json-config=` ≡ `--json`).
+An empty or [whitespace](ebnf.md#whitespace)-only [value](#option-values) of an
+output format's **output config option** (e.g.,
+[`<json-config-option>`](json.md#json-config)) overlays no settings (e.g.,
+`--json-config=` ≡ `--json`).
 
 A persistent output config's text is likewise optional (e.g.,
 `[ <json-config> ]`), because generated text may contain no setting, so an empty

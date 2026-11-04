@@ -349,6 +349,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 55. - resolve: map a name to its referent (resolved fields config)
     - find: search outcome ("if no match is found")
     - look up / lookup: search a context stack for a named config (name lookup)
+    - reference cycle: a cyclic chain of references among named configs, other
+      than a reference to a same-named ancestor, which is an error
+      ([defined](../Specs/configs.md#referencing-named-configs))
 56. - context: resolving named fields configs, formats, etc.; grammatical
       position (`context-dependent` multiplicity)
     - circumstances: situation

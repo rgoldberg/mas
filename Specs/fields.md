@@ -325,9 +325,7 @@ fields-config = <absolute-config> | <relative-config> (* default: <relative-conf
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`<fields-option>` is `--fields`, a [valued option](configs.md#option-values),
-whose value is a `<fields-config>`. Giving `--fields` more than once is an
-error.
+Giving `--fields` more than once is an error.
 
 `<absolute-config>` & `<relative-config>` are overlaid on top of the base fields
 config for the current command line only; they do not persistently affect named
@@ -381,7 +379,7 @@ base-fields-config-section-prefix = "@"
 
 base-fields-config-name =
   {string: fields config name, or a stem followed by "@unsuffixed"}
-  (* default: "default"; error: no fields config of its name is found *)
+  (* default: "default"; error: no fields config of its name is found, or it is in a reference cycle *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -460,14 +458,11 @@ The **field order**, in which each item's fields are output, is per
   `<document-order-option-set>`, each `<nonconforming-comparison>` &
   `<nonconforming-placement>` sets `<unpositioned-field-comparison>` &
   `<unpositioned-field-placement>`, respectively, to the alternative of its
-  letter, while `<all-conforming>` is an error, because no field order can order
-  an unpositioned field as a positioned one. E.g., if `x` has `/aP`, `@x/-` ≡
+  letter, which `<all-conforming>` lacks, because no field order can order an
+  unpositioned field as a positioned one. E.g., if `x` has `/aP`, `@x/-` ≡
   `@x/aP-` & `@x/f` ≡ `@x/aPf`; if `x` has `/D`, `@x/-` ≡ `@x/D-`; if `x` has
-  `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/k` is an
-  error. A `<field-order-tiebreaker>` after a `<field-order-adjustment-set>`
-  that is per `<positional-order-option-set>` is an error, because
-  `<positional-order-option-set>` takes none (e.g., if `x` has `/P`, `@x/-/+` is
-  an error).
+  `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/k` & `@x/-/+`
+  are errors.
 
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also
@@ -507,10 +502,8 @@ only:
 `<document-order-option-set>` is not supported for table output because items
 may each have different fields, or the same fields in different orders, so a
 table's rows share no document order; key-value & JSON output can order each
-item's fields independently. Per its error comment, for table output, a
-`<document-order-option-set>` is an error only if it sets the resolved fields
-config's field order (e.g., if `x` is `@all/D`, `@x/P` is supported, while `@x`
-is an error). Because `<order>` is last wins, `/DP` is a
+item's fields independently. E.g., for table output, if `x` is `@all/D`, `@x/P`
+is supported, while `@x` is an error. Because `<order>` is last wins, `/DP` is a
 `<positional-order-option-set>`, so it is supported, while `/PD` is a
 `<document-order-option-set>`, so it is an error for table output.
 
@@ -592,14 +585,10 @@ While a field spec's position in the reference fields config cannot be modified:
 - A `null` may replace it in its position, which does not modify any other field
   spec's position, and a field spec may replace that `null` in turn.
 
-When accessing a field spec position via an index:
-
-- If the position access reports an error, or if a `null` is present at the
-  normalized index in the list for a `<field-spec-removal>` (any other
-  `<field-spec-edit>` applies to a `null` as
-  [specified](#relative-field-specs)), an error is reported.
-- Otherwise, the field spec at the normalized index in the list is the
-  referenced field spec.
+An index's `<field-spec-reference>` references the field spec or `null` at its
+normalized index in the list; a `<field-spec-edit>` other than a
+`<field-spec-removal>` applies to a `null` as
+[specified](#relative-field-specs).
 
 #### Relative Field Specs
 
@@ -744,7 +733,7 @@ preset-delta     = <preset-prefix> ( <preset-addition> | <preset-removal> ) <pre
 preset-addition  = "+"
 preset-removal   = "-"
 
-preset-name = {string: preset name} (* error: no preset of its name is found, or its preset is attached within itself, directly or transitively *)
+preset-name = {string: preset name} (* error: no preset of its name is found, or it is in a reference cycle *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -770,8 +759,8 @@ names a preset more than once attaches it only at its last occurrence (e.g.,
 `%p%q%p` ≡ `%q%p`), and a `<preset-delta>` matches an attached preset of its
 name, even one looked up from another context (e.g., for a fields config `x` of
 `@all.name%-default` in context `mas`, `mas list --fields @x` detaches from
-`name` the `default` preset that `all` attached from `mas.list`). Each
-`<preset-name>` must name an existing preset, even in a `<preset-removal>` that
+`name` the `default` preset that `all` attached from `mas.list`).
+`<preset-name>`'s error comment applies even to a `<preset-removal>` that
 detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
 
@@ -798,8 +787,6 @@ A preset's own `<preset-list>` sets the list of presets attached within it,
 which starts empty, not the list of any field spec to which it is attached,
 though attaching it sets what they set (e.g., if preset `mb` is `%bytes=Size`,
 `.size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
-A preset that is attached within itself, directly or transitively, is an error,
-as is any other [reference cycle](configs.md#referencing-named-configs).
 
 A `<preset-name>` is looked up from the starting context of its reference, as
 configs.md [specifies](configs.md#referencing-named-configs) for every config
@@ -1120,8 +1107,8 @@ compares as `1500`), so it compares as a single number (e.g., `1,234` as `1234`)
 rather than being broken into smaller ones by the separator. Its integer part
 may have leading `0`s & its fractional part trailing `0`s (e.g., `007.50`
 compares as `7.5`). Its group sizes & separators come from its [number format
-arguments](fields-format.md#numberformat), each absent one defaulting to the
-base conventions; a `<digit-group-size>` of `0` allows groups of any size.
+arguments](fields-format.md#numberformat); a `<digit-group-size>` of `0` allows
+groups of any size.
 
 A `-` or `+` immediately preceding a number segment is its sign:
 

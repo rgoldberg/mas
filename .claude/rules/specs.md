@@ -110,6 +110,10 @@ or a `<relative-config>` that means something else.
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value").
 
+In specs, never write prose that merely restates a definition or a comment,
+because a restatement can drift from what it restates; state in prose only what
+neither says (e.g., a reason, a consequence, or an example).
+
 In specs, give a nonterminal whose input & output types are equal a single
 `type:` comment, rather than both `input type:` & `output type:` comments.
 

@@ -22,9 +22,8 @@ json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-
 <!--editorconfig-checker-enable-->
 
 `<json-config>` is the JSON config kind's [output config
-syntax](configs.md#output-configs), and `<json-config-option>` is
-`--json-config`, JSON output's [output config
-option](configs.md#output-configs).
+syntax](configs.md#output-configs), and `<json-config-option>` is JSON output's
+[output config option](configs.md#output-configs).
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.

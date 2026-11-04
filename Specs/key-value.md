@@ -31,9 +31,8 @@ key-value-setting =
 <!--editorconfig-checker-enable-->
 
 `<key-value-config>` is the key-value config kind's [output config
-syntax](configs.md#output-configs), and `<key-value-config-option>` is
-`--key-value-config`, key-value output's [output config
-option](configs.md#output-configs).
+syntax](configs.md#output-configs), and `<key-value-config-option>` is key-value
+output's [output config option](configs.md#output-configs).
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.
