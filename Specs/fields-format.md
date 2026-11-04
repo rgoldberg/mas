@@ -831,8 +831,8 @@ no nonzero digit (e.g., `%.n` coerces `"+01.50e+03"` to `1.5e3`, `".5"` to
 `0.5`, `"-0.0"` to `0` & `"1e-00"` to `1e0`).
 
 A number coercion also allows **trivia** around the number, matching a string
-iff the string is, for the shortest trivia prefix for which such a string
-exists:
+iff it splits into the following, using the shortest trivia prefix for which
+such a split exists:
 
 <!--editorconfig-checker-disable-->
 1. A **trivia prefix**: a [Swift Regex](
@@ -897,16 +897,14 @@ datetime, date-only, or time-only (trying them in that order), among those that
 its type & its `<date-format>`s allow; this does not depend on field name,
 label, output format, or any other context.
 
-`%d` & `%D` match a date; `%c` & `%C` match a time-only value. No predicate
-matches both (e.g., `%m.d.c+` coerces to either).
+No predicate matches both a date & a time-only value (e.g., `%m.d.c+` coerces to
+either).
 
 **Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
 seconds.
 
-A **decimal number** is an optional sign (`-` or `+`); ASCII digits, a `.`
-followed by ASCII digits, or both, in that order; then optionally an exponent
-indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
-`.5`, or `1.5e9`).
+A **decimal number** is text in `number`'s [lexical
+form](ebnf.md#typed-terminals) (e.g., `-1`, `.5`, or `1.5e9`).
 
 A `<coercion>` to a date parses what any of its `<date-format>`s
 [matches](fields.md#sort-chronologic-segments), except that `<iso>` does not

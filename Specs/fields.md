@@ -1061,11 +1061,12 @@ The canonical conventions compare text per the [CLDR root collation](
   https://www.unicode.org/reports/tr35/tr35-collation.html#Root_Collation
 ) (the Unicode Collation Algorithm with CLDR's root collation order & settings,
 which is independent of every real-world locale), while a locale compares it per
-its own collation. Each also sets [`<grouped-numeric>`'s default number
+its own collation. Each also sets [`<grouped-numeric>`'s base
 conventions](#sort-number-segments).
 
-Canonical number formatting uses a `.` decimal separator, a `,` digit group
-separator, a digit group size of 3 & a secondary digit group size of 0.
+The canonical conventions' number formatting uses a `.` decimal separator, a `,`
+digit group separator, a digit group size of 3 & a secondary digit group size
+of 0.
 
 ##### Sort Number Segments
 
