@@ -54,7 +54,7 @@ pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; la
 compact        = "p" (* mnemonic: lowercase of P, as off *)
 pretty-printed = "P" [ <indentation> ] <json-setting-termination>
 
-indentation = ^{string: only spaces & tabs}^ (* default: "  " *)
+indentation = ^{string: only spaces, tabs, LFs & CRs}^ (* default: "  " *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

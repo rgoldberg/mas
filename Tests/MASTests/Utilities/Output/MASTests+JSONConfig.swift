@@ -25,9 +25,11 @@ private extension MASTests {
 			("P\\ :", " "),
 			("P:p", nil),
 			("pP\t:", "\t"),
+			("P\n:", "\n"),
+			("P\r\n:", "\r\n"),
 		],
 	)
-	func `p renders compactly; P pretty-prints with spaces & tabs indentation, 2 spaces by default`(
+	func `p renders compactly; P pretty-prints with JSON whitespace indentation, 2 spaces by default`(
 		value: String,
 		indentation: String?,
 	) throws {
@@ -38,6 +40,8 @@ private extension MASTests {
 		arguments: [
 			("Pa", JSONConfigParsingError.invalidIndentation("a")),
 			("P  x:", .invalidIndentation("  x")),
+			("P\u{0C}:", .invalidIndentation("\u{0C}")),
+			("P\u{2028}:", .invalidIndentation("\u{2028}")),
 			("P\\", .danglingEscape),
 			("z", .invalidSetting("z")),
 		],
@@ -88,6 +92,10 @@ private extension MASTests {
 		#expect(
 			try json(of: twoItems, jsonConfig: try parseJSONConfig("P\t"))
 				== "{\n\t\"name\": \"Slack\",\n\t\"free\": true\n}\n{\n\t\"name\": \"X\",\n\t\"free\": false\n}",
+		)
+		#expect(
+			try json(of: twoItems, jsonConfig: try parseJSONConfig("P\n:"))
+				== "{\n\n\"name\": \"Slack\",\n\n\"free\": true\n}\n{\n\n\"name\": \"X\",\n\n\"free\": false\n}",
 		)
 		#expect(
 			try json(of: twoItems, jsonConfig: try parseJSONConfig("aP")) // editorconfig-checker-disable

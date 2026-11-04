@@ -27,8 +27,8 @@ struct JSONConfig: Equatable {
 
 	static let `default` = Self(indentation: nil, topLevelStructure: .itemStream, nonASCIIRendering: .verbatim)
 
-	/// The indentation per nesting level of pretty-printed output; only spaces &
-	/// tabs; never empty; `nil` means compact output.
+	/// The indentation per nesting level of pretty-printed output; only spaces,
+	/// tabs, LFs & CRs; never empty; `nil` means compact output.
 	let indentation: String?
 	let topLevelStructure: TopLevelStructure
 	let nonASCIIRendering: NonASCIIRendering
@@ -51,7 +51,7 @@ func parseJSONConfig(_ value: String) throws(JSONConfigParsingError) -> JSONConf
 			// `<indentation>` is a non-empty variable token: absent, its default (2
 			// spaces) applies
 			let text = try parseOutputConfigSettingPayload(&input, danglingEscapeError: JSONConfigParsingError.danglingEscape)
-			guard text.allSatisfy({ $0 == " " || $0 == "\t" }) else {
+			guard text.unicodeScalars.allSatisfy(indentationScalarSet.contains) else {
 				throw .invalidIndentation(text)
 			}
 			indentation = text.isEmpty ? defaultIndentation : text
@@ -81,7 +81,7 @@ enum JSONConfigParsingError: Equatable, Error, CustomStringConvertible {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --json-config's value"
 		case let .invalidIndentation(indentation):
-			"Invalid indentation (expected only spaces & tabs): \(indentation)"
+			"Invalid indentation (expected only spaces, tabs, LFs & CRs): \(indentation)"
 		case let .invalidSetting(setting):
 			"Invalid --json-config <json-setting>: \(setting)"
 		}
@@ -89,3 +89,4 @@ enum JSONConfigParsingError: Equatable, Error, CustomStringConvertible {
 }
 
 private let defaultIndentation = "  "
+private let indentationScalarSet = Set(" \t\n\r".unicodeScalars)

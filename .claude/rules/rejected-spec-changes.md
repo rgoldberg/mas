@@ -69,6 +69,12 @@ grammar, while being unused alone does not make it worth removing.
 
 In specs, never forbid a tab or a line terminator in an output config payload
 (e.g., `$'L\t:'` while `F` is effective, `$'F.\t:'`, `$'S-\t:'`, `$'O\t:'` while
-`K` & `F` are effective, or `$'L\n:'`), because it means what it says, and its
-output shows any misalignment or line split that it causes, while forbidding it
-needs a special rule per payload.
+`K` & `F` are effective, or `$'L\n:'`), unless it would make the output invalid
+in its output format, because it means what it says, and its output shows any
+misalignment or line split that it causes, while forbidding it needs a special
+rule per payload.
+
+In specs, never allow a line terminator other than an LF or a CR in
+`<indentation>` (e.g., `$'P\f:'`), because it is not JSON whitespace, so the
+output would not be JSON, which outweighs the overruled reason for rejecting its
+forbidding: it means what it says.
