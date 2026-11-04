@@ -293,6 +293,18 @@ a format's template text or from a field value) instead of rendering its ESC as
 10. Destinations that do not render it (e.g., a terminal without SGR support, or
     `less` without `-R`).
 
+### Column Width Limits
+
+Let a table column's width be limited (e.g., truncating a long app name with
+`…`), which needs:
+
+1. Whether the limit is a table setting, a field spec setting, or both.
+2. Whether a truncated cell is marked (e.g., with `…`) & on which side of it,
+   per its column's alignment.
+3. Whether a limit may be relative to the terminal's width, which an app cannot
+   determine if standard output is not a terminal.
+4. Whether `<output>` sorts by a formatted value before or after truncation.
+
 ### Multi-Line Rows
 
 Let a line terminator in a table header or data cell, or in a key-value key,
