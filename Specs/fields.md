@@ -1125,7 +1125,7 @@ A `-` or `+` immediately preceding a number segment is its sign:
 chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: 'iso'; last wins; inherited *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
-chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time> | <unix-time>
+chronologic-format  = <date-format> | <iso-time>
 
 iso          = 'iso'
 iso-date     = 'iso-date'

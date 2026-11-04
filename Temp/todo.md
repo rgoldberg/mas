@@ -171,9 +171,9 @@ Cross-unit conversion.
 
 ### Chronologic Coercion & Output Formats
 
-Mirror number coercion: chronologic coercion takes fenced arguments giving the
-input format (e.g., `%.:yyyy-MM-dd:d`, `..:yyyy-MM-dd:timeZone:UTC:`), with
-[UTS #35 date format patterns](
+Mirror number coercion: chronologic coercion's fenced arguments also give a
+custom input format (e.g., `%.:yyyy-MM-dd:d`, `..:yyyy-MM-dd:timeZone:UTC:`),
+with [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 ) as the pattern syntax. It would also cover the ISO-8601 representations that
 auto-detection omits (e.g., week dates) & let `%.c` & `%.C` take arguments
@@ -184,7 +184,7 @@ mirroring `numberFormat`) needs the same pattern syntax &, for a named one,
 custom presets.
 
 [`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) can then
-take custom formats (e.g., `yyyy-MM-dd`).
+take custom formats (e.g., `yyyy-MM-dd`), as `<date-formats>` will.
 
 ### Boolean Coercion Options
 

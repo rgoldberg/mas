@@ -128,6 +128,6 @@ any other transform (e.g., `%.d`), and it would lengthen even the simplest
 pipeline (e.g., `.toString.uppercase` instead of `..uppercase`).
 
 In specs, never let a `<coercion>` to a date accept a number or a decimal number
-without `<unix-time-coercion-arguments>` (e.g., `%.d` for `5.6` or `"1.2"`),
-because a number or a decimal string is rarely a time, so it would match a value
-that a later branch (e.g., `%m.d.n+`) means to match.
+without `<unix-time>` (e.g., `%.d` for `5.6` or `"1.2"`), because a number or a
+decimal string is rarely a time, so it would match a value that a later branch
+(e.g., `%m.d.n+`) means to match.

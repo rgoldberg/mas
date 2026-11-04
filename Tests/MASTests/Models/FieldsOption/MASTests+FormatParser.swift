@@ -55,6 +55,37 @@ private extension MASTests {
 		#expect(try rendered(format, value) == expected)
 	}
 
+	@Test(
+		arguments: [
+			("%.:iso,unix-time:D.timeZone:UTC:.dateOnly++", .number(0), "1970-01-01"),
+			("%.:iso,unix-time:D.timeZone:UTC:.dateOnly++", "0", "1970-01-01"),
+			("%.:iso,unix-time:D.timeZone:UTC:.dateOnly++", "2020-03-18", "2020-03-18"),
+			("%.:unix-time,iso:D.timeZone:UTC:.dateOnly++", "2020-03-18", "2020-03-18"),
+			("[%.:iso,unix-time:d]", "17:39:23", nil),
+			("[%.:iso:d]", .number(0), nil),
+			("[%.:iso:d]", "0", nil),
+			("[%.:iso:d]", "17:39:23", nil),
+			("%.:iso:D.dateOnly++", "2020-03-18", "2020-03-18"),
+			("%.:iso-date:d", "2020-03-18", "2020-03-18"),
+			("[%.:iso-date:d]", "2020-03-18T17:39:23Z", nil),
+			("%.:iso-datetime:D.timeZone:UTC:++", "2020-03-18T17:39:23Z", "2020-03-18T17:39:23Z"),
+			("[%.:iso-datetime:d]", "2020-03-18", nil),
+			("%.: iso-date , iso-datetime :D.timeZone:UTC:.dateOnly++", "2020-03-18", "2020-03-18"),
+			(#"%.:\unix-time:D.timeZone:UTC:.dateOnly++"#, .number(0), "1970-01-01"),
+			(#"%.:unix\-time:D.timeZone:UTC:.dateOnly++"#, .number(0), "1970-01-01"),
+			(".round..:iso,unix-time:timeZone:UTC:.dateOnly", .number(0), "1970-01-01"),
+			("..:iso-date:dateOnly", "2020-03-18", "2020-03-18"),
+			("..:iso-date:dateOnly", "2020-03-18T17:39:23Z", nil),
+		] as [(String, JSON.Node, String?)],
+	)
+	func `a date coercion parses what any of its date formats matches`(
+		format: String,
+		value: JSON.Node,
+		expected: String?,
+	) throws {
+		#expect(try rendered(format, value) == expected)
+	}
+
 	@Test
 	func `a fallible unconditional placeholder coerces its label`() throws {
 		#expect(
@@ -713,10 +744,24 @@ private extension MASTests {
 			(".dateOnly.timeZone:UTC:", .invalidPipeline("<value-transform-pipeline>")),
 			("%N..dateOnly+-+", .invalidPipeline("<number-pipeline>")),
 			(".round..dateOnly", .invalidPipeline("<value-transform-pipeline>")),
-			("%.:unix-time:c", .unixTimeCoercionArgumentsNotSupported("c")),
-			("%.:unix-time:n", .unixTimeCoercionArgumentsNotSupported("n")),
-			("..:unix-time:round", .unixTimeCoercionArgumentsNotSupported("round")),
-			("..:unix-time:uppercase", .unixTimeCoercionArgumentsNotSupported("uppercase")),
+			("%.:unix-time:c", .dateCoercionArgumentsNotSupported("c")),
+			("%.:iso:c", .dateCoercionArgumentsNotSupported("c")),
+			("%.:iso-time:C%c++", .invalidDateCoercionArguments),
+			("%.:iso-time:D%d++", .invalidDateCoercionArguments),
+			("%.:iso:n", .dateCoercionArgumentsNotSupported("n")),
+			("%.:iso,unix-time:b", .dateCoercionArgumentsNotSupported("b")),
+			("..:iso:timeOnlyTimeZone:UTC:", .dateCoercionArgumentsNotSupported("timeOnlyTimeZone")),
+			("%.:unix-time,:d", .invalidDateCoercionArguments),
+			("%.:unix-time,,,,,,:d", .invalidDateCoercionArguments),
+			("..:unix-time,:dateOnly", .invalidDateCoercionArguments),
+			("%.:iso,:d", .invalidDateCoercionArguments),
+			("%.:iso,de:d", .invalidDateCoercionArguments),
+			("%N..:iso:dateOnly+-+", .invalidPipeline("<number-pipeline>")),
+			("%N..:iso-date,iso-datetime:dateOnly+-+", .invalidPipeline("<number-pipeline>")),
+			(".round..:iso:dateOnly", .invalidPipeline("<value-transform-pipeline>")),
+			("%.:unix-time:n", .dateCoercionArgumentsNotSupported("n")),
+			("..:unix-time:round", .dateCoercionArgumentsNotSupported("round")),
+			("..:unix-time:uppercase", .dateCoercionArgumentsNotSupported("uppercase")),
 			("%.D..round+-+", .invalidPipeline("<date-pipeline>")),
 			("%.D..:,,,,,.*:round+-+", .invalidPipeline("<date-pipeline>")),
 			("%.C..round+-+", .invalidPipeline("<time-only-pipeline>")),

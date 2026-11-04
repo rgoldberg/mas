@@ -125,16 +125,17 @@ private struct FormatParser {
 			default:
 				valueTransformByName[name]! // swiftlint:disable:this force_unwrapping
 			}
-		if let coercion, coercion.hasArguments {
-			guard
-				coercion.coercion.isUnixTime
-				? transform.kind == .date || transform.kind == .dateOnly
-				: transform.kind == .number || transform.kind == .numberToString
-			else {
-				throw coercion.coercion.isUnixTime
-					? .unixTimeCoercionArgumentsNotSupported(name)
-					: .numberCoercionArgumentsNotSupported(name)
+		switch coercion?.argumentKind {
+		case .date:
+			guard transform.kind == .date || transform.kind == .dateOnly else {
+				throw .dateCoercionArgumentsNotSupported(name)
 			}
+		case .number:
+			guard transform.kind == .number || transform.kind == .numberToString else {
+				throw .numberCoercionArgumentsNotSupported(name)
+			}
+		case nil:
+			break
 		}
 		return .init(transform: transform, coercion: coercion?.coercion)
 	}
@@ -436,10 +437,17 @@ private struct FormatParser {
 			guard predicate.isCoercible else {
 				throw .coercionNotSupported(letter)
 			}
-			guard !coercion.hasArguments || predicate == (coercion.coercion.isUnixTime ? .date : .number) else {
-				throw coercion.coercion.isUnixTime
-					? .unixTimeCoercionArgumentsNotSupported(.init(letter))
-					: .numberCoercionArgumentsNotSupported(.init(letter))
+			switch coercion.argumentKind {
+			case .date:
+				guard predicate == .date else {
+					throw .dateCoercionArgumentsNotSupported(.init(letter))
+				}
+			case .number:
+				guard predicate == .number else {
+					throw .numberCoercionArgumentsNotSupported(.init(letter))
+				}
+			case nil:
+				break
 			}
 		}
 		return .init(predicate: predicate, coercion: coercion?.coercion)
@@ -452,9 +460,17 @@ private struct FormatParser {
 			return nil
 		}
 		guard input.first == argumentFence else {
-			return .init(coercion: .default, hasArguments: false)
+			return .init(coercion: .default, argumentKind: nil)
 		}
 		input.removeFirst()
+		if let dateFormats = try parseDateFormatsIfPresent() {
+			guard input.first == argumentFence else {
+				throw .invalidDateCoercionArguments
+			}
+			input.removeFirst()
+			skipWhitespace() // As for `<number-coercion-arguments>`' closing `<argument-fence>`
+			return .init(coercion: .date(dateFormats), argumentKind: .date)
+		}
 		let arguments = try parseArguments(
 			&input,
 			count: numberFormatArgumentCount + 2,
@@ -466,9 +482,6 @@ private struct FormatParser {
 		}
 		input.removeFirst()
 		skipWhitespace() // Unlike `<coercion>`'s, its closing `<argument-fence>`'s succeeding whitespace is ignored
-		if arguments.first == unixTimeCoercionArgument, arguments.dropFirst().allSatisfy({ $0 == nil }) {
-			return .init(coercion: .unixTime, hasArguments: true)
-		}
 		let triviaPrefixPattern = arguments[numberFormatArgumentCount] ?? ""
 		let triviaSuffixPattern = arguments[numberFormatArgumentCount + 1] ?? ""
 		guard let triviaPrefixRegex = TriviaRegex(pattern: triviaPrefixPattern) else {
@@ -487,7 +500,26 @@ private struct FormatParser {
 				triviaPrefixRegex: triviaPrefixRegex,
 				triviaSuffixRegex: triviaSuffixRegex,
 			),
-			hasArguments: true,
+			argumentKind: .number,
+		)
+	}
+
+	/// Parses `<date-formats>`, if present, which only a `<date-format>` starts.
+	private mutating func parseDateFormatsIfPresent() throws(ParsingError) -> ChronologicFormats? {
+		guard let firstName = parseNameLiteral(&input, from: dateFormatNames) else {
+			return nil
+		}
+		var names = [firstName]
+		while input.first == argumentSeparator {
+			input.removeFirst()
+			guard let name = parseNameLiteral(&input, from: dateFormatNames) else {
+				throw .invalidDateCoercionArguments
+			}
+			names.append(name)
+		}
+		return .init(
+			iso8601Forms: .init(names.flatMap { iso8601FormsByDateFormat[$0, default: []] }),
+			hasUnixTime: names.contains(unixTimeDateFormat),
 		)
 	}
 
@@ -599,10 +631,16 @@ private struct FormatParser {
 
 /// A parsed `<coercion>`, `<number-coercion>`, or `<date-coercion>`.
 private struct ParsedCoercion { // swiftlint:disable:this one_declaration_per_file
+	/// Which kind of arguments are present, if any.
+	enum ArgumentKind {
+		/// `<date-coercion-arguments>`.
+		case date
+		/// `<number-coercion-arguments>`.
+		case number
+	}
+
 	let coercion: Coercion
-	/// Whether `<number-coercion-arguments>` or `<unix-time-coercion-arguments>`
-	/// are present.
-	let hasArguments: Bool
+	let argumentKind: ArgumentKind?
 }
 
 /// How outer bare whitespace preceding a variable token is treated.
@@ -753,7 +791,7 @@ private extension TransformCall {
 			case .date, .dateOnly, .timeOnly:
 				inputType == .string
 			case .number:
-				inputType == .string || inputType == .date && coercion.isUnixTime
+				inputType == .string || inputType == .date && coercion.dateFormats.hasUnixTime
 			case .string:
 				inputType != .string
 			case .version:
@@ -790,7 +828,14 @@ private extension Predicate {
 // MARK: - Constants
 
 let formatModifierPrefix = Character(":")
-private let unixTimeCoercionArgument = "unix-time"
+/// The `<date-format>`s other than `<unix-time>`, by name literal.
+private let iso8601FormsByDateFormat = [
+	"iso": ChronologicFormats.date.iso8601Forms,
+	"iso-date": [.date],
+	"iso-datetime": [.datetime],
+] as [String: Set<ISO8601Form>]
+private let unixTimeDateFormat = "unix-time"
+private let dateFormatNames = iso8601FormsByDateFormat.keys + [unixTimeDateFormat]
 let placeholderPrefix = Character("%")
 let blockTerminator = Character("+")
 let namePrefix = Character(":")

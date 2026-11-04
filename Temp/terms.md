@@ -577,9 +577,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
     - decimal number: a Unix time's text syntax
       ([defined](../Specs/fields-format.md#chronologic-formatting))
-    - Unix time coercion: a `<coercion>` to a date with
-      `<unix-time-coercion-arguments>`, which coerces a number or a decimal
-      number as a Unix time (`<unix-time-coercion>`)
+    - date coercion: a `<coercion>` to a date, which parses what any of its
+      `<date-format>`s matches (`<date-coercion>`)
+    - Unix time coercion: a date coercion that includes `<unix-time>`, so it
+      coerces a number or a decimal number as a Unix time
+      (`<unix-time-coercion>`)
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
       timestamp / numeric timestamp
 93. - input type: the type of a nonterminal's input

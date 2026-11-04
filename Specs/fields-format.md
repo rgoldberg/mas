@@ -193,7 +193,7 @@ arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
 is not a canonical number).
 
 An **argument** is an element of an argument list: a transform's, a [number
-coercion's](#coercion), a [Unix time coercion's](#chronologic-formatting),
+coercion's](#coercion), a [date coercion's](#chronologic-formatting),
 [`N`'s](fields.md#sort-number-segments), or
 [`C`'s](fields.md#sort-chronologic-segments).
 
@@ -216,7 +216,7 @@ to the coerced input; otherwise, formatting [aborts](#success--failure).
 
 A number or number-to-string transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`), and a date
-transform's may take [`<unix-time-coercion-arguments>`](#chronologic-formatting)
+transform's may take [`<date-coercion-arguments>`](#chronologic-formatting)
 (e.g., `..:unix-time:dateOnly`).
 
 Coercing any value to a string always succeeds, so an
@@ -850,10 +850,14 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-coercion                 = <coercion> [ <unix-time-coercion-arguments> ]
-unix-time-coercion            = <coercion> <unix-time-coercion-arguments>
-unix-time-coercion-arguments  = <argument-fence> <unix-time-coercion-argument> <argument-fence>
-unix-time-coercion-argument   = 'unix-time'
+date-coercion           = <coercion> [ <date-coercion-arguments> ] (* default date-formats: 'iso' *)
+date-coercion-arguments = <argument-fence> <date-formats> <argument-fence>
+unix-time-coercion      = <coercion> <argument-fence> <unix-time-date-formats> <argument-fence>
+
+date-formats           = <date-format> … <argument-separator>
+unix-time-date-formats = [ ( <iso-date-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
+date-format            = <iso-date-format> | <unix-time>
+iso-date-format        = <iso> | <iso-date> | <iso-datetime>
 
 nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>
@@ -871,8 +875,9 @@ non-nullary-time-only = "C" (* is time-only; output type: time-only; value: {ISO
 <!--editorconfig-checker-enable-->
 
 A `<coercion>` to a chronologic type auto-detects a string as an ISO-8601
-datetime, date-only, or time-only (trying them in that order); this does not
-depend on field name, label, output format, or any other context.
+datetime, date-only, or time-only (trying them in that order), among those that
+its type & its `<date-format>`s allow; this does not depend on field name,
+label, output format, or any other context.
 
 `%d` & `%D` match a date; `%c` & `%C` match a time-only value. No predicate
 matches both (e.g., `%m.d.c+` coerces to either).
@@ -885,11 +890,21 @@ followed by ASCII digits, or both, in that order; then optionally an exponent
 indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
 `.5`, or `1.5e9`).
 
-With `<unix-time-coercion-arguments>`, a `<coercion>` to a date instead coerces
-a number, or a string whose entire content is a decimal number, as a Unix time
-(e.g., `%.:unix-time:D` matches `0` & `"0"`, but not `"2020-03-18"`, while `%.D`
-matches only the last), because a number or a decimal string is otherwise rarely
-a time (e.g., `%m.d.n+` would otherwise render the price `5.6` as a date).
+A `<date-coercion>` parses what any of its `<date-format>`s
+[matches](fields.md#sort-chronologic-segments), except that `<iso>` does not
+match a time-only, which is not a date, and `<unix-time>` also matches a number
+(e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not `"2020-03-18 17:39"`, and
+`%.:iso,unix-time:D` matches `0`, `"0"` & `"2020-03-18"`, while `%.:unix-time:D`
+matches only the 1st 2 & `%.D` only the last).
+
+A number or a decimal number coerces to a date only per `<unix-time>`, because
+it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise render the price
+`5.6` as a date), so a call that receives a number must list `<unix-time>`
+(e.g., `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which
+could only abort).
+
+A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
+format.
 
 An ISO-8601:
 

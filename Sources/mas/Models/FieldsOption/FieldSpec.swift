@@ -93,11 +93,13 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case binaryPlaceholderLacksBlock
 	case coercionNotSupported(Character)
 	case danglingEscape
+	case dateCoercionArgumentsNotSupported(String)
 	case documentOrderUnsupportedForTable
 	case emptyBoundaryGroup
 	case forbiddenWhitespace(after: Character)
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
+	case invalidDateCoercionArguments
 	case invalidLetter(Character)
 	case invalidLocaleIdentifier(String)
 	case invalidModifier(Character)
@@ -128,7 +130,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
 	case unexpectedCharacter(Character)
-	case unixTimeCoercionArgumentsNotSupported(String)
 	case unknownPreset(String)
 	case unknownTransform(String)
 
@@ -142,6 +143,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<coercion> is not supported for: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
+		case let .dateCoercionArgumentsNotSupported(name):
+			"<date-coercion-arguments> are not supported for: \(name)"
 		case .documentOrderUnsupportedForTable:
 			"<document-order> 'D' is supported only for JSON or key-value output"
 		case .emptyBoundaryGroup:
@@ -152,6 +155,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid base fields config name: \(baseFieldsConfigName)"
 		case let .invalidCharacterClass(name):
 			"Invalid character class: \(name)"
+		case .invalidDateCoercionArguments:
+			"Invalid <date-coercion-arguments>"
 		case let .invalidLetter(letter):
 			"Invalid <predicate>: \(letter)"
 		case let .invalidLocaleIdentifier(identifier):
@@ -216,8 +221,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<field-order-tiebreaker> is not supported for <positional-order> 'P'"
 		case let .unexpectedCharacter(character):
 			"Unexpected character: \(character)"
-		case let .unixTimeCoercionArgumentsNotSupported(name):
-			"<unix-time-coercion-arguments> are not supported for: \(name)"
 		case let .unknownPreset(name):
 			"Unknown preset: \(name)"
 		case let .unknownTransform(name):

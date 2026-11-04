@@ -29,7 +29,8 @@ private extension MASTests {
 		unixTime: String,
 		isChronologic: Bool,
 	) {
-		#expect((chronologic(from: .string(unixTime), isUnixTime: true) != nil) == isChronologic)
+		#expect((chronologic(from: .string(unixTime), formats: .init(iso8601Forms: [], hasUnixTime: true)) != nil) ==
+			isChronologic)
 	}
 
 	@Test(
@@ -44,12 +45,12 @@ private extension MASTests {
 		],
 	)
 	func `a Unix time coercion coerces a number or a decimal number string`(value: JSON.Node, isChronologic: Bool) {
-		#expect((chronologic(from: value, isUnixTime: true) != nil) == isChronologic)
+		#expect((chronologic(from: value, formats: .init(iso8601Forms: [], hasUnixTime: true)) != nil) == isChronologic)
 	}
 
 	@Test(arguments: [(JSON.Node.number(0), false), (.string("0"), false), (.string("2020-03-18"), true)])
 	func `any other date coercion coerces only an ISO-8601 string`(value: JSON.Node, isChronologic: Bool) {
-		#expect((chronologic(from: value, isUnixTime: false) != nil) == isChronologic)
+		#expect((chronologic(from: value, formats: .date) != nil) == isChronologic)
 	}
 
 	@Test
