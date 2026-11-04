@@ -765,8 +765,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        rest of `<format-block>`
        ([defined](../Specs/fields-format.md#success--failure))
 119. - coerced value: the value, at a matcher's type, that `<coercion>` parses
-       from a string, replacing the input
-       ([defined](../Specs/fields-format.md#coercion))
+       from a string, or, for a Unix time or a version, a number, replacing the
+       input ([defined](../Specs/fields-format.md#coercion))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))
      - trivia prefix / trivia suffix: the trivia before / after the number

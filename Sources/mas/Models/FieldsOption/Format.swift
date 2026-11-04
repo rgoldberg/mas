@@ -458,7 +458,15 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:
-			coercion.flatMap { _ in value.jsonString }.flatMap { isVersion($0) ? .string($0) : nil }
+			coercion
+				.flatMap { _ in
+					if case let .number(number) = value {
+						"\(number)"
+					} else {
+						value.jsonString
+					}
+				}
+				.flatMap { isVersion($0) ? .string($0) : nil }
 		case .whitespace:
 			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .input(value) : nil
 		}

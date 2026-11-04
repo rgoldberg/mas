@@ -284,6 +284,8 @@ private extension MASTests {
 			("[%d]", .number(0), nil),
 			("[%c]", .string("17:39:23"), nil),
 			("[%v]", .string("1.2"), nil),
+			("%.v", .number(1.2), "1.2"),
+			("[%.v]", .number(-1), nil),
 			("%.:unix-time:D.timeZone:UTC:.dateOnly++", .number(0), "1970-01-01"),
 			("%.D.dateOnly.dateOnly++", .string("2020-03-18"), "2020-03-18"),
 			("[%.d]", .number(0), nil),

@@ -773,8 +773,8 @@ non-nullary-version = "V" (* is version; output type: version; value: {field val
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a string whose entire content is a
-version (e.g., `%.v` matches `"1.2.3-beta"`, but `%v` matches no value of JSON
-input).
+version, or a number whose text is one (e.g., `%.v` matches `"1.2.3-beta"` &
+`1.2`, but `%v` matches no value of JSON input).
 
 ###### Coercion
 
