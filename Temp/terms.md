@@ -619,7 +619,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
 100. - date block: `%D`'s `<conditional-block>`, whose pipeline's 1st call takes
-       no `<coercion>` iff it is a `dateOnly` or a `timeZone`
+       no `<coercion>` iff it is a `dateOnly` or, except after a
+       `<date-only-coercion>`, a `timeZone`
      - time-only block: `%C`'s `<conditional-block>`, whose pipeline's 1st call
        takes no `<coercion>` iff it is a `timeOnlyTimeZone`
      - REJECTED: clock block / time block

@@ -59,9 +59,10 @@ because the shared definition states the shared syntax & semantic comments once.
 In specs, write a literal that selects 1 of a set of names, rather than
 structuring the syntax (e.g., a transform name or `unix-time`), as a [name
 literal](../../Specs/ebnf.md#name-literals) (e.g., `'round'`), and write each
-other literal (e.g., a prefix, a terminator, or a predicate letter) as a literal
-(e.g., `"%"`), because how a name is written cannot affect what it selects,
-while an escaped structural character means something else.
+other literal (e.g., a prefix, a terminator, a predicate letter, or an option
+name) as a literal (e.g., `"%"`), because how a name is written cannot affect
+what it selects, while an escaped structural character means something else, and
+Swift Argument Parser does not evaluate an option name's escape sequences.
 
 In specs, give an empty-string default for a block or a typed terminal as
 `{empty string}` (a free-form description), never as the literal `""`, which

@@ -104,7 +104,9 @@ private struct FormatParser {
 		let coercion = try parseCoercion()
 		guard let name = parseNameLiteral(&input, from: transformNames) else {
 			let unknownName = input.prefixMatch(of: /(?:\\?\p{L})*/)?.output ?? ""
-			throw .unknownTransform(.init(unknownName.filter { $0 != escapePrefix }))
+			throw input.dropFirst(unknownName.count) == String(escapePrefix)
+				? .danglingEscape
+				: .unknownTransform(.init(unknownName.filter { $0 != escapePrefix }))
 		}
 		let transform: Transform =
 			switch name {
@@ -806,7 +808,8 @@ private extension TransformCall {
 			case .version:
 				switch inputType {
 				case .date:
-					coercion.dateFormats.hasUnixTime || transform.kind == .dateOnly && coercion.dateFormats.acceptsVersion
+					coercion.dateFormats.hasUnixTime || transform.kind == .dateOnly && coercion.dateFormats
+						.iso8601Forms != [.datetime]
 				case .timeOnly:
 					false
 				default:

@@ -746,6 +746,8 @@ private extension MASTests {
 			("%.C..dateOnly++", .invalidPipeline("<time-only-pipeline>")),
 			(#".\bogus"#, .unknownTransform("bogus")),
 			(#".ro\xnd"#, .unknownTransform("roxnd")),
+			(#".ro\"#, .danglingEscape),
+			(#".\"#, .danglingEscape),
 			("%I..uppercase..lowercase+", .invalidPipeline("<input-pipeline>")),
 			(".round.uppercase", .invalidPipeline("<value-transform-pipeline>")),
 			(".round..round", .invalidPipeline("<value-transform-pipeline>")),
