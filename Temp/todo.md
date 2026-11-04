@@ -194,13 +194,12 @@ Coercion arguments for boolean coercion, e.g.:
 - Case: uppercase, lowercase, consistent case, or case-insensitive.
 - `0` & non-`0` numbers.
 
-### Heterogeneous Pipeline Types & Coercion Anywhere
+### Heterogeneous Pipeline Types
 
 Let a pipeline mix value types, requiring only that each transform's input type
 accept its predecessor's output type (e.g., a transform that takes any input &
-outputs a number may precede one whose input type is number or any). Allow
-`<coercion>` before any transform call. Each makes only currently invalid
-formats valid.
+outputs a number may precede one whose input type is number or any). This makes
+only currently invalid formats valid.
 
 ### Structured Value Operations
 
