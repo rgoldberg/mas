@@ -581,6 +581,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       `<date-format>`s matches
     - date-only coercion: a date coercion whose only `<date-format>` is
       `<iso-date>`, so its value is a date-only (`<date-only-coercion>`)
+    - version date-only coercion: a date coercion of a version without
+      `<unix-time>`, so its value is a date-only
+      (`<version-date-only-coercion>`)
     - Unix time coercion: a date coercion that includes `<unix-time>`, so it
       coerces a number or a decimal number as a Unix time
       (`<unix-time-coercion>`)
