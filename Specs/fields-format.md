@@ -242,10 +242,10 @@ string is:
 ```ebnf
 string-transform = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
-initial-titlecase = "initialTitlecase"
-lowercase         = "lowercase"
-trim-whitespace   = "trimWhitespace"
-uppercase         = "uppercase"
+initial-titlecase = 'initialTitlecase'
+lowercase         = 'lowercase'
+trim-whitespace   = 'trimWhitespace'
+uppercase         = 'uppercase'
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -276,10 +276,10 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
 
-absolute-value = "absoluteValue"
-round          = "round"
-scale          = "scale" <scale-arguments>
-number-format  = "numberFormat" [ <argument-fence> <number-format-arguments> <argument-fence> ]
+absolute-value = 'absoluteValue'
+round          = 'round'
+scale          = 'scale' <scale-arguments>
+number-format  = 'numberFormat' [ <argument-fence> <number-format-arguments> <argument-fence> ]
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -406,9 +406,9 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 date-transform      = <date-only> | <date-time-zone> (* non-structural *)
 time-only-transform = <time-only-time-zone> (* type: time-only *)
 
-date-only           = "dateOnly" (* input type: date; output type: date-only *)
-date-time-zone      = "timeZone" [ <date-time-zone-arguments> ] (* type: date; sets the output time zone; last wins *)
-time-only-time-zone = "timeOnlyTimeZone" [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
+date-only           = 'dateOnly' (* input type: date; output type: date-only *)
+date-time-zone      = 'timeZone' [ <date-time-zone-arguments> ] (* type: date; sets the output time zone; last wins *)
+time-only-time-zone = 'timeOnlyTimeZone' [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -853,7 +853,7 @@ escaped.
 date-coercion                 = <coercion> [ <unix-time-coercion-arguments> ]
 unix-time-coercion            = <coercion> <unix-time-coercion-arguments>
 unix-time-coercion-arguments  = <argument-fence> <unix-time-coercion-argument> <argument-fence>
-unix-time-coercion-argument   = "unix-time"
+unix-time-coercion-argument   = 'unix-time'
 
 nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>

@@ -320,7 +320,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 		if hasNumberSigns {
 			input.removeFirst()
 		}
-		let signs = hasNumberSigns ? parseLiteral(&input, from: NumberSigns.allCases.map(\.rawValue)) : nil
+		let signs = hasNumberSigns ? parseNameLiteral(&input, from: NumberSigns.allCases.map(\.rawValue)) : nil
 		guard isAtSortOptionSetEnd(input, terminatorSet: [sortOptionTerminator]) else {
 			throw invalidArgumentsError
 		}
@@ -353,7 +353,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 		var isAtChronologicFormat = skipWhitespace(&input)
 			&& !isAtSortOptionSetEnd(input, terminatorSet: [sortOptionTerminator])
 		while isAtChronologicFormat {
-			guard let format = parseLiteral(&input, from: chronologicFormats) else {
+			guard let format = parseNameLiteral(&input, from: chronologicFormats) else {
 				throw .invalidSortOptionArguments(chronologicSegmentsOption)
 			}
 			if let formatForms = iso8601FormsByChronologicFormat[format] {
@@ -397,12 +397,9 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				boundaries.append(.characters(text))
 			case characterClassFence:
 				input.removeFirst()
-				skipWhitespace(&input)
-				let name = input.prefix(while: \.isLetter)
-				input.removeFirst(name.count)
-				skipWhitespace(&input)
-				guard input.first == characterClassFence, let characterClass = CharacterClass(rawValue: .init(name)) else {
-					throw .invalidCharacterClass(.init(name))
+				let name = try parseText(&input, terminatorSet: [characterClassFence])
+				guard input.first == characterClassFence, let characterClass = CharacterClass(rawValue: name) else {
+					throw .invalidCharacterClass(name)
 				}
 				input.removeFirst()
 				boundaries.append(.characterClass(characterClass))
@@ -443,20 +440,6 @@ private func skipWhitespace(_ input: inout Substring) -> Bool {
 /// input.
 private func parseText(_ input: inout Substring, terminatorSet: Set<Character>) throws(ParsingError) -> String {
 	try parseEscapedText(&input, terminatorSet: terminatorSet)
-}
-
-/// Parses the longest of `literals` that bare characters at the start of
-/// `input` match, ignoring its outer bare whitespace (an escaped character
-/// renders a token a variable token, so it matches no literal); else `nil`,
-/// consuming only that whitespace.
-private func parseLiteral(_ input: inout Substring, from literals: some Sequence<String>) -> String? {
-	skipWhitespace(&input)
-	let literal = literals.filter(input.hasPrefix).max { $0.count < $1.count }
-	if let literal {
-		input.removeFirst(literal.count)
-		skipWhitespace(&input)
-	}
-	return literal
 }
 
 // MARK: - Comparison
@@ -1059,7 +1042,7 @@ private let numberSegmentsByOption = [
 private let groupedNumericOption = Character("N")
 
 private let chronologicSegmentsOption = Character("C")
-/// The `<chronologic-format>`s other than `<unix-time>`, by literal.
+/// The `<chronologic-format>`s other than `<unix-time>`, by name literal.
 private let iso8601FormsByChronologicFormat = [
 	"iso": Set(ISO8601Form.allCases),
 	"iso-date": [.date],

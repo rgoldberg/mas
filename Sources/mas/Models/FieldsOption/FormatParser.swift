@@ -102,11 +102,9 @@ private struct FormatParser {
 		input.removeFirst()
 		try forbidWhitespace(after: transformCallPrefix)
 		let coercion = try parseCoercion()
-		let name = transformNames.filter { input.hasPrefix($0) }.max { $0.count < $1.count }
-		guard let name else {
+		guard let name = parseNameLiteral(&input, from: transformNames) else {
 			throw .unknownTransform(.init(input.prefix(while: \.isLetter)))
 		}
-		input.removeFirst(name.count)
 		let transform: Transform =
 			switch name {
 			case numberFormatName:

@@ -1076,9 +1076,9 @@ grouped-numeric-arguments = <number-format-arguments> <argument-separator>? [ <n
 
 number-signs = <word-initial-signs> | <all-signs> | <no-signs> (* default: <word-initial-signs> *)
 
-word-initial-signs = "word-initial"
-all-signs          = "all"
-no-signs           = "none"
+word-initial-signs = 'word-initial'
+all-signs          = 'all'
+no-signs           = 'none'
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -1122,16 +1122,16 @@ A `-` or `+` immediately preceding a number segment is its sign:
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: "iso"; last wins; inherited *)
+chronologic-segments = "C" [ <chronologic-formats> ] <sort-option-terminator> (* transitive default chronologic-formats: 'iso'; last wins; inherited *)
 
 chronologic-formats = <chronologic-format> … <argument-separator>
 chronologic-format  = <iso> | <iso-date> | <iso-datetime> | <iso-time> | <unix-time>
 
-iso          = "iso"
-iso-date     = "iso-date"
-iso-datetime = "iso-datetime"
-iso-time     = "iso-time"
-unix-time    = "unix-time"
+iso          = 'iso'
+iso-date     = 'iso-date'
+iso-datetime = 'iso-datetime'
+iso-time     = 'iso-time'
+unix-time    = 'unix-time'
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -1181,20 +1181,20 @@ multi-character-boundary-text  = {string}
 character-class       = <character-class-fence> <character-class-name> <character-class-fence>
 character-class-fence = "+"
 character-class-name  =
-  "alnum"
-  | "alpha"
-  | "ascii"
-  | "blank"
-  | "cntrl"
-  | "digit"
-  | "graph"
-  | "lower"
-  | "print"
-  | "punct"
-  | "space"
-  | "upper"
-  | "word"
-  | "xdigit"
+  'alnum'
+  | 'alpha'
+  | 'ascii'
+  | 'blank'
+  | 'cntrl'
+  | 'digit'
+  | 'graph'
+  | 'lower'
+  | 'print'
+  | 'punct'
+  | 'space'
+  | 'upper'
+  | 'word'
+  | 'xdigit'
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

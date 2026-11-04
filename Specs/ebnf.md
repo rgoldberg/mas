@@ -74,7 +74,8 @@ possible occurrences, determined from the grammar instead of the syntax text:
 
 ### Constant Vs. Variable Expressions
 
-A **constant expression** consumes invariant text (e.g., a literal).
+A **constant expression** consumes text that evaluates to invariant text (e.g.,
+a literal or a name literal).
 
 A **variable expression** consumes variable text (e.g., a typed terminal).
 
@@ -95,14 +96,19 @@ element by the syntax.
 consumed by constant expressions; escaping any character within a token that
 would otherwise be a literal token renders it a variable token.
 
+**Name tokens** are tokens that match [name literals](#name-literals) & are
+consumed by constant expressions; each may contain both bare characters & escape
+sequences.
+
 **Variable tokens** are tokens that [typed terminals](#typed-terminals) consume;
 each may contain both bare characters & escape sequences.
 
 #### Candidate Literals
 
 The **candidate literals** of a given position in the syntax text are the
-literals that the syntax can consume at that position (regardless of the syntax
-text starting at that position), which includes the literals that:
+literals & name literals that the syntax can consume at that position
+(regardless of the syntax text starting at that position), which includes those
+that:
 
 - Start any choice available at that position.
 - Continue any enclosing sequence or repetition.
@@ -127,9 +133,9 @@ Syntax text is never reconsidered after it has been consumed.
 
 ##### Consuming Literal Tokens
 
-Syntax text is consumed as a literal token iff a candidate literal matches the
-syntax text starting at the current position; if multiple match, the longest is
-consumed.
+Syntax text is consumed as a literal token or a name token iff a candidate
+literal matches the syntax text starting at the current position; if multiple
+match, the longest is consumed.
 
 ##### Consuming Variable Tokens
 
@@ -165,7 +171,7 @@ includes:
 **Outer bare whitespace** exists immediately before the 1st, or immediately
 after the last:
 
-- Character consumed by a literal token.
+- Character consumed by a literal token or a name token.
 - Non-bare-whitespace character consumed by a variable token.
 
 A candidate literal is matched before outer bare whitespace is processed,
@@ -312,6 +318,23 @@ Inherent scalar.
 A **literal**, which matches a [literal token](#tokens) of `TEXT`.
 
 Within `TEXT`, `""` denotes a `"`.
+
+#### Name Literals
+
+```ebnf
+'TEXT'
+```
+
+Inherent scalar.
+
+A **name literal**, which matches a [name token](#tokens) that evaluates to
+`TEXT` (e.g., `'round'` matches `round`, `\round` & `ro\und`), because a name
+selects 1 of a set of texts, as a typed terminal's value does, rather than
+structuring the syntax, so how it is written cannot affect what it means. No
+escape sequence thus lets a variable token consume text that a candidate name
+literal matches.
+
+Within `TEXT`, `''` denotes a `'`.
 
 #### Typed Terminals
 
@@ -591,8 +614,8 @@ nonterminals; they cannot specify defaults for constant nonterminals.
   selects that alternative, as if that alternative were present but contained no
   token; otherwise, it evaluates to the referenced nonterminal's global default
   for the directly absent state.
-- A [literal](#literals), consumed by the nonterminal to which the default
-  applies.
+- A [literal](#literals) or a [name literal](#name-literals), consumed by the
+  nonterminal to which the default applies.
 
 All defaults must be valid for the applicable nonterminal.
 

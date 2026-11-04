@@ -217,8 +217,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: nil / missing
 32. - literal: a `"TEXT"` terminal, which literal tokens match
       ([defined](../Specs/ebnf.md#literals))
-    - candidate literal: a literal that the syntax can consume at a given
-      position ([defined](../Specs/ebnf.md#candidate-literals))
+    - name literal: a `'TEXT'` terminal, which name tokens match
+      ([defined](../Specs/ebnf.md#name-literals))
+    - name token: a token, which may contain escape sequences, that evaluates to
+      a name literal's text ([defined](../Specs/ebnf.md#tokens))
+    - candidate literal: a literal or a name literal that the syntax can consume
+      at a given position ([defined](../Specs/ebnf.md#candidate-literals))
     - REJECTED: literal text (for a literal) / candidate syntax literal /
       literal (as an adjective for as-is data, e.g., "a literal tab character")
     - verbatim: exact character-for-character match without processing escapes

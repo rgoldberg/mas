@@ -236,6 +236,33 @@ func parseArguments(
 	return arguments + [String?](repeating: nil, count: count - arguments.count)
 }
 
+/// Parses the longest of `names` that the text at the start of `input`
+/// evaluates to, ignoring its outer bare whitespace; else `nil`, consuming only
+/// its leading whitespace.
+func parseNameLiteral(_ input: inout Substring, from names: some Sequence<String>) -> String? {
+	input = input.drop(while: \.isWhitespace)
+	let start = input
+	let matched = names
+		.compactMap { name in start.droppingNameToken(name).map { (name: name, rest: $0) } }
+		.max { $0.name.count < $1.name.count }
+	if let matched {
+		input = matched.rest.drop(while: \.isWhitespace)
+	}
+	return matched?.name
+}
+
+private extension Substring {
+	/// The text after the start of this text, iff that start evaluates to `name`.
+	func droppingNameToken(_ name: String) -> Self? {
+		name.reduce(self as Self?) { rest, character in
+			rest.flatMap { rest in
+				let escaped = rest.first == escapePrefix ? rest.dropFirst() : rest
+				return escaped.first == character ? escaped.dropFirst() : nil
+			}
+		}
+	}
+}
+
 /// `argument` as an `{integer: non-negative}`, saturated at `Int.max` (which
 /// every caller treats as equivalent to any larger value); else `nil`.
 func nonNegativeInteger(_ argument: String) -> Int? {

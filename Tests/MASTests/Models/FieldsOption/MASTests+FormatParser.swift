@@ -43,6 +43,18 @@ private extension MASTests {
 		#expect(try rendered(format, .array([.number(1)])) == nil)
 	}
 
+	@Test(
+		arguments: [
+			(#".\round"#, .number(1.5), "2"),
+			(#".ro\und"#, .number(1.5), "2"),
+			(#"..up\percase"#, "a", "A"),
+			(#"%.D.\timeZone:UTC:.\dateOnly++"#, "2020-03-18T17:39:23Z", "2020-03-18"),
+		] as [(String, JSON.Node, String)],
+	)
+	func `a transform name evaluates its escape sequences`(format: String, value: JSON.Node, expected: String) throws {
+		#expect(try rendered(format, value) == expected)
+	}
+
 	@Test
 	func `a fallible unconditional placeholder coerces its label`() throws {
 		#expect(

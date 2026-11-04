@@ -150,6 +150,18 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			(#"1C\iso:"#, "1Ciso:"),
+			(#"1Ci\so-dat\e , \unix-time :"#, "1Ciso-date,unix-time:"),
+			(#"1N,,,,,a\ll:"#, "1N,,,,,all:"),
+			(#"1B+al\pha+:"#, "1B+alpha+:"),
+		],
+	)
+	func `a name literal evaluates its escape sequences`(escaped: String, unescaped: String) throws {
+		#expect(try parsedSortSpec(escaped).optionSet == parsedSortSpec(unescaped).optionSet)
+	}
+
+	@Test(
+		arguments: [
 			("1", false, Set(ISO8601Form.allCases)),
 			("1Cunix-time:", true, .init()),
 			("1C iso-date , unix-time :", true, .init([.date])),
@@ -172,14 +184,14 @@ private extension MASTests {
 			("1N,,-1:", .invalidSortOptionArguments("N")),
 			("1N,,,,,bogus:", .invalidSortOptionArguments("N")),
 			("1N,,,,,,:", .invalidSortOptionArguments("N")),
-			("1N,,,,,\\all:", .invalidSortOptionArguments("N")),
+			("1N,,,,,\\ all:", .invalidSortOptionArguments("N")),
 			("1N,,,,,allx:", .invalidSortOptionArguments("N")),
 			("1Nxx_Bogus:", .invalidLocaleIdentifier("xx_Bogus")),
 			("1C", .missingSortOptionTerminator),
 			("1Cbogus:", .invalidSortOptionArguments("C")),
 			("1Ciso,:", .invalidSortOptionArguments("C")),
 			("1Cunix:", .invalidSortOptionArguments("C")),
-			("1C\\iso:", .invalidSortOptionArguments("C")),
+			("1C\\ iso:", .invalidSortOptionArguments("C")),
 			("1Ciso\\,iso-date:", .invalidSortOptionArguments("C")),
 			("1Ciso date:", .invalidSortOptionArguments("C")),
 			("1L", .missingSortOptionTerminator),
