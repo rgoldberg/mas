@@ -151,6 +151,8 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			(#"1C\iso:"#, "1Ciso:"),
+			(#"1L\canonical:"#, "1Lcanonical:"),
+			(#"1Lsyste\m:"#, "1Lsystem:"),
 			(#"1Ci\so-dat\e , \unix-time :"#, "1Ciso-date,unix-time:"),
 			(#"1N,,,,,a\ll:"#, "1N,,,,,all:"),
 			(#"1B+al\pha+:"#, "1B+alpha+:"),

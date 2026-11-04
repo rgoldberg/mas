@@ -1038,17 +1038,20 @@ does (e.g., `a` equals `A`, but `é` does not equal `e`).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: "canonical"; last wins; inherited *)
+locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: <canonical-locale>; last wins; inherited *)
 
-locale-identifier = {string: locale identifier, "canonical", or "system"} (* default: "system" *)
+locale-identifier = <canonical-locale> | <system-locale> | {string: locale identifier} (* default: <system-locale> *)
+
+canonical-locale = 'canonical'
+system-locale    = 'system'
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 A `<locale-identifier>` of:
 
-- `canonical` identifies the canonical conventions.
-- `system` identifies the system locale.
+- `<canonical-locale>` identifies the canonical conventions.
+- `<system-locale>` identifies the system locale.
 
 The canonical conventions compare text per the [CLDR root collation](
   https://www.unicode.org/reports/tr35/tr35-collation.html#Root_Collation

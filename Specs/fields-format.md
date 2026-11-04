@@ -788,7 +788,7 @@ version, or a number whose text is one (e.g., `%.v` matches `"1.2.3-beta"` &
 <!--markdownlint-disable line-length-->
 ```ebnf
 coercion        = "."!
-number-coercion = <coercion> [ <number-coercion-arguments> ] (* default locale-identifier: "canonical" *)
+number-coercion = <coercion> [ <number-coercion-arguments> ] (* default locale-identifier: <canonical-locale> *)
 
 number-coercion-arguments =
   <argument-fence>

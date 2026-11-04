@@ -95,10 +95,10 @@ later occurrences override its earlier ones (e.g., `<direction>`), never to a
 nonterminal that repeats it (e.g., `<sort-option-set>`).
 
 In specs, give a default as a specific value for the nonterminal it defaults
-(e.g., `(* transitive default locale-identifier: "canonical" *)`), using
-descendant and/or transitive defaults as needed, rather than as syntax that must
-be parsed (e.g., `(* default: "Lcanonical:" *)`), giving a chosen alternative as
-a reference to it (e.g., `(* default: <ascending> *)`), unless only syntax can
+(e.g., `(* transitive default chronologic-formats: 'iso' *)`), using descendant
+and/or transitive defaults as needed, rather than as syntax that must be parsed
+(e.g., `(* default: "Lcanonical:" *)`), giving a chosen alternative as a
+reference to it (e.g., `(* default: <ascending> *)`), unless only syntax can
 express it (e.g., `(* default: "B+space+:" *)`, which both chooses an
 alternative & sets its payload).
 
