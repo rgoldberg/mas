@@ -459,8 +459,7 @@ private struct FormatParser {
 		return .init(predicate: predicate, coercion: coercion?.coercion)
 	}
 
-	/// Parses an optional `<coercion>`, `<number-coercion>`, or
-	/// `<date-coercion>`.
+	/// Parses an optional `<*coercion>`.
 	private mutating func parseCoercion() throws(ParsingError) -> ParsedCoercion? {
 		guard try parseModifier(in: [coercionPrefix]) != nil else {
 			return nil
@@ -510,7 +509,8 @@ private struct FormatParser {
 		)
 	}
 
-	/// Parses `<date-formats>`, if present, which only a `<date-format>` starts.
+	/// Parses a list of `<date-format>`s, if present, which only a
+	/// `<date-format>` starts.
 	private mutating func parseDateFormatsIfPresent() throws(ParsingError) -> ChronologicFormats? {
 		guard let firstName = parseNameLiteral(&input, from: dateFormatNames) else {
 			return nil
@@ -635,7 +635,7 @@ private struct FormatParser {
 	}
 }
 
-/// A parsed `<coercion>`, `<number-coercion>`, or `<date-coercion>`.
+/// A parsed `<*coercion>`.
 private struct ParsedCoercion { // swiftlint:disable:this one_declaration_per_file
 	/// Which kind of arguments are present, if any.
 	enum ArgumentKind {

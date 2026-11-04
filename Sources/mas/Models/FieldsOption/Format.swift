@@ -49,8 +49,7 @@ struct Pipeline: Equatable { // swiftlint:disable:this one_declaration_per_file
 	var calls = [TransformCall]()
 }
 
-/// A `<*transform-call>`: its `<value-transform>` & its `<coercion>` (or
-/// `<number-coercion>` or `<date-coercion>`), if any.
+/// A `<*transform-call>`: its `<value-transform>` & its `<*coercion>`, if any.
 struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let transform: Transform
 	let coercion: Coercion?
@@ -116,7 +115,7 @@ struct Coercion: Hashable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<coercion>` without `<number-coercion-arguments>`.
 	static let `default` = Self(numberConventions: .canonical, triviaPrefixRegex: .empty, triviaSuffixRegex: .empty)
 
-	/// A `<date-coercion>` with `<date-coercion-arguments>` of `dateFormats`.
+	/// A `<*date*-coercion>` with `<date-coercion-arguments>` of `dateFormats`.
 	static func date(_ dateFormats: ChronologicFormats) -> Self {
 		.init(
 			numberConventions: .canonical,
