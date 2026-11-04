@@ -396,9 +396,8 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
   `round`.
 - A value that would render with more than 100 digits before the decimal point,
   or, absent `<fractional-digits>`, after it, [aborts](#success--failure)
-  formatting, with or without `<coercion>`, because that limit is on rendering,
-  not on a number (e.g., `.scale:0,,0:` for `1e100`, or `.scale:0:` for
-  `1e-101`).
+  formatting, with or without `<coercion>`, because that restricts rendering,
+  not a number (e.g., `.scale:0,,0:` for `1e100`, or `.scale:0:` for `1e-101`).
 - E.g., a byte count as integer megabytes: `.scale:6,,0:`, or as megabytes to 3
   significant digits: `.scale:6,3:`; a ratio as an integer percentage:
   `.scale:-2,,0:` (e.g., `0.25` as `25`).
@@ -913,20 +912,20 @@ matches only the 1st 2 & `%.D` only the last).
 
 A number or a decimal number coerces to a date only per `<unix-time>`, because
 it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise render the price
-`5.6` as a date), so a call that receives a number must list `<unix-time>`
+`5.6` as a date), so a call whose input is a number must list `<unix-time>`
 (e.g., `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which
-could only abort).
+can only abort).
 
 A `<date-only-coercion>`'s value is always a date-only, which no time zone
 affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
 is an error, as `.dateOnly.timeZone:UTC:` is).
 
-A version has no `:`, so it is never a datetime, so a call that receives a
+A version has no `:`, so it is never a datetime, so a call whose input is a
 version must list a `<date-format>` other than `<iso-datetime>` (e.g.,
 `%.V..:iso,iso-datetime:dateOnly+-+`, but not `%.V..:iso-datetime:dateOnly+-+`,
-which could only abort), and only `<unix-time>` lets `timeZone` affect its value
+which can only abort), and only `<unix-time>` lets `timeZone` affect its value
 (e.g., `%.V..:unix-time:timeZone:UTC:+-+`, but not `%.V..:iso:timeZone:UTC:+-+`,
-whose value could only be a date-only).
+whose value can only be a date-only).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.

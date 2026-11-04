@@ -285,16 +285,16 @@ a format's template text or from a field value) instead of rendering its ESC as
 10. Destinations that do not render it (e.g., a terminal without SGR support, or
     `less` without `-R`).
 
-### Column Width Limits
+### Column Width Constraints
 
-Let a table column's width be limited (e.g., truncating a long app name with
+Let a table column's width be constrained (e.g., truncating a long app name with
 `…`), which needs:
 
-1. Whether the limit is a table setting, a field spec setting, or both.
+1. Whether the constraint is a table setting, a field spec setting, or both.
 2. Whether a truncated cell is marked (e.g., with `…`) & on which side of it,
    per its column's alignment.
-3. Whether a limit may be relative to the terminal's width, which an app cannot
-   determine if standard output is not a terminal.
+3. Whether a constraint may be relative to the terminal's width, which an app
+   cannot determine if standard output is not a terminal.
 4. Whether `<output>` sorts by a formatted value before or after truncation.
 
 ### Multi-Line Rows

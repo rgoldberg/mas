@@ -55,7 +55,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 12. - given: explicitly specified input values or parameters from a caller or
       user
     - attached: comments or metadata structurally bound to a nonterminal
-      definition; also a preset in a field spec's list of presets (see 111)
+      definition; also a preset in a field spec's list of presets (see 110)
     - present: an occurrence of a token or an expression in the syntax text
     - exists: abstract state of availability or occurrence (e.g., "a fields
       config exists")
@@ -195,7 +195,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - compound
     - placeholder: only the defined `%…` fields-format term
     - rule: only a semantic rule in prose
-    - REJECTED: contents / instance / usage (except as in 105) / use (as a noun)
+    - REJECTED: contents / instance / usage (except as in 104) / use (as a noun)
       / site / construct / projection / rule (as a syntactic element) /
       placeholder (as a generic term) / symbol (except a Unicode general
       category `S` character)
@@ -616,20 +616,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       Annex C's POSIX Compatible definitions
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
-100. - date block: `%D`'s `<conditional-block>`, whose pipeline's 1st call takes
-       no `<coercion>` iff it is a `dateOnly` or, except after a
-       `<date-only-coercion>`, a `timeZone`
-     - time-only block: `%C`'s `<conditional-block>`, whose pipeline's 1st call
-       takes no `<coercion>` iff it is a `timeOnlyTimeZone`
-     - REJECTED: clock block / time block
-101. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
+100. - expanded representation: ISO-8601's year of a sign & at least 5 digits,
        for a year outside 0000 to 9999
      - proleptic Gregorian calendar: the Gregorian calendar extended before
        1582-10-15, as ISO-8601 requires
      - instant: a point in time
      - REJECTED: extended year (for an expanded representation) / timestamp (for
        an instant)
-102. - nullary: of a form, or of a lowercase predicate letter other than `m`,
+101. - nullary: of a form, or of a lowercase predicate letter other than `m`,
        followed by no success clause or block
      - non-nullary: of an uppercase predicate letter other than `M`, followed by
        a success clause or 1 or more blocks
@@ -638,7 +632,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        not nullary
      - REJECTED: concise / verbose (the letters have equal length) / bare / full
        / block (for letter case) / nullary match / non-nullary match
-103. - success pipeline: a unary form's pipeline-only success clause
+102. - success pipeline: a unary form's pipeline-only success clause
        (`<success-pipeline>`), e.g., `%I…+`'s
        ([defined](../Specs/fields-format.md#success--failure))
      - success clause: a `<success-block>` or a `<success-pipeline>`
@@ -651,10 +645,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
        `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)
-104. - member: 1 of a field's name / value pairs in an item, of which there may
+103. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
-105. - option value: the rest of an option's command-line argument after `=`, or
+104. - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
        `-` ([defined](../Specs/configs.md#option-values))
      - option value separator: the `=` or the command-line argument boundary
@@ -671,16 +665,16 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `[--json | --json-config <json-config> | …]`)
      - REJECTED: option-argument / option-argument separator (the specs use
        "argument" for an argument list's elements)
-106. - line terminator: a CRLF, or any other character from U+000A to U+000D,
+105. - line terminator: a CRLF, or any other character from U+000A to U+000D,
        U+0085, U+2028, or U+2029
        ([defined](../Specs/configs.md#line-terminators))
      - newline: the LF that terminates an output line (e.g., after a JSON
        object)
      - REJECTED: line break / line ending / EOL (for a line terminator)
-107. - negated: the form of a non-nullary branch with `<branch-negation>`
+106. - negated: the form of a non-nullary branch with `<branch-negation>`
        (`-…`), whose `<failure-block>` is evaluated iff its matcher fails
        ([defined](../Specs/fields-format.md#success--failure))
-108. - list: verb; an app lists each field that it knows before reading any
+107. - list: verb; an app lists each field that it knows before reading any
        input, while a fields config lists those & each field that a field name
        in its, or in an extended fields config's, `<fields-config>` names
        ([defined](../Specs/fields.md#unlisted-fields))
@@ -689,20 +683,20 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields.md#unlisted-fields))
      - REJECTED: dynamic field / discovered field / unknown field (for an
        unlisted field)
-109. - unpositioned field: a field without a position in the field order, which
+108. - unpositioned field: a field without a position in the field order, which
        compares as less or greater than every positioned one: for
        `<document-order>`, the field of a field spec whose field an item lacks;
        for `<positional-order>`, a visible unlisted field
        ([defined](../Specs/fields.md#field-order))
      - REJECTED: absent field (for an unpositioned field)
-110. - output config: a table, key-value, or JSON config
+109. - output config: a table, key-value, or JSON config
        ([defined](../Specs/configs.md#output-configs))
      - output config option: an output format's option that selects it with a
        config overlaid on its `default` config (e.g., `--json-config`)
        ([defined](../Specs/configs.md#output-configs))
      - output config syntax: the syntax of an output config kind's configs
        (e.g., `<json-config>`) ([defined](../Specs/configs.md#output-configs))
-111. - preset: a named config of `<field-modifiers>`, which a
+110. - preset: a named config of `<field-modifiers>`, which a
        `<preset-modifier>` attaches to a field spec
        ([defined](../Specs/fields.md#presets))
      - attach / detach: add a preset to, or remove one from, a field spec's list
@@ -723,12 +717,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        against ([defined](../Specs/fields-format.md#success--failure))
      - REJECTED: named spec (the specs use "spec" for a `Specs/` document) /
        field style / template (for a preset)
-112. - alignment: where a field spec's label & values are in its table output
+111. - alignment: where a field spec's label & values are in its table output
        column (`start`, `centerStart`, `centerEnd`, or `end`;
        [defined](../Specs/fields.md#alignment))
      - align / aligned: verb & adjective
      - REJECTED: justification / justify / justified
-113. - setting: a separate value of a field spec, per `(* inherited *)`
+112. - setting: a separate value of a field spec, per `(* inherited *)`
        nonterminal in `<field-modifiers>` & its alignment
        ([defined](../Specs/fields.md#field-modifiers)); of a fields config, per
        field spec setting & per `(* inherited *)` nonterminal in
@@ -740,11 +734,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        nonterminal, each starting with its own letter (e.g., `<header-off>`, as
        `h`; [defined](../Specs/configs.md#output-configs))
      - REJECTED: axis (for a setting)
-114. - persistent: of a named config, built-in or custom, which no display
+113. - persistent: of a named config, built-in or custom, which no display
        command modifies ([defined](../Specs/configs.md#named-configs))
      - persist: verb; save a custom config
      - REJECTED: persisted (as an adjective for a config) / saved / stored
-115. - C0 control character: a character from U+0000 to U+001F
+114. - C0 control character: a character from U+0000 to U+001F
      - DEL: U+007F
      - C1 control character: a character from U+0080 to U+009F
      - 7-bit equivalent: ECMA-48's 2-character representation of a C1 control
@@ -754,12 +748,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        for a C0 control character or DEL (e.g., `␉` for a tab;
        [used](../Specs/table.md#table-config))
      - REJECTED: control code / control picture (for a Control Pictures symbol)
-116. - reference fields config: a semi-mutable copy of the baseline fields
+115. - reference fields config: a semi-mutable copy of the baseline fields
        config, whose field spec order is immutable, in which each removed field
        spec is replaced with `null`; each `<field-spec-reference>` index
        references its field specs
        ([defined](../Specs/fields.md#field-spec-references))
-117. - digit group: a run of digits of a number's integer part, between each 2
+116. - digit group: a run of digits of a number's integer part, between each 2
        of which `numberFormat` inserts `<digit-group-separator>`
        ([defined](../Specs/fields-format.md#numberformat))
      - primary group: the least significant digit group, of `<digit-group-size>`
@@ -770,30 +764,30 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        default: those that `<locale-identifier>` identifies, else those of the
        system locale, the canonical conventions, or `<locale>`'s, per use
        ([defined](../Specs/fields-format.md#numberformat))
-118. - abort: verb; of formatting, make the formatted value absent, ignoring the
+117. - abort: verb; of formatting, make the formatted value absent, ignoring the
        rest of `<format-block>`
        ([defined](../Specs/fields-format.md#success--failure))
-119. - coerced value: the value, at a matcher's type, that `<coercion>` parses
+118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a string, or, for a Unix time or a version, a number, replacing the
        input ([defined](../Specs/fields-format.md#coercion))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))
      - trivia prefix / trivia suffix: the trivia before / after the number
-120. - version: 1 or more `.`-separated components, each an ASCII digit followed
+119. - version: 1 or more `.`-separated components, each an ASCII digit followed
        by any Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
        `1.2.3-beta`; [defined](../Specs/fields-format.md#version-formatting));
        also the type of a version value (`%v`'s output type)
      - version fields: `minimumOSVersion`, `newVersion` & `version`
        ([defined](../Specs/mas.md#default-sort-options))
-121. - App Store locale: the locale of the App Store region that mas guesses
+120. - App Store locale: the locale of the App Store region that mas guesses
        from the macOS region, because the App Store's locale cannot be
        determined programmatically ([defined](../Specs/mas.md#price-sorting))
-122. - display command: a command whose primary function is to display data
+121. - display command: a command whose primary function is to display data
        ([defined](../Specs/configs.md#display-commands))
      - command list: the list of commands in the command line from root to leaf
        (the command that actually runs)
        ([defined](../Specs/configs.md#command-lists))
-123. - metavariable: a word of uppercase letters, digits & `_` that starts with
+122. - metavariable: a word of uppercase letters, digits & `_` that starts with
        an uppercase letter & stands for an expression or text in the
        meta-grammar ([defined](../Specs/ebnf.md#meta-grammar))
      - constant expression / variable expression: an expression that consumes
@@ -801,13 +795,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/ebnf.md#constant-vs-variable-expressions))
      - bare token: a token of only bare characters
        ([defined](../Specs/ebnf.md#tokens))
-124. - inherent scalar / inherent repetition / inherent tuple: of an expression
+123. - inherent scalar / inherent repetition / inherent tuple: of an expression
        each of whose occurrences is a scalar / a repetition / a tuple
        ([defined](../Specs/ebnf.md#multiplicity))
      - content-dependent / context-dependent: of an expression each of whose
        occurrences has its content's multiplicity / the multiplicity that its
        context requires ([defined](../Specs/ebnf.md#multiplicity))
-125. - outer bare whitespace: bare whitespace immediately before the 1st, or
+124. - outer bare whitespace: bare whitespace immediately before the 1st, or
        after the last, character that a literal or name token consumes, or
        non-bare-whitespace character that a variable token consumes
        ([defined](../Specs/ebnf.md#outer-bare-whitespace))
@@ -817,14 +811,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - defer: of a side of an expression, to let an adjacent side override its
        outer bare whitespace treatment (`~`;
        [defined](../Specs/ebnf.md#outer-bare-whitespace-treatment))
-126. - presence state: present, transitively absent, or directly absent
+125. - presence state: present, transitively absent, or directly absent
        ([defined](../Specs/ebnf.md#presence-states))
      - directly absent: not present, but not transitively absent (e.g.,
        `<label>` in `name=`)
      - transitively absent: of an expression an ancestor of which is absent, or
        that no consumed token matches as an alternative of a present choice or
        as an element of a present repetition
-127. - semantic comment: a comment part that matches a semantic comment format
+126. - semantic comment: a comment part that matches a semantic comment format
        ([defined](../Specs/ebnf.md#semantic-comments))
      - mnemonic comment: a comment part that explains how a nonterminal's
        literal was chosen ([defined](../Specs/ebnf.md#mnemonic-comments))
@@ -835,7 +829,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        applies ([defined](../Specs/ebnf.md#explicit--implicit-defaults))
      - global default: an expression's applicable self default, else its
        applicable implicit default ([defined](../Specs/ebnf.md#global-defaults))
-128. - matcher: a placeholder's or branch's `<placeholder-prefix>`, modifiers &
+127. - matcher: a placeholder's or branch's `<placeholder-prefix>`, modifiers &
        predicate (`<matcher>`), which succeeds iff it matches the value against
        which it is evaluated
        ([defined](../Specs/fields-format.md#success--failure))

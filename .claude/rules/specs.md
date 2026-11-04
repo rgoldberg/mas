@@ -11,16 +11,16 @@ the same tokens in another order, consistent semantics).
 
 In specs, terminate every single-letter option's / setting's payload with `:`.
 
-In specs, give each construct's constant syntax (e.g., a prefix) its own
-constant nonterminal, named for that construct (e.g.,
-`field-order-tiebreaker-prefix`), rather than reusing another construct's, even
+In specs, give each expression's constant syntax (e.g., a prefix) its own
+constant nonterminal, named for that expression (e.g.,
+`field-order-tiebreaker-prefix`), rather than reusing another expression's, even
 if their values are equal.
 
 In specs, annotate an outer bare whitespace treatment on the expression whose
-tokens need it (e.g., `-[ <format-block> ]-`), rather than on its neighbors'
-constant nonterminals (e.g., not `-"/"` for a following `/`), except on a
-terminator that terminates every expression that needs it, which would otherwise
-need many annotations (e.g., `block-terminator = -"+"`).
+tokens need it (e.g., `-[ <format-block> ]-`), rather than on adjacent
+expressions' constant nonterminals (e.g., not `-"/"` for a following `/`),
+except on a terminator that terminates every expression that needs it, which
+would otherwise need many annotations (e.g., `block-terminator = -"+"`).
 
 In specs, define each option that takes a value as a `<valued-option(…)>` (e.g.,
 `fields-option = <valued-option("--fields", <fields-config>)>`), whose
@@ -68,7 +68,7 @@ In specs, give an empty-string default for a block or a typed terminal as
 `{empty string}` (a free-form description), never as the literal `""`, which
 neither a block nor a variable token can consume.
 
-In specs, when 2 constructs express the same concept with similarly complex
+In specs, when 2 expressions denote the same concept with similarly complex
 syntax (e.g., a format's number coercion & a sort's grouped numbers), share 1
 syntax; give a much simpler one its own simpler syntax.
 
@@ -158,6 +158,6 @@ In specs, specify syntax according to the 1st of these that applies:
    comparison of variable tokens' values (e.g., `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`,
    or a digit group separator that equals the decimal separator).
-4. Otherwise: allow it, even if its output is merely misaligned or split across
-   lines (e.g., a tab or a line terminator in a `<leader-pattern>`), because its
-   output shows the effect.
+4. Otherwise: allow it, even if its output is merely misaligned or split into
+   multiple lines (e.g., a tab or a line terminator in a `<leader-pattern>`),
+   because its output shows the effect.

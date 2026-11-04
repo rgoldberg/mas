@@ -85,10 +85,10 @@ can follow it reliably: `@x///0` would consume `//`, the longest candidate
 literal, leaving `/0`, which is an error, so generated syntax that appends a
 section to it would still fail.
 
-In specs, never allow a `<coercion>` on a call whose input type equals the type
-of the value that it receives, unless a `<named-format-reference>` immediately
-precedes it (e.g., `.round..round` or `%S..uppercase++`), because it cannot
-affect what the call means, nor require one on a call whose types match (e.g.,
+In specs, never allow a `<coercion>` on a call whose value's type equals its
+input type, unless a `<named-format-reference>` immediately precedes it (e.g.,
+`.round..round` or `%S..uppercase++`), because it cannot affect what the call
+means, nor require one on a call whose types match (e.g.,
 `.numberFormat.uppercase`), because it would add nothing.
 
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
@@ -108,12 +108,12 @@ to a string 1st.
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,
 `.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
-converts it, while an argument would add syntax for a value that almost never
+affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without failing other items.
 
 In specs, never let a string match `%d`, `%c`, or `%v`, or conform to a date,
 time-only, or version input type, without a `<coercion>` (e.g., `%d` or
-`.dateOnly` for `"2020-03-18"`), because a `<coercion>` would then convert
+`.dateOnly` for `"2020-03-18"`), because a `<coercion>` would then coerce
 nothing, so it would only choose between an error & an abort.
 
 In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
@@ -122,21 +122,21 @@ date without `<unix-time>` (e.g., `.dateOnly.timeZone:UTC:`,
 `%.:iso-date:D.timeZone:UTC:+-+`, or `%.V..:iso:timeZone:UTC:+-+`), because its
 value is a date-only, which no time zone affects.
 
-In specs, never let a call that receives a version take a `<coercion>` to a date
-whose only `<date-format>` is `<iso-datetime>` (e.g.,
+In specs, never let a call whose input is a version take a `<coercion>` to a
+date whose only `<date-format>` is `<iso-datetime>` (e.g.,
 `%.V..:iso-datetime:dateOnly+-+`), because a version has no `:`, so it is never
-a datetime, so the coercion could only abort.
+a datetime, so the coercion can only abort.
 
 In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
 `%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
 cannot affect what it means.
 
-In specs, never add a transform that only converts a value's type (e.g.,
-`toDate` in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because
-a matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would
-add a 2nd syntax for 1 concept, while a `<coercion>` already converts without
-any other transform (e.g., `%.d`), and it would lengthen even the simplest
-pipeline (e.g., `.toString.uppercase` instead of `..uppercase`).
+In specs, never add a transform that only coerces a value's type (e.g., `toDate`
+in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because a
+matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would
+add a 2nd syntax for 1 concept, while a `<coercion>` already coerces without any
+other transform (e.g., `%.d`), and it would lengthen even the simplest pipeline
+(e.g., `.toString.uppercase` instead of `..uppercase`).
 
 In specs, never let a `<coercion>` to a date accept a number or a decimal number
 without `<unix-time>` (e.g., `%.d` for `5.6` or `"1.2"`), because a number or a

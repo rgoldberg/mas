@@ -781,9 +781,8 @@ private extension [TransformCall] {
 		allSatisfy { $0.transform.kind == .string } && dropFirst().allSatisfy { $0.coercion == nil }
 	}
 
-	/// Whether each of these calls follows the value type that it receives:
-	/// `type` (unknown iff `nil`) for the 1st, then its predecessor's output
-	/// type.
+	/// Whether each of these calls follows the value type of its input: `type`
+	/// (unknown iff `nil`) for the 1st, then its predecessor's output type.
 	func followsTypes(from type: TransformValueType?) -> Bool {
 		zip([type] + map(\.transform.kind.outputType), self).allSatisfy { type, call in
 			type.map { call.follows($0) } ?? true
@@ -792,9 +791,9 @@ private extension [TransformCall] {
 }
 
 private extension TransformCall {
-	/// Whether this call may receive a value of `type`: it takes a `<coercion>`
-	/// iff its input type differs, but only where a value of `type` can render as
-	/// a value of its input type.
+	/// Whether this call may take an input of `type`: it takes a `<coercion>` iff
+	/// its input type differs, but only where a value of `type` can render as a
+	/// value of its input type.
 	func follows(_ type: TransformValueType) -> Bool {
 		let inputType = transform.kind.inputType
 		return if let coercion {
