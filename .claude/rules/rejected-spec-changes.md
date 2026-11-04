@@ -78,3 +78,9 @@ In specs, never allow a line terminator other than an LF or a CR in
 `<indentation>` (e.g., `$'P\f:'`), because it is not JSON whitespace, so the
 output would not be JSON, which outweighs the overruled reason for rejecting its
 forbidding: it means what it says.
+
+In specs, never allow an empty `<field-order-section>` (e.g., `@x/`), because,
+unlike an empty `<item-sort-section>` or `<field-spec-edits-section>`, nothing
+can follow it reliably: `@x///0` would consume `//`, the longest candidate
+literal, leaving `/0`, which is an error, so generated syntax that appends a
+section to it would still fail.
