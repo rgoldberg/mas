@@ -397,7 +397,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				boundaries.append(.characters(text))
 			case characterClassFence:
 				input.removeFirst()
-				let name = try parseText(&input, terminatorSet: [characterClassFence])
+				let name = try parseText(&input, terminatorSet: [characterClassFence, sortOptionTerminator])
 				guard input.first == characterClassFence, let characterClass = CharacterClass(rawValue: name) else {
 					throw .invalidCharacterClass(name)
 				}

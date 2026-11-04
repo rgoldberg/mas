@@ -120,6 +120,10 @@ In specs, never let `timeZone` follow `dateOnly` (e.g.,
 `.dateOnly.timeZone:UTC:`), because `dateOnly`'s output is a date-only, which no
 time zone affects.
 
+In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
+`%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
+cannot affect what it means.
+
 In specs, never add a transform that only converts a value's type (e.g.,
 `toDate` in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because
 a matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would

@@ -103,7 +103,8 @@ private struct FormatParser {
 		try forbidWhitespace(after: transformCallPrefix)
 		let coercion = try parseCoercion()
 		guard let name = parseNameLiteral(&input, from: transformNames) else {
-			throw .unknownTransform(.init(input.prefix(while: \.isLetter)))
+			let unknownName = input.prefixMatch(of: /(?:\\?\p{L})*/)?.output ?? ""
+			throw .unknownTransform(.init(unknownName.filter { $0 != escapePrefix }))
 		}
 		let transform: Transform =
 			switch name {
@@ -828,14 +829,6 @@ private extension Predicate {
 // MARK: - Constants
 
 let formatModifierPrefix = Character(":")
-/// The `<date-format>`s other than `<unix-time>`, by name literal.
-private let iso8601FormsByDateFormat = [
-	"iso": ChronologicFormats.date.iso8601Forms,
-	"iso-date": [.date],
-	"iso-datetime": [.datetime],
-] as [String: Set<ISO8601Form>]
-private let unixTimeDateFormat = "unix-time"
-private let dateFormatNames = iso8601FormsByDateFormat.keys + [unixTimeDateFormat]
 let placeholderPrefix = Character("%")
 let blockTerminator = Character("+")
 let namePrefix = Character(":")
@@ -845,6 +838,14 @@ private let abortOnSuccess = Character("-")
 private let abortOnFailure = Character("+")
 private let abortModifierSet = Set([abortOnSuccess, abortOnFailure])
 private let coercionPrefix = Character(".")
+/// The `<date-format>`s other than `<unix-time>`, by name literal.
+private let iso8601FormsByDateFormat = [
+	"iso": ChronologicFormats.date.iso8601Forms,
+	"iso-date": [.date],
+	"iso-datetime": [.datetime],
+] as [String: Set<ISO8601Form>]
+private let unixTimeDateFormat = "unix-time"
+private let dateFormatNames = iso8601FormsByDateFormat.keys + [unixTimeDateFormat]
 private let branchNegation = Character("-")
 private let unaryMatch = Character("m")
 

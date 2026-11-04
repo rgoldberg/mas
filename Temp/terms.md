@@ -169,8 +169,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
       `<string-pipeline>`, empty strings)
-    - token: contiguous characters consumed together as 1 element: a literal or
-      variable token ([defined](../Specs/ebnf.md#tokens))
+    - token: contiguous characters consumed together as 1 element: a literal,
+      name, or variable token ([defined](../Specs/ebnf.md#tokens))
     - typed terminal: a `{SUBTYPE}` or `{SUBTYPE: CONSTRAINTS}` terminal, which
       consumes a variable token ([defined](../Specs/ebnf.md#typed-terminals))
     - subtype: a typed terminal's `SUBTYPE` (e.g., `integer`), which determines
@@ -794,7 +794,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        an uppercase letter & stands for an expression or text in the
        meta-grammar ([defined](../Specs/ebnf.md#meta-grammar))
      - constant expression / variable expression: an expression that consumes
-       invariant / variable text
+       text that evaluates to invariant text / variable text
        ([defined](../Specs/ebnf.md#constant-vs-variable-expressions))
      - bare token: a token of only bare characters
        ([defined](../Specs/ebnf.md#tokens))
@@ -805,7 +805,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        occurrences has its content's multiplicity / the multiplicity that its
        context requires ([defined](../Specs/ebnf.md#multiplicity))
 125. - outer bare whitespace: bare whitespace immediately before the 1st, or
-       after the last, character that a literal token consumes, or
+       after the last, character that a literal or name token consumes, or
        non-bare-whitespace character that a variable token consumes
        ([defined](../Specs/ebnf.md#outer-bare-whitespace))
      - inner bare whitespace: bare whitespace between a token's 1st & last

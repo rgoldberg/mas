@@ -855,9 +855,9 @@ date-coercion-arguments = <argument-fence> <date-formats> <argument-fence>
 unix-time-coercion      = <coercion> <argument-fence> <unix-time-date-formats> <argument-fence>
 
 date-formats           = <date-format> … <argument-separator>
-unix-time-date-formats = [ ( <iso-date-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
-date-format            = <iso-date-format> | <unix-time>
-iso-date-format        = <iso> | <iso-date> | <iso-datetime>
+unix-time-date-formats = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
+date-format            = <date-iso-format> | <unix-time>
+date-iso-format        = <iso> | <iso-date> | <iso-datetime>
 
 nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>

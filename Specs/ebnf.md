@@ -140,7 +140,8 @@ match, the longest is consumed.
 ##### Consuming Variable Tokens
 
 Syntax text is consumed as a variable token iff a typed terminal is available at
-the current position & no candidate literal matches the syntax text there.
+the current position & no candidate literal matches the syntax text there, or
+after any bare whitespace there that is ignored.
 
 A variable token's **candidate terminators** are the candidate literals of the
 position immediately following it.

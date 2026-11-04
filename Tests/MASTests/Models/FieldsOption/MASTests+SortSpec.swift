@@ -198,6 +198,7 @@ private extension MASTests {
 			("1Lxx_Bogus:", .invalidLocaleIdentifier("xx_Bogus")),
 			("1B/", .missingSortOptionTerminator),
 			("1B+bogus+:", .invalidCharacterClass("bogus")),
+			("1B+alpha:", .invalidCharacterClass("alpha")),
 			("1B_:", .emptyBoundaryGroup),
 			("1B/_:", .emptyBoundaryGroup),
 			("1B%%:", .invalidMultiCharacterBoundary),
