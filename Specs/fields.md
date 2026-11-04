@@ -290,7 +290,7 @@ A field spec formats an absent field's absent value once.
 A field spec's [formatted value](fields-format.md#value-types) is **absent** iff
 formatting [aborts](fields-format.md#success--failure), or iff the field value
 is absent & the format evaluates to it (e.g., via `%i`, `%u`, or `.round`,
-because an absent value remains unchanged through every
+because an absent value remains unmodified through every
 [transform](fields-format.md#value-coercion)).
 
 An absent value matches `u`, `U`, `e`, `E`, `w` & `W` as `null` does; it is
@@ -639,7 +639,7 @@ A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
 no `<field-occurrence-index>` & whose `<reference-field-name>` names neither a
 field spec nor a `null` in the reference fields config (e.g., one for an
 [unlisted field](#unlisted-fields)) has no such `source`: a
-`<field-spec-removal>` then does nothing (leaving $previous$ unchanged), though
+`<field-spec-removal>` then does nothing (leaving $previous$ unmodified), though
 it lists its field, while any other one 1st inserts a new field spec (as
 `<field-spec-insertion>` would) as its `source` (e.g., for an unlisted `foo`,
 `@all.foo=Foo` inserts a visible field spec & `@all._foo` a hidden one, while

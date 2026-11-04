@@ -156,7 +156,7 @@ type; otherwise, an error is reported. A value is of type date or time-only iff
 `<coercion>` (e.g., `.dateOnly` accepts `"2020-03-18"` & `1584553163`, but not
 `"0"`).
 
-A `null` or [absent](fields.md#absent-values) value remains unchanged through
+A `null` or [absent](fields.md#absent-values) value remains unmodified through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
 `..uppercase` evaluates to `null` for `null`).
 
@@ -172,7 +172,7 @@ Coercing any value to a string always succeeds, so an
 `<coerced-string-transform-call>`, cannot fail. A value coerced to a string is:
 
 - `null` or [absent](fields.md#absent-values): an empty string, except as a
-  transform's input, through which it remains unchanged.
+  transform's input, through which it remains unmodified.
 - A boolean: `true` or `false`.
 - A number: its trivia prefix, its text, then its trivia suffix (e.g., `1.50`,
   or, with [trivia](#coercion), `$1.50`).
@@ -207,8 +207,8 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
   character, per [ICU's default titlecasing index adjustment](
     https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/stringoptions_8h.html#a4975f537b9960f0330b233061ef0608d
   ). Titlecasing leaves an uncased number, symbol, or private-use character
-  unchanged, but titlecases a cased one (e.g., `hello` becomes `Hello` & `ⓐbc`
-  becomes `Ⓐbc`, but `1st` & `$abc` are unaffected).
+  unmodified, but titlecases a cased one (e.g., `hello` becomes `Hello` &
+  `ⓐbc` becomes `Ⓐbc`, but `1st` & `$abc` are unaffected).
 - `lowercase`: lowercases every character.
 - `trimWhitespace`: removes leading & trailing
   [whitespace](ebnf.md#whitespace).
@@ -789,7 +789,7 @@ exists:
 The default regexes match only an empty string, allowing no trivia (e.g.,
 `%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`). Number
 transforms & number-to-string transforms are applied to the number alone,
-retaining the trivia unchanged (e.g., `..:,,,,,[$]:numberFormat:de:` renders
+retaining the trivia unmodified (e.g., `..:,,,,,[$]:numberFormat:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every variable token, a regex's own

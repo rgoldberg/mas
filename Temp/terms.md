@@ -734,9 +734,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        [used](../Specs/table.md#table-config))
      - REJECTED: control code / control picture (for a Control Pictures symbol)
 116. - reference fields config: a semi-mutable copy of the baseline fields
-       config, whose order of field specs `<field-spec-edits-section>` cannot
-       change, in which each removed field spec is replaced with `null`; each
-       `<field-spec-reference>` index references its field specs
+       config, whose field spec order is immutable, in which each removed field
+       spec is replaced with `null`; each `<field-spec-reference>` index
+       references its field specs
        ([defined](../Specs/fields.md#field-spec-references))
 117. - digit group: a run of digits of a number's integer part, between each 2
        of which `numberFormat` inserts `<digit-group-separator>`

@@ -386,7 +386,7 @@ private extension MASTests {
 		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat"],
 		[JSON.Node?.none, .null],
 	)
-	func `a null or absent value remains unchanged through every transform`(format: String, value: JSON.Node?)
+	func `a null or absent value remains unmodified through every transform`(format: String, value: JSON.Node?)
 	throws {
 		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.description == value?
 			.description)

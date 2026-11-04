@@ -794,7 +794,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a removal naming no field spec leaves $previous$ unchanged`() throws {
+	func `a removal naming no field spec leaves $previous$ unmodified`() throws {
 		#expect(try parseFieldSpecs("@all.bundleID,-size,%adamID").map(\.name) == ["bundleID", "adamID"])
 	}
 

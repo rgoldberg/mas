@@ -66,7 +66,7 @@ extension [FieldSpec] {
 }
 
 extension FieldSpec {
-	/// This field spec unchanged if it has no `sortSpec` (nothing to disable);
+	/// This field spec unmodified if it has no `sortSpec` (nothing to disable);
 	/// otherwise, its `sortSpec` disabled, retaining its `<sort-priority>` &
 	/// `<sort-option-set>`.
 	var withSortDisabled: Self {

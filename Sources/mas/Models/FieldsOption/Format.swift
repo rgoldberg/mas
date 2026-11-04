@@ -209,7 +209,7 @@ extension Format { // swiftlint:disable:this file_types_order
 	/// Types"), at its type, for any output format to render: e.g., `%i` renders
 	/// `null` as `null`, while `(%i)` renders it as `"()"`. `nil` iff the
 	/// formatted value is absent (fields.md "Absent Values"): iff formatting
-	/// aborts, or iff `value` is `nil` & this format evaluates to it unchanged.
+	/// aborts, or iff `value` is `nil` & this format evaluates to it unmodified.
 	func rendered(value: JSON.Node?, label: String, name: String) throws(FormattingError) -> JSON.Node? {
 		try evaluated(in: .init(input: .input(value), label: label, name: name, matched: nil))?.node
 	}
@@ -875,7 +875,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	}
 
 	/// This value transformed by `calls`, or `nil` iff a coercion fails
-	/// (formatting aborts). A `null` or absent value remains unchanged through
+	/// (formatting aborts). A `null` or absent value remains unmodified through
 	/// every transform, so it is never an error.
 	func applying(_ calls: [TransformCall]) throws(FormattingError) -> Self? {
 		var value = self
