@@ -758,7 +758,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .date:
 			calls.followsTypes(from: isNamed ? nil : .date)
 		case .dateOnly:
-			calls.followsTypes(from: isNamed ? nil : .dateOnly)
+			(isNamed || calls.first?.coercion != nil) && calls.followsTypes(from: isNamed ? nil : .dateOnly)
 		case .input:
 			calls.first?.coercion != nil && calls.followsTypes(from: nil)
 		case .number:

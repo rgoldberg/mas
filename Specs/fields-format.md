@@ -53,7 +53,7 @@ string-pipeline               = <pipeline(<named-format-reference(<string-format
 version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
-date-only-pipeline            = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-only-input-pipeline>)>
+date-only-pipeline            = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <coerced-string-chain>)>
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        =
   <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
@@ -126,7 +126,6 @@ string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-stri
 number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
 version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-only-chain> | <unix-time-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
-date-only-input-pipeline = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <uncoerced-string-transform-run> ]
@@ -917,7 +916,10 @@ can only abort).
 
 A `<date-only-coercion>`'s value is always a date-only, which no time zone
 affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
-is an error, as `.dateOnly.timeZone:UTC:` is).
+is an error, as `.dateOnly.timeZone:UTC:` is). Nor may `dateOnly` be the 1st
+call of a pipeline after a matcher's `<date-only-coercion>`, because it cannot
+affect that value (e.g., `%.:iso-date:D.dateOnly+-+` is an error, while
+`%.:iso-date:D%d+-+` outputs the date-only).
 
 A version has no `:`, so it is never a datetime, so a call whose input is a
 version must list a `<date-format>` other than `<iso-datetime>` (e.g.,

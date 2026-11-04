@@ -74,7 +74,7 @@ private extension MASTests {
 			(#"%.:\unix-time:D.timeZone:UTC:.dateOnly++"#, .number(0), "1970-01-01"),
 			(#"%.:unix\-time:D.timeZone:UTC:.dateOnly++"#, .number(0), "1970-01-01"),
 			(".round..:iso,unix-time:timeZone:UTC:.dateOnly", .number(0), "1970-01-01"),
-			("%.:iso-date:D.dateOnly+-+", "2020-03-18", "2020-03-18"),
+			("%.:iso-date:D%d+-+", "2020-03-18", "2020-03-18"),
 			("%.:iso-date:D..uppercase+-+", "2020-03-18", "2020-03-18"),
 			("%.:iso-date,iso-datetime:D.timeZone:UTC:.dateOnly++", "2020-03-18", "2020-03-18"),
 			("%.V..:iso-date:dateOnly+-+", "2020-03-18", "2020-03-18"),
@@ -85,6 +85,7 @@ private extension MASTests {
 			("%.V..dateOnly+-+", "2020-03-18", "2020-03-18"),
 			("..:iso-date:dateOnly", "2020-03-18", "2020-03-18"),
 			("..:iso-date:dateOnly", "2020-03-18T17:39:23Z", nil),
+			("..:iso-date:dateOnly.dateOnly", "2020-03-18", "2020-03-18"),
 		] as [(String, JSON.Node, String?)],
 	)
 	func `a date coercion parses what any of its date formats matches`(
@@ -770,6 +771,9 @@ private extension MASTests {
 			("%.:iso-date:D.timeZone:UTC:+-+", .invalidPipeline("<date-only-pipeline>")),
 			("%.:iso-date,iso-date:D.timeZone:UTC:+-+", .invalidPipeline("<date-only-pipeline>")),
 			("%.:iso-date:D%D.timeZone:UTC:++-+", .invalidPipeline("<date-only-pipeline>")),
+			("%.:iso-date:D.dateOnly+-+", .invalidPipeline("<date-only-pipeline>")),
+			("%.:iso-date,iso-date:D.dateOnly+-+", .invalidPipeline("<date-only-pipeline>")),
+			("%.:iso-date:D%D.dateOnly++-+", .invalidPipeline("<date-only-pipeline>")),
 			("..:iso-date:timeZone:UTC:", .dateCoercionArgumentsNotSupported("timeZone")),
 			("%.V..:iso-datetime:dateOnly+-+", .invalidPipeline("<version-pipeline>")),
 			("%.V..:iso-datetime,iso-datetime:timeZone:UTC:+-+", .invalidPipeline("<version-pipeline>")),
