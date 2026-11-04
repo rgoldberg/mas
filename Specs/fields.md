@@ -906,12 +906,12 @@ sort-option-terminator = ":"
 The app may set, per output format, **default sort options** for field names,
 for field labels & for each field's content, each of which replaces the default
 of its `<sort-option>` (e.g., [mas's](mas.md#default-sort-options) make
-`<insensitive>` the default `<case-sensitivity>` for table output of non-path
-string content, so `--fields name/I` sorts items by `name` case-insensitively).
-Each `<sort-option>` that is absent & inherits no value thus takes the default
-sort option for what its option set compares: a field spec's `<sort>` compares
-its field's content, while a `<field-order-sort-option-set>` compares field
-names or labels, per its `<source>`.
+`<insensitive>` the default `<case-sensitivity>` for table output, so
+`--fields name/I` sorts items by `name` case-insensitively). Each
+`<sort-option>` that is absent & inherits no value thus takes the default sort
+option for what its option set compares: a field spec's `<sort>` compares its
+field's content, while a `<field-order-sort-option-set>` compares field names or
+labels, per its `<source>`.
 
 ##### Sort Source
 

@@ -23,11 +23,11 @@ private let versionFieldNameSet = Set(["minimumOSVersion", "newVersion", "versio
 /// guesses from the macOS region.
 private let appStoreLocale = Locale(identifier: Locale.Language(identifier: "und-\(appStoreRegion)").maximalIdentifier)
 
-/// mas.md's "Default Sort Options" for `outputFormat`: the path row iff
-/// `fieldName` is a path field's name, else the non-path row (also used for
-/// sorting field names & labels, for which `fieldName` is `nil`), but comparing
-/// versions for a version field & grouped numbers per the App Store locale's
-/// conventions plus `a` for `formattedPrice`, per mas.md's "Price Sorting".
+/// mas.md's "Default Sort Options" for `outputFormat`: the `path` row iff
+/// `fieldName` is `path`, else the `Other` row (also used for sorting field
+/// names & labels, for which `fieldName` is `nil`), but comparing versions for
+/// a version field & grouped numbers per the App Store locale's conventions
+/// plus `a` for `formattedPrice`, per mas.md's "Price Sorting".
 func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: OutputFormat) -> SortOptionSet {
 	let isPath = fieldName.map(pathFieldNameSet.contains) ?? false
 	var optionSet = SortOptionSet.default

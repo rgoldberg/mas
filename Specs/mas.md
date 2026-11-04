@@ -143,21 +143,20 @@ region.
 
 ## Default Sort Options
 
-The **version fields** are `minimumOSVersion`, `newVersion` & `version`. `path`
-is the sole field whose string content is a path.
+The **version fields** are `minimumOSVersion`, `newVersion` & `version`.
 
 Field names' & labels' default sort options, other than `<source>` (which a
 field order's `<field-order-sort-option-set>` uses to choose between names &
-labels), are those of non-path string content.
+labels), are those of the `Other` rows below.
 
 Version fields' default sort options compare
 [versions](fields.md#sort-number-segments) (`v`), and `formattedPrice`'s use the
 [App Store locale's conventions as `N`'s base conventions & include
 `a`](#price-sorting), but they otherwise match the following:
 
-| Output Format     | String Content | Default              |
-|:------------------|:---------------|:---------------------|
-| Table / Key-Value | Non-path       | `I+iL:N:`            |
-| Table / Key-Value | Path           | `I+iL:N:B/_+space+:` |
-| JSON              | Non-path       | `I+sN:B:`            |
-| JSON              | Path           | `I+sN:B/:`           |
+| Output Format     | Field  | Default              |
+|:------------------|:-------|:---------------------|
+| Table / Key-Value | Other  | `I+iL:N:`            |
+| Table / Key-Value | `path` | `I+iL:N:B/_+space+:` |
+| JSON              | Other  | `I+sN:B:`            |
+| JSON              | `path` | `I+sN:B/:`           |
