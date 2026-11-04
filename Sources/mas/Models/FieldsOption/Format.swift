@@ -666,6 +666,17 @@ struct ChronologicFormats: Hashable { // swiftlint:disable:this one_declaration_
 	let iso8601Forms: Set<ISO8601Form>
 	/// Whether this includes `<unix-time>`.
 	var hasUnixTime = false
+
+	/// Whether every value of these formats is a date-only.
+	var isDateOnly: Bool {
+		iso8601Forms == [.date] && !hasUnixTime
+	}
+
+	/// Whether a version can be a value of these formats, which it is not iff
+	/// their only form is a datetime, because a version has no `:`.
+	var acceptsVersion: Bool {
+		iso8601Forms != [.datetime] || hasUnixTime
+	}
 }
 
 /// `value` coerced to chronologic: a string as a whole ISO-8601 value of one of

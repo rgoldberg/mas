@@ -578,10 +578,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - decimal number: a Unix time's text syntax
       ([defined](../Specs/fields-format.md#chronologic-formatting))
     - date coercion: a `<coercion>` to a date, which parses what any of its
-      `<date-format>`s matches (`<date-coercion>`)
+      `<date-format>`s matches
+    - date-only coercion: a date coercion whose only `<date-format>` is
+      `<iso-date>`, so its value is a date-only (`<date-only-coercion>`)
     - Unix time coercion: a date coercion that includes `<unix-time>`, so it
       coerces a number or a decimal number as a Unix time
       (`<unix-time-coercion>`)
+    - zonable: of `<date-format>`s other than only `<iso-date>`, whose value a
+      time zone can affect (`<zonable-date-formats>`)
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
       timestamp / numeric timestamp
 93. - input type: the type of a nonterminal's input

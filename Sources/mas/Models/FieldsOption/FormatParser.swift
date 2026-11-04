@@ -128,7 +128,10 @@ private struct FormatParser {
 			}
 		switch coercion?.argumentKind {
 		case .date:
-			guard transform.kind == .date || transform.kind == .dateOnly else {
+			guard
+				transform.kind == .dateOnly
+				|| transform.kind == .date && coercion?.coercion.dateFormats.isDateOnly == false
+			else {
 				throw .dateCoercionArgumentsNotSupported(name)
 			}
 		case .number:
@@ -425,7 +428,7 @@ private struct FormatParser {
 
 	/// Parses `matcher`'s `<success-block>` & its `<block-terminator>`.
 	private mutating func parseSuccessBlock(for matcher: Matcher) throws(ParsingError) -> Format {
-		try parseBlock(kind: .init(successBlockFor: matcher.predicate), enclosingPredicate: matcher.predicate)
+		try parseBlock(kind: .init(successBlockFor: matcher), enclosingPredicate: matcher.predicate)
 	}
 
 	/// Parses a scalar conditional `<predicate>` `letter`, validating that
@@ -665,6 +668,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	case any
 	case boolean
 	case date
+	case dateOnly
 	/// A `<fallible-unconditional-placeholder>`'s `%I…+` pipeline's kind, which
 	/// no block has.
 	case input
@@ -680,7 +684,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
-		case .any, .boolean, .date, .number, .string, .timeOnly, .version:
+		case .any, .boolean, .date, .dateOnly, .number, .string, .timeOnly, .version:
 			true
 		case .input, .unconditional, .unconditionalString:
 			false
@@ -692,7 +696,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .input, .unconditional, .unconditionalString:
 			.unconditional
-		case .date, .number, .string, .timeOnly, .version:
+		case .date, .dateOnly, .number, .string, .timeOnly, .version:
 			self
 		}
 	}
@@ -704,6 +708,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<unconditional-pipeline>"
 		case .date:
 			"<date-pipeline>"
+		case .dateOnly:
+			"<date-only-pipeline>"
 		case .input:
 			"<input-pipeline>"
 		case .number:
@@ -719,14 +725,14 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		}
 	}
 
-	/// The `<success-block>` kind for `predicate`.
-	init(successBlockFor predicate: Predicate) {
+	/// The `<success-block>` kind for `matcher`.
+	init(successBlockFor matcher: Matcher) {
 		self =
-			switch predicate {
+			switch matcher.predicate {
 			case .boolean, .false, .true:
 				.boolean
 			case .date:
-				.date
+				matcher.coercion?.dateFormats.isDateOnly == true ? .dateOnly : .date
 			case .empty, .null, .whitespace:
 				.any
 			case .number:
@@ -749,6 +755,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			calls.first?.coercion != nil && calls.isStringTransformRun
 		case .date:
 			calls.followsTypes(from: isNamed ? nil : .date)
+		case .dateOnly:
+			calls.followsTypes(from: isNamed ? nil : .dateOnly)
 		case .input:
 			calls.first?.coercion != nil && calls.followsTypes(from: nil)
 		case .number:
@@ -796,7 +804,7 @@ private extension TransformCall {
 			case .string:
 				inputType != .string
 			case .version:
-				inputType != .timeOnly
+				inputType != .timeOnly && (inputType != .date || coercion.dateFormats.acceptsVersion)
 			}
 		} else {
 			inputType == type || transform.kind == .dateOnly && type == .dateOnly

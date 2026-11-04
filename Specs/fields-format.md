@@ -53,6 +53,7 @@ string-pipeline               = <pipeline(<named-format-reference(<string-format
 version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
+date-only-pipeline            = <pipeline(<named-format-reference(<date-only-format-name>)>, <value-transform-pipeline>, <date-only-input-pipeline>)>
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        =
   <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
@@ -80,6 +81,7 @@ string-format-name        = <format-name(<conditional-block(<nullary-string>, <n
 version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <named-format-pipeline(<version-format-name>)>)>)>
 number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
 date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
+date-only-format-name     = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-only-format-name>)>)>)>
 time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
 unconditional-format-name = <format-name(<unconditional-block(<unconditional-pipeline>)>)>
 
@@ -123,8 +125,9 @@ value-transform-pipeline =
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
 number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
-version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain>
+version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-only-chain> | <version-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
+date-only-input-pipeline = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <uncoerced-string-transform-run> ]
@@ -140,15 +143,17 @@ date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-time-z
 date-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <date-only>, <coerced-string-chain>)>
 time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <coerced-string-chain>)>
 
-coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
 
 coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
 coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
+coerced-date-only-chain = <date-only-chain(<transform-call-prefix> <date-only-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
+version-date-chain      = <date-chain(<transform-call-prefix> <version-date-coercion>)>
 
-after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
 after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
 after-date-run   = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
@@ -480,7 +485,7 @@ behind).
 placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
-modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> | <date-coercion> ] (* non-structural *)
+modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> | <date-coercion> | <date-only-coercion> ] (* non-structural *)
 predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
 nullary-predicate =
@@ -539,6 +544,7 @@ success-pipeline =
   | <version-pipeline>
   | <number-pipeline>
   | <date-pipeline>
+  | <date-only-pipeline>
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
@@ -850,18 +856,29 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-coercion           = <coercion> [ <date-coercion-arguments> ] (* default date-formats: 'iso' *)
-date-coercion-arguments = <argument-fence> <date-formats> <argument-fence>
-unix-time-coercion      = <coercion> <argument-fence> <unix-time-date-formats> <argument-fence>
+date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-date-formats           = <date-format> … <argument-separator>
+date-coercion         = <coercion> [ <date-coercion-arguments(<zonable-date-formats>)> ] (* default zonable-date-formats: 'iso' *)
+date-only-coercion    = <coercion> <date-coercion-arguments(<date-only-formats>)>
+version-date-coercion = <coercion> [ <date-coercion-arguments(<version-date-formats>)> ] (* default version-date-formats: 'iso' *)
+unix-time-coercion    = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
+
+zonable-date-formats   = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
+date-only-formats      = <iso-date> … <argument-separator>
+version-date-formats   =
+  [ ( ( <iso-date> | <iso-datetime> ) <argument-separator> )+ ] ( <iso> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
+  | ( <iso-date> <argument-separator> )+ <iso-datetime> [ ( <argument-separator> ( <iso-date> | <iso-datetime> ) )+ ]
+  | ( <iso-datetime> <argument-separator> )+ <iso-date> [ ( <argument-separator> ( <iso-date> | <iso-datetime> ) )+ ]
 unix-time-date-formats = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
-date-format            = <date-iso-format> | <unix-time>
-date-iso-format        = <iso> | <iso-date> | <iso-datetime>
 
-nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
-non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>
-non-nullary-date-success      = [ <date-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
+date-format     = <date-iso-format> | <unix-time>
+date-iso-format = <iso> | <iso-date> | <iso-datetime>
+
+nullary-date-matcher          = [ <date-coercion> | <date-only-coercion> ] <nullary-date>
+non-nullary-date-matcher      = [ <date-coercion> | <date-only-coercion> ] <non-nullary-date>
+non-nullary-date-success      =
+  [ <date-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
+  | <date-only-coercion> <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-only-pipeline>)>
 nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
 non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
@@ -890,7 +907,7 @@ followed by ASCII digits, or both, in that order; then optionally an exponent
 indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
 `.5`, or `1.5e9`).
 
-A `<date-coercion>` parses what any of its `<date-format>`s
+A `<coercion>` to a date parses what any of its `<date-format>`s
 [matches](fields.md#sort-chronologic-segments), except that `<iso>` does not
 match a time-only, which is not a date, and `<unix-time>` also matches a number
 (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not `"2020-03-18 17:39"`, and
@@ -902,6 +919,15 @@ it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise render the price
 `5.6` as a date), so a call that receives a number must list `<unix-time>`
 (e.g., `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which
 could only abort).
+
+A `<date-only-coercion>`'s value is always a date-only, which no time zone
+affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
+is an error, as `.dateOnly.timeZone:UTC:` is).
+
+A version has no `:`, so it is never a datetime, so a call that receives a
+version must list a `<date-format>` other than `<iso-datetime>` (e.g.,
+`%.V..:iso,iso-datetime:dateOnly+-+`, but not `%.V..:iso-datetime:dateOnly+-+`,
+which could only abort).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.

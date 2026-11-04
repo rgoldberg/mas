@@ -184,7 +184,7 @@ mirroring `numberFormat`) needs the same pattern syntax &, for a named one,
 custom presets.
 
 [`<chronologic-formats>`](../Specs/fields.md#sort-chronologic-segments) can then
-take custom formats (e.g., `yyyy-MM-dd`), as `<date-formats>` will.
+take custom formats (e.g., `yyyy-MM-dd`), as `<date-format>` will.
 
 ### Boolean Coercion Options
 

@@ -116,9 +116,15 @@ time-only, or version input type, without a `<coercion>` (e.g., `%d` or
 `.dateOnly` for `"2020-03-18"`), because a `<coercion>` would then convert
 nothing, so it would only choose between an error & an abort.
 
-In specs, never let `timeZone` follow `dateOnly` (e.g.,
-`.dateOnly.timeZone:UTC:`), because `dateOnly`'s output is a date-only, which no
+In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
+whose only `<date-format>` is `<iso-date>` (e.g., `.dateOnly.timeZone:UTC:` or
+`%.:iso-date:D.timeZone:UTC:+-+`), because its value is a date-only, which no
 time zone affects.
+
+In specs, never let a call that receives a version take a `<coercion>` to a date
+whose only `<date-format>` is `<iso-datetime>` (e.g.,
+`%.V..:iso-datetime:dateOnly+-+`), because a version has no `:`, so it is never
+a datetime, so the coercion could only abort.
 
 In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
 `%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
