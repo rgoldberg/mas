@@ -53,7 +53,7 @@ string-pipeline               = <pipeline(<named-format-reference(<string-format
 version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
-date-only-pipeline            = <pipeline(<named-format-reference(<date-only-format-name>)>, <value-transform-pipeline>, <date-only-input-pipeline>)>
+date-only-pipeline            = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-only-input-pipeline>)>
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        =
   <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
@@ -81,7 +81,6 @@ string-format-name        = <format-name(<conditional-block(<nullary-string>, <n
 version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <named-format-pipeline(<version-format-name>)>)>)>
 number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
 date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
-date-only-format-name     = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-only-format-name>)>)>)>
 time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
 unconditional-format-name = <format-name(<unconditional-block(<unconditional-pipeline>)>)>
 
