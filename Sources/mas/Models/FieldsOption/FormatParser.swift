@@ -731,13 +731,24 @@ private extension [TransformCall] {
 
 private extension TransformCall {
 	/// Whether this call may receive a value of `type`: it takes a `<coercion>`
-	/// iff its input type differs, but a coercion cannot make a date a time-only,
-	/// nor a time-only a date, because neither renders as the other.
+	/// iff its input type differs, but only where a value of `type` can render as
+	/// a value of its input type.
 	func follows(_ type: TransformValueType) -> Bool {
 		let inputType = transform.kind.inputType
-		return coercion == nil
-			? inputType == type || transform.kind == .dateOnly && type == .dateOnly
-			: inputType != type && !(inputType.isChronologic && type.isChronologic)
+		return if coercion == nil {
+			inputType == type || transform.kind == .dateOnly && type == .dateOnly
+		} else {
+			switch type {
+			case .date, .dateOnly, .timeOnly:
+				inputType == .string
+			case .number:
+				inputType == .string || inputType == .date
+			case .string:
+				inputType != .string
+			case .version:
+				inputType != .timeOnly
+			}
+		}
 	}
 }
 

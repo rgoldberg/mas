@@ -98,10 +98,12 @@ never abort, nor forbid one in a `<format-template>` or a `<conditional-block>`
 (e.g., `%L..round+`), because no matcher can otherwise coerce a label, a name,
 or a format input that it cannot match.
 
-In specs, never allow a `<date-transform>` call on a value of a
-`<time-only-transform>`, nor vice versa, even with a `<coercion>` (e.g.,
-`.dateOnly..timeOnlyTimeZone:UTC:`), because neither's rendering is ever a value
-of the other's type, so it would always abort.
+In specs, never allow a `<coercion>` from a date or a time-only to anything but
+a string, nor from a number or a version to a time-only (e.g.,
+`.dateOnly..timeOnlyTimeZone:UTC:`, `%.D..round+`, or
+`%N..timeOnlyTimeZone:UTC:+`), because its rendering is not a value of that
+type, so it would abort, while a pipeline that means to parse it can coerce it
+to a string 1st.
 
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,

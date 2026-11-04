@@ -402,13 +402,4 @@ enum TransformValueType { // swiftlint:disable:this one_declaration_per_file
 	case timeOnly
 	/// Which no transform takes.
 	case version
-
-	var isChronologic: Bool {
-		switch self {
-		case .date, .dateOnly, .timeOnly:
-			true
-		case .number, .string, .version:
-			false
-		}
-	}
 }

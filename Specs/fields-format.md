@@ -50,7 +50,7 @@ pipeline(NAMED_FORMAT_REFERENCE, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) =
 named-format-pipeline(FORMAT_NAME) = <pipeline(<named-format-reference(FORMAT_NAME)>, <value-transform-pipeline>, <value-transform-pipeline>)>
 
 string-pipeline               = <pipeline(<named-format-reference(<string-format-name>)>, <value-transform-pipeline>, <string-input-pipeline>)>
-version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <coerced-chain>)>
+version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
@@ -122,9 +122,10 @@ value-transform-pipeline =
   | <coerced-chain>
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
-number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
-date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <after-chronologic-run>
-time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <after-chronologic-run>
+number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
+version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain>
+date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
+time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <uncoerced-string-transform-run> ]
 uncoerced-string-transform-run   = <transform-run(<transform-call-prefix>, <string-transform>)>
@@ -136,8 +137,8 @@ string-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <string-tran
 number-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <number-transform>, <after-number-run>)> | <number-to-string-chain(CALL_PREFIX)>
 number-to-string-chain(CALL_PREFIX) = <transform-call(CALL_PREFIX, <number-to-string-transform>)> [ <string-input-pipeline> ]
 date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-time-zone>, <after-date-run>)> | <date-only-chain(CALL_PREFIX)>
-date-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <date-only>, <after-chronologic-run>)>
-time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <after-chronologic-run>)>
+date-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <date-only>, <coerced-string-chain>)>
+time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <coerced-string-chain>)>
 
 coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
 
@@ -146,10 +147,9 @@ coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion
 coerced-date-chain      = <date-chain(<transform-call-prefix> <coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 
-after-string-run      = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
-after-number-run      = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
-after-date-run        = <date-only-chain(<transform-call-prefix>)> | <after-chronologic-run>
-after-chronologic-run = <coerced-string-chain> | <coerced-number-chain>
+after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
+after-date-run   = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
 
@@ -179,9 +179,11 @@ call whose value's type the syntax text determines takes a `<coercion>` only if
 its input type differs from that type, because it otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
 `<format-block>`'s 1st call, or one that a `<named-format-reference>`
-immediately precedes, whose preset determines it) may take one regardless. No
-`<date-transform>` coerces a time-only value, nor any `<time-only-transform>` a
-date, because neither's rendering is ever a value of the other's type.
+immediately precedes, whose preset determines it) may take one regardless. A
+date or a time-only coerces only to a string, and neither a number nor a version
+coerces to a time-only, because its rendering is otherwise not a value of that
+type, so a pipeline that means to parse it must coerce it to a string 1st (e.g.,
+`%.D..uppercase..:,,,,,.*:round+`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
