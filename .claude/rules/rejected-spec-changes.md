@@ -117,3 +117,10 @@ nothing, so it would only choose between an error & an abort.
 In specs, never let `timeZone` follow `dateOnly` (e.g.,
 `.dateOnly.timeZone:UTC:`), because `dateOnly`'s output is a date-only, which no
 time zone affects.
+
+In specs, never add a transform that only converts a value's type (e.g.,
+`toDate` in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because
+a matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would
+add a 2nd syntax for 1 concept, while a `<coercion>` already converts without
+any other transform (e.g., `%.d`), and it would lengthen even the simplest
+pipeline (e.g., `.toString.uppercase` instead of `..uppercase`).
