@@ -71,8 +71,8 @@ only after `=` (e.g., `--json[=<json-config>]`).
    formatted value that is not absent (e.g., `:%N%n+none+`). Supporting them
    also needs each [named format](../Specs/fields-format.md#named-formats) to be
    checked per its error comment (e.g., that a `<string-format-name>`'s preset's
-   format conforms to `%S`'s `<conditional-block>`), because every built-in
-   preset's format is `%i`, which conforms to every block.
+   format conforms to its `BLOCK`), because every built-in preset's format is
+   `%i`, which conforms to every block.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context
@@ -116,10 +116,10 @@ the functionality that needs them from specs & code:
 1. Possibly vestigial after `1226-fields-no-custom-names` removes custom presets
    & custom configs; decide whether to remove each in
    `1226-fields-no-custom-names`:
-   1. [`<pipeline>`, `<string-pipeline>` &
-      `<unconditional-pipeline>`](../Specs/fields-format.md#pipelines): once
+   1. [`<pipeline>`, `<named-format-pipeline>` & every other
+      `<*-pipeline>`](../Specs/fields-format.md#pipelines): once
       `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline(…)>` is only its
-      `TRANSFORM_PIPELINE`, so each of the latter 2 is only an alias of a single
+      `TRANSFORM_PIPELINE`, so each of the others is only an alias of its
       transform pipeline.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
