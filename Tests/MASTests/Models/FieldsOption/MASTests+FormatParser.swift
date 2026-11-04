@@ -566,6 +566,8 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			("%.c", "17:39:23", String?.some("17:39:23-04:00")),
+			("%.c", "17:39:23.1234Z", "13:39:23.123-04:00"),
 			// A time-only value is converted between time zones as if on the
 			// reference date
 			("%.C.timeOnlyTimeZone:UTC:++", "17:39:23+02:00", "15:39:23Z"),
@@ -607,7 +609,9 @@ private extension MASTests {
 	}
 
 	@Test(arguments: ["1", "1.0b", "10.2.3-beta"])
-	func `%.v matches a version`(version _: String) {}
+	func `%.v matches a version`(version: String) throws {
+		#expect(try rendered("%.v", .string(version)) == version)
+	}
 
 	@Test(arguments: ["", "a1", "1..2", "1.", "٣.1", "½", "1.0 beta", "1.0_b", "1.0!"])
 	func `%.v does not match a non-version`(value: String) throws {
