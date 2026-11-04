@@ -117,9 +117,10 @@ time-only, or version input type, without a `<coercion>` (e.g., `%d` or
 nothing, so it would only choose between an error & an abort.
 
 In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
-whose only `<date-format>` is `<iso-date>` (e.g., `.dateOnly.timeZone:UTC:` or
-`%.:iso-date:D.timeZone:UTC:+-+`), because its value is a date-only, which no
-time zone affects.
+whose only `<date-format>` is `<iso-date>`, nor a `<coercion>` of a version to a
+date without `<unix-time>` (e.g., `.dateOnly.timeZone:UTC:`,
+`%.:iso-date:D.timeZone:UTC:+-+`, or `%.V..:iso:timeZone:UTC:+-+`), because its
+value is a date-only, which no time zone affects.
 
 In specs, never let a call that receives a version take a `<coercion>` to a date
 whose only `<date-format>` is `<iso-datetime>` (e.g.,

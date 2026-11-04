@@ -125,7 +125,7 @@ value-transform-pipeline =
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
 number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
-version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-only-chain> | <version-date-chain>
+version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-only-chain> | <unix-time-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
 date-only-input-pipeline = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
@@ -151,7 +151,7 @@ coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
 coerced-date-only-chain = <date-only-chain(<transform-call-prefix> <date-only-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
-version-date-chain      = <date-chain(<transform-call-prefix> <version-date-coercion>)>
+version-date-only-chain = <date-only-chain(<transform-call-prefix> <version-date-only-coercion>)>
 
 after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
 after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
@@ -858,18 +858,15 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-date-coercion         = <coercion> [ <date-coercion-arguments(<zonable-date-formats>)> ] (* default zonable-date-formats: 'iso' *)
-date-only-coercion    = <coercion> <date-coercion-arguments(<date-only-formats>)>
-version-date-coercion = <coercion> [ <date-coercion-arguments(<version-date-formats>)> ] (* default version-date-formats: 'iso' *)
-unix-time-coercion    = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
+date-coercion              = <coercion> [ <date-coercion-arguments(<zonable-date-formats>)> ] (* default zonable-date-formats: 'iso' *)
+date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
+version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
+unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
 
-zonable-date-formats   = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
-date-only-formats      = <iso-date> … <argument-separator>
-version-date-formats   =
-  [ ( ( <iso-date> | <iso-datetime> ) <argument-separator> )+ ] ( <iso> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
-  | ( <iso-date> <argument-separator> )+ <iso-datetime> [ ( <argument-separator> ( <iso-date> | <iso-datetime> ) )+ ]
-  | ( <iso-datetime> <argument-separator> )+ <iso-date> [ ( <argument-separator> ( <iso-date> | <iso-datetime> ) )+ ]
-unix-time-date-formats = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
+zonable-date-formats      = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
+date-only-formats         = <iso-date> … <argument-separator>
+version-date-only-formats = [ ( <iso-datetime> <argument-separator> )+ ] ( <iso> | <iso-date> ) [ ( <argument-separator> <date-iso-format> )+ ]
+unix-time-date-formats    = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
 
 date-format     = <date-iso-format> | <unix-time>
 date-iso-format = <iso> | <iso-date> | <iso-datetime>
@@ -927,7 +924,9 @@ is an error, as `.dateOnly.timeZone:UTC:` is).
 A version has no `:`, so it is never a datetime, so a call that receives a
 version must list a `<date-format>` other than `<iso-datetime>` (e.g.,
 `%.V..:iso,iso-datetime:dateOnly+-+`, but not `%.V..:iso-datetime:dateOnly+-+`,
-which could only abort).
+which could only abort), and only `<unix-time>` lets `timeZone` affect its value
+(e.g., `%.V..:unix-time:timeZone:UTC:+-+`, but not `%.V..:iso:timeZone:UTC:+-+`,
+whose value could only be a date-only).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.

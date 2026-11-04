@@ -804,7 +804,14 @@ private extension TransformCall {
 			case .string:
 				inputType != .string
 			case .version:
-				inputType != .timeOnly && (inputType != .date || coercion.dateFormats.acceptsVersion)
+				switch inputType {
+				case .date:
+					coercion.dateFormats.hasUnixTime || transform.kind == .dateOnly && coercion.dateFormats.acceptsVersion
+				case .timeOnly:
+					false
+				default:
+					true
+				}
 			}
 		} else {
 			inputType == type || transform.kind == .dateOnly && type == .dateOnly
