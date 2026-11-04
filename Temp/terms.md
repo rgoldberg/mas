@@ -584,8 +584,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - Unix time coercion: a date coercion that includes `<unix-time>`, so it
       coerces a number or a decimal number as a Unix time
       (`<unix-time-coercion>`)
-    - zonable: of `<date-format>`s other than only `<iso-date>`, whose value a
-      time zone can affect (`<zonable-date-formats>`)
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
       timestamp / numeric timestamp
 93. - input type: the type of a nonterminal's input

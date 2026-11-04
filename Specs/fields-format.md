@@ -858,12 +858,12 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-date-coercion              = <coercion> [ <date-coercion-arguments(<zonable-date-formats>)> ] (* default zonable-date-formats: 'iso' *)
+date-coercion              = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default non-date-only-formats: 'iso' *)
 date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
 version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
 unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
 
-zonable-date-formats      = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
+non-date-only-formats     = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
 date-only-formats         = <iso-date> … <argument-separator>
 version-date-only-formats = [ ( <iso-datetime> <argument-separator> )+ ] ( <iso> | <iso-date> ) [ ( <argument-separator> <date-iso-format> )+ ]
 unix-time-date-formats    = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
