@@ -484,7 +484,7 @@ placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
 modifiers =
   [ <abort-on-success> | <abort-on-failure> | <branch-negation> ]
-  [ <number-coercion> | <non-date-only-coercion> | <date-only-coercion> ]
+  [ <coercion> | <number-coercion> | <non-date-only-coercion> | <date-only-coercion> ]
   (* non-structural *)
 predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
