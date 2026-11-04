@@ -29,6 +29,11 @@ A field value may also be an array or an object, each a **structured value**. No
 predicate whose output type is not any (e.g., `%s` or `%.n`) matches a
 structured value.
 
+A **date** is a date-only or a datetime. An input format determines which types
+its field values have (e.g., JSON has no version, date-only, datetime, or
+time-only value), so only a `<coercion>` gives a value of its input 1 of those
+types.
+
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
 that type (JSON: string, boolean, `null`, structured value & a number whose
@@ -45,6 +50,7 @@ pipeline(NAMED_FORMAT_REFERENCE, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) =
 named-format-pipeline(FORMAT_NAME) = <pipeline(<named-format-reference(FORMAT_NAME)>, <value-transform-pipeline>, <value-transform-pipeline>)>
 
 string-pipeline               = <pipeline(<named-format-reference(<string-format-name>)>, <value-transform-pipeline>, <string-input-pipeline>)>
+version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <coerced-chain>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
@@ -71,6 +77,7 @@ named-format-reference(FORMAT_NAME) = <name-prefix> FORMAT_NAME
 format-name(BLOCK) = <preset-name> (* error: its preset's format does not conform to BLOCK *)
 
 string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <named-format-pipeline(<string-format-name>)>)>)>
+version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <named-format-pipeline(<version-format-name>)>)>)>
 number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
 date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
 time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
@@ -128,7 +135,8 @@ transform-chain(CALL_PREFIX, TRANSFORM, AFTER_RUN) = <transform-run(CALL_PREFIX,
 string-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <string-transform>, <after-string-run>)>
 number-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <number-transform>, <after-number-run>)> | <number-to-string-chain(CALL_PREFIX)>
 number-to-string-chain(CALL_PREFIX) = <transform-call(CALL_PREFIX, <number-to-string-transform>)> [ <string-input-pipeline> ]
-date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-transform>, <after-chronologic-run>)>
+date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-time-zone>, <after-date-run>)> | <date-only-chain(CALL_PREFIX)>
+date-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <date-only>, <after-chronologic-run>)>
 time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <after-chronologic-run>)>
 
 coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
@@ -140,6 +148,7 @@ coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 
 after-string-run      = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
 after-number-run      = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
+after-date-run        = <date-only-chain(<transform-call-prefix>)> | <after-chronologic-run>
 after-chronologic-run = <coerced-string-chain> | <coerced-number-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
@@ -192,10 +201,6 @@ but `.scale:6, ,0:` omits `<significant-digits>`).
 
 ###### Value Coercion
 
-A value is of type date or time-only iff [`%d` or
-`%c`](#chronologic-formatting), respectively, matches it without `<coercion>`
-(e.g., `.dateOnly` accepts `"2020-03-18"` & `1584553163`, but not `"0"`).
-
 A `null` or [absent](fields.md#absent-values) value remains unmodified through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
 `..uppercase` evaluates to `null` for `null`).
@@ -219,6 +224,7 @@ string is:
   or, with [trivia](#coercion), `$1.50`).
 - A date or time-only: its [rendering](#chronologic-formatting) (e.g.,
   `2020-03-18T17:39:23Z`).
+- A version: its text.
 - A [structured value](#value-types): its compact JSON text, with non-ASCII
   characters verbatim (e.g., `["é",{"a":null}]`).
 
@@ -390,18 +396,18 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-transform      = <date-only> | <date-time-zone> (* type: date *)
+date-transform      = <date-only> | <date-time-zone> (* non-structural *)
 time-only-transform = <time-only-time-zone> (* type: time-only *)
 
-date-only           = "dateOnly"
-date-time-zone      = "timeZone" [ <date-time-zone-arguments> ] (* sets the output time zone; last wins *)
+date-only           = "dateOnly" (* input type: date; output type: date-only *)
+date-time-zone      = "timeZone" [ <date-time-zone-arguments> ] (* type: date; sets the output time zone; last wins *)
 time-only-time-zone = "timeOnlyTimeZone" [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-A date or time-only transform run's transforms jointly set how its value is
-rendered, regardless of where `dateOnly` appears:
+A date's or a time-only's contiguous transforms jointly set how it is rendered,
+until a `<coercion>` renders it:
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone` (for a date) & `timeOnlyTimeZone` (for a time-only): set the output
@@ -523,6 +529,7 @@ failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct defaul
 
 success-pipeline =
   <string-pipeline>
+  | <version-pipeline>
   | <number-pipeline>
   | <date-pipeline>
   | <time-only-pipeline>
@@ -654,14 +661,19 @@ non-nullary-scalar-conditional-placeholder =
     | <abort-on-failure> <non-nullary-scalar-success> <block-terminator>
   )
 
-nullary-scalar-matcher = <nullary-standard-matcher> | <nullary-number-matcher> | <nullary-version> | <nullary-date-matcher> | <nullary-time-only>
+nullary-scalar-matcher =
+  <nullary-standard-matcher>
+  | <nullary-number-matcher>
+  | <nullary-version-matcher>
+  | <nullary-date-matcher>
+  | <nullary-time-only-matcher>
 
 non-nullary-scalar-matcher =
   <non-nullary-standard-matcher>
   | <non-nullary-number-matcher>
-  | <non-nullary-version>
+  | <non-nullary-version-matcher>
   | <non-nullary-date-matcher>
-  | <non-nullary-time-only>
+  | <non-nullary-time-only-matcher>
 
 non-nullary-scalar-success           = <non-nullary-scalar-blocked-success> | <non-nullary-scalar-blockless-success>
 non-nullary-scalar-blockless-success = <non-nullary-scalar-matcher> (* default success-block: {empty string} *)
@@ -741,18 +753,21 @@ non-nullary-number = "N" (* is number; output type: number; value: {field value}
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-non-nullary-version-success = <non-nullary-success(<nullary-version>, <non-nullary-version>, <string-pipeline>)>
+nullary-version-matcher     = [ <coercion> ] <nullary-version>
+non-nullary-version-matcher = [ <coercion> ] <non-nullary-version>
+non-nullary-version-success = [ <coercion> ] <non-nullary-success(<nullary-version>, <non-nullary-version>, <version-pipeline>)>
 
-nullary-version     = "v" (* is version; output type: string; value: {field value} *)
-non-nullary-version = "V" (* is version; output type: string; value: {field value} *)
+nullary-version     = "v" (* is version; output type: version; value: {field value} *)
+non-nullary-version = "V" (* is version; output type: version; value: {field value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
-(e.g., `1.2.3-beta`). `%v` & `%V` match a string whose entire content is a
-version.
+(e.g., `1.2.3-beta`). `<coercion>` parses a string whose entire content is a
+version (e.g., `%.v` matches `"1.2.3-beta"`, but `%v` matches no value of JSON
+input).
 
 ###### Coercion
 
@@ -831,7 +846,9 @@ escaped.
 nullary-date-matcher          = [ <coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
 non-nullary-date-success      = [ <coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
-non-nullary-time-only-success = <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
+nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
+non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
+non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
 
 nullary-date          = "d" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
 non-nullary-date      = "D" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
@@ -841,13 +858,12 @@ non-nullary-time-only = "C" (* is time-only;               output type: time-onl
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Input is always auto-detected: a string as an ISO-8601 datetime, date-only, or
-time-only (trying them in that order) & a number as a Unix time; this does not
+A `<coercion>` to a chronologic type auto-detects a string as an ISO-8601
+datetime, date-only, or time-only (trying them in that order); this does not
 depend on field name, label, output format, or any other context.
 
-`%d` & `%D` match a chronologic value that has a date (i.e., a date-only, a
-datetime, or a Unix time); `%c` & `%C` match a time-only value. No predicate
-matches both (e.g., `%mdc+` matches either).
+`%d` & `%D` match a date; `%c` & `%C` match a time-only value. No predicate
+matches both (e.g., `%m.d.c+` coerces to either).
 
 **Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
 seconds.
@@ -857,9 +873,9 @@ followed by ASCII digits, or both, in that order; then optionally an exponent
 indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
 `.5`, or `1.5e9`).
 
-[`<coercion>`](#coercion) also allows a string that is not an ISO-8601 value but
-whose entire content is a decimal number, as a Unix time (e.g., `%.D` matches
-`"0"`, but `%D` does not).
+A `<coercion>` to a date also coerces a number, or a string that is not an
+ISO-8601 value but whose entire content is a decimal number, as a Unix time
+(e.g., `%.D` matches `0` & `"0"`, but `%D` matches neither).
 
 An ISO-8601:
 
@@ -890,11 +906,10 @@ week dates, or reduced precision other than a datetime without seconds).
 A datetime or time-only without a UTC offset is in the system time zone.
 
 A time-only value has no date, so `%C`'s block cannot apply `dateOnly` or
-`timeZone` to it, and elsewhere, it does not conform to their input type, so
-[value coercion](#value-coercion) applies (e.g., `.dateOnly` reports an error
-for `17:39:23`, while `..dateOnly` aborts formatting); `%D.dateOnly+-+` outputs
-`-` for `17:39:23`. Likewise, a date does not conform to `timeOnlyTimeZone`'s
-input type (e.g., `.timeOnlyTimeZone:UTC:` reports an error for `2020-03-18`).
+`timeZone` to it, and a [`<coercion>`](#coercion) to a date fails for it (e.g.,
+`..dateOnly` aborts formatting for `"17:39:23"`, while `%.D.dateOnly+-+` outputs
+`-` for it). Likewise, a `<coercion>` to a time-only fails for a date (e.g.,
+`..timeOnlyTimeZone:UTC:` aborts formatting for `"2020-03-18"`).
 
 Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
 year `0000` is 1 BCE, and `1500-02-29` does not exist).

@@ -108,3 +108,12 @@ an error or aborts formatting for a value that it cannot render (e.g.,
 `.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
 converts it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without failing other items.
+
+In specs, never let a string match `%d`, `%c`, or `%v`, or conform to a date,
+time-only, or version input type, without a `<coercion>` (e.g., `%d` or
+`.dateOnly` for `"2020-03-18"`), because a `<coercion>` would then convert
+nothing, so it would only choose between an error & an abort.
+
+In specs, never let `timeZone` follow `dateOnly` (e.g.,
+`.dateOnly.timeZone:UTC:`), because `dateOnly`'s output is a date-only, which no
+time zone affects.

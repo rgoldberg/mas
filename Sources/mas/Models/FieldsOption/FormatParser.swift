@@ -623,11 +623,12 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// An `<infallible-unconditional-placeholder>`'s `%L…+` or `%K…+` pipeline's
 	/// kind, which no block has.
 	case unconditionalString
+	case version
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
-		case .any, .boolean, .date, .number, .string, .timeOnly:
+		case .any, .boolean, .date, .number, .string, .timeOnly, .version:
 			true
 		case .input, .unconditional, .unconditionalString:
 			false
@@ -639,7 +640,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .input, .unconditional, .unconditionalString:
 			.unconditional
-		case .date, .number, .string, .timeOnly:
+		case .date, .number, .string, .timeOnly, .version:
 			self
 		}
 	}
@@ -661,6 +662,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<time-only-pipeline>"
 		case .unconditionalString:
 			"<unconditional-string-pipeline>"
+		case .version:
+			"<version-pipeline>"
 		}
 	}
 
@@ -676,10 +679,12 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.any
 			case .number:
 				.number
-			case .string, .version:
+			case .string:
 				.string
 			case .timeOnly:
 				.timeOnly
+			case .version:
+				.version
 			}
 	}
 
@@ -702,6 +707,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			calls.followsTypes(from: isNamed ? nil : .timeOnly)
 		case .unconditionalString:
 			(isNamed || calls.first?.coercion == nil) && calls.isStringTransformRun
+		case .version:
+			calls.followsTypes(from: isNamed ? nil : .version)
 		}
 	}
 }
@@ -728,7 +735,9 @@ private extension TransformCall {
 	/// nor a time-only a date, because neither renders as the other.
 	func follows(_ type: TransformValueType) -> Bool {
 		let inputType = transform.kind.inputType
-		return coercion == nil ? inputType == type : inputType != type && !(inputType.isChronologic && type.isChronologic)
+		return coercion == nil
+			? inputType == type || transform.kind == .dateOnly && type == .dateOnly
+			: inputType != type && !(inputType.isChronologic && type.isChronologic)
 	}
 }
 
@@ -746,9 +755,9 @@ private extension Predicate {
 	/// Whether this predicate supports a `<coercion>`.
 	var isCoercible: Bool {
 		switch self {
-		case .boolean, .date, .false, .number, .true:
+		case .boolean, .date, .false, .number, .timeOnly, .true, .version:
 			true
-		case .empty, .null, .string, .timeOnly, .version, .whitespace:
+		case .empty, .null, .string, .whitespace:
 			false
 		}
 	}

@@ -425,8 +425,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 70. - date-only: adjective & noun (e.g., "a date-only")
     - time-only: adjective & noun (e.g., "a time-only"); also the type of a
       time-only value (`%c`'s output type)
-    - datetime: noun
-    - date: the type of a date-only or a datetime (`%d`'s output type)
+    - datetime: noun; also the type of a datetime value
+    - date: a date-only or a datetime, either of which `%d` matches (`%d`'s
+      output type)
     - REJECTED: date-time / date time
 71. - app: software implementing the specs (e.g., mas;
       [defined](../Specs/configs.md#configs))
@@ -605,7 +606,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
 100. - date block: `%D`'s `<conditional-block>`, whose pipeline's 1st call takes
-       no `<coercion>` iff it is a `dateOnly` or a `timeZone`
+       no `<coercion>` iff it is a `dateOnly` or a `timeZone`, the latter of
+       which no `dateOnly` may precede
      - time-only block: `%C`'s `<conditional-block>`, whose pipeline's 1st call
        takes no `<coercion>` iff it is a `timeOnlyTimeZone`
      - REJECTED: clock block / time block
@@ -767,7 +769,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - trivia prefix / trivia suffix: the trivia before / after the number
 120. - version: 1 or more `.`-separated components, each an ASCII digit followed
        by any Unicode general category `L` or `N` characters, `+`s & `-`s (e.g.,
-       `1.2.3-beta`; [defined](../Specs/fields-format.md#version-formatting))
+       `1.2.3-beta`; [defined](../Specs/fields-format.md#version-formatting));
+       also the type of a version value (`%v`'s output type)
      - version fields: `minimumOSVersion`, `newVersion` & `version`
        ([defined](../Specs/mas.md#default-sort-options))
 121. - App Store locale: the locale of the App Store region that mas guesses

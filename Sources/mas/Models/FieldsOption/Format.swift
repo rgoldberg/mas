@@ -95,7 +95,7 @@ struct Matcher: Equatable { // swiftlint:disable:this one_declaration_per_file
 enum Predicate: Character { // swiftlint:disable:this one_declaration_per_file
 	// swiftlint:disable sorted_enum_cases
 	case boolean = "b"
-	/// Is chronologic with a date: a date-only, a datetime, or a Unix time.
+	/// Is a date: a date-only or a datetime.
 	case date = "d"
 	case empty = "e"
 	case `false` = "f"
@@ -413,13 +413,15 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		matched(value) != nil
 	}
 
-	/// This matcher's value iff it matches `value`, else `nil`.
+	/// This matcher's value iff it matches `value`, else `nil`. JSON has no date,
+	/// time-only, or version value, so each of their predicates matches only with
+	/// a `<coercion>`.
 	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
 		switch predicate {
 		case .boolean:
 			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
 		case .date:
-			FormatValue.chronologic(from: value, isCoerced: coercion != nil).flatMap { matched in
+			coercion.flatMap { _ in FormatValue.chronologic(from: value) }.flatMap { matched in
 				if case .chronologic(.time, _) = matched {
 					nil
 				} else {
@@ -437,7 +439,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .string:
 			value.jsonString.map(FormatValue.string)
 		case .timeOnly:
-			FormatValue.chronologic(from: value, isCoerced: false).flatMap { matched in
+			coercion.flatMap { _ in FormatValue.chronologic(from: value) }.flatMap { matched in
 				if case .chronologic(.time, _) = matched {
 					matched
 				} else {
@@ -447,7 +449,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:
-			value.jsonString.flatMap { isVersion($0) ? .string($0) : nil }
+			coercion.flatMap { _ in value.jsonString }.flatMap { isVersion($0) ? .string($0) : nil }
 		case .whitespace:
 			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .input(value) : nil
 		}
@@ -645,17 +647,17 @@ enum ISO8601Form: CaseIterable { // swiftlint:disable:this one_declaration_per_f
 	case time
 }
 
-/// `value` parsed as chronologic: a string as an ISO-8601 datetime, date-only,
-/// or time-only, else, iff `isCoerced`, as a Unix time iff its entire content
-/// is a decimal number; a number as a Unix time; else `nil`.
-func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Chronologic? {
+/// `value` coerced to chronologic: a string as an ISO-8601 datetime, date-only,
+/// or time-only, else as a Unix time iff its entire content is a decimal
+/// number; a number as a Unix time; else `nil`.
+func chronologic(from value: JSON.Node?) -> Chronologic? {
 	switch value {
 	case let .number(number):
 		DecimalNumber("\(number)").flatMap(unixTimeInstant).map(Chronologic.datetime)
 	case let .string(literal):
 		iso8601ChronologicPrefix(of: literal.value[...], forms: Set(ISO8601Form.allCases))
 			.flatMap { chronologic, end in end == literal.value.endIndex ? chronologic : nil }
-			?? (isCoerced ? unixTimeInstant(in: literal.value[...]).map(Chronologic.datetime) : nil)
+			?? unixTimeInstant(in: literal.value[...]).map(Chronologic.datetime)
 	default:
 		nil
 	}
@@ -814,9 +816,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	/// A string.
 	case string(String)
 
-	/// The value parsed as chronologic, per `isCoerced`; else `nil`.
-	static func chronologic(from value: JSON.Node?, isCoerced: Bool) -> Self? {
-		mas.chronologic(from: value, isCoerced: isCoerced).map { .chronologic($0, style: .init()) }
+	/// The value coerced to chronologic; else `nil`.
+	static func chronologic(from value: JSON.Node?) -> Self? {
+		mas.chronologic(from: value).map { .chronologic($0, style: .init()) }
 	}
 
 	/// The value as a number, per `coercion`; else `nil`.
@@ -890,7 +892,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
 		switch call.transform.kind {
-		case .date, .timeOnly:
+		case .date, .dateOnly, .timeOnly:
 			guard case let .chronologic(chronologic, style)? = try coercedChronologic(for: call) else {
 				return nil
 			}
@@ -926,21 +928,20 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// This value as chronologic iff it conforms to the chronologic predicate,
-	/// else `nil` iff `call` has `<coercion>` (formatting aborts).
+	/// This value iff it is chronologic, else coerced to chronologic iff `call`
+	/// has `<coercion>` (`nil` iff that coercion fails, so formatting aborts).
 	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
 		if case .chronologic = self {
 			return self
 		}
-		let chronologic = if case let .input(node) = self {
-			Self.chronologic(from: node, isCoerced: call.coercion != nil)
-		} else {
-			Self.chronologic(from: .string(string), isCoerced: call.coercion != nil)
-		}
-		guard chronologic != nil || call.coercion != nil else {
+		guard call.coercion != nil else {
 			throw .transformInputTypeMismatch(transform: call.transform, input: string)
 		}
-		return chronologic
+		return if case let .input(node) = self {
+			Self.chronologic(from: node)
+		} else {
+			Self.chronologic(from: .string(string))
+		}
 	}
 
 	/// This value as a number, coerced iff `call` has `<number-coercion>` (`nil`

@@ -176,9 +176,8 @@ input format (e.g., `%.:yyyy-MM-dd:d`, `..:yyyy-MM-dd:timeZone:UTC:`), with
 [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 ) as the pattern syntax. It would also cover the ISO-8601 representations that
-auto-detection omits (e.g., week dates) & let `%c` & `%C` take a coercion (e.g.,
-`%.:HH\:mm:c`), which they currently lack, because only a time-only value
-matches them.
+auto-detection omits (e.g., week dates) & let `%.c` & `%.C` take arguments
+(e.g., `%.:HH\:mm:c`).
 
 A named or inline output format (e.g., a chronologic-to-string transform
 mirroring `numberFormat`) needs the same pattern syntax &, for a named one,
