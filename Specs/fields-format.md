@@ -930,10 +930,10 @@ can only abort).
 
 A `<date-only-coercion>`'s value is always a date-only, which no time zone
 affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
-is an error, as `.dateOnly.timeZone:UTC:` is). Nor may `dateOnly` be the 1st
-call of a pipeline after a matcher's `<date-only-coercion>`, because it cannot
-affect that value (e.g., `%.:iso-date:D.dateOnly+-+` is an error, while
-`%.:iso-date:D%d+-+` outputs the date-only).
+is an error, as `.dateOnly.timeZone:UTC:` is). Nor may `dateOnly` start the
+pipeline of a matcher's `<date-only-coercion>`, because it cannot affect that
+value (e.g., `%.:iso-date:D.dateOnly+-+` is an error, while `%.:iso-date:D%d+-+`
+outputs the date-only).
 
 A version has no `:`, so it is never a datetime, so a call whose input is a
 version must list a `<date-format>` other than `<iso-datetime>` (e.g.,

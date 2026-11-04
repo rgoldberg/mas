@@ -75,6 +75,7 @@ private extension MASTests {
 			(#"%.:unix\-time:D.timeZone:UTC:.dateOnly++"#, .number(0), "1970-01-01"),
 			(".round..:iso,unix-time:timeZone:UTC:.dateOnly", .number(0), "1970-01-01"),
 			("%.:iso-date:D%d+-+", "2020-03-18", "2020-03-18"),
+			("%.:iso-date:D:default.dateOnly+-+", "2020-03-18", "2020-03-18"),
 			("%.:iso-date:D..uppercase+-+", "2020-03-18", "2020-03-18"),
 			("%.:iso-date,iso-datetime:D.timeZone:UTC:.dateOnly++", "2020-03-18", "2020-03-18"),
 			("%.V..:iso-date:dateOnly+-+", "2020-03-18", "2020-03-18"),

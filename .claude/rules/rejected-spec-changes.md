@@ -122,7 +122,7 @@ date without `<unix-time>` (e.g., `.dateOnly.timeZone:UTC:`,
 `%.:iso-date:D.timeZone:UTC:+-+`, or `%.V..:iso:timeZone:UTC:+-+`), because its
 value is a date-only, which no time zone affects.
 
-In specs, never let `dateOnly` be the 1st call of a pipeline after a matcher's
+In specs, never let `dateOnly` start the pipeline of a matcher's
 `<date-only-coercion>` (e.g., `%.:iso-date:D.dateOnly+-+`), because that value
 is already a date-only, so `dateOnly` cannot affect what it means.
 
