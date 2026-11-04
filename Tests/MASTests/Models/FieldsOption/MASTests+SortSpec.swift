@@ -464,12 +464,13 @@ private extension MASTests {
 	@Test(arguments: [OutputFormat.json(.default), .keyValue(.default), .table(.default)])
 	func `sorts output values by their formatted values' types for every output format`(outputFormat: OutputFormat)
 	throws {
-		// As numbers, 1.5 > 1.10; as versions, 1.5 < 1.10
+		// `v` compares a number's text as a version: 1.5 < 1.10, though 1.5 > 1.10
+		// as numbers
 		let fieldSpec = try parsedFieldSpec(format: "..absoluteValue", sort: "1Ov", outputFormat: outputFormat)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
 			sortSpec.compare(try sortValues("1.5", fieldSpec: fieldSpec), try sortValues("1.10", fieldSpec: fieldSpec))
-				== .orderedDescending,
+				== .orderedAscending,
 		)
 	}
 

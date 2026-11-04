@@ -404,6 +404,8 @@ extension JSON.Node {
 				.joined(separator: ",")
 				+ closingIndentation
 				+ "}"
+		case let .number(number):
+			"\(number)".jsonNumberText
 		case let .string(string):
 			string.value.jsonStringLiteral(escapingNonASCII: escapingNonASCII)
 		default:
@@ -413,6 +415,17 @@ extension JSON.Node {
 }
 
 private extension String {
+	/// This number's text as JSON number syntax, modified only as that syntax
+	/// requires (fields-format.md "Value Types"): no `+` sign & an integer part
+	/// that has no leading `0`s before a nonzero digit & that is at least `0`.
+	var jsonNumberText: Self {
+		let unsigned = hasPrefix("-") || hasPrefix("+") ? dropFirst() : self[...]
+		let integerPart = unsigned.prefix(while: \.isASCIIDigit)
+		let significantIntegerPart = integerPart.drop { $0 == "0" }
+		return "\(hasPrefix("-") ? "-" : "")\(significantIntegerPart.isEmpty ? "0" : significantIntegerPart)"
+			+ unsigned[integerPart.endIndex...]
+	}
+
 	/// This string as a quoted JSON string (json.md "JSON Config"): each `"` &
 	/// `\` escaped by a `\`, each backspace, tab, LF, form feed & CR as its short
 	/// escape sequence (e.g., `\n`), and each other C0 control character, each

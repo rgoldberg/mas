@@ -220,4 +220,52 @@ private extension MASTests {
 				.description == #"{"x":"A","x":"1"}"#,
 		)
 	}
+
+	@Test(
+		arguments: [
+			("+01.50", "1.50"),
+			(".5", "0.5"),
+			("-.5", "-0.5"),
+			("+.5e+03", "0.5e+03"),
+			("000", "0"),
+			("-00.0", "-0.0"),
+			("1.50", "1.50"),
+			("0.50E+03", "0.50E+03"),
+		],
+	)
+	func `only JSON output modifies a coerced number's text, only as JSON number syntax requires`(
+		text: String,
+		jsonText: String,
+	) throws {
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: "a:%.n",
+			standard: SelectedFieldsConfig(),
+			all: .init(),
+			outputFormat: .json(.default),
+		)
+		.fieldSpecs
+		let objects = [JSON.Object([("a", .string(text))])]
+		#expect(
+			try objects.json(fieldSpecs: fieldSpecs, fieldOrder: .positional(.init()), jsonConfig: .default)
+				== #"{"a":\#(jsonText)}"#,
+		)
+		#expect(try objects.table(fieldSpecs: fieldSpecs, tableConfig: .default) == text)
+		#expect(try fieldSpecs[0].keyValueRow(for: .string(text))?.value == text)
+	}
+
+	@Test
+	func `JSON output renders a number with trivia as a string, retaining its text`() throws {
+		let fieldSpecs = try resolvedFieldsConfig(
+			from: "a:%.:,,,,,[$]:n",
+			standard: SelectedFieldsConfig(),
+			all: .init(),
+			outputFormat: .json(.default),
+		)
+		.fieldSpecs
+		#expect(
+			try [JSON.Object([("a", .string("$+01.50"))])]
+				.json(fieldSpecs: fieldSpecs, fieldOrder: .positional(.init()), jsonConfig: .default)
+				== #"{"a":"$+01.50"}"#,
+		)
+	}
 }

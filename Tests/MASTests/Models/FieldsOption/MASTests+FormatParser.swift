@@ -112,7 +112,7 @@ private extension MASTests {
 	@Test(
 		arguments: [
 			// fields-format.md's examples
-			("%.N%n (%i)++", JSON.Node.string("4.50"), String?.some("4.5 (4.50)")),
+			("%.:de:N%n (%i)++", JSON.Node.string("1.234,5"), String?.some("1234.5 (1.234,5)")),
 			("%MN.absoluteValue+b+%I..uppercase++", .number(-5), "5"),
 			("%MN.absoluteValue+b+%I..uppercase++", .bool(true), "true"),
 			("%MN.absoluteValue+b+%I..uppercase++", .string("abc"), "ABC"),
@@ -175,7 +175,7 @@ private extension MASTests {
 			(":standard..round", .string("4.6"), "5"),
 			// A block's named format is evaluated against its matcher's value, which
 			// is thus the format input that its `%i` inserts
-			("%.N:default+-+", .string("4.50"), "4.5"),
+			("%.:de:N:default+-+", .string("1.234,5"), "1234.5"),
 			("%K:default.uppercase+", .string("abc"), "N"),
 		],
 	)
@@ -189,19 +189,19 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("%.:,,,,,.*,.*:n", JSON.Node.string("US$1,234.50"), String?.some("US$1234.5")),
+			("%.:,,,,,.*,.*:n", JSON.Node.string("US$1,234.50"), String?.some("US$1234.50")),
 			("%.:,,,,,.*,.*:N.round++", .string("US$1,234.50"), "US$1235"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("-3 MB"), "3 MB"),
 			("[%.n]", .string("US$5"), nil),
 			("[%.:,,,,,.*,.*:n]", .string("none"), nil),
-			("%.n", .string("4.50"), "4.5"),
+			("%.n", .string("4.50"), "4.50"),
 			("[%.n]", .string("4.5a"), nil),
 			("[%.n]", .string("nan"), nil),
 			("[%.n]", .string("0x10"), nil),
 			("%.n", .string("-1e3"), "-1e3"),
-			("%.n", .string("12345678901234567890.123456789000"), "12345678901234567890.123456789"),
-			("%.n", .string("+007.50"), "7.5"),
-			("%.n", .string("-0.0"), "0"),
+			("%.n", .string("12345678901234567890.123456789000"), "12345678901234567890.123456789000"),
+			("%.n", .string("+007.50"), "+007.50"),
+			("%.n", .string("-0.0"), "-0.0"),
 			("%n", .number(4.5), "4.5"),
 			// fields-format.md's examples
 			("%.:de:n", .string("1.234,56"), "1234.56"),
@@ -222,7 +222,7 @@ private extension MASTests {
 			("%.:,,,,,\\\\d:n", .string("15"), "15"),
 			("%.:,,,,,\\\\\\$:n", .string("$5"), "$5"),
 			("%.:,,,,,\\\\$:n", .string("$5"), "$5"),
-			("%.:,,,,,.*,.*:N.absoluteValue++", .string("x-1.50 y"), "x1.5 y"),
+			("%.:,,,,,.*,.*:N.absoluteValue++", .string("x-1.50 y"), "x1.50 y"),
 			("[%.:,,,,,.*:n]", .string("5 MB"), nil),
 			("%.:,,,,, [$] :n", .string("$5"), "$5"),
 			// The trivia suffix regex is the last argument, so its `,` is unescaped
@@ -275,7 +275,7 @@ private extension MASTests {
 		arguments: [
 			("%S<%s>++", JSON.Node.string("x"), "<x>"),
 			("%S<%S.uppercase+>++", .string("x"), "<X>"),
-			("%.N%n/%i++", .string("4.50"), "4.5/4.50"),
+			("%.:de:N%n/%i++", .string("1.234,5"), "1234.5/1.234,5"),
 			("%.B%b!++", .string("true"), "true!"),
 			("%.D%D.dateOnly+++", .string("2020-03-18T17:39:23Z"), "2020-03-18"),
 			("%.V[%v]++", .string("1.2"), "[1.2]"),
@@ -387,6 +387,8 @@ private extension MASTests {
 			("..numberFormat:en:", .string("-1234e-2"), "-1,234e-2"),
 			("..scale:0,,2:.numberFormat:de:", .string("1.5e3"), "1.500,00"),
 			("..:,,,,,[$]:numberFormat:de:", .string("$1234.5"), "$1.234,5"),
+			("..numberFormat:de:", .string("+01234.50"), "+01.234,50"),
+			("..numberFormat:de:", .string(".5"), ",5"),
 			("..:de:round", .string("1.234,56"), "1235"),
 			("..:de: round", .string("1.234,56"), "1235"),
 			("..:,,,,,.*,.*:round", .string("about 2.5 MB"), "about 3 MB"),
@@ -521,7 +523,7 @@ private extension MASTests {
 			("%N%n+%i+", .number(42), "42"),
 			("%.N%n+%i+", .string("42"), "42"),
 			(".round", .number(5), "5"),
-			("..round", .string("+2.4"), "2"),
+			("..round", .string("+2.4"), "+2"),
 			("..:,,,,,[$]:round", .string("$2.4"), #""$2""#),
 			(".numberFormat", .number(5), #""5""#),
 			("%t", .bool(true), "true"),

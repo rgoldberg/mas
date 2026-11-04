@@ -37,8 +37,15 @@ types.
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
 that type (JSON: string, boolean, `null`, structured value & a number whose
-text, including any trivia, is JSON number syntax; table & key-value: string);
-otherwise, it renders it coerced to a string.
+text, including any trivia, is in `number`'s [lexical
+form](ebnf.md#typed-terminals); table & key-value: string); otherwise, it
+renders it coerced to a string.
+
+An output format modifies a value's text only as its syntax requires, when it
+renders the value (e.g., JSON output renders the number `+01.50` as `1.50` &
+`.5` as `0.5`, because a JSON number has no leading `+`, no leading `0` before a
+nonzero digit & at least 1 digit before its `.`, but may have trailing `0`s,
+while table & key-value output render them as is).
 
 ##### Pipelines
 
@@ -345,7 +352,8 @@ renders `12345678` as `1,23,45,678`).
 
 `numberFormat` also replaces the `.` between its input's integer & fractional
 parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
-`1.234,5`).
+`1.234,5`), retaining its input's sign & leading `0`s (e.g., it renders
+`+01234.50` as `+01.234,50` & `.5` as `,5`).
 
 `numberFormat` retains scientific notation, applying to its significand &
 rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
@@ -600,13 +608,13 @@ enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
 / `%I` are evaluated against their format's **input**, which no block modifies:
 in a field spec's format, the field value, at its original type; in a named
 format, the value against which its `<named-format-reference>` evaluates it
-(e.g., `%.N%n (%i)++` renders `"4.50"` as `4.5 (4.50)`, while `%+.N:x+`, where
-preset `x` sets no format, renders it as `4.5`).
+(e.g., `%.:de:N%n (%i)++` renders `"1.234,5"` as `1234.5 (1.234,5)`, while
+`%+.:de:N:x+`, where preset `x` sets no format, renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
-its [coerced value](#coercion) iff the matcher coerces (e.g., `%.n` evaluates to
-`4.5` for `"4.50"`, as does `%n` in `%.N%n++`).
+its [coerced value](#coercion) iff the matcher coerces (e.g., `%.:de:n`
+evaluates to `1234.5` for `"1.234,5"`, as does `%n` in `%.:de:N%n++`).
 
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
@@ -824,11 +832,12 @@ number `1` followed by the trivia suffix `,2345`).
 
 A number coercion accepts both positional & scientific notation (an exponent
 indicator, `e` or `E`, followed by an optionally signed integer exponent). The
-coerced value retains the input's notation, without `+` signs, a `-` sign on 0,
-or trailing fractional `0`s, in either its significand or its exponent; its
-integer part & its exponent each have no leading `0`s, being `0` iff they have
-no nonzero digit (e.g., `%.n` coerces `"+01.50e+03"` to `1.5e3`, `".5"` to
-`0.5`, `"-0.0"` to `0` & `"1e-00"` to `1e0`).
+coerced value's text retains the number's sign, leading & trailing `0`s &
+notation, but has no digit group separators & has `.` as its decimal separator
+(e.g., `%.n` coerces `"+01.50e+03"` to `+01.50e+03` & `".5"` to `.5`, while
+`%.:de:n` coerces `"1.234,50"` to `1234.50`), because each later transform reads
+that 1 syntax, while an [output format](#value-types) modifies it only as its
+syntax requires.
 
 A number coercion also allows **trivia** around the number, matching a string
 iff it splits into the following, using the shortest trivia prefix for which

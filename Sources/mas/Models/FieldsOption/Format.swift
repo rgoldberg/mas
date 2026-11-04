@@ -500,10 +500,9 @@ func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTr
 
 extension Coercion { // swiftlint:disable:this file_types_order
 	/// `string` coerced to a number: the shortest trivia prefix (a whole match of
-	/// `triviaPrefixRegex`) for which the longest number after it (as a canonical
-	/// number) leaves a trivia suffix (the rest of `string`) that is a whole
-	/// match of `triviaSuffixRegex`; else `nil`. See "Coercion" in
-	/// fields-format.md.
+	/// `triviaPrefixRegex`) for which the longest number after it (as its text)
+	/// leaves a trivia suffix (the rest of `string`) that is a whole match of
+	/// `triviaSuffixRegex`; else `nil`. See "Coercion" in fields-format.md.
 	func coercedNumber(in string: String) -> (number: String, triviaPrefix: Substring, triviaSuffix: Substring)? {
 		string.indices
 			.lazy
@@ -752,7 +751,7 @@ private func iso8601TimePrefix(of string: Substring, isSecondOptional: Bool = fa
 	)
 }
 
-private nonisolated(unsafe) let jsonNumberRegex = #/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/#
+private nonisolated(unsafe) let numberTextRegex = #/[-+]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?/#
 private nonisolated(unsafe) let iso8601DateRegex = #/([+-][0-9]{5,}|[0-9]{4})-([0-9]{2})-([0-9]{2})/#
 private nonisolated(unsafe) let iso8601TimeRegex =
 	#/([0-9]{2}):([0-9]{2})(?::([0-9]{2})(?:[.,]([0-9]+))?)?([Zz]|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
@@ -854,7 +853,8 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 	}
 
 	/// The value as an output node, at its type iff JSON supports it (a number
-	/// iff its text, trivia included, is JSON number syntax), else as a string;
+	/// iff its text, trivia included, is in `number`'s lexical form, which JSON
+	/// output modifies only as JSON number syntax requires), else as a string;
 	/// `nil` iff it is an absent field value.
 	var node: JSON.Node? {
 		switch self {
@@ -863,7 +863,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		case let .input(node):
 			node
 		case .number:
-			string.wholeMatch(of: unsafe jsonNumberRegex).map { _ in .number(.fallback(string)) } ?? .string(string)
+			string.wholeMatch(of: unsafe numberTextRegex).map { _ in .number(.fallback(string)) } ?? .string(string)
 		}
 	}
 

@@ -71,14 +71,12 @@ extension NumberConventions {
 		return sign + grouped(integerPart) + (rest.first == "." ? decimalSeparator + rest.dropFirst() : rest)
 	}
 
-	/// The canonical form & end of the longest number at the start of `string`
-	/// (an optional sign, an integer part, an optional `decimalSeparator` &
-	/// fractional part & an optional exponent; the integer part may be omitted
-	/// iff the fractional part is present); else `nil`. The canonical form has no
-	/// `+` sign & no `-` sign for 0 (neither leading nor in its exponent), no
-	/// leading `0`s in its integer part or exponent (except a sole `0`), no
-	/// trailing `0`s in its fractional part & no `.` without a fractional part,
-	/// but retains any exponent.
+	/// The text & end of the longest number at the start of `string` (an optional
+	/// sign, an integer part, an optional `decimalSeparator` & fractional part &
+	/// an optional exponent; the integer part may be omitted iff the fractional
+	/// part is present); else `nil`. The text retains its sign, its leading &
+	/// trailing `0`s & its exponent, but has no digit group separators & has `.`
+	/// as its decimal separator.
 	func numberPrefix(of string: Substring) -> (number: String, end: Substring.Index)? {
 		var rest = string
 		let sign = rest.first.flatMap { $0 == "-" || $0 == "+" ? $0 : nil }
@@ -96,16 +94,9 @@ extension NumberConventions {
 		guard integerPart != nil || fractionalPart != nil else {
 			return nil
 		}
-		let integerDigits = integerPart.map { String($0.digits.drop { $0 == "0" }) } ?? ""
-		let fractionalDigits = fractionalPart.map { String($0.reversed().drop { $0 == "0" }.reversed()) } ?? ""
-		var number = (sign == "-" && !(integerDigits.isEmpty && fractionalDigits.isEmpty) ? "-" : "")
-			+ (integerDigits.isEmpty ? "0" : integerDigits)
-			+ (fractionalDigits.isEmpty ? "" : "." + fractionalDigits)
+		var number = (sign.map(String.init) ?? "") + (integerPart?.digits ?? "") + (fractionalPart.map { "." + $0 } ?? "")
 		if let exponent = exponent(of: rest) {
-			let exponentDigits = String(exponent.drop { !$0.isASCIIDigit }.drop { $0 == "0" })
-			number += exponent.prefix(1)
-				+ (exponent.dropFirst().first == "-" && !exponentDigits.isEmpty ? "-" : "")
-				+ (exponentDigits.isEmpty ? "0" : exponentDigits)
+			number += exponent
 			rest = rest[exponent.endIndex...]
 		}
 		return (number, rest.startIndex)

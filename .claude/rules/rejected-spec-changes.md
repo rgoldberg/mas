@@ -131,6 +131,14 @@ date whose only `<date-format>` is `<iso-datetime>` (e.g.,
 `%.V..:iso-datetime:dateOnly+-+`), because a version has no `:`, so it is never
 a datetime, so the coercion can only abort.
 
+In specs, never let a number coercion normalize its coerced value's text,
+whether only for a string (e.g., `%.n` giving `1.5` for `"1.50"`, but `1.50` for
+the number `1.50`) or for every number (e.g., `%.n` giving `1.5` for both),
+because it loses text that a format may mean to output, while only an output
+format's syntax requires a modified number, so that output format modifies it
+only as necessary when rendering it (e.g., JSON output renders `+01.50` as
+`1.50`).
+
 In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
 `%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
 cannot affect what it means.
