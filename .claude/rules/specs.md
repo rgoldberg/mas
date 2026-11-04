@@ -79,8 +79,9 @@ only in prose; reference a shared argument list (e.g.,
 `<number-format-arguments>`) rather than repeating its arguments.
 
 In specs, make an argument list's `<argument-fence>`s optional iff every
-argument in it is omissible, because the empty list `::` would otherwise be
-required to express all defaults.
+argument in it is omissible or defaults when the whole list is absent (e.g.,
+`..dateOnly`, but not `..::dateOnly`), because the empty list `::` would
+otherwise be required to express all defaults.
 
 In specs, give a sort option that takes arguments an uppercase letter &
 terminate its arguments with its `<sort-option-terminator>`; an empty list
