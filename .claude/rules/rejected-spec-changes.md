@@ -45,8 +45,8 @@ cannot affect what it means.
 
 In specs, never allow `<abort-on-failure>` on a nullary conditional placeholder
 or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because
-the former already aborts on failure & the latter cannot fail, so it cannot
-affect what either means.
+the former already aborts on failure & the latter's matcher cannot fail, so it
+cannot affect what either means.
 
 In specs, never make `<styled-key>`'s `<style-specifier>` optional (e.g., `K:`),
 because `K:` would style keys by nothing, which contradicts `K` & means what `k`
@@ -91,9 +91,12 @@ precedes it (e.g., `.round..round` or `%S..uppercase+`), because it cannot
 affect what the call means, nor require one on a call whose types match (e.g.,
 `.numberFormat.uppercase`), because it would add nothing.
 
-In specs, never let `<unconditional-pipeline>` or a `%L` or `%K` pipeline take a
-`<coercion>` that can fail (e.g., `%I..trimWhitespace..round+` or `%L..round+`),
-because `<failure-block>` & every unconditional placeholder must never abort.
+In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
+(e.g., `%S.uppercase+%L..round++` or
+`%S.uppercase+%I..trimWhitespace..round++`), because a `<failure-block>` must
+never abort, nor forbid one in a `<format-template>` or a `<conditional-block>`
+(e.g., `%L..round+`), because no matcher can otherwise coerce a label, a name,
+or a format input that it cannot match.
 
 In specs, never allow a `<date-transform>` call on a value of a
 `<time-only-transform>`, nor vice versa, even with a `<coercion>` (e.g.,

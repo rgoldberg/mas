@@ -630,6 +630,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields-format.md#success--failure))
      - success clause: a `<success-block>` or a `<success-pipeline>`
        (`<success-clause>`), evaluated iff its enclosing matcher succeeds
+     - fallible / infallible unconditional placeholder: an unconditional
+       placeholder whose pipeline may / may not abort formatting, which an
+       `<unconditional-block>` requires (`<fallible-unconditional-placeholder>`
+       / `<infallible-unconditional-placeholder>`)
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
        `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)

@@ -50,6 +50,7 @@ date-pipeline                 = <pipeline(<named-format-reference(<date-format-n
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        =
   <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
+input-pipeline                = <pipeline(<named-format-reference(<unconditional-format-name>)>, <coerced-chain>, <coerced-chain>)>
 unconditional-string-pipeline =
   <pipeline(
     <named-format-reference(<unconditional-format-name>)>,
@@ -111,10 +112,7 @@ value-transform-pipeline =
   | <number-chain(<transform-call-prefix>)>
   | <date-chain(<transform-call-prefix>)>
   | <time-only-chain(<transform-call-prefix>)>
-  | <coerced-string-chain>
-  | <coerced-number-chain>
-  | <coerced-date-chain>
-  | <coerced-time-only-chain>
+  | <coerced-chain>
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
 number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain> | <coerced-time-only-chain>
@@ -132,6 +130,8 @@ number-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <number-tran
 number-to-string-chain(CALL_PREFIX) = <transform-call(CALL_PREFIX, <number-to-string-transform>)> [ <string-input-pipeline> ]
 date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-transform>, <after-chronologic-run>)>
 time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <after-chronologic-run>)>
+
+coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
 
 coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
@@ -464,7 +464,7 @@ behind).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-placeholder = <unconditional-placeholder> | <conditional-placeholder>
+placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
 modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> ] (* non-structural *)
@@ -528,15 +528,16 @@ success-pipeline =
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
+  | <input-pipeline>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
 
 conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
-  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder>)>
+  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <fallible-unconditional-placeholder>)>
   (* direct default: {empty string} *)
-unconditional-block(PIPELINE) = PIPELINE | <block-template(<unconditional-placeholder>)> (* direct default: {empty string} *)
+unconditional-block(PIPELINE) = PIPELINE | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
 
 block-template(PLACEHOLDER) = <template-text> | [ <template-text> ] ( PLACEHOLDER [ <template-text> ] )+
 
@@ -605,12 +606,17 @@ preceding & succeeding.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-unconditional-placeholder = <nullary-unconditional-placeholder> | <non-nullary-unconditional-placeholder>
+fallible-unconditional-placeholder   = <unconditional-placeholder(<input-pipeline>, <string-pipeline>)>
+infallible-unconditional-placeholder = <unconditional-placeholder(<unconditional-pipeline>, <unconditional-string-pipeline>)>
 
-nullary-unconditional-placeholder     = <placeholder-prefix> <nullary-unconditional-predicate>
-non-nullary-unconditional-placeholder =
+unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
+  <nullary-unconditional-placeholder>
+  | <non-nullary-unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE)>
+
+nullary-unconditional-placeholder                                    = <placeholder-prefix> <nullary-unconditional-predicate>
+non-nullary-unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
   <placeholder-prefix>
-  ( <non-nullary-input> -<unconditional-pipeline> | ( <non-nullary-label> | <non-nullary-name> ) -<unconditional-string-pipeline> )
+  ( <non-nullary-input> -INPUT_PIPELINE | ( <non-nullary-label> | <non-nullary-name> ) -NAME_PIPELINE )
   <block-terminator>
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>
@@ -624,6 +630,12 @@ non-nullary-name  = "K" (* output type: string; value: {field name}; mnemonic: k
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+An unconditional placeholder's matcher always succeeds, but a `<coercion>` in
+its pipeline may abort formatting, except in an `<unconditional-block>`, because
+a `<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
+lets a label, a name, or a format input that no matcher can match be coerced
+(e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`).
 
 ###### Conditional Placeholders
 

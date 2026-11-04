@@ -44,6 +44,14 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a fallible unconditional placeholder coerces its label`() throws {
+		#expect(
+			try parsedFieldSpec("%L..:,,,,,.*:round+").format.rendered(value: nil, label: "Size 5.6", name: "n")?.description
+				== #""Size 6""#,
+		)
+	}
+
+	@Test
 	func `coerces a structured value to its compact JSON text`() throws {
 		#expect(try rendered("(%i)", structuredValue) == #"(["é",{"a":null}])"#)
 	}
@@ -274,6 +282,15 @@ private extension MASTests {
 			("%L.uppercase+", .string("x"), "L"),
 			("%L:standard.uppercase+", .string("x"), "L"),
 			("%L:standard..uppercase+", .string("x"), "L"),
+			("%L..round+", .string("x"), nil),
+			("%L..:,,,,,.*:round+", .string("x"), nil),
+			("%I..trimWhitespace..round+", .string(" 5.6 "), "6"),
+			("%I..round+ MB", .string("5.6"), "6 MB"),
+			("%I..round+", .string("x"), nil),
+			("%S%I..round+++", .string("5.6"), "6"),
+			("%S%I..round+++", .string("x"), nil),
+			("%S.uppercase+%I..uppercase++", .number(5), "5"),
+			("%S.uppercase+%L.lowercase++", .number(5), "l"),
 			("%D..round+none+", .string("2020-03-18"), nil),
 			("%D..round+none+", .string("x"), "none"),
 			("%D.timeZone:UTC:..lowercase+none+", .string("2020-03-18T17:39:23Z"), "2020-03-18t17:39:23z"),
@@ -641,20 +658,23 @@ private extension MASTests {
 			(".uppercase%i", .unexpectedCharacter("%")),
 			("%N.uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%S.round++", .invalidPipeline("<string-pipeline>")),
-			("%I.uppercase+", .invalidPipeline("<unconditional-pipeline>")),
-			("%Ix+", .invalidPipeline("<unconditional-pipeline>")),
-			("%I+", .invalidPipeline("<unconditional-pipeline>")),
-			("%L+", .invalidPipeline("<unconditional-string-pipeline>")),
-			("%L..uppercase+", .invalidPipeline("<unconditional-string-pipeline>")),
-			("%L..round+", .invalidPipeline("<unconditional-string-pipeline>")),
+			("%I.uppercase+", .invalidPipeline("<input-pipeline>")),
+			("%Ix+", .invalidPipeline("<input-pipeline>")),
+			("%I+", .invalidPipeline("<input-pipeline>")),
+			("%L+", .invalidPipeline("<string-pipeline>")),
+			("%L..uppercase+", .invalidPipeline("<string-pipeline>")),
+			("%S.uppercase+%L..round++", .invalidPipeline("<unconditional-string-pipeline>")),
+			("%S.uppercase+%L..uppercase++", .invalidPipeline("<unconditional-string-pipeline>")),
+			("%S.uppercase+%I..trimWhitespace..round++", .invalidPipeline("<unconditional-pipeline>")),
+			("%S.uppercase+%I..round++", .invalidPipeline("<unconditional-pipeline>")),
+			("%S.uppercase+..round+", .invalidPipeline("<unconditional-pipeline>")),
 			("%S..uppercase++", .invalidPipeline("<string-pipeline>")),
 			("%N..round++", .invalidPipeline("<number-pipeline>")),
 			("%N.numberFormat..uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%D.dateOnly..timeZone:UTC:++", .invalidPipeline("<date-pipeline>")),
 			("%D..timeOnlyTimeZone:UTC:++", .invalidPipeline("<date-pipeline>")),
 			("%C..dateOnly++", .invalidPipeline("<time-only-pipeline>")),
-			("%I..uppercase..lowercase+", .invalidPipeline("<unconditional-pipeline>")),
-			("%I..trimWhitespace..round+", .invalidPipeline("<unconditional-pipeline>")),
+			("%I..uppercase..lowercase+", .invalidPipeline("<input-pipeline>")),
 			(".round.uppercase", .invalidPipeline("<value-transform-pipeline>")),
 			(".round..round", .invalidPipeline("<value-transform-pipeline>")),
 			(".uppercase..uppercase", .invalidPipeline("<value-transform-pipeline>")),

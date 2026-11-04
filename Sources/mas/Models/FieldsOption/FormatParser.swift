@@ -322,7 +322,9 @@ private struct FormatParser {
 			return .placeholder(
 				.unconditional(
 					predicate,
-					pipeline: letter.isUppercase ? try parseUnconditionalPipelineBlock(predicate) : .init(),
+					pipeline: letter.isUppercase
+						? try parseUnconditionalPipelineBlock(predicate, isFallible: kind != .unconditional)
+						: .init(),
 				),
 			)
 		}
@@ -339,10 +341,15 @@ private struct FormatParser {
 	}
 
 	/// Parses a `<non-nullary-unconditional-placeholder>`'s pipeline & its
-	/// `<block-terminator>`.
-	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate)
+	/// `<block-terminator>`: a `<fallible-unconditional-placeholder>`'s iff
+	/// `isFallible`, else an `<infallible-unconditional-placeholder>`'s.
+	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate, isFallible: Bool)
 	throws(ParsingError) -> Pipeline {
-		try parsePipelineBlock(kind: predicate == .input ? .unconditional : .unconditionalString)
+		try parsePipelineBlock(
+			kind: predicate == .input
+				? isFallible ? .input : .unconditional
+				: isFallible ? .string : .unconditionalString,
+		)
 	}
 
 	/// Parses a `<format-template>`'s `<placeholder>`.
@@ -363,7 +370,7 @@ private struct FormatParser {
 			}
 			return .unconditional(
 				predicate,
-				pipeline: isNonNullary ? try parseUnconditionalPipelineBlock(predicate) : .init(),
+				pipeline: isNonNullary ? try parseUnconditionalPipelineBlock(predicate, isFallible: true) : .init(),
 			)
 		}
 		if lowercaseLetter == unaryMatch {
@@ -606,11 +613,15 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	case any
 	case boolean
 	case date
+	/// A `<fallible-unconditional-placeholder>`'s `%I…+` pipeline's kind, which
+	/// no block has.
+	case input
 	case number
 	case string
 	case timeOnly
 	case unconditional
-	/// A `%L` or `%K` pipeline's kind, which no block has.
+	/// An `<infallible-unconditional-placeholder>`'s `%L…+` or `%K…+` pipeline's
+	/// kind, which no block has.
 	case unconditionalString
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
@@ -618,7 +629,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .any, .boolean, .date, .number, .string, .timeOnly:
 			true
-		case .unconditional, .unconditionalString:
+		case .input, .unconditional, .unconditionalString:
 			false
 		}
 	}
@@ -626,7 +637,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a non-nullary `<block-placeholder>`'s pipeline block.
 	var blockPlaceholderPipelineKind: Self {
 		switch self {
-		case .any, .boolean, .unconditional, .unconditionalString:
+		case .any, .boolean, .input, .unconditional, .unconditionalString:
 			.unconditional
 		case .date, .number, .string, .timeOnly:
 			self
@@ -640,6 +651,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<unconditional-pipeline>"
 		case .date:
 			"<date-pipeline>"
+		case .input:
+			"<input-pipeline>"
 		case .number:
 			"<number-pipeline>"
 		case .string:
@@ -679,6 +692,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			calls.first?.coercion != nil && calls.isStringTransformRun
 		case .date:
 			calls.followsTypes(from: isNamed ? nil : .date)
+		case .input:
+			calls.first?.coercion != nil && calls.followsTypes(from: nil)
 		case .number:
 			calls.followsTypes(from: isNamed ? nil : .number)
 		case .string:
