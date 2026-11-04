@@ -128,6 +128,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
 	case unexpectedCharacter(Character)
+	case unixTimeCoercionArgumentsNotSupported(String)
 	case unknownPreset(String)
 	case unknownTransform(String)
 
@@ -205,6 +206,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Nonexistent fields config: \(name)"
 		case let .numberCoercionArgumentsNotSupported(name):
 			"<number-coercion-arguments> are not supported for: \(name)"
+		case let .unixTimeCoercionArgumentsNotSupported(name):
+			"<unix-time-coercion-arguments> are not supported for: \(name)"
 		case let .reservedFieldNameCharacter(character):
 			"A field name must escape its reserved character: \(character)"
 		case .singleBranch:

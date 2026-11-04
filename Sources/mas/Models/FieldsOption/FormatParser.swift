@@ -127,8 +127,16 @@ private struct FormatParser {
 			default:
 				valueTransformByName[name]! // swiftlint:disable:this force_unwrapping
 			}
-		guard coercion?.hasArguments != true || transform.kind == .number || transform.kind == .numberToString else {
-			throw .numberCoercionArgumentsNotSupported(name)
+		if let coercion, coercion.hasArguments {
+			guard
+				coercion.coercion.isUnixTime
+				? transform.kind == .date || transform.kind == .dateOnly
+				: transform.kind == .number || transform.kind == .numberToString
+			else {
+				throw coercion.coercion.isUnixTime
+					? .unixTimeCoercionArgumentsNotSupported(name)
+					: .numberCoercionArgumentsNotSupported(name)
+			}
 		}
 		return .init(transform: transform, coercion: coercion?.coercion)
 	}
@@ -430,8 +438,10 @@ private struct FormatParser {
 			guard predicate.isCoercible else {
 				throw .coercionNotSupported(letter)
 			}
-			guard !coercion.hasArguments || predicate == .number else {
-				throw .numberCoercionArgumentsNotSupported(.init(letter))
+			guard !coercion.hasArguments || predicate == (coercion.coercion.isUnixTime ? .date : .number) else {
+				throw coercion.coercion.isUnixTime
+					? .unixTimeCoercionArgumentsNotSupported(.init(letter))
+					: .numberCoercionArgumentsNotSupported(.init(letter))
 			}
 		}
 		return .init(predicate: predicate, coercion: coercion?.coercion)
@@ -457,6 +467,9 @@ private struct FormatParser {
 		}
 		input.removeFirst()
 		skipWhitespace() // Unlike `<coercion>`'s, its closing `<argument-fence>`'s succeeding whitespace is ignored
+		if arguments.first == unixTimeCoercionArgument, arguments.dropFirst().allSatisfy({ $0 == nil }) {
+			return .init(coercion: .unixTime, hasArguments: true)
+		}
 		let triviaPrefixPattern = arguments[numberFormatArgumentCount] ?? ""
 		let triviaSuffixPattern = arguments[numberFormatArgumentCount + 1] ?? ""
 		guard let triviaPrefixRegex = TriviaRegex(pattern: triviaPrefixPattern) else {
@@ -588,7 +601,8 @@ private struct FormatParser {
 /// A parsed `<coercion>` or `<number-coercion>`.
 private struct ParsedCoercion { // swiftlint:disable:this one_declaration_per_file
 	let coercion: Coercion
-	/// Whether `<number-coercion-arguments>` are present.
+	/// Whether `<number-coercion-arguments>` or `<unix-time-coercion-arguments>`
+	/// are present.
 	let hasArguments: Bool
 }
 
@@ -735,19 +749,19 @@ private extension TransformCall {
 	/// a value of its input type.
 	func follows(_ type: TransformValueType) -> Bool {
 		let inputType = transform.kind.inputType
-		return if coercion == nil {
-			inputType == type || transform.kind == .dateOnly && type == .dateOnly
-		} else {
+		return if let coercion {
 			switch type {
 			case .date, .dateOnly, .timeOnly:
 				inputType == .string
 			case .number:
-				inputType == .string || inputType == .date
+				inputType == .string || inputType == .date && coercion.isUnixTime
 			case .string:
 				inputType != .string
 			case .version:
 				inputType != .timeOnly
 			}
+		} else {
+			inputType == type || transform.kind == .dateOnly && type == .dateOnly
 		}
 	}
 }
@@ -777,6 +791,7 @@ private extension Predicate {
 // MARK: - Constants
 
 let formatModifierPrefix = Character(":")
+private let unixTimeCoercionArgument = "unix-time"
 let placeholderPrefix = Character("%")
 let blockTerminator = Character("+")
 let namePrefix = Character(":")

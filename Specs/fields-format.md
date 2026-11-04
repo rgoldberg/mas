@@ -122,7 +122,7 @@ value-transform-pipeline =
   | <coerced-chain>
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
-number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
+number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
 version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
@@ -144,11 +144,12 @@ coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-
 
 coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
-coerced-date-chain      = <date-chain(<transform-call-prefix> <coercion>)>
+coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
+unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
 
 after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
-after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
+after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
 after-date-run   = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
@@ -180,9 +181,10 @@ its input type differs from that type, because it otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
 `<format-block>`'s 1st call, or one that a `<named-format-reference>`
 immediately precedes, whose preset determines it) may take one regardless. A
-date or a time-only coerces only to a string, and neither a number nor a version
-coerces to a time-only, because its rendering is otherwise not a value of that
-type, so a pipeline that means to parse it must coerce it to a string 1st (e.g.,
+date or a time-only coerces only to a string, neither a number nor a version
+coerces to a time-only & a number coerces to a date only as a Unix time, because
+its rendering is otherwise not a value of that type, so a pipeline that means to
+parse it must coerce it to a string 1st (e.g.,
 `%.D..uppercase..:,,,,,.*:round+`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
@@ -191,7 +193,8 @@ arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
 is not a canonical number).
 
 An **argument** is an element of an argument list: a transform's, a [number
-coercion's](#coercion), [`N`'s](fields.md#sort-number-segments), or
+coercion's](#coercion), a [Unix time coercion's](#chronologic-formatting),
+[`N`'s](fields.md#sort-number-segments), or
 [`C`'s](fields.md#sort-chronologic-segments).
 
 An argument ignores its outer bare whitespace, which must be escaped to be
@@ -212,7 +215,9 @@ the annotated transform. If the coercion is successful, the transform is applied
 to the coerced input; otherwise, formatting [aborts](#success--failure).
 
 A number or number-to-string transform's coercion may take
-[`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`).
+[`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`), and a date
+transform's may take [`<unix-time-coercion-arguments>`](#chronologic-formatting)
+(e.g., `..:unix-time:dateOnly`).
 
 Coercing any value to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
@@ -475,7 +480,7 @@ behind).
 placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
-modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> ] (* non-structural *)
+modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> | <date-coercion> ] (* non-structural *)
 predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
 nullary-predicate =
@@ -845,9 +850,14 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-date-matcher          = [ <coercion> ] <nullary-date>
-non-nullary-date-matcher      = [ <coercion> ] <non-nullary-date>
-non-nullary-date-success      = [ <coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
+date-coercion                 = <coercion> [ <unix-time-coercion-arguments> ]
+unix-time-coercion            = <coercion> <unix-time-coercion-arguments>
+unix-time-coercion-arguments  = <argument-fence> <unix-time-coercion-argument> <argument-fence>
+unix-time-coercion-argument   = "unix-time"
+
+nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
+non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>
+non-nullary-date-success      = [ <date-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
 nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
 non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
@@ -875,9 +885,11 @@ followed by ASCII digits, or both, in that order; then optionally an exponent
 indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `-1`,
 `.5`, or `1.5e9`).
 
-A `<coercion>` to a date also coerces a number, or a string that is not an
-ISO-8601 value but whose entire content is a decimal number, as a Unix time
-(e.g., `%.D` matches `0` & `"0"`, but `%D` matches neither).
+With `<unix-time-coercion-arguments>`, a `<coercion>` to a date instead coerces
+a number, or a string whose entire content is a decimal number, as a Unix time
+(e.g., `%.:unix-time:D` matches `0` & `"0"`, but not `"2020-03-18"`, while `%.D`
+matches only the last), because a number or a decimal string is otherwise rarely
+a time (e.g., `%m.d.n+` would otherwise render the price `5.6` as a date).
 
 An ISO-8601:
 

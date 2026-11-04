@@ -126,3 +126,8 @@ a matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would
 add a 2nd syntax for 1 concept, while a `<coercion>` already converts without
 any other transform (e.g., `%.d`), and it would lengthen even the simplest
 pipeline (e.g., `.toString.uppercase` instead of `..uppercase`).
+
+In specs, never let a `<coercion>` to a date accept a number or a decimal number
+without `<unix-time-coercion-arguments>` (e.g., `%.d` for `5.6` or `"1.2"`),
+because a number or a decimal string is rarely a time, so it would match a value
+that a later branch (e.g., `%m.d.n+`) means to match.
