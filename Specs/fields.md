@@ -572,7 +572,7 @@ index = {integer} (* error: its normalized index is invalid *)
 The **reference fields config** is a semi-mutable copy of the baseline fields
 config, in which each removed field spec is replaced with `null`. The order of
 field specs in the reference fields config is immutable (i.e., unaffected by any
-inserts, moves, or removals performed in `<field-spec-edits-section>`).
+insertions, moves, or removals performed in `<field-spec-edits-section>`).
 
 Each index references a position in a list of the reference fields config's
 field specs, in reference fields config order, filtered to include:

@@ -311,7 +311,7 @@ next line, so a row is as many lines as its most-lined cell or key. This needs:
 
 ### Streaming Output
 
-mas reads every item before outputting any. Let key-value & JSON output output
+mas reads every item before outputting any. Let key-value & JSON output render
 each item as soon as it is read, unless item sorting reorders items, which
 [unlisted fields](../Specs/fields.md#unlisted-fields) allow.
 
