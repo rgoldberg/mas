@@ -609,8 +609,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([used](../Specs/fields.md#sort-boundaries))
     - REJECTED: GNU Extended POSIX character class / bracket expression class
 100. - date block: `%D`'s `<conditional-block>`, whose pipeline's 1st call takes
-       no `<coercion>` iff it is a `dateOnly` or a `timeZone`, the latter of
-       which no `dateOnly` may precede
+       no `<coercion>` iff it is a `dateOnly` or a `timeZone`
      - time-only block: `%C`'s `<conditional-block>`, whose pipeline's 1st call
        takes no `<coercion>` iff it is a `timeOnlyTimeZone`
      - REJECTED: clock block / time block
@@ -636,9 +635,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - success clause: a `<success-block>` or a `<success-pipeline>`
        (`<success-clause>`), evaluated iff its enclosing matcher succeeds
      - fallible / infallible unconditional placeholder: an unconditional
-       placeholder whose pipeline may / may not abort formatting, which an
-       `<unconditional-block>` requires (`<fallible-unconditional-placeholder>`
-       / `<infallible-unconditional-placeholder>`)
+       placeholder whose pipeline may / may not abort formatting, the latter of
+       which an `<unconditional-block>` requires
+       (`<fallible-unconditional-placeholder>` /
+       `<infallible-unconditional-placeholder>`)
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
        `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)

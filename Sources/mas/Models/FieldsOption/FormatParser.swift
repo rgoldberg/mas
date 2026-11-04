@@ -447,7 +447,8 @@ private struct FormatParser {
 		return .init(predicate: predicate, coercion: coercion?.coercion)
 	}
 
-	/// Parses an optional `<coercion>` or `<number-coercion>`.
+	/// Parses an optional `<coercion>`, `<number-coercion>`, or
+	/// `<date-coercion>`.
 	private mutating func parseCoercion() throws(ParsingError) -> ParsedCoercion? {
 		guard try parseModifier(in: [coercionPrefix]) != nil else {
 			return nil
@@ -598,7 +599,7 @@ private struct FormatParser {
 	}
 }
 
-/// A parsed `<coercion>` or `<number-coercion>`.
+/// A parsed `<coercion>`, `<number-coercion>`, or `<date-coercion>`.
 private struct ParsedCoercion { // swiftlint:disable:this one_declaration_per_file
 	let coercion: Coercion
 	/// Whether `<number-coercion-arguments>` or `<unix-time-coercion-arguments>`

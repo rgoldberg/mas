@@ -50,7 +50,7 @@ struct Pipeline: Equatable { // swiftlint:disable:this one_declaration_per_file
 }
 
 /// A `<*transform-call>`: its `<value-transform>` & its `<coercion>` (or
-/// `<number-coercion>`), if any.
+/// `<number-coercion>` or `<date-coercion>`), if any.
 struct TransformCall: Equatable { // swiftlint:disable:this one_declaration_per_file
 	let transform: Transform
 	let coercion: Coercion?
@@ -109,8 +109,9 @@ enum Predicate: Character { // swiftlint:disable:this one_declaration_per_file
 	case whitespace = "w" // swiftlint:enable sorted_enum_cases
 }
 
-/// A `<coercion>`, with its `<number-coercion-arguments>`' values (their
-/// defaults absent them, as for a boolean coercion, which has none).
+/// A `<coercion>`, with its `<number-coercion-arguments>`' or
+/// `<unix-time-coercion-arguments>`' values (their defaults absent them, as for
+/// a boolean coercion, which has none).
 struct Coercion: Hashable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<coercion>` without `<number-coercion-arguments>`.
 	static let `default` = Self(numberConventions: .canonical, triviaPrefixRegex: .empty, triviaSuffixRegex: .empty)

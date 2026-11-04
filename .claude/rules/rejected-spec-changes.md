@@ -87,7 +87,7 @@ section to it would still fail.
 
 In specs, never allow a `<coercion>` on a call whose input type equals the type
 of the value that it receives, unless a `<named-format-reference>` immediately
-precedes it (e.g., `.round..round` or `%S..uppercase+`), because it cannot
+precedes it (e.g., `.round..round` or `%S..uppercase++`), because it cannot
 affect what the call means, nor require one on a call whose types match (e.g.,
 `.numberFormat.uppercase`), because it would add nothing.
 
@@ -100,8 +100,8 @@ or a format input that it cannot match.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,
-`.dateOnly..timeOnlyTimeZone:UTC:`, `%.D..round+`, or
-`%N..timeOnlyTimeZone:UTC:+`), because its rendering is not a value of that
+`.dateOnly..timeOnlyTimeZone:UTC:`, `%.D..round++`, or
+`%N..timeOnlyTimeZone:UTC:++`), because its rendering is not a value of that
 type, so it would abort, while a pipeline that means to parse it can coerce it
 to a string 1st.
 

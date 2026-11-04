@@ -185,7 +185,7 @@ date or a time-only coerces only to a string, neither a number nor a version
 coerces to a time-only & a number coerces to a date only as a Unix time, because
 its rendering is otherwise not a value of that type, so a pipeline that means to
 parse it must coerce it to a string 1st (e.g.,
-`%.D..uppercase..:,,,,,.*:round+`).
+`%.D..uppercase..:,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
@@ -862,10 +862,10 @@ nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
 non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
 
-nullary-date          = "d" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
-non-nullary-date      = "D" (* is chronologic with a date; output type: date; value: {ISO date / datetime, per input, in system time zone} *)
-nullary-time-only     = "c" (* is time-only;               output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
-non-nullary-time-only = "C" (* is time-only;               output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
+nullary-date          = "d" (* is date;      output type: date; value: {ISO date / datetime, per input, in system time zone} *)
+non-nullary-date      = "D" (* is date;      output type: date; value: {ISO date / datetime, per input, in system time zone} *)
+nullary-time-only     = "c" (* is time-only; output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
+non-nullary-time-only = "C" (* is time-only; output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
