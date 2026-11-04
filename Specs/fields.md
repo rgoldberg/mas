@@ -1040,7 +1040,11 @@ does (e.g., `a` equals `A`, but `é` does not equal `e`).
 ```ebnf
 locale = "L" [ <locale-identifier> ] <sort-option-terminator> (* transitive default locale-identifier: <canonical-locale>; last wins; inherited *)
 
-locale-identifier = <canonical-locale> | <system-locale> | {string: locale identifier} (* default: <system-locale> *)
+locale-identifier =
+  <canonical-locale>
+  | <system-locale>
+  | {string: ICU or BCP 47 identifier of a locale that Foundation makes available}
+  (* default: <system-locale> *)
 
 canonical-locale = 'canonical'
 system-locale    = 'system'
