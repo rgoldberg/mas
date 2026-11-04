@@ -193,11 +193,11 @@ private func scientificNotation(
 
 private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:([eE])([+-]?[0-9]+))?/
 
-/// The time zone a `<time-zone-code>` identifies: an IANA Time Zone Database
-/// identifier, Foundation time zone abbreviation, UTC offset, or `system`, each
-/// case-insensitive; else `nil`.
+/// The time zone a `<time-zone-code>` identifies: `system`, or an IANA Time
+/// Zone Database identifier, Foundation time zone abbreviation, or UTC offset,
+/// each case-insensitive; else `nil`.
 func timeZone(forCode code: String) -> TimeZone? {
-	code.caseInsensitiveCompare("system") == .orderedSame
+	code == "system"
 		? Environment.current.systemTimeZone
 		: TimeZone.abbreviationDictionary[code.uppercased()].flatMap(TimeZone.init(identifier:))
 			?? (FileManager.default.subpaths(atPath: "/usr/share/zoneinfo") ?? [])

@@ -444,8 +444,12 @@ date-time-zone-arguments      = <argument-fence> [ <time-zone-code> ] <argument-
 time-only-time-zone-arguments = <argument-fence> [ <time-zone-code> ] <argument-separator>? [ <reference-date> ] <argument-fence>
 
 time-zone-code =
-  {string: IANA Time Zone Database identifier, Foundation time zone abbreviation, UTC offset, or "system", each case-insensitive}
-  (* default: "system" *)
+  <system-time-zone>
+  | {string: IANA Time Zone Database identifier, Foundation time zone abbreviation, or UTC offset, each case-insensitive}
+  (* default: <system-time-zone> *)
+
+system-time-zone = 'system'
+
 reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone} *)
 ```
 <!--markdownlint-enable line-length-->

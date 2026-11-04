@@ -145,9 +145,9 @@ private extension MASTests {
 		#expect(timeZone(forCode: code)?.secondsFromGMT() == secondsFromGMT)
 	}
 
-	@Test(arguments: ["system", "SYSTEM"])
-	func `system identifies the system time zone`(code: String) throws {
-		#expect(try inSystemTimeZone("Asia/Tokyo") { timeZone(forCode: code)?.identifier } == "Asia/Tokyo")
+	@Test
+	func `system identifies the system time zone`() throws {
+		#expect(try inSystemTimeZone("Asia/Tokyo") { timeZone(forCode: "system")?.identifier } == "Asia/Tokyo")
 	}
 
 	@Test(arguments: [
@@ -165,6 +165,7 @@ private extension MASTests {
 		"EST+5",
 		"America",
 		"Nowhere/Land",
+		"SYSTEM",
 	])
 	func `rejects an invalid time zone code`(code: String) {
 		#expect(timeZone(forCode: code) == nil)
