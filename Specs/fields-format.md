@@ -145,7 +145,7 @@ coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-
 
 coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
-coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
+coerced-date-chain      = <date-chain(<transform-call-prefix> <non-date-only-coercion>)>
 coerced-date-only-chain = <date-only-chain(<transform-call-prefix> <date-only-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
@@ -482,7 +482,10 @@ behind).
 placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
-modifiers = [ <abort-on-success> | <abort-on-failure> | <branch-negation> ] [ <number-coercion> | <date-coercion> | <date-only-coercion> ] (* non-structural *)
+modifiers =
+  [ <abort-on-success> | <abort-on-failure> | <branch-negation> ]
+  [ <number-coercion> | <non-date-only-coercion> | <date-only-coercion> ]
+  (* non-structural *)
 predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
 nullary-predicate =
@@ -855,7 +858,7 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-date-coercion              = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default non-date-only-formats: 'iso' *)
+non-date-only-coercion     = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default non-date-only-formats: 'iso' *)
 date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
 version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
 unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
@@ -868,10 +871,10 @@ unix-time-date-formats    = [ ( <date-iso-format> <argument-separator> )+ ] <uni
 date-format     = <date-iso-format> | <unix-time>
 date-iso-format = <iso> | <iso-date> | <iso-datetime>
 
-nullary-date-matcher          = [ <date-coercion> | <date-only-coercion> ] <nullary-date>
-non-nullary-date-matcher      = [ <date-coercion> | <date-only-coercion> ] <non-nullary-date>
+nullary-date-matcher          = [ <non-date-only-coercion> | <date-only-coercion> ] <nullary-date>
+non-nullary-date-matcher      = [ <non-date-only-coercion> | <date-only-coercion> ] <non-nullary-date>
 non-nullary-date-success      =
-  [ <date-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
+  [ <non-date-only-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
   | <date-only-coercion> <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-only-pipeline>)>
 nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
