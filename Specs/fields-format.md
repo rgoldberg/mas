@@ -166,12 +166,13 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
     [format input](#success--failure)).
 
 A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
-`<coercion>` cannot affect what a call whose input type equals the type of the
-value that it receives means, so only a call whose input type differs takes one,
-or a call that a `<named-format-reference>` immediately precedes, whose value's
-type only its preset determines. No `<date-transform>` coerces a time-only
-value, nor any `<time-only-transform>` a date, because neither's rendering is
-ever a value of the other's type.
+call whose value's type the syntax text determines takes a `<coercion>` only if
+its input type differs from that type, because it otherwise has nothing to
+coerce. A call whose value's type the syntax text does not determine (e.g., a
+`<format-block>`'s 1st call, or one that a `<named-format-reference>`
+immediately precedes, whose preset determines it) may take one regardless. No
+`<date-transform>` coerces a time-only value, nor any `<time-only-transform>` a
+date, because neither's rendering is ever a value of the other's type.
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
