@@ -751,7 +751,6 @@ private func iso8601TimePrefix(of string: Substring, isSecondOptional: Bool = fa
 	)
 }
 
-private nonisolated(unsafe) let numberTextRegex = #/[-+]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?/#
 private nonisolated(unsafe) let iso8601DateRegex = #/([+-][0-9]{5,}|[0-9]{4})-([0-9]{2})-([0-9]{2})/#
 private nonisolated(unsafe) let iso8601TimeRegex =
 	#/([0-9]{2}):([0-9]{2})(?::([0-9]{2})(?:[.,]([0-9]+))?)?([Zz]|[+-][0-9]{2}(?::?[0-9]{2})?)?/#
@@ -773,9 +772,7 @@ private func iso8601UTCOffsetTimeZone(_ offset: Substring) -> TimeZone? {
 /// `string`'s Unix time instant iff its entire content is a decimal number,
 /// else `nil`.
 func unixTimeInstant(in string: Substring) -> Int? {
-	(try? /[-+]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?/.wholeMatch(in: string)) != nil
-		? DecimalNumber(string).flatMap(unixTimeInstant)
-		: nil
+	DecimalNumber(string).flatMap(unixTimeInstant)
 }
 
 /// The Unix time `seconds`' instant, truncated to whole milliseconds; else
@@ -863,7 +860,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		case let .input(node):
 			node
 		case .number:
-			string.wholeMatch(of: unsafe numberTextRegex).map { _ in .number(.fallback(string)) } ?? .string(string)
+			DecimalNumber(string).map { _ in .number(.fallback(string)) } ?? .string(string)
 		}
 	}
 
