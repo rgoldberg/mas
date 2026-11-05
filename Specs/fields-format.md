@@ -43,9 +43,9 @@ renders it coerced to a string.
 
 An output format modifies a value's text only as its syntax requires, when it
 renders the value (e.g., JSON output renders the number `+01.50` as `1.50` &
-`.5` as `0.5`, because a JSON number has no leading `+`, no leading `0` before a
-nonzero digit & at least 1 digit before its `.`, but may have trailing `0`s,
-while table & key-value output render them as is).
+`.5` as `0.5`, because a JSON number has no leading `+`, no `0` before another
+digit of its integer part & at least 1 digit before its `.`, but may have
+trailing `0`s, while table & key-value output render them as is).
 
 ##### Pipelines
 
