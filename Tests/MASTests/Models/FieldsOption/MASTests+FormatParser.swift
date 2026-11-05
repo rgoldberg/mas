@@ -527,18 +527,42 @@ private extension MASTests {
 			(
 				"%S:standard.dateOnly+-+",
 				.string("x"),
-				.transformInputTypeMismatch(transform: .dateOnly, input: "x"),
-				"Transform dateOnly requires an input of its input type (<coercion> '.' coerces it): x",
+				.uncoercibleTransformInput(transform: .dateOnly, input: "x"),
+				"Transform dateOnly requires an input of its input type: x",
+			),
+			(
+				"%S:standard.dateOnly+-+",
+				.string("2020-03-18"),
+				.transformInputTypeMismatch(transform: .dateOnly, input: "2020-03-18"),
+				"Transform dateOnly requires an input of its input type (<coercion> '.' coerces it): 2020-03-18",
 			),
 			(
 				".round",
 				.string("x"),
-				.transformInputTypeMismatch(transform: .round, input: "x"),
-				"Transform round requires an input of its input type (<coercion> '.' coerces it): x",
+				.uncoercibleTransformInput(transform: .round, input: "x"),
+				"Transform round requires an input of its input type: x",
+			),
+			(
+				".round",
+				.string("5"),
+				.transformInputTypeMismatch(transform: .round, input: "5"),
+				"Transform round requires an input of its input type (<coercion> '.' coerces it): 5",
+			),
+			(
+				".round",
+				.bool(true),
+				.uncoercibleTransformInput(transform: .round, input: "true"),
+				"Transform round requires an input of its input type: true",
+			),
+			(
+				".uppercase",
+				.number(5),
+				.transformInputTypeMismatch(transform: .uppercase, input: "5"),
+				"Transform uppercase requires an input of its input type (<coercion> '.' coerces it): 5",
 			),
 		],
 	)
-	func `a transform's error suggests a coercion only if a default coercion might coerce its input`(
+	func `a transform's error suggests a coercion iff a default coercion would coerce its input`(
 		format: String,
 		value: JSON.Node,
 		error: FormattingError,

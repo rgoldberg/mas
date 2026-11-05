@@ -201,11 +201,11 @@ struct Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
 
 /// An error reported while formatting a value.
 enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
-	/// A transform without `<coercion>` was applied to an input that is not
-	/// already of its input type.
+	/// A transform without `<coercion>` was applied to an input not of its input
+	/// type, which a default coercion would coerce to that type.
 	case transformInputTypeMismatch(transform: Transform, input: String)
-	/// A transform without `<coercion>` was applied to an input that a default
-	/// coercion cannot coerce to its input type either.
+	/// A transform without `<coercion>` was applied to an input not of its input
+	/// type, which a default coercion would not coerce to that type.
 	case uncoercibleTransformInput(transform: Transform, input: String)
 
 	var description: String {
@@ -469,7 +469,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 /// a type that its input format does not support, as a default coercion would
 /// coerce it (fields-format.md "Value Types").
 struct InputFormat { // swiftlint:disable:this one_declaration_per_file
-	/// JSON has no date-only, datetime, time-only, or version value.
+	/// JSON supports no date-only, datetime, time-only, or version.
 	static let json = Self(supportedChronologicForms: [], supportsVersions: false)
 
 	/// The chronologic forms that this input format supports.
@@ -1003,10 +1003,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 				nil
 			}
 		guard coerced != nil || call.coercion != nil else {
-			if case .input = self {
-				throw .uncoercibleTransformInput(transform: call.transform, input: string)
-			}
-			throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			throw inputTypeError(for: call, isCoercible: Self.chronologic(from: node, formats: formats) != nil)
 		}
 		return coerced
 	}
@@ -1021,15 +1018,21 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		case .number:
 			return self
 		default:
-			guard let coercion = call.coercion else {
-				throw .transformInputTypeMismatch(transform: call.transform, input: string)
+			let coerced = Self.number(from: node, coercion: call.coercion ?? .default)
+			guard call.coercion != nil else {
+				throw inputTypeError(for: call, isCoercible: coerced != nil)
 			}
-			return if case let .input(node) = self {
-				.number(from: node, coercion: coercion)
-			} else {
-				.number(from: .string(string), coercion: coercion)
-			}
+			return coerced
 		}
+	}
+
+	/// The error for this value as the input of `call`, which has no
+	/// `<coercion>`, suggesting one iff `isCoercible`, i.e., iff a default
+	/// coercion would coerce this value to `call`'s input type.
+	private func inputTypeError(for call: TransformCall, isCoercible: Bool) -> FormattingError {
+		isCoercible
+			? .transformInputTypeMismatch(transform: call.transform, input: string)
+			: .uncoercibleTransformInput(transform: call.transform, input: string)
 	}
 }
 
