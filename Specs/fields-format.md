@@ -381,7 +381,7 @@ scale-arguments =
   <argument-fence>
 
 exponent           = {integer}           (* divides the input by 10 to this power before rendering *)
-significant-digits = {integer: 1 to 100} (* rounds to this many total digits; absent: no rounding *)
+significant-digits = {integer: 1 to 100} (* rounds to this many significant digits; absent: no rounding *)
 fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the point; 0: integer; absent: exact *)
 ```
 <!--markdownlint-enable line-length-->
