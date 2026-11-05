@@ -963,8 +963,8 @@ string `5.6` as a date).
 every chronologic number, so a branch that means to match a number must precede
 theirs or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
 `%m.:iso:d.n+`, but not `%m.d.n+`, which would render the price `5.6` as a
-date). A call whose input is a number must omit `<date-coercion-arguments>` or
-list `<unix-time>` (e.g., `.round..dateOnly` or
+date). A call whose input the syntax text determines to be a number must omit
+`<date-coercion-arguments>` or list `<unix-time>` (e.g., `.round..dateOnly` or
 `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which can
 only abort).
 
@@ -975,12 +975,12 @@ pipeline of a matcher's `<date-only-coercion>`, because it cannot affect that
 value (e.g., `%.:iso-date:D.dateOnly+-+` is an error, while `%.:iso-date:D%d+-+`
 outputs the date-only).
 
-A version has no `:`, so it is never a datetime, so a call whose input is a
-version must list a `<date-format>` other than `<iso-datetime>` (e.g.,
-`%.V..:iso,iso-datetime:dateOnly+-+`, but not `%.V..:iso-datetime:dateOnly+-+`,
-which can only abort), and only `<unix-time>` lets `timeZone` affect its value
-(e.g., `%.V..:unix-time:timeZone:UTC:+-+`, but not `%.V..:iso:timeZone:UTC:+-+`,
-whose value can only be a date-only).
+A version has no `:`, so it is never a datetime, so a call whose input the
+syntax text determines to be a version must list a `<date-format>` other than
+`<iso-datetime>` (e.g., `%.V..:iso,iso-datetime:dateOnly+-+`, but not
+`%.V..:iso-datetime:dateOnly+-+`, which can only abort), and only `<unix-time>`
+lets `timeZone` affect its value (e.g., `%.V..:unix-time:timeZone:UTC:+-+`, but
+not `%.V..:iso:timeZone:UTC:+-+`, whose value can only be a date-only).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.
