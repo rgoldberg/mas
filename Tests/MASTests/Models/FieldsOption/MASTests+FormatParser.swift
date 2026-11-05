@@ -530,7 +530,10 @@ private extension MASTests {
 			("%N%n+%i+", .number(42), "42"),
 			("%.N%n+%i+", .string("42"), "42"),
 			(".round", .number(5), "5"),
-			("..round", .string("+2.4"), "+2"),
+			("..round", .string("+2.4"), "2"),
+			("%.n", .string("+01.50"), "1.50"),
+			("%.n", .string(".5"), "0.5"),
+			("%.:,,,,,,[.]:n", .string("5."), #""5.""#),
 			("..:,,,,,[$]:round", .string("$2.4"), #""$2""#),
 			(".numberFormat", .number(5), #""5""#),
 			("%t", .bool(true), "true"),
@@ -544,7 +547,10 @@ private extension MASTests {
 	)
 	func `renders a format's value at its type iff JSON supports it`(format: String, value: JSON.Node, json: String)
 	throws {
-		#expect(try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.description == json)
+		#expect(
+			try parsedFieldSpec(format).format.rendered(value: value, label: "L", name: "n")?.rendered(jsonConfig: .default)
+				== json,
+		)
 	}
 
 	@Test(
