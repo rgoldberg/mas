@@ -110,8 +110,8 @@ leader-pattern = ^{string}^ (* default: "▁" *)
   leader's width is the width of its item's widest rendered key, less the width
   of its own rendered key, plus the width of `<leader-pattern>`, so the widest
   key's leader is 1 `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a
-  tab) is printed once, with no space-fill, because no number of repetitions can
-  fill any width.
+  tab) is rendered once, with no space-fill, because no number of repetitions
+  can fill any width.
 
 ## Leading Spacing
 

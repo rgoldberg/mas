@@ -267,9 +267,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - display: a command's purpose
     - source from: take a config or setting from
     - read: take in input (e.g., an item) from its source
-    - REJECTED: decode / obtain / get / compute / make / resolve (in this sense;
-      see 55) / interpolate / interpolation / receives / evaluate on / evaluate
-      for
+    - REJECTED: decode / obtain / get / compute / make / print (except the
+      `print` character class & pretty-printing) / resolve (in this sense; see
+      55) / interpolate / interpolation / receives / evaluate on / evaluate for
 37. - neither … nor: independent prohibition applied individually to multiple
       items (e.g., "Neither `ELEMENT` nor `SEPARATOR` may match empty text")
     - REJECTED: X & Y must not / both … must not (when expressing independent

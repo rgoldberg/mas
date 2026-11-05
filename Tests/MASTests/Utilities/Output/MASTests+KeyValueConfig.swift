@@ -170,7 +170,7 @@ private extension MASTests {
 	}
 
 	@Test(arguments: ["\t", "\u{301}"])
-	func `key-value prints a 0-width leader pattern once per row`(pattern: String) throws {
+	func `key-value renders a 0-width leader pattern once per row`(pattern: String) throws {
 		#expect(
 			try keyValue(
 				of: twoItems,

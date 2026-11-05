@@ -22,7 +22,7 @@ private extension MASTests {
 			("\u{301}", false, "\u{301}"),
 		],
 	)
-	func `a table separator fills its width, except a 0-width separator, which is printed once`(
+	func `a table separator fills its width, except a 0-width separator, which is rendered once`(
 		pattern: String,
 		broken: Bool,
 		separatorLine: String,
