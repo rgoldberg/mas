@@ -666,7 +666,9 @@ private extension MASTests {
 	}
 
 	@Test(arguments: ["/P", "/D", "/aP-"])
-	func `all-conforming is an error in an adjustment set per positional-order or document-order`(base: String) throws {
+	func `effective all-conforming is an error in an adjustment set per positional-order or document-order`(
+		base: String,
+	) throws {
 		let standard = SelectedFieldsConfig(
 			fieldSpecs: standardFixture.fieldSpecs,
 			fieldOrder: try parseFieldsConfig(base, outputFormat: .json(.default)).fieldOrder,
@@ -679,6 +681,30 @@ private extension MASTests {
 				outputFormat: .json(.default),
 			)
 		}
+		#expect(throws: Never.self) {
+			try resolvedFieldsConfig(
+				from: "@default@unsuffixed/ka",
+				standard: standard,
+				all: allFixture,
+				outputFormat: .json(.default),
+			)
+		}
+	}
+
+	@Test
+	func `overridden all-conforming means what the adjustment set without it means`() throws {
+		let standard = SelectedFieldsConfig(
+			fieldSpecs: standardFixture.fieldSpecs,
+			fieldOrder: try parseFieldsConfig("/P", outputFormat: .json(.default)).fieldOrder,
+		)
+		let fieldOrder = try resolvedFieldsConfig(
+			from: "@default@unsuffixed/ka",
+			standard: standard,
+			all: allFixture,
+			outputFormat: .json(.default),
+		)
+		.fieldOrder
+		#expect(fieldOrder == (try parseFieldsConfig("/aP", outputFormat: .json(.default)).fieldOrder))
 	}
 
 	@Test(

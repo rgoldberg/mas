@@ -403,7 +403,7 @@ field-order-tiebreaker-prefix = "/"
 
 field-order-adjustment-set  =
   <field-order-adjustment>+
-  (* error: it contains <all-conforming> & is per <positional-order-option-set> or <document-order-option-set> *)
+  (* error: it has an effective <all-conforming> & is per <positional-order-option-set> or <document-order-option-set> *)
 field-order-sort-option-set = [ <field-order-adjustment>+ ] <non-adjustment-sort-option> [ <sort-option>+ ]
 
 field-order-adjustment     = <direction> | <nonconforming-comparison> | <nonconforming-placement>
@@ -461,8 +461,8 @@ The **field order**, in which each item's fields are output, is per
   letter, which `<all-conforming>` lacks, because no field order can order an
   unpositioned field as a positioned one. E.g., if `x` has `/aP`, `@x/-` ≡
   `@x/aP-` & `@x/f` ≡ `@x/aPf`; if `x` has `/D`, `@x/-` ≡ `@x/D-`; if `x` has
-  `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/k` & `@x/-/+`
-  are errors.
+  `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/ka` ≡ `@x/aP`,
+  while `@x/k`, `@x/ak` & `@x/-/+` are errors.
 
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also

@@ -546,8 +546,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 	/// `inheritedFieldOrder`, as if its `<order>` letter, if any, preceded it,
 	/// its `<nonconforming-comparison>`s & `<nonconforming-placement>`s then
 	/// setting the same-letter `<unpositioned-field-comparison>` &
-	/// `<unpositioned-field-placement>`, except `<all-conforming>`, an error.
-	/// Each option that a `<document-order-option-set>` or a
+	/// `<unpositioned-field-placement>`, except an effective `<all-conforming>`,
+	/// an error. Each option that a `<document-order-option-set>` or a
 	/// `<field-order-sort-option-set>` omits, including its tiebreak direction,
 	/// retains `inheritedFieldOrder`'s iff that is also `.document` or also
 	/// sorts, respectively; each option that a `<positional-order-option-set>`
@@ -598,17 +598,22 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				nil
 			}
 		var optionSet = inherited?.optionSet ?? .init()
+		var isAllConformingEffective = false
 		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
 			if let direction = SortOptionSet.Direction(rawValue: char) {
 				optionSet.direction = direction
 			} else if let comparison = OrderOptionSet.UnpositionedFieldComparison(rawValue: char) {
 				optionSet.unpositionedFieldComparison = comparison
+				isAllConformingEffective = false
 			} else if let placement = OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) {
 				optionSet.unpositionedFieldPlacement = placement
 			} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
-				throw .allConformingUnsupported
+				isAllConformingEffective = true
 			}
 			input.removeFirst()
+		}
+		guard !isAllConformingEffective else {
+			throw .allConformingUnsupported
 		}
 		let tiebreakDirection = try parseFieldOrderTiebreaker(&input)
 		return switch (order, outputFormat, tiebreakDirection) {

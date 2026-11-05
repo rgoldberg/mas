@@ -160,7 +160,7 @@ In specs, specify syntax according to the 1st of these that applies:
    branch).
 3. Attach an error comment: syntax that contradicts itself, or cannot mean what
    it says, when only context outside the syntax text decides it, or only a
-   comparison of variable tokens' values (e.g., `k` in a
+   comparison of variable tokens' values (e.g., an effective `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`,
    or a digit group separator that equals the decimal separator).
 4. Otherwise: allow it, even if its output is merely misaligned or split into
