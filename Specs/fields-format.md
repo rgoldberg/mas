@@ -38,7 +38,7 @@ A **default coercion** is a `<coercion>` without arguments.
 An **implicit coercion** coerces a field value, at its original type, absent a
 `<coercion>`, wherever syntax requires a type that its input format does not
 support, iff a default coercion would coerce it to that type, because no value
-could otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
+can otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
 input, `%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` &
 `.dateOnly` accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces
 it, ignoring its defaults (e.g., `%.:iso:d` does not match `0`).
