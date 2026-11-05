@@ -586,7 +586,7 @@ success-pipeline =
   | <unconditional-string-pipeline>
   | <named-unconditional-pipeline>
   | <whitespace-pipeline>
-  | <named-format-pipeline(<unconditional-format-name>)>
+  | <named-format-pipeline(<preset-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
@@ -664,7 +664,7 @@ preceding & succeeding.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-fallible-unconditional-placeholder   = <unconditional-placeholder(<named-format-pipeline(<unconditional-format-name>)>, <string-pipeline>)>
+fallible-unconditional-placeholder   = <unconditional-placeholder(<named-format-pipeline(<preset-name>)>, <string-pipeline>)>
 infallible-unconditional-placeholder = <unconditional-placeholder(<unconditional-pipeline>, <unconditional-string-pipeline>)>
 
 unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
@@ -693,7 +693,10 @@ An unconditional placeholder's matcher always succeeds, but a `<coercion>` in
 its pipeline may abort formatting, except in an `<unconditional-block>`, because
 a `<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
 lets a label, a name, or a format input that no matcher can match be coerced
-(e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`).
+(e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`), and lets
+a template insert any named format, which may abort formatting (e.g., if preset
+`bytes` is `%+.N.scale:6,,0:+ MB`, `Size: %I:bytes+` renders `1500000` as
+`Size: 2 MB`).
 
 ###### Conditional Placeholders
 
