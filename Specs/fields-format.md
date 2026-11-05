@@ -248,8 +248,8 @@ transform's may take [`<date-coercion-arguments>`](#chronologic-formatting)
 
 Coercing any value to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
-call, cannot fail, while each other `<coercion>` may. A value coerced to a
-string is:
+call, cannot fail, while a `<coercion>` to any other type may. A value coerced
+to a string is:
 
 - `null` or [absent](fields.md#absent-values): an empty string, except as a
   transform's input, through which it remains unmodified.
