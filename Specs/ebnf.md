@@ -375,10 +375,10 @@ as a Swift Regex literal that the whole value must match (e.g.,
 `,`.
 
 A typed terminal **accepts** text iff the text is in its lexical form &
-satisfies its `CONSTRAINTS`, unless only something outside the
-[app](configs.md#configs) (e.g., a terminal) can determine the value's validity,
-in which case the app accepts any text in its lexical form & passes the value
-through unchecked.
+satisfies its `CONSTRAINTS`, except that an [app](configs.md#configs) does not
+check a constraint that only something outside it (e.g., a terminal) can
+determine, passing the value through unchecked (e.g., `H99:` is accepted, while
+`Hb` is an error, for [`<style-specifier>`](table.md#header)).
 
 For an `integer` or a `number`:
 
