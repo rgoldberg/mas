@@ -207,8 +207,9 @@ selected by, a command line.
 
 ### Working Fields Config
 
-The **working fields config** is a mutable copy of the base fields config, as
-modified by the command line so far.
+The **working fields config** is a mutable copy of the fields config that a
+`<fields-config>` extends (on a command line, the base fields config), as
+modified by that `<fields-config>` so far.
 
 ### Baseline Fields Config
 
