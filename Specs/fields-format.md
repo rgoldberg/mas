@@ -653,12 +653,12 @@ A `<failure-block>` is evaluated iff its enclosing matcher fails.
 
 Within a `<conditional-input-block>`, a `<block-placeholder>` is evaluated
 against the enclosing matcher's value (coerced, if it coerces), so it always
-succeeds; `%i` / `%I` are evaluated against their format's **input**, which no
-block modifies: in a field spec's format, the field value, at its original type;
-in a named format, the value against which its `<named-format-reference>`
-evaluates it (e.g., `%.:de:N%n (%i)++` renders `"1.234,5"` as
-`1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x` sets no format,
-renders it as `1234.5`).
+succeeds. A `<conditional-placeholder>`, a `%i` & a `%I` are each evaluated
+against the **format input**, which no block modifies: in a field spec's format,
+the field value, at its original type; in a named format, the value against
+which its `<named-format-reference>` evaluates it (e.g., `%.:de:N%n (%i)++`
+renders `"1.234,5"` as `1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x`
+sets no format, renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
