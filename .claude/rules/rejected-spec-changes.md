@@ -159,15 +159,15 @@ cannot affect what it means.
 
 In specs, never add a transform that only coerces a value's type (e.g., `toDate`
 in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because a
-matcher must still coerce before any pipeline runs (e.g., `%.D`), so it would
+matcher must still coerce before any pipeline runs (e.g., `%.N`), so it would
 add a 2nd syntax for 1 concept, while a `<coercion>` already coerces without any
-other transform (e.g., `%.d`), and it would lengthen even the simplest pipeline
+other transform (e.g., `%.n`), and it would lengthen even the simplest pipeline
 (e.g., `.toString.uppercase` instead of `..uppercase`).
 
 In specs, never let a default coercion or an implicit coercion to a date accept
 a decimal number (e.g., `%.d` or `%d` for `"1.2"`), because a string that holds
 a number is rarely a time, so it would match a value that a later branch (e.g.,
-`%m.d.s+`) means to match.
+`%m.ds+`) means to match.
 
 In specs, never make a number need `<unix-time>` for a default coercion or an
 implicit coercion to a date (e.g., `%.d`, `%d`, or `.dateOnly` for `0`), because

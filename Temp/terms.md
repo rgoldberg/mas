@@ -584,8 +584,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       as a Unix time
     - date-only coercion: a date coercion whose only `<date-format>` is
       `<iso-date>`, so its value is a date-only (`<date-only-coercion>`)
-    - non-date-only coercion: a date coercion that lists a `<date-format>` other
-      than `<iso-date>`, so its value may be a datetime
+    - non-date-only coercion: a date coercion that omits its `<date-format>`s or
+      lists 1 other than `<iso-date>`, so its value may be a datetime
       (`<non-date-only-coercion>`)
     - version date-only coercion: a date coercion of a version without
       `<unix-time>`, so its value is a date-only
@@ -789,8 +789,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields-format.md#coercion))
      - default coercion: a `<coercion>` without arguments
        ([defined](../Specs/fields-format.md#value-types))
-     - implicit coercion: what coerces a value, absent a `<coercion>`, to a type
-       that its input format does not have, iff a default coercion would
+     - implicit coercion: what coerces a field value, absent a `<coercion>`, to
+       a type that its input format does not have, iff a default coercion would
        ([defined](../Specs/fields-format.md#value-types))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))

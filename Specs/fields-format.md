@@ -35,13 +35,14 @@ time-only value).
 
 A **default coercion** is a `<coercion>` without arguments.
 
-An **implicit coercion** coerces a value, absent a `<coercion>`, wherever syntax
-requires a version, date-only, datetime, or time-only that its input format does
-not have, iff a default coercion would coerce it to that type, because no value
-could otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
-input, `%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` &
-`.dateOnly` accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces
-it, ignoring its defaults (e.g., `%.:iso:d` does not match `0`).
+An **implicit coercion** coerces a field value, at its original type, absent a
+`<coercion>`, wherever syntax requires a version, date-only, datetime, or
+time-only that its input format does not have, iff a default coercion would
+coerce it to that type, because no value could otherwise ever satisfy that
+syntax without a `<coercion>` (e.g., for JSON input, `%v` matches `"1.2.3"`,
+`%c` matches `"17:39:23"`, while `%d` & `.dateOnly` accept `"2020-03-18"` & the
+Unix time `0`). A `<coercion>` replaces it, ignoring its defaults (e.g.,
+`%.:iso:d` does not match `0`).
 
 No implicit coercion gives a value a type that its input format has, so only a
 `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while `%.n`
@@ -184,7 +185,7 @@ transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)>
 
 transform-call(CALL_PREFIX, TRANSFORM) =
   CALL_PREFIX TRANSFORM
-  (* error: CALL_PREFIX lacks a coercion & its input is not null, absent, or of TRANSFORM's input type *)
+  (* error: CALL_PREFIX lacks a coercion & its input is not null, absent, of TRANSFORM's input type, or implicitly coercible to it *)
 
 transform-call-prefix = "."!
 
@@ -815,7 +816,9 @@ A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
 version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`), as does an [implicit
-coercion](#value-types).
+coercion](#value-types), so a branch that means to match a number must precede
+that of a matcher to a version (e.g., `%mnv+`, but not `%mvn+`, which would
+render the number `1.2` as the string `1.2`).
 
 ###### Coercion
 
@@ -894,10 +897,12 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-non-date-only-coercion     = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default: {what <iso> matches, or a number as a Unix time} *)
+non-date-only-coercion     =
+  <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ]
+  (* default non-date-only-formats: {what <iso> matches, or a number as a Unix time} *)
 date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
 version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
-number-date-coercion       = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default: {a number as a Unix time} *)
+number-date-coercion       = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default unix-time-date-formats: {a number as a Unix time} *)
 unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
 
 non-date-only-formats     = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
@@ -946,19 +951,20 @@ without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
 `"2020-03-18 17:39"`, and `%.:iso,unix-time:D` matches `0`, `"0"` &
 `"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2).
 
-A default coercion to a date also parses what `<iso>` matches & a number without
+A default coercion to a date parses what `<iso>` matches & a number without
 trivia as a Unix time, as a datetime, because a number has no other meaning as a
 date (e.g., `%.D` matches `0` & `"2020-03-18"`, but not `"0"`).
 
 A decimal number coerces to a date only per `<unix-time>`, because a string that
-holds a number is rarely a time (e.g., `%m.d.s+` would otherwise render the
+holds a number is rarely a time (e.g., `%m.ds+` would otherwise render the
 string `5.6` as a date).
 
-A matcher to a date thus matches every chronologic number, so a branch that
-means to match a number must precede it or follow a coercion that omits
-`<unix-time>` (e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would
-render the price `5.6` as a date). A call whose input is a number must omit
-`<date-coercion-arguments>` or list `<unix-time>` (e.g., `.round..dateOnly` or
+`%.d`, and `%d` for an input format that has no datetime, thus match every
+chronologic number, so a branch that means to match a number must precede theirs
+or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
+`%m.:iso:d.n+`, but not `%m.d.n+`, which would render the price `5.6` as a
+date). A call whose input is a number must omit `<date-coercion-arguments>` or
+list `<unix-time>` (e.g., `.round..dateOnly` or
 `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which can
 only abort).
 

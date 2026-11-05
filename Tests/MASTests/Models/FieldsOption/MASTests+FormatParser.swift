@@ -28,6 +28,15 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a matcher to a version that precedes a matcher to a number renders a number as a string`() throws {
+		let rendered = { (format: String) in
+			try parsedFieldSpec(format).format.rendered(value: .number(1.2), label: "L", name: "n")?.description
+		}
+		#expect(try rendered("%mvn+") == #""1.2""#)
+		#expect(try rendered("%mnv+") == "1.2")
+	}
+
+	@Test
 	func `a number coercion parses a string, but not a structured value, whose text is a number between trivia`()
 	throws {
 		let format = #"%.:,,,,,\\[,\\]:N%n+no+"#
@@ -349,6 +358,8 @@ private extension MASTests {
 			("[%.:unix-time:d]", .string("2020-03-18"), nil),
 			("%m.D.timeZone:UTC:+n+", .number(5.6), "1970-01-01T00:00:05.600Z"),
 			("%mn.d+", .number(5.6), "5.6"),
+			("%m.ds+", .string("5.6"), "5.6"),
+			("%mnv+", .number(1.2), "1.2"),
 			("%m.:iso:d.n+", .number(5.6), "5.6"),
 			("%N..:unix-time:timeZone:UTC:.dateOnly+-+", .number(0), "1970-01-01"),
 			("..:,,,,,[$]:round..:unix-time:timeZone:UTC:.dateOnly", .string("$5"), nil),
