@@ -201,12 +201,18 @@ struct Branch: Equatable { // swiftlint:disable:this one_declaration_per_file
 
 /// An error reported while formatting a value.
 enum FormattingError: Equatable, Error, CustomStringConvertible { // swiftlint:disable:this one_declaration_per_file
+	/// A transform without `<coercion>` was applied to a field value that an
+	/// implicit coercion cannot coerce to its input type, so a default coercion
+	/// cannot coerce it either.
+	case implicitCoercionFailure(transform: Transform, input: String)
 	/// A transform without `<coercion>` was applied to an input that is not
 	/// already of its input type.
 	case transformInputTypeMismatch(transform: Transform, input: String)
 
 	var description: String {
 		switch self {
+		case let .implicitCoercionFailure(transform, input):
+			"Transform \(transform) requires an input of its input type: \(input)"
 		case let .transformInputTypeMismatch(transform, input):
 			"Transform \(transform) requires an input of its input type (<coercion> '.' coerces it): \(input)"
 		}
@@ -994,6 +1000,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 				nil
 			}
 		guard coerced != nil || call.coercion != nil else {
+			if case .input = self {
+				throw .implicitCoercionFailure(transform: call.transform, input: string)
+			}
 			throw .transformInputTypeMismatch(transform: call.transform, input: string)
 		}
 		return coerced

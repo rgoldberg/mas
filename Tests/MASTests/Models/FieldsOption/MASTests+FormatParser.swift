@@ -496,6 +496,39 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
+			(
+				".dateOnly",
+				JSON.Node.string("x"),
+				FormattingError.implicitCoercionFailure(transform: .dateOnly, input: "x"),
+				"Transform dateOnly requires an input of its input type: x",
+			),
+			(
+				"%S:standard.dateOnly+-+",
+				.string("x"),
+				.transformInputTypeMismatch(transform: .dateOnly, input: "x"),
+				"Transform dateOnly requires an input of its input type (<coercion> '.' coerces it): x",
+			),
+			(
+				".round",
+				.string("x"),
+				.transformInputTypeMismatch(transform: .round, input: "x"),
+				"Transform round requires an input of its input type (<coercion> '.' coerces it): x",
+			),
+		],
+	)
+	func `a transform's error suggests a coercion only if a default coercion might coerce its input`(
+		format: String,
+		value: JSON.Node,
+		error: FormattingError,
+		description: String,
+	) throws {
+		let fieldSpec = try parsedFieldSpec(format)
+		#expect(throws: error) { try fieldSpec.format.rendered(value: value, label: "L", name: "n") }
+		#expect(error.description == description)
+	}
+
+	@Test(
+		arguments: [
 			(".uppercase", JSON.Node.number(5)),
 			(".round", .string("5.6")),
 			(".dateOnly", .string("not a date")),
