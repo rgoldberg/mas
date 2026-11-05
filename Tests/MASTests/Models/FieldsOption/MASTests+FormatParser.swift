@@ -33,7 +33,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a matcher to a version that precedes a matcher to a number renders a number as a string`() throws {
+	func `%v before %n renders a number as a string`() throws {
 		let rendered = { (format: String) in
 			try parsedFieldSpec(format).format.rendered(value: .number(1.2), label: "L", name: "n")?.description
 		}
@@ -669,8 +669,8 @@ private extension MASTests {
 			("[%.d]", .string("2020-078"), nil),
 			("[%.d]", .string("2020-W12-3"), nil),
 			("[%.d]", .string("not a date"), nil),
-			// A string is chronologic wherever syntax requires it, iff a <coercion>
-			// without arguments would coerce it
+			// An implicit coercion gives a string a chronologic type wherever syntax
+			// requires it, iff a default coercion would coerce it
 			("%D.timeZone:UTC:+-+", .string("2020-03-18T17:39:23Z"), "2020-03-18T17:39:23Z"),
 			("%D.dateOnly+-+", .string("2020-03-18"), "2020-03-18"),
 			("[%d]", .string("2020-03-18"), "[2020-03-18]"),

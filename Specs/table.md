@@ -87,7 +87,8 @@ style-specifier = {string: terminal-specific styling text with no bare ASCII let
 
 ## Styling
 
-The settings below style each **stylable string**: the header row or, in
+`<styling-setting>`, `<style-prefix-setting>`, `<style-suffix-setting>` &
+`<style-reset-setting>` style each **stylable string**: the header row or, in
 [key-value output](key-value.md#key), each key.
 
 <!--editorconfig-checker-disable-->

@@ -817,8 +817,8 @@ followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
 version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`), as does an [implicit
 coercion](#value-types), so a branch that means to match a number must precede
-that of a matcher to a version (e.g., `%mnv+`, but not `%mvn+`, which would
-render the number `1.2` as the string `1.2`).
+`%v`'s (e.g., `%mnv+`, but not `%mvn+`, which would render the number `1.2` as
+the string `1.2`).
 
 ###### Coercion
 
@@ -844,7 +844,9 @@ trivia-suffix-regex = {regex} (* default: {empty string} *)
 `<coercion>` allows a matcher to also match a value whose entire content parses
 as the matcher's type, instead of requiring the input's type to match (e.g.,
 `%.n` matches `4.5` & `"4.50"`, but not `"4.5a"`), replacing the input with the
-**coerced value**.
+**coerced value**. For a type unsupported by the input format, a default
+coercion matches what an [implicit coercion](#value-types) matches (e.g., `%.v`
+& `%v`, for JSON input).
 
 A boolean coercion parses only `true` & `false`, verbatim.
 

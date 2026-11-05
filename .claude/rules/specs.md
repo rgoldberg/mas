@@ -154,7 +154,7 @@ In specs, specify syntax according to the 1st of these that applies:
    2nd `-a` removes a `null`), because generated or edited syntax produces them.
 2. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a modifier or wrapper that cannot affect what it means, when the
-   syntax text alone decides this (e.g., `%S%v++`, `K:`, whose keys are styled
+   syntax text alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled
    by nothing, `%+s`, whose `<abort-on-failure>` modifies nothing, because `%s`
    already aborts on failure, or `%mN.round++`, whose `%m` matches only 1
    branch).
