@@ -923,11 +923,11 @@ without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
 `"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2 & `%.D` only the
 last).
 
-A number or a decimal number coerces to a date only per `<unix-time>`, because
-it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise render the price
-`5.6` as a date), so a call whose input is a number must list `<unix-time>`
-(e.g., `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which
-can only abort).
+A number or a decimal number coerces to a date only per `<unix-time>`, as a
+datetime, because it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise
+render the price `5.6` as a date), so a call whose input is a number must list
+`<unix-time>` (e.g., `.round..:iso,unix-time:dateOnly`, but not
+`.round..:iso:dateOnly`, which can only abort).
 
 A `<date-only-coercion>`'s value is always a date-only, which no time zone
 affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
