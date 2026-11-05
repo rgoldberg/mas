@@ -87,6 +87,8 @@ unconditional-string-pipeline =
     <uncoerced-string-transform-run> | <unconditional-transform-pipeline>,
     <uncoerced-string-transform-run>
   )>
+named-unconditional-pipeline  = <named-format-reference(<unconditional-format-name>)> [ <unconditional-transform-pipeline> ]
+whitespace-pipeline           = <named-unconditional-pipeline> | <transform-run(<transform-call-prefix> <coercion>, <trim-whitespace>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -582,6 +584,8 @@ success-pipeline =
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
+  | <named-unconditional-pipeline>
+  | <whitespace-pipeline>
   | <named-format-pipeline(<unconditional-format-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
@@ -750,9 +754,9 @@ non-nullary-standard-success =
       | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
       | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
     )
-  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>)>
 
 nullary-incoercible-standard-predicate     = <nullary-blank-predicate> | <nullary-string>
 non-nullary-incoercible-standard-predicate = <non-nullary-blank-predicate> | <non-nullary-string>
@@ -779,6 +783,12 @@ non-nullary-string     = "S" (* is string;                                      
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+`%U`'s & `%E`'s values are `null` or an empty string, which no transform can
+modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
+can modify, so any other transform must follow a `<named-format-reference>`,
+whose named format may output other text (e.g., `%W..trimWhitespace+-+` &
+`%U:x..uppercase+-+`, but neither `%U..uppercase+-+` nor `%W..uppercase+-+`).
 
 ###### Number Formatting
 
