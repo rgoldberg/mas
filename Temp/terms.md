@@ -684,8 +684,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        else the next command-line argument, iff it is `-` or does not start with
        `-` ([defined](../Specs/configs.md#option-values))
      - option value separator: the `=` or the command-line argument boundary
-       between a long option & its value (e.g., in `--fields=name` or
-       `--fields name`)
+       between a long option & its value (`<option-value-separator>`; e.g., in
+       `--fields=name` or `--fields name`)
      - command-line argument boundary: `_`, which matches between 2 adjacent
        command-line arguments, iff the latter is `-` or does not start with `-`
        ([defined](../Specs/ebnf.md#command-line-argument-boundaries))

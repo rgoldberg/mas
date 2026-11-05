@@ -49,7 +49,9 @@ Text's **width** is its terminal display width: the sum of its characters'
 ## Option Values
 
 ```ebnf
-valued-option(NAME, VALUE) = !NAME! ( "=" | _ ) VALUE
+valued-option(NAME, VALUE) = !NAME! <option-value-separator> VALUE
+
+option-value-separator = "=" | _
 ```
 
 A **valued option** is an option that takes a value; each spec defines one as a
