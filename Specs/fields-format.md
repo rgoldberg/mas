@@ -595,7 +595,7 @@ unconditional-block(PIPELINE) = PIPELINE | <block-template(<infallible-unconditi
 
 block-template(PLACEHOLDER) = <template-text> | [ <template-text> ] ( PLACEHOLDER [ <template-text> ] )+
 
-block-placeholder(NULLARY, NON_NULLARY, PIPELINE) = <placeholder-prefix> ( NULLARY | NON_NULLARY -PIPELINE <block-terminator> )
+block-placeholder(NULLARY, NON_NULLARY, PIPELINE) = <placeholder-prefix> ( NULLARY | NON_NULLARY PIPELINE <block-terminator> )
 
 abort-on-success = "-"!
 abort-on-failure = "+"!
@@ -670,7 +670,7 @@ unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
 nullary-unconditional-placeholder                                    = <placeholder-prefix> <nullary-unconditional-predicate>
 non-nullary-unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
   <placeholder-prefix>
-  ( <non-nullary-input> -INPUT_PIPELINE | ( <non-nullary-label> | <non-nullary-name> ) -NAME_PIPELINE )
+  ( <non-nullary-input> INPUT_PIPELINE | ( <non-nullary-label> | <non-nullary-name> ) NAME_PIPELINE )
   <block-terminator>
 
 nullary-unconditional-predicate = <nullary-input> | <nullary-label> | <nullary-name>
