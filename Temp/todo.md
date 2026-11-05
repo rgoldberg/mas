@@ -246,7 +246,9 @@ Configurable behavior per output format:
 An input format other than JSON needs:
 
 1. Its `InputFormat`, which determines the types to which a field value is
-   [implicitly coerced](../Specs/fields-format.md#value-types).
+   [implicitly coerced](../Specs/fields-format.md#value-types), covering every
+   type that an input format may not support (e.g., a number or a boolean), not
+   only those that JSON does not.
 2. That `InputFormat` passed to `Pipeline.evaluated(on:in:)`'s transforms &
    `Placeholder.evaluated(in:)`'s matchers, which assume `InputFormat.json`.
 3. Its field values represented at those types, which `JSON.Node` cannot.
