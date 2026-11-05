@@ -392,6 +392,8 @@ extension JSON.Node {
 				.joined(separator: ",")
 				+ closingIndentation
 				+ "]"
+		case let .number(number):
+			"\(number)".jsonNumberText
 		case let .object(object) where !object.fields.isEmpty:
 			"{"
 				+ object.fields
@@ -404,8 +406,6 @@ extension JSON.Node {
 				.joined(separator: ",")
 				+ closingIndentation
 				+ "}"
-		case let .number(number):
-			"\(number)".jsonNumberText
 		case let .string(string):
 			string.value.jsonStringLiteral(escapingNonASCII: escapingNonASCII)
 		default:
