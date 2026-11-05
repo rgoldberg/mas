@@ -31,8 +31,8 @@ private extension MASTests {
 			try parseTableConfig("H")
 				== .init(
 					header: .init(styleSpecifier: ""),
-					headerStyling: .terminalOnly,
-					headerStyleSequences: .default,
+					styling: .terminalOnly,
+					styleSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
 				),
@@ -41,8 +41,8 @@ private extension MASTests {
 			try parseTableConfig("H1")
 				== .init(
 					header: .init(styleSpecifier: "1"),
-					headerStyling: .terminalOnly,
-					headerStyleSequences: .default,
+					styling: .terminalOnly,
+					styleSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
 				),
@@ -52,7 +52,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an omitted trailing table-setting terminator is only valid at the end of the value`() throws {
+	func `an omitted trailing setting terminator is only valid at the end of the value`() throws {
 		// "H1" (no ':', end of value): fine, value is "1"
 		#expect(try parseTableConfig("H1").header == .init(styleSpecifier: "1"))
 		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value &
@@ -71,13 +71,13 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("H1:", TableConfig.HeaderStyling.terminalOnly),
+			("H1:", Styling.terminalOnly),
 			("H1:a", .always),
 			("aH1:t", .terminalOnly),
 		],
 	)
-	func `t & a set header styling, last wins`(value: String, headerStyling: TableConfig.HeaderStyling) throws {
-		#expect(try parseTableConfig(value).headerStyling == headerStyling)
+	func `t & a set header styling, last wins`(value: String, styling: Styling) throws {
+		#expect(try parseTableConfig(value).styling == styling)
 	}
 
 	@Test(
@@ -92,9 +92,9 @@ private extension MASTests {
 	)
 	func `header style sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
 		value: String,
-		headerStyleSequences: StyleSequences,
+		styleSequences: StyleSequences,
 	) throws {
-		#expect(try parseTableConfig(value).headerStyleSequences == headerStyleSequences)
+		#expect(try parseTableConfig(value).styleSequences == styleSequences)
 	}
 
 	@Test(arguments: ["\t", "-\t", "\t\u{301}=", "\n", "-\r\n-", "\u{85}", "\u{2028}"])
@@ -111,7 +111,7 @@ private extension MASTests {
 	func `a header style specifier or sequence may contain a line terminator`() throws {
 		#expect(try parseTableConfig("H1\n2:").header?.styleSpecifier == "1\n2")
 		#expect(
-			try parseTableConfig("P\u{2028}:X\r:O\r\n:").headerStyleSequences
+			try parseTableConfig("P\u{2028}:X\r:O\r\n:").styleSequences
 				== .init(prefix: "\u{2028}", suffix: "\r", reset: "\r\n"),
 		)
 	}
@@ -277,7 +277,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table styles a header row for a non-terminal only with header-always-styling`() throws {
+	func `table styles a header row for a non-terminal only with always-styling`() throws {
 		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
 		let objects = [JSON.Object([("name", .string("Slack"))])]
 		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))

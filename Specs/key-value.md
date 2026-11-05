@@ -18,10 +18,10 @@ key-value-config-option = <valued-option("--key-value-config", [ <key-value-conf
 key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
-  | <key-styling-setting>
-  | <key-style-prefix-setting>
-  | <key-style-suffix-setting>
-  | <key-style-reset-setting>
+  | <styling-setting>
+  | <style-prefix-setting>
+  | <style-suffix-setting>
+  | <style-reset-setting>
   | <leader-setting>
   | <leading-spacing-setting>
   | <trailing-spacing-setting>
@@ -69,7 +69,7 @@ align with, so it misaligns nothing.
 key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key>; last wins; inherited *)
 
 unstyled-key = "k"
-styled-key   = "K" <style-specifier> <key-value-setting-termination>
+styled-key   = "K" <style-specifier> <setting-termination>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -77,85 +77,14 @@ styled-key   = "K" <style-specifier> <key-value-setting-termination>
 - `k`: unstyled keys.
 - `K`: keys styled by `<style-specifier>`, as [defined for table
   output](table.md#header) (e.g., with the default [style
-  prefix](#key-style-prefix), [style suffix](#key-style-suffix) & [style
-  reset](#key-style-reset), `1` for bold, `1;4` for bold & underlined), applied
-  to each key, but not to its spacing, its leader, or its value.
+  prefix](table.md#style-prefix), [style suffix](table.md#style-suffix) & [style
+  reset](table.md#style-reset), `1` for bold, `1;4` for bold & underlined),
+  applied to each key, but not to its spacing, its leader, or its value.
 
 ## Key Styling
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-key-styling-setting = <key-terminal-only-styling> | <key-always-styling> (* default: <key-terminal-only-styling>; last wins; inherited *)
-
-key-terminal-only-styling = "t"
-key-always-styling        = "a"
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-`<key-styling-setting>` is as [`<header-styling-setting>` is defined for table
-output](table.md#header-styling):
-
-- `t`: keys are styled iff standard output is a terminal.
-- `a`: keys are always styled, even if standard output is not a terminal, e.g.,
-  when piped to `less -R`.
-
-## Key Style Prefix
-
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-key-style-prefix-setting = <key-style-prefix-default> | <key-style-prefix-custom> (* default: <key-style-prefix-default>; last wins; inherited *)
-
-key-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
-key-style-prefix-custom  = "P" [ <style-prefix> ] <key-value-setting-termination>
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-`<style-prefix>` is as [defined for table output](table.md#style-prefix):
-
-- `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
-  precedes `<style-specifier>`.
-- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none).
-
-## Key Style Suffix
-
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-key-style-suffix-setting = <key-style-suffix-default> | <key-style-suffix-custom> (* default: <key-style-suffix-default>; last wins; inherited *)
-
-key-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
-key-style-suffix-custom  = "X" [ <style-suffix> ] <key-value-setting-termination> (* mnemonic: last letter of suffix *)
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-`<style-suffix>` is as [defined for table output](table.md#style-suffix):
-
-- `x`: `m` (the ANSI SGR control sequence's final byte) follows
-  `<style-specifier>`.
-- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none).
-
-## Key Style Reset
-
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-key-style-reset-setting = <key-style-reset-default> | <key-style-reset-custom> (* default: <key-style-reset-default>; last wins; inherited *)
-
-key-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
-key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> (* mnemonic: off *)
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-`<style-reset>` is as [defined for table output](table.md#style-reset):
-
-- `o`: `ESC[0m` (the ANSI SGR reset) follows each styled key.
-- `O`: a custom string follows each styled key (e.g., `O:` for none).
+`<styling-setting>`, `<style-prefix-setting>`, `<style-suffix-setting>` &
+`<style-reset-setting>` are [defined for table output](table.md#styling).
 
 ## Leader
 
@@ -165,7 +94,7 @@ key-style-reset-custom  = "O" [ <style-reset> ] <key-value-setting-termination> 
 leader-setting = <leader-off> | <leader-on> (* default: <leader-on>; last wins; inherited *)
 
 leader-off = "f" (* default leader-pattern: {empty string}; mnemonic: fill *)
-leader-on  = "F" [ <leader-pattern> ] <key-value-setting-termination> (* mnemonic: fill *)
+leader-on  = "F" [ <leader-pattern> ] <setting-termination> (* mnemonic: fill *)
 
 leader-pattern = ^{string}^ (* default: "▁" *)
 ```
@@ -192,7 +121,7 @@ leader-pattern = ^{string}^ (* default: "▁" *)
 leading-spacing-setting = <leading-spacing-default> | <leading-spacing-custom> (* default: <leading-spacing-default>; last wins; inherited *)
 
 leading-spacing-default = "l" (* default leading-spacing: " " *)
-leading-spacing-custom  = "L" [ <leading-spacing> ] <key-value-setting-termination>
+leading-spacing-custom  = "L" [ <leading-spacing> ] <setting-termination>
 
 leading-spacing = ^{string}^ (* default: {empty string} *)
 ```
@@ -212,7 +141,7 @@ leading-spacing = ^{string}^ (* default: {empty string} *)
 trailing-spacing-setting = <trailing-spacing-default> | <trailing-spacing-custom> (* default: <trailing-spacing-default>; last wins; inherited *)
 
 trailing-spacing-default = "r" (* default trailing-spacing: " "; mnemonic: right *)
-trailing-spacing-custom  = "R" [ <trailing-spacing> ] <key-value-setting-termination> (* mnemonic: right *)
+trailing-spacing-custom  = "R" [ <trailing-spacing> ] <setting-termination> (* mnemonic: right *)
 
 trailing-spacing = ^{string}^ (* default: {empty string} *)
 ```
@@ -231,7 +160,7 @@ trailing-spacing = ^{string}^ (* default: {empty string} *)
 item-separator-setting = <item-separator-off> | <item-separator-on> (* default: <item-separator-on>; last wins; inherited *)
 
 item-separator-off = "s"
-item-separator-on  = "S" [ <item-separator-line> ] <key-value-setting-termination>
+item-separator-on  = "S" [ <item-separator-line> ] <setting-termination>
 
 item-separator-line = ^{string}^ (* default: {empty string} *)
 ```
@@ -248,22 +177,6 @@ An item without any key-value pair has no rows, but is still an item, so the
 item separator lines on each side of it remain (e.g., with `S---:`, such an item
 between 2 others leaves 2 adjacent `---` lines), unless no item has a key-value
 pair, in which case nothing is rendered.
-
-## Key-Value Setting Termination
-
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
-```ebnf
-key-value-setting-termination = <key-value-setting-terminator> | <end-of-key-value-config>
-
-key-value-setting-terminator = ":"
-end-of-key-value-config      = end
-```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
-
-E.g., in `--key-value-config Fs`, `s` is interpreted as `<leader-pattern>` text,
-not as a separate `<item-separator-setting>`.
 
 ## Implied Alternatives
 

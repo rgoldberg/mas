@@ -16,10 +16,10 @@ table-config-option = <valued-option("--table-config", [ <table-config> ])>
 table-config  = <table-setting>+
 table-setting =
   <header-setting>
-  | <header-styling-setting>
-  | <header-style-prefix-setting>
-  | <header-style-suffix-setting>
-  | <header-style-reset-setting>
+  | <styling-setting>
+  | <style-prefix-setting>
+  | <style-suffix-setting>
+  | <style-reset-setting>
   | <separator-setting>
   | <broken-setting>
   | <column-spacing-setting>
@@ -66,7 +66,7 @@ adjacent columns (e.g., 2 per pair for the default 2-space column spacing).
 header-setting = <header-off> | <header-on> (* default: <header-off>; last wins; inherited *)
 
 header-off = "h"
-header-on  = "H" [ <style-specifier> ] <table-setting-termination>
+header-on  = "H" [ <style-specifier> ] <setting-termination>
 
 style-specifier = {string: terminal-specific styling text with no bare ASCII letters}
 ```
@@ -85,21 +85,24 @@ style-specifier = {string: terminal-specific styling text with no bare ASCII let
   (e.g., `--table-config Hb`); escape it to include it (e.g.,
   `--table-config 'H\b'`).
 
-## Header Styling
+## Styling
+
+The settings below style each **stylable string**: the header row or, in
+[key-value output](key-value.md#key), each key.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-styling-setting = <header-terminal-only-styling> | <header-always-styling> (* default: <header-terminal-only-styling>; last wins; inherited *)
+styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins; inherited *)
 
-header-terminal-only-styling = "t"
-header-always-styling        = "a"
+terminal-only-styling = "t"
+always-styling        = "a"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `t`: the header row is styled iff standard output is a terminal.
-- `a`: the header row is always styled, even if standard output is not a
+- `t`: each stylable string is styled iff standard output is a terminal.
+- `a`: each stylable string is always styled, even if standard output is not a
   terminal, e.g., when piped to `less -R`.
 
 ## Style Prefix
@@ -107,10 +110,10 @@ header-always-styling        = "a"
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-prefix-setting = <header-style-prefix-default> | <header-style-prefix-custom> (* default: <header-style-prefix-default>; last wins; inherited *)
+style-prefix-setting = <style-prefix-default> | <style-prefix-custom> (* default: <style-prefix-default>; last wins; inherited *)
 
-header-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
-header-style-prefix-custom  = "P" [ <style-prefix> ] <table-setting-termination>
+style-prefix-default = "p" (* default style-prefix: {ESC [} *)
+style-prefix-custom  = "P" [ <style-prefix> ] <setting-termination>
 
 style-prefix = ^{string}^ (* default: {empty string} *)
 ```
@@ -126,10 +129,10 @@ style-prefix = ^{string}^ (* default: {empty string} *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-suffix-setting = <header-style-suffix-default> | <header-style-suffix-custom> (* default: <header-style-suffix-default>; last wins; inherited *)
+style-suffix-setting = <style-suffix-default> | <style-suffix-custom> (* default: <style-suffix-default>; last wins; inherited *)
 
-header-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
-header-style-suffix-custom  = "X" [ <style-suffix> ] <table-setting-termination> (* mnemonic: last letter of suffix *)
+style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
+style-suffix-custom  = "X" [ <style-suffix> ] <setting-termination> (* mnemonic: last letter of suffix *)
 
 style-suffix = ^{string}^ (* default: {empty string} *)
 ```
@@ -145,18 +148,18 @@ style-suffix = ^{string}^ (* default: {empty string} *)
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-header-style-reset-setting = <header-style-reset-default> | <header-style-reset-custom> (* default: <header-style-reset-default>; last wins; inherited *)
+style-reset-setting = <style-reset-default> | <style-reset-custom> (* default: <style-reset-default>; last wins; inherited *)
 
-header-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
-header-style-reset-custom  = "O" [ <style-reset> ] <table-setting-termination> (* mnemonic: off *)
+style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
+style-reset-custom  = "O" [ <style-reset> ] <setting-termination> (* mnemonic: off *)
 
 style-reset = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `o`: `ESC[0m` (the ANSI SGR reset) follows the styled header row.
-- `O`: a custom string follows the styled header row (e.g., `O:` for none).
+- `o`: `ESC[0m` (the ANSI SGR reset) follows each styled string.
+- `O`: a custom string follows each styled string (e.g., `O:` for none).
 
 ## Separator
 
@@ -166,7 +169,7 @@ style-reset = ^{string}^ (* default: {empty string} *)
 separator-setting = <separator-off> | <separator-on> (* default: <separator-off>; last wins; inherited *)
 
 separator-off = "s"
-separator-on  = "S" [ <separator-pattern> ] <table-setting-termination>
+separator-on  = "S" [ <separator-pattern> ] <setting-termination>
 
 separator-pattern = ^{string}^ (* default: "-" *)
 ```
@@ -218,7 +221,7 @@ unbroken = "u"
 column-spacing-setting = <column-spacing-default> | <column-spacing-custom> (* default: <column-spacing-default>; last wins; inherited *)
 
 column-spacing-default = "c" (* default column-spacing: "  " *)
-column-spacing-custom  = "C" [ <column-spacing> ] <table-setting-termination>
+column-spacing-custom  = "C" [ <column-spacing> ] <setting-termination>
 
 column-spacing = ^{string}^ (* default: {empty string} *)
 ```
@@ -229,18 +232,6 @@ column-spacing = ^{string}^ (* default: {empty string} *)
 - `C`: a custom spacing string between adjacent columns (e.g., `C:` for no
   spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
   `$'C\t:'` in zsh).
-
-## Table Setting Termination
-
-```ebnf
-table-setting-termination = <table-setting-terminator> | <end-of-table-config>
-
-table-setting-terminator = ":"
-end-of-table-config      = end
-```
-
-E.g., in `--table-config Hb`, `b` is an error (because `<style-specifier>`
-cannot consume it), not a separate `<broken-setting>`.
 
 ## Implied Alternatives
 

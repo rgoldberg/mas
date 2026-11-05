@@ -41,9 +41,9 @@ private extension MASTests {
 		#expect(throws: error) { try parseKeyValueConfig(value) }
 	}
 
-	@Test(arguments: [("K1:", KeyValueConfig.KeyStyling.terminalOnly), ("K1:a", .always), ("aK1:t", .terminalOnly)])
-	func `t & a set key styling, last wins`(value: String, keyStyling: KeyValueConfig.KeyStyling) throws {
-		#expect(try parseKeyValueConfig(value).keyStyling == keyStyling)
+	@Test(arguments: [("K1:", Styling.terminalOnly), ("K1:a", .always), ("aK1:t", .terminalOnly)])
+	func `t & a set key styling, last wins`(value: String, styling: Styling) throws {
+		#expect(try parseKeyValueConfig(value).styling == styling)
 	}
 
 	@Test(arguments: [
@@ -79,9 +79,9 @@ private extension MASTests {
 	)
 	func `key style sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
 		value: String,
-		keyStyleSequences: StyleSequences,
+		styleSequences: StyleSequences,
 	) throws {
-		#expect(try parseKeyValueConfig(value).keyStyleSequences == keyStyleSequences)
+		#expect(try parseKeyValueConfig(value).styleSequences == styleSequences)
 	}
 
 	@Test(arguments: [
@@ -176,8 +176,8 @@ private extension MASTests {
 				of: twoItems,
 				keyValueConfig: .init(
 					keyStyleSpecifier: "",
-					keyStyling: .terminalOnly,
-					keyStyleSequences: .default,
+					styling: .terminalOnly,
+					styleSequences: .default,
 					leaderPattern: pattern,
 					leadingSpacing: " ",
 					trailingSpacing: " ",
@@ -212,8 +212,8 @@ private extension MASTests {
 				of: twoItems,
 				keyValueConfig: .init(
 					keyStyleSpecifier: "",
-					keyStyling: .terminalOnly,
-					keyStyleSequences: .default,
+					styling: .terminalOnly,
+					styleSequences: .default,
 					leaderPattern: nil,
 					leadingSpacing: "=",
 					trailingSpacing: "",
@@ -323,7 +323,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `key-value styles only keys, for a non-terminal only with key-always-styling`() throws {
+	func `key-value styles only keys, for a non-terminal only with always-styling`() throws {
 		let alwaysStyled = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:afL=:R:"))
 		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m=X\n\u{1B}[1mVersion\u{1B}[0m=1")
 		let terminalOnly = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:tfL=:R:"))

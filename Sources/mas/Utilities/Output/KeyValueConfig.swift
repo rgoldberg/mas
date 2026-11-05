@@ -7,18 +7,10 @@
 
 /// A fully-parsed `--key-value-config`'s value (key-value.md).
 struct KeyValueConfig: Equatable {
-	/// `<key-styling-setting>`: when keys are styled.
-	enum KeyStyling: Equatable {
-		/// `a`: always, even if standard output is not a terminal.
-		case always
-		/// `t`: iff standard output is a terminal.
-		case terminalOnly
-	}
-
 	static let `default` = Self(
 		keyStyleSpecifier: "",
-		keyStyling: .terminalOnly,
-		keyStyleSequences: .default,
+		styling: .terminalOnly,
+		styleSequences: .default,
 		leaderPattern: defaultLeaderPattern,
 		leadingSpacing: " ",
 		trailingSpacing: " ",
@@ -28,8 +20,8 @@ struct KeyValueConfig: Equatable {
 	/// Styles each key (e.g., with the default `StyleSequences`, `"1"` for bold,
 	/// `"1;4"` for bold & underlined); empty means unstyled.
 	let keyStyleSpecifier: String
-	let keyStyling: KeyStyling
-	let keyStyleSequences: StyleSequences
+	let styling: Styling
+	let styleSequences: StyleSequences
 	/// Repeated (truncating mid-repetition if needed, then space-filling any
 	/// remaining width) to fill each leader, aligning an item's values; never
 	/// empty; `nil` means no leader, leaving an item's values unaligned.
@@ -48,10 +40,10 @@ struct KeyValueConfig: Equatable {
 /// per setting. Outer bare whitespace between settings is ignored.
 func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> KeyValueConfig {
 	var keyStyleSpecifier = KeyValueConfig.default.keyStyleSpecifier
-	var keyStyling = KeyValueConfig.default.keyStyling
-	var keyStylePrefix = KeyValueConfig.default.keyStyleSequences.prefix
-	var keyStyleSuffix = KeyValueConfig.default.keyStyleSequences.suffix
-	var keyStyleReset = KeyValueConfig.default.keyStyleSequences.reset
+	var styling = KeyValueConfig.default.styling
+	var stylePrefix = KeyValueConfig.default.styleSequences.prefix
+	var styleSuffix = KeyValueConfig.default.styleSequences.suffix
+	var styleReset = KeyValueConfig.default.styleSequences.reset
 	var leaderPattern = KeyValueConfig.default.leaderPattern
 	var leadingSpacing = String?.none
 	var trailingSpacing = KeyValueConfig.default.trailingSpacing
@@ -74,21 +66,21 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			}
 			keyStyleSpecifier = styleSpecifier
 		case "t":
-			keyStyling = .terminalOnly
+			styling = .terminalOnly
 		case "a":
-			keyStyling = .always
+			styling = .always
 		case "p":
-			keyStylePrefix = KeyValueConfig.default.keyStyleSequences.prefix
+			stylePrefix = KeyValueConfig.default.styleSequences.prefix
 		case "P":
-			keyStylePrefix = try parseKeyValueSettingText(&input)
+			stylePrefix = try parseKeyValueSettingText(&input)
 		case "x":
-			keyStyleSuffix = KeyValueConfig.default.keyStyleSequences.suffix
+			styleSuffix = KeyValueConfig.default.styleSequences.suffix
 		case "X":
-			keyStyleSuffix = try parseKeyValueSettingText(&input)
+			styleSuffix = try parseKeyValueSettingText(&input)
 		case "o":
-			keyStyleReset = KeyValueConfig.default.keyStyleSequences.reset
+			styleReset = KeyValueConfig.default.styleSequences.reset
 		case "O":
-			keyStyleReset = try parseKeyValueSettingText(&input)
+			styleReset = try parseKeyValueSettingText(&input)
 		case "f":
 			leaderPattern = nil
 		case "F":
@@ -114,8 +106,8 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 	}
 	return .init(
 		keyStyleSpecifier: keyStyleSpecifier,
-		keyStyling: keyStyling,
-		keyStyleSequences: .init(prefix: keyStylePrefix, suffix: keyStyleSuffix, reset: keyStyleReset),
+		styling: styling,
+		styleSequences: .init(prefix: stylePrefix, suffix: styleSuffix, reset: styleReset),
 		leaderPattern: leaderPattern,
 		// An effective `f` implies a `:` leading spacing, if none is otherwise set
 		leadingSpacing: leadingSpacing ?? (leaderPattern == nil ? ":" : KeyValueConfig.default.leadingSpacing),
@@ -145,8 +137,7 @@ enum KeyValueConfigParsingError: Equatable, Error, CustomStringConvertible {
 /// Parses an uppercase `<key-value-setting>`'s `{string}` payload
 /// (`<style-prefix>`, `<style-suffix>`, `<style-reset>`, `<leader-pattern>`,
 /// `<leading-spacing>`, `<trailing-spacing>`, or `<item-separator-line>`)
-/// through its `<key-value-setting-termination>` via
-/// `parseOutputConfigSettingPayload`.
+/// through its `<setting-termination>` via `parseOutputConfigSettingPayload`.
 private func parseKeyValueSettingText(_ input: inout Substring) throws(KeyValueConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: KeyValueConfigParsingError.danglingEscape)
 }

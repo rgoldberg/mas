@@ -106,8 +106,8 @@ extension JSON.Object {
 				styled(
 					label,
 					specifier: keyValueConfig.keyStyleSpecifier,
-					sequences: keyValueConfig.keyStyleSequences,
-					isAlwaysStyled: keyValueConfig.keyStyling == .always,
+					sequences: keyValueConfig.styleSequences,
+					isAlwaysStyled: keyValueConfig.styling == .always,
 				)
 					+ separation
 					+ renderedValue,
@@ -180,8 +180,8 @@ extension [JSON.Object] {
 				styled(
 					headerRow,
 					specifier: header.styleSpecifier,
-					sequences: tableConfig.headerStyleSequences,
-					isAlwaysStyled: tableConfig.headerStyling == .always,
+					sequences: tableConfig.styleSequences,
+					isAlwaysStyled: tableConfig.styling == .always,
 				),
 			)
 		}

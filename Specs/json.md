@@ -56,7 +56,7 @@ trailing `0`s (e.g., `+01.50` as `1.50` & `.5` as `0.5`).
 pretty-printing-setting = <compact> | <pretty-printed> (* default: <compact>; last wins; inherited *)
 
 compact        = "p" (* mnemonic: lowercase of P, as off *)
-pretty-printed = "P" [ <indentation> ] <json-setting-termination>
+pretty-printed = "P" [ <indentation> ] <setting-termination>
 
 indentation = ^{string: only spaces, tabs, LFs & CRs}^ (* default: "  " *)
 ```
@@ -113,18 +113,6 @@ Applies to every key & every string value.
   outside the Basic Multilingual Plane, as an escape sequence for each of its
   UTF-16 surrogates (e.g., `\ud83d\ude00` for `😀`), so the output contains only
   ASCII characters.
-
-## JSON Setting Termination
-
-```ebnf
-json-setting-termination = <json-setting-terminator> | <end-of-json-config>
-
-json-setting-terminator = ":"
-end-of-json-config      = end
-```
-
-E.g., in `--json-config Pa`, `a` is an error (because `<indentation>` cannot
-consume it), not a separate `<top-level-structure-setting>`.
 
 ## Examples
 

@@ -36,8 +36,8 @@ private extension MASTests {
 					fieldSpecs: ["name", "id"].map { .init(name: $0, label: $0, format: .default(fieldName: $0), sortSpec: nil) },
 					tableConfig: .init(
 						header: .init(styleSpecifier: ""),
-						headerStyling: .terminalOnly,
-						headerStyleSequences: .default,
+						styling: .terminalOnly,
+						styleSequences: .default,
 						separator: .init(pattern: pattern, broken: broken),
 						columnSpacing: "  ",
 					),
@@ -57,8 +57,8 @@ private extension MASTests {
 					fieldSpecs: ["name", "id"].map { .init(name: $0, label: $0, format: .default(fieldName: $0), sortSpec: nil) },
 					tableConfig: .init(
 						header: .init(styleSpecifier: ""),
-						headerStyling: .terminalOnly,
-						headerStyleSequences: .default,
+						styling: .terminalOnly,
+						styleSequences: .default,
 						separator: .init(pattern: "-", broken: false),
 						columnSpacing: columnSpacing,
 					),
@@ -117,8 +117,8 @@ private extension MASTests {
 					],
 					tableConfig: .init(
 						header: .init(styleSpecifier: ""),
-						headerStyling: .terminalOnly,
-						headerStyleSequences: .default,
+						styling: .terminalOnly,
+						styleSequences: .default,
 						separator: nil,
 						columnSpacing: "  ",
 					),

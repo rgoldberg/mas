@@ -43,8 +43,8 @@ func parseStyleSpecifier<E: Error>(
 
 /// Wraps `string` in `sequences` around `specifier` iff `specifier` is not
 /// empty & either `isAlwaysStyled` or standard output is a terminal (table.md's
-/// `<header-styling-setting>`): `sequences.prefix`, `specifier` &
-/// `sequences.suffix` precede `string`; `sequences.reset` follows it.
+/// `<styling-setting>`): `sequences.prefix`, `specifier` & `sequences.suffix`
+/// precede `string`; `sequences.reset` follows it.
 func styled(_ string: String, specifier: String, sequences: StyleSequences, isAlwaysStyled: Bool) -> String {
 	!specifier.isEmpty && (isAlwaysStyled || FileHandle.standardOutput.isTerminal)
 		? sequences.prefix + specifier + sequences.suffix + string + sequences.reset

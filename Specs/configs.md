@@ -217,12 +217,27 @@ Each kind's [built-in standard](#immutable-built-in-named-configs) output config
 sets every setting to its default.
 
 An alternative's **payload** is the expression between its letter & its
-termination (e.g., `<style-specifier>` in [`<header-on>`](table.md#header)). A
-payload's tabs & [line terminators](#line-terminators) are output as is (e.g., a
-key-value config of `$'L\n:'` puts each value on the line after its key). A
-**payloadless** alternative is the lowercase alternative of a setting whose
-uppercase alternative takes a payload (e.g., `h`, but not `t`, in a table
-config).
+[`<setting-termination>`](#setting-termination) (e.g., `<style-specifier>` in
+[`<header-on>`](table.md#header)). A payload's tabs & [line
+terminators](#line-terminators) are output as is (e.g., a key-value config of
+`$'L\n:'` puts each value on the line after its key). A **payloadless**
+alternative is the lowercase alternative of a setting whose uppercase
+alternative takes a payload (e.g., `h`, but not `t`, in a table config).
+
+### Setting Termination
+
+```ebnf
+setting-termination = <setting-terminator> | <end-of-output-config>
+
+setting-terminator   = ":"
+end-of-output-config = end
+```
+
+E.g., in `--key-value-config Fs`, `s` is interpreted as `<leader-pattern>` text,
+not as a separate `<item-separator-setting>`, while in `--table-config Hb` &
+`--json-config Pa`, `b` & `a` are errors (because `<style-specifier>` &
+`<indentation>` cannot consume them), not a separate `<broken-setting>` or
+`<top-level-structure-setting>`.
 
 ### Implied Alternatives
 

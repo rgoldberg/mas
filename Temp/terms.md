@@ -493,6 +493,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - style prefix: precedes a style specifier (`<style-prefix>`)
     - style suffix: follows a style specifier (`<style-suffix>`)
     - style reset: follows a styled string (`<style-reset>`)
+    - stylable string: a header row or a key, which a style specifier may style
+      ([defined](../Specs/table.md#styling))
     - final byte: ECMA-48's term for the character that terminates a control
       sequence (e.g., SGR's `m`)
     - REJECTED: style terminator / style end / final character
