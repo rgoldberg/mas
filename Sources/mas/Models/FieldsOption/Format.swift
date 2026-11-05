@@ -476,15 +476,15 @@ nonisolated(unsafe) let versionRegex = #/[0-9][\p{L}\p{N}+\-]*(?:\.[0-9][\p{L}\p
 /// A number & its trivia (both empty unless coerced with a trivia regex).
 struct NumberWithTrivia { // swiftlint:disable:this one_declaration_per_file
 	let number: DecimalNumber
-	/// The number's text: a JSON number's literal, or a coerced number's text,
+	/// The number's text: an input number's literal, or a coerced number's text,
 	/// without digit group separators & with `.` as its decimal separator.
 	let text: String
 	let triviaPrefix: Substring
 	let triviaSuffix: Substring
 }
 
-/// `value` as a number, per `coercion`: a JSON number; with `coercion`, also a
-/// string that `coercion` coerces to a number; else `nil`.
+/// `value` as a number, per `coercion`: an input number; with `coercion`, also
+/// a string that `coercion` coerces to a number; else `nil`.
 func numberWithTrivia(in value: JSON.Node?, coercion: Coercion?) -> NumberWithTrivia? {
 	switch (value, coercion) {
 	case let (.number(number), _):
