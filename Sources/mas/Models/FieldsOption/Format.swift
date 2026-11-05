@@ -991,6 +991,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		let formats = call.transform.kind == .timeOnly
 			? ChronologicFormats.timeOnly
 			: call.coercion?.dateFormats ?? .date
+		// swiftlint:disable:next todo
+		// TODO: Temp/todo.md "Additional Input Formats": use the field value's
+		//  input format, rather than assuming JSON
 		let coerced: Self? =
 			if call.coercion != nil {
 				.chronologic(from: node, formats: formats)

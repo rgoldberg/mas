@@ -241,6 +241,16 @@ Configurable behavior per output format:
 - `omit`: Omit output for absent values.
 - `emit`: Output a configurable default value for absent values.
 
+### Additional Input Formats
+
+An input format other than JSON needs:
+
+1. Its `InputFormat`, which determines the types to which a field value is
+   [implicitly coerced](../Specs/fields-format.md#value-types).
+2. That `InputFormat` passed to `Pipeline.evaluated(on:in:)`'s transforms &
+   `Placeholder.evaluated(in:)`'s matchers, which assume `InputFormat.json`.
+3. Its field values represented at those types, which `JSON.Node` cannot.
+
 ### Configurable Unix Time Segment Adjacent Characters
 
 Let a [`<unix-time>`](../Specs/fields.md#sort-chronologic-segments) sort segment
