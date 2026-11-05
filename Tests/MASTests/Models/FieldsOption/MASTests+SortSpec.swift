@@ -336,6 +336,10 @@ private extension MASTests {
 			("1", "09:00:00", "12:00:00Z", .orderedDescending),
 			("1", "23:00:00Z", "2020-01-01", .orderedAscending),
 			("1Ciso-date:", "23:00:00Z", "2020-01-01", .orderedDescending),
+			// An ISO-8601 value that is not chronologic is not a chronologic segment,
+			// so it precedes no number as a chronologic segment does
+			("1Ciso:", "+292278994-01-01", "1", .orderedAscending),
+			("1Ciso:", "+292278995-01-01", "1", .orderedDescending),
 			("1", "2020-03-18t17:39-05:00", "2020-03-18T18:00z", .orderedDescending),
 			// Typed segments are detected before boundaries
 			("1", "2020-03-18 17:39-05:00", "2020-03-18 18:00Z", .orderedDescending),

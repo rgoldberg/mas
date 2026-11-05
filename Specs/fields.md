@@ -1148,10 +1148,11 @@ The chronologic segments are each longest text that a `<chronologic-format>`
 matches, as [`%.c`, `%.d` & `%.:unix-time:d`
 detect](fields-format.md#chronologic-formatting) it:
 
-- `<iso-date>`: an ISO-8601 date-only.
-- `<iso-datetime>`: an ISO-8601 datetime.
+- `<iso-date>`: a chronologic ISO-8601 date-only.
+- `<iso-datetime>`: a chronologic ISO-8601 datetime.
 - `<iso-time>`: an ISO-8601 time-only.
-- `<iso>`: an ISO-8601 date-only, datetime, or time-only.
+- `<iso>`: a chronologic ISO-8601 date-only or datetime, or an ISO-8601
+  time-only.
 - `<unix-time>`: a chronologic Unix time written as a decimal number.
 
 Text that a `<chronologic-format>` matches is not a chronologic segment iff a
