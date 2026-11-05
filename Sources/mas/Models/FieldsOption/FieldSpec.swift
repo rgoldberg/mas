@@ -489,9 +489,9 @@ private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_f
 private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per_file
 	private(set) var fieldSpecs: [FieldSpec]
 
-	/// The field names of `<field-spec-removal>`s whose `<reference-field-name>`
-	/// named no field spec, each of which only lists its field (fields.md
-	/// "Unlisted Fields").
+	/// The field names of `<field-spec-removal>`s whose `<field-name>` named no
+	/// field spec, each of which only lists its field (fields.md "Unlisted
+	/// Fields").
 	private(set) var removedUnmatchedFieldNameSet = Set<String>()
 
 	private let outputFormat: OutputFormat
@@ -680,10 +680,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					modifiersInput: &input,
 				)
 			case .overlay:
-				// A `<named-field-spec-reference>` whose `<reference-field-name>` names
-				// no field spec, or a `<field-spec-reference>` that resolves to a
-				// `null`, inserts a new field spec (as `<field-spec-insertion>` would)
-				// as `source`, replacing any such `null`, as for each
+				// A `<named-field-spec-reference>` whose `<field-name>` names no field
+				// spec, or a `<field-spec-reference>` that resolves to a `null`,
+				// inserts a new field spec (as `<field-spec-insertion>` would) as
+				// `source`, replacing any such `null`, as for each
 				// `<reference-sourced-field-spec-edit>` other than
 				// `<field-spec-removal>`
 				let (reference, restored, existing) = try parseInsertingReference(&input)
@@ -710,8 +710,8 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					modifiersInput: &input,
 				)
 			case .removal:
-				// A `<field-spec-removal>`'s `<reference-field-name>` has no modifiers
-				// to terminate it
+				// A `<field-spec-removal>`'s `<field-name>` has no modifiers to
+				// terminate it
 				switch try parseReference(&input, nameTerminatorSet: [fieldOccurrenceIndexPrefix, fieldSpecSeparator]) {
 				case let .resolved(reference):
 					_ = try resolvedReferenceFieldSpec(reference) // Validates existence
@@ -861,7 +861,7 @@ private extension FieldSpecsBuilder {
 	private enum ParsedReference {
 		case resolved(Reference)
 		/// A `<named-field-spec-reference>` without a `<field-occurrence-index>`
-		/// whose `<reference-field-name>` names no field spec.
+		/// whose `<field-name>` names no field spec.
 		case unmatched(name: String)
 	}
 
@@ -891,8 +891,8 @@ private extension FieldSpecsBuilder {
 	/// `<baseline-sourced-field-spec-edit>` & resolves its `source` from the
 	/// baseline fields config (as in the reference fields config, except that a
 	/// `<named-field-spec-reference>` without a `<field-occurrence-index>` whose
-	/// `<reference-field-name>` names no field spec selects the default field
-	/// spec for field `<reference-field-name>`).
+	/// `<field-name>` names no field spec selects the default field spec for
+	/// field `<field-name>`).
 	private func parseBaselineSourcedFieldSpec(_ input: inout Substring) throws(ParsingError) -> FieldSpec {
 		guard input.first != fieldSpecIndexPrefix else {
 			return baselineFieldSpecs[try normalizedPosition(
@@ -910,10 +910,10 @@ private extension FieldSpecsBuilder {
 
 	/// Parses a `<reference-sourced-field-spec-edit>`'s `<field-spec-reference>`:
 	/// its resolved reference, or, iff it is a `<named-field-spec-reference>`
-	/// without a `<field-occurrence-index>` whose `<reference-field-name>` names
-	/// no field spec (e.g., for an unlisted field), the reference to the field
-	/// spec that an earlier `<reference-sourced-field-spec-edit>` inserted for
-	/// that name, if not since removed, else that name.
+	/// without a `<field-occurrence-index>` whose `<field-name>` names no field
+	/// spec (e.g., for an unlisted field), the reference to the field spec that
+	/// an earlier `<reference-sourced-field-spec-edit>` inserted for that name,
+	/// if not since removed, else that name.
 	private func parseReference(
 		_ input: inout Substring,
 		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
@@ -1005,8 +1005,8 @@ private extension FieldSpecsBuilder {
 		baselineFieldSpecs.indices.compactMap { baselineFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
-	/// Parses a `<named-field-spec-reference>`'s `<reference-field-name>`, up to
-	/// a character in `nameTerminatorSet` & optional
+	/// Parses a `<named-field-spec-reference>`'s `<field-name>`, up to a
+	/// character in `nameTerminatorSet` & optional
 	/// `<field-occurrence-index-prefix>` `<field-occurrence-index>` (`nil` iff
 	/// absent).
 	private func parseNameAndIndex(
@@ -1308,8 +1308,8 @@ let sortModifierPrefix = Character("/")
 let fieldOccurrenceIndexPrefix = Character("@")
 let fieldSpecIndexPrefix = Character("@")
 
-/// The characters that terminate a `<reference-field-name>` that may be
-/// followed by `<field-modifiers>`.
+/// The characters that terminate a `<field-name>` that may be followed by
+/// `<field-modifiers>`.
 private let modifiedFieldNameTerminatorSet = Set([
 	fieldOccurrenceIndexPrefix,
 	presetPrefix,

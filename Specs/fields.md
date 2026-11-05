@@ -76,14 +76,13 @@ end-align it).
 
 ### Unlisted Fields
 
-A fields config **lists** a field iff the app lists it, or a
-`<reference-field-name>` or an `<absolute-field-name>` names it in the fields
-config's `<fields-config>` or in that of any fields config that it
-[extends](configs.md#referencing-named-configs) (the resolved fields config
-extends its base fields config), e.g., `foo` in `@all.-foo`. An app lists each
-field that it knows before reading any input (e.g., each field of an input
-format that specifies all potential input fields up front, per [nonexistent
-fields](#nonexistent-fields)).
+A fields config **lists** a field iff the app lists it, or a `<field-name>`
+names it in the fields config's `<fields-config>` or in that of any fields
+config that it [extends](configs.md#referencing-named-configs) (the resolved
+fields config extends its base fields config), e.g., `foo` in `@all.-foo`. An
+app lists each field that it knows before reading any input (e.g., each field of
+an input format that specifies all potential input fields up front, per
+[nonexistent fields](#nonexistent-fields)).
 
 An item's field is **unlisted** iff the fields config does not list it. A
 [built-in fields config](#immutable-built-in-named-fields-configs)'s unlisted
@@ -338,8 +337,9 @@ fields configs.
 ```ebnf
 absolute-config = <absolute-field-spec> … <field-spec-separator>
 
-absolute-field-spec = <absolute-field-name> <field-modifiers>
-absolute-field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
+absolute-field-spec = <field-name> <field-modifiers>
+
+field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -546,13 +546,11 @@ input order).
 ```ebnf
 field-spec-reference = <named-field-spec-reference> | <indexed-field-spec-reference>
 
-named-field-spec-reference   = <reference-field-name> [ <field-occurrence-index-prefix> <field-occurrence-index> ]
+named-field-spec-reference   = <field-name> [ <field-occurrence-index-prefix> <field-occurrence-index> ]
 indexed-field-spec-reference = <field-spec-index-prefix> <field-spec-index>
 
-reference-field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
-
 field-occurrence-index-prefix = "@"
-field-occurrence-index        = <index> (* transitive default: {1 iff <reference-field-name> names a field spec or a null; null otherwise} *)
+field-occurrence-index        = <index> (* transitive default: {1 iff <field-name> names a field spec or a null; null otherwise} *)
 
 field-spec-index-prefix = "@"
 field-spec-index        = <index>
@@ -570,8 +568,8 @@ insertions, moves, or removals performed in `<field-spec-edits-section>`).
 Each index references a position in a list of the reference fields config's
 field specs, in reference fields config order, filtered to include:
 
-- For `<field-occurrence-index>`: only the field specs for field
-  `<reference-field-name>`, or the `null`s that replaced them.
+- For `<field-occurrence-index>`: only the field specs for field `<field-name>`,
+  or the `null`s that replaced them.
 - For `<field-spec-index>`: all field specs.
 
 E.g., if the baseline fields config's field specs are `x,a=aa,b,a=AA`:
@@ -625,17 +623,17 @@ inserted field spec cannot be modified by another field spec edit, unless a
 `<reference-sourced-field-spec-edit>` inserted it as its `source`.
 
 A `<reference-sourced-field-spec-edit>` whose `<named-field-spec-reference>` has
-no `<field-occurrence-index>` & whose `<reference-field-name>` names neither a
-field spec nor a `null` in the reference fields config (e.g., one for an
-[unlisted field](#unlisted-fields)) has no such `source`: a
-`<field-spec-removal>` then does nothing (leaving $previous$ unmodified), though
-it lists its field, while any other one 1st inserts a new field spec (as
-`<field-spec-insertion>` would) as its `source` (e.g., for an unlisted `foo`,
-`@all.foo=Foo` inserts a visible field spec & `@all._foo` a hidden one, while
-`@all.-foo` lists `foo`, so `all` does not output it). Until a
-`<field-spec-removal>` removes that inserted field spec, each later such
-`<named-field-spec-reference>` for its field references it, though no index does
-(e.g., `@all.foo=X,foo=Y` outputs 1 `foo`, labeled `Y`).
+no `<field-occurrence-index>` & whose `<field-name>` names neither a field spec
+nor a `null` in the reference fields config (e.g., one for an [unlisted
+field](#unlisted-fields)) has no such `source`: a `<field-spec-removal>` then
+does nothing (leaving $previous$ unmodified), though it lists its field, while
+any other one 1st inserts a new field spec (as `<field-spec-insertion>` would)
+as its `source` (e.g., for an unlisted `foo`, `@all.foo=Foo` inserts a visible
+field spec & `@all._foo` a hidden one, while `@all.-foo` lists `foo`, so `all`
+does not output it). Until a `<field-spec-removal>` removes that inserted field
+spec, each later such `<named-field-spec-reference>` for its field references
+it, though no index does (e.g., `@all.foo=X,foo=Y` outputs 1 `foo`, labeled
+`Y`).
 
 A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
 whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
@@ -650,10 +648,10 @@ spec from the baseline fields config referenced by `fs`, so
 `name/I`, `@x//0.+name` inserts a copy of `name` whose sort is disabled).
 `source` is resolved as in the reference fields config, except that a
 `<named-field-spec-reference>` without a `<field-occurrence-index>` whose
-`<reference-field-name>` names no field spec selects a [default field
-spec](#default-field-specs) for field `<reference-field-name>` (whereas a
-present `<field-occurrence-index>` beyond its field's field specs is an error,
-e.g., `.+x@1` when `x` has no field spec).
+`<field-name>` names no field spec selects a [default field
+spec](#default-field-specs) for field `<field-name>` (whereas a present
+`<field-occurrence-index>` beyond its field's field specs is an error, e.g.,
+`.+x@1` when `x` has no field spec).
 
 $previous$ is the location in the working fields config where the direct results
 of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
@@ -1316,14 +1314,14 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 <!--markdownlint-disable line-length-->
 | Nonterminal                                                          | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
 |:---------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
-| `<absolute-field-name>` of the 1st `<absolute-field-spec>`           | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<absolute-field-name>` of a subsequent `<absolute-field-spec>`      |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<field-name>` of the 1st `<absolute-field-spec>`                    | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<field-name>` of a subsequent `<absolute-field-spec>`               |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
 | `<base-fields-config-name>`                                          |             |                             | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-insertion>`                 |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-overlay>`                   | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-move>`                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-hide>`                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<reference-field-name>` in `<field-spec-removal>`                   |             | `@` `.` `,`                 | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-insertion>`                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-overlay>`                             | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-move>`                                |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-hide>`                                |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-removal>`                             |             | `@` `.` `,`                 | ignored            | ignored                 |
 | `<preset-name>` in a `<preset-modifier>`                             |             |                             | ignored            | ignored                 |
 | `<label>`                                                            |             | `:` `/` `,`                 | ignored            | ignored                 |
 | `<locale-identifier>` in `<locale>`                                  |             | `:`                         | ignored            | ignored                 |
