@@ -447,7 +447,8 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .number:
 			.number(from: value, coercion: coercion)
 		case .string:
-			value.jsonString.map(FormatValue.string)
+			(coercion == nil ? value.jsonString : value.isNullish ? nil : FormatValue.input(value).string)
+				.map(FormatValue.string)
 		case .timeOnly:
 			.chronologic(
 				from: value,

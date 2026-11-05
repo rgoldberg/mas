@@ -23,7 +23,9 @@ private extension MASTests {
 			"%.V%v+no+",
 		],
 	)
-	func `no predicate whose output type is not any matches a structured value`(format: String) throws {
+	func `no predicate whose output type is not any, except a string coercion, matches a structured value`(
+		format: String,
+	) throws {
 		#expect(try rendered(format, structuredValue) == "no")
 	}
 
@@ -225,6 +227,16 @@ private extension MASTests {
 			("%.:,,,,,.*,.*:N.round++", .string("US$1,234.50"), "US$1235"),
 			("%.:,,,,,.*,.*:N.absoluteValue++", .string("-3 MB"), "3 MB"),
 			("[%.n]", .string("US$5"), nil),
+			("%.s", .number(5), "5"),
+			("%.s", .bool(true), "true"),
+			("%.s", .string(" a "), " a "),
+			("[%.s]", .null, nil),
+			("%.S%s+none+", .null, "none"),
+			("%.S%s+none+", .number(5), "5"),
+			("%.S+none+", .null, "none"),
+			("%+.S.uppercase+", .string("a"), "A"),
+			("%.S.uppercase+-+", .number(5), "5"),
+			("%m.:iso:dn.s+", .string("a"), "a"),
 			("[%.:,,,,,.*,.*:n]", .string("none"), nil),
 			("%.n", .string("4.50"), "4.50"),
 			("[%.n]", .string("4.5a"), nil),
@@ -613,6 +625,8 @@ private extension MASTests {
 			("[%u]", "[]"),
 			("x%iy", "xy"),
 			("[%s]", nil),
+			("[%.s]", nil),
+			("%.S%s+none+", "none"),
 		],
 	)
 	func `an absent value matches u, e & w as null does & coerces to the empty string`(format: String, expected: String?)
@@ -651,6 +665,9 @@ private extension MASTests {
 			("%w", .string(" \t"), #"" \t""#),
 			("%.d", .string("2020-03-18"), #""2020-03-18""#),
 			("%i", structuredValue, #"["é",{"a":null}]"#),
+			("%.s", structuredValue, #""[\"é\",{\"a\":null}]""#),
+			("%.s", .number(5), #""5""#),
+			("%m.su+", .null, "null"),
 			("(%i)", structuredValue, #""([\"é\",{\"a\":null}])""#),
 		],
 	)
@@ -853,10 +870,13 @@ private extension MASTests {
 			(". uppercase", .forbiddenWhitespace(after: ".")),
 			(": name", .forbiddenWhitespace(after: ":")),
 			("abc", .templateLacksPlaceholder),
-			("%.s", .coercionNotSupported("s")),
+			("%.u", .coercionNotSupported("u")),
+			("%.S++", .binaryPlaceholderLacksBlock),
+			("%.S..uppercase+-+", .invalidPipeline("<string-pipeline>")),
+			("%.S%n++", .invalidLetter("n")),
 			("%.:de:b", .numberCoercionArgumentsNotSupported("b")),
 			("%.:de:T++", .numberCoercionArgumentsNotSupported("T")),
-			("%.:de:s", .coercionNotSupported("s")),
+			("%.:de:s", .numberCoercionArgumentsNotSupported("s")),
 			("%.:de:i", .invalidModifier("i")),
 			("%m.:de:b+", .numberCoercionArgumentsNotSupported("b")),
 			("..:de:uppercase", .numberCoercionArgumentsNotSupported("uppercase")),

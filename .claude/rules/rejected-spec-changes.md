@@ -166,7 +166,19 @@ in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because a
 matcher must still coerce before any pipeline runs (e.g., `%.N`), so it would
 add a 2nd syntax for 1 concept, while a `<coercion>` already coerces without any
 other transform (e.g., `%.n`), and it would lengthen even the simplest pipeline
-(e.g., `.toString.uppercase` instead of `..uppercase`).
+(e.g., `.toString.uppercase` instead of `..uppercase`). An overruling to add
+`toString`, because no `<coercion>` coerced a value to a string without another
+transform, was declined, because `%.s` & `%.S` do, without any rule for where a
+transform may appear in a pipeline.
+
+In specs, never let `%i` take a `<coercion>` (e.g., `%.i`), because a
+`<coercion>` gives a value its predicate's type, while `%i` has no type to
+coerce to, and `%.s` already renders a value as a string.
+
+In specs, never let a block hold a conditional matcher other than its enclosing
+matcher's predicate (e.g., `%S%.N.round+-+++` or `%N%.s+none+`), because a
+`<block-placeholder>` always succeeds, while such a matcher could fail, and a
+pipeline already coerces (e.g., `%S..round+-+` or `%N..trimWhitespace+none+`).
 
 In specs, never let a default coercion or an implicit coercion to a date accept
 a decimal number (e.g., `%.d` or `%d` for `"1.2"`), because a string that holds

@@ -852,9 +852,9 @@ private extension Predicate {
 	/// Whether this predicate supports a `<coercion>`.
 	var isCoercible: Bool {
 		switch self {
-		case .boolean, .date, .false, .number, .timeOnly, .true, .version:
+		case .boolean, .date, .false, .number, .string, .timeOnly, .true, .version:
 			true
-		case .empty, .null, .string, .whitespace:
+		case .empty, .null, .whitespace:
 			false
 		}
 	}

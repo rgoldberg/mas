@@ -26,8 +26,8 @@ Each of the following evaluates to a value whose type is:
 - Template text: string.
 
 A field value may also be an array or an object, each a **structured value**. No
-predicate whose output type is not any (e.g., `%s` or `%.n`) matches a
-structured value.
+predicate whose output type is not any (e.g., `%s` or `%.n`), except `%.s` &
+`%.S`, matches a structured value.
 
 A **date** is a date-only or a datetime. An input format **supports** a type iff
 its field values can have that type (e.g., JSON supports no version, date-only,
@@ -248,13 +248,14 @@ A number or number-to-string transform's coercion may take
 transform's may take [`<date-coercion-arguments>`](#chronologic-formatting)
 (e.g., `..:unix-time:dateOnly`).
 
-Coercing any value to a string always succeeds, so an
+A transform's `<coercion>` to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
-call, cannot fail, while a `<coercion>` to any other type may. A value coerced
-to a string is:
+call, cannot fail, while one to any other type may. A value coerced to a string
+is:
 
 - `null` or [absent](fields.md#absent-values): an empty string, except as a
-  transform's input, through which it remains unmodified.
+  transform's input, through which it remains unmodified, or for a [string
+  coercion](#coercion), which does not match it.
 - A boolean: `true` or `false`.
 - A number: its trivia prefix, its text, then its trivia suffix (e.g., `1.50`,
   or, with [trivia](#coercion), `$1.50`).
@@ -746,14 +747,14 @@ non-nullary-scalar-blocked-success   =
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-nullary-standard-matcher     = <nullary-incoercible-standard-predicate> | [ <coercion> ] <nullary-coercible-standard-predicate>
-non-nullary-standard-matcher = <non-nullary-incoercible-standard-predicate> | [ <coercion> ] <non-nullary-coercible-standard-predicate>
+nullary-standard-matcher     = <nullary-blank-predicate> | [ <coercion> ] <nullary-coercible-standard-predicate>
+non-nullary-standard-matcher = <non-nullary-blank-predicate> | [ <coercion> ] <non-nullary-coercible-standard-predicate>
 
 non-nullary-standard-success =
-  <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
-  | [ <coercion> ]
+  [ <coercion> ]
     (
-      <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
+      <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
+      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
       | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
       | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
     )
@@ -761,10 +762,8 @@ non-nullary-standard-success =
   | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>)>
   | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>)>
 
-nullary-incoercible-standard-predicate     = <nullary-blank-predicate> | <nullary-string>
-non-nullary-incoercible-standard-predicate = <non-nullary-blank-predicate> | <non-nullary-string>
-nullary-coercible-standard-predicate       = <nullary-boolean> | <nullary-true> | <nullary-false>
-non-nullary-coercible-standard-predicate   = <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
+nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
+non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
 
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
@@ -858,6 +857,11 @@ as the matcher's type, instead of requiring the input's type to match (e.g.,
 **coerced value**. For a type unsupported by the input format, a default
 coercion matches what an [implicit coercion](#value-types) matches (e.g., `%.v`
 & `%v`, for JSON input).
+
+A string coercion matches every value except a `null` or an absent one, which
+has no text to coerce, and coerces it as [specified](#value-coercion) (e.g., for
+JSON output, `%.s` renders `5` as `"5"` & `" a "` as `" a "`, `%.S%s+none+`
+renders `null` as `none`, and `%m.su+` retains `null`).
 
 A boolean coercion parses only `true` & `false`, verbatim.
 
