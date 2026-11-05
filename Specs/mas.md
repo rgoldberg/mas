@@ -40,8 +40,10 @@ variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 For the same `mas` leaf context & output format suffix (or its absence), every
 listed field has a field spec in each of [`all` &
 `none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
-standard](configs.md#immutable-built-in-named-configs), each of whose
-user-facing variants' field specs is visible, while unlisted fields are hidden.
+standard](configs.md#immutable-built-in-named-configs).
+
+Each user-facing variant of the built-in standard has only visible field specs &
+hides unlisted fields.
 
 A `mas` built-in fields config has:
 
