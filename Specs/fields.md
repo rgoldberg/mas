@@ -1313,32 +1313,32 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Nonterminal                                                          | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
-|:---------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
-| `<field-name>` of the 1st `<absolute-field-spec>`                    | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<field-name>` of a subsequent `<absolute-field-spec>`               |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<base-fields-config-name>`                                          |             |                             | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-insertion>`                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-overlay>`                             | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-move>`                                |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-hide>`                                |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-removal>`                             |             | `@` `.` `,`                 | ignored            | ignored                 |
-| `<preset-name>` in a `<preset-modifier>`                             |             |                             | ignored            | ignored                 |
-| `<label>`                                                            |             | `:` `/` `,`                 | ignored            | ignored                 |
-| `<locale-identifier>` in `<locale>`                                  |             | `:`                         | ignored            | ignored                 |
-| `<boundary-characters>`                                              |             | `%` `+` `_` `:`             | ignored            | ignored                 |
-| `<multi-character-boundary-text>`                                    |             | `%`                         | ignored            | ignored                 |
-| `<preset-name>` in a `<format-block>`                                |             |                             | forbidden          | ignored                 |
-| `<template-text>` starting a `<format-block>`                        | `:` `.`     | `%` `/` `,`                 | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>`                |             | `%` `/` `,`                 | consumed           | consumed iff before `%` |
-| `<preset-name>` in a `<block>`                                       |             |                             | forbidden          | ignored                 |
-| `<template-text>` starting a `<block>`                               | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
-| `<template-text>` immediately after a `<placeholder>` in a `<block>` |             | `%` `+`                     | consumed           | consumed iff before `%` |
-| `<decimal-separator>` in `<number-format>`                           |             | `:`                         | ignored            | ignored                 |
-| `<time-zone-code>` in `<date-time-zone-arguments>`                   |             | `:`                         | ignored            | ignored                 |
-| `<reference-date>`                                                   |             |                             | ignored            | ignored                 |
-| `<trivia-suffix-regex>`                                              |             | `:`                         | ignored            | ignored                 |
-| Any other argument                                                   |             | `,` `:`                     | ignored            | ignored                 |
+| Nonterminal                                                                                     | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
+|:------------------------------------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
+| `<field-name>` of the 1st `<absolute-field-spec>`                                               | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<field-name>` of a subsequent `<absolute-field-spec>`                                          |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| `<base-fields-config-name>`                                                                     |             |                             | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-insertion>`                                                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-overlay>`                                                        | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-move>`                                                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-hide>`                                                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-removal>`                                                        |             | `@` `.` `,`                 | ignored            | ignored                 |
+| `<preset-name>` in a `<preset-modifier>`                                                        |             |                             | ignored            | ignored                 |
+| `<label>`                                                                                       |             | `:` `/` `,`                 | ignored            | ignored                 |
+| `<locale-identifier>` in `<locale>`                                                             |             | `:`                         | ignored            | ignored                 |
+| `<boundary-characters>`                                                                         |             | `%` `+` `_` `:`             | ignored            | ignored                 |
+| `<multi-character-boundary-text>`                                                               |             | `%`                         | ignored            | ignored                 |
+| `<preset-name>` in a `<format-block>`                                                           |             |                             | forbidden          | ignored                 |
+| `<template-text>` starting a `<format-block>`                                                   | `:` `.`     | `%` `/` `,`                 | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a placeholder in a `<format-block>`                         |             | `%` `/` `,`                 | consumed           | consumed iff before `%` |
+| `<preset-name>` in a `<success-block>` or a `<failure-block>`                                   |             |                             | forbidden          | ignored                 |
+| `<template-text>` starting a `<success-block>` or a `<failure-block>`                           | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
+| `<template-text>` immediately after a placeholder in a `<success-block>` or a `<failure-block>` |             | `%` `+`                     | consumed           | consumed iff before `%` |
+| `<decimal-separator>` in `<number-format>`                                                      |             | `:`                         | ignored            | ignored                 |
+| `<time-zone-code>` in `<date-time-zone-arguments>`                                              |             | `:`                         | ignored            | ignored                 |
+| `<reference-date>`                                                                              |             |                             | ignored            | ignored                 |
+| `<trivia-suffix-regex>`                                                                         |             | `:`                         | ignored            | ignored                 |
+| Any other argument                                                                              |             | `,` `:`                     | ignored            | ignored                 |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
