@@ -1067,7 +1067,9 @@ year `0000` is 1 BCE, and `1500-02-29` does not exist).
 A Unix time is chronologic iff it is at least `-9223372036854775.808` & less
 than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
 a signed 64-bit integer); an ISO-8601 date-only or datetime is chronologic iff
-its instant, as a Unix time, is.
+its instant, as a Unix time, is, a date-only's instant being its start in the
+system time zone (e.g., `+292278994-08-17` is chronologic in UTC, but not at
+UTC-8).
 
 A datetime's or time-only's fractional seconds are truncated or padded with `0`s
 to exactly 3 digits, which are omitted iff all are `0` (e.g., in the UTC output
