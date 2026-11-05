@@ -139,6 +139,15 @@ the functionality that needs them from specs & code:
 
 ## Later Versions
 
+### `replace` Transform
+
+A string transform that replaces each match of a `{regex}` with a string (e.g.,
+removing `Inc.` from `sellerName`), which needs:
+
+1. Its argument syntax, including whether its replacement can reference a
+   capture.
+2. Whether it replaces only the 1st match or a setting chooses.
+
 ### `numberFormat` Number Templates
 
 Number templates for `numberFormat` (e.g., [UTS #35 number
