@@ -104,7 +104,7 @@ following visible field specs, at the given positions:
 | `bundleID`                  | `Bundle ID`   | `%i`                                |        |        3 |            |          |
 | `formattedPrice`            | `Price`       | `%i`                                |        |        5 |            |          |
 | `sellerName`                | `By`          | `%i`                                |        |        6 |            |          |
-| `currentVersionReleaseDate` | `Released`    | `%+.D.dateOnly+`                    |        |        7 |            |          |
+| `currentVersionReleaseDate` | `Released`    | `%+D.dateOnly+`                     |        |        7 |            |          |
 | `minimumOSVersion`          | `Minimum OS`  | `%i`                                |        |        8 |            |          |
 | `fileSizeBytes`             | `Size`        | `%+.N.scale:6,,0:.numberFormat+ MB` |        |        9 |            |          |
 | `appStorePageURL`           | `From`        | `%i`                                |        |       10 |            |          |
