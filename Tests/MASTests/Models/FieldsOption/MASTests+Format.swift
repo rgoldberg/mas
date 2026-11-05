@@ -48,9 +48,14 @@ private extension MASTests {
 		#expect((chronologic(from: value, formats: .init(iso8601Forms: [], hasUnixTime: true)) != nil) == isChronologic)
 	}
 
-	@Test(arguments: [(JSON.Node.number(0), false), (.string("0"), false), (.string("2020-03-18"), true)])
-	func `any other date coercion coerces only an ISO-8601 string`(value: JSON.Node, isChronologic: Bool) {
+	@Test(arguments: [(JSON.Node.number(0), true), (.string("0"), false), (.string("2020-03-18"), true)])
+	func `a default date coercion coerces a number or an ISO-8601 string`(value: JSON.Node, isChronologic: Bool) {
 		#expect((chronologic(from: value, formats: .date) != nil) == isChronologic)
+	}
+
+	@Test(arguments: [(JSON.Node.number(0), false), (.string("0"), false), (.string("2020-03-18"), true)])
+	func `a date coercion that omits unix-time coerces only an ISO-8601 string`(value: JSON.Node, isChronologic: Bool) {
+		#expect((chronologic(from: value, formats: .init(iso8601Forms: [.date, .datetime])) != nil) == isChronologic)
 	}
 
 	@Test
@@ -84,7 +89,7 @@ private extension MASTests {
 			(.string, nil, .null, false),
 			(.date, nil, .string("XYZ"), false),
 			(.date, nil, .string("2020-03-18"), true),
-			(.date, nil, .number(0), false),
+			(.date, nil, .number(0), true),
 			(.timeOnly, nil, .string("2020-03-18"), false),
 			(.timeOnly, nil, .string("17:39:23"), true),
 			(.version, nil, .string("1.2.3"), true),
@@ -131,6 +136,8 @@ private extension MASTests {
 		let matcher = Matcher(predicate: .date, coercion: nil)
 		#expect(!matcher.conforms(.string("2020-03-18"), in: inputFormat))
 		#expect(matcher.conforms(.string("2020-03-18T17:39:23Z"), in: inputFormat))
+		#expect(matcher.conforms(.number(0), in: inputFormat))
+		#expect(!matcher.conforms(.number(0), in: .init(chronologicForms: [.datetime], hasVersions: true)))
 		#expect(!Matcher(predicate: .version, coercion: nil).conforms(.string("1.2.3"), in: inputFormat))
 		#expect(Matcher(predicate: .version, coercion: .default).conforms(.string("1.2.3"), in: inputFormat))
 	}

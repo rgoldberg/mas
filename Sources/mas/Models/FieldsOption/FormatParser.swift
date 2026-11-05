@@ -801,7 +801,7 @@ private extension TransformCall {
 			case .date, .dateOnly, .timeOnly:
 				inputType == .string
 			case .number:
-				inputType == .string || inputType == .date && coercion.dateFormats.hasUnixTime
+				inputType == .string || inputType == .date && coercion.dateFormats.isNumberUnixTime
 			case .string:
 				inputType != .string
 			case .version:

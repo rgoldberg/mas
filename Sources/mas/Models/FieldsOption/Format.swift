@@ -473,7 +473,10 @@ struct InputFormat { // swiftlint:disable:this one_declaration_per_file
 
 	/// What an implicit coercion parses, given what a default coercion parses.
 	func implicitCoercionFormats(for coercionFormats: ChronologicFormats) -> ChronologicFormats {
-		.init(iso8601Forms: coercionFormats.iso8601Forms.subtracting(chronologicForms))
+		.init(
+			iso8601Forms: coercionFormats.iso8601Forms.subtracting(chronologicForms),
+			isNumberDefaultUnixTime: coercionFormats.isNumberDefaultUnixTime && !chronologicForms.contains(.datetime),
+		)
 	}
 }
 
@@ -670,13 +673,21 @@ enum ISO8601Form: CaseIterable { // swiftlint:disable:this one_declaration_per_f
 /// What a `<coercion>` to a chronologic type parses.
 struct ChronologicFormats: Hashable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<coercion>` to a date without `<date-coercion-arguments>`.
-	static let date = Self(iso8601Forms: [.date, .datetime])
+	static let date = Self(iso8601Forms: [.date, .datetime], isNumberDefaultUnixTime: true)
 	/// A `<coercion>` to a time-only, which has only 1 format.
 	static let timeOnly = Self(iso8601Forms: [.time])
 
 	let iso8601Forms: Set<ISO8601Form>
 	/// Whether this includes `<unix-time>`.
 	var hasUnixTime = false
+	/// Whether, without `<unix-time>`, a number is a Unix time, as it is for a
+	/// default coercion, which does not so parse a decimal number.
+	var isNumberDefaultUnixTime = false
+
+	/// Whether a number is a Unix time.
+	var isNumberUnixTime: Bool {
+		hasUnixTime || isNumberDefaultUnixTime
+	}
 
 	/// Whether every value of these formats is a date-only.
 	var isDateOnly: Bool {
@@ -685,11 +696,12 @@ struct ChronologicFormats: Hashable { // swiftlint:disable:this one_declaration_
 }
 
 /// `value` coerced to chronologic: a string as a whole ISO-8601 value of one of
-/// `formats`' forms; iff `formats` has `<unix-time>`, also a number, or a
-/// string whose entire content is a decimal number, as a Unix time; else `nil`.
+/// `formats`' forms; iff `formats` parses it, a number as a Unix time; iff
+/// `formats` has `<unix-time>`, also a string whose entire content is a decimal
+/// number, as a Unix time; else `nil`.
 func chronologic(from value: JSON.Node?, formats: ChronologicFormats) -> Chronologic? {
 	switch value {
-	case let .number(number) where formats.hasUnixTime:
+	case let .number(number) where formats.isNumberUnixTime:
 		DecimalNumber("\(number)").flatMap(unixTimeInstant).map(Chronologic.datetime)
 	case let .string(literal):
 		iso8601ChronologicPrefix(of: literal.value[...], forms: formats.iso8601Forms)

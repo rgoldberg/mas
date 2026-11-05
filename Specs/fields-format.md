@@ -40,8 +40,8 @@ requires a version, date-only, datetime, or time-only that its input format does
 not have, iff a default coercion would coerce it to that type, because no value
 could otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
 input, `%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` &
-`.dateOnly` accept `"2020-03-18"`). A `<coercion>` replaces it, ignoring its
-defaults (e.g., `%.:iso-date:d` does not match `"2020-03-18 17:39"`).
+`.dateOnly` accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces
+it, ignoring its defaults (e.g., `%.:iso:d` does not match `0`).
 
 No implicit coercion gives a value a type that its input format has, so only a
 `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while `%.n`
@@ -147,7 +147,7 @@ value-transform-pipeline =
   | <coerced-chain>
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
-number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
+number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
 version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-only-chain> | <unix-time-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
@@ -172,11 +172,12 @@ coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion
 coerced-date-chain      = <date-chain(<transform-call-prefix> <non-date-only-coercion>)>
 coerced-date-only-chain = <date-only-chain(<transform-call-prefix> <date-only-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
+number-date-chain       = <date-chain(<transform-call-prefix> <number-date-coercion>)>
 unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
 version-date-only-chain = <date-only-chain(<transform-call-prefix> <version-date-only-coercion>)>
 
 after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
-after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <unix-time-date-chain>
+after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
 after-date-run   = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
@@ -893,9 +894,10 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-non-date-only-coercion     = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default non-date-only-formats: 'iso' *)
+non-date-only-coercion     = <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ] (* default: {what <iso> matches, or a number as a Unix time} *)
 date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
 version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
+number-date-coercion       = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default: {a number as a Unix time} *)
 unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
 
 non-date-only-formats     = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
@@ -942,14 +944,23 @@ A `<coercion>` to a date parses what any of its `<date-format>`s
 match a time-only, which is not a date, and `<unix-time>` also matches a number
 without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
 `"2020-03-18 17:39"`, and `%.:iso,unix-time:D` matches `0`, `"0"` &
-`"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2 & `%.D` only the
-last).
+`"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2).
 
-A number or a decimal number coerces to a date only per `<unix-time>`, as a
-datetime, because it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise
-render the price `5.6` as a date), so a call whose input is a number must list
-`<unix-time>` (e.g., `.round..:iso,unix-time:dateOnly`, but not
-`.round..:iso:dateOnly`, which can only abort).
+A default coercion to a date also parses what `<iso>` matches & a number without
+trivia as a Unix time, as a datetime, because a number has no other meaning as a
+date (e.g., `%.D` matches `0` & `"2020-03-18"`, but not `"0"`).
+
+A decimal number coerces to a date only per `<unix-time>`, because a string that
+holds a number is rarely a time (e.g., `%m.d.s+` would otherwise render the
+string `5.6` as a date).
+
+A matcher to a date thus matches every chronologic number, so a branch that
+means to match a number must precede it or follow a coercion that omits
+`<unix-time>` (e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would
+render the price `5.6` as a date). A call whose input is a number must omit
+`<date-coercion-arguments>` or list `<unix-time>` (e.g., `.round..dateOnly` or
+`.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which can
+only abort).
 
 A `<date-only-coercion>`'s value is always a date-only, which no time zone
 affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
