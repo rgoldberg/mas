@@ -583,6 +583,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       `<date-format>`s matches
     - date-only coercion: a date coercion whose only `<date-format>` is
       `<iso-date>`, so its value is a date-only (`<date-only-coercion>`)
+    - non-date-only coercion: a date coercion that lists a `<date-format>` other
+      than `<iso-date>`, so its value may be a datetime
+      (`<non-date-only-coercion>`)
     - version date-only coercion: a date coercion of a version without
       `<unix-time>`, so its value is a date-only
       (`<version-date-only-coercion>`)
@@ -615,6 +618,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - CLDR root collation: the Unicode Collation Algorithm with CLDR's root
       collation order & settings, per which the canonical conventions compare
       text ([used](../Specs/fields.md#sort-locale))
+    - canonical conventions: the conventions that `<canonical-locale>`
+      identifies, which are independent of every real-world locale
+      ([defined](../Specs/fields.md#sort-locale))
+    - system locale: the locale of the system running mas (`<system-locale>`;
+      [used](../Specs/fields.md#sort-locale))
     - REJECTED: code point order / Unicode order (for the canonical conventions'
       text comparison)
 99. - character class: a `<character-class-name>`'s characters, per UTS #18
