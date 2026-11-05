@@ -62,7 +62,6 @@ date-only-pipeline            = <pipeline(<named-format-reference(<date-format-n
 time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        =
   <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
-input-pipeline                = <pipeline(<named-format-reference(<unconditional-format-name>)>, <coerced-chain>, <coerced-chain>)>
 unconditional-string-pipeline =
   <pipeline(
     <named-format-reference(<unconditional-format-name>)>,
@@ -187,13 +186,13 @@ A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
 call whose value's type the syntax text determines takes a `<coercion>` only if
 its input type differs from that type, because it otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
-`<format-block>`'s 1st call, or one that a `<named-format-reference>`
-immediately precedes, whose preset determines it) may take one regardless. A
-date or a time-only coerces only to a string, neither a number nor a version
-coerces to a time-only & a number coerces to a date only as a Unix time, because
-its rendering is otherwise not a value of that type, so a pipeline that means to
-parse it must coerce it to a string 1st (e.g.,
-`%.D..uppercase..:,,,,,.*:round++`).
+`<format-block>`'s 1st call, `%I`'s 1st call outside an `<unconditional-block>`,
+or one that a `<named-format-reference>` immediately precedes, whose preset
+determines it) may take one regardless. A date or a time-only coerces only to a
+string, neither a number nor a version coerces to a time-only & a number coerces
+to a date only as a Unix time, because its rendering is otherwise not a value of
+that type, so a pipeline that means to parse it must coerce it to a string 1st
+(e.g., `%.D..uppercase..:,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
@@ -563,7 +562,7 @@ success-pipeline =
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
-  | <input-pipeline>
+  | <named-format-pipeline(<unconditional-format-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
@@ -641,7 +640,7 @@ preceding & succeeding.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-fallible-unconditional-placeholder   = <unconditional-placeholder(<input-pipeline>, <string-pipeline>)>
+fallible-unconditional-placeholder   = <unconditional-placeholder(<named-format-pipeline(<unconditional-format-name>)>, <string-pipeline>)>
 infallible-unconditional-placeholder = <unconditional-placeholder(<unconditional-pipeline>, <unconditional-string-pipeline>)>
 
 unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =

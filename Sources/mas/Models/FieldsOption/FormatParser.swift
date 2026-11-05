@@ -713,7 +713,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .dateOnly:
 			"<date-only-pipeline>"
 		case .input:
-			"<input-pipeline>"
+			"<named-format-pipeline>"
 		case .number:
 			"<number-pipeline>"
 		case .string:
@@ -760,7 +760,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .dateOnly:
 			(isNamed || calls.first?.coercion != nil) && calls.followsTypes(from: isNamed ? nil : .dateOnly)
 		case .input:
-			calls.first?.coercion != nil && calls.followsTypes(from: nil)
+			calls.followsTypes(from: nil)
 		case .number:
 			calls.followsTypes(from: isNamed ? nil : .number)
 		case .string:

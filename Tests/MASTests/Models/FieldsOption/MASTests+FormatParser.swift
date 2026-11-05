@@ -241,6 +241,7 @@ private extension MASTests {
 			("%l", "L"),
 			("%k", "n"),
 			("%I..uppercase+", "V"),
+			("%I.uppercase+", "V"),
 			("%L.uppercase+", "L"),
 			("%K.uppercase+", "N"),
 		],
@@ -360,6 +361,8 @@ private extension MASTests {
 			("%I..trimWhitespace..round+", .string(" 5.6 "), "6"),
 			("%I..round+ MB", .string("5.6"), "6 MB"),
 			("%I..round+", .string("x"), nil),
+			("%I.round+ MB", .number(5.6), "6 MB"),
+			("%I:standard.uppercase+", .string("x"), "X"),
 			("%S%I..round+++", .string("5.6"), "6"),
 			("%S%I..round+++", .string("x"), nil),
 			("%S.uppercase+%I..uppercase++", .number(5), "5"),
@@ -490,6 +493,9 @@ private extension MASTests {
 			(".timeZone:UTC:", .string("17:39:23")),
 			(".timeOnlyTimeZone:UTC:", .string("2020-03-18")),
 			("%S:standard.round+none+", .string("5")),
+			("%I.uppercase+", .number(5)),
+			("%I.round+", .string("5")),
+			("[%I.uppercase+]", .number(5)),
 		],
 	)
 	func `an uncoerced transform on an input not of its input type is an error`(format: String, value: JSON.Node)
@@ -516,7 +522,7 @@ private extension MASTests {
 	}
 
 	@Test(
-		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat"],
+		arguments: [".round", ".uppercase", "..uppercase", ".dateOnly", "..:de:numberFormat", "%I.uppercase+"],
 		[JSON.Node?.none, .null],
 	)
 	func `a null or absent value remains unmodified through every transform`(format: String, value: JSON.Node?)
@@ -752,9 +758,8 @@ private extension MASTests {
 			(".uppercase%i", .unexpectedCharacter("%")),
 			("%N.uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%S.round++", .invalidPipeline("<string-pipeline>")),
-			("%I.uppercase+", .invalidPipeline("<input-pipeline>")),
-			("%Ix+", .invalidPipeline("<input-pipeline>")),
-			("%I+", .invalidPipeline("<input-pipeline>")),
+			("%Ix+", .invalidPipeline("<named-format-pipeline>")),
+			("%I+", .invalidPipeline("<named-format-pipeline>")),
 			("%L+", .invalidPipeline("<string-pipeline>")),
 			("%L..uppercase+", .invalidPipeline("<string-pipeline>")),
 			("%S.uppercase+%L..round++", .invalidPipeline("<unconditional-string-pipeline>")),
@@ -772,7 +777,7 @@ private extension MASTests {
 			(#".ro\xnd"#, .unknownTransform("roxnd")),
 			(#".ro\"#, .danglingEscape),
 			(#".\"#, .danglingEscape),
-			("%I..uppercase..lowercase+", .invalidPipeline("<input-pipeline>")),
+			("%I..uppercase..lowercase+", .invalidPipeline("<named-format-pipeline>")),
 			(".round.uppercase", .invalidPipeline("<value-transform-pipeline>")),
 			(".round..round", .invalidPipeline("<value-transform-pipeline>")),
 			(".uppercase..uppercase", .invalidPipeline("<value-transform-pipeline>")),
