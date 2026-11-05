@@ -108,6 +108,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
    [table](../Specs/table.md#implied-alternatives) or
    [key-value](../Specs/key-value.md#implied-alternatives) alternative yet meets
    an inherited payload, which it would not override.
+4. How a user defines & persists a [custom named
+   config](../Specs/configs.md#custom-named-configs): the project owner will
+   specify this later (not actionable until then).
 
 #### Custom Names Removal
 
