@@ -918,9 +918,10 @@ form](ebnf.md#typed-terminals) (e.g., `-1`, `.5`, or `1.5e9`).
 A `<coercion>` to a date parses what any of its `<date-format>`s
 [matches](fields.md#sort-chronologic-segments), except that `<iso>` does not
 match a time-only, which is not a date, and `<unix-time>` also matches a number
-(e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not `"2020-03-18 17:39"`, and
-`%.:iso,unix-time:D` matches `0`, `"0"` & `"2020-03-18"`, while `%.:unix-time:D`
-matches only the 1st 2 & `%.D` only the last).
+without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
+`"2020-03-18 17:39"`, and `%.:iso,unix-time:D` matches `0`, `"0"` &
+`"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2 & `%.D` only the
+last).
 
 A number or a decimal number coerces to a date only per `<unix-time>`, because
 it is otherwise rarely a time (e.g., `%m.d.n+` would otherwise render the price
