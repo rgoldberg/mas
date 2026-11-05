@@ -117,7 +117,7 @@ with other output configuration.
 
 A fields config may include:
 
-- Rules that apply to all fields
+- Settings that apply to all fields (e.g., its field order)
 - Field-specific field specs
 
 ### Named Fields Configs
