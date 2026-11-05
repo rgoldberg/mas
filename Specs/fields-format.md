@@ -461,6 +461,8 @@ reference-date = {date: ISO-8601 date-only} (* default: {current date in the sys
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
+`<system-time-zone>` identifies the system time zone.
+
 <!--editorconfig-checker-disable-->
 A `<time-zone-code>` that is both [an IANA Time Zone Database
 identifier](https://www.iana.org/time-zones) & [a Foundation time zone
