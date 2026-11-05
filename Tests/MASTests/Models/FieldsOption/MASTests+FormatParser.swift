@@ -10,7 +10,7 @@ internal import JSONAST
 @testable private import mas
 internal import Testing
 
-private extension MASTests {
+private extension MASTests { // swiftlint:disable file_length
 	@Test(
 		arguments: [
 			"%S%s+no+",
@@ -427,6 +427,16 @@ private extension MASTests {
 			("%W..trimWhitespace+-+", .string(" "), ""),
 			("%W..trimWhitespace.trimWhitespace+-+", .string(" "), ""),
 			("%W%W..trimWhitespace+++", .string(" "), ""),
+			("[%U%I:standard..uppercase++-+]", .null, "[]"),
+			("%E%I:standard..uppercase++-+", .string(""), ""),
+			("%E[%I:standard+]+-+", .string(""), "[]"),
+			("%W%I:standard..uppercase++-+", .string(" "), " "),
+			("%W%I:standard..round++-+", .string(" "), nil),
+			("%W%I..trimWhitespace++-+", .string(" "), ""),
+			("%W%I..trimWhitespace.trimWhitespace++-+", .string(" "), ""),
+			("%-E%I..uppercase++", .string("x"), "X"),
+			("%E+%I..uppercase++", .string("x"), "X"),
+			("%m-U%I..uppercase++s+", .string("x"), "X"),
 			(".round", .number(5.6), "6"),
 			("..round", .string("5.6"), "6"),
 			("..round", .string("x"), nil),
@@ -939,6 +949,15 @@ private extension MASTests {
 			("%W..uppercase+-+", .invalidPipeline("<whitespace-pipeline>")),
 			("%W..trimWhitespace.uppercase+-+", .invalidPipeline("<whitespace-pipeline>")),
 			("%W%W..uppercase++", .invalidPipeline("<whitespace-pipeline>")),
+			("%U%I..uppercase++-+", .invalidPipeline("<named-input-pipeline>")),
+			("%E%I..trimWhitespace++-+", .invalidPipeline("<named-input-pipeline>")),
+			("%U%I.round++-+", .invalidPipeline("<named-input-pipeline>")),
+			("%U%I+", .invalidPipeline("<named-input-pipeline>")),
+			("%mU%I..uppercase++s+", .invalidPipeline("<named-input-pipeline>")),
+			("%+U%I..uppercase++", .invalidPipeline("<named-input-pipeline>")),
+			("%W%I..uppercase++-+", .invalidPipeline("<whitespace-input-pipeline>")),
+			("%W%I.trimWhitespace++-+", .invalidPipeline("<whitespace-input-pipeline>")),
+			("%W%I..trimWhitespace.uppercase++-+", .invalidPipeline("<whitespace-input-pipeline>")),
 			("%.D.dateOnly..timeZone:UTC:++", .invalidPipeline("<date-pipeline>")),
 			("%.D..timeOnlyTimeZone:UTC:++", .invalidPipeline("<date-pipeline>")),
 			("%.C..dateOnly++", .invalidPipeline("<time-only-pipeline>")),

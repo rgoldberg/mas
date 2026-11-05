@@ -73,6 +73,10 @@ pipeline(NAMED_FORMAT_REFERENCE, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) =
 
 named-format-pipeline(FORMAT_NAME) = <pipeline(<named-format-reference(FORMAT_NAME)>, <value-transform-pipeline>, <value-transform-pipeline>)>
 
+named-pipeline(FORMAT_NAME, TRANSFORM_PIPELINE) = <named-format-reference(FORMAT_NAME)> [ TRANSFORM_PIPELINE ]
+
+trimmable-pipeline(NAMED_PIPELINE) = NAMED_PIPELINE | <transform-run(<transform-call-prefix> <coercion>, <trim-whitespace>)>
+
 string-pipeline               = <pipeline(<named-format-reference(<string-format-name>)>, <value-transform-pipeline>, <string-input-pipeline>)>
 version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
@@ -87,8 +91,10 @@ unconditional-string-pipeline =
     <uncoerced-string-transform-run> | <unconditional-transform-pipeline>,
     <uncoerced-string-transform-run>
   )>
-named-unconditional-pipeline  = <named-format-reference(<unconditional-format-name>)> [ <unconditional-transform-pipeline> ]
-whitespace-pipeline           = <named-unconditional-pipeline> | <transform-run(<transform-call-prefix> <coercion>, <trim-whitespace>)>
+named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <unconditional-transform-pipeline>)>
+named-input-pipeline          = <named-pipeline(<preset-name>, <value-transform-pipeline>)>
+whitespace-pipeline           = <trimmable-pipeline(<named-unconditional-pipeline>)>
+whitespace-input-pipeline     = <trimmable-pipeline(<named-input-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -573,7 +579,7 @@ block-terminator = -"+"
 ```ebnf
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
-success-block = <conditional-block> (* non-structural *)
+success-block = <conditional-input-block> (* non-structural *)
 failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct default: {empty string} *)
 
 success-pipeline =
@@ -586,15 +592,23 @@ success-pipeline =
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
   | <named-unconditional-pipeline>
+  | <named-input-pipeline>
   | <whitespace-pipeline>
+  | <whitespace-input-pipeline>
   | <named-format-pipeline(<preset-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
-non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
+non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) =
+  <non-nullary-input-success(NULLARY, NON_NULLARY, PIPELINE, <named-format-pipeline(<preset-name>)>)>
+non-nullary-input-success(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE) =
+  NON_NULLARY -<conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE)>
 
 conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
-  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <fallible-unconditional-placeholder>)>
+  <conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, <named-format-pipeline(<preset-name>)>)>
+  (* direct default: {empty string} *)
+conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE) =
+  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder(INPUT_PIPELINE, <string-pipeline>)>)>
   (* direct default: {empty string} *)
 unconditional-block(PIPELINE) = PIPELINE | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
 
@@ -637,13 +651,14 @@ A `<success-clause>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing matcher fails.
 
-Within a `<conditional-block>`, a `<block-placeholder>` is evaluated against the
-enclosing matcher's value (coerced, if it coerces), so it always succeeds; `%i`
-/ `%I` are evaluated against their format's **input**, which no block modifies:
-in a field spec's format, the field value, at its original type; in a named
-format, the value against which its `<named-format-reference>` evaluates it
-(e.g., `%.:de:N%n (%i)++` renders `"1.234,5"` as `1234.5 (1.234,5)`, while
-`%+.:de:N:x+`, where preset `x` sets no format, renders it as `1234.5`).
+Within a `<conditional-input-block>`, a `<block-placeholder>` is evaluated
+against the enclosing matcher's value (coerced, if it coerces), so it always
+succeeds; `%i` / `%I` are evaluated against their format's **input**, which no
+block modifies: in a field spec's format, the field value, at its original type;
+in a named format, the value against which its `<named-format-reference>`
+evaluates it (e.g., `%.:de:N%n (%i)++` renders `"1.234,5"` as
+`1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x` sets no format,
+renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which the field value is the value against which the matcher is evaluated, as
@@ -765,9 +780,9 @@ non-nullary-standard-success =
       | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
       | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
     )
-  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>)>
+  | <non-nullary-input-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>, <named-input-pipeline>)>
+  | <non-nullary-input-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>, <named-input-pipeline>)>
+  | <non-nullary-input-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>, <whitespace-input-pipeline>)>
 
 nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
 non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
@@ -796,8 +811,11 @@ non-nullary-string     = "S" (* is string;                                      
 `%U`'s & `%E`'s values are `null` or an empty string, which no transform can
 modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
 can modify, so any other transform must follow a `<named-format-reference>`,
-whose named format may output other text (e.g., `%W..trimWhitespace+-+` &
-`%U:x..uppercase+-+`, but neither `%U..uppercase+-+` nor `%W..uppercase+-+`).
+whose named format may output other text, whether in the placeholder's pipeline
+or in a `%I`'s in its `<success-block>`, whose format input is that value (e.g.,
+`%W..trimWhitespace+-+`, `%U:x..uppercase+-+`, `%W%I..trimWhitespace++-+`,
+`%U%I:x..uppercase++-+` & `%U+%I..uppercase++`, but none of `%U..uppercase+-+`,
+`%W..uppercase+-+` & `%U%I..uppercase++-+`).
 
 ###### Number Formatting
 

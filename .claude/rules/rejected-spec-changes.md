@@ -69,10 +69,12 @@ In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
 empty string, so its matcher cannot affect what it means.
 
-In specs, never let `%U` or `%E` take a transform before a named format, nor
-`%W` take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
-`%E..trimWhitespace+-+`, or `%W..uppercase+-+`), because no such transform can
-modify its value, so it cannot affect what its placeholder means.
+In specs, never let `%U` or `%E`, or a `%I` in either's `<success-block>`, take
+a transform before a named format, nor `%W`, or a `%I` in its `<success-block>`,
+take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
+`%E..trimWhitespace+-+`, `%W..uppercase+-+`, `%U%I..uppercase++-+`, or
+`%W%I..uppercase++-+`), because no such transform can modify its value, so it
+cannot affect what its placeholder means.
 
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
@@ -106,9 +108,11 @@ means, nor require one on a call whose types match (e.g.,
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 (e.g., `%S.uppercase+%L..round++` or
 `%S.uppercase+%I..trimWhitespace..round++`), because a `<failure-block>` must
-never abort, nor forbid one in a `<format-template>` or a `<conditional-block>`
-(e.g., `%L..round+`), because no matcher can otherwise coerce a label, a name,
-or a format input that it cannot match.
+never abort, nor forbid one in a `<format-template>` or a `<success-block>`
+(e.g., `%L..round+` or `%S%I..round++-+`), other than a `%I`'s in the
+`<success-block>` of `%U`, `%E`, or `%W`, whose matcher matched its format input
+(e.g., `%U%I..round++-+`), because no matcher can otherwise coerce a label, a
+name, or a format input that it cannot match.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,

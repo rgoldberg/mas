@@ -336,7 +336,7 @@ private struct FormatParser {
 				.unconditional(
 					predicate,
 					pipeline: letter.isUppercase
-						? try parseUnconditionalPipelineBlock(predicate, isFallible: kind != .unconditional)
+						? try parseUnconditionalPipelineBlock(predicate, enclosingKind: kind)
 						: .init(),
 				),
 			)
@@ -354,14 +354,14 @@ private struct FormatParser {
 	}
 
 	/// Parses a `<non-nullary-unconditional-placeholder>`'s pipeline & its
-	/// `<block-terminator>`: a `<fallible-unconditional-placeholder>`'s iff
-	/// `isFallible`, else an `<infallible-unconditional-placeholder>`'s.
-	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate, isFallible: Bool)
+	/// `<block-terminator>`, per its enclosing block's kind `enclosingKind`, or,
+	/// iff `nil`, for a `<format-template>`'s placeholder.
+	private mutating func parseUnconditionalPipelineBlock(_ predicate: UnconditionalPredicate, enclosingKind: BlockKind?)
 	throws(ParsingError) -> Pipeline {
 		try parsePipelineBlock(
 			kind: predicate == .input
-				? isFallible ? .input : .unconditional
-				: isFallible ? .string : .unconditionalString,
+				? enclosingKind?.inputPipelineKind ?? .input
+				: enclosingKind == .unconditional ? .unconditionalString : .string,
 		)
 	}
 
@@ -383,7 +383,7 @@ private struct FormatParser {
 			}
 			return .unconditional(
 				predicate,
-				pipeline: isNonNullary ? try parseUnconditionalPipelineBlock(predicate, isFallible: true) : .init(),
+				pipeline: isNonNullary ? try parseUnconditionalPipelineBlock(predicate, enclosingKind: nil) : .init(),
 			)
 		}
 		if lowercaseLetter == unaryMatch {
@@ -673,6 +673,9 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// A `<fallible-unconditional-placeholder>`'s `%I…+` pipeline's kind, which
 	/// no block has.
 	case input
+	/// A `%I…+` pipeline's kind in `%U`'s or `%E`'s `<success-block>`, which no
+	/// block has.
+	case namedInput
 	/// `%U`'s or `%E`'s, whose value no transform can modify, so its pipeline
 	/// must start with a `<named-format-reference>`.
 	case nullOrEmpty
@@ -687,13 +690,15 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// `%W`'s, whose value only `trimWhitespace` can modify, so any other
 	/// transform must follow a `<named-format-reference>`.
 	case whitespace
+	/// A `%I…+` pipeline's kind in `%W`'s `<success-block>`, which no block has.
+	case whitespaceInput
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
 		case .boolean, .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
 			true
-		case .input, .unconditional, .unconditionalString:
+		case .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
 			false
 		}
 	}
@@ -701,10 +706,26 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a non-nullary `<block-placeholder>`'s pipeline block.
 	var blockPlaceholderPipelineKind: Self {
 		switch self {
-		case .boolean, .input, .unconditional, .unconditionalString:
+		case .boolean, .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
 			.unconditional
 		case .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
 			self
+		}
+	}
+
+	/// The kind of a `%I…+` pipeline in this kind's template.
+	var inputPipelineKind: Self {
+		switch self {
+		case .boolean, .date, .dateOnly, .number, .string, .timeOnly, .version:
+			.input
+		case .input, .namedInput, .unconditionalString, .whitespaceInput:
+			.input
+		case .nullOrEmpty:
+			.namedInput
+		case .unconditional:
+			.unconditional
+		case .whitespace:
+			.whitespaceInput
 		}
 	}
 
@@ -719,6 +740,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<date-only-pipeline>"
 		case .input:
 			"<named-format-pipeline>"
+		case .namedInput:
+			"<named-input-pipeline>"
 		case .nullOrEmpty:
 			"<named-unconditional-pipeline>"
 		case .number:
@@ -733,6 +756,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<version-pipeline>"
 		case .whitespace:
 			"<whitespace-pipeline>"
+		case .whitespaceInput:
+			"<whitespace-input-pipeline>"
 		}
 	}
 
@@ -772,6 +797,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			(isNamed || calls.first?.coercion != nil) && calls.followsTypes(from: isNamed ? nil : .dateOnly)
 		case .input:
 			calls.followsTypes(from: nil)
+		case .namedInput:
+			isNamed && calls.followsTypes(from: nil)
 		case .nullOrEmpty:
 			isNamed && calls.first?.coercion != nil && calls.isStringTransformRun
 		case .number:
@@ -788,6 +815,9 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			calls.first?.coercion != nil
 				&& calls.isStringTransformRun
 				&& (isNamed || calls.allSatisfy { $0.transform == .trimWhitespace })
+		case .whitespaceInput:
+			calls.followsTypes(from: nil)
+				&& (isNamed || calls.first?.coercion != nil && calls.allSatisfy { $0.transform == .trimWhitespace })
 		}
 	}
 }
