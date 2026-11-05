@@ -575,7 +575,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/configs.md#implied-alternatives))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
-    - decimal number: a Unix time's text syntax
+    - decimal number: text in `number`'s lexical form (e.g., a Unix time's text)
       ([defined](../Specs/fields-format.md#chronologic-formatting))
     - date coercion: a `<coercion>` to a date, which parses what any of its
       `<date-format>`s matches

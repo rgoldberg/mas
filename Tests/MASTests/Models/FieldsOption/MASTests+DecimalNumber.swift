@@ -10,7 +10,7 @@ internal import Testing
 
 private extension MASTests {
 	@Test(arguments: ["", ".", "-", "e5", "1e", "1x", "0x1", " 1", "1,000"])
-	func `rejects a string that is not a canonical number`(string: String) {
+	func `rejects a string that is not a decimal number`(string: String) {
 		#expect(DecimalNumber(string) == nil)
 	}
 

@@ -23,12 +23,12 @@ struct DecimalNumber: Hashable {
 		digits.isEmpty ? self : .init(digits: digits, exponent: exponent, isNegative: !isNegative)
 	}
 
-	/// `string`, a canonical number (an optional sign, ASCII digits, an optional
+	/// `string`, a decimal number (an optional sign, ASCII digits, an optional
 	/// `.` & fractional part & an optional exponent, with at least 1 digit before
 	/// the exponent); else `nil`.
 	init?(_ string: some StringProtocol) {
 		guard
-			let match = String(string).wholeMatch(of: unsafe canonicalNumberRegex),
+			let match = String(string).wholeMatch(of: unsafe decimalNumberRegex),
 			!(match.2.isEmpty && (match.3 ?? "").isEmpty),
 			let exponent = BigInt(match.4.map { $0.hasPrefix("+") ? $0.dropFirst() : $0 } ?? "0")
 		else {
@@ -91,4 +91,4 @@ extension DecimalNumber {
 	}
 }
 
-private nonisolated(unsafe) let canonicalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:[eE]([+-]?[0-9]+))?/
+private nonisolated(unsafe) let decimalNumberRegex = /([+-]?)([0-9]*)(?:\.([0-9]*))?(?:[eE]([+-]?[0-9]+))?/

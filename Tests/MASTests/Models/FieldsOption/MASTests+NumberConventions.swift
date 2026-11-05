@@ -23,7 +23,7 @@ private extension MASTests {
 			(fourDigitGroupConventions, "123456789", "1'2345'6789"),
 		],
 	)
-	func `formats a canonical number per number conventions`(
+	func `formats a decimal number per number conventions`(
 		conventions: NumberConventions,
 		number: String,
 		expected: String,

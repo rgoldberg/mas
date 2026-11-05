@@ -198,7 +198,7 @@ parse it must coerce it to a string 1st (e.g.,
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
 `1235`, while `..numberFormat:de:..round` aborts formatting, because `1.234,5`
-is not a canonical number).
+is not a number in the canonical conventions).
 
 An **argument** is an element of an argument list: a transform's, a [number
 coercion's](#coercion), a [date coercion's](#chronologic-formatting),

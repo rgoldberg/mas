@@ -13,9 +13,9 @@ private import Synchronization
 /// A number's digit group separator, digit group sizes & decimal separator, per
 /// `<number-format-arguments>`.
 struct NumberConventions: Hashable {
-	/// fields.md's canonical number formatting: a `.` decimal separator, a `,`
-	/// digit group separator, a digit group size of 3 & a secondary digit group
-	/// size of 0.
+	/// fields.md's canonical conventions' number formatting: a `.` decimal
+	/// separator, a `,` digit group separator, a digit group size of 3 & a
+	/// secondary digit group size of 0.
 	static let canonical = Self(
 		digitGroupSeparator: ",",
 		digitGroupSize: 3,
