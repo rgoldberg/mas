@@ -38,16 +38,10 @@ variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 `mas list`).
 
 For the same `mas` leaf context & output format suffix (or its absence), every
-listed field has a field spec in each of `all`, `none` & the [built-in
-standard](configs.md#immutable-built-in-named-configs):
-
-- `all`: Every field spec is visible, as are unlisted fields.
-- `none`: `all`, ordered by `<positional-order>`, with every field spec's
-  `<sort>`, if any,
-  [disabled](fields.md#immutable-built-in-named-fields-configs) & with every
-  field spec & unlisted field hidden.
-- Built-in standard's user-facing variants: Every field spec is visible, while
-  unlisted fields are hidden.
+listed field has a field spec in each of [`all` &
+`none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
+standard](configs.md#immutable-built-in-named-configs), each of whose
+user-facing variants' field specs is visible, while unlisted fields are hidden.
 
 A `mas` built-in fields config has:
 
