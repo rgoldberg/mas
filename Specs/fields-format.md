@@ -29,30 +29,29 @@ A field value may also be an array or an object, each a **structured value**. No
 predicate whose output type is not any (e.g., `%s` or `%.n`) matches a
 structured value.
 
-A **date** is a date-only or a datetime. An input format determines which types
-its field values have (e.g., JSON has no version, date-only, datetime, or
-time-only value).
+A **date** is a date-only or a datetime. An input format **supports** a type iff
+its field values can have that type (e.g., JSON supports no version, date-only,
+datetime, or time-only).
 
 A **default coercion** is a `<coercion>` without arguments.
 
 An **implicit coercion** coerces a field value, at its original type, absent a
 `<coercion>`, wherever syntax requires a version, date-only, datetime, or
-time-only that its input format does not have, iff a default coercion would
+time-only that its input format does not support, iff a default coercion would
 coerce it to that type, because no value could otherwise ever satisfy that
 syntax without a `<coercion>` (e.g., for JSON input, `%v` matches `"1.2.3"`,
 `%c` matches `"17:39:23"`, while `%d` & `.dateOnly` accept `"2020-03-18"` & the
 Unix time `0`). A `<coercion>` replaces it, ignoring its defaults (e.g.,
 `%.:iso:d` does not match `0`).
 
-No implicit coercion gives a value a type that its input format has, so only a
-`<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while `%.n`
-does, and for an input format that has date-only & datetime values, but no
-time-only value, `%d` would match no string, while `%c` would match
-`"17:39:23"`).
+No implicit coercion gives a value a type that its input format supports, so
+only a `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while
+`%.n` does, and for an input format that supports date-only & datetime, but not
+time-only, `%d` would match no string, while `%c` would match `"17:39:23"`).
 
-A `<coercion>` to a type that its input format does not have thus remains useful
-to choose its `<date-format>`s & to abort formatting, rather than report an
-error, for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly`
+A `<coercion>` to a type that its input format does not support thus remains
+useful to choose its `<date-format>`s & to abort formatting, rather than report
+an error, for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly`
 aborts, while `.dateOnly` reports an error).
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
@@ -961,9 +960,9 @@ A decimal number coerces to a date only per `<unix-time>`, because a string that
 holds a number is rarely a time (e.g., `%m.ds+` would otherwise render the
 string `5.6` as a date).
 
-`%.d`, and `%d` for an input format that has no datetime, thus match every
-chronologic number, so a branch that means to match a number must precede theirs
-or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
+`%.d`, and `%d` for an input format that does not support datetime, thus match
+every chronologic number, so a branch that means to match a number must precede
+theirs or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
 `%m.:iso:d.n+`, but not `%m.d.n+`, which would render the price `5.6` as a
 date). A call whose input is a number must omit `<date-coercion-arguments>` or
 list `<unix-time>` (e.g., `.round..dateOnly` or

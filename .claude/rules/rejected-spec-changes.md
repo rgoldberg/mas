@@ -119,15 +119,16 @@ affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without failing other items.
 
 In specs, never make a value need a `<coercion>` to match a predicate, or to
-conform to an input type, whose type its input format does not have (e.g., `%d`,
-`%c`, or `.dateOnly` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON input),
-because such syntax could otherwise never succeed without a `<coercion>`, which
-outweighs the overruled reason for rejecting its allowance: a `<coercion>` would
-then coerce nothing, so it would only choose between an error & an abort.
+conform to an input type, whose type its input format does not support (e.g.,
+`%d`, `%c`, or `.dateOnly` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
+input), because such syntax could otherwise never succeed without a
+`<coercion>`, which outweighs the overruled reason for rejecting its allowance:
+a `<coercion>` would then coerce nothing, so it would only choose between an
+error & an abort.
 
-In specs, never implicitly coerce a value to a type that its input format has
-(e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because the value
-then has its own type, so an implicit coercion would misread it.
+In specs, never implicitly coerce a value to a type that its input format
+supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
+the value then has its own type, so an implicit coercion would misread it.
 
 In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
 whose only `<date-format>` is `<iso-date>`, nor a `<coercion>` of a version to a

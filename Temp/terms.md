@@ -790,7 +790,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - default coercion: a `<coercion>` without arguments
        ([defined](../Specs/fields-format.md#value-types))
      - implicit coercion: what coerces a field value, absent a `<coercion>`, to
-       a type that its input format does not have, iff a default coercion would
+       a type that its input format does not support, iff a default coercion
+       would ([defined](../Specs/fields-format.md#value-types))
+     - support: of an input format, can have field values of a type; of an
+       output format, can render a value at a type
        ([defined](../Specs/fields-format.md#value-types))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))

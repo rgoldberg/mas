@@ -456,7 +456,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:
-			(coercion == nil && inputFormat.hasVersions ? nil : value.versionText)
+			(coercion == nil && inputFormat.supportsVersions ? nil : value.versionText)
 				.flatMap { isVersion($0) ? .string($0) : nil }
 		case .whitespace:
 			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .input(value) : nil
@@ -464,23 +464,24 @@ extension Matcher { // swiftlint:disable:this file_types_order
 	}
 }
 
-/// An input format, by which of the types that an input format might not have
-/// it has. Absent a `<coercion>`, a value is implicitly coerced to a type that
-/// its input format does not have, as a default coercion would coerce it
-/// (fields-format.md "Value Types").
+/// An input format, by which of the types that an input format might not
+/// support it supports. Absent a `<coercion>`, a value is implicitly coerced to
+/// a type that its input format does not support, as a default coercion would
+/// coerce it (fields-format.md "Value Types").
 struct InputFormat { // swiftlint:disable:this one_declaration_per_file
 	/// JSON has no date-only, datetime, time-only, or version value.
-	static let json = Self(chronologicForms: [], hasVersions: false)
+	static let json = Self(supportedChronologicForms: [], supportsVersions: false)
 
-	/// The chronologic forms of this input format's values.
-	let chronologicForms: Set<ISO8601Form>
-	let hasVersions: Bool
+	/// The chronologic forms that this input format supports.
+	let supportedChronologicForms: Set<ISO8601Form>
+	let supportsVersions: Bool
 
 	/// What an implicit coercion parses, given what a default coercion parses.
 	func implicitCoercionFormats(for coercionFormats: ChronologicFormats) -> ChronologicFormats {
 		.init(
-			iso8601Forms: coercionFormats.iso8601Forms.subtracting(chronologicForms),
-			isNumberDefaultUnixTime: coercionFormats.isNumberDefaultUnixTime && !chronologicForms.contains(.datetime),
+			iso8601Forms: coercionFormats.iso8601Forms.subtracting(supportedChronologicForms),
+			isNumberDefaultUnixTime: coercionFormats.isNumberDefaultUnixTime && !supportedChronologicForms
+				.contains(.datetime),
 		)
 	}
 }
