@@ -83,7 +83,11 @@ private extension MASTests {
 			(.number, .default, .string("5"), true),
 			(.string, nil, .null, false),
 			(.date, nil, .string("XYZ"), false),
+			(.date, nil, .string("2020-03-18"), true),
+			(.date, nil, .number(0), false),
 			(.timeOnly, nil, .string("2020-03-18"), false),
+			(.timeOnly, nil, .string("17:39:23"), true),
+			(.version, nil, .string("1.2.3"), false),
 			(.boolean, .default, .string("true"), true),
 		],
 	)

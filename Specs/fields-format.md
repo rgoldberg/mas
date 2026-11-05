@@ -31,8 +31,21 @@ structured value.
 
 A **date** is a date-only or a datetime. An input format determines which types
 its field values have (e.g., JSON has no version, date-only, datetime, or
-time-only value), so only a `<coercion>` gives a value of its input 1 of those
-types.
+time-only value), so only a `<coercion>` gives a value of its input a version
+type.
+
+An input format that has no chronologic type treats a string as that type
+wherever syntax requires it, iff a `<coercion>` without arguments would coerce
+the string to it, because no such string could otherwise satisfy that syntax
+without a `<coercion>` (e.g., for JSON input, `.dateOnly` & `%d` accept
+`"2020-03-18"`, while `.timeOnlyTimeZone:UTC:` & `%c` accept `"17:39:23"`). So a
+number is never a Unix time without `<unix-time>`, in any syntax (e.g.,
+`.dateOnly` reports an error for `0`, while `..:unix-time:dateOnly` accepts it).
+
+A `<coercion>` to a chronologic type thus remains useful to choose its
+`<date-format>`s, to abort formatting, rather than report an error, for an input
+that it cannot coerce (e.g., for `"abc"`, `..dateOnly` aborts, while `.dateOnly`
+reports an error) & to parse a string for an input format that has that type.
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports

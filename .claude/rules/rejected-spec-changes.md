@@ -118,10 +118,17 @@ an error or aborts formatting for a value that it cannot render (e.g.,
 affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without failing other items.
 
-In specs, never let a string match `%d`, `%c`, or `%v`, or conform to a date,
-time-only, or version input type, without a `<coercion>` (e.g., `%d` or
-`.dateOnly` for `"2020-03-18"`), because a `<coercion>` would then coerce
-nothing, so it would only choose between an error & an abort.
+In specs, never make a string need a `<coercion>` to match `%d` or `%c`, or to
+conform to a date or time-only input type, for an input format that has no such
+type (e.g., `%d` or `.dateOnly` for `"2020-03-18"`, for JSON input), because
+such syntax could otherwise never succeed without a `<coercion>`, while a
+`<coercion>` still chooses its `<date-format>`s, which outweighs the overruled
+reason for rejecting its allowance: a `<coercion>` would then coerce nothing, so
+it would only choose between an error & an abort.
+
+In specs, never let a string match `%v`, or conform to a version input type,
+without a `<coercion>` (e.g., `%v` for `"1.2.3"`), because a `<coercion>` would
+then coerce nothing, so it would only choose between an error & an abort.
 
 In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
 whose only `<date-format>` is `<iso-date>`, nor a `<coercion>` of a version to a

@@ -426,14 +426,15 @@ extension Matcher { // swiftlint:disable:this file_types_order
 	}
 
 	/// This matcher's value iff it matches `value`, else `nil`. JSON has no date,
-	/// time-only, or version value, so each of their predicates matches only with
-	/// a `<coercion>`.
+	/// time-only, or version value, so a chronologic predicate matches a string
+	/// that a `<coercion>` without arguments would coerce, while a version
+	/// predicate matches only with a `<coercion>`.
 	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
 		switch predicate {
 		case .boolean:
 			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
 		case .date:
-			coercion.flatMap { FormatValue.chronologic(from: value, formats: $0.dateFormats) }
+			.chronologic(from: value, formats: coercion?.dateFormats ?? .date)
 		case .empty:
 			value.isNullish || value.jsonString?.isEmpty == true ? .input(value) : nil
 		case .false:
@@ -445,7 +446,7 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .string:
 			value.jsonString.map(FormatValue.string)
 		case .timeOnly:
-			coercion.flatMap { _ in FormatValue.chronologic(from: value, formats: .timeOnly) }
+			.chronologic(from: value, formats: .timeOnly)
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:
@@ -950,21 +951,29 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// This value iff it is chronologic, else coerced to chronologic iff `call`
-	/// has `<coercion>` (`nil` iff that coercion fails, so formatting aborts).
+	/// This value iff it is chronologic, else coerced to chronologic: a field
+	/// value always, because JSON has no chronologic value, or any other value
+	/// iff `call` has `<coercion>`. `nil` iff that `<coercion>` fails, so
+	/// formatting aborts; absent `<coercion>`, a failure is an error.
 	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
 		if case .chronologic = self {
 			return self
 		}
-		guard let coercion = call.coercion else {
+		let formats = call.transform.kind == .timeOnly
+			? ChronologicFormats.timeOnly
+			: call.coercion?.dateFormats ?? .date
+		let coerced: Self? =
+			if case let .input(node) = self {
+				.chronologic(from: node, formats: formats)
+			} else if call.coercion != nil {
+				.chronologic(from: .string(string), formats: formats)
+			} else {
+				nil
+			}
+		guard coerced != nil || call.coercion != nil else {
 			throw .transformInputTypeMismatch(transform: call.transform, input: string)
 		}
-		let formats = call.transform.kind == .timeOnly ? ChronologicFormats.timeOnly : coercion.dateFormats
-		return if case let .input(node) = self {
-			Self.chronologic(from: node, formats: formats)
-		} else {
-			Self.chronologic(from: .string(string), formats: formats)
-		}
+		return coerced
 	}
 
 	/// This value as a number, coerced iff `call` has `<number-coercion>` (`nil`
