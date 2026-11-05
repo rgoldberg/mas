@@ -308,7 +308,7 @@ the rest of its representation, e.g.:
 `round` rounds the value exactly to the nearest integer, with halves rounded
 away from 0, rendering it in the value's notation:
 
-- Positional: as an integer (e.g., `-2.5` becomes `-3`).
+- Positional: as an integer (e.g., `-2.5` becomes `-3` & `007` becomes `7`).
 - Scientific: in normalized scientific notation, retaining the value's exponent
   indicator (`e` or `E`) & whether a non-negative exponent has a `+` (e.g.,
   `1.25E1` becomes `1.3E1`, `9.96e+1` becomes `1e+2`, `4e-1` becomes `0e0` &
@@ -395,6 +395,9 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
   round halves away from 0.
 - `0` renders as `0`, followed, iff `<fractional-digits>` is positive, by a
   decimal point & `<fractional-digits>` `0`s.
+- A result has no `0` before another digit of its integer part &, absent
+  `<fractional-digits>`, no trailing fractional `0`s (e.g., `.scale:0:` renders
+  `01.50` as `1.5`).
 - A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
   `round`.
