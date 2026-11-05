@@ -987,10 +987,11 @@ than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
 a signed 64-bit integer); an ISO-8601 date-only or datetime is chronologic iff
 its instant, as a Unix time, is.
 
-A datetime's or time-only's fractional seconds are truncated to 3 digits, which
-are omitted iff all are `0` (e.g., in the UTC output time zone,
-`2020-03-18T17:39:23.1234Z` renders as `2020-03-18T17:39:23.123Z`, but
-`2020-03-18T17:39:23.0004Z` renders as `2020-03-18T17:39:23Z`).
+A datetime's or time-only's fractional seconds are truncated or padded with `0`s
+to exactly 3 digits, which are omitted iff all are `0` (e.g., in the UTC output
+time zone, `2020-03-18T17:39:23.1234Z` renders as `2020-03-18T17:39:23.123Z`,
+`2020-03-18T17:39:23.5Z` as `2020-03-18T17:39:23.500Z` &
+`2020-03-18T17:39:23.0004Z` as `2020-03-18T17:39:23Z`).
 
 A chronologic value renders in the output time zone, in ISO-8601 extended format
 (as RFC 3339 profiles it for a year from 0000 to 9999):

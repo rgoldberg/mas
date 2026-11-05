@@ -568,6 +568,7 @@ private extension MASTests {
 			("%.D.timeZone:UTC:++", .string("2020-03-18T17:39:23.000Z"), "2020-03-18T17:39:23Z"),
 			("%.D.timeZone:UTC:++", .string("2020-03-18T17:39:23.0004Z"), "2020-03-18T17:39:23Z"),
 			("%.:unix-time:D.timeZone:UTC:++", .number(0.5), "1970-01-01T00:00:00.500Z"),
+			("%.D.timeZone:UTC:++", .string("2020-03-18T17:39:23.5Z"), "2020-03-18T17:39:23.500Z"),
 			// A year outside 0000 to 9999 renders as an ISO-8601 expanded year, and
 			// every date is in the proleptic Gregorian calendar
 			("%.:unix-time:D.timeZone:UTC:++", .number(253_402_300_800), "+10000-01-01T00:00:00Z"),
