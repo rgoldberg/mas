@@ -32,6 +32,23 @@ private extension MASTests {
 		#expect(try inSystemTimeZone("UTC") { try rendered(".round..dateOnly", .number(0)) } == "1970-01-01")
 	}
 
+	@Test(
+		arguments: [
+			("%.C:standard.dateOnly+-+", "17:39:23Z", Transform.dateOnly),
+			("%.D:standard.timeOnlyTimeZone:UTC:+-+", "2020-03-18", .timeOnlyTimeZone(.gmt, referenceDate: nil)),
+		],
+	)
+	func `a chronologic value of another type is uncoercible, so its error suggests no coercion`(
+		format: String,
+		value: String,
+		transform: Transform,
+	) throws {
+		let fieldSpec = try parsedFieldSpec(format)
+		#expect(throws: FormattingError.uncoercibleTransformInput(transform: transform, input: value)) {
+			try inSystemTimeZone("UTC") { try fieldSpec.format.rendered(value: .string(value), label: "L", name: "n") }
+		}
+	}
+
 	@Test
 	func `%v before %n renders a number as a string`() throws {
 		let rendered = { (format: String) in
@@ -504,7 +521,7 @@ private extension MASTests {
 			(
 				".dateOnly",
 				JSON.Node.string("x"),
-				FormattingError.implicitCoercionFailure(transform: .dateOnly, input: "x"),
+				FormattingError.uncoercibleTransformInput(transform: .dateOnly, input: "x"),
 				"Transform dateOnly requires an input of its input type: x",
 			),
 			(
