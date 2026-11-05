@@ -116,8 +116,9 @@ that:
 
 #### Consuming Tokens
 
-Syntax text is consumed as a token iff a literal token or a variable token, as
-specified below, matches the syntax text starting at the current position.
+Syntax text is consumed as a token iff a literal token, a name token, or a
+variable token, as specified below, matches the syntax text starting at the
+current position.
 
 Consuming a token commits to the set of expressions that the token starts,
 continues, or closes; each subsequently consumed token narrows the set to the
