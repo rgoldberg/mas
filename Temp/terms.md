@@ -662,6 +662,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
        `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)
+     - block leading text: the text that starts a `<block-template>`, which
+       cannot start with a bare `.` (`<block-leading-text>`;
+       [defined](../Specs/fields-format.md#success--failure))
 103. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)

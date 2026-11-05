@@ -186,6 +186,8 @@ private extension MASTests {
 			("%E(empty)+%i+", .string(""), "(empty)"),
 			("%W(blank)+%i+", .string(" \t"), "(blank)"),
 			("%W(blank)+%i+", .string(" a "), " a "),
+			(#"%U\.x+-+"#, .null, ".x"),
+			(#"%E\.x+-+"#, .string(""), ".x"),
 			// A directly absent block defaults to an empty string
 			("[%N+fail+]", .number(5), "[]"),
 			("[%N +fail+]", .number(5), "[]"),
@@ -930,6 +932,8 @@ private extension MASTests {
 			("%N.numberFormat..uppercase++", .invalidPipeline("<number-pipeline>")),
 			("%U..uppercase+-+", .invalidPipeline("<named-unconditional-pipeline>")),
 			("%E..trimWhitespace+-+", .invalidPipeline("<named-unconditional-pipeline>")),
+			("%U.x+-+", .unknownTransform("x")),
+			("%E .x+-+", .unknownTransform("x")),
 			("%U%U..uppercase++", .invalidPipeline("<named-unconditional-pipeline>")),
 			("%U:standard.uppercase+-+", .invalidPipeline("<named-unconditional-pipeline>")),
 			("%W..uppercase+-+", .invalidPipeline("<whitespace-pipeline>")),
