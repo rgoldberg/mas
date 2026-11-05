@@ -126,8 +126,8 @@ neither says (e.g., a reason, a consequence, or an example).
 In specs, give a nonterminal whose input & output types are equal a single
 `type:` comment, rather than both `input type:` & `output type:` comments.
 
-In specs, never limit a consideration of input or output formats to those that
-exist (e.g., by treating a number's leading `+` as unreachable because JSON
+In specs, never restrict a consideration of input or output formats to those
+that exist (e.g., by treating a number's leading `+` as unreachable because JSON
 input cannot have one), because an app may add others later.
 
 In specs, give each new syntax character only punctuation that no common shell
