@@ -1346,6 +1346,10 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 A bare `.` in a field name is invalid, reserving it for future syntax; an
 escaped `.` is consumed (e.g., `a\.b` names the field `a.b`).
 
+A preset's `<label>` & `<template-text>` need not escape `,`, because a preset's
+syntax has no `<field-spec-separator>` (e.g., a preset of `=a,b` sets the label
+`a,b`).
+
 No [config name](configs.md#named-configs) or `<reference-date>` can contain a
 character that must be escaped to be consumed, so their rows list none (e.g.,
 `@x\.y` is an error, because no config can be named `x.y`).
