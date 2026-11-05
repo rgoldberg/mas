@@ -463,13 +463,13 @@ private extension MASTests {
 
 	@Test(
 		arguments: [OutputFormat.json(.default), .keyValue(.default), .table(.default)],
-		[("1O", ComparisonResult.orderedDescending), ("1Ov", .orderedAscending)],
+		[("1Ou", ComparisonResult.orderedDescending), ("1Ov", .orderedAscending)],
 	)
 	func `sorts output values by their formatted values' types for every output format`(
 		outputFormat: OutputFormat,
 		sort: (option: String, result: ComparisonResult),
 	) throws {
-		// As numbers, 1.5 > 1.10; as strings or, with `v`, as versions, 1.5 < 1.10
+		// As numbers, with `u`, 1.5 > 1.10; as strings, with `u` or `v`, 1.5 < 1.10
 		let fieldSpec = try parsedFieldSpec(format: "..absoluteValue", sort: sort.option, outputFormat: outputFormat)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
