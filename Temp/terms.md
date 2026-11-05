@@ -402,8 +402,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       unlike its uppercase one (e.g., a table's `h`;
       [defined](../Specs/configs.md#output-configs))
     - argument: an element of an argument list (a transform's, a number
-      coercion's, `N`'s, or `C`'s); also an expression that a parameterized
-      nonterminal's reference passes for a parameter
+      coercion's, a date coercion's, `N`'s, or `C`'s); also an expression that a
+      parameterized nonterminal's reference passes for a parameter
     - REJECTED: body / argument (for other modifiers & options)
 67. - titlecase: verb & adjective
     - uppercase: verb & adjective
