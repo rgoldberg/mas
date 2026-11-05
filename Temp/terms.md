@@ -783,6 +783,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, replacing the input
        ([defined](../Specs/fields-format.md#coercion))
+     - default coercion: a `<coercion>` without arguments
+       ([defined](../Specs/fields-format.md#value-types))
+     - implicit coercion: what coerces a value, absent a `<coercion>`, to a type
+       that its input format does not have, iff a default coercion would
+       ([defined](../Specs/fields-format.md#value-types))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))
      - trivia prefix / trivia suffix: the trivia before / after the number

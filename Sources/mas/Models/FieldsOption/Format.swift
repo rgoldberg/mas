@@ -421,20 +421,18 @@ private extension UnconditionalPredicate { // swiftlint:disable:this file_types_
 
 extension Matcher { // swiftlint:disable:this file_types_order
 	/// Whether `value` conforms to this matcher's predicate with its coercion.
-	func conforms(_ value: JSON.Node?) -> Bool {
-		matched(value) != nil
+	func conforms(_ value: JSON.Node?, in inputFormat: InputFormat = .json) -> Bool {
+		matched(value, in: inputFormat) != nil
 	}
 
-	/// This matcher's value iff it matches `value`, else `nil`. JSON has no date,
-	/// time-only, or version value, so a chronologic predicate matches a string
-	/// that a `<coercion>` without arguments would coerce, while a version
-	/// predicate matches only with a `<coercion>`.
-	fileprivate func matched(_ value: JSON.Node?) -> FormatValue? {
+	/// This matcher's value iff it matches `value`, a value of `inputFormat`,
+	/// else `nil`.
+	fileprivate func matched(_ value: JSON.Node?, in inputFormat: InputFormat = .json) -> FormatValue? {
 		switch predicate {
 		case .boolean:
 			value.boolean(isCoerced: coercion != nil).map { .input(.bool($0)) }
 		case .date:
-			.chronologic(from: value, formats: coercion?.dateFormats ?? .date)
+			.chronologic(from: value, formats: coercion?.dateFormats ?? inputFormat.implicitCoercionFormats(for: .date))
 		case .empty:
 			value.isNullish || value.jsonString?.isEmpty == true ? .input(value) : nil
 		case .false:
@@ -446,22 +444,36 @@ extension Matcher { // swiftlint:disable:this file_types_order
 		case .string:
 			value.jsonString.map(FormatValue.string)
 		case .timeOnly:
-			.chronologic(from: value, formats: .timeOnly)
+			.chronologic(
+				from: value,
+				formats: coercion == nil ? inputFormat.implicitCoercionFormats(for: .timeOnly) : .timeOnly,
+			)
 		case .true:
 			value.boolean(isCoerced: coercion != nil) == true ? .input(.bool(true)) : nil
 		case .version:
-			coercion
-				.flatMap { _ in
-					if case let .number(number) = value {
-						"\(number)"
-					} else {
-						value.jsonString
-					}
-				}
+			(coercion == nil && inputFormat.hasVersions ? nil : value.versionText)
 				.flatMap { isVersion($0) ? .string($0) : nil }
 		case .whitespace:
 			value.isNullish || value.jsonString?.allSatisfy(\.isWhitespace) == true ? .input(value) : nil
 		}
+	}
+}
+
+/// An input format, by which of the types that an input format might not have
+/// it has. Absent a `<coercion>`, a value is implicitly coerced to a type that
+/// its input format does not have, as a default coercion would coerce it
+/// (fields-format.md "Value Types").
+struct InputFormat { // swiftlint:disable:this one_declaration_per_file
+	/// JSON has no date-only, datetime, time-only, or version value.
+	static let json = Self(chronologicForms: [], hasVersions: false)
+
+	/// The chronologic forms of this input format's values.
+	let chronologicForms: Set<ISO8601Form>
+	let hasVersions: Bool
+
+	/// What an implicit coercion parses, given what a default coercion parses.
+	func implicitCoercionFormats(for coercionFormats: ChronologicFormats) -> ChronologicFormats {
+		.init(iso8601Forms: coercionFormats.iso8601Forms.subtracting(chronologicForms))
 	}
 }
 
@@ -951,10 +963,9 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// This value iff it is chronologic, else coerced to chronologic: a field
-	/// value always, because JSON has no chronologic value, or any other value
-	/// iff `call` has `<coercion>`. `nil` iff that `<coercion>` fails, so
-	/// formatting aborts; absent `<coercion>`, a failure is an error.
+	/// This value iff it is chronologic, else coerced to chronologic iff `call`
+	/// has `<coercion>` (`nil` iff that coercion fails, so formatting aborts),
+	/// else a field value by an implicit coercion, else an error.
 	private func coercedChronologic(for call: TransformCall) throws(FormattingError) -> Self? {
 		if case .chronologic = self {
 			return self
@@ -963,10 +974,10 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 			? ChronologicFormats.timeOnly
 			: call.coercion?.dateFormats ?? .date
 		let coerced: Self? =
-			if case let .input(node) = self {
+			if call.coercion != nil {
 				.chronologic(from: node, formats: formats)
-			} else if call.coercion != nil {
-				.chronologic(from: .string(string), formats: formats)
+			} else if case let .input(value) = self {
+				.chronologic(from: value, formats: InputFormat.json.implicitCoercionFormats(for: formats))
 			} else {
 				nil
 			}
@@ -1117,6 +1128,15 @@ private extension JSON.Node? {
 			literal.value
 		} else {
 			nil
+		}
+	}
+
+	/// The text that may be a version: a number's, or a string.
+	var versionText: String? {
+		if case let .number(number) = self {
+			"\(number)"
+		} else {
+			jsonString
 		}
 	}
 

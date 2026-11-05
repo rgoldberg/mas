@@ -87,7 +87,10 @@ private extension MASTests {
 			(.date, nil, .number(0), false),
 			(.timeOnly, nil, .string("2020-03-18"), false),
 			(.timeOnly, nil, .string("17:39:23"), true),
-			(.version, nil, .string("1.2.3"), false),
+			(.version, nil, .string("1.2.3"), true),
+			(.version, nil, .string("x"), false),
+			(.number, nil, .string("5"), false),
+			(.boolean, nil, .string("true"), false),
 			(.boolean, .default, .string("true"), true),
 		],
 	)
@@ -98,6 +101,38 @@ private extension MASTests {
 		conforms: Bool,
 	) {
 		#expect(Matcher(predicate: predicate, coercion: coercion).conforms(value) == conforms)
+	}
+
+	@Test(
+		arguments: [
+			(Predicate.date, String?.some("2020-03-18"), false),
+			(.date, "2020-03-18T17:39:23Z", false),
+			(.timeOnly, "17:39:23", true),
+			(.version, "1.2.3", true),
+		],
+	)
+	func `only a type that an input format lacks has an implicit coercion`(
+		predicate: Predicate,
+		string: String?,
+		conforms: Bool,
+	) {
+		#expect(
+			Matcher(predicate: predicate, coercion: nil).conforms(
+				string.map { .string($0) },
+				in: .init(chronologicForms: [.date, .datetime], hasVersions: false),
+			)
+				== conforms,
+		)
+	}
+
+	@Test
+	func `an implicit coercion to a date skips only the form that an input format has`() {
+		let inputFormat = InputFormat(chronologicForms: [.date], hasVersions: true)
+		let matcher = Matcher(predicate: .date, coercion: nil)
+		#expect(!matcher.conforms(.string("2020-03-18"), in: inputFormat))
+		#expect(matcher.conforms(.string("2020-03-18T17:39:23Z"), in: inputFormat))
+		#expect(!Matcher(predicate: .version, coercion: nil).conforms(.string("1.2.3"), in: inputFormat))
+		#expect(Matcher(predicate: .version, coercion: .default).conforms(.string("1.2.3"), in: inputFormat))
 	}
 
 	@Test(

@@ -31,21 +31,28 @@ structured value.
 
 A **date** is a date-only or a datetime. An input format determines which types
 its field values have (e.g., JSON has no version, date-only, datetime, or
-time-only value), so only a `<coercion>` gives a value of its input a version
-type.
+time-only value).
 
-An input format that has no chronologic type treats a string as that type
-wherever syntax requires it, iff a `<coercion>` without arguments would coerce
-the string to it, because no such string could otherwise satisfy that syntax
-without a `<coercion>` (e.g., for JSON input, `.dateOnly` & `%d` accept
-`"2020-03-18"`, while `.timeOnlyTimeZone:UTC:` & `%c` accept `"17:39:23"`). So a
-number is never a Unix time without `<unix-time>`, in any syntax (e.g.,
-`.dateOnly` reports an error for `0`, while `..:unix-time:dateOnly` accepts it).
+A **default coercion** is a `<coercion>` without arguments.
 
-A `<coercion>` to a chronologic type thus remains useful to choose its
-`<date-format>`s, to abort formatting, rather than report an error, for an input
-that it cannot coerce (e.g., for `"abc"`, `..dateOnly` aborts, while `.dateOnly`
-reports an error) & to parse a string for an input format that has that type.
+An **implicit coercion** coerces a value, absent a `<coercion>`, wherever syntax
+requires a version, date-only, datetime, or time-only that its input format does
+not have, iff a default coercion would coerce it to that type, because no value
+could otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
+input, `%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` &
+`.dateOnly` accept `"2020-03-18"`). A `<coercion>` replaces it, ignoring its
+defaults (e.g., `%.:iso-date:d` does not match `"2020-03-18 17:39"`).
+
+No implicit coercion gives a value a type that its input format has, so only a
+`<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while `%.n`
+does, and for an input format that has date-only & datetime values, but no
+time-only value, `%d` would match no string, while `%c` would match
+`"17:39:23"`).
+
+A `<coercion>` to a type that its input format does not have thus remains useful
+to choose its `<date-format>`s & to abort formatting, rather than report an
+error, for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly`
+aborts, while `.dateOnly` reports an error).
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
@@ -806,8 +813,8 @@ non-nullary-version = "V" (* is version; output type: version; value: {field val
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
-version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`, but `%v` matches no value
-of JSON input).
+version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`), as does an [implicit
+coercion](#value-types).
 
 ###### Coercion
 
