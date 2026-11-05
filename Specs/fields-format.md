@@ -790,9 +790,9 @@ non-nullary-version = "V" (* is version; output type: version; value: {field val
 
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
-(e.g., `1.2.3-beta`). `<coercion>` parses a string whose entire content is a
-version, or a number whose text is one (e.g., `%.v` matches `"1.2.3-beta"` &
-`1.2`, but `%v` matches no value of JSON input).
+(e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
+version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`, but `%v` matches no value
+of JSON input).
 
 ###### Coercion
 
@@ -815,7 +815,7 @@ trivia-suffix-regex = {regex} (* default: {empty string} *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`<coercion>` allows a matcher to also match a string whose entire content parses
+`<coercion>` allows a matcher to also match a value whose entire content parses
 as the matcher's type, instead of requiring the input's type to match (e.g.,
 `%.n` matches `4.5` & `"4.50"`, but not `"4.5a"`), replacing the input with the
 **coerced value**.
