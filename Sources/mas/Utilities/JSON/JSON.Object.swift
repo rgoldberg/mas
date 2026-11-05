@@ -416,8 +416,8 @@ extension JSON.Node {
 
 private extension String {
 	/// This number's text as JSON number syntax, modified only as that syntax
-	/// requires (fields-format.md "Value Types"): no `+` sign & an integer part
-	/// of at least 1 digit, with no `0` before another digit.
+	/// requires (json.md "JSON Config"): no `+` sign & an integer part of at
+	/// least 1 digit, with no `0` before another digit.
 	var jsonNumberText: Self {
 		let unsigned = hasPrefix("-") || hasPrefix("+") ? dropFirst() : self[...]
 		let integerPart = unsigned.prefix(while: \.isASCIIDigit)

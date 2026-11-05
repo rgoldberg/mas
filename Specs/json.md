@@ -43,6 +43,11 @@ invisible & a raw C1 control character would modify the terminal's state (e.g.,
 U+009B, an 8-bit CSI, which starts an escape sequence). Each other character,
 including `/`, is rendered verbatim, except as [`e`](#non-ascii) escapes it.
 
+Each number's text is rendered as JSON number syntax, modified only as that
+syntax requires: without a leading `+`, without a `0` before another digit of
+its integer part & with at least 1 digit before its `.`, but retaining its
+trailing `0`s (e.g., `+01.50` as `1.50` & `.5` as `0.5`).
+
 ## Pretty-Printing
 
 <!--editorconfig-checker-disable-->
