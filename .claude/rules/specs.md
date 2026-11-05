@@ -150,8 +150,8 @@ In specs, specify syntax according to the 1st of these that applies:
 
 1. Allow it: an empty list, or a list element that repeats or overlaps another
    without affecting what the list means, unless it makes the grammar ambiguous
-   (e.g., `005`, `//00`, `@x.`, or `Ciso,iso:`, but not `.-a,-a`, whose 2nd `-a`
-   removes a `null`), because generated or edited syntax produces them.
+   (e.g., `005`, `//00`, `@x.`, `Ciso,iso:`, or `B/_:`, but not `.-a,-a`, whose
+   2nd `-a` removes a `null`), because generated or edited syntax produces them.
 2. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a modifier or wrapper that cannot affect what it means, when the
    syntax text alone decides this (e.g., `%S%v++`, `K:`, whose keys are styled

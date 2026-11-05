@@ -95,7 +95,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case danglingEscape
 	case dateCoercionArgumentsNotSupported(String)
 	case documentOrderUnsupportedForTable
-	case emptyBoundaryGroup
 	case forbiddenWhitespace(after: Character)
 	case invalidBaseFieldsConfigName(String)
 	case invalidCharacterClass(String)
@@ -147,8 +146,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<date-coercion-arguments> are not supported for: \(name)"
 		case .documentOrderUnsupportedForTable:
 			"<document-order> 'D' is supported only for JSON or key-value output"
-		case .emptyBoundaryGroup:
-			"<boundary-group> requires at least 1 boundary"
 		case let .forbiddenWhitespace(token):
 			"Whitespace is forbidden after: \(token)"
 		case let .invalidBaseFieldsConfigName(baseFieldsConfigName):

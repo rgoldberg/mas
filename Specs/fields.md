@@ -1175,7 +1175,7 @@ boundaries = <uncollapsed-boundaries> | <collapsed-boundaries> (* default: "B+sp
 uncollapsed-boundaries = "B" [ <boundary-groups> ] <sort-option-terminator>
 collapsed-boundaries   = "M" [ <boundary-groups> ] <sort-option-terminator> (* mnemonic: merged *)
 
-boundary-groups          = <boundary-group> … <boundary-group-separator>
+boundary-groups          = <boundary-group> | [ <boundary-group> ] ( <boundary-group-separator> [ <boundary-group> ] )+
 boundary-group-separator = "_"
 
 boundary-group      = ( <boundary-characters> | <multi-character-boundary> | <character-class> )+
@@ -1222,7 +1222,8 @@ Each of the following is itself a boundary:
   not alphabetic, such as `$`), with `ascii` being U+0000 to U+007F.
 
 If multiple `<boundary-group>`s define the same boundary, it belongs to the last
-group.
+group. An empty group defines no boundary, so it affects no other group's sort
+precedence (e.g., `B/_:` means what `B/:` means, and `B_:` what `B:` means).
 
 At each position, the longest boundary that matches there is consumed (e.g.,
 with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).

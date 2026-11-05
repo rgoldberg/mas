@@ -374,7 +374,8 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 	}
 
 	/// Parses `<uncollapsed-boundaries>`' / `<collapsed-boundaries>`' optional
-	/// `<boundary-groups>` (none iff absent) & its `<sort-option-terminator>`.
+	/// `<boundary-groups>` (none iff absent; each empty group omitted) & its
+	/// `<sort-option-terminator>`.
 	private static func parseBoundaryGroups(_ input: inout Substring) throws(ParsingError) -> [BoundaryGroup] {
 		var groups = [BoundaryGroup]()
 		var boundaries = [Boundary]()
@@ -382,11 +383,10 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 			switch first {
 			case boundaryGroupSeparator:
 				input.removeFirst()
-				guard !boundaries.isEmpty else {
-					throw .emptyBoundaryGroup
+				if !boundaries.isEmpty {
+					groups.append(.init(boundaries: boundaries))
+					boundaries.removeAll()
 				}
-				groups.append(.init(boundaries: boundaries))
-				boundaries.removeAll()
 			case multiCharacterBoundaryFence:
 				input.removeFirst()
 				let text = try parseText(&input, terminatorSet: [multiCharacterBoundaryFence])
@@ -408,9 +408,6 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 			}
 		}
 		try parseSortOptionTerminator(&input)
-		guard !boundaries.isEmpty || groups.isEmpty else {
-			throw .emptyBoundaryGroup
-		}
 		return boundaries.isEmpty ? groups : groups + [.init(boundaries: boundaries)]
 	}
 
