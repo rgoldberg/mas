@@ -830,6 +830,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - command list: the list of commands in the command line from root to leaf
        (the command that actually runs)
        ([defined](../Specs/configs.md#command-lists))
+     - alias: another name of a command, which never names a context (e.g.,
+       `info` for `lookup`; [used](../Specs/configs.md#contexts))
 122. - metavariable: a word of uppercase letters, digits & `_` that starts with
        an uppercase letter & stands for an expression or text in the
        meta-grammar ([defined](../Specs/ebnf.md#meta-grammar))

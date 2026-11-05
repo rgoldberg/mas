@@ -76,8 +76,9 @@ A **context** can contain named configs.
 
 A context exists for each command in a command list.
 
-Each context's name is a `.`-separated concatenation of all the commands from
-the root through the current command.
+Each context's name is a `.`-separated concatenation of the names of all the
+commands from the root through the current command, never of an alias (e.g.,
+`mas info`'s leaf context is `mas.lookup`).
 
 ## Context Stacks
 
