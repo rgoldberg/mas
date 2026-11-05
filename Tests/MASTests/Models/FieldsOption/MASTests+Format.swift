@@ -110,7 +110,7 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(Predicate.date, String?.some("2020-03-18"), false),
+			(Predicate.date, "2020-03-18", false),
 			(.date, "2020-03-18T17:39:23Z", false),
 			(.timeOnly, "17:39:23", true),
 			(.version, "1.2.3", true),
@@ -118,12 +118,12 @@ private extension MASTests {
 	)
 	func `only a type that an input format lacks has an implicit coercion`(
 		predicate: Predicate,
-		string: String?,
+		string: String,
 		conforms: Bool,
 	) {
 		#expect(
 			Matcher(predicate: predicate, coercion: nil).conforms(
-				string.map { .string($0) },
+				.string(string),
 				in: .init(chronologicForms: [.date, .datetime], hasVersions: false),
 			)
 				== conforms,

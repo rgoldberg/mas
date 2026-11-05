@@ -28,6 +28,11 @@ private extension MASTests {
 	}
 
 	@Test
+	func `a call after a number run coerces the number as a Unix time without date-coercion-arguments`() throws {
+		#expect(try inSystemTimeZone("UTC") { try rendered(".round..dateOnly", .number(0)) } == "1970-01-01")
+	}
+
+	@Test
 	func `a matcher to a version that precedes a matcher to a number renders a number as a string`() throws {
 		let rendered = { (format: String) in
 			try parsedFieldSpec(format).format.rendered(value: .number(1.2), label: "L", name: "n")?.description
