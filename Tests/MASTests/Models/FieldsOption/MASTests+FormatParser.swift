@@ -433,6 +433,12 @@ private extension MASTests {
 			("..scale:-99999999999999999999,,0:", .string("1"), nil),
 			(".numberFormat:en,\\,,18446744073709551616:", .number(12_345_678), "12345678"),
 			("..round", .string("12345678901234567890.5"), "12345678901234567891"),
+			("..round", .string("007.5"), "8"),
+			("..round", .string("+01.50"), "+2"),
+			("..round", .string(".5"), "1"),
+			("..absoluteValue", .string("+01.50"), "01.50"),
+			("..scale:0:", .string("+01.50"), "+1.5"),
+			("..scale:0:", .string(".5"), "0.5"),
 		],
 	)
 	func `applies a format-block's value-transform-pipeline`(format: String, value: JSON.Node, expected: String?)
