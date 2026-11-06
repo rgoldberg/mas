@@ -78,9 +78,11 @@ cannot affect what its placeholder means.
 
 In specs, never forbid a string transform merely because it cannot modify a
 non-string value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`,
-or `.dateOnly..uppercase`), because that would require a `<boolean-pipeline>` &
-a whitespace-free variant of the string chains after each date, time-only,
-version, or number, all to report no-ops that almost nobody writes.
+or `.dateOnly..uppercase`), other than for `%U`, `%E`, or `%W`, whose matcher
+exists only to detect a blank value, because that would require a
+`<boolean-pipeline>` & a whitespace-free variant of the string chains after each
+date, time-only, version, or number, all to report no-ops that almost nobody
+writes.
 
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
