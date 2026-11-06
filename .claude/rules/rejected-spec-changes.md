@@ -68,6 +68,10 @@ because `K:` would style keys by nothing, which contradicts `K` & means what `k`
 means, while `<header-on>`'s is optional because `H:` (an unstyled header row)
 means something other than `h` (no header row).
 
+In specs, never forbid a binary placeholder merely because its blocks are equal
+(e.g., `%Sx+x+` or `%N%i+%i+`), because other blocks make the same placeholder
+useful, so its equal blocks are what it holds, not what it is.
+
 In specs, never let a non-nullary unconditional placeholder take an empty
 pipeline or a template block (e.g., `%I+` or `%I(%i)+`), because `%I+` always
 outputs an empty string & `%I(%i)+` means what `(%i)` means, so its `%I` cannot
@@ -117,9 +121,9 @@ section to it would still fail.
 In specs, never allow a `<coercion>` on a call whose value's type equals its
 input type, unless a `<named-format-reference>` immediately precedes it (e.g.,
 `.round..round`, `%S..uppercase++`, or `%W..trimWhitespace+-+`, whose value is a
-string or a `null`), because it cannot affect what the call means, nor require
-one on a call whose types match (e.g., `.numberFormat.uppercase`), because it
-would add nothing.
+string or a `null`), because it cannot affect what the call means, while every
+`<coercion>` then marks a type change, nor require one on a call whose types
+match (e.g., `.numberFormat.uppercase`), because it would add nothing.
 
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 (e.g., `%S.uppercase+%L..round++` or

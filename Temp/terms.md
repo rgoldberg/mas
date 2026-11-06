@@ -167,8 +167,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       text, boundary text)
     - syntax text: the text that a syntax parses (e.g., an option value), as
       opposed to an app's input (e.g., its items)
-    - synonymous syntax text: syntax text that means what other syntax text
-      means (e.g., `%+N%n+` & `%n`)
     - REJECTED: parsed text (too generic: an app's input is parsed too) / input
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
@@ -910,3 +908,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        boundaries ([defined](../Specs/fields.md#sort-segments))
      - grouped number: a number segment of `<grouped-numeric>`, which compares
        as a single number ([defined](../Specs/fields.md#sort-number-segments))
+131. - ambiguous: of syntax, its text, or what it parses, cannot be read
+       reliably
+     - ill-typed: of syntax, a construct's or a token's type does not fit what
+       surrounds it
+     - dangling: of syntax, it refers to something that does not exist
+     - unsupported in context: of syntax, its context cannot do what it asks,
+       whatever it holds
+     - redundant: of syntax, whatever it holds, a part has no effect, or its
+       output cannot depend on anything but its own text
+     - hold: of a construct, to have a name, an argument, a block content, or a
+       list element in it
