@@ -458,10 +458,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - positional order: field specs ordered by position (`<positional-order>`)
     - document order: field specs ordered by their fields' order in an input
       item (`<document-order>`)
-    - field-order adjustment: a `<direction>`, `<nonconforming-comparison>`, or
+    - adjustment sort option: a `<direction>`, `<nonconforming-comparison>`, or
       `<nonconforming-placement>`, which, in a field-order adjustment set,
-      adjusts the working field order (`<field-order-adjustment>`)
-    - field-order adjustment set: only field-order adjustments, which set only
+      adjusts the working field order (`<adjustment-sort-option>`)
+    - field-order adjustment set: only adjustment sort options, which set only
       the working field order's direction & its comparison & placement of
       unpositioned fields or nonconforming values
       (`<field-order-adjustment-set>`)

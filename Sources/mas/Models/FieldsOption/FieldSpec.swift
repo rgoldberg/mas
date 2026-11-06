@@ -531,7 +531,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 
 	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
 	/// a required `<field-order-option-set>`, either a
-	/// `<field-order-adjustment-set>` (only `<field-order-adjustment>`s), a
+	/// `<field-order-adjustment-set>` (only `<adjustment-sort-option>`s), a
 	/// `<positional-order-option-set>` / `<document-order-option-set>`
 	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
 	/// respectively, plus `<unpositioned-field-comparison>`s &
@@ -819,7 +819,7 @@ private func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingE
 /// `<unpositioned-field-comparison>`, an `<unpositioned-field-placement>`, or
 /// an `<order>`, with at least 1 `<order>` (last wins); or iff it is a
 /// `<field-order-adjustment-set>` (every top-level character is a
-/// `<field-order-adjustment>`: a `<direction>`, a `<nonconforming-comparison>`,
+/// `<adjustment-sort-option>`: a `<direction>`, a `<nonconforming-comparison>`,
 /// or a `<nonconforming-placement>`) & `inheritedFieldOrder` is `.positional` /
 /// `.document`, as whose alternative it is parsed. `nil` means it is a
 /// `<field-order-sort-option-set>`, or a `<field-order-adjustment-set>` parsed

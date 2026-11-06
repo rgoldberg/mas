@@ -403,12 +403,9 @@ field-order-tiebreaker        =
 field-order-tiebreaker-prefix = "/"
 
 field-order-adjustment-set  =
-  <field-order-adjustment>+
+  <adjustment-sort-option>+
   (* error: it has an effective <all-conforming> & is per <positional-order-option-set> or <document-order-option-set> *)
-field-order-sort-option-set = [ <field-order-adjustment>+ ] <non-adjustment-sort-option> [ <sort-option>+ ]
-
-field-order-adjustment     = <direction> | <nonconforming-comparison> | <nonconforming-placement>
-non-adjustment-sort-option = <source> | <case-sensitivity> | <locale> | <number-segments> | <chronologic-segments> | <boundaries> | <text-order>
+field-order-sort-option-set = [ <adjustment-sort-option>+ ] <non-adjustment-sort-option> [ <sort-option>+ ]
 
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
 document-order-option-set   =
@@ -885,22 +882,18 @@ while `--fields name/I,version/101I` sorts them by `name`, then by `version`).
 
 ##### Sort Options
 
+<!--editorconfig-checker-disable-->
+<!--markdownlint-disable line-length-->
 ```ebnf
-sort-option-set           = <sort-option>+
-sort-option               = <direction> | <non-direction-sort-option>
-non-direction-sort-option =
-  <source>
-  | <case-sensitivity>
-  | <locale>
-  | <number-segments>
-  | <chronologic-segments>
-  | <boundaries>
-  | <nonconforming-comparison>
-  | <nonconforming-placement>
-  | <text-order>
+sort-option-set            = <sort-option>+
+sort-option                = <adjustment-sort-option> | <non-adjustment-sort-option>
+adjustment-sort-option     = <direction> | <nonconforming-comparison> | <nonconforming-placement>
+non-adjustment-sort-option = <source> | <case-sensitivity> | <locale> | <number-segments> | <chronologic-segments> | <boundaries> | <text-order>
 
 sort-option-terminator = ":"
 ```
+<!--markdownlint-enable line-length-->
+<!--editorconfig-checker-enable-->
 
 The app may set, per output format, **default sort options** for field names,
 for field labels & for each field's content, each of which replaces the default
