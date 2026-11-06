@@ -41,8 +41,8 @@ In specs, make every block reference optional, except one that is:
    `<format-name(<conditional-block>)>`), whose parameterized nonterminal's
    definition makes it optional wherever it consumes text.
 3. One whose absence a sibling alternative, with a default for it, expresses
-   instead (e.g., `<conditional-input-block>` in `<non-nullary-input-success>`,
-   whose absence `<non-nullary-scalar-blockless-success>` expresses), so that a
+   instead (e.g., `<conditional-block>` in `<non-nullary-success>`, whose
+   absence `<non-nullary-scalar-blockless-success>` expresses), so that a
    grammar can require at least 1 of multiple blocks (e.g., to forbid `%S++`).
 
 In specs, give every block not marked `(* non-structural *)` a direct default of

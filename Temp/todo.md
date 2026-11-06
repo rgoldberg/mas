@@ -127,10 +127,9 @@ the functionality that needs them from specs & code:
       `<*-pipeline>`](../Specs/fields-format.md#pipelines): once `FORMAT_NAME`
       is removed, each `<pipeline>` is only its `TRANSFORM_PIPELINE`, so each of
       the others is only another name of its transform pipeline, except that
-      `<named-pipeline>`, `<named-unconditional-pipeline>` &
-      `<named-input-pipeline>` are only named format references, so removing
-      them leaves `%U`, `%E` & a `%I` in their `<success-block>`s without a
-      pipeline, `<trimmable-pipeline>` is only its `trimWhitespace` run, and
+      `<named-pipeline>` & `<named-unconditional-pipeline>` are only named
+      format references, so removing them leaves `%U` & `%E` without a pipeline,
+      `<trimmable-pipeline>` is only its `trimWhitespace` run, and
       `<string-transform-pipeline>` is unreferenced.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default

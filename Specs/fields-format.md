@@ -88,10 +88,7 @@ time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transf
 unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
 named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <string-transform-pipeline>)>
-named-input-pipeline          = <named-pipeline(<preset-name>, <value-transform-pipeline>)>
-boolean-input-pipeline        = <pipeline(<preset-name>, <value-transform-pipeline>, <unconditional-transform-pipeline>)>
 whitespace-pipeline           = <trimmable-pipeline(<named-unconditional-pipeline>)>
-whitespace-input-pipeline     = <trimmable-pipeline(<named-input-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -211,14 +208,13 @@ A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
 call whose value's type the syntax text determines takes a `<coercion>` only if
 its input type differs from that type, because it otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
-`<format-block>`'s 1st call, `%I`'s 1st call in a `<format-template>` or in the
-`<success-block>` of `%S`, `%N`, `%V`, `%D`, or `%C`, or one that a
-`<named-format-reference>` immediately precedes, whose preset determines it) may
-take one regardless. A date or a time-only coerces only to a string, neither a
-number nor a version coerces to a time-only & a number coerces to a date only as
-a Unix time, because its rendering is otherwise not a value of that type, so a
-pipeline that means to parse it must coerce it to a string 1st (e.g.,
-`%.D..uppercase..:,,,,,.*:round++`).
+`<format-block>`'s 1st call, `%I`'s 1st call outside an `<unconditional-block>`,
+or one that a `<named-format-reference>` immediately precedes, whose preset
+determines it) may take one regardless. A date or a time-only coerces only to a
+string, neither a number nor a version coerces to a time-only & a number coerces
+to a date only as a Unix time, because its rendering is otherwise not a value of
+that type, so a pipeline that means to parse it must coerce it to a string 1st
+(e.g., `%.D..uppercase..:,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
@@ -589,7 +585,7 @@ block-terminator = -"+"
 ```ebnf
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
-success-block = <conditional-input-block> (* non-structural *)
+success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block> (* direct default: {empty string} *)
 
 success-pipeline =
@@ -602,24 +598,15 @@ success-pipeline =
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
   | <named-unconditional-pipeline>
-  | <named-input-pipeline>
-  | <boolean-input-pipeline>
   | <whitespace-pipeline>
-  | <whitespace-input-pipeline>
   | <named-format-pipeline(<preset-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
-non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) =
-  <non-nullary-input-success(NULLARY, NON_NULLARY, PIPELINE, <named-format-pipeline(<preset-name>)>)>
-non-nullary-input-success(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE) =
-  NON_NULLARY -<conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE)>
+non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
 
 conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
-  <conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, <named-format-pipeline(<preset-name>)>)>
-  (* direct default: {empty string} *)
-conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE) =
-  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder(INPUT_PIPELINE, <string-pipeline>)>)>
+  PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <fallible-unconditional-placeholder>)>
   (* direct default: {empty string} *)
 unconditional-block = <unconditional-pipeline> | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
 
@@ -663,14 +650,14 @@ A `<success-clause>` is evaluated iff its enclosing matcher succeeds.
 
 A `<failure-block>` is evaluated iff its enclosing matcher fails.
 
-Within a `<conditional-input-block>`, a `<block-placeholder>` is evaluated
-against the enclosing matcher's value (coerced, if it coerces), so it always
-succeeds. A `<conditional-placeholder>`, a `%i` & a `%I` are each evaluated
-against the **format input**, which no block modifies: in a field spec's format,
-the field value, at its original type; in a named format, the value against
-which its `<named-format-reference>` evaluates it (e.g., `%.:de:N%n (%i)++`
-renders `"1.234,5"` as `1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x`
-sets no format, renders it as `1234.5`).
+Within a `<conditional-block>`, a `<block-placeholder>` is evaluated against the
+enclosing matcher's value (coerced, if it coerces), so it always succeeds. A
+`<conditional-placeholder>`, a `%i` & a `%I` are each evaluated against the
+**format input**, which no block modifies: in a field spec's format, the field
+value, at its original type; in a named format, the value against which its
+`<named-format-reference>` evaluates it (e.g., `%.:de:N%n (%i)++` renders
+`"1.234,5"` as `1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x` sets no
+format, renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which its **matched value** is the value against which it is evaluated, as its
@@ -788,13 +775,13 @@ non-nullary-standard-success =
   [ <coercion> ]
     (
       <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
-      | <non-nullary-input-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>, <boolean-input-pipeline>)>
-      | <non-nullary-input-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>, <boolean-input-pipeline>)>
-      | <non-nullary-input-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>, <boolean-input-pipeline>)>
+      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
+      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
+      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
     )
-  | <non-nullary-input-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>, <named-input-pipeline>)>
-  | <non-nullary-input-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>, <named-input-pipeline>)>
-  | <non-nullary-input-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>, <whitespace-input-pipeline>)>
+  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>)>
+  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>)>
 
 nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
 non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
@@ -823,20 +810,11 @@ non-nullary-string     = "S" (* is string;                                      
 `%U`'s & `%E`'s values are `null` or an empty string, which no transform can
 modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
 can modify, so any other transform must follow a `<named-format-reference>`,
-whose named format may output other text, whether in the placeholder's pipeline
-or in a `%I`'s in its `<success-block>`, whose format input is that value (e.g.,
-`%W.trimWhitespace+-+`, `%U:x..uppercase+-+`, `%U:x.uppercase+-+`,
-`%W%I.trimWhitespace++-+`, `%U%I:x..uppercase++-+` & `%U+%I..uppercase++`, but
-none of `%U..uppercase+-+`, `%W..uppercase+-+` & `%U%I..uppercase++-+`).
-`trimWhitespace` takes no `<coercion>` here, because `%W`'s value is a string or
-a `null`, which remains unmodified, so it has nothing to coerce (e.g.,
-`%W..trimWhitespace+-+` is an error, as `%S..uppercase++` is).
-
-`%B`'s, `%T`'s & `%F`'s format input is a boolean or the text of one, which has
-no digit, so a `<coercion>` of it to anything but a string can only abort, so a
-`%I` in their `<success-block>` can take one only after a
-`<named-format-reference>`, whose named format may output other text (e.g.,
-`%T%I..uppercase++-+` & `%T%I:x..round++-+`, but not `%T%I..round++-+`).
+whose named format may output other text (e.g., `%W.trimWhitespace+-+`,
+`%U:x..uppercase+-+` & `%U:x.uppercase+-+`, but neither `%U..uppercase+-+` nor
+`%W..uppercase+-+`). `trimWhitespace` takes no `<coercion>` here, because `%W`'s
+value is a string or a `null`, which remains unmodified, so it has nothing to
+coerce (e.g., `%W..trimWhitespace+-+` is an error, as `%S..uppercase++` is).
 
 ###### Number Formatting
 

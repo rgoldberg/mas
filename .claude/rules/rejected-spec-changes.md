@@ -76,12 +76,10 @@ In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
 empty string, so its matcher cannot affect what it means.
 
-In specs, never let `%U` or `%E`, or a `%I` in either's `<success-block>`, take
-a transform before a named format, nor `%W`, or a `%I` in its `<success-block>`,
-take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
-`%E..trimWhitespace+-+`, `%W..uppercase+-+`, `%U%I..uppercase++-+`, or
-`%W%I..uppercase++-+`), because no such transform can modify its value, so it
-cannot affect what its placeholder means.
+In specs, never let `%U` or `%E` take a transform before a named format, nor
+`%W` take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
+`%E..trimWhitespace+-+`, or `%W..uppercase+-+`), because no such transform can
+modify its value, so it cannot affect what its placeholder means.
 
 In specs, never forbid a string transform merely because it cannot modify a
 non-string value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`,
@@ -125,24 +123,14 @@ In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 (e.g., `%S.uppercase+%L..round++` or
 `%S.uppercase+%I..trimWhitespace..round++`), because a `<failure-block>` must
 never abort, nor forbid one in a `<format-template>` or a `<success-block>`
-(e.g., `%L..round+` or `%S%I..round++-+`), other than a `%I`'s in the
-`<success-block>` of `%U`, `%E`, `%W`, `%B`, `%T`, or `%F`, whose matcher
-matched its format input (e.g., `%U%I..round++-+` or `%T%I..round++-+`), because
-no matcher can otherwise coerce a label, a name, or a format input that it
-cannot match. An overruling to forbid a `%I`'s `<coercion>` that can only abort
-in the `<success-block>` of `%D`, `%C`, or `%V` (e.g.,
-`%D%I..timeOnlyTimeZone:UTC:++-+`, `%C%I..dateOnly++-+`, or
-`%.V%I..timeOnlyTimeZone:UTC:++-+`), because its matcher matched a format input
-that can never parse as that type, was declined, because it would need 3 input
-pipelines & variants of the string chains, only to report no-ops that almost
-nobody writes, while an aborted value shows its effect.
-
-In specs, never let a `%I` in the `<success-block>` of `%B`, `%T`, or `%F` take
-a `<coercion>` to anything but a string, unless it follows a
-`<named-format-reference>` (e.g., `%T%I..round++-+`), because a boolean's text
-has no digit, so it can only abort, as `%T..round+-+` would, which outweighs the
-overruled reason for rejecting its forbidding: no matcher can otherwise coerce a
-format input that it cannot match.
+(e.g., `%L..round+`, `%S%I..round++-+`, `%U%I..round++-+`, or
+`%T%I..round++-+`), because no matcher can otherwise coerce a label, a name, or
+a format input that it cannot match, while `%I`'s type is any in every
+`<success-block>`, so forbidding it in only some of them would treat near
+parallels differently (e.g., `%T%I..round++-+` & `%C%I..dateOnly++-+`), which
+outweighs the overruled reason for forbidding it in the `<success-block>` of
+`%U`, `%E`, `%W`, `%B`, `%T`, or `%F`: its matcher matched its format input, so
+the coercion can only abort.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,
