@@ -26,8 +26,8 @@ Each of the following evaluates to a value whose type is:
 - Template text: string.
 
 A field value may also be an array or an object, each a **structured value**. No
-matcher whose predicate's output type is not any (e.g., `%s` or `%.n`), except
-`%.s` & `%.S`, matches a structured value.
+`<nullary-scalar-matcher>` or `<non-nullary-scalar-matcher>` (e.g., `%s` or
+`%.n`), except `%.s` & `%.S`, matches a structured value.
 
 A **date** is a date-only or a datetime, either of which an input format may
 support alone. An input format **supports** a type iff its field values can have

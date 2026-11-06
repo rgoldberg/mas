@@ -23,10 +23,23 @@ private extension MASTests { // swiftlint:disable file_length
 			"%.V%v+no+",
 		],
 	)
-	func `no predicate whose output type is not any, except a string coercion, matches a structured value`(
-		format: String,
-	) throws {
+	func `no scalar matcher, except a string coercion, matches a structured value`(format: String) throws {
 		#expect(try rendered(format, structuredValue) == "no")
+	}
+
+	@Test(
+		arguments: [
+			("%l", "L"),
+			("%k", "n"),
+			("%L.uppercase+", "L"),
+			("%K.uppercase+", "N"),
+			("%m.s+", #"["é",{"a":null}]"#),
+			("%M.s+no+", #"["é",{"a":null}]"#),
+		],
+	)
+	func `a label, a name, or a string coercion branch matches a structured value`(format: String, expected: String)
+	throws {
+		#expect(try rendered(format, structuredValue) == expected)
 	}
 
 	@Test
