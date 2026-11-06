@@ -298,6 +298,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       execute / invocation / invoke
 43. - kind: config kinds; block kinds
     - type: value types
+    - stem: a config name, without any output format suffix
+      ([defined](../Specs/configs.md#named-configs))
     - variant: same-stem fields configs
     - unsuffixed variant: the variant whose name has no output format suffix,
       which the `@unsuffixed` reference suffix selects
