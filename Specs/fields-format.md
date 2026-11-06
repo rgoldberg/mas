@@ -18,7 +18,7 @@ template-text = ~^{string}^~
 
 Each of the following evaluates to a value whose type is:
 
-- Block: its pipeline's or template's type.
+- `<block>`: its pipeline's or template's type.
 - Pipeline: its last `<value-transform>`'s output type; absent any, its named
   format's value's type.
 - Placeholder: its inserted value's type.
