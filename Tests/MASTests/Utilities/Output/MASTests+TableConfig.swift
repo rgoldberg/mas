@@ -121,6 +121,7 @@ private extension MASTests {
 		#expect(try parseTableConfig("S\\::").separator?.pattern == ":")
 		#expect(try parseTableConfig("C\\\\:").columnSpacing == "\\")
 		#expect(try parseTableConfig("C \\: :").columnSpacing == " : ")
+		#expect(try parseTableConfig("C :").columnSpacing == " ") // Whitespace-only text is consumed
 		#expect(throws: TableConfigParsingError.danglingEscape) { try parseTableConfig("S-\\") }
 	}
 

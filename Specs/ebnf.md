@@ -152,7 +152,8 @@ position that contains no candidate terminator & that its typed terminal
 [accepts](#typed-terminals) (i.e., maximal munch; e.g., for
 `{integer: 1 to 100}`, `150` consumes `15`, leaving `0` for the next token),
 less any ignored outer bare whitespace; iff no such prefix exists, an error is
-reported.
+reported. Text that is empty after ignoring its outer bare whitespace is not a
+variable token (e.g., in `a= ,b`, `a`'s `<label>` is directly absent).
 
 Iff multiple typed terminals are available at the current position (e.g., in
 `<a> | <b>`), the longest variable token that any of them accepts is consumed,
@@ -175,6 +176,9 @@ after the last:
 
 - Character consumed by a literal token or a name token.
 - Non-bare-whitespace character consumed by a variable token.
+
+A variable token without a non-bare-whitespace character contains only outer
+bare whitespace.
 
 A candidate literal is matched before outer bare whitespace is processed,
 consuming any bare whitespace that it matches.
@@ -213,19 +217,30 @@ overridden.
 The syntax text's start & end are treated as deferring sides that ignore outer
 bare whitespace.
 
-Outer bare whitespace is treated per its 2 adjacent sides: the preceding token's
-end & the following token's start, the following token being the one that would
-start after the whitespace if it were ignored (or at the whitespace, iff a
-variable token starts there). Of those 2 sides:
+Outer bare whitespace is treated per its adjacent sides:
 
-- If both defer: the higher-precedence treatment applies, in descending
+- The preceding token's end, or the syntax text's start.
+- The start of each candidate literal that matches immediately after the
+  whitespace, or the syntax text's end.
+- The start of the variable token that each available typed terminal would start
+  at the whitespace &, iff that variable token would contain only that
+  whitespace, its end.
+
+Of those sides:
+
+- If all defer: the highest-precedence treatment applies, in descending
   precedence:
   - Required
   - Consumed
   - Ignored
   - Forbidden
-- Otherwise: the non-deferring side's treatment applies. A syntax must ensure
+- Otherwise: each non-deferring side's treatment applies. A syntax must ensure
   that no 2 potentially adjacent non-deferring sides differ.
+
+E.g., `%k %l` consumes its space as `<template-text>`, because each side defers
+& `<template-text>`'s Consumed takes precedence over `%`'s Ignored, while
+`%S%k +-+` ignores its space, because `<block-terminator>`'s start does not
+defer.
 
 Consumed outer bare whitespace is included in the adjacent variable token's
 value, if any; otherwise, it is discarded.

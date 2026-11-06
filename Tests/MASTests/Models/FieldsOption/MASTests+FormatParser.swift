@@ -298,6 +298,9 @@ private extension MASTests { // swiftlint:disable file_length
 	@Test(
 		arguments: [
 			("%i  x %l ", JSON.Node.string("v"), "v  x L"), // Consumed between placeholders; ignored at the end
+			("%i %l", .string("v"), "v L"), // Whitespace-only text is consumed before a placeholder
+			("%i ", .string("v"), "v"), // Whitespace-only text is ignored at the end
+			("%S%i +-+", .string("v"), "v"), // Whitespace-only text is ignored before a block terminator
 			("  x%i", .string("v"), "xv"), // Ignored at the start
 			("x  %i", .string("v"), "x  v"), // Consumed before a placeholder
 			("\\ x%i", .string("v"), " xv"), // Escaped whitespace is always consumed

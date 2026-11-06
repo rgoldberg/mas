@@ -93,6 +93,7 @@ private extension MASTests {
 		("fF.", "."),
 		("F.:f", nil),
 		("F\t\u{301}:", "\t\u{301}"),
+		("F :", " "),
 	])
 	func `f removes the leader; F sets its pattern, ▁ by default`(value: String, leaderPattern: String?) throws {
 		#expect(try parseKeyValueConfig(value).leaderPattern == leaderPattern)
