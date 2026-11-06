@@ -22,7 +22,7 @@ expressions' constant nonterminals (e.g., not `-"/"` for a following `/`),
 except on a terminator that terminates every expression that needs it, which
 would otherwise need many annotations (e.g., `block-terminator = -"+"`).
 
-In specs, define each option that takes a value as a `<valued-option(…)>` (e.g.,
+In specs, define each option that takes a value as a `<valued-option>` (e.g.,
 `fields-option = <valued-option("--fields", <fields-config>)>`), whose
 command-line argument boundary (`_`) models Swift Argument Parser's split of an
 option from its value as the next command-line argument, so that the grammar
@@ -37,14 +37,13 @@ In specs, make every block reference optional, except one that is:
 
 1. A block's entire definition (e.g., `failure-block = <unconditional-block>`),
    which a single optional cannot define.
-2. An argument (e.g., `<conditional-block(…)>` in
-   `<format-name(<conditional-block(…)>)>`), whose parameterized nonterminal's
+2. An argument (e.g., `<conditional-block>` in
+   `<format-name(<conditional-block>)>`), whose parameterized nonterminal's
    definition makes it optional wherever it consumes text.
 3. One whose absence a sibling alternative, with a default for it, expresses
-   instead (e.g., `<conditional-input-block(…)>` in
-   `<non-nullary-input-success(…)>`, whose absence
-   `<non-nullary-scalar-blockless-success>` expresses), so that a grammar can
-   require at least 1 of multiple blocks (e.g., to forbid `%S++`).
+   instead (e.g., `<conditional-input-block>` in `<non-nullary-input-success>`,
+   whose absence `<non-nullary-scalar-blockless-success>` expresses), so that a
+   grammar can require at least 1 of multiple blocks (e.g., to forbid `%S++`).
 
 In specs, give every block not marked `(* non-structural *)` a direct default of
 `{empty string}`, because no syntax references a non-structural block, so none

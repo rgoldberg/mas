@@ -122,7 +122,7 @@ the functionality that needs them from specs & code:
    `1226-fields-no-custom-names`:
    1. [`<pipeline>`, `<named-format-pipeline>` & every other
       `<*-pipeline>`](../Specs/fields-format.md#pipelines): once
-      `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline(…)>` is only its
+      `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline>` is only its
       `TRANSFORM_PIPELINE`, so each of the others is only another name of its
       transform pipeline, except that `<named-pipeline>`,
       `<named-unconditional-pipeline>` & `<named-input-pipeline>` are only named

@@ -55,7 +55,7 @@ option-value-separator = "=" | _
 ```
 
 A **valued option** is an option that takes a value; each spec defines one as a
-`<valued-option(…)>` (e.g., [`<fields-option>`](fields.md#fields-option)).
+`<valued-option>` (e.g., [`<fields-option>`](fields.md#fields-option)).
 
 A valued option's **value** (`VALUE`) is the rest of its command-line argument
 after `=` (e.g., `--fields=name`), or else the next command-line argument (e.g.,

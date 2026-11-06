@@ -690,7 +690,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        command-line arguments, iff the latter is `-` or does not start with `-`
        ([defined](../Specs/ebnf.md#command-line-argument-boundaries))
      - valued option: an option that takes a value, defined as a
-       `<valued-option(…)>` ([defined](../Specs/configs.md#option-values))
+       `<valued-option>` ([defined](../Specs/configs.md#option-values))
      - flag: an option that takes no value (e.g., `--json`)
        ([defined](../Specs/configs.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
