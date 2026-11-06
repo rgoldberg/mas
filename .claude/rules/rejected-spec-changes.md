@@ -94,6 +94,12 @@ In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
 empty string, so its matcher cannot affect what it means.
 
+In specs, never let a top-level `<format-block>` be template text without a
+placeholder (e.g., `src:App Store`), because its output cannot depend on
+anything but its own text, while a format that omits a transform's
+`<transform-call-prefix>` (e.g., `name:uppercase`) would output its text instead
+of reporting an error, and `%UApp Store+App Store+` already gives that output.
+
 In specs, never forbid a string transform on `%U`, `%E`, or `%W` merely because
 it cannot modify its value (e.g., `%U.uppercase+-+`, `%E.trimWhitespace+-+`, or
 `%W.uppercase+-+`), because a string transform on a value that it cannot modify

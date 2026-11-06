@@ -351,19 +351,3 @@ each item as soon as it is read, unless item sorting reorders items, which
 Let a `<fields-config>` set whether its [unlisted
 fields](../Specs/fields.md#unlisted-fields) are visible (e.g., to output them
 with `standard`'s field specs, or to hide them with `all`'s).
-
-### Constant Top-Level Formats
-
-Probably do not do this: let a top-level `<format-block>` be template text
-without a placeholder (e.g., `src:App Store` outputs `App Store` for every
-item), as a `<block>` may be (e.g., `none` in `%N%n+none+`):
-
-1. Pro: a top-level `<format-block>` would match a `<block>`, whose template
-   text needs no placeholder.
-2. Pro: a constant column would need no placeholder (e.g., `src:App Store`,
-   instead of `src:%UApp Store+App Store+`).
-3. Con: a format that omits a transform's `<transform-call-prefix>` (e.g.,
-   `name:uppercase` for `name:.uppercase`) would output its text for every item
-   instead of reporting an error.
-4. Con: a constant column is rarely useful, and a placeholder can already
-   express one.
