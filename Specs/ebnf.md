@@ -80,7 +80,9 @@ a literal or a name literal).
 A **variable expression** consumes variable text (e.g., a typed terminal). A
 choice of constant expressions is a variable expression, because which
 alternative it consumes varies (e.g.,
-[`<direction>`](fields.md#sort-direction)).
+[`<direction>`](fields.md#sort-direction)), unless it only separates or
+terminates other expressions (e.g.,
+[`<setting-termination>`](configs.md#setting-termination)).
 
 ### Compounds Vs. Terminals
 
