@@ -156,16 +156,16 @@ In specs, specify syntax according to the 1st of these that applies:
    `%U.uppercase+-+`, `%T..lowercase+-+`, `.dateOnly..uppercase`, or
    `%.:iso-date:D.timeZone:UTC:+-+`), because a name only selects an operation,
    which merely has nothing to do, so every such name behaves alike.
-3. Allow it: synonymous syntax text (i.e., syntax text that means what other
-   syntax text means) that would make the syntax too complicated to forbid
-   (e.g., `%+N%n+`, which means what `%n` means, but forbidding it would need a
-   separate block syntax per predicate).
-4. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
+3. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a literal that cannot affect what it means, when the syntax text
-   alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled by nothing,
-   `%+s`, whose `<abort-on-failure>` modifies nothing, because `%s` already
-   aborts on failure, `%mN.round++`, whose `%m` matches only 1 branch, or
+   alone decides this, unless the grammar would need a separate syntax per case
+   (e.g., `%N%s++`, `K:`, whose keys are styled by nothing, `%+s`, whose
+   `<abort-on-failure>` modifies nothing, because `%s` already aborts on
+   failure, `%mN.round++`, whose `%m` matches only 1 branch, or
    `%S..uppercase++`, whose `<coercion>` has nothing to coerce).
+4. Attach an error comment: such syntax that the grammar would need a separate
+   syntax per case to forbid (e.g., `%+N%n+`, which means what `%n` means, but
+   whose grammar would need a separate block syntax per predicate).
 5. Attach an error comment: syntax that contradicts itself, or cannot mean what
    it says, when only context outside the syntax text decides it, or only a
    comparison of variable tokens' values (e.g., an effective `k` in a

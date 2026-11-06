@@ -730,7 +730,9 @@ non-nullary-scalar-matcher =
   | <non-nullary-date-matcher>
   | <non-nullary-time-only-matcher>
 
-non-nullary-scalar-success           = <non-nullary-scalar-blocked-success> | <non-nullary-scalar-blockless-success>
+non-nullary-scalar-success           =
+  <non-nullary-scalar-blocked-success> | <non-nullary-scalar-blockless-success>
+  (* error: its <success-block> is solely a nullary <block-placeholder> *)
 non-nullary-scalar-blockless-success = <non-nullary-scalar-matcher> (* default success-block: {empty string} *)
 non-nullary-scalar-blocked-success   =
   <non-nullary-standard-success>
@@ -741,6 +743,11 @@ non-nullary-scalar-blocked-success   =
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
+
+A `<non-nullary-scalar-success>` has no `<failure-block>`, so a
+`<success-block>` that is solely a nullary `<block-placeholder>` would add
+nothing to its matcher's nullary form (e.g., `%+N%n+` would mean what `%n`
+means), while `%N%n+none+`'s `<failure-block>` has no such shorter form.
 
 ###### Standard Placeholders
 

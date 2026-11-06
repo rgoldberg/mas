@@ -172,6 +172,9 @@ private extension MASTests { // swiftlint:disable file_length
 			// Non-nullary abort-on-failure
 			("%+N.round+", .number(5.6), "6"),
 			("[%+N.round+]", .string("x"), nil),
+			("%+N%n%n+", .number(5), "55"),
+			("%+N%i+", .number(5), "5"),
+			("%mN(%n)+b+", .number(5), "(5)"),
 			// Non-nullary abort-on-success
 			("%-Nnot a number+", .string("x"), "not a number"),
 			("[%-Nnot a number+]", .number(5), nil),
@@ -1062,6 +1065,13 @@ private extension MASTests { // swiftlint:disable file_length
 			("%N++", .binaryPlaceholderLacksBlock),
 			("%.N++", .binaryPlaceholderLacksBlock),
 			("%U + +", .binaryPlaceholderLacksBlock),
+			("%+N%n+", .soleNullaryBlockPlaceholder),
+			("%+N %n +", .soleNullaryBlockPlaceholder),
+			("%+.N%n+", .soleNullaryBlockPlaceholder),
+			("%+U%u+", .soleNullaryBlockPlaceholder),
+			("%mN%n+b+", .soleNullaryBlockPlaceholder),
+			("%mbN%n++", .soleNullaryBlockPlaceholder),
+			("%MN%n+b+none+", .soleNullaryBlockPlaceholder),
 			("%S<%n>++", .invalidLetter("n")),
 			("%N+%n+", .invalidLetter("n")),
 			("%mn+", .singleBranch),

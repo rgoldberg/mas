@@ -405,7 +405,7 @@ private struct FormatParser {
 		case (abortOnFailure, false):
 			throw .invalidModifier(letter)
 		case (abortOnFailure, true):
-			.conditional(matcher, .abortOnFailure(success: try parseSuccessBlock(for: matcher)))
+			.conditional(matcher, .abortOnFailure(success: try parseFailurelessSuccessBlock(for: matcher)))
 		case (_, false):
 			.conditional(matcher, .abortOnFailure(success: nil))
 		case (_, true):
@@ -423,6 +423,18 @@ private struct FormatParser {
 			throw .binaryPlaceholderLacksBlock
 		}
 		return .binary(success: success, failure: failure)
+	}
+
+	/// Parses a `<non-nullary-scalar-success>`'s `<success-block>` & its
+	/// `<block-terminator>`, which has no `<failure-block>`, so a nullary
+	/// `<block-placeholder>` as its sole content (e.g., `%+N%n+`) would mean what
+	/// its matcher's nullary form means.
+	private mutating func parseFailurelessSuccessBlock(for matcher: Matcher) throws(ParsingError) -> Format {
+		let success = try parseSuccessBlock(for: matcher)
+		guard success != .template([.blockPlaceholder(pipeline: .init())]) else {
+			throw .soleNullaryBlockPlaceholder
+		}
+		return success
 	}
 
 	/// Parses `matcher`'s `<success-block>` & its `<block-terminator>`.
@@ -568,7 +580,7 @@ private struct FormatParser {
 			block: letter.isUppercase
 				? isNegated
 					? try parseBlock(kind: .unconditional, enclosingPredicate: nil)
-					: try parseSuccessBlock(for: matcher)
+					: try parseFailurelessSuccessBlock(for: matcher)
 				: nil,
 		)
 	}

@@ -55,10 +55,13 @@ or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because
 the former already aborts on failure & the latter's matcher cannot fail, so it
 cannot affect what either means.
 
-In specs, never forbid a `<success-block>` that is solely its matcher's nullary
-placeholder (e.g., `%+N%n+` or `%mN%n+b+`), because, although it means what
-shorter syntax text means (e.g., `%n` or `%mnb+`), `%N%n+none+` must remain
-valid, so forbidding it would need a separate block syntax per predicate for
+In specs, never allow a `<success-block>` that is solely a nullary
+`<block-placeholder>`, without a `<failure-block>` (e.g., `%+N%n+` or
+`%mN%n+b+`), because it means what shorter syntax text means (e.g., `%n` or
+`%mnb+`), so its other literals cannot affect what it means, while an error
+comment forbids it without any block syntax, which outweighs the overruled
+reason for rejecting its forbidding: `%N%n+none+` must remain valid, so
+forbidding it would need a separate block syntax per predicate for
 `<abort-on-failure>` & for non-negated branches, which would make the syntax too
 complicated.
 
