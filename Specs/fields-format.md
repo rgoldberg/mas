@@ -130,7 +130,7 @@ string for a string).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-transform-pipeline = <value-transform-pipeline> | <unconditional-transform-pipeline> | <uncoerced-string-transform-run> (* non-structural *)
+transform-pipeline = <value-transform-pipeline> (* non-structural *)
 
 value-transform-pipeline =
   <string-chain(<transform-call-prefix>)>
@@ -569,16 +569,7 @@ block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block> (* direct default: {empty string} *)
 
-success-pipeline =
-  <string-pipeline>
-  | <version-pipeline>
-  | <number-pipeline>
-  | <date-pipeline>
-  | <time-only-pipeline>
-  | <unconditional-pipeline>
-  | <unconditional-string-pipeline>
-  | <named-format-pipeline(<preset-name>)>
-  (* non-structural *)
+success-pipeline = <named-format-pipeline(<preset-name>)> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
