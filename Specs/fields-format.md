@@ -1065,7 +1065,7 @@ branch-negation = "-"!
   - For `%m`: the placeholder fails & aborts formatting.
   - For `%M`: returns its `<failure-block>`'s value.
 
-A match has at least 1 branch, because without any, its `%m` or `%M` could not
+A match has at least 1 branch, because without any, its `%m` or `%M` cannot
 affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
 branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
 means).

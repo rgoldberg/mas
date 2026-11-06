@@ -147,9 +147,9 @@ never abort, nor forbid one in a `<format-template>` or a `<success-block>`
 a format input that it cannot match, while `%I`'s type is any in every
 `<success-block>`, so forbidding it in only some of them would treat near
 parallels differently (e.g., `%T%I..round++-+` & `%C%I..dateOnly++-+`), which
-outweighs the overruled reason for forbidding it in the `<success-block>` of
-`%U`, `%E`, `%W`, `%B`, `%T`, or `%F`: its matcher matched its format input, so
-the coercion can only abort.
+outweighs the overruled reason for forbidding it in `<success-block>` of `%U`,
+`%E`, `%W`, `%B`, `%T`, or `%F`: its matcher matched its format input, so the
+coercion can only abort.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,
@@ -180,7 +180,7 @@ would then coerce nothing, so it would only choose between an error & an abort.
 In specs, never let an input format's support of a date-only or a datetime stop
 an implicit coercion to the other (e.g., `%d` for `0` or
 `"2020-03-18T17:39:23Z"`, for an input format that supports date-only, but not
-datetime), because such a value could otherwise match `%d` only with a
+datetime), because such a value can otherwise match `%d` only with a
 `<coercion>`, although its type is unsupported by its input format.
 
 In specs, never implicitly coerce a value to a type that its input format
@@ -231,7 +231,7 @@ coerce to, and `%.s` already renders a value as a string.
 
 In specs, never let a block hold a conditional matcher other than its enclosing
 matcher's predicate (e.g., `%S%.N.round+-+++` or `%N%.s+none+`), because a
-`<block-placeholder>` always succeeds, while such a matcher could fail, and a
+`<block-placeholder>` always succeeds, while such a matcher can fail, and a
 pipeline already coerces (e.g., `%S..round+-+` or `%N..trimWhitespace+none+`).
 
 In specs, never let a default coercion or an implicit coercion to a date accept

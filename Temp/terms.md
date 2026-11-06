@@ -647,7 +647,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - success clause: a `<success-block>` or a `<success-pipeline>`
        (`<success-clause>`), evaluated iff its enclosing matcher succeeds
      - fallible / infallible unconditional placeholder: an unconditional
-       placeholder whose pipeline may / may not abort formatting, the latter of
+       placeholder whose pipeline may / cannot abort formatting, the latter of
        which an `<unconditional-block>` requires
        (`<fallible-unconditional-placeholder>` /
        `<infallible-unconditional-placeholder>`)
@@ -712,6 +712,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#output-configs))
      - output config syntax: the syntax of an output config kind's configs
        (e.g., `<json-config>`) ([defined](../Specs/configs.md#output-configs))
+     - output format: how a display command renders its items: table, key-value,
+       or JSON ([defined](../Specs/configs.md#output-formats))
+     - table config / key-value config / JSON config: a named config of its kind
+       ([defined](../Specs/table.md#table-config),
+       [defined](../Specs/key-value.md#key-value-config),
+       [defined](../Specs/json.md#json-config))
 110. - preset: a named config of `<field-modifiers>`, which a
        `<preset-modifier>` attaches to a field spec
        ([defined](../Specs/fields.md#presets))
@@ -901,12 +907,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        as a single number ([defined](../Specs/fields.md#sort-number-segments))
 131. - ambiguous: of syntax, its text, or what it parses, cannot be read
        reliably
-     - ill-typed: of syntax, a construct's or a token's type does not fit what
+     - ill-typed: of syntax, an expression's or a token's type does not fit what
        surrounds it
      - dangling: of syntax, it refers to something that does not exist
      - unsupported in context: of syntax, its context cannot do what it asks,
        whatever it holds
      - redundant: of syntax, whatever it holds, a part has no effect, or its
        output cannot depend on anything but its own text
-     - hold: of a construct, to have a name, an argument, a block content, or a
-       list element in it
+     - hold: of an expression, to have a name, an argument, a block content, or
+       a list element in it

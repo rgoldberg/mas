@@ -153,29 +153,30 @@ output shows its effect):
 
 1. **Ambiguous:** the syntax text, or what it parses, cannot be read reliably
    (e.g., `@x/`, or a digit group separator that equals the decimal separator).
-2. **Ill-typed:** a construct's or a token's type does not fit what surrounds it
-   (e.g., `%S.round+-+`, `%.D..round++`, `%N%s++`, or `$'P\f:'`).
+2. **Ill-typed:** an expression's or a token's type does not fit what surrounds
+   it (e.g., `%S.round+-+`, `%.D..round++`, `%N%s++`, or `$'P\f:'`).
 3. **Dangling:** it refers to something that does not exist (e.g., a
    `<preset-name>` of no preset, or `@9` in `.@9` for fewer than 9 field specs).
 4. **Unsupported in context, whatever it holds:** its context cannot do what it
-   asks (e.g., `%S.uppercase+%L..round++`, whose `<failure-block>` could abort,
+   asks (e.g., `%S.uppercase+%L..round++`, whose `<failure-block>` can abort,
    `<document-order>` for table output, or an effective `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`).
 5. **Redundant, whatever it holds:** a part has no effect, or its output cannot
    depend on anything but its own text (e.g., `%S..uppercase++`, `%+s`, `%S++`,
    `K:`, `%I+`, `%m+`, or `plain`).
 
-In that list, a construct **holds** each name, argument, or block content in it
-(e.g., `%+N…+` is not redundant, because it can hold something other than `%n`,
-such as `.round`). An absent expression holds nothing. A list holds its
+In that list, an expression **holds** each name, argument, or block content in
+it (e.g., `%+N…+` is not redundant, because it can hold something other than
+`%n`, such as `.round`). An absent expression holds nothing. A list holds its
 elements, and its own prefix or fences are never redundant, because generated
 syntax may hold no elements (e.g., `@x.`, but not `%m+`, whose `%m` is a
 predicate, not a prefix). A template is not a list, because it mixes text &
 placeholders.
 
-That list judges uses of constructs & spellings that a spec defines, so it adds
-neither; add a construct only for output that existing syntax cannot give (e.g.,
-not `%S%.N.round+-+++`, because `%M-S+.N.round++-+` gives its output).
+That list judges occurrences of expressions & spellings that a spec defines, so
+it adds neither; add an expression only for output that existing syntax cannot
+give (e.g., not `%S%.N.round+-+++`, because `%M-S+.N.round++-+` gives its
+output).
 
 Forbid syntax in the grammar when the syntax text alone decides it & the grammar
 would need no separate syntax per case; otherwise, attach an error comment.

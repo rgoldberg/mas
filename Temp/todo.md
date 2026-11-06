@@ -301,8 +301,8 @@ a format's template text or from a field value) instead of rendering its ESC as
    column remains aligned.
 3. Whether formatting is output only iff standard output is a terminal (as `t`
    styles a header row), being removed otherwise.
-4. Ending each cell's formatting (e.g., with an SGR reset), so that it styles
-   neither the column spacing nor the next cell.
+4. Terminating each cell's formatting (e.g., with an SGR reset), so that it
+   styles neither the column spacing nor the next cell.
 5. How a cell's formatting interacts with a styled header row's `<style-reset>`.
 6. Rendering each non-formatting escape sequence (e.g., OSC 52, which sets the
    clipboard, or one that moves the cursor) as Control Pictures symbols, because
