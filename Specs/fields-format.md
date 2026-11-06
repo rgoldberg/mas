@@ -29,9 +29,9 @@ A field value may also be an array or an object, each a **structured value**. No
 predicate whose output type is not any (e.g., `%s` or `%.n`), except `%.s` &
 `%.S`, matches a structured value.
 
-A **date** is a date-only or a datetime. An input format **supports** a type iff
-its field values can have that type (e.g., JSON supports no version, date-only,
-datetime, or time-only).
+A **date** is a date-only or a datetime, either of which an input format may
+support alone. An input format **supports** a type iff its field values can have
+that type (e.g., JSON supports no version, date-only, datetime, or time-only).
 
 A **default coercion** is a `<coercion>` without arguments.
 
@@ -46,7 +46,9 @@ it, ignoring its defaults (e.g., `%.:iso:d` does not match `0`).
 No implicit coercion gives a value a type that its input format supports, so
 only a `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while
 `%.n` does, and for an input format that supports date-only & datetime, but not
-time-only, `%d` would match no string, while `%c` would match `"17:39:23"`).
+time-only, `%d` would match no string, while `%c` would match `"17:39:23"`, and
+for one that supports date-only, but not datetime, `%d` would match `0`, but not
+`"2020-03-18"`).
 
 A `<coercion>` to a type that its input format does not support thus remains
 useful to choose its `<date-format>`s & to abort formatting, rather than report
