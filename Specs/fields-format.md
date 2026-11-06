@@ -85,14 +85,9 @@ number-pipeline               = <pipeline(<number-format-name>, <value-transform
 date-pipeline                 = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline>)>
 date-only-pipeline            = <pipeline(<date-format-name>, <value-transform-pipeline>, <coerced-string-chain>)>
 time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline>)>
-unconditional-pipeline        = <pipeline(<unconditional-format-name>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
-unconditional-string-pipeline =
-  <pipeline(
-    <unconditional-format-name>,
-    <uncoerced-string-transform-run> | <unconditional-transform-pipeline>,
-    <uncoerced-string-transform-run>
-  )>
-named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <unconditional-transform-pipeline>)>
+unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
+unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
+named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <string-transform-pipeline>)>
 named-input-pipeline          = <named-pipeline(<preset-name>, <value-transform-pipeline>)>
 whitespace-pipeline           = <trimmable-pipeline(<named-unconditional-pipeline>)>
 whitespace-input-pipeline     = <trimmable-pipeline(<named-input-pipeline>)>
@@ -162,6 +157,7 @@ time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced
 unconditional-transform-pipeline = <coerced-string-transform-call> [ <uncoerced-string-transform-run> ]
 uncoerced-string-transform-run   = <transform-run(<transform-call-prefix>, <string-transform>)>
 coerced-string-transform-call    = <transform-call(<transform-call-prefix> <coercion>, <string-transform>)>
+string-transform-pipeline        = <uncoerced-string-transform-run> | <unconditional-transform-pipeline>
 
 transform-chain(CALL_PREFIX, TRANSFORM, AFTER_RUN) = <transform-run(CALL_PREFIX, TRANSFORM)> [ AFTER_RUN ]
 
@@ -819,12 +815,12 @@ modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
 can modify, so any other transform must follow a `<named-format-reference>`,
 whose named format may output other text, whether in the placeholder's pipeline
 or in a `%I`'s in its `<success-block>`, whose format input is that value (e.g.,
-`%W.trimWhitespace+-+`, `%U:x..uppercase+-+`, `%W%I.trimWhitespace++-+`,
-`%U%I:x..uppercase++-+` & `%U+%I..uppercase++`, but none of `%U..uppercase+-+`,
-`%W..uppercase+-+` & `%U%I..uppercase++-+`). `trimWhitespace` takes no
-`<coercion>` here, because `%W`'s value is a string or a `null`, which remains
-unmodified, so it has nothing to coerce (e.g., `%W..trimWhitespace+-+` is an
-error, as `%S..uppercase++` is).
+`%W.trimWhitespace+-+`, `%U:x..uppercase+-+`, `%U:x.uppercase+-+`,
+`%W%I.trimWhitespace++-+`, `%U%I:x..uppercase++-+` & `%U+%I..uppercase++`, but
+none of `%U..uppercase+-+`, `%W..uppercase+-+` & `%U%I..uppercase++-+`).
+`trimWhitespace` takes no `<coercion>` here, because `%W`'s value is a string or
+a `null`, which remains unmodified, so it has nothing to coerce (e.g.,
+`%W..trimWhitespace+-+` is an error, as `%S..uppercase++` is).
 
 ###### Number Formatting
 

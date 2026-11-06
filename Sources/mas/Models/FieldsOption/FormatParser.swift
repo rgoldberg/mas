@@ -790,7 +790,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	func isPipeline(_ calls: [TransformCall], isNamed: Bool) -> Bool {
 		switch self {
 		case .boolean, .unconditional:
-			calls.first?.coercion != nil && calls.isStringTransformRun
+			(isNamed || calls.first?.coercion != nil) && calls.isStringTransformRun
 		case .date:
 			calls.followsTypes(from: isNamed ? nil : .date)
 		case .dateOnly:
@@ -800,7 +800,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .namedInput:
 			isNamed && calls.followsTypes(from: nil)
 		case .nullOrEmpty:
-			isNamed && calls.first?.coercion != nil && calls.isStringTransformRun
+			isNamed && calls.isStringTransformRun
 		case .number:
 			calls.followsTypes(from: isNamed ? nil : .number)
 		case .string:
@@ -812,7 +812,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .version:
 			calls.followsTypes(from: isNamed ? nil : .version)
 		case .whitespace:
-			isNamed ? calls.first?.coercion != nil && calls.isStringTransformRun : calls.isUncoercedTrimWhitespaceRun
+			isNamed ? calls.isStringTransformRun : calls.isUncoercedTrimWhitespaceRun
 		case .whitespaceInput:
 			isNamed ? calls.followsTypes(from: nil) : calls.isUncoercedTrimWhitespaceRun
 		}
