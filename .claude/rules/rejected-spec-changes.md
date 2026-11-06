@@ -45,10 +45,17 @@ In specs, never forbid a `<chronologic-formats>` whose formats overlap (e.g.,
 and detecting the overlap depends on what each format matches, not on the
 syntax.
 
-In specs, never allow a `<match-placeholder>` with only 1 branch (e.g.,
-`%mN.round++` or `%MN.round++none+`), because it means what its branch's own
-placeholder means (e.g., `%+N.round+` or `%N.round+none+`), so its `%m` or `%M`
-cannot affect what it means.
+In specs, never forbid a `<match-placeholder>` with only 1 branch (e.g.,
+`%mN.round++` or `%MN.round++none+`), because it does what it says, while a
+match with a repeated branch means the same & stays valid (e.g., `%mnn+`), and
+removing a branch should not break what remains, which outweighs the overruled
+reason for rejecting its allowance: it means what its branch's own placeholder
+means (e.g., `%+N.round+` or `%N.round+none+`), so its `%m` or `%M` cannot
+affect what it means.
+
+In specs, never allow a `<match-placeholder>` with no branches (e.g., `%m+` or
+`%M+none+`), because it has nothing to match, so its `%m` or `%M` cannot affect
+what it means.
 
 In specs, never allow `<abort-on-failure>` on a nullary conditional placeholder
 or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because

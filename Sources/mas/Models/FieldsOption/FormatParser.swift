@@ -547,8 +547,8 @@ private struct FormatParser {
 			throw .missingBlockTerminator
 		}
 		input.removeFirst()
-		guard branches.count >= 2 else {
-			throw .singleBranch
+		guard !branches.isEmpty else {
+			throw .missingBranch
 		}
 		return branches
 	}

@@ -1065,7 +1065,7 @@ binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block
 unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 
-branches = <branch> <branch>+
+branches = <branch>+
 branch   = <nullary-branch> | <non-nullary-branch>
 
 nullary-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
@@ -1089,6 +1089,11 @@ branch-negation = "-"!
 - If no branch returns a value:
   - For `%m`: the placeholder fails & aborts formatting.
   - For `%M`: returns its `<failure-block>`'s value.
+
+A match has at least 1 branch, because without any, its `%m` or `%M` could not
+affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
+branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
+means).
 
 Every branch is conditional, because an unconditional last branch would mean
 what a `%M` whose `<failure-block>` holds that branch as a placeholder means

@@ -112,6 +112,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidTransformArguments(name: String)
 	case invalidTriviaRegex(String)
 	case missingBlockTerminator
+	case missingBranch
 	case missingFieldName
 	case missingFieldOccurrenceIndex
 	case missingFieldOrderOptionSet
@@ -125,7 +126,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case nonexistentFieldSpec(forName: String)
 	case numberCoercionArgumentsNotSupported(String)
 	case reservedFieldNameCharacter(Character)
-	case singleBranch
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
 	case unexpectedCharacter(Character)
@@ -180,6 +180,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid trivia regex: \(pattern)"
 		case .missingBlockTerminator:
 			"Expected <block-terminator> '+'"
+		case .missingBranch:
+			"Expected <branch>"
 		case .missingFieldName:
 			"Expected field name"
 		case .missingFieldOccurrenceIndex:
@@ -210,8 +212,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"<number-coercion-arguments> are unsupported for: \(name)"
 		case let .reservedFieldNameCharacter(character):
 			"A field name must escape its reserved character: \(character)"
-		case .singleBranch:
-			"<branches> requires at least 2 branches"
 		case .templateLacksPlaceholder:
 			"<format-template> requires at least 1 <placeholder>"
 		case .tiebreakerUnsupportedForPositionalOrder:
