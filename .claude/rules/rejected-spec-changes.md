@@ -176,6 +176,10 @@ an error or aborts formatting for a value that it cannot render (e.g.,
 affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without omitting its item.
 
+In specs, never let an item error stop its command, nor output nothing at all
+(e.g., outputting only the 1st of 3 items, or none, if only the 2nd has an item
+error), because 1 item's value should not hide any other item.
+
 In specs, never make a value need a `<coercion>` to match a predicate, or to
 conform to an input type, whose type is unsupported by its input format (e.g.,
 `%d`, `%c`, or `.dateOnly` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
