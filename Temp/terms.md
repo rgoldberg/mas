@@ -795,7 +795,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - primary group: the least significant digit group, of `<digit-group-size>`
        digits
      - secondary group: each other digit group, of
-       `<secondary-digit-group-size>` digits
+       `<secondary-digit-group-size>` digits, or `<digit-group-size>` digits if
+       that is `0`
      - base conventions: the conventions from which number format arguments
        default: those that `<locale-identifier>` identifies, else those of the
        system locale, the canonical conventions, or `<locale>`'s, depending on
