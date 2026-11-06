@@ -115,7 +115,7 @@ version-format-name       = <format-name(<conditional-block(<nullary-version>, <
 number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
 date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
 time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
-unconditional-format-name = <format-name(<unconditional-block(<unconditional-pipeline>)>)>
+unconditional-format-name = <format-name(<unconditional-block>)>
 
 name-prefix = ":"!
 ```
@@ -132,9 +132,8 @@ A `<named-format-reference>` evaluates its named format against the value to
 which a `<transform-pipeline>` in its position would be applied (e.g., in
 `%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
 
-Because every `<format-name>`'s `BLOCK` includes
-`<unconditional-block(<unconditional-pipeline>)>`'s syntax, a named
-unconditional format conforms to every one.
+Because every `<format-name>`'s `BLOCK` includes `<unconditional-block>`'s
+syntax, a named unconditional format conforms to every one.
 
 An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 `<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
@@ -582,7 +581,7 @@ block-terminator = -"+"
 block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 
 success-block = <conditional-input-block> (* non-structural *)
-failure-block = <unconditional-block(<unconditional-pipeline>)> (* direct default: {empty string} *)
+failure-block = <unconditional-block> (* direct default: {empty string} *)
 
 success-pipeline =
   <string-pipeline>
@@ -612,7 +611,7 @@ conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
 conditional-input-block(NULLARY, NON_NULLARY, PIPELINE, INPUT_PIPELINE) =
   PIPELINE | <block-template(<block-placeholder(NULLARY, NON_NULLARY, PIPELINE)> | <unconditional-placeholder(INPUT_PIPELINE, <string-pipeline>)>)>
   (* direct default: {empty string} *)
-unconditional-block(PIPELINE) = PIPELINE | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
+unconditional-block = <unconditional-pipeline> | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
 
 block-template(PLACEHOLDER) = <block-leading-text> | [ <block-leading-text> ] ( PLACEHOLDER [ <template-text> ] )+
 
