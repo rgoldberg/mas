@@ -142,6 +142,12 @@ input), because such syntax can otherwise never succeed without a `<coercion>`,
 which outweighs the overruled reason for rejecting its allowance: a `<coercion>`
 would then coerce nothing, so it would only choose between an error & an abort.
 
+In specs, never let an input format's support of 1 date form stop an implicit
+coercion to the other (e.g., `%d` for `0` or `"2020-03-18T17:39:23Z"`, for an
+input format that supports date-only, but not datetime), because such a value
+could otherwise match `%d` only with a `<coercion>`, although its input format
+does not support its type.
+
 In specs, never implicitly coerce a value to a type that its input format
 supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
 the value then has its own type, so an implicit coercion would misread it.
