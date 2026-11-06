@@ -130,7 +130,8 @@ the functionality that needs them from specs & code:
       `<named-pipeline>`, `<named-unconditional-pipeline>` &
       `<named-input-pipeline>` are only named format references, so removing
       them leaves `%U`, `%E` & a `%I` in their `<success-block>`s without a
-      pipeline, and `<trimmable-pipeline>` is only its `trimWhitespace` run.
+      pipeline, `<trimmable-pipeline>` is only its `trimWhitespace` run, and
+      `<string-transform-pipeline>` is unreferenced.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).
