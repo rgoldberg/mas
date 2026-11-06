@@ -1327,7 +1327,7 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 | `<template-text>` starting a `<format-block>`                                                   | `:` `.`     | `%` `/` `,`                 | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a placeholder in a `<format-block>`                         |             | `%` `/` `,`                 | consumed           | consumed iff before `%` |
 | `<preset-name>` in a `<success-block>` or a `<failure-block>`                                   |             |                             | forbidden          | ignored                 |
-| `<block-leading-text>`                                                                          | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
+| `<template-text>` starting a `<success-block>` or a `<failure-block>`                           | `:` `.`     | `%` `+`                     | ignored            | consumed iff before `%` |
 | `<template-text>` immediately after a placeholder in a `<success-block>` or a `<failure-block>` |             | `%` `+`                     | consumed           | consumed iff before `%` |
 | `<decimal-separator>` in `<number-format>`                                                      |             | `:`                         | ignored            | ignored                 |
 | `<time-zone-code>` in `<date-time-zone-arguments>`                                              |             | `:`                         | ignored            | ignored                 |

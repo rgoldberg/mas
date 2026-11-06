@@ -654,9 +654,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
        `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)
-     - block leading text: the text that starts a `<block-template>`, which
-       cannot start with a bare `.` (`<block-leading-text>`;
-       [defined](../Specs/fields-format.md#success--failure))
      - string transform pipeline: the string transforms after a named format
        reference whose named format is unconditional, the 1st of which may take
        a `<coercion>` (`<string-transform-pipeline>`;

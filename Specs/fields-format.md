@@ -588,9 +588,7 @@ conditional-block(NULLARY, NON_NULLARY, PIPELINE) =
   (* direct default: {empty string} *)
 unconditional-block = <unconditional-pipeline> | <block-template(<infallible-unconditional-placeholder>)> (* direct default: {empty string} *)
 
-block-template(PLACEHOLDER) = <block-leading-text> | [ <block-leading-text> ] ( PLACEHOLDER [ <template-text> ] )+
-
-block-leading-text = {string: no bare "." at its start}^~
+block-template(PLACEHOLDER) = <template-text> | [ <template-text> ] ( PLACEHOLDER [ <template-text> ] )+
 
 block-placeholder(NULLARY, NON_NULLARY, PIPELINE) = <placeholder-prefix> ( NULLARY | NON_NULLARY PIPELINE <block-terminator> )
 
@@ -599,10 +597,6 @@ abort-on-failure = "+"!
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
-
-`<block-leading-text>` cannot start with a bare `.`, so a transform that a
-block's pipeline cannot take is an error, rather than text (e.g.,
-`%U..uppercase+-+` is an error, while `%U\.x+-+` outputs `.x`).
 
 A placeholder or branch is a **matcher** (`<matcher>`) immediately followed by
 its success clause, blocks, or branches, which define the matcher's **form**:

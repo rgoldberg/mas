@@ -62,7 +62,7 @@ enum TemplateElement: Equatable { // swiftlint:disable:this one_declaration_per_
 	case blockPlaceholder(pipeline: Pipeline)
 	/// A `<placeholder>`.
 	case placeholder(Placeholder)
-	/// A `<template-text>`'s or a `<block-leading-text>`'s value.
+	/// A `<template-text>`'s value.
 	case text(String)
 }
 
