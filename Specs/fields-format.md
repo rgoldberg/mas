@@ -953,9 +953,9 @@ A default coercion to a date parses what a `<coercion>` whose only
 datetime, because a number has no other meaning as a date (e.g., `%.D` matches
 `0` & `"2020-03-18"`, but not `"0"`).
 
-A decimal number coerces to a date only per `<unix-time>`, because a string that
-holds a number is rarely a time (e.g., `%m.ds+` would otherwise render the
-string `5.6` as a date).
+A string that holds a decimal number coerces to a date only per `<unix-time>`,
+because such a string is rarely a time (e.g., `%m.ds+` would otherwise render
+the string `5.6` as a date).
 
 `%.d`, and `%d` for an input format that does not support datetime, thus match
 every chronologic number, so a branch that means to match a number must precede
