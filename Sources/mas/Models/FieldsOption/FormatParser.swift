@@ -672,6 +672,9 @@ private enum TrailingWhitespaceTreatment { // swiftlint:disable:this one_declara
 /// A block's kind, which selects its valid pipelines & `<block-placeholder>`s.
 private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_per_file
 	case boolean
+	/// A `%I…+` pipeline's kind in `%B`'s, `%T`'s, or `%F`'s `<success-block>`,
+	/// which no block has.
+	case booleanInput
 	case date
 	case dateOnly
 	/// A `<fallible-unconditional-placeholder>`'s `%I…+` pipeline's kind, which
@@ -702,7 +705,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .boolean, .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
 			true
-		case .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
+		case .booleanInput, .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
 			false
 		}
 	}
@@ -710,7 +713,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a non-nullary `<block-placeholder>`'s pipeline block.
 	var blockPlaceholderPipelineKind: Self {
 		switch self {
-		case .boolean, .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
+		case .boolean, .booleanInput, .input, .namedInput, .unconditional, .unconditionalString, .whitespaceInput:
 			.unconditional
 		case .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
 			self
@@ -720,9 +723,11 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a `%I…+` pipeline in this kind's template.
 	var inputPipelineKind: Self {
 		switch self {
-		case .boolean, .date, .dateOnly, .number, .string, .timeOnly, .version:
+		case .boolean:
+			.booleanInput
+		case .booleanInput, .input, .namedInput, .unconditionalString, .whitespaceInput:
 			.input
-		case .input, .namedInput, .unconditionalString, .whitespaceInput:
+		case .date, .dateOnly, .number, .string, .timeOnly, .version:
 			.input
 		case .nullOrEmpty:
 			.namedInput
@@ -738,6 +743,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .boolean, .unconditional:
 			"<unconditional-pipeline>"
+		case .booleanInput:
+			"<boolean-input-pipeline>"
 		case .date:
 			"<date-pipeline>"
 		case .dateOnly:
@@ -795,6 +802,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .boolean, .unconditional:
 			(isNamed || calls.first?.coercion != nil) && calls.isStringTransformRun
+		case .booleanInput:
+			isNamed ? calls.followsTypes(from: nil) : calls.first?.coercion != nil && calls.isStringTransformRun
 		case .date:
 			calls.followsTypes(from: isNamed ? nil : .date)
 		case .dateOnly:

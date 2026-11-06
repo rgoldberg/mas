@@ -675,11 +675,15 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        [defined](../Specs/fields-format.md#success--failure))
      - conditional input block: a conditional block whose `%I` takes a given
        pipeline (`<conditional-input-block>`), which lets `%U`, `%E` & `%W`
-       forbid a `%I` transform that cannot modify their values
+       forbid a `%I` transform that cannot modify their values, and `%B`, `%T` &
+       `%F` a `%I` `<coercion>` that can only abort
        ([defined](../Specs/fields-format.md#success--failure))
      - named input pipeline / whitespace input pipeline: the pipeline of a `%I`
        in the `<success-block>` of `%U` or `%E` / of `%W`
        (`<named-input-pipeline>` / `<whitespace-input-pipeline>`;
+       [defined](../Specs/fields-format.md#pipelines))
+     - boolean input pipeline: the pipeline of a `%I` in the `<success-block>`
+       of `%B`, `%T`, or `%F` (`<boolean-input-pipeline>`;
        [defined](../Specs/fields-format.md#pipelines))
      - named pipeline: a named format reference & any transforms after it
        (`<named-pipeline>`; [defined](../Specs/fields-format.md#pipelines))

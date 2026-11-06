@@ -125,9 +125,17 @@ In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 `%S.uppercase+%I..trimWhitespace..round++`), because a `<failure-block>` must
 never abort, nor forbid one in a `<format-template>` or a `<success-block>`
 (e.g., `%L..round+` or `%S%I..round++-+`), other than a `%I`'s in the
-`<success-block>` of `%U`, `%E`, or `%W`, whose matcher matched its format input
-(e.g., `%U%I..round++-+`), because no matcher can otherwise coerce a label, a
-name, or a format input that it cannot match.
+`<success-block>` of `%U`, `%E`, `%W`, `%B`, `%T`, or `%F`, whose matcher
+matched its format input (e.g., `%U%I..round++-+` or `%T%I..round++-+`), because
+no matcher can otherwise coerce a label, a name, or a format input that it
+cannot match.
+
+In specs, never let a `%I` in the `<success-block>` of `%B`, `%T`, or `%F` take
+a `<coercion>` to anything but a string, unless it follows a
+`<named-format-reference>` (e.g., `%T%I..round++-+`), because a boolean's text
+has no digit, so it can only abort, as `%T..round+-+` would, which outweighs the
+overruled reason for rejecting its forbidding: no matcher can otherwise coerce a
+format input that it cannot match.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,

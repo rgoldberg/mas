@@ -89,6 +89,7 @@ unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-t
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
 named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <string-transform-pipeline>)>
 named-input-pipeline          = <named-pipeline(<preset-name>, <value-transform-pipeline>)>
+boolean-input-pipeline        = <pipeline(<preset-name>, <value-transform-pipeline>, <unconditional-transform-pipeline>)>
 whitespace-pipeline           = <trimmable-pipeline(<named-unconditional-pipeline>)>
 whitespace-input-pipeline     = <trimmable-pipeline(<named-input-pipeline>)>
 ```
@@ -601,6 +602,7 @@ success-pipeline =
   | <unconditional-string-pipeline>
   | <named-unconditional-pipeline>
   | <named-input-pipeline>
+  | <boolean-input-pipeline>
   | <whitespace-pipeline>
   | <whitespace-input-pipeline>
   | <named-format-pipeline(<preset-name>)>
@@ -785,9 +787,9 @@ non-nullary-standard-success =
   [ <coercion> ]
     (
       <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
-      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
-      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
-      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
+      | <non-nullary-input-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>, <boolean-input-pipeline>)>
+      | <non-nullary-input-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>, <boolean-input-pipeline>)>
+      | <non-nullary-input-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>, <boolean-input-pipeline>)>
     )
   | <non-nullary-input-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>, <named-input-pipeline>)>
   | <non-nullary-input-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>, <named-input-pipeline>)>
@@ -828,6 +830,12 @@ none of `%U..uppercase+-+`, `%W..uppercase+-+` & `%U%I..uppercase++-+`).
 `trimWhitespace` takes no `<coercion>` here, because `%W`'s value is a string or
 a `null`, which remains unmodified, so it has nothing to coerce (e.g.,
 `%W..trimWhitespace+-+` is an error, as `%S..uppercase++` is).
+
+`%B`'s, `%T`'s & `%F`'s format input is a boolean or the text of one, which has
+no digit, so a `<coercion>` of it to anything but a string can only abort, so a
+`%I` in their `<success-block>` can take one only after a
+`<named-format-reference>`, whose named format may output other text (e.g.,
+`%T%I..uppercase++-+` & `%T%I:x..round++-+`, but not `%T%I..round++-+`).
 
 ###### Number Formatting
 
