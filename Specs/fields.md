@@ -785,11 +785,11 @@ though attaching it sets what they set (e.g., if preset `mb` is `%bytes=Size`,
 `.size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
 
 A `<preset-name>` is looked up from the starting context of its reference, as
-configs.md [specifies](configs.md#referencing-named-configs) for every config
-kind; the `default` preset that a default field spec or a built-in fields
-config's field spec has attached is looked up from the starting context of the
-reference that selects the base fields config (e.g., `mas.list`'s `default`
-preset for `mas list --fields @all`).
+[specified for every config kind](configs.md#referencing-named-configs); the
+`default` preset that a default field spec or a built-in fields config's field
+spec has attached is looked up from the starting context of the reference that
+selects the base fields config (e.g., `mas.list`'s `default` preset for
+`mas list --fields @all`).
 
 The preset kind's [built-in
 standard](configs.md#immutable-built-in-named-configs) sets nothing, so, absent
@@ -826,8 +826,7 @@ label = {string} (* direct default: {empty string}; inherited *)
 
 #### Formatting
 
-[This section will be replaced by the content of
-`fields-format.md`](fields-format.md).
+[`<format-modifier>` is specified separately](fields-format.md).
 
 #### Sorting
 
