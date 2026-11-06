@@ -42,24 +42,29 @@ spacing, then its value.
 
 Each [line terminator](configs.md#line-terminators) & each other control
 character in a key is rendered as it is in a [table cell](table.md#table-config)
-(e.g., a tab as `␉`), so each key is 1 line & aligns its leader. Each line
-terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF), so the
-value continues on a new line, each such non-empty line indented to the value's
-start by its row's unstyled text before the value, after that text's last line
-terminator, if any, with each tab retained & each other character replaced by as
-many spaces as its [width](configs.md#width), so each tab reaches the same tab
-stop as in the row, because a tab's rendered width depends on the terminal's tab
-stops, which an app cannot determine (e.g., with `fL=:R:`, the key `Notes` & a
-value of `a` & `b` separated by an LF render as `Notes=a`, then 6 spaces & `b`
-on the next line, while with `$'fL\t:R:'`, they render as `Notes`, a tab & `a`,
-then 5 spaces, a tab & `b` on the next line; with `$'fL\n:R  :'`, they render as
-`Notes`, then 2 spaces & `a` on the next line, then 2 spaces & `b` on the line
-after). Each other control character in a value, except a tab, is rendered as it
-is in a key (e.g., an ESC as `␛`), because each would otherwise modify the
-terminal's state (e.g., an ESC, which starts an escape sequence) or move the
-cursor back over the row (e.g., a backspace), while a tab, which only advances
-the cursor to its next tab stop, follows everything that a value's line must
-align with, so it misaligns nothing.
+(e.g., a tab as `␉`), so each key is 1 line & aligns its leader.
+
+Each line terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF),
+so the value continues on a new line. Each such non-empty line is indented to
+the value's start by its row's unstyled text before the value, after that text's
+last line terminator, if any, with each tab retained & each other character
+replaced by as many spaces as its [width](configs.md#width), so each tab reaches
+the same tab stop as in the row, because a tab's rendered width depends on the
+terminal's tab stops, which an app cannot determine. E.g., the key `Notes` & a
+value of `a` & `b` separated by an LF render, with:
+
+- `fL=:R:`, as `Notes=a`, then 6 spaces & `b` on the next line.
+- `$'fL\t:R:'`, as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next
+  line.
+- `$'fL\n:R  :'`, as `Notes`, then 2 spaces & `a` on the next line, then 2
+  spaces & `b` on the line after.
+
+Each other control character in a value, except a tab, is rendered as it is in a
+key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
+state (e.g., an ESC, which starts an escape sequence) or move the cursor back
+over the row (e.g., a backspace), while a tab, which only advances the cursor to
+its next tab stop, follows everything that a value's line must align with, so it
+misaligns nothing.
 
 ## Key
 
