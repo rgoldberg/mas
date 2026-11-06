@@ -174,7 +174,7 @@ In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,
 `.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
 affects it, while an argument would add syntax for a value that almost never
-occurs, and an aborted value shows its effect without failing other items.
+occurs, and an aborted value shows its effect without omitting its item.
 
 In specs, never make a value need a `<coercion>` to match a predicate, or to
 conform to an input type, whose type is unsupported by its input format (e.g.,

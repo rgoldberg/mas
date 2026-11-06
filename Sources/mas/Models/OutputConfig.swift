@@ -62,30 +62,49 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 
 	private static func output(_ objects: [JSON.Object], resolved: any FieldsConfig, outputFormat: OutputFormat)
 	throws(FormattingError) {
-		// Each sort key's values, per item
-		let sortValues = try resolved.itemSort.keys.map { key throws(FormattingError) in
-			try objects.map { object throws(FormattingError) in
-				try key.fieldSpec.sortValues(
-					input: object[lastNodeKey: .init(rawValue: key.fieldSpec.name)],
-					source: key.sortSpec.optionSet.source,
+		// Each item without an item error in a sort key's value, with those values
+		let sortableItems = objects.compactMap { object in
+			reportingItemError { () throws(FormattingError) in
+				(
+					object: object,
+					sortValues: try resolved.itemSort.keys.map { key throws(FormattingError) in
+						try key.fieldSpec.sortValues(
+							input: object[lastNodeKey: .init(rawValue: key.fieldSpec.name)],
+							source: key.sortSpec.optionSet.source,
+						)
+					},
 				)
 			}
 		}
 		let sortedObjects = resolved.itemSort
-			.sortedIndices(count: objects.count) { index, keyIndex in sortValues[keyIndex][index] }
-			.map { objects[$0] }
-		let displayFieldSpecs = resolved.fieldOrder
-			.applied(to: resolved.fieldSpecs, unlisted: resolved.unlistedFieldSpecs(in: objects))
-			.filter { !$0.isHidden }
+			.sortedIndices(count: sortableItems.count) { index, keyIndex in sortableItems[index].sortValues[keyIndex] }
+			.map { sortableItems[$0].object }
+		// An item with an item error is as if not in the input, so the field specs
+		// are resolved again, for only the items that remain
+		let sortedFieldSpecs = resolved.displayFieldSpecs(for: sortedObjects)
+		let outputObjects = sortedObjects.filter { object in
+			reportingItemError { () throws(FormattingError) in
+				try resolved.renderMembers(of: object, fieldSpecs: sortedFieldSpecs, outputFormat: outputFormat)
+			} != nil
+		}
+		let displayFieldSpecs = resolved.displayFieldSpecs(for: outputObjects)
 		switch outputFormat {
 		case let .json(jsonConfig):
-			MAS.printer.info(
-				try sortedObjects.json(fieldSpecs: displayFieldSpecs, fieldOrder: resolved.fieldOrder, jsonConfig: jsonConfig),
-			)
+			// json.md: an item array renders `[]` for 0 items; an item stream renders
+			// nothing
+			if !outputObjects.isEmpty || jsonConfig.topLevelStructure == .itemArray {
+				MAS.printer.info(
+					try outputObjects.json(
+						fieldSpecs: displayFieldSpecs,
+						fieldOrder: resolved.fieldOrder,
+						jsonConfig: jsonConfig,
+					),
+				)
+			}
 		case let .keyValue(keyValueConfig):
 			// Nothing is output iff no item has a row
 			if
-				let keyValue = try sortedObjects.keyValue(
+				let keyValue = try outputObjects.keyValue(
 					fieldSpecs: displayFieldSpecs,
 					fieldOrder: resolved.fieldOrder,
 					keyValueConfig: keyValueConfig,
@@ -95,10 +114,46 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 			}
 		case let .table(tableConfig):
 			// Nothing is output iff no field spec is visible
-			if let table = try sortedObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig) {
+			if let table = try outputObjects.table(fieldSpecs: displayFieldSpecs, tableConfig: tableConfig) {
 				MAS.printer.info(table)
 			}
 		}
+	}
+}
+
+private extension FieldsConfig { // swiftlint:disable:this file_types_order
+	/// The visible field specs, in field order, given `objects`' unlisted fields.
+	func displayFieldSpecs(for objects: [JSON.Object]) -> [FieldSpec] {
+		fieldOrder.applied(to: fieldSpecs, unlisted: unlistedFieldSpecs(in: objects)).filter { !$0.isHidden }
+	}
+
+	/// Renders each of `object`'s members that `outputFormat` outputs, which
+	/// throws `object`'s 1st item error, if any: the last member of each field
+	/// for table output (fields.md "Members"), else every member.
+	func renderMembers(of object: JSON.Object, fieldSpecs: [FieldSpec], outputFormat: OutputFormat)
+	throws(FormattingError) {
+		let members =
+			if case .table = outputFormat {
+				fieldSpecs.map { fieldSpec in
+					(fieldSpec: fieldSpec, value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])
+				}
+			} else {
+				fieldOrder.itemMembers(fieldSpecs, for: object)
+			}
+		for member in members {
+			_ = try member.fieldSpec.rendered(value: member.value)
+		}
+	}
+}
+
+/// `body`'s value, else `nil` after reporting its item error (configs.md
+/// "Output Formats").
+private func reportingItemError<Value>(_ body: () throws(FormattingError) -> Value) -> Value? {
+	do {
+		return try body()
+	} catch {
+		MAS.printer.error(error: error)
+		return nil
 	}
 }
 

@@ -790,6 +790,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 117. - abort: verb; of formatting, make the formatted value absent, ignoring the
        rest of `<format-block>`
        ([defined](../Specs/fields-format.md#success--failure))
+     - item error: an error that depends on an item's field value, which omits
+       that item, without stopping its command
+       ([defined](../Specs/configs.md#output-formats))
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, replacing the input
        ([defined](../Specs/fields-format.md#coercion))
