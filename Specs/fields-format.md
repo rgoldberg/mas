@@ -766,12 +766,14 @@ non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-b
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                               output type: any; value: {matched value}; mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                               output type: any; value: {matched value}; mnemonic: 2nd letter of null *)
-nullary-empty          = "e" (* is null or an empty string;                            output type: any; value: {matched value} *)
-non-nullary-empty      = "E" (* is null or an empty string;                            output type: any; value: {matched value} *)
-nullary-whitespace     = "w" (* is null, an empty string, or a whitespace-only string; output type: any; value: {matched value} *)
-non-nullary-whitespace = "W" (* is null, an empty string, or a whitespace-only string; output type: any; value: {matched value} *)
+nullary-null           = "u" (* is null;                                               output type: string or null; value: {matched value};
+  mnemonic: 2nd letter of null *)
+non-nullary-null       = "U" (* is null;                                               output type: string or null; value: {matched value};
+  mnemonic: 2nd letter of null *)
+nullary-empty          = "e" (* is null or an empty string;                            output type: string or null; value: {matched value} *)
+non-nullary-empty      = "E" (* is null or an empty string;                            output type: string or null; value: {matched value} *)
+nullary-whitespace     = "w" (* is null, an empty string, or a whitespace-only string; output type: string or null; value: {matched value} *)
+non-nullary-whitespace = "W" (* is null, an empty string, or a whitespace-only string; output type: string or null; value: {matched value} *)
 nullary-boolean        = "b" (* is boolean;                                            output type: boolean; value: {matched value} *)
 non-nullary-boolean    = "B" (* is boolean;                                            output type: boolean; value: {matched value} *)
 nullary-true           = "t" (* is true;                                               output type: boolean; value: {matched value} *)
