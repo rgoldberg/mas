@@ -617,7 +617,7 @@ struct CivilDate: Hashable { // swiftlint:disable:this one_declaration_per_file
 	}
 
 	/// This date's instant at its start in the system time zone, else `nil` iff
-	/// that instant is out of range (i.e., this date is not chronologic).
+	/// that instant is out of range (i.e., this date is not representable).
 	var startInstant: Int? {
 		TimeOfDay(hour: 0, minute: 0, second: 0, millisecond: 0, timeZone: nil).instant(on: self)
 	}

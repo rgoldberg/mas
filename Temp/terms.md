@@ -583,13 +583,17 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/configs.md#implied-alternatives))
 92. - Unix time: the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
       seconds ([defined](../Specs/fields-format.md#chronologic-formatting))
+    - representable: of a Unix time whose whole milliseconds, rounded down, fit
+      in a signed 64-bit integer, or of an ISO-8601 date-only or datetime whose
+      instant is ([defined](../Specs/fields-format.md#chronologic-formatting))
+    - chronologic: of a date or a time-only
     - decimal number: text in `number`'s lexical form (e.g., a Unix time's text)
       ([defined](../Specs/fields-format.md#chronologic-formatting))
     - date coercion: a `<coercion>` to a date, which parses a date that any of
       its `<date-format>`s matches or, absent any, a date that `<iso>` matches &
       a number as a Unix time
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
-      timestamp / numeric timestamp
+      timestamp / numeric timestamp / chronologic (for representable)
 93. - input type: the type of a nonterminal's input
       ([defined](../Specs/ebnf.md#type-comments))
     - output type: the type of a nonterminal's value

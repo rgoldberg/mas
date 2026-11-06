@@ -1138,7 +1138,7 @@ private extension MASTests { // swiftlint:disable file_length
 	}
 
 	@Test
-	func `whether a reference date is chronologic depends on the system time zone`() {
+	func `whether a reference date is representable depends on the system time zone`() {
 		let format = ".timeOnlyTimeZone:UTC,+292278994-08-17:"
 		#expect(throws: Never.self) {
 			try inSystemTimeZone("UTC") { try parsedFieldSpec(format) }

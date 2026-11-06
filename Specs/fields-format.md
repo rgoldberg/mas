@@ -460,7 +460,7 @@ fixed UTC offset, but a Foundation time zone abbreviation may identify a time
 zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 
 A time-only value whose instant on its `<reference-date>`, as a Unix time, is
-not chronologic [aborts](#success--failure) formatting, with or without
+not representable [aborts](#success--failure) formatting, with or without
 `<coercion>`, because its value, rather than its syntax, decides this (e.g., in
 the UTC system time zone, `.timeOnlyTimeZone:UTC,+292278994-08-17:` aborts for
 `"17:39:23Z"`, but renders `"01:00:00Z"` as `01:00:00Z`).
@@ -480,7 +480,7 @@ time-zone-code =
 
 system-time-zone = 'system'
 
-reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone}; error: it is not chronologic *)
+reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone}; error: it is not representable *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -958,10 +958,10 @@ because such a string is rarely a time (e.g., `%m.ds+` would otherwise render
 the string `5.6` as a date).
 
 `%.d`, and `%d` for an input format that does not support datetime, thus match
-every chronologic number, so a branch that means to match a number must precede
-theirs or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
-`%m.:iso:d.n+`, but not `%m.d.n+`, which would render the price `5.6` as a
-date).
+every number that is a representable Unix time, so a branch that means to match
+a number must precede theirs or follow a `<coercion>` that omits `<unix-time>`
+(e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would render the
+price `5.6` as a date).
 
 A `<coercion>` whose `<date-format>`s cannot match its input merely aborts
 (e.g., `.round..:iso:dateOnly`, because no number matches `<iso>`, or
@@ -1008,12 +1008,12 @@ A time-only value has no date, so `%C`'s block cannot apply `dateOnly` or
 Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
 year `0000` is 1 BCE, and `1500-02-29` does not exist).
 
-A Unix time is chronologic iff it is at least `-9223372036854775.808` & less
-than `9223372036854775.808` (i.e., its whole milliseconds, rounded down, fit in
-a signed 64-bit integer); an ISO-8601 date-only or datetime is chronologic iff
-its instant, as a Unix time, is, a date-only's instant being its start in the
-system time zone (e.g., `+292278994-08-17` is chronologic in UTC, but not at
-UTC-8).
+A Unix time is **representable** iff it is at least `-9223372036854775.808` &
+less than `9223372036854775.808` (i.e., its whole milliseconds, rounded down,
+fit in a signed 64-bit integer); an ISO-8601 date-only or datetime is
+representable iff its instant, as a Unix time, is, a date-only's instant being
+its start in the system time zone (e.g., `+292278994-08-17` is representable in
+UTC, but not at UTC-8).
 
 A datetime's or time-only's fractional seconds are truncated or padded with `0`s
 to exactly 3 digits, which are omitted iff all are `0` (e.g., in the UTC output

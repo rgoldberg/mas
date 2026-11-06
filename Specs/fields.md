@@ -927,7 +927,7 @@ prefix & suffix, each compared as a string (e.g., the trivia prefix `$` in
 `$10`):
 
 - A chronologic segment, iff `<chronologic-formats>` includes `<unix-time>` &
-  the number is a [chronologic Unix
+  the number is a [representable Unix
   time](fields-format.md#chronologic-formatting).
 - Otherwise, a number segment, unless `<number-segments>` is `<lexicographic>`
   or `<versions>`, either of which compares the number as a string, its trivia
@@ -1141,12 +1141,12 @@ The chronologic segments are each longest text that a `<chronologic-format>`
 matches, as [`%.c`, `%.d` & `%.:unix-time:d`
 detect](fields-format.md#chronologic-formatting) it:
 
-- `<iso-date>`: a chronologic ISO-8601 date-only.
-- `<iso-datetime>`: a chronologic ISO-8601 datetime.
+- `<iso-date>`: a representable ISO-8601 date-only.
+- `<iso-datetime>`: a representable ISO-8601 datetime.
 - `<iso-time>`: an ISO-8601 time-only.
-- `<iso>`: a chronologic ISO-8601 date-only or datetime, or an ISO-8601
+- `<iso>`: a representable ISO-8601 date-only or datetime, or an ISO-8601
   time-only.
-- `<unix-time>`: a chronologic Unix time written as a decimal number.
+- `<unix-time>`: a representable Unix time written as a decimal number.
 
 Text that a `<chronologic-format>` matches is not a chronologic segment iff a
 character immediately precedes or follows it that is:

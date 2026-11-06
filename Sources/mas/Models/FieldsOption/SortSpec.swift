@@ -555,7 +555,7 @@ extension SortOptionSet {
 	}
 
 	/// `value`'s single segment iff it is a number: a chronologic segment iff
-	/// `hasUnixTimeSegments` & it is a chronologic Unix time, else a number
+	/// `hasUnixTimeSegments` & it is a representable Unix time, else a number
 	/// segment unless `numberSegments` is `<lexicographic>` or `<versions>`
 	/// (either of which compares its text); else `nil`.
 	private func numberValueSegment(of value: JSON.Node?) -> Segment? {

@@ -25,12 +25,12 @@ private extension MASTests {
 			("9223372036854775.808", false),
 		],
 	)
-	func `a Unix time is chronologic iff its whole milliseconds fit in 64 bits`(
+	func `a Unix time is representable iff its whole milliseconds fit in 64 bits`(
 		unixTime: String,
-		isChronologic: Bool,
+		isRepresentable: Bool,
 	) {
 		#expect((chronologic(from: .string(unixTime), formats: .init(iso8601Forms: [], hasUnixTime: true)) != nil) ==
-			isChronologic)
+			isRepresentable)
 	}
 
 	@Test(
