@@ -337,7 +337,8 @@ number-format-arguments =
   <argument-separator>? [ <digit-group-size> ]
   <argument-separator>? [ <secondary-digit-group-size> ]
   <argument-separator>? [ <decimal-separator> ]
-  (* error: its digit group separator equals its decimal separator, each after defaulting to the base conventions *)
+  (* error: its digit group separator equals its decimal separator, or either contains an ASCII digit, "e", or "E",
+    each after defaulting to the base conventions *)
 
 digit-group-separator      = {string}                (* default: {base conventions' digit group separator} *)
 digit-group-size           = {integer: non-negative} (* default: {base conventions' digit group size} *)
@@ -369,6 +370,11 @@ it (e.g., `.scale:0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.
+
+A separator that contains an ASCII digit, `e`, or `E` would give a number
+multiple parses (e.g., for `%.:,5,3:n`, `"15234"` would be either `15234` or
+`1234`, and, for `%.:,e,3:n`, `"1e234"` would be either `1234` or `1` with the
+exponent `234`).
 
 The **base conventions** are those that
 [`<locale-identifier>`](fields.md#sort-locale) identifies, per its default if it

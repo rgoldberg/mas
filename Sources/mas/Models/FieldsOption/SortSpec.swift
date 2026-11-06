@@ -281,8 +281,7 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 		}
 		if
 			case let .groupedNumeric(arguments) = optionSet.numberSegments,
-			case let conventions = arguments.conventions(localeConventions: optionSet.locale.numberConventions),
-			conventions.digitGroupSeparator == conventions.decimalSeparator
+			arguments.conventions(localeConventions: optionSet.locale.numberConventions).hasAmbiguousSeparators
 		{
 			throw .invalidSortOptionArguments(groupedNumericOption)
 		}

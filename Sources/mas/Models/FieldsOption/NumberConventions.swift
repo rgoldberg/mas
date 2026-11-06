@@ -31,6 +31,13 @@ struct NumberConventions: Hashable {
 	let secondaryDigitGroupSize: Int
 	let decimalSeparator: String
 
+	/// Whether a number's text can have multiple parses, because the separators
+	/// are equal, or either contains an ASCII digit or an exponent indicator.
+	var hasAmbiguousSeparators: Bool {
+		digitGroupSeparator == decimalSeparator
+			|| (digitGroupSeparator + decimalSeparator).contains { $0.isASCIIDigit || $0 == "e" || $0 == "E" }
+	}
+
 	/// The size of each secondary digit group.
 	private var effectiveSecondaryDigitGroupSize: Int {
 		secondaryDigitGroupSize > 0 ? secondaryDigitGroupSize : digitGroupSize
@@ -274,8 +281,8 @@ func integer(_ argument: String) -> Int? {
 /// those that `<locale-identifier>` identifies, or, absent it,
 /// `defaultBaseConventions`.
 ///
-/// - Throws: `invalidArgumentsError` for an invalid argument, or iff the digit
-///   group separator equals the decimal separator.
+/// - Throws: `invalidArgumentsError` for an invalid argument, or iff the
+///   separators are ambiguous.
 func numberConventions(
 	from arguments: ArraySlice<String?>,
 	defaultBaseConventions: NumberConventions,
@@ -298,7 +305,7 @@ func numberConventions(
 		secondaryDigitGroupSize: try size(at: 3, default: baseConventions.secondaryDigitGroupSize),
 		decimalSeparator: arguments[4] ?? baseConventions.decimalSeparator,
 	)
-	guard conventions.digitGroupSeparator != conventions.decimalSeparator else {
+	guard !conventions.hasAmbiguousSeparators else {
 		throw invalidArgumentsError
 	}
 	return conventions
