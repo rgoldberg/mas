@@ -449,8 +449,8 @@ until a `<coercion>` renders it (e.g., `.dateOnly.timeZone:UTC:` means what
 Absent `timeZone` & `timeOnlyTimeZone`, the output time zone is the system time
 zone.
 
-A date-only value's date is independent of time zones, so `timeZone` does not
-affect it.
+A value parsed from a date-only has a date that is independent of time zones, so
+`timeZone` does not affect it.
 
 A time-only value is rendered in the output time zone as if on the last
 `timeOnlyTimeZone`'s `<reference-date>`, because a time zone's UTC offset can
