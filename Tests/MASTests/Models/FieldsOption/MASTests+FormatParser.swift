@@ -524,6 +524,7 @@ private extension MASTests { // swiftlint:disable file_length
 	@Test(
 		arguments: [
 			("..scale:3:", JSON.Node.string("1500"), String?.some("1.5")),
+			("..scale:3:", .string("500"), "0.5"),
 			("..scale:3,:", .string("1234"), "1.234"),
 			("..scale:3,,:", .string("-1234"), "-1.234"),
 			("..scale:-3:", .string("1.5"), "1500"),

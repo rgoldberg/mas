@@ -422,11 +422,10 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
-- `0` renders as `0`, followed, iff `<fractional-digits>` is positive, by a
-  decimal point & `<fractional-digits>` `0`s.
-- A result has no `0` before another digit of its integer part &, absent
-  `<fractional-digits>`, no trailing fractional `0`s (e.g., `.scale:0:` renders
-  `01.50` as `1.5`).
+- A result's integer part has at least 1 digit & no `0` before another digit;
+  absent `<fractional-digits>`, its fractional part has no trailing `0`s (e.g.,
+  `.scale:0:` renders `01.50` as `1.5`, while `.scale:3:` renders `500` as
+  `0.5`).
 - A leading `+` is retained, while a leading `-` is retained iff the result is
   nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
   `round`.
