@@ -645,6 +645,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 - **Abort-on-failure**: a `<success-block>`.
 - **Abort-on-success**: a `<failure-block>`.
 - **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
+- **Non-negated** (in a non-nullary branch): a `<success-block>`.
 - **Unary match** (`%m`): `<branches>`.
 - **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
 

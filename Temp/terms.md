@@ -712,6 +712,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 106. - negated: the form of a non-nullary branch with `<branch-negation>`
        (`-…`), whose `<failure-block>` is evaluated iff its matcher fails
        ([defined](../Specs/fields-format.md#success--failure))
+     - non-negated: the form of a non-nullary branch without
+       `<branch-negation>`, whose `<success-block>` is evaluated iff its matcher
+       succeeds ([defined](../Specs/fields-format.md#success--failure))
 107. - list: verb; an app lists each field that it knows before reading any
        input, while a fields config lists those & each field that a field name
        in its, or in an extended fields config's, `<fields-config>` names
