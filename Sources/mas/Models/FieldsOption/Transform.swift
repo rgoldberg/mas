@@ -51,9 +51,7 @@ enum Transform: Hashable {
 			.number
 		case .numberFormat:
 			.numberToString
-		case .dateOnly:
-			.dateOnly
-		case .timeZone:
+		case .dateOnly, .timeZone:
 			.date
 		case .timeOnlyTimeZone:
 			.timeOnly
@@ -353,7 +351,6 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 /// A `<value-transform>`'s kind.
 enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 	case date
-	case dateOnly
 	case number
 	case numberToString
 	case string
@@ -363,7 +360,7 @@ enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 	/// comment.
 	var inputType: TransformValueType {
 		switch self {
-		case .date, .dateOnly:
+		case .date:
 			.date
 		case .number, .numberToString:
 			.number
@@ -380,8 +377,6 @@ enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 		switch self {
 		case .date:
 			.date
-		case .dateOnly:
-			.dateOnly
 		case .number:
 			.number
 		case .numberToString, .string:
@@ -396,7 +391,6 @@ enum TransformKind { // swiftlint:disable:this one_declaration_per_file
 enum TransformValueType { // swiftlint:disable:this one_declaration_per_file
 	/// A date-only or a datetime.
 	case date
-	case dateOnly
 	case number
 	case string
 	case timeOnly

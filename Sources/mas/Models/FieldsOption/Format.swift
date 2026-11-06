@@ -701,11 +701,6 @@ struct ChronologicFormats: Hashable { // swiftlint:disable:this one_declaration_
 	var isNumberUnixTime: Bool {
 		hasUnixTime || isNumberDefaultUnixTime
 	}
-
-	/// Whether every value of these formats is a date-only.
-	var isDateOnly: Bool {
-		iso8601Forms == [.date] && !hasUnixTime
-	}
 }
 
 /// `value` coerced to chronologic: a string as a whole ISO-8601 value of one of
@@ -963,7 +958,7 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 
 	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
 		switch call.transform.kind {
-		case .date, .dateOnly, .timeOnly:
+		case .date, .timeOnly:
 			guard case let .chronologic(chronologic, style)? = try coercedChronologic(for: call) else {
 				return nil
 			}

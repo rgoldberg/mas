@@ -163,15 +163,15 @@ In specs, never implicitly coerce a value to a type that its input format
 supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
 the value then has its own type, so an implicit coercion would misread it.
 
-In specs, never let `timeZone` follow `dateOnly`, nor a `<coercion>` to a date
-whose only `<date-format>` is `<iso-date>`, nor a `<coercion>` of a version to a
-date without `<unix-time>` (e.g., `.dateOnly.timeZone:UTC:`,
-`%.:iso-date:D.timeZone:UTC:+-+`, or `%.V..:iso:timeZone:UTC:+-+`), because its
-value is a date-only, which no time zone affects.
-
-In specs, never let `dateOnly` start the pipeline of a matcher's
-`<date-only-coercion>` (e.g., `%.:iso-date:D.dateOnly+-+`), because that value
-is already a date-only, so `dateOnly` cannot affect what it means.
+In specs, never forbid `timeZone` or `dateOnly` merely because it cannot affect
+a date-only (e.g., `%.:iso-date:D.timeZone:UTC:+-+`,
+`%.V..:iso:timeZone:UTC:+-+`, or `%.:iso-date:D.dateOnly+-+`), nor forbid
+`timeZone` after `dateOnly` (e.g., `.dateOnly.timeZone:UTC:`), because a date's
+transforms set its rendering jointly, in any order, while a string transform on
+a value that it cannot modify stays valid (e.g., `%T..lowercase+-+`), so
+forbidding it treats near parallels differently, which outweighs the overruled
+reason for rejecting its allowance: its value is a date-only, which no time zone
+affects, or is already a date-only, so `dateOnly` cannot affect what it means.
 
 In specs, never let a call whose input is a version take a `<coercion>` to a
 date whose only `<date-format>` is `<iso-datetime>` (e.g.,

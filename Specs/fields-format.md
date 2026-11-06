@@ -79,7 +79,6 @@ string-pipeline               = <pipeline(<string-format-name>, <value-transform
 version-pipeline              = <pipeline(<version-format-name>, <value-transform-pipeline>, <version-input-pipeline>)>
 number-pipeline               = <pipeline(<number-format-name>, <value-transform-pipeline>, <number-input-pipeline>)>
 date-pipeline                 = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline>)>
-date-only-pipeline            = <pipeline(<date-format-name>, <value-transform-pipeline>, <coerced-string-chain>)>
 time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
@@ -142,7 +141,7 @@ value-transform-pipeline =
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
 number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
-version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-only-chain> | <unix-time-date-chain>
+version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
@@ -156,24 +155,20 @@ transform-chain(CALL_PREFIX, TRANSFORM, AFTER_RUN) = <transform-run(CALL_PREFIX,
 string-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <string-transform>, <after-string-run>)>
 number-chain(CALL_PREFIX)           = <transform-chain(CALL_PREFIX, <number-transform>, <after-number-run>)> | <number-to-string-chain(CALL_PREFIX)>
 number-to-string-chain(CALL_PREFIX) = <transform-call(CALL_PREFIX, <number-to-string-transform>)> [ <string-input-pipeline> ]
-date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-time-zone>, <after-date-run>)> | <date-only-chain(CALL_PREFIX)>
-date-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <date-only>, <coerced-string-chain>)>
+date-chain(CALL_PREFIX)             = <transform-chain(CALL_PREFIX, <date-transform>, <coerced-string-chain>)>
 time-only-chain(CALL_PREFIX)        = <transform-chain(CALL_PREFIX, <time-only-transform>, <coerced-string-chain>)>
 
-coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
+coerced-chain = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
 
 coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
-coerced-date-chain      = <date-chain(<transform-call-prefix> <non-date-only-coercion>)>
-coerced-date-only-chain = <date-only-chain(<transform-call-prefix> <date-only-coercion>)>
+coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
 number-date-chain       = <date-chain(<transform-call-prefix> <number-date-coercion>)>
-unix-time-date-chain    = <date-chain(<transform-call-prefix> <unix-time-coercion>)>
-version-date-only-chain = <date-only-chain(<transform-call-prefix> <version-date-only-coercion>)>
+version-date-chain      = <date-chain(<transform-call-prefix> <version-date-coercion>)>
 
-after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-date-only-chain> | <coerced-time-only-chain>
+after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
 after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
-after-date-run   = <date-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
 
@@ -436,7 +431,7 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-transform      = <date-only> | <date-time-zone> (* non-structural *)
+date-transform      = <date-only> | <date-time-zone>
 time-only-transform = <time-only-time-zone> (* type: time-only *)
 
 date-only           = 'dateOnly' (* input type: date; output type: date-only *)
@@ -447,7 +442,8 @@ time-only-time-zone = 'timeOnlyTimeZone' [ <time-only-time-zone-arguments> ] (* 
 <!--editorconfig-checker-enable-->
 
 A date's or a time-only's contiguous transforms jointly set how it is rendered,
-until a `<coercion>` renders it:
+until a `<coercion>` renders it (e.g., `.dateOnly.timeZone:UTC:` means what
+`.timeZone:UTC:.dateOnly` means):
 
 - `dateOnly`: renders only the date, in the output time zone.
 - `timeZone` (for a date) & `timeOnlyTimeZone` (for a time-only): set the output
@@ -527,7 +523,7 @@ placeholder = <fallible-unconditional-placeholder> | <conditional-placeholder>
 matcher   = [ <placeholder-prefix> ] <modifiers> <predicate> (* non-structural *)
 modifiers =
   [ <abort-on-success> | <abort-on-failure> | <branch-negation> ]
-  [ <coercion> | <number-coercion> | <non-date-only-coercion> | <date-only-coercion> ]
+  [ <coercion> | <number-coercion> | <date-coercion> ]
   (* non-structural *)
 predicate = <nullary-predicate> | <non-nullary-predicate> | <unary-match> | <binary-match> (* non-structural *)
 
@@ -587,7 +583,6 @@ success-pipeline =
   | <version-pipeline>
   | <number-pipeline>
   | <date-pipeline>
-  | <date-only-pipeline>
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
@@ -927,27 +922,22 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-non-date-only-coercion     =
-  <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ]
-  (* default non-date-only-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
-date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
-version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
-number-date-coercion       = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default unix-time-date-formats: {a number as a Unix time} *)
-unix-time-coercion         = <coercion> <date-coercion-arguments(<unix-time-date-formats>)>
+date-coercion         =
+  <coercion> [ <date-coercion-arguments(<date-formats>)> ]
+  (* default date-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
+version-date-coercion = <coercion> [ <date-coercion-arguments(<version-date-formats>)> ] (* default version-date-formats: 'iso' *)
+number-date-coercion  = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default unix-time-date-formats: {a number as a Unix time} *)
 
-non-date-only-formats     = [ ( <iso-date> <argument-separator> )+ ] ( <iso> | <iso-datetime> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
-date-only-formats         = <iso-date> … <argument-separator>
-version-date-only-formats = [ ( <iso-datetime> <argument-separator> )+ ] ( <iso> | <iso-date> ) [ ( <argument-separator> <date-iso-format> )+ ]
-unix-time-date-formats    = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
+date-formats           = <date-format> … <argument-separator>
+version-date-formats   = [ ( <iso-datetime> <argument-separator> )+ ] ( <iso> | <iso-date> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
+unix-time-date-formats = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
 
 date-format     = <date-iso-format> | <unix-time>
 date-iso-format = <iso> | <iso-date> | <iso-datetime>
 
-nullary-date-matcher          = [ <non-date-only-coercion> | <date-only-coercion> ] <nullary-date>
-non-nullary-date-matcher      = [ <non-date-only-coercion> | <date-only-coercion> ] <non-nullary-date>
-non-nullary-date-success      =
-  [ <non-date-only-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
-  | <date-only-coercion> <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-only-pipeline>)>
+nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
+non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>
+non-nullary-date-success      = [ <date-coercion> ] <non-nullary-success(<nullary-date>, <non-nullary-date>, <date-pipeline>)>
 nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
 non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
@@ -999,19 +989,10 @@ date). A call whose input the syntax text determines to be a number must omit
 `.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which can
 only abort).
 
-A `<date-only-coercion>`'s value is always a date-only, which no time zone
-affects, so no `timeZone` may follow it (e.g., `%.:iso-date:D.timeZone:UTC:+-+`
-is an error, as `.dateOnly.timeZone:UTC:` is). Nor may `dateOnly` start the
-pipeline of a matcher's `<date-only-coercion>`, because it cannot affect that
-value (e.g., `%.:iso-date:D.dateOnly+-+` is an error, while `%.:iso-date:D%d+-+`
-outputs the date-only).
-
 A version has no `:`, so it is never a datetime, so a call whose input the
 syntax text determines to be a version must list a `<date-format>` other than
 `<iso-datetime>` (e.g., `%.V..:iso,iso-datetime:dateOnly+-+`, but not
-`%.V..:iso-datetime:dateOnly+-+`, which can only abort), and only `<unix-time>`
-lets `timeZone` affect its value (e.g., `%.V..:unix-time:timeZone:UTC:+-+`, but
-not `%.V..:iso:timeZone:UTC:+-+`, whose value can only be a date-only).
+`%.V..:iso-datetime:dateOnly+-+`, which can only abort).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.
