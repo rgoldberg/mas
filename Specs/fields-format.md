@@ -204,7 +204,7 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- A `<transform-pipeline>` `t` is a pipeline of transformations applied to:
+- A `<transform-pipeline>` `t` is a transform pipeline applied to:
   - If a `<named-format-reference>` `n` immediately precedes `t` in its
     pipeline: `n`'s value.
   - Otherwise: the value against which its enclosing block is evaluated (i.e.,

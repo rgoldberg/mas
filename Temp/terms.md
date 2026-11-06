@@ -294,6 +294,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - run: noun & verb, for commands
     - transform run: a `<transform-run>`'s contiguous calls of 1 value type
       ([defined](../Specs/fields-format.md#transforms))
+    - transform pipeline: a `<transform-pipeline>`, whose transforms are applied
+      to a value ([defined](../Specs/fields-format.md#transforms))
     - REJECTED: function (except in "primary function") / method / execution /
       execute / invocation / invoke
 43. - kind: config kinds; block kinds
