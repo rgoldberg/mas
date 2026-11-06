@@ -126,7 +126,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case numberCoercionArgumentsNotSupported(String)
 	case reservedFieldNameCharacter(Character)
 	case singleBranch
-	case soleNullaryBlockPlaceholder
 	case templateLacksPlaceholder
 	case tiebreakerUnsupportedForPositionalOrder
 	case unexpectedCharacter(Character)
@@ -213,8 +212,6 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"A field name must escape its reserved character: \(character)"
 		case .singleBranch:
 			"<branches> requires at least 2 branches"
-		case .soleNullaryBlockPlaceholder:
-			"A <success-block> without a <failure-block> cannot be solely a nullary <block-placeholder>"
 		case .templateLacksPlaceholder:
 			"<format-template> requires at least 1 <placeholder>"
 		case .tiebreakerUnsupportedForPositionalOrder:
