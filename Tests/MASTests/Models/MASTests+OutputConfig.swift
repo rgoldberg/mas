@@ -52,6 +52,23 @@ private extension MASTests { // swiftlint:disable:this file_types_order
 		#expect(actual == Consequences(nil, "2\n", itemErrorMessage))
 	}
 
+	@Test(
+		arguments: [
+			(JSON.Object([("a", .number(1)), ("b", .string("x"))]), "@none.+a,_b:.round"),
+			(.init([("a", .string("x")), ("a", .number(1))]), "a:.round"),
+		],
+	)
+	func `a format that is not evaluated has no item error`(item: JSON.Object, fieldsOptionValue: String) async throws {
+		let actual = try await consequencesOf(
+			try ItemErrorOutputConfig.output(
+				[item],
+				outputFormat: .table(.default),
+				fieldsOptionValue: fieldsOptionValue,
+			),
+		)
+		#expect(actual == Consequences(nil, "1\n"))
+	}
+
 	@Test
 	func `only an item's 1st item error is reported`() async throws {
 		let actual = try await consequencesOf(
