@@ -850,7 +850,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        context requires ([defined](../Specs/ebnf.md#multiplicity))
 124. - outer bare whitespace: bare whitespace immediately before the 1st, or
        after the last, character that a literal or name token consumes, or
-       non-bare-whitespace character that a variable token consumes
+       non-bare-whitespace character that a variable token consumes; also all of
+       a variable token without such a character
        ([defined](../Specs/ebnf.md#outer-bare-whitespace))
      - inner bare whitespace: bare whitespace between a token's 1st & last
        non-bare-whitespace characters
