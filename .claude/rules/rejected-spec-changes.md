@@ -84,11 +84,11 @@ parallels differently, which outweighs the overruled reason for rejecting its
 allowance: no such transform can modify its value, so it cannot affect what its
 placeholder means.
 
-In specs, never forbid a string transform merely because it cannot modify a
-non-string value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`,
-or `.dateOnly..uppercase`), because that would require a `<boolean-pipeline>` &
-a whitespace-free variant of the string chains after each date, time-only,
-version, or number, all to report no-ops that almost nobody writes.
+In specs, never forbid a name literal merely because it cannot affect what its
+syntax text means (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`, or
+`.dateOnly..uppercase`), because a name only selects an operation, which merely
+has nothing to do, while forbidding only some such names treats near parallels
+differently.
 
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
