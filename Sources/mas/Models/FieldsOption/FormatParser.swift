@@ -812,12 +812,9 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		case .version:
 			calls.followsTypes(from: isNamed ? nil : .version)
 		case .whitespace:
-			calls.first?.coercion != nil
-				&& calls.isStringTransformRun
-				&& (isNamed || calls.allSatisfy { $0.transform == .trimWhitespace })
+			isNamed ? calls.first?.coercion != nil && calls.isStringTransformRun : calls.isUncoercedTrimWhitespaceRun
 		case .whitespaceInput:
-			calls.followsTypes(from: nil)
-				&& (isNamed || calls.first?.coercion != nil && calls.allSatisfy { $0.transform == .trimWhitespace })
+			isNamed ? calls.followsTypes(from: nil) : calls.isUncoercedTrimWhitespaceRun
 		}
 	}
 }
@@ -826,6 +823,11 @@ private extension [TransformCall] {
 	/// Whether these calls are string transforms, none after the 1st coerced.
 	var isStringTransformRun: Bool {
 		allSatisfy { $0.transform.kind == .string } && dropFirst().allSatisfy { $0.coercion == nil }
+	}
+
+	/// Whether these calls are all `trimWhitespace`, none coerced.
+	var isUncoercedTrimWhitespaceRun: Bool {
+		allSatisfy { $0.transform == .trimWhitespace && $0.coercion == nil }
 	}
 
 	/// Whether each of these calls follows the value type of its input: `type`

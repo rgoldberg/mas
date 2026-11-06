@@ -77,7 +77,7 @@ named-format-pipeline(FORMAT_NAME) = <pipeline(FORMAT_NAME, <value-transform-pip
 
 named-pipeline(FORMAT_NAME, TRANSFORM_PIPELINE) = <named-format-reference(FORMAT_NAME)> [ TRANSFORM_PIPELINE ]
 
-trimmable-pipeline(NAMED_PIPELINE) = NAMED_PIPELINE | <transform-run(<transform-call-prefix> <coercion>, <trim-whitespace>)>
+trimmable-pipeline(NAMED_PIPELINE) = NAMED_PIPELINE | <transform-run(<transform-call-prefix>, <trim-whitespace>)>
 
 string-pipeline               = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline>)>
 version-pipeline              = <pipeline(<version-format-name>, <value-transform-pipeline>, <version-input-pipeline>)>
@@ -819,9 +819,12 @@ modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
 can modify, so any other transform must follow a `<named-format-reference>`,
 whose named format may output other text, whether in the placeholder's pipeline
 or in a `%I`'s in its `<success-block>`, whose format input is that value (e.g.,
-`%W..trimWhitespace+-+`, `%U:x..uppercase+-+`, `%W%I..trimWhitespace++-+`,
+`%W.trimWhitespace+-+`, `%U:x..uppercase+-+`, `%W%I.trimWhitespace++-+`,
 `%U%I:x..uppercase++-+` & `%U+%I..uppercase++`, but none of `%U..uppercase+-+`,
-`%W..uppercase+-+` & `%U%I..uppercase++-+`).
+`%W..uppercase+-+` & `%U%I..uppercase++-+`). `trimWhitespace` takes no
+`<coercion>` here, because `%W`'s value is a string or a `null`, which remains
+unmodified, so it has nothing to coerce (e.g., `%W..trimWhitespace+-+` is an
+error, as `%S..uppercase++` is).
 
 ###### Number Formatting
 
