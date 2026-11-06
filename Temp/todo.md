@@ -163,11 +163,11 @@ removing `Inc.` from `sellerName`), which needs:
 Number templates for `numberFormat` (e.g., [UTS #35 number
 patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
 
-1. They would cover group sizes, fraction digits & scientific notation, as an
+1. They would cover group sizes, fractional digits & scientific notation, as an
    alternative argument form, distinguished from `<number-format-arguments>`
    (which would remain valid) by a leading character that no locale identifier
    can contain.
-2. They overlap `round` & `scale`'s fraction digits, and they are base 10 only.
+2. They overlap `round` & `<fractional-digits>`, and they are base 10 only.
 3. They would also select an output notation (positional, `e`, or `E`), which is
    not supported: every number transform retains its input's notation, except
    `scale`, which always renders positional notation.
