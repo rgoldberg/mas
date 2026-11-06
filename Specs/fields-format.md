@@ -724,7 +724,7 @@ a `<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
 lets a label, a name, or a format input that no matcher can match be coerced
 (e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`), and lets
 a template insert any named format, which may abort formatting (e.g., if preset
-`bytes` is `%+.N.scale:6,,0:+ MB`, `Size: %I:bytes+` renders `1500000` as
+`bytes` is `:%+.N.scale:6,,0:+ MB`, `Size: %I:bytes+` renders `1500000` as
 `Size: 2 MB`).
 
 ###### Conditional Placeholders
