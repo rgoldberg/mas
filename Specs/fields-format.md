@@ -983,8 +983,8 @@ datetime, date-only, or time-only (trying them in that order), among those that
 its type & its `<date-format>`s allow; this does not depend on field name,
 label, output format, or any other context.
 
-No predicate matches both a date & a time-only value (e.g., `%m.d.c+` coerces to
-either).
+No chronologic predicate matches both a date & a time-only value (e.g.,
+`%m.d.c+` coerces to either).
 
 **Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
 seconds.
