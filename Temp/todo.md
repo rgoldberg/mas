@@ -73,7 +73,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
    checked per its error comment (e.g., that a `<string-format-name>`'s preset's
    format conforms to its `BLOCK`), because every built-in preset's format is
    `%i`, which conforms to every block. Supporting them also needs a preset's
-   `<label>` & `<template-text>` to consume a bare `,`.
+   `<label>` & `<template-text>` to consume a bare `,`. Supporting them also
+   needs a matcher in a named format to match its format input, rather than that
+   input's `node`, so that a coerced number retains its trivia & a chronologic
+   value its type.
 2. [Custom named configs](../Specs/configs.md#custom-named-configs) of every
    kind, presets included:
    1. Looking a name up through the [context
