@@ -897,3 +897,30 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        the matcher fails / succeeds
      - boundary group: a `<boundary-group>`'s boundaries, which share 1 sort
        precedence ([defined](../Specs/fields.md#sort-boundaries))
+128. - named config: a config that has a name, unique for its kind within a
+       context ([defined](../Specs/configs.md#named-configs))
+     - named fields config: a named config of the fields kind
+       ([defined](../Specs/fields.md#named-fields-configs))
+     - config kind: a hierarchy among which a config is looked up, referenced &
+       extended (e.g., fields configs)
+       ([defined](../Specs/configs.md#config-kinds))
+     - context stack: a command list's contexts, from most to least specific
+       ([defined](../Specs/configs.md#context-stacks))
+129. - base fields config: the named fields config that a command line
+       references or implicitly selects
+       ([defined](../Specs/fields.md#base-fields-config))
+     - working fields config: a mutable copy of the fields config that a
+       `<fields-config>` extends, as modified by it so far
+       ([defined](../Specs/fields.md#working-fields-config))
+     - baseline fields config: an immutable snapshot of the working fields
+       config immediately before `<field-spec-edits-section>`
+       ([defined](../Specs/fields.md#baseline-fields-config))
+     - resolved fields config: the working fields config after the command line
+       has been parsed, which is used to render output
+       ([defined](../Specs/fields.md#resolved-fields-config))
+130. - sort key: a field spec with an enabled `<sort>`
+       ([defined](../Specs/fields.md#sorting))
+     - run of non-boundary text: a maximal sequence of segments between
+       boundaries ([defined](../Specs/fields.md#sort-segments))
+     - grouped number: a number segment of `<grouped-numeric>`, which compares
+       as a single number ([defined](../Specs/fields.md#sort-number-segments))
