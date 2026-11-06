@@ -55,6 +55,7 @@ private extension MASTests { // swiftlint:disable:this file_types_order
 	@Test(
 		arguments: [
 			(JSON.Object([("a", .number(1)), ("b", .string("x"))]), "@none.+a,_b:.round"),
+			(.init([("a", .number(1)), ("b", .string("x"))]), "@none.+a,_b:.round/I"),
 			(.init([("a", .string("x")), ("a", .number(1))]), "a:.round"),
 		],
 	)
