@@ -56,6 +56,8 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		do {
 			try output(objects, resolved: resolved, outputFormat: outputFormat)
 		} catch {
+			// Unreachable: each item whose rendering throws has already been removed,
+			// and the final rendering only repeats a subset of that rendering
 			throw .formatting(error)
 		}
 	}
