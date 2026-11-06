@@ -1053,6 +1053,7 @@ private extension MASTests { // swiftlint:disable file_length
 			(".timeOnlyTimeZone:UTC,UTC:", .invalidTransformArguments(name: "timeOnlyTimeZone")),
 			(".timeOnlyTimeZone:UTC,2020-02-30:", .invalidTransformArguments(name: "timeOnlyTimeZone")),
 			(".timeOnlyTimeZone:UTC,2020-01-01,2020-01-02:", .invalidTransformArguments(name: "timeOnlyTimeZone")),
+			(".timeOnlyTimeZone:UTC,+292278995-01-01:", .invalidTransformArguments(name: "timeOnlyTimeZone")),
 			(".numberFormat:en,.,18446744073709551615:", .invalidTransformArguments(name: "numberFormat")),
 			(".timeZone:Nowhere/Land:", .invalidTransformArguments(name: "timeZone")),
 			(".timeZone:+530:", .invalidTransformArguments(name: "timeZone")),
@@ -1062,6 +1063,17 @@ private extension MASTests { // swiftlint:disable file_length
 	)
 	func `reports a format-block syntax error`(format: String, error: ParsingError) {
 		#expect(throws: error) { try parsedFieldSpec(format) }
+	}
+
+	@Test
+	func `whether a reference date is chronologic depends on the system time zone`() {
+		let format = ".timeOnlyTimeZone:UTC,+292278994-08-17:"
+		#expect(throws: Never.self) {
+			try inSystemTimeZone("UTC") { try parsedFieldSpec(format) }
+		}
+		#expect(throws: ParsingError.invalidTransformArguments(name: "timeOnlyTimeZone")) {
+			try inSystemTimeZone("Etc/GMT+8") { try parsedFieldSpec(format) }
+		}
 	}
 
 	@Test(arguments: ["", "  "])

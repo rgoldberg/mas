@@ -616,6 +616,12 @@ struct CivilDate: Hashable { // swiftlint:disable:this one_declaration_per_file
 		return era * 146_097 + yearOfEra * 365 + yearOfEra / 4 - yearOfEra / 100 + dayOfYear - 719_468
 	}
 
+	/// This date's instant at its start in the system time zone, else `nil` iff
+	/// that instant is out of range (i.e., this date is not chronologic).
+	var startInstant: Int? {
+		TimeOfDay(hour: 0, minute: 0, second: 0, millisecond: 0, timeZone: nil).instant(on: self)
+	}
+
 	/// ISO-8601 extended-format text: a 4-digit year from `0000` to `9999`, else
 	/// a sign & at least 5 digits, then `-MM-DD`.
 	var iso8601Text: String {
@@ -745,9 +751,7 @@ func iso8601ChronologicPrefix(of string: Substring, forms: Set<ISO8601Form>)
 		return (.datetime(instant), time.end)
 	}
 	return forms.contains(.date)
-		? TimeOfDay(hour: 0, minute: 0, second: 0, millisecond: 0, timeZone: nil)
-			.instant(on: day)
-			.map { (.date($0), date.range.upperBound) }
+		? day.startInstant.map { (.date($0), date.range.upperBound) }
 		: nil
 }
 

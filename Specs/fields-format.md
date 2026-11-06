@@ -487,7 +487,7 @@ time-zone-code =
 
 system-time-zone = 'system'
 
-reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone} *)
+reference-date = {date: ISO-8601 date-only} (* default: {current date in the system time zone}; error: it is not chronologic *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

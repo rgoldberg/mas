@@ -223,7 +223,7 @@ private struct FormatParser {
 		return transform(
 			timeZone,
 			try (hasReferenceDate ? arguments[1] : nil).map { argument throws(ParsingError) in
-				guard let referenceDate = CivilDate(iso8601Text: argument) else {
+				guard let referenceDate = CivilDate(iso8601Text: argument), referenceDate.startInstant != nil else {
 					throw invalidArgumentsError
 				}
 				return referenceDate
