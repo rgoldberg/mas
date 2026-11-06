@@ -78,7 +78,15 @@ private extension MASTests {
 		}
 	}
 
-	@Test(arguments: [(".adamID=", "label"), (".adamID:", "format"), (".adamID/", "sort")])
+	@Test(
+		arguments: [
+			(".adamID=", "label"),
+			(".adamID= ", "label"), // Whitespace-only text at the end is no variable token
+			(".adamID:", "format"),
+			(".adamID: ", "format"),
+			(".adamID/", "sort"),
+		],
+	)
 	func `an absent modifier payload resets its value`(value: String, property: String) throws {
 		let fieldSpec = try parseFieldSpecs(value)[0]
 		switch property {
