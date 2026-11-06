@@ -71,13 +71,9 @@ renders the value (e.g., [JSON output](json.md#json-config) renders the number
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | <named-pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE)>
+pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | <named-format-reference(FORMAT_NAME)> [ NAMED_TRANSFORM_PIPELINE ]
 
 named-format-pipeline(FORMAT_NAME) = <pipeline(FORMAT_NAME, <value-transform-pipeline>, <value-transform-pipeline>)>
-
-named-pipeline(FORMAT_NAME, TRANSFORM_PIPELINE) = <named-format-reference(FORMAT_NAME)> [ TRANSFORM_PIPELINE ]
-
-trimmable-pipeline(NAMED_PIPELINE) = NAMED_PIPELINE | <transform-run(<transform-call-prefix>, <trim-whitespace>)>
 
 string-pipeline               = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline>)>
 version-pipeline              = <pipeline(<version-format-name>, <value-transform-pipeline>, <version-input-pipeline>)>
@@ -87,8 +83,6 @@ date-only-pipeline            = <pipeline(<date-format-name>, <value-transform-p
 time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
-named-unconditional-pipeline  = <named-pipeline(<unconditional-format-name>, <string-transform-pipeline>)>
-whitespace-pipeline           = <trimmable-pipeline(<named-unconditional-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -597,8 +591,6 @@ success-pipeline =
   | <time-only-pipeline>
   | <unconditional-pipeline>
   | <unconditional-string-pipeline>
-  | <named-unconditional-pipeline>
-  | <whitespace-pipeline>
   | <named-format-pipeline(<preset-name>)>
   (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
@@ -623,9 +615,8 @@ abort-on-failure = "+"!
 <!--editorconfig-checker-enable-->
 
 `<block-leading-text>` cannot start with a bare `.`, so a transform that a
-block's pipeline cannot take is an error, rather than text, even where no
-pipeline of that block starts with `.` (e.g., `%U..uppercase+-+` is an error,
-while `%U\.x+-+` outputs `.x`).
+block's pipeline cannot take is an error, rather than text (e.g.,
+`%U..uppercase+-+` is an error, while `%U\.x+-+` outputs `.x`).
 
 A placeholder or branch is a **matcher** (`<matcher>`) immediately followed by
 its success clause, blocks, or branches, which define the matcher's **form**:
@@ -779,9 +770,9 @@ non-nullary-standard-success =
       | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
       | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
     )
-  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <named-unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <named-unconditional-pipeline>)>
-  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <whitespace-pipeline>)>
+  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <unconditional-string-pipeline>)>
+  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <unconditional-string-pipeline>)>
+  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <unconditional-string-pipeline>)>
 
 nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
 non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
@@ -807,14 +798,12 @@ non-nullary-string     = "S" (* is string;                                      
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`%U`'s & `%E`'s values are `null` or an empty string, which no transform can
-modify, and `%W`'s also a whitespace-only string, which only `trimWhitespace`
-can modify, so any other transform must follow a `<named-format-reference>`,
-whose named format may output other text (e.g., `%W.trimWhitespace+-+`,
-`%U:x..uppercase+-+` & `%U:x.uppercase+-+`, but neither `%U..uppercase+-+` nor
-`%W..uppercase+-+`). `trimWhitespace` takes no `<coercion>` here, because `%W`'s
-value is a string or a `null`, which remains unmodified, so it has nothing to
-coerce (e.g., `%W..trimWhitespace+-+` is an error, as `%S..uppercase++` is).
+`%U`'s, `%E`'s & `%W`'s values are each a string or a `null`, which remains
+unmodified, so a transform has nothing to coerce, unless it follows a
+`<named-format-reference>`, whose named format may output any type (e.g.,
+`%W.trimWhitespace+-+`, `%U.uppercase+-+` & `%U:x..uppercase+-+`, but neither
+`%W..trimWhitespace+-+` nor `%U..uppercase+-+`, as `%S..uppercase++` is an
+error).
 
 ###### Number Formatting
 

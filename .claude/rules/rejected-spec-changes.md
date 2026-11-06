@@ -76,18 +76,19 @@ In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), because it always inserts an
 empty string, so its matcher cannot affect what it means.
 
-In specs, never let `%U` or `%E` take a transform before a named format, nor
-`%W` take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
-`%E..trimWhitespace+-+`, or `%W..uppercase+-+`), because no such transform can
-modify its value, so it cannot affect what its placeholder means.
+In specs, never forbid a string transform on `%U`, `%E`, or `%W` merely because
+it cannot modify its value (e.g., `%U.uppercase+-+`, `%E.trimWhitespace+-+`, or
+`%W.uppercase+-+`), because a string transform on a value that it cannot modify
+stays valid elsewhere (e.g., `%T..lowercase+-+`), so forbidding it treats near
+parallels differently, which outweighs the overruled reason for rejecting its
+allowance: no such transform can modify its value, so it cannot affect what its
+placeholder means.
 
 In specs, never forbid a string transform merely because it cannot modify a
 non-string value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`,
-or `.dateOnly..uppercase`), other than for `%U`, `%E`, or `%W`, whose matcher
-exists only to detect a blank value, because that would require a
-`<boolean-pipeline>` & a whitespace-free variant of the string chains after each
-date, time-only, version, or number, all to report no-ops that almost nobody
-writes.
+or `.dateOnly..uppercase`), because that would require a `<boolean-pipeline>` &
+a whitespace-free variant of the string chains after each date, time-only,
+version, or number, all to report no-ops that almost nobody writes.
 
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type

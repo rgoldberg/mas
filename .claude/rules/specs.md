@@ -161,10 +161,9 @@ In specs, specify syntax according to the 1st of these that applies:
    syntax text alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled
    by nothing, `%+s`, whose `<abort-on-failure>` modifies nothing, because `%s`
    already aborts on failure, or `%mN.round++`, whose `%m` matches only 1
-   branch). Exempt a string transform that merely cannot modify a non-string
-   value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`, or
-   `.dateOnly..uppercase`), other than for `%U`, `%E`, or `%W`, whose matcher
-   exists only to detect a blank value.
+   branch). Exempt a string transform that merely cannot modify a value (e.g.,
+   `%T..lowercase+-+`, `%D..trimWhitespace+-+`, `.dateOnly..uppercase`, or
+   `%U.uppercase+-+`).
 4. Attach an error comment: syntax that contradicts itself, or cannot mean what
    it says, when only context outside the syntax text decides it, or only a
    comparison of variable tokens' values (e.g., an effective `k` in a

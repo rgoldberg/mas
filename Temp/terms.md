@@ -673,14 +673,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - block leading text: the text that starts a `<block-template>`, which
        cannot start with a bare `.` (`<block-leading-text>`;
        [defined](../Specs/fields-format.md#success--failure))
-     - named pipeline: a named format reference & any transforms after it
-       (`<named-pipeline>`; [defined](../Specs/fields-format.md#pipelines))
      - string transform pipeline: the string transforms after a named format
        reference whose named format is unconditional, the 1st of which may take
        a `<coercion>` (`<string-transform-pipeline>`;
        [defined](../Specs/fields-format.md#transforms))
-     - trimmable pipeline: a named pipeline or a `trimWhitespace` run
-       (`<trimmable-pipeline>`; [defined](../Specs/fields-format.md#pipelines))
 103. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)

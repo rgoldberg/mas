@@ -671,15 +671,16 @@ private enum TrailingWhitespaceTreatment { // swiftlint:disable:this one_declara
 
 /// A block's kind, which selects its valid pipelines & `<block-placeholder>`s.
 private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_per_file
+	/// `%U`'s, `%E`'s, or `%W`'s, whose value is a string or a `null`, so a
+	/// transform takes no `<coercion>`, unless it follows a
+	/// `<named-format-reference>`.
+	case blank
 	case boolean
 	case date
 	case dateOnly
 	/// A `<fallible-unconditional-placeholder>`'s `%I…+` pipeline's kind, which
 	/// no block has.
 	case input
-	/// `%U`'s or `%E`'s, whose value no transform can modify, so its pipeline
-	/// must start with a `<named-format-reference>`.
-	case nullOrEmpty
 	case number
 	case string
 	case timeOnly
@@ -688,14 +689,11 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// kind, which no block has.
 	case unconditionalString
 	case version
-	/// `%W`'s, whose value only `trimWhitespace` can modify, so any other
-	/// transform must follow a `<named-format-reference>`.
-	case whitespace
 
 	/// Whether this kind's template may contain `<block-placeholder>`s.
 	var hasBlockPlaceholders: Bool {
 		switch self {
-		case .boolean, .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
+		case .blank, .boolean, .date, .dateOnly, .number, .string, .timeOnly, .version:
 			true
 		case .input, .unconditional, .unconditionalString:
 			false
@@ -707,7 +705,7 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 		switch self {
 		case .boolean, .input, .unconditional, .unconditionalString:
 			.unconditional
-		case .date, .dateOnly, .nullOrEmpty, .number, .string, .timeOnly, .version, .whitespace:
+		case .blank, .date, .dateOnly, .number, .string, .timeOnly, .version:
 			self
 		}
 	}
@@ -728,20 +726,16 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<date-only-pipeline>"
 		case .input:
 			"<named-format-pipeline>"
-		case .nullOrEmpty:
-			"<named-unconditional-pipeline>"
 		case .number:
 			"<number-pipeline>"
 		case .string:
 			"<string-pipeline>"
 		case .timeOnly:
 			"<time-only-pipeline>"
-		case .unconditionalString:
+		case .blank, .unconditionalString:
 			"<unconditional-string-pipeline>"
 		case .version:
 			"<version-pipeline>"
-		case .whitespace:
-			"<whitespace-pipeline>"
 		}
 	}
 
@@ -753,8 +747,8 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.boolean
 			case .date:
 				matcher.coercion?.dateFormats.isDateOnly == true ? .dateOnly : .date
-			case .empty, .null:
-				.nullOrEmpty
+			case .empty, .null, .whitespace:
+				.blank
 			case .number:
 				.number
 			case .string:
@@ -763,8 +757,6 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 				.timeOnly
 			case .version:
 				.version
-			case .whitespace:
-				.whitespace
 			}
 	}
 
@@ -781,20 +773,16 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			(isNamed || calls.first?.coercion != nil) && calls.followsTypes(from: isNamed ? nil : .dateOnly)
 		case .input:
 			calls.followsTypes(from: nil)
-		case .nullOrEmpty:
-			isNamed && calls.isStringTransformRun
 		case .number:
 			calls.followsTypes(from: isNamed ? nil : .number)
 		case .string:
 			calls.followsTypes(from: isNamed ? nil : .string)
 		case .timeOnly:
 			calls.followsTypes(from: isNamed ? nil : .timeOnly)
-		case .unconditionalString:
+		case .blank, .unconditionalString:
 			(isNamed || calls.first?.coercion == nil) && calls.isStringTransformRun
 		case .version:
 			calls.followsTypes(from: isNamed ? nil : .version)
-		case .whitespace:
-			isNamed ? calls.isStringTransformRun : calls.isUncoercedTrimWhitespaceRun
 		}
 	}
 }
@@ -803,11 +791,6 @@ private extension [TransformCall] {
 	/// Whether these calls are string transforms, none after the 1st coerced.
 	var isStringTransformRun: Bool {
 		allSatisfy { $0.transform.kind == .string } && dropFirst().allSatisfy { $0.coercion == nil }
-	}
-
-	/// Whether these calls are all `trimWhitespace`, none coerced.
-	var isUncoercedTrimWhitespaceRun: Bool {
-		allSatisfy { $0.transform == .trimWhitespace && $0.coercion == nil }
 	}
 
 	/// Whether each of these calls follows the value type of its input: `type`
