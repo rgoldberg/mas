@@ -149,12 +149,11 @@ private extension FieldsConfig { // swiftlint:disable:this file_types_order
 /// `body`'s value, else `nil` after reporting its item error (configs.md
 /// "Output Formats").
 private func reportingItemError<Value>(_ body: () throws(FormattingError) -> Value) -> Value? {
-	do {
-		return try body()
-	} catch {
+	let result = Result(catching: body)
+	if case let .failure(error) = result {
 		MAS.printer.error(error: error)
-		return nil
 	}
+	return try? result.get()
 }
 
 /// An error reported while outputting items per `--fields`.
