@@ -169,7 +169,7 @@ patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
    can contain.
 2. They overlap `round` & `<fractional-digits>`, and they are base 10 only.
 3. They would also select an output notation (positional, `e`, or `E`), which is
-   not supported: every number transform retains its input's notation, except
+   unsupported: every number transform retains its input's notation, except
    `scale`, which always renders positional notation.
 
 ### Radix `%n` Modifier
@@ -257,8 +257,8 @@ An input format other than JSON needs:
 
 1. Its `InputFormat`, which determines the types to which a field value is
    [implicitly coerced](../Specs/fields-format.md#value-types), covering every
-   type that an input format may not support (e.g., a number or a boolean), not
-   only those that JSON does not.
+   type unsupported by some input format (e.g., a number or a boolean), not only
+   those that JSON does not.
 2. That `InputFormat` passed to `Pipeline.evaluated(on:in:)`'s transforms &
    `Placeholder.evaluated(in:)`'s matchers, which assume `InputFormat.json`.
 3. Its field values represented at those types, which `JSON.Node` cannot.

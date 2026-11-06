@@ -116,7 +116,7 @@ private extension MASTests {
 			(.version, "1.2.3", true),
 		],
 	)
-	func `only a type that an input format does not support has an implicit coercion`(
+	func `only a type unsupported by an input format has an implicit coercion`(
 		predicate: Predicate,
 		string: String,
 		conforms: Bool,

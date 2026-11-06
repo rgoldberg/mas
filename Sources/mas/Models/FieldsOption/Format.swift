@@ -467,8 +467,8 @@ extension Matcher { // swiftlint:disable:this file_types_order
 
 /// An input format, by which of the types that an input format might not
 /// support it supports. Absent a `<coercion>`, a value is implicitly coerced to
-/// a type that its input format does not support, as a default coercion would
-/// coerce it (fields-format.md "Value Types").
+/// a type unsupported by its input format, as a default coercion would coerce
+/// it (fields-format.md "Value Types").
 struct InputFormat { // swiftlint:disable:this one_declaration_per_file
 	/// JSON supports no date-only, datetime, time-only, or version.
 	static let json = Self(supportedChronologicForms: [], supportsVersions: false)

@@ -497,11 +497,11 @@ only:
 - Sort precedence among sort keys with the same
   [`<sort-priority>`](#sort-priority).
 
-`<document-order-option-set>` is not supported for table output because items
-may each have different fields, or the same fields in different orders, so a
-table's rows share no document order; key-value & JSON output can order each
-item's fields independently. E.g., for table output, if `x` is `@all/D`, `@x/P`
-is supported, while `@x` is an error. Because `<order>` is last wins, `/DP` is a
+`<document-order-option-set>` is unsupported for table output because items may
+each have different fields, or the same fields in different orders, so a table's
+rows share no document order; key-value & JSON output can order each item's
+fields independently. E.g., for table output, if `x` is `@all/D`, `@x/P` is
+supported, while `@x` is an error. Because `<order>` is last wins, `/DP` is a
 `<positional-order-option-set>`, so it is supported, while `/PD` is a
 `<document-order-option-set>`, so it is an error for table output.
 

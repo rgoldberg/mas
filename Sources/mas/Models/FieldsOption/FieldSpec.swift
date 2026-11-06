@@ -135,15 +135,15 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	var description: String {
 		switch self {
 		case .allConformingUnsupported:
-			"<all-conforming> 'k' is not supported for <positional-order> 'P' or <document-order> 'D'"
+			"<all-conforming> 'k' is unsupported for <positional-order> 'P' or <document-order> 'D'"
 		case .binaryPlaceholderLacksBlock:
 			"A binary placeholder requires a <success-block> or a <failure-block>"
 		case let .coercionNotSupported(letter):
-			"<coercion> is not supported for: \(letter)"
+			"<coercion> is unsupported for: \(letter)"
 		case .danglingEscape:
 			"Expected a character to escape after trailing '\\'"
 		case let .dateCoercionArgumentsNotSupported(name):
-			"<date-coercion-arguments> are not supported for: \(name)"
+			"<date-coercion-arguments> are unsupported for: \(name)"
 		case .documentOrderUnsupportedForTable:
 			"<document-order> 'D' is supported only for JSON or key-value output"
 		case let .forbiddenWhitespace(token):
@@ -207,7 +207,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case let .nonexistentFieldsConfig(name):
 			"Nonexistent fields config: \(name)"
 		case let .numberCoercionArgumentsNotSupported(name):
-			"<number-coercion-arguments> are not supported for: \(name)"
+			"<number-coercion-arguments> are unsupported for: \(name)"
 		case let .reservedFieldNameCharacter(character):
 			"A field name must escape its reserved character: \(character)"
 		case .singleBranch:
@@ -215,7 +215,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case .templateLacksPlaceholder:
 			"<format-template> requires at least 1 <placeholder>"
 		case .tiebreakerUnsupportedForPositionalOrder:
-			"<field-order-tiebreaker> is not supported for <positional-order> 'P'"
+			"<field-order-tiebreaker> is unsupported for <positional-order> 'P'"
 		case let .unexpectedCharacter(character):
 			"Unexpected character: \(character)"
 		case let .unknownPreset(name):

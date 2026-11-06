@@ -36,12 +36,12 @@ that type (e.g., JSON supports no version, date-only, datetime, or time-only).
 A **default coercion** is a `<coercion>` without arguments.
 
 An **implicit coercion** coerces a field value, at its original type, absent a
-`<coercion>`, wherever syntax requires a type that its input format does not
-support, iff a default coercion would coerce it to that type, because no value
-can otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON
-input, `%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` &
-`.dateOnly` accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces
-it, ignoring its defaults (e.g., `%.:iso:d` does not match `0`).
+`<coercion>`, wherever syntax requires a type unsupported by its input format,
+iff a default coercion would coerce it to that type, because no value can
+otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON input,
+`%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` & `.dateOnly`
+accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces it, ignoring
+its defaults (e.g., `%.:iso:d` does not match `0`).
 
 No implicit coercion gives a value a type that its input format supports, so
 only a `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while
@@ -50,10 +50,10 @@ time-only, `%d` would match no string, while `%c` would match `"17:39:23"`, and
 for one that supports date-only, but not datetime, `%d` would match `0`, but not
 `"2020-03-18"`).
 
-A `<coercion>` to a type that its input format does not support thus remains
-useful to choose its `<date-format>`s & to abort formatting, rather than report
-an error, for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly`
-aborts, while `.dateOnly` reports an error).
+A `<coercion>` to a type unsupported by its input format thus remains useful to
+choose its `<date-format>`s & to abort formatting, rather than report an error,
+for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly` aborts,
+while `.dateOnly` reports an error).
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports

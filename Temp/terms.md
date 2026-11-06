@@ -116,8 +116,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       match")
     - let: enable, with a bare infinitive ("let `--table-config`'s value
       select")
-    - support: feature availability ("supports escape sequences", "not supported
-      for table output")
+    - support: feature availability ("supports escape sequences")
+    - unsupported: not supported ("unsupported for table output", "a type
+      unsupported by its input format")
     - include: membership
     - emit: only as the config value name
     - REJECTED: permit / honor / follow (rules)
@@ -819,8 +820,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - default coercion: a `<coercion>` without arguments
        ([defined](../Specs/fields-format.md#value-types))
      - implicit coercion: what coerces a field value, absent a `<coercion>`, to
-       a type that its input format does not support, iff a default coercion
-       would ([defined](../Specs/fields-format.md#value-types))
+       a type unsupported by its input format, iff a default coercion would
+       ([defined](../Specs/fields-format.md#value-types))
      - support: of an input format, can have field values of a type; of an
        output format, can render a value at a type
        ([defined](../Specs/fields-format.md#value-types))

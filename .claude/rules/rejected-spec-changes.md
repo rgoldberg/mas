@@ -143,7 +143,7 @@ affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without failing other items.
 
 In specs, never make a value need a `<coercion>` to match a predicate, or to
-conform to an input type, whose type its input format does not support (e.g.,
+conform to an input type, whose type is unsupported by its input format (e.g.,
 `%d`, `%c`, or `.dateOnly` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
 input), because such syntax can otherwise never succeed without a `<coercion>`,
 which outweighs the overruled reason for rejecting its allowance: a `<coercion>`
@@ -153,7 +153,7 @@ In specs, never let an input format's support of a date-only or a datetime stop
 an implicit coercion to the other (e.g., `%d` for `0` or
 `"2020-03-18T17:39:23Z"`, for an input format that supports date-only, but not
 datetime), because such a value could otherwise match `%d` only with a
-`<coercion>`, although its input format does not support its type.
+`<coercion>`, although its type is unsupported by its input format.
 
 In specs, never implicitly coerce a value to a type that its input format
 supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
