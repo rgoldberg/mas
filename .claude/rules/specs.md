@@ -152,9 +152,9 @@ In specs, specify syntax according to the 1st of these that applies:
    (e.g., `005`, `//00`, `@x.`, `Ciso,iso:`, or `B/_:`, but not `.-a,-a`, whose
    2nd `-a` removes a `null`), because generated or edited syntax produces them.
 2. Allow it: synonymous syntax text (i.e., syntax text that means what other
-   syntax text means) that would make the syntax too complicated to prevent
-   (e.g., `%+N%n+`, which means what `%n` means, but whose prevention would need
-   a separate block syntax per predicate).
+   syntax text means) that would make the syntax too complicated to forbid
+   (e.g., `%+N%n+`, which means what `%n` means, but forbidding it would need a
+   separate block syntax per predicate).
 3. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a modifier or wrapper that cannot affect what it means, when the
    syntax text alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled
