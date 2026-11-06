@@ -32,6 +32,12 @@ affect what the set means, so `/ka` clearly expresses `a`, which outweighs the
 overruled reason for rejecting its allowance: it silently accepts text that
 cannot express what was meant.
 
+In specs, never forbid a `<field-spec-removal>` whose `<field-spec-reference>`
+resolves to a `null` (e.g., the 2nd `-a` in `.-a,-a`), because it does nothing,
+as a removal for an unlisted field does, so forbidding it treats near parallels
+differently (e.g., `@all.size=X,-size,-size`), which outweighs the overruled
+reason for forbidding it: it removes a `null`.
+
 In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `005`) or a
 repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
 contradictory.

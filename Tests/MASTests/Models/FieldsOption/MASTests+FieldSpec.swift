@@ -255,11 +255,15 @@ private extension MASTests {
 		#expect(throws: ParsingError.invalidPosition("3")) { try parseFieldSpecs("@all.size,@3=X") }
 	}
 
-	@Test
-	func `removing a field spec removed earlier in the section is an error`() {
-		#expect(throws: ParsingError.nonexistentFieldSpec(forName: "adamID")) {
-			try parseFieldSpecs("@all.-adamID,-adamID")
-		}
+	@Test(
+		arguments: [
+			("@all.-adamID,-adamID", ["bundleID"]),
+			("@all.-@1,-@1", ["bundleID"]),
+			("@all.-adamID,bundleID,-adamID,+size", ["bundleID", "size"]),
+		],
+	)
+	func `removing a field spec removed earlier in the section does nothing`(value: String, names: [String]) throws {
+		#expect(try parseFieldSpecs(value).map(\.name) == names)
 	}
 
 	@Test(arguments: ["@all._adamID,adamID", "@all._adamID,%adamID"])

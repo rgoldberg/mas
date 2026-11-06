@@ -716,8 +716,9 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 				// terminate it
 				switch try parseReference(&input, nameTerminatorSet: [fieldOccurrenceIndexPrefix, fieldSpecSeparator]) {
 				case let .resolved(reference):
-					_ = try resolvedReferenceFieldSpec(reference) // Validates existence
-					remove(reference)
+					if referenceFieldSpecs[reference.position - 1] != nil {
+						remove(reference)
+					}
 				case let .unmatched(name):
 					_ = try defaultFieldSpec(forName: name) // Validates that it is not a nonexistent field
 					removedUnmatchedFieldNameSet.insert(name)
@@ -1038,16 +1039,6 @@ private extension FieldSpecsBuilder {
 			throw .invalidPosition(text)
 		}
 		return index
-	}
-
-	/// The `source` field spec for a resolved reference: errors if its
-	/// reference-config position is `nil` (already removed earlier in this
-	/// section).
-	private func resolvedReferenceFieldSpec(_ reference: Reference) throws(ParsingError) -> FieldSpec {
-		guard let fieldSpec = referenceFieldSpecs[reference.position - 1] else {
-			throw .nonexistentFieldSpec(forName: reference.name ?? "@\(reference.position)")
-		}
-		return fieldSpec
 	}
 
 	private func currentWorkingIndex(ofReferencePosition position: Int) -> Int {

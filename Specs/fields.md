@@ -582,8 +582,7 @@ While a field spec's position in the reference fields config cannot be modified:
   spec's position, and a field spec may replace that `null` in turn.
 
 An index's `<field-spec-reference>` references the field spec or `null` at its
-normalized index in the list; a `<field-spec-edit>` other than a
-`<field-spec-removal>` applies to a `null` as
+normalized index in the list; a `<field-spec-edit>` applies to a `null` as
 [specified](#relative-field-specs).
 
 #### Relative Field Specs
@@ -603,7 +602,7 @@ field-spec-insertion = <insert> <field-spec-reference> <field-modifiers>
 field-spec-overlay   = <field-spec-reference> <field-modifiers>
 field-spec-move      = <move> <field-spec-reference> <field-modifiers>
 field-spec-hide      = <hide> <field-spec-reference> <field-modifiers>
-field-spec-removal   = <remove> <field-spec-reference> (* error: its <field-spec-reference> resolves to a null *)
+field-spec-removal   = <remove> <field-spec-reference>
 
 insert = "+"
 move   = "%"
@@ -639,6 +638,10 @@ field spec (as `<field-spec-insertion>` would, copying the baseline fields
 config's field spec) as its `source`, which replaces the `null` in the reference
 fields config, so that a later field spec edit modifies it (e.g., `.-a,a=X`
 restores `a`, labeled `X`, while `.-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
+
+A `<field-spec-removal>` whose `<field-spec-reference>` resolves to a `null`
+does nothing, leaving $previous$ unmodified (e.g., `.-a,-a` means what `.-a`
+means).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
 spec from the baseline fields config referenced by `fs`, so
