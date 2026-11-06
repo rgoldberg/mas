@@ -55,9 +55,9 @@ nonterminal](../../Specs/ebnf.md#parameterized-nonterminals) (e.g.,
 `transform-call(CALL_PREFIX, TRANSFORM)`), rather than repeating the definition,
 when that definition is long enough for its copies to drift (e.g.,
 `<transform-call>`'s error comment), because the shared definition states the
-shared syntax & semantic comments once; repeat a short sequence or choice whose
-name documents it (e.g., `<field-spec-move>` or `<style-prefix-setting>`),
-because a parameter would hide it for no gain.
+shared syntax & semantic comments once; repeat a short sequence or choice only
+if each use has a name of its own that documents it (e.g., `<field-spec-move>`
+or `<style-prefix-setting>`), because a parameter would hide it for no gain.
 
 In specs, write a literal that selects 1 of a set of names, rather than
 structuring the syntax (e.g., a transform name, `unix-time`, a config name, or
