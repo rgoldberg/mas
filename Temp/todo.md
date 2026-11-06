@@ -124,14 +124,13 @@ the functionality that needs them from specs & code:
    & custom configs; decide whether to remove each in
    `1226-fields-no-custom-names`:
    1. [`<pipeline>`, `<named-format-pipeline>` & every other
-      `<*-pipeline>`](../Specs/fields-format.md#pipelines): once
-      `NAMED_FORMAT_REFERENCE` is removed, each `<pipeline>` is only its
-      `TRANSFORM_PIPELINE`, so each of the others is only another name of its
-      transform pipeline, except that `<named-pipeline>`,
-      `<named-unconditional-pipeline>` & `<named-input-pipeline>` are only named
-      format references, so removing them leaves `%U`, `%E` & a `%I` in their
-      `<success-block>`s without a pipeline, and `<trimmable-pipeline>` is only
-      its `trimWhitespace` run.
+      `<*-pipeline>`](../Specs/fields-format.md#pipelines): once `FORMAT_NAME`
+      is removed, each `<pipeline>` is only its `TRANSFORM_PIPELINE`, so each of
+      the others is only another name of its transform pipeline, except that
+      `<named-pipeline>`, `<named-unconditional-pipeline>` &
+      `<named-input-pipeline>` are only named format references, so removing
+      them leaves `%U`, `%E` & a `%I` in their `<success-block>`s without a
+      pipeline, and `<trimmable-pipeline>` is only its `trimWhitespace` run.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also requires editing the [default
       configs](../Specs/configs.md#default-configs).

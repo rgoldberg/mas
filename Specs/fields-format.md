@@ -71,25 +71,24 @@ renders the value (e.g., [JSON output](json.md#json-config) renders the number
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-pipeline(NAMED_FORMAT_REFERENCE, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | NAMED_FORMAT_REFERENCE [ NAMED_TRANSFORM_PIPELINE ]
+pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | <named-pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE)>
 
-named-format-pipeline(FORMAT_NAME) = <pipeline(<named-format-reference(FORMAT_NAME)>, <value-transform-pipeline>, <value-transform-pipeline>)>
+named-format-pipeline(FORMAT_NAME) = <pipeline(FORMAT_NAME, <value-transform-pipeline>, <value-transform-pipeline>)>
 
 named-pipeline(FORMAT_NAME, TRANSFORM_PIPELINE) = <named-format-reference(FORMAT_NAME)> [ TRANSFORM_PIPELINE ]
 
 trimmable-pipeline(NAMED_PIPELINE) = NAMED_PIPELINE | <transform-run(<transform-call-prefix> <coercion>, <trim-whitespace>)>
 
-string-pipeline               = <pipeline(<named-format-reference(<string-format-name>)>, <value-transform-pipeline>, <string-input-pipeline>)>
-version-pipeline              = <pipeline(<named-format-reference(<version-format-name>)>, <value-transform-pipeline>, <version-input-pipeline>)>
-number-pipeline               = <pipeline(<named-format-reference(<number-format-name>)>, <value-transform-pipeline>, <number-input-pipeline>)>
-date-pipeline                 = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <date-input-pipeline>)>
-date-only-pipeline            = <pipeline(<named-format-reference(<date-format-name>)>, <value-transform-pipeline>, <coerced-string-chain>)>
-time-only-pipeline            = <pipeline(<named-format-reference(<time-only-format-name>)>, <value-transform-pipeline>, <time-only-input-pipeline>)>
-unconditional-pipeline        =
-  <pipeline(<named-format-reference(<unconditional-format-name>)>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
+string-pipeline               = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline>)>
+version-pipeline              = <pipeline(<version-format-name>, <value-transform-pipeline>, <version-input-pipeline>)>
+number-pipeline               = <pipeline(<number-format-name>, <value-transform-pipeline>, <number-input-pipeline>)>
+date-pipeline                 = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline>)>
+date-only-pipeline            = <pipeline(<date-format-name>, <value-transform-pipeline>, <coerced-string-chain>)>
+time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline>)>
+unconditional-pipeline        = <pipeline(<unconditional-format-name>, <unconditional-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline =
   <pipeline(
-    <named-format-reference(<unconditional-format-name>)>,
+    <unconditional-format-name>,
     <uncoerced-string-transform-run> | <unconditional-transform-pipeline>,
     <uncoerced-string-transform-run>
   )>
