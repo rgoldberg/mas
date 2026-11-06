@@ -796,23 +796,16 @@ private extension TransformCall {
 	/// value of its input type.
 	func follows(_ type: TransformValueType) -> Bool {
 		let inputType = transform.kind.inputType
-		return if let coercion {
+		return if coercion != nil {
 			switch type {
 			case .date, .timeOnly:
 				inputType == .string
 			case .number:
-				inputType == .string || inputType == .date && coercion.dateFormats.isNumberUnixTime
+				inputType == .string || inputType == .date
 			case .string:
 				inputType != .string
 			case .version:
-				switch inputType {
-				case .date:
-					coercion.dateFormats.hasUnixTime || coercion.dateFormats.iso8601Forms != [.datetime]
-				case .timeOnly:
-					false
-				default:
-					true
-				}
+				inputType != .timeOnly
 			}
 		} else {
 			inputType == type

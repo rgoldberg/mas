@@ -191,10 +191,11 @@ forbidding it treats near parallels differently, which outweighs the overruled
 reason for rejecting its allowance: its value is a date-only, which no time zone
 affects, or is already a date-only, so `dateOnly` cannot affect what it means.
 
-In specs, never let a call whose input is a version take a `<coercion>` to a
-date whose only `<date-format>` is `<iso-datetime>` (e.g.,
-`%.V..:iso-datetime:dateOnly+-+`), because a version has no `:`, so it is never
-a datetime, so the coercion can only abort.
+In specs, never forbid a `<coercion>` to a date merely because its
+`<date-format>`s cannot match its input (e.g., `.round..:iso:dateOnly` or
+`%.V..:iso-datetime:dateOnly+-+`), because other `<date-format>`s make the same
+`<coercion>` useful, while an aborted value shows its effect, which outweighs
+the overruled reason for rejecting its allowance: the coercion can only abort.
 
 In specs, never let a number coercion normalize its coerced value's text,
 whether only for a string (e.g., `%.n` giving `1.5` for `"1.50"`, but `1.50` for

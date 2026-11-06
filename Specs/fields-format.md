@@ -140,8 +140,8 @@ value-transform-pipeline =
   | <coerced-chain>
 
 string-input-pipeline    = <string-chain(<transform-call-prefix>)> | <after-string-run>
-number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
-version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <version-date-chain>
+number-input-pipeline    = <number-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
+version-input-pipeline   = <coerced-string-chain> | <coerced-number-chain> | <coerced-date-chain>
 date-input-pipeline      = <date-chain(<transform-call-prefix>)> | <coerced-string-chain>
 time-only-input-pipeline = <time-only-chain(<transform-call-prefix>)> | <coerced-string-chain>
 
@@ -164,11 +164,9 @@ coerced-string-chain    = <string-chain(<transform-call-prefix> <coercion>)>
 coerced-number-chain    = <number-chain(<transform-call-prefix> <number-coercion>)>
 coerced-date-chain      = <date-chain(<transform-call-prefix> <date-coercion>)>
 coerced-time-only-chain = <time-only-chain(<transform-call-prefix> <coercion>)>
-number-date-chain       = <date-chain(<transform-call-prefix> <number-date-coercion>)>
-version-date-chain      = <date-chain(<transform-call-prefix> <version-date-coercion>)>
 
 after-string-run = <coerced-number-chain> | <coerced-date-chain> | <coerced-time-only-chain>
-after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <number-date-chain>
+after-number-run = <number-to-string-chain(<transform-call-prefix>)> | <coerced-string-chain> | <coerced-date-chain>
 
 transform-run(CALL_PREFIX, TRANSFORM) = <transform-call(CALL_PREFIX, TRANSFORM)> [ <transform-call(<transform-call-prefix>, TRANSFORM)>+ ]
 
@@ -915,15 +913,11 @@ escaped.
 ```ebnf
 date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
 
-date-coercion         =
+date-coercion =
   <coercion> [ <date-coercion-arguments(<date-formats>)> ]
   (* default date-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
-version-date-coercion = <coercion> [ <date-coercion-arguments(<version-date-formats>)> ] (* default version-date-formats: 'iso' *)
-number-date-coercion  = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default unix-time-date-formats: {a number as a Unix time} *)
 
-date-formats           = <date-format> … <argument-separator>
-version-date-formats   = [ ( <iso-datetime> <argument-separator> )+ ] ( <iso> | <iso-date> | <unix-time> ) [ ( <argument-separator> <date-format> )+ ]
-unix-time-date-formats = [ ( <date-iso-format> <argument-separator> )+ ] <unix-time> [ ( <argument-separator> <date-format> )+ ]
+date-formats = <date-format> … <argument-separator>
 
 date-format     = <date-iso-format> | <unix-time>
 date-iso-format = <iso> | <iso-date> | <iso-datetime>
@@ -977,15 +971,12 @@ string `5.6` as a date).
 every chronologic number, so a branch that means to match a number must precede
 theirs or follow a `<coercion>` that omits `<unix-time>` (e.g., `%mn.d+` or
 `%m.:iso:d.n+`, but not `%m.d.n+`, which would render the price `5.6` as a
-date). A call whose input the syntax text determines to be a number must omit
-`<date-coercion-arguments>` or list `<unix-time>` (e.g., `.round..dateOnly` or
-`.round..:iso,unix-time:dateOnly`, but not `.round..:iso:dateOnly`, which can
-only abort).
+date).
 
-A version has no `:`, so it is never a datetime, so a call whose input the
-syntax text determines to be a version must list a `<date-format>` other than
-`<iso-datetime>` (e.g., `%.V..:iso,iso-datetime:dateOnly+-+`, but not
-`%.V..:iso-datetime:dateOnly+-+`, which can only abort).
+A `<coercion>` whose `<date-format>`s cannot match its input merely aborts
+(e.g., `.round..:iso:dateOnly`, because no number matches `<iso>`, or
+`%.V..:iso-datetime:dateOnly+-+`, because a version has no `:`, so it is never a
+datetime).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.

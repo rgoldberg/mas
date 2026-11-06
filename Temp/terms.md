@@ -588,12 +588,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - date coercion: a `<coercion>` to a date, which parses a date that any of
       its `<date-format>`s matches or, absent any, a date that `<iso>` matches &
       a number as a Unix time
-    - version date coercion: a date coercion of a version, which omits its
-      `<date-format>`s or lists 1 other than `<iso-datetime>`
-      (`<version-date-coercion>`)
-    - number date coercion: a date coercion of a number, which omits its
-      `<date-format>`s or includes `<unix-time>`, so it coerces the number as a
-      Unix time (`<number-date-coercion>`)
     - REJECTED: Unix epoch (for a Unix time) / epoch / epoch time / Unix
       timestamp / numeric timestamp
 93. - input type: the type of a nonterminal's input
