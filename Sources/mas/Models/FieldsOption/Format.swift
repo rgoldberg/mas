@@ -115,7 +115,7 @@ struct Coercion: Hashable { // swiftlint:disable:this one_declaration_per_file
 	/// A `<coercion>` without `<number-coercion-arguments>`.
 	static let `default` = Self(numberConventions: .canonical, triviaPrefixRegex: .empty, triviaSuffixRegex: .empty)
 
-	/// A `<*date*-coercion>` with `<date-coercion-arguments>` of `dateFormats`.
+	/// A `<date-coercion>` with `<date-coercion-arguments>` of `dateFormats`.
 	static func date(_ dateFormats: ChronologicFormats) -> Self {
 		.init(
 			numberConventions: .canonical,
