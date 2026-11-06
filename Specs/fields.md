@@ -846,9 +846,8 @@ sort =
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- A **sort key** is a field spec with an enabled `<sort>`, which affects item
-  sorting.
-- Other field specs do not affect item sorting.
+A **sort key** is a field spec with an enabled `<sort>`, which affects item
+sorting.
 
 ##### Sort Priority
 
