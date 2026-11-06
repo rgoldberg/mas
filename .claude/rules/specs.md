@@ -158,7 +158,8 @@ In specs, specify syntax according to the 1st of these that applies:
    which merely has nothing to do, so every such name behaves alike.
 3. Allow it: synonymous syntax text (i.e., syntax text that means what other
    syntax text means) that nests a placeholder in a block (e.g., `%+N%n+`, which
-   means what `%n` means), because verbose syntax text still does what it says.
+   means what `%n` means, `%+N%N.round++`, or `%+N%i+`), because verbose syntax
+   text still does what it says.
 4. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a literal that cannot affect what it means, when the syntax text
    alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled by nothing,

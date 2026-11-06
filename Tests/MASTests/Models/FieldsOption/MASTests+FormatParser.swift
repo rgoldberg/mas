@@ -175,6 +175,9 @@ private extension MASTests { // swiftlint:disable file_length
 			("%+N%n+", .number(5), "5"),
 			("[%+N%n+]", .string("x"), nil),
 			("%mN%n+b+", .number(5), "5"),
+			("%+N%N.round++", .number(5.6), "6"),
+			("%N%N.round++none+", .string("x"), "none"),
+			("%+N%i+", .number(5), "5"),
 			// Non-nullary abort-on-success
 			("%-Nnot a number+", .string("x"), "not a number"),
 			("[%-Nnot a number+]", .number(5), nil),
