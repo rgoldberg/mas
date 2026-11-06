@@ -158,7 +158,8 @@ position that contains no candidate terminator & that its typed terminal
 `{integer: 1 to 100}`, `150` consumes `15`, leaving `0` for the next token),
 less any ignored outer bare whitespace; iff no such prefix exists, an error is
 reported. Text that is empty after ignoring its outer bare whitespace is not a
-variable token (e.g., in `a= ,b`, `a`'s `<label>` is directly absent).
+variable token (e.g., if the syntax text ends with `a=` & a space, `<label>` is
+directly absent).
 
 Iff multiple typed terminals are available at the current position (e.g., in
 `<a> | <b>`), the longest variable token that any of them accepts is consumed,
