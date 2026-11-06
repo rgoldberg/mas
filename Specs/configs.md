@@ -27,7 +27,7 @@ Display commands support multiple **output formats**:
   between items.
 - **JSON**: JSON object per item, key-value pair per field.
 
-Output configuration applies to every output format unless otherwise specified.
+A fields config applies to every output format unless otherwise specified.
 
 Each display command has a default output format.
 
