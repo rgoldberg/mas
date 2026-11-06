@@ -840,9 +840,7 @@ trivia-suffix-regex = {regex} (* default: {empty string} *)
 `<coercion>` allows a matcher to also match a value whose entire content parses
 as the matcher's type, instead of requiring the input's type to match (e.g.,
 `%.n` matches `4.5` & `"4.50"`, but not `"4.5a"`), replacing the input with the
-**coerced value**. For a type unsupported by the input format, a default
-coercion matches what an [implicit coercion](#value-types) matches (e.g., `%.v`
-& `%v`, for JSON input).
+**coerced value**.
 
 A string coercion matches every value except a `null` or an absent one, which
 has no text to coerce, and coerces it as [specified](#value-coercion) (e.g., for
