@@ -38,13 +38,13 @@ Giving more than 1 such flag or option, even the same one twice (e.g.,
 `--json --json` or `--json-config P --table`), is an error.
 
 An **item error** is an error that depends on an item's field value (e.g.,
-`.round` for a string, per [`<transform-call>`](fields-format.md#transforms)'s
+`.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s
 error comment). Only an item's 1st item error is reported, which does not stop
 its command: the command outputs every other item as if that item were not in
 the input, because 1 item's value should not hide any other item (e.g., if only
 the 2nd of 3 items has an item error, the 1st & 3rd are output, with 1 item
-separator line between them, and, for table output, a field that only the 2nd
-has has no column).
+separator line between them for key-value output, and, for table output, a field
+of only the 2nd has no column).
 
 ## Line Terminators
 
