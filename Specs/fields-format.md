@@ -793,9 +793,9 @@ non-nullary-string     = "S" (* is string;                                      
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`%U`'s, `%E`'s & `%W`'s values are each a string or a `null`, which remains
-unmodified, so a transform has nothing to coerce, unless it follows a
-`<named-format-reference>`, whose named format may output any type (e.g.,
+`%U`'s, `%E`'s & `%W`'s values are each a `null`, which a transform leaves
+unmodified, or a string, so a transform has nothing to coerce, unless it follows
+a `<named-format-reference>`, whose named format may output any type (e.g.,
 `%W.trimWhitespace+-+`, `%U.uppercase+-+` & `%U:x..uppercase+-+`, but neither
 `%W..trimWhitespace+-+` nor `%U..uppercase+-+`, as `%S..uppercase++` is an
 error).
