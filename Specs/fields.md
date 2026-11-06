@@ -1335,6 +1335,9 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
+Whitespace-only `<template-text>` immediately after a placeholder is consumed
+iff before `%` (e.g., `%i %l` retains its space).
+
 A bare `.` in a field name is invalid, reserving it for future syntax; an
 escaped `.` is consumed (e.g., `a\.b` names the field `a.b`).
 
