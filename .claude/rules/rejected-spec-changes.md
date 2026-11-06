@@ -129,7 +129,13 @@ never abort, nor forbid one in a `<format-template>` or a `<success-block>`
 `<success-block>` of `%U`, `%E`, `%W`, `%B`, `%T`, or `%F`, whose matcher
 matched its format input (e.g., `%U%I..round++-+` or `%T%I..round++-+`), because
 no matcher can otherwise coerce a label, a name, or a format input that it
-cannot match.
+cannot match. An overruling to forbid a `%I`'s `<coercion>` that can only abort
+in the `<success-block>` of `%D`, `%C`, or `%V` (e.g.,
+`%D%I..timeOnlyTimeZone:UTC:++-+`, `%C%I..dateOnly++-+`, or
+`%.V%I..timeOnlyTimeZone:UTC:++-+`), because its matcher matched a format input
+that can never parse as that type, was declined, because it would need 3 input
+pipelines & variants of the string chains, only to report no-ops that almost
+nobody writes, while an aborted value shows its effect.
 
 In specs, never let a `%I` in the `<success-block>` of `%B`, `%T`, or `%F` take
 a `<coercion>` to anything but a string, unless it follows a
