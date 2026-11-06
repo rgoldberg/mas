@@ -379,8 +379,8 @@ base-fields-config-section        = <base-fields-config-section-prefix> <base-fi
 base-fields-config-section-prefix = "@"
 
 base-fields-config-name =
-  {string: fields config name, or a stem followed by "@unsuffixed"}
-  (* default: "default"; error: no fields config of its name is found, or it is in a reference cycle *)
+  {string: fields config name, or a stem followed by '@unsuffixed'}
+  (* default: 'default'; error: no fields config of its name is found, or it is in a reference cycle *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
