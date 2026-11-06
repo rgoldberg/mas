@@ -296,6 +296,7 @@ private extension MASTests {
 			("1N de_DE :", "1.234", "999", .orderedDescending),
 			("1N,.,3,,\\,:", "1.234,5", "1.234,25", .orderedDescending),
 			("1N,,0:", "1,2345", "999", .orderedDescending),
+			("1N,x,0:", "1x2345", "999", .orderedDescending),
 			("1N:", "1,2345", "999", .orderedAscending),
 			("1N:", "1.5e3", "999", .orderedDescending),
 			("1N:", ".5", ".25", .orderedDescending),

@@ -654,6 +654,7 @@ private extension MASTests { // swiftlint:disable file_length
 			("%e", nil),
 			("%w", nil),
 			("%U+-+", ""),
+			("%W.trimWhitespace+-+", nil),
 			("%S+-+", "-"),
 			("[%u]", "[]"),
 			("x%iy", "xy"),
