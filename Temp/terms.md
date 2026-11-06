@@ -919,3 +919,24 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        output cannot depend on anything but its own text
      - hold: of an expression, to have a name, an argument, a block content, or
        a list element in it
+132. - item: 1 of the elements of a display command's input, each of which has
+       fields (e.g., an app; [used](../Specs/mas.md#items))
+     - field spec: the configuration of an output field, with its position
+       ([defined](../Specs/fields.md#field-specs))
+     - label: a field spec's table header, or its key-value or JSON key
+       (`<label>`; [defined](../Specs/fields.md#labeling))
+     - modifier: a `<preset-modifier>`, `<label-modifier>`, `<format-modifier>`,
+       or `<sort-modifier>` ([used](../Specs/fields.md#field-modifiers))
+     - section: a `<relative-config>`'s `<base-fields-config-section>`,
+       `<field-order-section>`, `<item-sort-section>`, or
+       `<field-spec-edits-section>` ([used](../Specs/fields.md#relative-config))
+133. - pipeline: a named format reference and/or transforms, which are applied
+       to a value (`<pipeline>`; [used](../Specs/fields-format.md#pipelines))
+     - template: template text & placeholders (e.g., `(%i)`; `<format-template>`
+       or `<block-template>`; [used](../Specs/fields-format.md#value-types))
+     - predicate: what a matcher tests a value for, named by a letter
+       (`<predicate>`; [used](../Specs/fields-format.md#placeholders))
+     - conditional / unconditional placeholder: a placeholder whose matcher can
+       fail / always succeeds (`<conditional-placeholder>` /
+       `<unconditional-placeholder>`;
+       [used](../Specs/fields-format.md#success--failure))
