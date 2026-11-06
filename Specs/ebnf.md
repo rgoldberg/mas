@@ -77,7 +77,10 @@ possible occurrences, determined from the grammar instead of the syntax text:
 A **constant expression** consumes text that evaluates to invariant text (e.g.,
 a literal or a name literal).
 
-A **variable expression** consumes variable text (e.g., a typed terminal).
+A **variable expression** consumes variable text (e.g., a typed terminal). A
+choice of constant expressions is a variable expression, because which
+alternative it consumes varies (e.g.,
+[`<direction>`](fields.md#sort-direction)).
 
 ### Compounds Vs. Terminals
 
