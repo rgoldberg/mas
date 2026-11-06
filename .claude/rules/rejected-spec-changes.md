@@ -76,6 +76,12 @@ take one other than `trimWhitespace` (e.g., `%U..uppercase+-+`,
 `%W%I..uppercase++-+`), because no such transform can modify its value, so it
 cannot affect what its placeholder means.
 
+In specs, never forbid a string transform merely because it cannot modify a
+non-string value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`,
+or `.dateOnly..uppercase`), because that would require a `<boolean-pipeline>` &
+a whitespace-free variant of the string chains after each date, time-only,
+version, or number, all to report no-ops that almost nobody writes.
+
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
 (e.g., `%b`'s boolean), so a future syntax can use it without extending the
