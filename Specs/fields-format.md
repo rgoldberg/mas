@@ -472,6 +472,12 @@ the current date in the system time zone. A UTC offset `<time-zone-code>` has a
 fixed UTC offset, but a Foundation time zone abbreviation may identify a time
 zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 
+A time-only value whose instant on its `<reference-date>`, as a Unix time, is
+not chronologic [aborts](#success--failure) formatting, with or without
+`<coercion>`, because its value, rather than its syntax, decides this (e.g., in
+the UTC system time zone, `.timeOnlyTimeZone:UTC,+292278994-08-17:` aborts for
+`"17:39:23Z"`, but renders `"01:00:00Z"` as `01:00:00Z`).
+
 ###### `timeZone` & `timeOnlyTimeZone`
 
 <!--editorconfig-checker-disable-->

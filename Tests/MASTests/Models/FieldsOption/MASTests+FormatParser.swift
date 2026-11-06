@@ -835,6 +835,18 @@ private extension MASTests { // swiftlint:disable file_length
 			("%.C.timeOnlyTimeZone:America/New_York,2020-07-15:++", "17:39:23Z", "13:39:23-04:00"),
 			("%.C.timeOnlyTimeZone:America/New_York:++", "17:39:23Z", "13:39:23-04:00"),
 			("%.C.timeOnlyTimeZone:America/New_York,+10000-07-15:++", "17:39:23Z", "13:39:23-04:00"),
+			// A time-only value whose instant on its reference date is out of range
+			// aborts formatting, with or without `<coercion>`
+			(".timeOnlyTimeZone:UTC,+292278994-08-17:", "17:39:23Z", nil),
+			("..timeOnlyTimeZone:UTC,+292278994-08-17:", "17:39:23Z", nil),
+			("%.C.timeOnlyTimeZone:UTC,+292278994-08-17:+-+", "17:39:23Z", nil),
+			("[%.C.timeOnlyTimeZone:UTC,+292278994-08-17:+-+]", "17:39:23Z", nil),
+			("..timeOnlyTimeZone:UTC,+292278994-08-17:..uppercase", "17:39:23Z", nil),
+			("..timeOnlyTimeZone:UTC,+292278994-08-17:", "01:00:00Z", "01:00:00Z"),
+			// Only the last `timeOnlyTimeZone` sets the reference date
+			(".timeOnlyTimeZone:UTC,+292278994-08-17:.timeOnlyTimeZone:UTC,2020-01-15:", "17:39:23Z", "17:39:23Z"),
+			(".timeOnlyTimeZone:UTC,+292278994-08-17:.timeOnlyTimeZone:UTC:", "17:39:23Z", "17:39:23Z"),
+			(".timeOnlyTimeZone:UTC,2020-01-15:.timeOnlyTimeZone:UTC,+292278994-08-17:", "17:39:23Z", nil),
 			("[%.c]", "24:00:00", nil),
 			("[%.c]", "23:59:60", nil),
 			("[%.c]", "17:39:23+19:00", nil),

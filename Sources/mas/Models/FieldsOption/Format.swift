@@ -934,18 +934,31 @@ private enum FormatValue { // swiftlint:disable:this one_declaration_per_file
 		}
 	}
 
-	/// This value transformed by `calls`, or `nil` iff a coercion fails
+	/// Whether this is anything but a time-only value whose instant on its given
+	/// reference date is out of range; the current date's is always in range.
+	private var isRenderable: Bool {
+		if case let .chronologic(.time(time), style) = self {
+			style.referenceDate.map { time.instant(on: $0) != nil } ?? true
+		} else {
+			true
+		}
+	}
+
+	/// This value transformed by `calls`, or `nil` iff a coercion fails or a
+	/// time-only value's instant on its reference date is out of range
 	/// (formatting aborts). A `null` or absent value remains unmodified through
-	/// every transform, so it is never an error.
+	/// every transform, so it is never an error. Only the last of a time-only
+	/// value's contiguous transforms sets its reference date, so they may pass
+	/// through an out-of-range instant.
 	func applying(_ calls: [TransformCall]) throws(FormattingError) -> Self? {
 		var value = self
 		for call in calls where !isNullish {
-			guard let transformed = try value.applying(call) else {
+			guard value.isRenderable || call.transform.kind == .timeOnly, let transformed = try value.applying(call) else {
 				return nil
 			}
 			value = transformed
 		}
-		return value
+		return value.isRenderable ? value : nil
 	}
 
 	private func applying(_ call: TransformCall) throws(FormattingError) -> Self? {
@@ -1130,6 +1143,9 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 		case let .datetime(instant):
 			Self.formatted(instant, in: timeZone ?? systemTimeZone, as: isDateOnly ? .date : .datetime)
 		case let .time(time):
+			// `?? ""` is unreachable: `FormatValue.applying(_:)` aborts formatting
+			// for an instant out of range on a given reference date, while the
+			// current date's is always in range
 			time.instant(on: referenceDate ?? Self.currentDay).map { instant in
 				Self.formatted(instant, in: timeZone ?? systemTimeZone, as: .time)
 			}
