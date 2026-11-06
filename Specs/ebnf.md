@@ -616,7 +616,7 @@ commentary.
 ```
 
 A **free-form description** describes a value or a type in prose (e.g.,
-`{empty string}` or `{field value}`). Its 1st word must be followed by
+`{empty string}` or `{matched value}`). Its 1st word must be followed by
 whitespace, so that it never matches a [typed terminal](#typed-terminals), even
 one of a future `SUBTYPE` (e.g., neither `{empty}` nor `{empty: string}`).
 
