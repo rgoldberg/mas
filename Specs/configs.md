@@ -7,6 +7,8 @@ per-[context](#contexts) lookup hierarchy.
 An **app** (software implementing these specs, e.g., mas) may override any
 behavior or default that these specs define.
 
+Uses the [custom EBNF grammar](ebnf.md).
+
 ## Commands
 
 A **command** is a node in a CLI tool's command hierarchy: either the root
