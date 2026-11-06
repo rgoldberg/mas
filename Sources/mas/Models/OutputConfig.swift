@@ -83,8 +83,18 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		// are resolved again, for only the items that remain
 		let sortedFieldSpecs = resolved.displayFieldSpecs(for: sortedObjects)
 		let outputObjects = sortedObjects.filter { object in
-			reportingItemError { () throws(FormattingError) in
-				try resolved.renderMembers(of: object, fieldSpecs: sortedFieldSpecs, outputFormat: outputFormat)
+			// Table output outputs only each field's last member (fields.md
+			// "Members")
+			let members =
+				if case .table = outputFormat {
+					sortedFieldSpecs.map { fieldSpec in
+						(fieldSpec: fieldSpec, value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])
+					}
+				} else {
+					resolved.fieldOrder.itemMembers(sortedFieldSpecs, for: object)
+				}
+			return reportingItemError { () throws(FormattingError) in
+				try members.map { member throws(FormattingError) in try member.fieldSpec.rendered(value: member.value) }
 			} != nil
 		}
 		let displayFieldSpecs = resolved.displayFieldSpecs(for: outputObjects)
@@ -125,24 +135,6 @@ private extension FieldsConfig { // swiftlint:disable:this file_types_order
 	/// The visible field specs, in field order, given `objects`' unlisted fields.
 	func displayFieldSpecs(for objects: [JSON.Object]) -> [FieldSpec] {
 		fieldOrder.applied(to: fieldSpecs, unlisted: unlistedFieldSpecs(in: objects)).filter { !$0.isHidden }
-	}
-
-	/// Renders each of `object`'s members that `outputFormat` outputs, which
-	/// throws `object`'s 1st item error, if any: the last member of each field
-	/// for table output (fields.md "Members"), else every member.
-	func renderMembers(of object: JSON.Object, fieldSpecs: [FieldSpec], outputFormat: OutputFormat)
-	throws(FormattingError) {
-		let members =
-			if case .table = outputFormat {
-				fieldSpecs.map { fieldSpec in
-					(fieldSpec: fieldSpec, value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])
-				}
-			} else {
-				fieldOrder.itemMembers(fieldSpecs, for: object)
-			}
-		for member in members {
-			_ = try member.fieldSpec.rendered(value: member.value)
-		}
 	}
 }
 
