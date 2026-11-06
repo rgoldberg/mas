@@ -116,9 +116,10 @@ section to it would still fail.
 
 In specs, never allow a `<coercion>` on a call whose value's type equals its
 input type, unless a `<named-format-reference>` immediately precedes it (e.g.,
-`.round..round` or `%S..uppercase++`), because it cannot affect what the call
-means, nor require one on a call whose types match (e.g.,
-`.numberFormat.uppercase`), because it would add nothing.
+`.round..round`, `%S..uppercase++`, or `%W..trimWhitespace+-+`, whose value is a
+string or a `null`), because it cannot affect what the call means, nor require
+one on a call whose types match (e.g., `.numberFormat.uppercase`), because it
+would add nothing.
 
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 (e.g., `%S.uppercase+%L..round++` or
