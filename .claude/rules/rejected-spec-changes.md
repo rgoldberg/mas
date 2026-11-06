@@ -55,6 +55,13 @@ or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because
 the former already aborts on failure & the latter's matcher cannot fail, so it
 cannot affect what either means.
 
+In specs, never forbid a `<success-block>` that is solely its matcher's nullary
+placeholder (e.g., `%+N%n+` or `%mN%n+b+`), because, although it means what
+shorter syntax text means (e.g., `%n` or `%mnb+`), `%N%n+none+` must remain
+valid, so forbidding it would need a separate block syntax per predicate for
+`<abort-on-failure>` & for non-negated branches, which would make the syntax too
+complicated.
+
 In specs, never make `<styled-key>`'s `<style-specifier>` optional (e.g., `K:`),
 because `K:` would style keys by nothing, which contradicts `K` & means what `k`
 means, while `<header-on>`'s is optional because `H:` (an unstyled header row)

@@ -151,7 +151,11 @@ In specs, specify syntax according to the 1st of these that applies:
    without affecting what the list means, unless it makes the grammar ambiguous
    (e.g., `005`, `//00`, `@x.`, `Ciso,iso:`, or `B/_:`, but not `.-a,-a`, whose
    2nd `-a` removes a `null`), because generated or edited syntax produces them.
-2. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
+2. Allow it: synonymous syntax text (i.e., syntax text that means what other
+   syntax text means) that would make the syntax too complicated to prevent
+   (e.g., `%+N%n+`, which means what `%n` means, but whose prevention would need
+   a separate block syntax per predicate).
+3. Forbid it in the grammar: syntax that contradicts itself, cannot mean what it
    says, or has a modifier or wrapper that cannot affect what it means, when the
    syntax text alone decides this (e.g., `%N%s++`, `K:`, whose keys are styled
    by nothing, `%+s`, whose `<abort-on-failure>` modifies nothing, because `%s`
@@ -160,11 +164,11 @@ In specs, specify syntax according to the 1st of these that applies:
    value's rendering (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`, or
    `.dateOnly..uppercase`), other than for `%U`, `%E`, or `%W`, whose matcher
    exists only to detect a blank value.
-3. Attach an error comment: syntax that contradicts itself, or cannot mean what
+4. Attach an error comment: syntax that contradicts itself, or cannot mean what
    it says, when only context outside the syntax text decides it, or only a
    comparison of variable tokens' values (e.g., an effective `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`,
    or a digit group separator that equals the decimal separator).
-4. Otherwise: allow it, even if its output is merely misaligned or split into
+5. Otherwise: allow it, even if its output is merely misaligned or split into
    multiple lines (e.g., a tab or a line terminator in a `<leader-pattern>`),
    because its output shows the effect.

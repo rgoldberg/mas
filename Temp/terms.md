@@ -165,6 +165,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       text, boundary text)
     - syntax text: the text that a syntax parses (e.g., an option value), as
       opposed to an app's input (e.g., its items)
+    - synonymous syntax text: syntax text that means what other syntax text
+      means (e.g., `%+N%n+` & `%n`)
     - REJECTED: parsed text (too generic: an app's input is parsed too) / input
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
