@@ -667,9 +667,9 @@ renders `"1.234,5"` as `1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x`
 sets no format, renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
-which the field value is the value against which the matcher is evaluated, as
-its [coerced value](#coercion) iff the matcher coerces (e.g., `%.:de:n`
-evaluates to `1234.5` for `"1.234,5"`, as does `%n` in `%.:de:N%n++`).
+which its **matched value** is the value against which it is evaluated, as its
+[coerced value](#coercion) iff it coerces (e.g., `%.:de:n` evaluates to `1234.5`
+for `"1.234,5"`, as does `%n` in `%.:de:N%n++`).
 
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
@@ -796,20 +796,20 @@ non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-b
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                               output type: any; value: {field value}; mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                               output type: any; value: {field value}; mnemonic: 2nd letter of null *)
-nullary-empty          = "e" (* is null or an empty string;                            output type: any; value: {field value} *)
-non-nullary-empty      = "E" (* is null or an empty string;                            output type: any; value: {field value} *)
-nullary-whitespace     = "w" (* is null, an empty string, or a whitespace-only string; output type: any; value: {field value} *)
-non-nullary-whitespace = "W" (* is null, an empty string, or a whitespace-only string; output type: any; value: {field value} *)
-nullary-boolean        = "b" (* is boolean;                                            output type: boolean; value: {field value} *)
-non-nullary-boolean    = "B" (* is boolean;                                            output type: boolean; value: {field value} *)
-nullary-true           = "t" (* is true;                                               output type: boolean; value: {field value} *)
-non-nullary-true       = "T" (* is true;                                               output type: boolean; value: {field value} *)
-nullary-false          = "f" (* is false;                                              output type: boolean; value: {field value} *)
-non-nullary-false      = "F" (* is false;                                              output type: boolean; value: {field value} *)
-nullary-string         = "s" (* is string;                                             output type: string; value: {field value} *)
-non-nullary-string     = "S" (* is string;                                             output type: string; value: {field value} *)
+nullary-null           = "u" (* is null;                                               output type: any; value: {matched value}; mnemonic: 2nd letter of null *)
+non-nullary-null       = "U" (* is null;                                               output type: any; value: {matched value}; mnemonic: 2nd letter of null *)
+nullary-empty          = "e" (* is null or an empty string;                            output type: any; value: {matched value} *)
+non-nullary-empty      = "E" (* is null or an empty string;                            output type: any; value: {matched value} *)
+nullary-whitespace     = "w" (* is null, an empty string, or a whitespace-only string; output type: any; value: {matched value} *)
+non-nullary-whitespace = "W" (* is null, an empty string, or a whitespace-only string; output type: any; value: {matched value} *)
+nullary-boolean        = "b" (* is boolean;                                            output type: boolean; value: {matched value} *)
+non-nullary-boolean    = "B" (* is boolean;                                            output type: boolean; value: {matched value} *)
+nullary-true           = "t" (* is true;                                               output type: boolean; value: {matched value} *)
+non-nullary-true       = "T" (* is true;                                               output type: boolean; value: {matched value} *)
+nullary-false          = "f" (* is false;                                              output type: boolean; value: {matched value} *)
+non-nullary-false      = "F" (* is false;                                              output type: boolean; value: {matched value} *)
+nullary-string         = "s" (* is string;                                             output type: string; value: {matched value} *)
+non-nullary-string     = "S" (* is string;                                             output type: string; value: {matched value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -832,8 +832,8 @@ nullary-number-matcher     = [ <number-coercion> ] <nullary-number>
 non-nullary-number-matcher = [ <number-coercion> ] <non-nullary-number>
 non-nullary-number-success = [ <number-coercion> ] <non-nullary-success(<nullary-number>, <non-nullary-number>, <number-pipeline>)>
 
-nullary-number     = "n" (* is number; output type: number; value: {field value} *)
-non-nullary-number = "N" (* is number; output type: number; value: {field value} *)
+nullary-number     = "n" (* is number; output type: number; value: {matched value} *)
+non-nullary-number = "N" (* is number; output type: number; value: {matched value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -847,8 +847,8 @@ nullary-version-matcher     = [ <coercion> ] <nullary-version>
 non-nullary-version-matcher = [ <coercion> ] <non-nullary-version>
 non-nullary-version-success = [ <coercion> ] <non-nullary-success(<nullary-version>, <non-nullary-version>, <version-pipeline>)>
 
-nullary-version     = "v" (* is version; output type: version; value: {field value} *)
-non-nullary-version = "V" (* is version; output type: version; value: {field value} *)
+nullary-version     = "v" (* is version; output type: version; value: {matched value} *)
+non-nullary-version = "V" (* is version; output type: version; value: {matched value} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->

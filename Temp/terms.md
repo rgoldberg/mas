@@ -812,6 +812,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, replacing the input
        ([defined](../Specs/fields-format.md#coercion))
+     - matched value: the value against which a matcher is evaluated, as its
+       coerced value iff it coerces
+       ([defined](../Specs/fields-format.md#success--failure))
      - default coercion: a `<coercion>` without arguments
        ([defined](../Specs/fields-format.md#value-types))
      - implicit coercion: what coerces a field value, absent a `<coercion>`, to
