@@ -183,6 +183,7 @@ private extension MASTests {
 			("1N,.:", .invalidSortOptionArguments("N")),
 			("1N,,,,.:L de_DE :", .invalidSortOptionArguments("N")),
 			("1N,,x:", .invalidSortOptionArguments("N")),
+			("1N,,0,2:", .invalidSortOptionArguments("N")),
 			("1N,,-1:", .invalidSortOptionArguments("N")),
 			("1N,,,,,bogus:", .invalidSortOptionArguments("N")),
 			("1N,,,,,,:", .invalidSortOptionArguments("N")),

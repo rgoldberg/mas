@@ -275,7 +275,8 @@ func integer(_ argument: String) -> Int? {
 /// `defaultBaseConventions`.
 ///
 /// - Throws: `invalidArgumentsError` for an invalid argument, or iff the digit
-///   group separator equals the decimal separator.
+///   group separator equals the decimal separator, or iff a
+///   `<digit-group-size>` of `0` has a positive `<secondary-digit-group-size>`.
 func numberConventions(
 	from arguments: ArraySlice<String?>,
 	defaultBaseConventions: NumberConventions,
@@ -283,25 +284,35 @@ func numberConventions(
 ) throws(ParsingError) -> NumberConventions {
 	let arguments = Array(arguments)
 	let baseConventions = try arguments[0].map(numberConventions(forIdentifier:)) ?? defaultBaseConventions
-	func size(at index: Int, default: Int) throws(ParsingError) -> Int {
-		guard let argument = arguments[index] else {
-			return `default`
+	func size(at index: Int) throws(ParsingError) -> Int? {
+		try arguments[index].map { argument throws(ParsingError) in
+			guard let size = nonNegativeInteger(argument) else {
+				throw invalidArgumentsError
+			}
+			return size
 		}
-		guard let size = nonNegativeInteger(argument) else {
-			throw invalidArgumentsError
-		}
-		return size
 	}
+	let digitGroupSize = try size(at: 2)
+	let secondaryDigitGroupSize = try size(at: 3)
 	let conventions = NumberConventions(
 		digitGroupSeparator: arguments[1] ?? baseConventions.digitGroupSeparator,
-		digitGroupSize: try size(at: 2, default: baseConventions.digitGroupSize),
-		secondaryDigitGroupSize: try size(at: 3, default: baseConventions.secondaryDigitGroupSize),
+		digitGroupSize: digitGroupSize ?? baseConventions.digitGroupSize,
+		secondaryDigitGroupSize: secondaryDigitGroupSize ?? baseConventions.secondaryDigitGroupSize,
 		decimalSeparator: arguments[4] ?? baseConventions.decimalSeparator,
 	)
-	guard conventions.digitGroupSeparator != conventions.decimalSeparator else {
+	guard
+		conventions.digitGroupSeparator != conventions.decimalSeparator,
+		!isSecondaryDigitGroupSizeIgnored(digitGroupSize: digitGroupSize, secondaryDigitGroupSize: secondaryDigitGroupSize)
+	else {
 		throw invalidArgumentsError
 	}
 	return conventions
+}
+
+/// Whether a `<digit-group-size>` of `0`, which ignores
+/// `<secondary-digit-group-size>`, is given with a positive one.
+func isSecondaryDigitGroupSizeIgnored(digitGroupSize: Int?, secondaryDigitGroupSize: Int?) -> Bool {
+	digitGroupSize == 0 && secondaryDigitGroupSize ?? 0 > 0
 }
 
 /// The conventions that a `<locale-identifier>` identifies: the canonical ones
