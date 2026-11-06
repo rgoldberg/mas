@@ -124,7 +124,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 22. - require: a spec requirement
     - need: a prerequisite for outstanding work (`Temp/` only)
 23. - must not: prohibition
-    - forbid: grammar term (`Forbidden` treatment)
+    - forbid: make syntax invalid, via a treatment (`Forbidden`), a constraint,
+      or a grammar
     - cannot: inability
     - omit: leave out
     - consume: take syntax text into a token
