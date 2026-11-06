@@ -913,16 +913,15 @@ escaped.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-fence>
+date-coercion-arguments = <argument-fence> <date-formats> <argument-fence>
 
 date-coercion =
-  <coercion> [ <date-coercion-arguments(<date-formats>)> ]
+  <coercion> [ <date-coercion-arguments> ]
   (* default date-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
 
 date-formats = <date-format> … <argument-separator>
 
-date-format     = <date-iso-format> | <unix-time>
-date-iso-format = <iso> | <iso-date> | <iso-datetime>
+date-format = <iso> | <iso-date> | <iso-datetime> | <unix-time>
 
 nullary-date-matcher          = [ <date-coercion> ] <nullary-date>
 non-nullary-date-matcher      = [ <date-coercion> ] <non-nullary-date>
