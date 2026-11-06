@@ -160,10 +160,6 @@ private struct FormatParser {
 			isLastArgumentSeparatorTerminated: false,
 		)
 		try parseArgumentFence(for: numberFormatName)
-		// A `<digit-group-size>` of `0` inserts no `<digit-group-separator>`
-		guard arguments[1] == nil || arguments[2].flatMap(nonNegativeInteger) != 0 else {
-			throw invalidArgumentsError
-		}
 		return .numberFormat(
 			try numberConventions(
 				from: arguments[...],

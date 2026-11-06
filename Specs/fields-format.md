@@ -298,9 +298,7 @@ number-to-string-transform = <number-format> (* input type: number; output type:
 absolute-value = 'absoluteValue'
 round          = 'round'
 scale          = 'scale' <scale-arguments>
-number-format  =
-  'numberFormat' [ <argument-fence> <number-format-arguments> <argument-fence> ]
-  (* error: it has a <digit-group-separator> & a <digit-group-size> of 0 *)
+number-format  = 'numberFormat' [ <argument-fence> <number-format-arguments> <argument-fence> ]
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -342,7 +340,6 @@ number-format-arguments =
   <argument-separator>? [ <secondary-digit-group-size> ]
   <argument-separator>? [ <decimal-separator> ]
   (* error: its digit group separator equals its decimal separator, each after defaulting to the base conventions *)
-  (* error: it has a <digit-group-size> of 0 & a positive <secondary-digit-group-size> *)
 
 digit-group-separator      = {string}                (* default: {base conventions' digit group separator} *)
 digit-group-size           = {integer: non-negative} (* default: {base conventions' digit group size} *)
@@ -373,11 +370,7 @@ renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
 it (e.g., `.scale:0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
-`<secondary-digit-group-size>`, so giving it with a positive
-`<secondary-digit-group-size>`, or giving `numberFormat` a
-`<digit-group-separator>` with it, can only have no effect (e.g.,
-`.numberFormat:,,0,2:` & `.numberFormat:,x,0:` are errors, while
-`.numberFormat:,,0:` is not).
+`<secondary-digit-group-size>`.
 
 The **base conventions** are those that
 [`<locale-identifier>`](fields.md#sort-locale) identifies, per its default if it

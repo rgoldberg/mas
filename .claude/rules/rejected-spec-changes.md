@@ -140,6 +140,12 @@ a string, nor from a number or a version to a time-only (e.g.,
 type, so it would abort, while a pipeline that means to parse it can coerce it
 to a string 1st.
 
+In specs, never forbid a number format argument merely because a
+`<digit-group-size>` of `0` ignores it (e.g., `.numberFormat:,,0,2:` or
+`.numberFormat:,x,0:`), because other payloads that nothing uses stay valid
+(e.g., `--table-config 'H:P<:'`), so forbidding it treats near parallels
+differently.
+
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,
 `.scale:0,,0:` for `1e100`), because that value is a number, so no coercion

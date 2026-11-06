@@ -333,21 +333,11 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 				return size
 			}
 		}
-		let digitGroupSize = try size(arguments[2])
-		let secondaryDigitGroupSize = try size(arguments[3])
-		guard
-			!isSecondaryDigitGroupSizeIgnored(
-				digitGroupSize: digitGroupSize,
-				secondaryDigitGroupSize: secondaryDigitGroupSize,
-			)
-		else {
-			throw invalidArgumentsError
-		}
 		return .init(
 			baseConventions: try arguments[0].map(numberConventions(forIdentifier:)),
 			digitGroupSeparator: arguments[1],
-			digitGroupSize: digitGroupSize,
-			secondaryDigitGroupSize: secondaryDigitGroupSize,
+			digitGroupSize: try size(arguments[2]),
+			secondaryDigitGroupSize: try size(arguments[3]),
 			decimalSeparator: arguments[4],
 			signs: signs.flatMap(NumberSigns.init(rawValue:)) ?? .wordInitialSigns,
 		)
