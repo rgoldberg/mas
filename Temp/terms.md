@@ -582,8 +582,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - decimal number: text in `number`'s lexical form (e.g., a Unix time's text)
       ([defined](../Specs/fields-format.md#chronologic-formatting))
     - date coercion: a `<coercion>` to a date, which parses what any of its
-      `<date-format>`s matches or, absent any, what `<iso>` matches & a number
-      as a Unix time
+      `<date-format>`s matches or, absent any, what 1 whose only `<date-format>`
+      is `<iso>` parses & a number as a Unix time
     - date-only coercion: a date coercion whose only `<date-format>` is
       `<iso-date>`, so its value is a date-only (`<date-only-coercion>`)
     - non-date-only coercion: a date coercion that omits its `<date-format>`s or

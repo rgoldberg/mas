@@ -947,7 +947,7 @@ date-coercion-arguments(DATE_FORMATS) = <argument-fence> DATE_FORMATS <argument-
 
 non-date-only-coercion     =
   <coercion> [ <date-coercion-arguments(<non-date-only-formats>)> ]
-  (* default non-date-only-formats: {what <iso> matches, or a number as a Unix time} *)
+  (* default non-date-only-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
 date-only-coercion         = <coercion> <date-coercion-arguments(<date-only-formats>)>
 version-date-only-coercion = <coercion> [ <date-coercion-arguments(<version-date-only-formats>)> ] (* default version-date-only-formats: 'iso' *)
 number-date-coercion       = <coercion> [ <date-coercion-arguments(<unix-time-date-formats>)> ] (* default unix-time-date-formats: {a number as a Unix time} *)
@@ -999,9 +999,10 @@ without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
 `"2020-03-18 17:39"`, and `%.:iso,unix-time:D` matches `0`, `"0"` &
 `"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2).
 
-A default coercion to a date parses what `<iso>` matches & a number without
-trivia as a Unix time, as a datetime, because a number has no other meaning as a
-date (e.g., `%.D` matches `0` & `"2020-03-18"`, but not `"0"`).
+A default coercion to a date parses what a `<coercion>` whose only
+`<date-format>` is `<iso>` parses & a number without trivia as a Unix time, as a
+datetime, because a number has no other meaning as a date (e.g., `%.D` matches
+`0` & `"2020-03-18"`, but not `"0"`).
 
 A decimal number coerces to a date only per `<unix-time>`, because a string that
 holds a number is rarely a time (e.g., `%m.ds+` would otherwise render the
