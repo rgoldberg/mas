@@ -231,11 +231,12 @@ sets every setting to its default.
 
 An alternative's **payload** is the expression between its letter & its
 [`<setting-termination>`](#setting-termination) (e.g., `<styling-specifier>` in
-[`<header-on>`](table.md#header)). A payload's tabs & [line
-terminators](#line-terminators) are output as is (e.g., a key-value config of
-`L<LF>:` puts each value on the line after its key). A **payloadless**
-alternative is the lowercase alternative of a setting whose uppercase
-alternative takes a payload (e.g., `h`, but not `t`, in a table config).
+[`<header-on>`](table.md#header)). A payload's characters, including control
+characters (e.g., a tab, a [line terminator](#line-terminators), or an ESC), are
+output as is (e.g., a key-value config of `L<LF>:` puts each value on the line
+after its key). A **payloadless** alternative is the lowercase alternative of a
+setting whose uppercase alternative takes a payload (e.g., `h`, but not `t`, in
+a table config).
 
 ### Setting Termination
 
