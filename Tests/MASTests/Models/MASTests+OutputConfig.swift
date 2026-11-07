@@ -97,6 +97,18 @@ private extension MASTests { // swiftlint:disable:this file_types_order
 	}
 
 	@Test
+	func `an item error counts toward a nonzero exit status`() async throws {
+		_ = try await consequencesOf(
+			try ItemErrorOutputConfig.output(
+				[.init([("a", .number(1))]), .init([("a", .string("x"))])],
+				outputFormat: .table(.default),
+				fieldsOptionValue: "a:.round",
+			),
+		)
+		#expect(MAS.printer.errorCount == 1)
+	}
+
+	@Test
 	func `an item with an item error adds no column for its unlisted fields`() async throws {
 		let actual = try await consequencesOf(
 			try ItemErrorOutputConfig.output(

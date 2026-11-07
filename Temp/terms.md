@@ -797,6 +797,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - item error: an error that depends on an item's field value, which omits
        that item, without stopping its command
        ([defined](../Specs/configs.md#output-formats))
+     - exit status: the status with which a command exits, which is nonzero if
+       it reports an item error ([defined](../Specs/configs.md#output-formats))
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, replacing the input
        ([defined](../Specs/fields-format.md#coercion))

@@ -49,7 +49,9 @@ item error, the 1st & 3rd are output, with 1 item separator line between them
 for key-value output, and, for table output, a field of only the 2nd has no
 column). An item's item errors are ordered by its `<output>` sort keys' [sort
 precedence](fields.md#sort-priority), then by its output order (e.g., for
-`a:.round,b:.round/O`, if `a` & `b` are strings, only `b`'s is reported).
+`a:.round,b:.round/O`, if `a` & `b` are strings, only `b`'s is reported). A
+command that reports an item error exits with a nonzero **exit status**, so that
+a script can detect an omitted item.
 
 ## Line Terminators
 
