@@ -804,8 +804,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - item error: an error that depends on an item's field value, which omits
        that item, without stopping its command
        ([defined](../Specs/configs.md#output-formats))
-     - fail: of a command, to report an item error, so that its caller can
-       detect an omitted item ([defined](../Specs/configs.md#output-formats))
+     - fail: of a command, to report any error, so that its caller can detect it
+       (e.g., an omitted item, for an item error)
+       ([defined](../Specs/configs.md#output-formats))
      - exit status: the status with which a command exits, which is nonzero iff
        it fails ([defined](../Specs/command-line.md#exit-status))
      - normal output / error output: where a display command outputs its items /
