@@ -248,8 +248,8 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 - An empty table config: no header, no separator, 2 spaces between columns.
 - `H1:`: a header row, bold (SGR `1`) iff normal output supports styling, no
   separator.
-- `H1:a`: a header row, bold (SGR `1`) regardless of normal output, no
-  separator.
+- `H1:a`: a header row, bold (SGR `1`) whether or not normal output supports
+  styling, no separator.
 - `H1:O<ESC>[22m:`: a header row, bold (SGR `1`) iff normal output supports
   styling, reset to normal intensity (SGR `22`) instead of via a full reset, no
   separator.

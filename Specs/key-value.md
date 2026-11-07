@@ -189,9 +189,9 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 - An empty key-value config: unstyled keys, values aligned by a `▁`-patterned
   leader (with 1 space on each side) & a blank line between items.
 - `K1:`: bold keys (SGR `1`) iff normal output supports styling.
-- `K1:a`: bold keys (SGR `1`) regardless of normal output.
-- `K\b:P<:X>:O</b>:a`: keys wrapped in `<b>` & `</b>` tags regardless of normal
-  output.
+- `K1:a`: bold keys (SGR `1`) whether or not normal output supports styling.
+- `K\b:P<:X>:O</b>:a`: keys wrapped in `<b>` & `</b>` tags whether or not normal
+  output supports styling.
 - `F.:`: values aligned by a dotted (`.`) leader.
 - `F :L:R:`: values aligned by spaces, with 1 space after each item's widest
   key.
