@@ -673,7 +673,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `--fields=name` or `--fields name`)
      - command-line argument boundary: `_`, which matches between 2 adjacent
        command-line arguments, iff the latter is `-` or does not start with `-`
-       ([defined](../Specs/command-line.md#command-line-argument-boundaries))
+       ([defined](../Specs/ebnf.md#command-line-argument-boundaries))
      - valued option: an option that takes a value, defined as a
        `<valued-option>` ([defined](../Specs/command-line.md#option-values))
      - flag: an option that takes no value (e.g., `--json`)

@@ -284,6 +284,21 @@ end
 A constant expression that matches no syntax text, only at the end of the syntax
 text.
 
+#### Command-Line Argument Boundaries
+
+```ebnf
+_
+```
+
+A **command-line argument boundary**: a constant expression that matches no
+syntax text, only between 2 adjacent command-line arguments, iff the latter is
+`-` or does not start with `-`, as an [option
+value](command-line.md#option-values) requires (e.g., `"--fields" _ "x"` matches
+the arguments `--fields` & `x`, but `"--fields" _ "-x"` matches no arguments).
+Syntax text spans multiple command-line arguments only where a command-line
+argument boundary separates them. Each side of a command-line argument boundary
+treats outer bare whitespace as the syntax text's start & end do.
+
 #### Literals
 
 ```ebnf

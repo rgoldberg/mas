@@ -22,23 +22,6 @@ status**, so that a script can detect its failure.
 A **command line** is a run of a [command list](configs.md#command-lists), whose
 [transient configs](configs.md#transient-configs) are the values of its options.
 
-## Command-Line Argument Boundaries
-
-This spec extends the custom EBNF grammar with:
-
-```ebnf
-_
-```
-
-A **command-line argument boundary**: a constant expression that matches no
-syntax text, only between 2 adjacent command-line arguments, iff the latter is
-`-` or does not start with `-`, as an [option value](#option-values) requires
-(e.g., `"--fields" _ "x"` matches the arguments `--fields` & `x`, but
-`"--fields" _ "-x"` matches no arguments). Syntax text spans multiple
-command-line arguments only where a command-line argument boundary separates
-them. Each side of a command-line argument boundary treats outer bare whitespace
-as the syntax text's start & end do.
-
 ## Option Values
 
 ```ebnf
@@ -53,10 +36,10 @@ A **valued option** is an option that takes a value; this spec defines each as a
 A valued option's **value** (`VALUE`) is the rest of its command-line argument
 after `=` (e.g., `--fields=name`), or else the next command-line argument (e.g.,
 `--fields name`), which a [command-line argument
-boundary](#command-line-argument-boundaries) separates from `NAME` iff that
-argument is `-` or does not start with `-`, so any other value that starts with
-`-` must follow `=` (e.g., `--fields=-x`); otherwise, the option is an error
-(e.g., `--fields -x`).
+boundary](ebnf.md#command-line-argument-boundaries) separates from `NAME` iff
+that argument is `-` or does not start with `-`, so any other value that starts
+with `-` must follow `=` (e.g., `--fields=-x`); otherwise, the option is an
+error (e.g., `--fields -x`).
 
 A **flag** is an option that takes no value (e.g., `--json`).
 
