@@ -1,9 +1,8 @@
 # Command-Line Interface
 
 How an [app](configs.md#configs) run from a command line exposes the other
-specs: which standard stream each output uses, which styling sequences are
-default, what its exit status means & which command-line options take which
-syntax.
+specs: which standard stream each output uses, what its style defaults are, what
+its exit status means & which command-line options take which syntax.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
