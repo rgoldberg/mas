@@ -403,9 +403,9 @@ determine, passing the value through unchecked (e.g., `H99:` is accepted, while
 
 For an `integer` or a `number`:
 
-- Its value is the decimal number that its digits denote, negated iff its sign
-  is `-` (e.g., `-0` is `0`), constrained by nothing but its `CONSTRAINTS`
-  (e.g., `{integer}` has no minimum or maximum).
+- Its value is the number that its text denotes (e.g., `1e3` is `1000`, while
+  `-0` is `0`), constrained by nothing but its `CONSTRAINTS` (e.g., `{integer}`
+  has no minimum or maximum).
 - A sign is accepted iff a valid value can be negative, unless `CONSTRAINTS`
   forbids `+` (e.g., `{integer: no "+"}`) or allows it (e.g.,
   `{integer: non-negative, optional "+"}`).
