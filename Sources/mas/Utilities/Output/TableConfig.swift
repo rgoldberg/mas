@@ -9,11 +9,11 @@
 /// `separator` means neither is shown; `separator` is `nil` whenever `header`
 /// is, because a separator line is rendered iff a header row is.
 struct TableConfig: Equatable {
-	/// The header row: field labels, styled per `styleSpecifier` (e.g., with the
-	/// default `StyleSequences`, `"1"` for bold, `"1;4"` for bold & underlined;
-	/// empty means unstyled).
+	/// The header row: field labels, styled per `stylingSpecifier` (e.g., with
+	/// the default `StylingSequences`, `"1"` for bold, `"1;4"` for bold &
+	/// underlined; empty means unstyled).
 	struct Header: Equatable {
-		let styleSpecifier: String
+		let stylingSpecifier: String
 	}
 
 	/// The line between the header row & the 1st data row.
@@ -32,14 +32,14 @@ struct TableConfig: Equatable {
 	static let `default` = Self(
 		header: nil,
 		styling: .supportedOnly,
-		styleSequences: .default,
+		stylingSequences: .default,
 		separator: nil,
 		columnSpacing: "  ",
 	)
 
 	let header: Header?
 	let styling: Styling
-	let styleSequences: StyleSequences
+	let stylingSequences: StylingSequences
 	let separator: Separator?
 	let columnSpacing: String
 }
@@ -56,9 +56,9 @@ struct TableConfig: Equatable {
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigSetting<String>.unset
 	var styling = Styling.supportedOnly
-	var stylePrefix = TableConfig.default.styleSequences.prefix
-	var styleSuffix = TableConfig.default.styleSequences.suffix
-	var styleReset = TableConfig.default.styleSequences.reset
+	var stylingPrefix = TableConfig.default.stylingSequences.prefix
+	var stylingSuffix = TableConfig.default.stylingSequences.suffix
+	var stylingReset = TableConfig.default.stylingSequences.reset
 	var separatorPattern = TableConfigSetting<String>.unset
 	var broken = TableConfigSetting<Bool>.unset
 	var columnSpacing = String?.none
@@ -70,10 +70,10 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 			header = .off
 		case "H":
 			header = .set(
-				try parseStyleSpecifier(
+				try parseStylingSpecifier(
 					&input,
 					danglingEscapeError: TableConfigParsingError.danglingEscape,
-					invalidStyleSpecifierError: TableConfigParsingError.invalidHeaderStyleSpecifier,
+					invalidStylingSpecifierError: TableConfigParsingError.invalidHeaderStylingSpecifier,
 				),
 			)
 		case "t":
@@ -81,17 +81,17 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		case "a":
 			styling = .always
 		case "p":
-			stylePrefix = TableConfig.default.styleSequences.prefix
+			stylingPrefix = TableConfig.default.stylingSequences.prefix
 		case "P":
-			stylePrefix = try parseTableSettingText(&input)
+			stylingPrefix = try parseTableSettingText(&input)
 		case "x":
-			styleSuffix = TableConfig.default.styleSequences.suffix
+			stylingSuffix = TableConfig.default.stylingSequences.suffix
 		case "X":
-			styleSuffix = try parseTableSettingText(&input)
+			stylingSuffix = try parseTableSettingText(&input)
 		case "o":
-			styleReset = TableConfig.default.styleSequences.reset
+			stylingReset = TableConfig.default.stylingSequences.reset
 		case "O":
-			styleReset = try parseTableSettingText(&input)
+			stylingReset = try parseTableSettingText(&input)
 		case "s":
 			separatorPattern = .off
 		case "S":
@@ -118,9 +118,9 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 		header = .set("")
 	}
 	return .init(
-		header: header.setValue.map { .init(styleSpecifier: $0) },
+		header: header.setValue.map { .init(stylingSpecifier: $0) },
 		styling: styling,
-		styleSequences: .init(prefix: stylePrefix, suffix: styleSuffix, reset: styleReset),
+		stylingSequences: .init(prefix: stylingPrefix, suffix: stylingSuffix, reset: stylingReset),
 		separator: header.setValue == nil
 			? nil
 			: separatorPattern.setValue.map { .init(pattern: $0, broken: broken.setValue ?? false) },
@@ -131,15 +131,15 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 // swiftlint:disable:next one_declaration_per_file
 enum TableConfigParsingError: Equatable, Error, CustomStringConvertible {
 	case danglingEscape
-	case invalidHeaderStyleSpecifier(String)
+	case invalidHeaderStylingSpecifier(String)
 	case invalidSetting(Character)
 
 	var description: String {
 		switch self {
 		case .danglingEscape:
 			"Escape prefix '\\' at the end of --table-config's value"
-		case let .invalidHeaderStyleSpecifier(styleSpecifier):
-			"Invalid header style specifier (expected each ASCII letter escaped, e.g., \"\\b\"): \(styleSpecifier)"
+		case let .invalidHeaderStylingSpecifier(stylingSpecifier):
+			"Invalid header styling specifier (expected each ASCII letter escaped, e.g., \"\\b\"): \(stylingSpecifier)"
 		case let .invalidSetting(setting):
 			"Invalid --table-config <table-setting>: \(setting)"
 		}
@@ -173,9 +173,9 @@ private enum TableConfigSetting<Value> { // swiftlint:disable:this one_declarati
 }
 
 /// Parses an uppercase `<table-setting>`'s `{string}` payload
-/// (`<style-prefix>`, `<style-suffix>`, `<style-reset>`, `<separator-pattern>`,
-/// or `<column-spacing>`) through its `<setting-termination>` via
-/// `parseOutputConfigSettingPayload`.
+/// (`<styling-prefix>`, `<styling-suffix>`, `<styling-reset>`,
+/// `<separator-pattern>`, or `<column-spacing>`) through its
+/// `<setting-termination>` via `parseOutputConfigSettingPayload`.
 private func parseTableSettingText(_ input: inout Substring) throws(TableConfigParsingError) -> String {
 	try parseOutputConfigSettingPayload(&input, danglingEscapeError: TableConfigParsingError.danglingEscape)
 }

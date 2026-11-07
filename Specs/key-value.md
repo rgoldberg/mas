@@ -12,9 +12,9 @@ key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
   | <styling-setting>
-  | <style-prefix-setting>
-  | <style-suffix-setting>
-  | <style-reset-setting>
+  | <styling-prefix-setting>
+  | <styling-suffix-setting>
+  | <styling-reset-setting>
   | <leader-setting>
   | <leading-spacing-setting>
   | <trailing-spacing-setting>
@@ -64,22 +64,22 @@ align with, so it misaligns nothing.
 key-setting = <unstyled-key> | <styled-key> (* default: <unstyled-key>; last wins; inherited *)
 
 unstyled-key = "k"
-styled-key   = "K" <style-specifier> <setting-termination>
+styled-key   = "K" <styling-specifier> <setting-termination>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `k`: unstyled keys.
-- `K`: keys styled by `<style-specifier>`, as [defined for table
-  output](table.md#header) (e.g., with the [ANSI SGR style
-  defaults](command-line.md#style-defaults), `1` for bold, `1;4` for bold &
+- `K`: keys styled by `<styling-specifier>`, as [defined for table
+  output](table.md#header) (e.g., with the [ANSI SGR styling
+  defaults](command-line.md#styling-defaults), `1` for bold, `1;4` for bold &
   underlined), applied to each key, but not to its spacing, its leader, or its
   value.
 
 ## Key Styling
 
-`<styling-setting>`, `<style-prefix-setting>`, `<style-suffix-setting>` &
-`<style-reset-setting>` are [defined for table output](table.md#styling).
+`<styling-setting>`, `<styling-prefix-setting>`, `<styling-suffix-setting>` &
+`<styling-reset-setting>` are [defined for table output](table.md#styling).
 
 ## Leader
 
@@ -186,8 +186,8 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 
 ## Examples
 
-These examples use the [ANSI SGR style
-defaults](command-line.md#style-defaults).
+These examples use the [ANSI SGR styling
+defaults](command-line.md#styling-defaults).
 
 - An empty key-value config: unstyled keys, values aligned by a `▁`-patterned
   leader (with 1 space on each side) & a blank line between items.
@@ -217,14 +217,14 @@ escapes the next character.
 In each row of the table below, the given characters must be escaped to be
 consumed as any character in a variable token consumed by the given typed
 terminal. Leading & trailing outer bare whitespace is ignored by
-`<style-specifier>` & consumed by every other typed terminal.
+`<styling-specifier>` & consumed by every other typed terminal.
 
 | Nonterminal             | Any                 |
 |:------------------------|:--------------------|
-| `<style-specifier>`     | `:` & ASCII letters |
-| `<style-prefix>`        | `:`                 |
-| `<style-suffix>`        | `:`                 |
-| `<style-reset>`         | `:`                 |
+| `<styling-specifier>`   | `:` & ASCII letters |
+| `<styling-prefix>`      | `:`                 |
+| `<styling-suffix>`      | `:`                 |
+| `<styling-reset>`       | `:`                 |
 | `<leader-pattern>`      | `:`                 |
 | `<leading-spacing>`     | `:`                 |
 | `<trailing-spacing>`    | `:`                 |

@@ -17,24 +17,24 @@ private extension MASTests {
 	}
 
 	@Test(arguments: [("K1", "1"), ("K1;4:", "1;4"), ("K 1;4 :", "1;4"), ("K\\b", "b"), ("K1:k", ""), ("kK1:", "1")])
-	func `k unstyles keys; K styles them with a required style specifier; last wins`(
+	func `k unstyles keys; K styles them with a required styling specifier; last wins`(
 		value: String,
-		keyStyleSpecifier: String,
+		keyStylingSpecifier: String,
 	) throws {
-		#expect(try parseKeyValueConfig(value).keyStyleSpecifier == keyStyleSpecifier)
+		#expect(try parseKeyValueConfig(value).keyStylingSpecifier == keyStylingSpecifier)
 	}
 
 	@Test(
 		arguments: [
-			("K", KeyValueConfigParsingError.invalidKeyStyleSpecifier("")),
-			("K:", .invalidKeyStyleSpecifier("")),
-			("K1S", .invalidKeyStyleSpecifier("1S")),
-			("Kb:", .invalidKeyStyleSpecifier("b")),
+			("K", KeyValueConfigParsingError.invalidKeyStylingSpecifier("")),
+			("K:", .invalidKeyStylingSpecifier("")),
+			("K1S", .invalidKeyStylingSpecifier("1S")),
+			("Kb:", .invalidKeyStylingSpecifier("b")),
 			("z", .invalidSetting("z")),
 			("F-\\", .danglingEscape),
 		],
 	)
-	func `an invalid key style specifier, unknown setting, or dangling escape is a parse error`(
+	func `an invalid key styling specifier, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: KeyValueConfigParsingError,
 	) throws {
@@ -69,7 +69,7 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("", StyleSequences.default),
+			("", StylingSequences.default),
 			("P<:X>:O</>:", .init(prefix: "<", suffix: ">", reset: "</>")),
 			("P:X:O", .init(prefix: "", suffix: "", reset: "")),
 			("P < :X\\::", .init(prefix: " < ", suffix: ":", reset: "\u{1B}[0m")),
@@ -77,11 +77,11 @@ private extension MASTests {
 			("pxoP<:X>:O</>:", .init(prefix: "<", suffix: ">", reset: "</>")),
 		],
 	)
-	func `key style sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
+	func `key styling sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
 		value: String,
-		styleSequences: StyleSequences,
+		stylingSequences: StylingSequences,
 	) throws {
-		#expect(try parseKeyValueConfig(value).styleSequences == styleSequences)
+		#expect(try parseKeyValueConfig(value).stylingSequences == stylingSequences)
 	}
 
 	@Test(arguments: [
@@ -176,9 +176,9 @@ private extension MASTests {
 			try keyValue(
 				of: twoItems,
 				keyValueConfig: .init(
-					keyStyleSpecifier: "",
+					keyStylingSpecifier: "",
 					styling: .supportedOnly,
-					styleSequences: .default,
+					stylingSequences: .default,
 					leaderPattern: pattern,
 					leadingSpacing: " ",
 					trailingSpacing: " ",
@@ -212,9 +212,9 @@ private extension MASTests {
 			try keyValue(
 				of: twoItems,
 				keyValueConfig: .init(
-					keyStyleSpecifier: "",
+					keyStylingSpecifier: "",
 					styling: .supportedOnly,
-					styleSequences: .default,
+					stylingSequences: .default,
 					leaderPattern: nil,
 					leadingSpacing: "=",
 					trailingSpacing: "",
@@ -332,7 +332,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `key-value styles keys with custom style sequences`() throws {
+	func `key-value styles keys with custom styling sequences`() throws {
 		#expect(
 			try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K\\b:P<:X>:O</b>:afL=:R:"))
 				== "<b>Name</b>=X\n<b>Version</b>=1",

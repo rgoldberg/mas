@@ -105,8 +105,8 @@ extension JSON.Object {
 			return (
 				styled(
 					label,
-					specifier: keyValueConfig.keyStyleSpecifier,
-					sequences: keyValueConfig.styleSequences,
+					specifier: keyValueConfig.keyStylingSpecifier,
+					sequences: keyValueConfig.stylingSequences,
 					isAlwaysStyled: keyValueConfig.styling == .always,
 				)
 					+ separation
@@ -179,8 +179,8 @@ extension [JSON.Object] {
 			rows.append(
 				styled(
 					headerRow,
-					specifier: header.styleSpecifier,
-					sequences: tableConfig.styleSequences,
+					specifier: header.stylingSpecifier,
+					sequences: tableConfig.stylingSequences,
 					isAlwaysStyled: tableConfig.styling == .always,
 				),
 			)

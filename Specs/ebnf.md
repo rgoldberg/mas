@@ -366,7 +366,7 @@ satisfies its `CONSTRAINTS`, except that an [app](configs.md#configs) does not
 check a constraint that only something outside it (e.g., an [output
 device](configs.md#normal--error-output)) can determine, passing the value
 through unchecked (e.g., `H99:` is accepted, while `Hb` is an error, for
-[`<style-specifier>`](table.md#header)).
+[`<styling-specifier>`](table.md#header)).
 
 For an `integer` or a `number`:
 

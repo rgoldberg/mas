@@ -227,7 +227,7 @@ Each kind's [built-in standard](#immutable-built-in-named-configs) output config
 sets every setting to its default.
 
 An alternative's **payload** is the expression between its letter & its
-[`<setting-termination>`](#setting-termination) (e.g., `<style-specifier>` in
+[`<setting-termination>`](#setting-termination) (e.g., `<styling-specifier>` in
 [`<header-on>`](table.md#header)). A payload's tabs & [line
 terminators](#line-terminators) are output as is (e.g., a key-value config of
 `L<LF>:` puts each value on the line after its key). A **payloadless**
@@ -245,8 +245,8 @@ end-of-output-config = end
 
 E.g., in the key-value config `Fs`, `s` is interpreted as `<leader-pattern>`
 text, not as a separate `<item-separator-setting>`, while in the table config
-`Hb` & the JSON config `Pa`, `b` & `a` are errors (because `<style-specifier>` &
-`<indentation>` cannot consume them), not a separate `<broken-setting>` or
+`Hb` & the JSON config `Pa`, `b` & `a` are errors (because `<styling-specifier>`
+& `<indentation>` cannot consume them), not a separate `<broken-setting>` or
 `<top-level-structure-setting>`.
 
 ### Implied Alternatives

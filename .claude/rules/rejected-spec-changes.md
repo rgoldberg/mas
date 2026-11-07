@@ -76,10 +76,10 @@ an implicit coercion or a `<coercion>` would treat near parallels differently
 (e.g., `%+.N%i+`, which can output a string), which outweighs the overruled
 reason for forbidding it: its other literals cannot affect what it means.
 
-In specs, never make `<styled-key>`'s `<style-specifier>` optional (e.g., `K:`),
-because `K:` would style keys by nothing, which contradicts `K` & means what `k`
-means, while `<header-on>`'s is optional because `H:` (an unstyled header row)
-means something other than `h` (no header row).
+In specs, never make `<styled-key>`'s `<styling-specifier>` optional (e.g.,
+`K:`), because `K:` would style keys by nothing, which contradicts `K` & means
+what `k` means, while `<header-on>`'s is optional because `H:` (an unstyled
+header row) means something other than `h` (no header row).
 
 In specs, never forbid a binary placeholder merely because its blocks are equal
 (e.g., `%Sx+x+` or `%N%i+%i+`), because other blocks make the same placeholder

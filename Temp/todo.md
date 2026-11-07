@@ -303,7 +303,8 @@ a format's template text or from a field value) instead of rendering its ESC as
    styles a header row), being removed otherwise.
 4. Terminating each cell's formatting (e.g., with an SGR reset), so that it
    styles neither the column spacing nor the next cell.
-5. How a cell's formatting interacts with a styled header row's `<style-reset>`.
+5. How a cell's formatting interacts with a styled header row's
+   `<styling-reset>`.
 6. Rendering each non-formatting escape sequence (e.g., OSC 52, which sets the
    clipboard, or one that moves the cursor) as Control Pictures symbols, because
    it would modify the output device's state or misalign the table.
@@ -337,7 +338,7 @@ next line, so a row is as many lines as its most-lined cell or key. This needs:
    consumers, such as `cut`, which need 1 line per row).
 2. Whether a continuation line is marked (e.g., as `psql` marks one with `+`),
    because it can otherwise be mistaken for the next row.
-3. How each line is aligned, styled (e.g., a style reset per header line) &
+3. How each line is aligned, styled (e.g., a styling reset per header line) &
    measured (e.g., column widths & separator lines per widest line).
 
 ### Streaming Output

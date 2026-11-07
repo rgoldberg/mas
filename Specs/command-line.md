@@ -1,8 +1,8 @@
 # Command-Line Interface
 
 How an [app](configs.md#configs) run from a command line exposes the other
-specs: which standard stream each output uses, what its style defaults are, what
-its exit status means & which command-line options take which syntax.
+specs: which standard stream each output uses, what its styling defaults are,
+what its exit status means & which command-line options take which syntax.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
@@ -17,17 +17,17 @@ device](configs.md#normal--error-output), so normal output [supports
 styling](configs.md#normal--error-output) iff standard output is connected to a
 terminal.
 
-## Style Defaults
+## Styling Defaults
 
-A terminal renders ANSI SGR control sequences, so the **ANSI SGR style
+A terminal renders ANSI SGR control sequences, so the **ANSI SGR styling
 defaults** override [`p`, `x` & `o`'s defaults](table.md#styling):
 
-- `p`'s `<style-prefix>`: `ESC[` (the ANSI control sequence introducer, where
+- `p`'s `<styling-prefix>`: `ESC[` (the ANSI control sequence introducer, where
   `ESC` is U+001B).
-- `x`'s `<style-suffix>`: `m` (the ANSI SGR control sequence's final byte).
-- `o`'s `<style-reset>`: `ESC[0m` (the ANSI SGR reset).
+- `x`'s `<styling-suffix>`: `m` (the ANSI SGR control sequence's final byte).
+- `o`'s `<styling-reset>`: `ESC[0m` (the ANSI SGR reset).
 
-Thus, with these defaults, a `<style-specifier>` holds ANSI SGR parameters
+Thus, with these defaults, a `<styling-specifier>` holds ANSI SGR parameters
 (e.g., `1` for bold, `1;4` for bold & underlined).
 
 ## Exit Status

@@ -12,9 +12,9 @@ table-config  = <table-setting>+
 table-setting =
   <header-setting>
   | <styling-setting>
-  | <style-prefix-setting>
-  | <style-suffix-setting>
-  | <style-reset-setting>
+  | <styling-prefix-setting>
+  | <styling-suffix-setting>
+  | <styling-reset-setting>
   | <separator-setting>
   | <broken-setting>
   | <column-spacing-setting>
@@ -60,29 +60,29 @@ adjacent columns (e.g., 2 per pair for the default 2-space column spacing).
 header-setting = <header-off> | <header-on> (* default: <header-off>; last wins; inherited *)
 
 header-off = "h"
-header-on  = "H" [ <style-specifier> ] <setting-termination>
+header-on  = "H" [ <styling-specifier> ] <setting-termination>
 
-style-specifier = {string: output-device-specific styling text with no bare ASCII letters}
+styling-specifier = {string: output-device-specific styling text with no bare ASCII letters}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 - `h`: no header row, so no [separator line](#separator).
 - `H`: a header row of field labels, each aligned as its column is (per its
-  field spec's [alignment](fields.md#alignment)). `<style-specifier>`, if given,
-  styles the entire header row: [`<style-prefix>`](#style-prefix),
-  `<style-specifier>` & [`<style-suffix>`](#style-suffix) precede it, and
-  [`<style-reset>`](#style-reset) follows it (e.g., with the [ANSI SGR style
-  defaults](command-line.md#style-defaults), `1` for bold, `1;4` for bold &
-  underlined); absent, the header row is unstyled. A bare ASCII letter in
-  `<style-specifier>` is invalid, so that a mistyped setting is not silently
-  consumed as `<style-specifier>` text (e.g., `Hb`); escape it to include it
+  field spec's [alignment](fields.md#alignment)). `<styling-specifier>`, if
+  given, styles the entire header row: [`<styling-prefix>`](#styling-prefix),
+  `<styling-specifier>` & [`<styling-suffix>`](#styling-suffix) precede it, and
+  [`<styling-reset>`](#styling-reset) follows it (e.g., with the [ANSI SGR
+  styling defaults](command-line.md#styling-defaults), `1` for bold, `1;4` for
+  bold & underlined); absent, the header row is unstyled. A bare ASCII letter in
+  `<styling-specifier>` is invalid, so that a mistyped setting is not silently
+  consumed as `<styling-specifier>` text (e.g., `Hb`); escape it to include it
   (e.g., `H\b`).
 
 ## Styling
 
-`<styling-setting>`, `<style-prefix-setting>`, `<style-suffix-setting>` &
-`<style-reset-setting>` style each **stylable string**: the header row or, in
+`<styling-setting>`, `<styling-prefix-setting>`, `<styling-suffix-setting>` &
+`<styling-reset-setting>` style each **stylable string**: the header row or, in
 [key-value output](key-value.md#key), each key.
 
 <!--editorconfig-checker-disable-->
@@ -104,59 +104,59 @@ always-styling         = "a"
 
 Styling text depends on the output device, so no default of `p`, `x`, or `o`
 styles anything: an app should override each as appropriate for its output
-devices (e.g., with the [ANSI SGR style
-defaults](command-line.md#style-defaults)). Otherwise, `<style-specifier>` is
-output as is (e.g., `H1:` outputs `1` before a header row).
+devices (e.g., with the [ANSI SGR styling
+defaults](command-line.md#styling-defaults)). Otherwise, `<styling-specifier>`
+is output as is (e.g., `H1:` outputs `1` before a header row).
 
-## Style Prefix
+## Styling Prefix
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-style-prefix-setting = <style-prefix-default> | <style-prefix-custom> (* default: <style-prefix-default>; last wins; inherited *)
+styling-prefix-setting = <styling-prefix-default> | <styling-prefix-custom> (* default: <styling-prefix-default>; last wins; inherited *)
 
-style-prefix-default = "p" (* default style-prefix: {empty string} *)
-style-prefix-custom  = "P" [ <style-prefix> ] <setting-termination>
+styling-prefix-default = "p" (* default styling-prefix: {empty string} *)
+styling-prefix-custom  = "P" [ <styling-prefix> ] <setting-termination>
 
-style-prefix = ^{string}^ (* default: {empty string} *)
+styling-prefix = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `p`: no string precedes `<style-specifier>`, unless an app [overrides this
+- `p`: no string precedes `<styling-specifier>`, unless an app [overrides this
   default](#styling).
-- `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none).
+- `P`: a custom string precedes `<styling-specifier>` (e.g., `P:` for none).
 
-## Style Suffix
+## Styling Suffix
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-style-suffix-setting = <style-suffix-default> | <style-suffix-custom> (* default: <style-suffix-default>; last wins; inherited *)
+styling-suffix-setting = <styling-suffix-default> | <styling-suffix-custom> (* default: <styling-suffix-default>; last wins; inherited *)
 
-style-suffix-default = "x" (* default style-suffix: {empty string}; mnemonic: last letter of suffix *)
-style-suffix-custom  = "X" [ <style-suffix> ] <setting-termination> (* mnemonic: last letter of suffix *)
+styling-suffix-default = "x" (* default styling-suffix: {empty string}; mnemonic: last letter of suffix *)
+styling-suffix-custom  = "X" [ <styling-suffix> ] <setting-termination> (* mnemonic: last letter of suffix *)
 
-style-suffix = ^{string}^ (* default: {empty string} *)
+styling-suffix = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `x`: no string follows `<style-specifier>`, unless an app [overrides this
+- `x`: no string follows `<styling-specifier>`, unless an app [overrides this
   default](#styling).
-- `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none).
+- `X`: a custom string follows `<styling-specifier>` (e.g., `X:` for none).
 
-## Style Reset
+## Styling Reset
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-style-reset-setting = <style-reset-default> | <style-reset-custom> (* default: <style-reset-default>; last wins; inherited *)
+styling-reset-setting = <styling-reset-default> | <styling-reset-custom> (* default: <styling-reset-default>; last wins; inherited *)
 
-style-reset-default = "o" (* default style-reset: {empty string}; mnemonic: off *)
-style-reset-custom  = "O" [ <style-reset> ] <setting-termination> (* mnemonic: off *)
+styling-reset-default = "o" (* default styling-reset: {empty string}; mnemonic: off *)
+styling-reset-custom  = "O" [ <styling-reset> ] <setting-termination> (* mnemonic: off *)
 
-style-reset = ^{string}^ (* default: {empty string} *)
+styling-reset = ^{string}^ (* default: {empty string} *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -253,8 +253,8 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Examples
 
-These examples use the [ANSI SGR style
-defaults](command-line.md#style-defaults).
+These examples use the [ANSI SGR styling
+defaults](command-line.md#styling-defaults).
 
 - An empty table config: no header, no separator, 2 spaces between columns.
 - `H1:`: a header row, bold (SGR `1`) iff normal output supports styling, no
@@ -281,13 +281,13 @@ escapes the next character.
 In each row of the table below, the given characters must be escaped to be
 consumed as any character in a variable token consumed by the given typed
 terminal. Leading & trailing outer bare whitespace is ignored by
-`<style-specifier>` & consumed by every other typed terminal.
+`<styling-specifier>` & consumed by every other typed terminal.
 
 | Nonterminal           | Any                 |
 |:----------------------|:--------------------|
-| `<style-specifier>`   | `:` & ASCII letters |
-| `<style-prefix>`      | `:`                 |
-| `<style-suffix>`      | `:`                 |
-| `<style-reset>`       | `:`                 |
+| `<styling-specifier>` | `:` & ASCII letters |
+| `<styling-prefix>`    | `:`                 |
+| `<styling-suffix>`    | `:`                 |
+| `<styling-reset>`     | `:`                 |
 | `<separator-pattern>` | `:`                 |
 | `<column-spacing>`    | `:`                 |

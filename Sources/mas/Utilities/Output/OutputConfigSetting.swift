@@ -17,17 +17,17 @@ func parseOutputConfigSettingPayload<E: Error>(_ input: inout Substring, danglin
 	)
 }
 
-/// Parses a `<style-specifier>` payload (table.md) through its setting
+/// Parses a `<styling-specifier>` payload (table.md) through its setting
 /// termination via `parseOutputConfigSettingPayloadCharacters`, ignoring its
 /// outer bare whitespace; a bare ASCII letter in it throws
-/// `invalidStyleSpecifierError` of the payload's text.
-func parseStyleSpecifier<E: Error>(
+/// `invalidStylingSpecifierError` of the payload's text.
+func parseStylingSpecifier<E: Error>(
 	_ input: inout Substring,
 	danglingEscapeError: E,
-	invalidStyleSpecifierError: (String) -> E,
+	invalidStylingSpecifierError: (String) -> E,
 ) throws(E) -> String {
 	let characters = try parseOutputConfigSettingPayloadCharacters(&input, danglingEscapeError: danglingEscapeError)
-	let styleSpecifier = String(
+	let stylingSpecifier = String(
 		characters
 			.drop { $0.isBare && $0.character.isWhitespace }
 			.reversed()
@@ -36,16 +36,16 @@ func parseStyleSpecifier<E: Error>(
 			.map(\.character),
 	)
 	guard !characters.contains(where: { $0.isBare && $0.character.isASCII && $0.character.isLetter }) else {
-		throw invalidStyleSpecifierError(String(characters.map(\.character)))
+		throw invalidStylingSpecifierError(String(characters.map(\.character)))
 	}
-	return styleSpecifier
+	return stylingSpecifier
 }
 
 /// Wraps `string` in `sequences` around `specifier` iff `specifier` is not
 /// empty & either `isAlwaysStyled` or standard output is a terminal (table.md's
 /// `<styling-setting>`): `sequences.prefix`, `specifier` & `sequences.suffix`
 /// precede `string`; `sequences.reset` follows it.
-func styled(_ string: String, specifier: String, sequences: StyleSequences, isAlwaysStyled: Bool) -> String {
+func styled(_ string: String, specifier: String, sequences: StylingSequences, isAlwaysStyled: Bool) -> String {
 	!specifier.isEmpty && (isAlwaysStyled || FileHandle.standardOutput.isTerminal)
 		? sequences.prefix + specifier + sequences.suffix + string + sequences.reset
 		: string

@@ -26,13 +26,13 @@ private extension MASTests {
 	}
 
 	@Test
-	func `an uppercase H shows a header, plain by default, styled with an explicit style specifier`() throws {
+	func `an uppercase H shows a header, plain by default, styled with an explicit styling specifier`() throws {
 		#expect(
 			try parseTableConfig("H")
 				== .init(
-					header: .init(styleSpecifier: ""),
+					header: .init(stylingSpecifier: ""),
 					styling: .supportedOnly,
-					styleSequences: .default,
+					stylingSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
 				),
@@ -40,25 +40,25 @@ private extension MASTests {
 		#expect(
 			try parseTableConfig("H1")
 				== .init(
-					header: .init(styleSpecifier: "1"),
+					header: .init(stylingSpecifier: "1"),
 					styling: .supportedOnly,
-					styleSequences: .default,
+					stylingSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
 				),
 		)
-		#expect(try parseTableConfig("H1;4:").header == .init(styleSpecifier: "1;4"))
-		#expect(try parseTableConfig("H\\b").header == .init(styleSpecifier: "b"))
+		#expect(try parseTableConfig("H1;4:").header == .init(stylingSpecifier: "1;4"))
+		#expect(try parseTableConfig("H\\b").header == .init(stylingSpecifier: "b"))
 	}
 
 	@Test
 	func `an omitted trailing setting terminator is only valid at the end of the value`() throws {
 		// "H1" (no ':', end of value): fine, value is "1"
-		#expect(try parseTableConfig("H1").header == .init(styleSpecifier: "1"))
+		#expect(try parseTableConfig("H1").header == .init(stylingSpecifier: "1"))
 		// "H1S-" (no ':' before 'S'): "1S-" is swallowed whole as H's own value &
-		// fails style specifier validation (a bare ASCII letter), rather than
+		// fails styling specifier validation (a bare ASCII letter), rather than
 		// silently treating 'S' as a 2nd setting
-		#expect(throws: TableConfigParsingError.invalidHeaderStyleSpecifier("1S-")) { try parseTableConfig("H1S-") }
+		#expect(throws: TableConfigParsingError.invalidHeaderStylingSpecifier("1S-")) { try parseTableConfig("H1S-") }
 	}
 
 	@Test(arguments: [("S", "-"), ("S:", "-"), ("S-+:", "-+")])
@@ -82,7 +82,7 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("", StyleSequences.default),
+			("", StylingSequences.default),
 			("P<:X>:O</>:", .init(prefix: "<", suffix: ">", reset: "</>")),
 			("P:X:O", .init(prefix: "", suffix: "", reset: "")),
 			("P < :X\\::", .init(prefix: " < ", suffix: ":", reset: "\u{1B}[0m")),
@@ -90,11 +90,11 @@ private extension MASTests {
 			("pxoP<:X>:O</>:", .init(prefix: "<", suffix: ">", reset: "</>")),
 		],
 	)
-	func `header style sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
+	func `header styling sequences: P, X & O set literal ones, including empty; p, x & o restore defaults; last wins`(
 		value: String,
-		styleSequences: StyleSequences,
+		stylingSequences: StylingSequences,
 	) throws {
-		#expect(try parseTableConfig(value).styleSequences == styleSequences)
+		#expect(try parseTableConfig(value).stylingSequences == stylingSequences)
 	}
 
 	@Test(arguments: ["\t", "-\t", "\t\u{301}=", "\n", "-\r\n-", "\u{85}", "\u{2028}"])
@@ -108,10 +108,10 @@ private extension MASTests {
 	}
 
 	@Test
-	func `a header style specifier or sequence may contain a line terminator`() throws {
-		#expect(try parseTableConfig("H1\n2:").header?.styleSpecifier == "1\n2")
+	func `a header styling specifier or sequence may contain a line terminator`() throws {
+		#expect(try parseTableConfig("H1\n2:").header?.stylingSpecifier == "1\n2")
 		#expect(
-			try parseTableConfig("P\u{2028}:X\r:O\r\n:").styleSequences
+			try parseTableConfig("P\u{2028}:X\r:O\r\n:").stylingSequences
 				== .init(prefix: "\u{2028}", suffix: "\r", reset: "\r\n"),
 		)
 	}
@@ -126,7 +126,7 @@ private extension MASTests {
 	}
 
 	@Test(arguments: [(" h s ", "hs"), ("H 1;4 : S", "H1;4:S"), ("H :", "H"), ("H : a", "H:a")])
-	func `outer bare whitespace between settings & around a style specifier is ignored`(
+	func `outer bare whitespace between settings & around a styling specifier is ignored`(
 		value: String,
 		equivalent: String,
 	) throws {
@@ -135,11 +135,11 @@ private extension MASTests {
 
 	@Test
 	func `an uppercase S implies a header iff none was already set`() throws {
-		#expect(try parseTableConfig("S").header == .init(styleSpecifier: ""))
+		#expect(try parseTableConfig("S").header == .init(stylingSpecifier: ""))
 		// `S`'s own value-scan needs its own terminator before `H1:` starts, else
 		// it swallows "H1" as its own (literal) pattern text instead
 		#expect(try parseTableConfig("S:H1:")
-			.header == .init(styleSpecifier: "1")) // explicit header wins over the implied 1
+			.header == .init(stylingSpecifier: "1")) // explicit header wins over the implied 1
 		#expect(try parseTableConfig("S:h").header == nil) // explicit "off" wins over the implied header, too
 	}
 
@@ -152,7 +152,7 @@ private extension MASTests {
 	func `b & u each imply a dashed separator (not blank) iff none was already set & set broken-ness`() throws {
 		let broken = try parseTableConfig("b")
 		#expect(broken.separator == .init(pattern: "-", broken: true))
-		#expect(broken.header == .init(styleSpecifier: "")) // transitively implied, via the implied separator
+		#expect(broken.header == .init(stylingSpecifier: "")) // transitively implied, via the implied separator
 		let unbroken = try parseTableConfig("u")
 		#expect(unbroken.separator == .init(pattern: "-", broken: false))
 		// An explicit separator pattern is kept; only broken-ness & (if unset)
@@ -164,7 +164,7 @@ private extension MASTests {
 	func `last one wins per setting, ad hoc order`() throws {
 		#expect(try parseTableConfig("bu").separator?.broken == false)
 		#expect(try parseTableConfig("ub").separator?.broken == true)
-		#expect(try parseTableConfig("H1:H2:").header == .init(styleSpecifier: "2"))
+		#expect(try parseTableConfig("H1:H2:").header == .init(stylingSpecifier: "2"))
 	}
 
 	@Test(arguments: [("c", "  "), ("C:", ""), ("C....:", "...."), ("C\t", "\t")])
@@ -177,13 +177,13 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("Hbogus:", TableConfigParsingError.invalidHeaderStyleSpecifier("bogus")),
-			("Hb", .invalidHeaderStyleSpecifier("b")),
+			("Hbogus:", TableConfigParsingError.invalidHeaderStylingSpecifier("bogus")),
+			("Hb", .invalidHeaderStylingSpecifier("b")),
 			("z", .invalidSetting("z")),
 			("H1\\", .danglingEscape),
 		],
 	)
-	func `an invalid header style specifier, unknown setting, or dangling escape is a parse error`(
+	func `an invalid header styling specifier, unknown setting, or dangling escape is a parse error`(
 		value: String,
 		error: TableConfigParsingError,
 	) throws {
@@ -248,7 +248,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table renders a header row styled with a given style specifier`() throws {
+	func `table renders a header row styled with a given styling specifier`() throws {
 		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],
@@ -258,7 +258,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table renders a header row styled with custom style sequences`() throws {
+	func `table renders a header row styled with custom styling sequences`() throws {
 		let table = try [JSON.Object([("name", .string("Slack"))])]
 			.table(
 				fieldSpecs: [.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)],

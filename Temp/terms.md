@@ -493,18 +493,19 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       is one in the grammar)
     - REJECTED: default value comment / applicability comment (for an error
       comment) / actual parameter (for an argument)
-78. - style specifier: output-device-specific text styling a header row or a key
-      (`<style-specifier>`)
-    - style prefix: precedes a style specifier (`<style-prefix>`)
-    - style suffix: follows a style specifier (`<style-suffix>`)
-    - style reset: follows a styled string (`<style-reset>`)
-    - ANSI SGR style defaults: the defaults of `p`, `x` & `o` on a command line
-      ([defined](../Specs/command-line.md#style-defaults))
-    - stylable string: a header row or a key, which a style specifier may style
-      ([defined](../Specs/table.md#styling))
+78. - styling specifier: output-device-specific text styling a header row or a
+      key (`<styling-specifier>`)
+    - styling prefix: precedes a styling specifier (`<styling-prefix>`)
+    - styling suffix: follows a styling specifier (`<styling-suffix>`)
+    - styling reset: follows a styled string (`<styling-reset>`)
+    - ANSI SGR styling defaults: the defaults of `p`, `x` & `o` on a command
+      line ([defined](../Specs/command-line.md#styling-defaults))
+    - stylable string: a header row or a key, which a styling specifier may
+      style ([defined](../Specs/table.md#styling))
     - final byte: ECMA-48's term for the character that terminates a control
       sequence (e.g., SGR's `m`)
-    - REJECTED: style terminator / style end / final character
+    - REJECTED: styling terminator / styling end / final character
+    - REJECTED: style (as a noun, for styling; e.g., style specifier)
 79. - width: text's display width ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - column width: the width of a table column's widest rendered cell,

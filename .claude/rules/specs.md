@@ -58,7 +58,7 @@ when that definition is long enough for its copies to drift (e.g.,
 `<transform-call>`'s error comment), because the shared definition states the
 shared syntax & semantic comments once; repeat a short sequence or choice only
 if each use has a name of its own that documents it (e.g., `<field-spec-move>`
-or `<style-prefix-setting>`), because a parameter would hide it for no gain.
+or `<styling-prefix-setting>`), because a parameter would hide it for no gain.
 
 In specs, write a literal that selects 1 of a set of names, rather than
 structuring the syntax (e.g., a transform name, `unix-time`, a config name, or
@@ -153,10 +153,10 @@ except:
 3. Anywhere, to explain a motivation that applies if a shell is used.
 
 In specs, default text that depends on an output device (e.g.,
-`<style-prefix-default>`'s `<style-prefix>`) to `{empty string}`, say that an
-app should override it as appropriate & give the override in the [command-line
-spec](../../Specs/command-line.md), because no default suits every output
-device.
+`<styling-prefix-default>`'s `<styling-prefix>`) to `{empty string}`, say that
+an app should override it as appropriate & give the override in the
+[command-line spec](../../Specs/command-line.md), because no default suits every
+output device.
 
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload

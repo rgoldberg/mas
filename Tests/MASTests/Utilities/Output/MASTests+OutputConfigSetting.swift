@@ -11,7 +11,7 @@ internal import Testing
 
 private enum PayloadError: Equatable, Error {
 	case danglingEscape
-	case invalidStyleSpecifier(String)
+	case invalidStylingSpecifier(String)
 }
 
 private extension MASTests {
@@ -57,37 +57,37 @@ private extension MASTests {
 			("38;5;208", "38;5;208", ""),
 		],
 	)
-	func `a style specifier ignores outer bare whitespace & allows escaped ASCII letters`(
+	func `a styling specifier ignores outer bare whitespace & allows escaped ASCII letters`(
 		value: String,
-		styleSpecifier: String,
+		stylingSpecifier: String,
 		remainder: String,
 	) throws {
 		var input = value[...]
 		#expect(
-			try parseStyleSpecifier(
+			try parseStylingSpecifier(
 				&input,
 				danglingEscapeError: PayloadError.danglingEscape,
-				invalidStyleSpecifierError: PayloadError.invalidStyleSpecifier,
+				invalidStylingSpecifierError: PayloadError.invalidStylingSpecifier,
 			)
-				== styleSpecifier,
+				== stylingSpecifier,
 		)
 		#expect(input == remainder)
 	}
 
 	@Test(arguments: ["b", "1b", " 1;4b "])
-	func `a style specifier containing a bare ASCII letter throws the given style specifier error`(value: String) {
+	func `a styling specifier containing a bare ASCII letter throws the given styling specifier error`(value: String) {
 		var input = value[...]
-		#expect(throws: PayloadError.invalidStyleSpecifier(value)) {
-			try parseStyleSpecifier(
+		#expect(throws: PayloadError.invalidStylingSpecifier(value)) {
+			try parseStylingSpecifier(
 				&input,
 				danglingEscapeError: PayloadError.danglingEscape,
-				invalidStyleSpecifierError: PayloadError.invalidStyleSpecifier,
+				invalidStylingSpecifierError: PayloadError.invalidStylingSpecifier,
 			)
 		}
 	}
 
 	@Test
-	func `styling wraps a string in style sequences, for a non-terminal only if always styled`() {
+	func `styling wraps a string in styling sequences, for a non-terminal only if always styled`() {
 		#expect(
 			styled("x", specifier: "1;4", sequences: .default, isAlwaysStyled: true) == "\u{1B}[1;4mx\u{1B}[0m",
 		)
@@ -102,7 +102,7 @@ private extension MASTests {
 	}
 
 	@Test(arguments: [true, false])
-	func `styling with an empty style specifier leaves a string unstyled`(isAlwaysStyled: Bool) {
+	func `styling with an empty styling specifier leaves a string unstyled`(isAlwaysStyled: Bool) {
 		#expect(styled("x", specifier: "", sequences: .default, isAlwaysStyled: isAlwaysStyled) == "x")
 	}
 }
