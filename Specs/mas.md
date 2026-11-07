@@ -151,9 +151,9 @@ field order's `<field-order-sort-option-set>` uses to choose between names &
 labels), are those of the `Other` rows below.
 
 Version fields' default sort options compare
-[versions](fields.md#sort-number-segments) (`v`), and `formattedPrice`'s use the
-[App Store locale's conventions as `N`'s base conventions & include
-`a`](#price-sorting), but they otherwise match the following:
+[versions](fields.md#sort-number-segments) (`v`), and `formattedPrice`'s are
+[those for price sorting](#price-sorting), but they otherwise match the
+following:
 
 | Output Format     | Field  | Default              |
 |:------------------|:-------|:---------------------|
