@@ -167,8 +167,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       text, boundary text)
     - syntax text: the text that a syntax parses (e.g., a config), as opposed to
       an app's input (e.g., its items)
-    - REJECTED: parsed text (too generic: an app's input is parsed too) / input
-      (for syntax text)
     - string: the data type of a value (string fields, string transforms,
       `<string-pipeline>`, empty strings)
     - token: contiguous characters consumed together as 1 element: a literal,
@@ -181,11 +179,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - free-form description: a `{DESCRIPTION}` that describes a value or a type
       in prose in a semantic comment
       ([defined](../Specs/ebnf.md#free-form-descriptions))
-    - REJECTED: syntax token / constant token (for a literal token) / scalar
-      token / text token (for a variable token) / ad hoc text (for a variable
-      token's text) / scalar description / text terminal / constrained text
-      terminal (for a typed terminal) / ad hoc description (for a free-form
-      description)
     - occurrence: specific appearance of something
     - value: evaluated content bound to a nonterminal or field
     - content: substance as a whole (of a string, file, or expression)
@@ -197,8 +190,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - compound
     - placeholder: only the defined `%…` fields-format term
     - rule: only a semantic rule in prose
-    - REJECTED: contents / instance / usage (except as in 104) / use (as a noun)
-      / site / construct / projection / rule (as a syntactic element) /
+    - REJECTED: parsed text (too generic: an app's input is parsed too) / input
+      (for syntax text) / syntax token / constant token (for a literal token) /
+      scalar token / text token (for a variable token) / ad hoc text (for a
+      variable token's text) / scalar description / text terminal / constrained
+      text terminal (for a typed terminal) / ad hoc description (for a free-form
+      description) / contents / instance / usage (except as in 104) / use (as a
+      noun) / site / construct / projection / rule (as a syntactic element) /
       placeholder (as a generic term) / symbol (except a Unicode general
       category `S` character)
 30. - meta-grammar: the notation the custom EBNF grammar is defined in
@@ -225,10 +223,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       a name literal's text ([defined](../Specs/ebnf.md#tokens))
     - candidate literal: a literal or a name literal that the syntax can consume
       at a given position ([defined](../Specs/ebnf.md#candidate-literals))
-    - REJECTED: literal text (for a literal) / candidate syntax literal /
-      literal (as an adjective for as-is data, e.g., "a literal tab character")
     - verbatim: exact character-for-character match without processing escapes
       or evaluation
+    - REJECTED: literal text (for a literal) / candidate syntax literal /
+      literal (as an adjective for as-is data, e.g., "a literal tab character")
 33. - overlay: merging specific modifiers or fields onto an existing base while
       retaining unspecified attributes
     - override: priority precedence where a higher-level rule prevails over a
@@ -504,8 +502,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       style ([defined](../Specs/table.md#styling))
     - final byte: ECMA-48's term for the character that terminates a control
       sequence (e.g., SGR's `m`)
-    - REJECTED: styling terminator / styling end / final character
-    - REJECTED: style (as a noun, for styling; e.g., style specifier)
+    - REJECTED: styling terminator / styling end / final character / style (as a
+      noun, for styling; e.g., style specifier)
 79. - width: text's display width ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - column width: the width of a table column's widest rendered cell,
@@ -529,10 +527,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: multiplicity
 82. - tie & fall through: compare as equal for a sort key, leaving the order to
       the next sort key ([used](../Specs/fields.md#sort-source))
-    - REJECTED: retain their input order
     - default sort options: the app's per-output-format replacements for sort
       options' defaults, for field names, field labels, or a field's content
       ([defined](../Specs/fields.md#sort-options))
+    - REJECTED: retain their input order
 83. - field occurrence index: `<field-occurrence-index>`, an index into only the
       field specs for 1 field
       ([defined](../Specs/fields.md#field-spec-references))
