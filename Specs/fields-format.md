@@ -608,7 +608,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 - **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
 - **Non-negated** (in a non-nullary branch): a `<success-block>`.
 - **Unary match** (`%m`): `<branches>`.
-- **Binary match** (`%M`): `<branches>` & a `<failure-block>`.
+- **Binary match** (`%M`): branches & a `<failure-block>`.
 
 A matcher succeeds iff it matches the value against which it is evaluated.
 
@@ -1051,27 +1051,36 @@ match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 
 unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
 binary-match-placeholder =
-  <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
-  (* error: its <failure-block> is absent & every <branch> is non-nullary & its block is absent *)
+  <placeholder-prefix>
+  <binary-match>
+  (
+    <blockless-branch>+ <block-terminator> -<failure-block>
+    | [ <blockless-branch>+ ] ( <nullary-branch> | <blocked-branch> ) [ <branch>+ ] <block-terminator> -[ <failure-block> ]
+  )
+  <block-terminator>
 
-unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
-binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
+unary-match  = "m" (* matches 1 of its branches; output type: {matched branch value's type}; value: {matched branch value} *)
+binary-match = "M" (* matches 1 of its branches; output type: {matched branch value's type}; value: {matched branch value} *)
 
 branches = <branch>+
 branch   = <nullary-branch> | <non-nullary-branch>
 
 nullary-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
-non-nullary-branch =
-  <non-nullary-scalar-success> <block-terminator>
-  | <branch-negation> <non-nullary-scalar-matcher> -[ <failure-block> ] <block-terminator>
+non-nullary-branch = <blockless-branch> | <blocked-branch>
+blockless-branch   =
+  ( <non-nullary-scalar-blockless-success> | <branch-negation> <non-nullary-scalar-matcher> ) <block-terminator>
+  (* default failure-block: {empty string} *)
+blocked-branch     =
+  <non-nullary-scalar-blocked-success> <block-terminator>
+  | <branch-negation> <non-nullary-scalar-matcher> -<failure-block> <block-terminator>
 
 branch-negation = "-"!
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- The branches in `<branches>` are evaluated sequentially against the format
-  input, returning as `<match-placeholder>`'s value:
+- A match's branches are evaluated sequentially against the format input,
+  returning as `<match-placeholder>`'s value:
   - If a branch has `<branch-negation>`:
     - If it fails: its `<failure-block>`'s evaluated value if it is non-nullary,
       otherwise the format input.

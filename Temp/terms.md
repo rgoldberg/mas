@@ -655,7 +655,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `<infallible-unconditional-placeholder>`)
      - blocked / blockless: of a non-nullary success with / without a success
        block (`<non-nullary-scalar-blocked-success>` /
-       `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`)
+       `<non-nullary-scalar-blockless-success>`, e.g., `S` in `%S+none+`), or of
+       a non-nullary branch with / without a block (`<blocked-branch>` /
+       `<blockless-branch>`, e.g., `N` in `%MN+n++`)
      - string transform pipeline: the string transforms after a named format
        reference whose named format is unconditional, the 1st of which may take
        a `<coercion>` (`<string-transform-pipeline>`;

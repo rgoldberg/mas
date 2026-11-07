@@ -547,7 +547,7 @@ private struct FormatParser {
 		return modifier
 	}
 
-	/// Parses a `<match-placeholder>`'s `<branches>` & its `<block-terminator>`.
+	/// Parses a `<match-placeholder>`'s branches & their `<block-terminator>`.
 	private mutating func parseBranches() throws(ParsingError) -> [Branch] {
 		var branches = [Branch]()
 		while skipWhitespace(), let first = input.first, first != blockTerminator {
