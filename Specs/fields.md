@@ -250,10 +250,12 @@ So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
 `.name=x`) or option (e.g., `<direction>` in `.name/1`, in `.name/1Ii`, or in
 `//0`) retains the working fields config's value, while an empty
 [payload](#payloads) (e.g., in `.name=`, `.name/`, `L:`, or `B:`) is directly
-absent, so it resets its value to its default, as it does each value within it
-(e.g., `.name/` removes the field spec's `<sort>`, resetting its
-`<sort-priority>` & each of its `<sort-option>`s, while `.name:` empties its
-format, but retains its alignment).
+absent, so it resets the payload's value to the payload's own default, rather
+than to its option's (e.g., `B:` sets no boundaries, rather than `B+space+:`'s,
+and `L:` selects the system locale, rather than the canonical conventions), as
+it does each value within it (e.g., `.name/` removes the field spec's `<sort>`,
+resetting its `<sort-priority>` & each of its `<sort-option>`s, while `.name:`
+empties its format, but retains its alignment).
 
 ## Nonexistent Fields
 
