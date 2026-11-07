@@ -22,7 +22,7 @@ expressions' constant nonterminals (e.g., not `-"/"` for a following `/`),
 except on a terminator that terminates every expression that needs it, which
 would otherwise need many annotations (e.g., `block-terminator = -"+"`).
 
-In `Specs/shell.md`, define each option that takes a value as a
+In `Specs/command-line.md`, define each option that takes a value as a
 `<valued-option>` (e.g.,
 `fields-option = <valued-option("--fields", <fields-config>)>`), whose
 command-line argument boundary (`_`) models Swift Argument Parser's split of an
@@ -139,11 +139,11 @@ In specs, give each new syntax character only punctuation that no common shell
 interprets unquoted, in case a syntax is used from a shell: `%`, `+`, `-`, `.`,
 `/`, `:`, `,`, `@`, or `_`, or `=` anywhere but at the start of a word.
 
-In specs other than `Specs/shell.md` & `Specs/mas.md`, never mention a standard
-stream, a shell, a command line, or a command-line option (e.g., write normal
-output, error output, a transient config, or `H1:`, rather than standard output,
-standard error, the command line, or `--table-config H1:`), because a syntax may
-be used outside of a command line.
+In specs other than `Specs/command-line.md` & `Specs/mas.md`, never mention a
+standard stream, a shell, a command line, or a command-line option (e.g., write
+normal output, error output, a transient config, or `H1:`, rather than standard
+output, standard error, the command line, or `--table-config H1:`), because a
+syntax may be used outside of a command line.
 
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload

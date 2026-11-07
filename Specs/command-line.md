@@ -1,8 +1,8 @@
-# Shell Usage
+# Command-Line Interface
 
-How an [app](configs.md#configs) that a shell runs exposes the other specs:
-which standard stream each output uses, what its exit status means & which
-command-line options take which syntax.
+How an [app](configs.md#configs) run from a command line exposes the other
+specs: which standard stream each output uses, what its exit status means &
+which command-line options take which syntax.
 
 Uses the [custom EBNF grammar](ebnf.md).
 

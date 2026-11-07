@@ -664,20 +664,20 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
 104. - command line: a run of a command list, whose transient configs are the
-       values of its options ([defined](../Specs/shell.md#command-lines))
+       values of its options ([defined](../Specs/command-line.md#command-lines))
      - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
-       `-` ([defined](../Specs/shell.md#option-values))
+       `-` ([defined](../Specs/command-line.md#option-values))
      - option value separator: the `=` or the command-line argument boundary
        between a long option & its value (`<option-value-separator>`; e.g., in
        `--fields=name` or `--fields name`)
      - command-line argument boundary: `_`, which matches between 2 adjacent
        command-line arguments, iff the latter is `-` or does not start with `-`
-       ([defined](../Specs/shell.md#command-line-argument-boundaries))
+       ([defined](../Specs/command-line.md#command-line-argument-boundaries))
      - valued option: an option that takes a value, defined as a
-       `<valued-option>` ([defined](../Specs/shell.md#option-values))
+       `<valued-option>` ([defined](../Specs/command-line.md#option-values))
      - flag: an option that takes no value (e.g., `--json`)
-       ([defined](../Specs/shell.md#option-values))
+       ([defined](../Specs/command-line.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
        `[--json | --json-config <json-config> | …]`)
      - REJECTED: option-argument / option-argument separator (the specs use
@@ -713,7 +713,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#output-configs))
      - output config option: an output format's option that selects it with its
        value as a transient output config (e.g., `--json-config`)
-       ([defined](../Specs/shell.md#output-format-options))
+       ([defined](../Specs/command-line.md#output-format-options))
      - output config syntax: the syntax of an output config kind's configs
        (e.g., `<json-config>`) ([defined](../Specs/configs.md#output-configs))
      - output format: how a display command renders its items: table, key-value,
@@ -803,7 +803,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - fail: of a command, to report an item error, so that its caller can
        detect an omitted item ([defined](../Specs/configs.md#output-formats))
      - exit status: the status with which a command exits, which is nonzero iff
-       it fails ([defined](../Specs/shell.md#exit-status))
+       it fails ([defined](../Specs/command-line.md#exit-status))
      - normal output / error output: where a display command outputs its items /
        where an app reports every error, separately
        ([defined](../Specs/configs.md#normal--error-output))
