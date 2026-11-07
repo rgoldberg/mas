@@ -102,11 +102,11 @@ leader-pattern = ^{string}^ (* default: "▁" *)
   `<leader-pattern>` is repeated to fill the leader's [width](configs.md#width),
   truncated before the 1st character that would exceed that width; spaces fill
   any remaining width (e.g., when that character is wide, such as `中`). A
-  leader's width is the width of its item's widest rendered key, less the width
-  of its own rendered key, plus the width of `<leader-pattern>`, so the widest
-  key's leader is 1 `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a
-  tab) is rendered once, with no space-fill, because no number of repetitions
-  can fill any width.
+  leader's width is its item's widest rendered key's width, less its own
+  rendered key's width, plus `<leader-pattern>`'s width, so the widest key's
+  leader is 1 `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is
+  rendered once, with no space-fill, because no number of repetitions can fill
+  any width.
 
 ## Leading Spacing
 

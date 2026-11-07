@@ -42,7 +42,7 @@ A command exits with a nonzero **exit status** iff it
 
 A **command line** is text that specifies a [command
 list](configs.md#command-lists) & its arguments to run; its [transient
-configs](configs.md#transient-configs) are the values of its options.
+configs](configs.md#transient-configs) are its options' values.
 
 ## Option Values
 

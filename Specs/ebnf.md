@@ -2,7 +2,7 @@
 
 ## Meta-Grammar
 
-Within the definition of this custom EBNF grammar:
+Within this custom EBNF grammar's definition:
 
 - All text is case-sensitive.
 - A word of uppercase letters, digits & `_` that starts with an uppercase letter

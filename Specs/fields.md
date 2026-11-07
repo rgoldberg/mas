@@ -510,15 +510,14 @@ last).
 fields config's field specs before `<field-spec-edits-section>`, so its edits &
 each `<index>` (including a `<baseline-sourced-field-spec-edit>`'s) apply to the
 reversed positions (e.g., in `@all/P-.+@1`, `@1` references `all`'s last field
-spec). A `<direction>` of a field order per `<positional-order-option-set>`
-reverses those positions iff it differs from the working fields config's saved
-positional field order's `<direction>`, which already reversed them iff
-`<descending>` (e.g., if `x` has `/P-`, each of `@x/P-`, `@x/P` & `@x/-` outputs
-`x`'s field order, while each of `@x/P+` & `@x/+` reverses it; if `y` is `@x/O`,
-`@y/P-` outputs `x`'s field order, while `@y/P+` reverses it). So a positional
-order that a later section overrides still reverses positions (e.g., `/P-/I`
-sorts by name, tiebreaking as `/I/T-` does, while each `<index>` references the
-reversed positions).
+spec). A positional field order's `<direction>` reverses those positions iff it
+differs from the working fields config's saved positional field order's
+`<direction>`, which already reversed them iff `<descending>` (e.g., if `x` has
+`/P-`, each of `@x/P-`, `@x/P` & `@x/-` outputs `x`'s field order, while each of
+`@x/P+` & `@x/+` reverses it; if `y` is `@x/O`, `@y/P-` outputs `x`'s field
+order, while `@y/P+` reverses it). So a positional order that a later section
+overrides still reverses positions (e.g., `/P-/I` sorts by name, tiebreaking as
+`/I/T-` does, while each `<index>` references the reversed positions).
 
 Field specs that the field order ties are ordered by position, reversed iff the
 effective `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
@@ -694,8 +693,8 @@ spec](#default-field-specs) for field `<field-name>` (whereas a present
 `<field-occurrence-index>` beyond its field's field specs is an error, e.g.,
 `.+x@1` when `x` has no field spec).
 
-$previous$ is the location in the working fields config where the direct results
-of the immediately preceding `<field-spec-edit>` were effected: a field spec, or
+$previous$ is the location in the working fields config where the immediately
+preceding `<field-spec-edit>`'s direct results were effected: a field spec, or
 the start of the working fields config. Before the 1st `<field-spec-edit>`, it
 is the start (i.e., immediately before the 1st field spec in the working fields
 config). It locates a field spec, not an index, so moving another field spec
@@ -827,7 +826,7 @@ which starts empty, not the list of any field spec to which it is attached,
 though attaching it sets what they set (e.g., if preset `mb` is `%bytes=Size`,
 `.size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
 
-A `<preset-name>` is looked up from the starting context of its reference, as
+A `<preset-name>` is looked up from its reference's starting context, as
 [specified for every config kind](configs.md#referencing-named-configs); the
 `default` preset that a default field spec or a built-in fields config's field
 spec has attached is looked up from the starting context of the reference that
@@ -937,10 +936,10 @@ sort-option-terminator = ":"
 <!--editorconfig-checker-enable-->
 
 The app may set, per output format, **default sort options** for each field's
-content, each of which replaces the default of its `<sort-option>` in a field
-spec's `<sort>` (e.g., [mas's](mas.md#default-sort-options) make `<insensitive>`
-the default `<case-sensitivity>` for table output, so `name/I` sorts items by
-`name` case-insensitively), while a `<field-order-sort-option-set>` inherits its
+content, each of which replaces its `<sort-option>`'s default in a field spec's
+`<sort>` (e.g., [mas's](mas.md#default-sort-options) make `<insensitive>` the
+default `<case-sensitivity>` for table output, so `name/I` sorts items by `name`
+case-insensitively), while a `<field-order-sort-option-set>` inherits its
 options from a [saved field order](#field-order), which a built-in fields config
 sets per the app's default field orders.
 
