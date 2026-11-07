@@ -39,38 +39,19 @@ both evaluating to that same character.
 **Whitespace** is any Unicode `White_Space` character: Unicode general category
 `Z` characters, `U+0009` to `U+000D` & `U+0085`.
 
-### Multiplicity
+### Repeating Expressions
 
-A value's multiplicity is one of:
+An expression is **repeating** iff it is:
 
-- **Scalar**: a single value (e.g., an integer or a string).
-- **Repetition**: a sequence of 0 or more elements. A repetition with 0 or 1
-  elements is still a repetition, not a scalar.
-- **Tuple**: the values of a [sequence](#sequences)'s children, in order.
-
-An expression's multiplicity determines its occurrences' multiplicity:
-
-- **Inherent scalar** expression: every occurrence is a scalar.
-- **Inherent repetition** expression: every occurrence is a repetition.
-- **Inherent tuple** expression: every occurrence is a tuple.
-- **Content-dependent** expression: each occurrence has its content's
-  multiplicity.
-- **Context-dependent** expression: each occurrence has the multiplicity
-  required by its context.
-
-An expression's **static multiplicity** is the multiplicity shared by all its
-possible occurrences, determined from the grammar instead of the syntax text:
-
-- Inherent scalar, repetition, or tuple: that multiplicity.
-- [Nonterminal reference](#nonterminal-references): its definition's static
-  multiplicity, with each [parameter](#parameterized-nonterminals) replaced by
-  its argument.
-- [Grouping](#groupings), [optional](#optionals), or
-  [trailing-omissible](#trailing-omissibles): its child's static multiplicity.
-- [Sequence](#sequences) with exactly 1 variable child: that child's static
-  multiplicity.
-- [Choice](#choices): its alternatives' static multiplicity, if they all share
-  one; otherwise, **mixed**.
+- A [repetition](#repetitions-1-or-more), a [repetition with
+  separators](#repetitions-with-separators-1-or-more), or [`empty`](#empty).
+- A [nonterminal reference](#nonterminal-references) whose definition is
+  repeating, with each [parameter](#parameterized-nonterminals) replaced by its
+  argument.
+- A [grouping](#groupings), an [optional](#optionals), or a
+  [trailing-omissible](#trailing-omissibles) whose child is repeating.
+- A [sequence](#sequences) with exactly 1 variable child, which is repeating.
+- A [choice](#choices) whose alternatives are all repeating.
 
 ### Constant Vs. Variable Expressions
 
@@ -267,8 +248,6 @@ outermost annotation overrides.
 BARE
 ```
 
-Inherent scalar.
-
 A [bare character](#escaping), which evaluates to itself.
 
 #### Escape Sequences
@@ -276,8 +255,6 @@ A [bare character](#escaping), which evaluates to itself.
 ```ebnf
 \ESCAPED
 ```
-
-Inherent scalar.
 
 An [escape sequence](#escaping), which evaluates to `ESCAPED`.
 
@@ -287,8 +264,6 @@ An [escape sequence](#escaping), which evaluates to `ESCAPED`.
 null
 ```
 
-Context-dependent multiplicity.
-
 The absence of a value; matches no syntax text.
 
 #### Empty
@@ -297,18 +272,14 @@ The absence of a value; matches no syntax text.
 empty
 ```
 
-Inherent repetition.
-
-A [repetition](#multiplicity) of 0 elements; matches no syntax text. Distinct
-from `null` & from an empty string.
+A [repetition](#repetitions-1-or-more) of 0 elements; matches no syntax text.
+Distinct from `null` & from an empty string.
 
 #### End
 
 ```ebnf
 end
 ```
-
-Inherent scalar.
 
 A constant expression that matches no syntax text, only at the end of the syntax
 text.
@@ -318,8 +289,6 @@ text.
 ```ebnf
 _
 ```
-
-Inherent scalar.
 
 A **command-line argument boundary**: a constant expression that matches no
 syntax text, only between 2 adjacent command-line arguments, iff the latter is
@@ -336,8 +305,6 @@ as the syntax text's start & end do.
 "TEXT"
 ```
 
-Inherent scalar.
-
 A **literal**, which matches a [literal token](#tokens) of `TEXT`.
 
 Within `TEXT`, `""` denotes a `"`.
@@ -347,8 +314,6 @@ Within `TEXT`, `""` denotes a `"`.
 ```ebnf
 'TEXT'
 ```
-
-Inherent scalar.
 
 A **name literal**, which matches a [name token](#tokens) that evaluates to
 `TEXT` (e.g., `'round'` matches `round`, `\round` & `ro\und`), because a name
@@ -367,8 +332,6 @@ Defined via a modified meta-grammar supporting [optionals](#optionals) &
 ```ebnf
 "{" SUBTYPE [ ":" CONSTRAINTS ] "}"
 ```
-
-Inherent scalar.
 
 Consumes a [variable token](#tokens), whose value has `SUBTYPE`'s type:
 
@@ -420,8 +383,6 @@ For an `integer` or a `number`:
 NONTERMINAL = DEFINITION
 ```
 
-Content-dependent multiplicity.
-
 Binds a nonterminal to its definition.
 
 An absent nonterminal's value is given by [Defaults for Absent
@@ -432,8 +393,6 @@ Expressions](#defaults-for-absent-expressions).
 ```ebnf
 <NONTERMINAL>
 ```
-
-Content-dependent multiplicity.
 
 References the nonterminal `NONTERMINAL`.
 
@@ -446,8 +405,6 @@ separators](#repetitions-with-separators-1-or-more) & [literals](#literals):
 NONTERMINAL "(" PARAMETER … "," ")" "=" DEFINITION
 "<" NONTERMINAL "(" ARGUMENT … "," ")" ">"
 ```
-
-Content-dependent multiplicity.
 
 A **parameterized nonterminal**'s definition names 1 or more **parameters**,
 each a word of uppercase letters, digits & `_` (as a metavariable is), which
@@ -471,16 +428,11 @@ non-structural definitions may contain one.
 ( EXPRESSION )
 ```
 
-Content-dependent multiplicity.
-
 ### Sequences
 
 ```ebnf
 A B
 ```
-
-If exactly 1 child is a variable expression: content-dependent multiplicity
-based on the variable child; otherwise: inherent tuple.
 
 `A` followed by `B`.
 
@@ -490,8 +442,6 @@ based on the variable child; otherwise: inherent tuple.
 A | B
 ```
 
-Content-dependent multiplicity.
-
 `A` or `B`. `A` & `B` must match disjoint sets of text, unless the enclosing
 definition is [non-structural](#non-structural-comments).
 
@@ -500,8 +450,6 @@ definition is [non-structural](#non-structural-comments).
 ```ebnf
 [ EXPRESSION ]
 ```
-
-Content-dependent multiplicity.
 
 0 or 1 occurrence of `EXPRESSION`.
 
@@ -527,8 +475,6 @@ An expression is **absent** if it is either directly or transitively absent.
 EXPRESSION?
 ```
 
-Content-dependent multiplicity.
-
 An expression's **trailing run** is the longest run of adjacent expressions,
 each an optional or a trailing-omissible, that includes it, treating each
 nonterminal reference whose definition is a sequence as that sequence's children
@@ -547,8 +493,6 @@ A trailing-omissible is otherwise an optional.
 ELEMENT+
 ```
 
-Inherent repetition.
-
 `ELEMENT` must not match empty text.
 
 ### Repetitions with Separators (1 or More)
@@ -556,8 +500,6 @@ Inherent repetition.
 ```ebnf
 ELEMENT … SEPARATOR
 ```
-
-Inherent repetition.
 
 E.g.:
 
@@ -584,8 +526,6 @@ From highest to lowest precedence within a grouping:
 ```ebnf
 (* COMMENT *)
 ```
-
-No multiplicity.
 
 #### Mnemonic Comments
 
@@ -785,8 +725,7 @@ any of its descendants, so each one's default applies.
   - For a grouping, optional, trailing-omissible, or sequence with exactly 1
     variable child: its variable child's value evaluated in the expression's
     presence state.
-  - For any other variable expression whose [static multiplicity](#multiplicity)
-    is repetition:
+  - For any other [repeating](#repeating-expressions) variable expression:
     - If transitively absent: `null`.
     - Otherwise (i.e., directly absent): `empty`.
   - Otherwise: `null`.

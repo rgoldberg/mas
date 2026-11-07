@@ -364,8 +364,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - reference cycle: a cyclic chain of references among named configs, other
       than a reference to a same-named ancestor, which is an error
       ([defined](../Specs/configs.md#referencing-named-configs))
-56. - context: resolving named fields configs, formats, etc.; grammatical
-      position (`context-dependent` multiplicity)
+56. - context: resolving named fields configs, formats, etc.
     - circumstances: situation
     - REJECTED: situation
 57. - where: static location
@@ -523,13 +522,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       following a variable token
     - REJECTED: literal scalar (for a value) / candidate text terminator /
       greedy matching / longest match / how far a token extends
-81. - tuple: the multiplicity of a sequence's children's values
-      ([defined](../Specs/ebnf.md#multiplicity))
-    - static multiplicity: the multiplicity shared by all of an expression's
-      possible occurrences ([defined](../Specs/ebnf.md#multiplicity))
-    - mixed: the static multiplicity of a choice whose alternatives' static
-      multiplicities differ
-    - REJECTED: product / record (for a tuple)
+81. - repeating: of a repetition, of `empty`, or of an expression that the
+      grammar makes one ([defined](../Specs/ebnf.md#repeating-expressions))
+    - REJECTED: multiplicity
 82. - tie & fall through: compare as equal for a sort key, leaving the order to
       the next sort key ([used](../Specs/fields.md#sort-source))
     - REJECTED: retain their input order
@@ -846,13 +841,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/ebnf.md#constant-vs-variable-expressions))
      - bare token: a token of only bare characters
        ([defined](../Specs/ebnf.md#tokens))
-123. - inherent scalar / inherent repetition / inherent tuple: of an expression
-       each of whose occurrences is a scalar / a repetition / a tuple
-       ([defined](../Specs/ebnf.md#multiplicity))
-     - content-dependent / context-dependent: of an expression each of whose
-       occurrences has its content's multiplicity / the multiplicity that its
-       context requires ([defined](../Specs/ebnf.md#multiplicity))
-124. - outer bare whitespace: bare whitespace immediately before the 1st, or
+123. - outer bare whitespace: bare whitespace immediately before the 1st, or
        after the last, character that a literal or name token consumes, or
        non-bare-whitespace character that a variable token consumes; also all of
        a variable token without such a character
@@ -866,14 +855,14 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - forbidden / ignored / consumed / required: the outer bare whitespace
        treatments `!` / `-` / `^` / `&`
        ([defined](../Specs/ebnf.md#outer-bare-whitespace-treatment))
-125. - presence state: present, transitively absent, or directly absent
+124. - presence state: present, transitively absent, or directly absent
        ([defined](../Specs/ebnf.md#presence-states))
      - directly absent: not present, but not transitively absent (e.g.,
        `<label>` in `name=`)
      - transitively absent: of an expression an ancestor of which is absent, or
        that no consumed token matches as an alternative of a present choice or
        as an element of a present repetition
-126. - semantic comment: a comment part that matches a semantic comment format
+125. - semantic comment: a comment part that matches a semantic comment format
        ([defined](../Specs/ebnf.md#semantic-comments))
      - mnemonic comment: a comment part that explains how a nonterminal's
        literal was chosen ([defined](../Specs/ebnf.md#mnemonic-comments))
@@ -884,7 +873,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        applies ([defined](../Specs/ebnf.md#explicit--implicit-defaults))
      - global default: an expression's applicable self default, else its
        applicable implicit default ([defined](../Specs/ebnf.md#global-defaults))
-127. - matcher: a placeholder's or branch's `<placeholder-prefix>`, modifiers &
+126. - matcher: a placeholder's or branch's `<placeholder-prefix>`, modifiers &
        predicate (`<matcher>`), which succeeds iff it matches the value against
        which it is evaluated
        ([defined](../Specs/fields-format.md#success--failure))
@@ -893,7 +882,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        the matcher fails / succeeds
      - boundary group: a `<boundary-group>`'s boundaries, which share 1 sort
        precedence ([defined](../Specs/fields.md#sort-boundaries))
-128. - named config: a config that has a name, unique for its kind within a
+127. - named config: a config that has a name, unique for its kind within a
        context ([defined](../Specs/configs.md#named-configs))
      - named fields config: a named config of the fields kind
        ([defined](../Specs/fields.md#named-fields-configs))
@@ -902,7 +891,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#config-kinds))
      - context stack: a command list's contexts, from most to least specific
        ([defined](../Specs/configs.md#context-stacks))
-129. - base fields config: the named fields config that a command line
+128. - base fields config: the named fields config that a command line
        references or implicitly selects
        ([defined](../Specs/fields.md#base-fields-config))
      - working fields config: a mutable copy of the fields config that a
@@ -914,13 +903,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - resolved fields config: the working fields config after the command line
        has been parsed, which is used to render output
        ([defined](../Specs/fields.md#resolved-fields-config))
-130. - sort key: a field spec with an enabled `<sort>`
+129. - sort key: a field spec with an enabled `<sort>`
        ([defined](../Specs/fields.md#sorting))
      - run of non-boundary text: a maximal sequence of segments between
        boundaries ([defined](../Specs/fields.md#sort-segments))
      - grouped number: a number segment of `<grouped-numeric>`, which compares
        as a single number ([defined](../Specs/fields.md#sort-number-segments))
-131. - ambiguous: of syntax, its text, or what it parses, cannot be read
+130. - ambiguous: of syntax, its text, or what it parses, cannot be read
        reliably
      - ill-typed: of syntax, an expression's or a token's type does not fit what
        surrounds it
@@ -931,7 +920,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        output cannot depend on anything but its own text
      - hold: of an expression, to have a name, an argument, a block content, or
        a list element in it
-132. - item: 1 of the elements of a display command's input, each of which has
+131. - item: 1 of the elements of a display command's input, each of which has
        fields (e.g., an app; [used](../Specs/mas.md#items))
      - field spec: the configuration of an output field, with its position
        ([defined](../Specs/fields.md#field-specs))
@@ -942,7 +931,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - section: a `<relative-config>`'s `<base-fields-config-section>`,
        `<field-order-section>`, `<item-sort-section>`, or
        `<field-spec-edits-section>` ([used](../Specs/fields.md#relative-config))
-133. - pipeline: a named format reference and/or transforms, which are applied
+132. - pipeline: a named format reference and/or transforms, which are applied
        to a value (`<pipeline>`; [used](../Specs/fields-format.md#pipelines))
      - template: template text & placeholders (e.g., `(%i)`; `<format-template>`
        or `<block-template>`; [used](../Specs/fields-format.md#value-types))
