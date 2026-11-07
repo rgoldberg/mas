@@ -373,7 +373,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       / preserve
 59. - define: bind a meaning
     - specify: state a rule
-    - set: assign a value
+    - set: assign a value; also, of a `<field-modifiers>`, give a setting a
+      value, rather than retain its inherited value (e.g., `/-` sets
+      `<direction>`; [defined](../Specs/fields.md#field-modifiers))
 60. - visible
     - hidden
     - hide: verb
@@ -520,6 +522,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       ([defined](../Specs/ebnf.md#typed-terminals))
     - candidate terminator: a candidate literal of the position immediately
       following a variable token
+    - parsed: of a complete expression, the sole element in its set of
+      expressions that consumed tokens start, continue, or close
+      ([defined](../Specs/ebnf.md#consuming-tokens))
     - REJECTED: literal scalar (for a value) / candidate text terminator /
       greedy matching / longest match / how far a token extends
 81. - repeating: of a repetition, of `empty`, or of an expression that the
@@ -848,7 +853,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 120. - App Store locale: the locale of the App Store region that mas guesses
        from the macOS region, because the App Store's locale cannot be
        determined programmatically ([defined](../Specs/mas.md#price-sorting))
-121. - display command: a command whose primary function is to display data
+121. - command: a node in an app's command hierarchy: the root command (the app
+       itself) or a subcommand of another command
+       ([defined](../Specs/configs.md#commands))
+     - display command: a command whose primary function is to display data
        ([defined](../Specs/configs.md#display-commands))
      - command list: the list of commands in a run from root to leaf (the
        command that actually runs)
@@ -911,6 +919,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - config kind: a hierarchy among which a config is looked up, referenced &
        extended (e.g., fields configs)
        ([defined](../Specs/configs.md#config-kinds))
+     - extend: of a persistent config, derive its settings from another config
+       of its kind (`none` for an `<absolute-config>`, else the fields config
+       that its `<base-fields-config-section>` names; `default` for an output
+       config) ([defined](../Specs/configs.md#referencing-named-configs))
      - context stack: a command list's contexts, from most to least specific
        ([defined](../Specs/configs.md#context-stacks))
 128. - base fields config: the named fields config that a transient fields
