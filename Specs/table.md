@@ -1,18 +1,13 @@
-# Table Output Options
+# Table Output
 
-`--table` & `--table-config` are optional options of every [display
-command](configs.md#display-commands).
-
-Each selects table output; `--table-config` also configures its header row,
-separator line & column spacing.
+A table config configures table output's header row, separator line & column
+spacing.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
 ## Table Config
 
 ```ebnf
-table-config-option = <valued-option("--table-config", [ <table-config> ])>
-
 table-config  = <table-setting>+
 table-setting =
   <header-setting>
@@ -26,8 +21,7 @@ table-setting =
 ```
 
 `<table-config>` is the table config kind's [output config
-syntax](configs.md#output-configs), and `<table-config-option>` is table
-output's [output config option](configs.md#output-configs).
+syntax](configs.md#output-configs).
 
 A **table config** is a [named config](configs.md#named-configs) of the table
 kind.
@@ -82,8 +76,7 @@ style-specifier = {string: terminal-specific styling text with no bare ASCII let
   bold, `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header
   row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so
   that a mistyped setting is not silently consumed as `<style-specifier>` text
-  (e.g., `--table-config Hb`); escape it to include it (e.g.,
-  `--table-config 'H\b'`).
+  (e.g., `Hb`); escape it to include it (e.g., `H\b`).
 
 ## Styling
 
@@ -102,9 +95,9 @@ always-styling        = "a"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `t`: each stylable string is styled iff standard output is a terminal.
-- `a`: each stylable string is always styled, even if standard output is not a
-  terminal, e.g., when piped to `less -R`.
+- `t`: each stylable string is styled iff normal output goes to a terminal.
+- `a`: each stylable string is always styled, even if normal output does not go
+  to a terminal, e.g., when a pager that renders styles reads it.
 
 ## Style Prefix
 
@@ -182,7 +175,7 @@ separator-pattern = ^{string}^ (* default: "-" *)
   header row is, because a separator line's sole purpose is to separate a header
   from the data; absent a header row, `S` is retained, but unrendered (e.g.,
   `S:h` renders neither, while, for a persistent `default` table config of
-  `S=:h`, `--table-config H` renders a header row & a `=`-patterned separator
+  `S=:h`, a transient `H` renders a header row & a `=`-patterned separator
   line). `<separator-pattern>` is repeated to fill the line's
   [width](configs.md#width), truncated before the 1st character that would
   exceed that width; spaces fill any remaining width (e.g., when that character
@@ -212,7 +205,7 @@ unbroken = "u"
   table width, except that it retains each tab of each column spacing in place,
   filling each run between tabs independently, because a tab's rendered width
   depends on the terminal's tab stops, which an app cannot determine (e.g., with
-  `$'C\t:S'`, the separator line of 2 3-wide columns is `---`, a tab & `---`).
+  `C<TAB>:S`, the separator line of 2 3-wide columns is `---`, a tab & `---`).
 
 ## Column Spacing
 
@@ -231,8 +224,7 @@ column-spacing = ^{string}^ (* default: {empty string} *)
 
 - `c`: 2 spaces between adjacent columns.
 - `C`: a custom spacing string between adjacent columns (e.g., `C:` for no
-  spacing at all, `C<TAB>:` for a tab, where `<TAB>` is a tab character, e.g.,
-  `$'C\t:'` in zsh).
+  spacing at all, `C<TAB>:` for a tab).
 
 ## Implied Alternatives
 
@@ -250,20 +242,18 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Examples
 
-- `--table`: no header, no separator, 2 spaces between columns.
-- `--table-config H1:`: a header row, bold (SGR `1`) iff standard output is a
-  terminal, no separator.
-- `--table-config H1:a`: a header row, bold (SGR `1`) regardless of standard
-  output, no separator.
-- `--table-config $'H1:O\e[22m:'` (in zsh): a header row, bold (SGR `1`) iff
-  standard output is a terminal, reset to normal intensity (SGR `22`) instead of
-  via a full reset, no separator.
-- `--table-config S`: a header row (implied) & a dashed (`-`) separator line.
-- `--table-config b`: a header row (implied) & a dashed (`-`), broken separator
-  line.
-- `--table-config S-+:b`: a header row (implied) & a `-+`-patterned, broken
-  separator line.
-- `--table-config C....`: no header, no separator, `....` between columns.
+- An empty table config: no header, no separator, 2 spaces between columns.
+- `H1:`: a header row, bold (SGR `1`) iff normal output goes to a terminal, no
+  separator.
+- `H1:a`: a header row, bold (SGR `1`) regardless of normal output, no
+  separator.
+- `H1:O<ESC>[22m:`: a header row, bold (SGR `1`) iff normal output goes to a
+  terminal, reset to normal intensity (SGR `22`) instead of via a full reset, no
+  separator.
+- `S`: a header row (implied) & a dashed (`-`) separator line.
+- `b`: a header row (implied) & a dashed (`-`), broken separator line.
+- `S-+:b`: a header row (implied) & a `-+`-patterned, broken separator line.
+- `C....`: no header, no separator, `....` between columns.
 
 ## Appendix: Escaping
 

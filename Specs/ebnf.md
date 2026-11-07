@@ -284,21 +284,6 @@ end
 A constant expression that matches no syntax text, only at the end of the syntax
 text.
 
-#### Command-Line Argument Boundaries
-
-```ebnf
-_
-```
-
-A **command-line argument boundary**: a constant expression that matches no
-syntax text, only between 2 adjacent command-line arguments, iff the latter is
-`-` or does not start with `-`, as an [option value](configs.md#option-values)
-requires (e.g., `"--fields" _ "x"` matches the arguments `--fields` & `x`, but
-`"--fields" _ "-x"` matches no arguments). Syntax text spans multiple
-command-line arguments only where a command-line argument boundary separates
-them. Each side of a command-line argument boundary treats outer bare whitespace
-as the syntax text's start & end do.
-
 #### Literals
 
 ```ebnf
@@ -573,10 +558,10 @@ nonterminals; they cannot specify defaults for constant nonterminals.
 - A [nonterminal reference](#nonterminal-references): if it references an
   alternative of the choice that defines the nonterminal to which the default
   applies, directly or as a [grouping](#groupings)'s child (e.g.,
-  `<relative-config>` for [`<fields-config>`](fields.md#fields-option)), it
-  selects that alternative, as if that alternative were present but contained no
-  token; otherwise, it evaluates to the referenced nonterminal's global default
-  for the directly absent state.
+  `<relative-config>` for [`<fields-config>`](fields.md#fields-config-syntax)),
+  it selects that alternative, as if that alternative were present but contained
+  no token; otherwise, it evaluates to the referenced nonterminal's global
+  default for the directly absent state.
 - A [literal](#literals) or a [name literal](#name-literals), consumed by the
   nonterminal to which the default applies.
 

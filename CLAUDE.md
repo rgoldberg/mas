@@ -162,9 +162,9 @@ chosen), except always use `.md` for Markdown.
 
 ## Specs
 
-`Specs/*.md` define mas's option syntaxes & semantics. Whenever a spec changes,
-make every other file (code, tests, docs, completions, `Temp/`, etc.) consistent
-with it.
+`Specs/*.md` define mas's syntaxes & semantics. Whenever a spec changes, make
+every other file (code, tests, docs, completions, `Temp/`, etc.) consistent with
+it.
 
 Follow the [spec grammar rules](.claude/rules/specs.md) in specs.
 

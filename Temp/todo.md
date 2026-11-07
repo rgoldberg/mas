@@ -237,8 +237,8 @@ member, `name@@-1` for the last), which needs:
 
 Let the [default](../Specs/fields.md#sort-priority) `<sort-priority>` (currently
 `100`) be configured (e.g., via a `<fields-config>` setting, so that a
-persistent fields config can set it & a command line can override it, without a
-separate option).
+persistent fields config can set it & a transient fields config can override it,
+without a separate option).
 
 ### Configurable Absent Value Handling
 
@@ -299,8 +299,8 @@ a format's template text or from a field value) instead of rendering its ESC as
    rest of its cell.
 2. Excluding each formatting escape sequence from its cell's width, so that its
    column remains aligned.
-3. Whether formatting is output only iff standard output is a terminal (as `t`
-   styles a header row), being removed otherwise.
+3. Whether formatting is output only iff normal output goes to a terminal (as
+   `t` styles a header row), being removed otherwise.
 4. Terminating each cell's formatting (e.g., with an SGR reset), so that it
    styles neither the column spacing nor the next cell.
 5. How a cell's formatting interacts with a styled header row's `<style-reset>`.
@@ -322,7 +322,7 @@ Let a table column's width be constrained (e.g., truncating a long app name with
 2. Whether a truncated cell is marked (e.g., with `…`) & on which side of it,
    per its column's alignment.
 3. Whether a constraint may be relative to the terminal's width, which an app
-   cannot determine if standard output is not a terminal.
+   cannot determine if normal output does not go to a terminal.
 4. Whether `<output>` sorts by a formatted value before or after truncation.
 
 ### Multi-Line Rows

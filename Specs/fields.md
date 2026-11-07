@@ -1,9 +1,7 @@
-# Field-Selection Option
+# Field Selection
 
-`--fields` is an optional option of every [display
-command](configs.md#display-commands).
-
-It selects, orders, labels & formats the output fields.
+A fields config selects, orders, labels & formats a [display
+command](configs.md#display-commands)'s output fields.
 
 It also sorts the items the command outputs.
 
@@ -70,10 +68,10 @@ the following:
 - Alignment: [`start`](#alignment).
 - No `<sort>`, so it is not a sort key.
 
-E.g., `--fields .+size`, when the base fields config has no field spec for
-`size`, outputs `size` labeled `size`, formatted as `%i`, start-aligned & not
-sorting items, absent a custom `default` preset (e.g., one of `%end` would
-end-align it).
+E.g., `.+size`, when the base fields config has no field spec for `size`,
+outputs `size` labeled `size`, formatted as `%i`, start-aligned & not sorting
+items, absent a custom `default` preset (e.g., one of `%end` would end-align
+it).
 
 ### Unlisted Fields
 
@@ -203,14 +201,15 @@ config.
 
 ### Base Fields Config
 
-The **base fields config** is a named fields config referenced in, or implicitly
-selected by, a command line.
+The **base fields config** is a named fields config referenced in a
+[transient](configs.md#transient-configs) fields config, or implicitly selected
+for a run.
 
 ### Working Fields Config
 
 The **working fields config** is a mutable copy of the fields config that a
-`<fields-config>` extends (on a command line, the base fields config), as
-modified by that `<fields-config>` so far.
+`<fields-config>` extends (for a transient fields config, the base fields
+config), as modified by that `<fields-config>` so far.
 
 ### Baseline Fields Config
 
@@ -219,8 +218,8 @@ config immediately before `<field-spec-edits-section>`.
 
 ### Resolved Fields Config
 
-The **resolved fields config** is the working fields config after the command
-line has been parsed; it is used to render output.
+The **resolved fields config** is the working fields config after any transient
+fields config has been parsed; it is used to render output.
 
 ## Inherited Values
 
@@ -267,8 +266,8 @@ Other input formats cannot guarantee field nonexistence, e.g.: JSON without a
 JSON schema, for which a field may exist for some JSON objects, but not exist
 for others.
 
-A reference to a nonexistent field is an error on the command line, but a
-persistent fields config, which may apply to multiple commands, ignores each
+A reference to a nonexistent field is an error in a transient fields config, but
+a persistent fields config, which may apply to multiple commands, ignores each
 `<absolute-field-spec>` & `<field-spec-edit>` that references one (e.g., a `mas`
 context `default` of `@standard.name=App` ignores `.name=App` for `mas config`,
 whose item has no `name` field).
@@ -316,23 +315,21 @@ E.g., for an absent field, `%N%n+none+` outputs `none` in every output format,
 while `%i` & `%n` output an empty table cell, but no key-value pair in key-value
 or JSON output.
 
-## Fields Option
+## Fields Config Syntax
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-fields-option = <valued-option("--fields", <fields-config>)>
-
 fields-config = <absolute-config> | <relative-config> (* default: <relative-config> *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-Giving `--fields` more than once is an error.
+Giving more than 1 transient fields config for a run is an error.
 
-`<absolute-config>` & `<relative-config>` are overlaid on top of the base fields
-config for the current command line only; they do not persistently affect named
-fields configs.
+In a transient fields config, `<absolute-config>` & `<relative-config>` are
+overlaid on top of the base fields config for its run only; they do not
+persistently affect named fields configs.
 
 ### Absolute Config
 
@@ -343,7 +340,7 @@ absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <field-name> <field-modifiers>
 
-field-name = {string: field name with no bare "."} (* error: on the command line, it names a nonexistent field *)
+field-name = {string: field name with no bare "."} (* error: in a transient fields config, it names a nonexistent field *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -881,8 +878,8 @@ A field spec with an enabled `<sort>` takes sort precedence over field specs:
 
 Thus, a `<sort-priority>` below `100` takes sort precedence over every sort that
 omits its `<sort-priority>` & inherits none, while one above `100` cedes it
-(e.g., `--fields name/I,version/1I` sorts items by `version`, then by `name`,
-while `--fields name/I,version/101I` sorts them by `name`, then by `version`).
+(e.g., `name/I,version/1I` sorts items by `version`, then by `name`, while
+`name/I,version/101I` sorts them by `name`, then by `version`).
 
 ##### Sort Options
 
@@ -902,12 +899,12 @@ sort-option-terminator = ":"
 The app may set, per output format, **default sort options** for field names,
 for field labels & for each field's content, each of which replaces the default
 of its `<sort-option>` (e.g., [mas's](mas.md#default-sort-options) make
-`<insensitive>` the default `<case-sensitivity>` for table output, so
-`--fields name/I` sorts items by `name` case-insensitively). Each
-`<sort-option>` that is absent & inherits no value thus takes the default sort
-option for what its option set compares: a field spec's `<sort>` compares its
-field's content, while a `<field-order-sort-option-set>` compares field names or
-labels, per its `<source>`.
+`<insensitive>` the default `<case-sensitivity>` for table output, so `name/I`
+sorts items by `name` case-insensitively). Each `<sort-option>` that is absent &
+inherits no value thus takes the default sort option for what its option set
+compares: a field spec's `<sort>` compares its field's content, while a
+`<field-order-sort-option-set>` compares field names or labels, per its
+`<source>`.
 
 ##### Sort Source
 

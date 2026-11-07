@@ -22,7 +22,8 @@ expressions' constant nonterminals (e.g., not `-"/"` for a following `/`),
 except on a terminator that terminates every expression that needs it, which
 would otherwise need many annotations (e.g., `block-terminator = -"+"`).
 
-In specs, define each option that takes a value as a `<valued-option>` (e.g.,
+In `Specs/shell.md`, define each option that takes a value as a
+`<valued-option>` (e.g.,
 `fields-option = <valued-option("--fields", <fields-config>)>`), whose
 command-line argument boundary (`_`) models Swift Argument Parser's split of an
 option from its value as the next command-line argument, so that the grammar
@@ -135,8 +136,14 @@ that exist (e.g., by treating a number's leading `+` as unreachable because JSON
 input cannot have one), because an app may add others later.
 
 In specs, give each new syntax character only punctuation that no common shell
-interprets unquoted: `%`, `+`, `-`, `.`, `/`, `:`, `,`, `@`, or `_`, or `=`
-anywhere but at the start of a word.
+interprets unquoted, in case a syntax is used from a shell: `%`, `+`, `-`, `.`,
+`/`, `:`, `,`, `@`, or `_`, or `=` anywhere but at the start of a word.
+
+In specs other than `Specs/shell.md` & `Specs/mas.md`, never mention a standard
+stream, a shell, a command line, or a command-line option (e.g., write normal
+output, error output, a transient config, or `H1:`, rather than standard output,
+standard error, the command line, or `--table-config H1:`), because a syntax may
+be used outside of a command line.
 
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload
@@ -158,7 +165,7 @@ output shows its effect):
 1. **Ambiguous:** the syntax text, or what it parses, cannot be read reliably
    (e.g., `@x/`, or a digit group separator that equals the decimal separator).
 2. **Ill-typed:** an expression's or a token's type does not fit what surrounds
-   it (e.g., `%S.round+-+`, `%.D..round++`, `%N%s++`, or `$'P\f:'`).
+   it (e.g., `%S.round+-+`, `%.D..round++`, `%N%s++`, or `P<FF>:`).
 3. **Dangling:** it refers to something that does not exist (e.g., a
    `<preset-name>` of no preset, or `@9` in `.@9` for fewer than 9 field specs).
 4. **Unsupported in context, whatever it holds:** its context cannot do what it

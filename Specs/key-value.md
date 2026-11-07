@@ -1,20 +1,13 @@
-# Key-Value Output Options
+# Key-Value Output
 
-`--key-value` & `--key-value-config` are optional options of every [display
-command](configs.md#display-commands).
-
-Each selects key-value output; `--key-value-config` also configures its key
-styling, leader, leading spacing, trailing spacing & item separator line.
+A key-value config configures key-value output's key styling, leader, leading
+spacing, trailing spacing & item separator line.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
 ## Key-Value Config
 
-<!--editorconfig-checker-disable-->
-<!--markdownlint-disable line-length-->
 ```ebnf
-key-value-config-option = <valued-option("--key-value-config", [ <key-value-config> ])>
-
 key-value-config  = <key-value-setting>+
 key-value-setting =
   <key-setting>
@@ -27,12 +20,9 @@ key-value-setting =
   | <trailing-spacing-setting>
   | <item-separator-setting>
 ```
-<!--markdownlint-enable line-length-->
-<!--editorconfig-checker-enable-->
 
 `<key-value-config>` is the key-value config kind's [output config
-syntax](configs.md#output-configs), and `<key-value-config-option>` is key-value
-output's [output config option](configs.md#output-configs).
+syntax](configs.md#output-configs).
 
 A **key-value config** is a [named config](configs.md#named-configs) of the
 key-value kind.
@@ -54,10 +44,10 @@ terminal's tab stops, which an app cannot determine. E.g., the key `Notes` & a
 value of `a` & `b` separated by an LF render, with:
 
 - `fL=:R:`, as `Notes=a`, then 6 spaces & `b` on the next line.
-- `$'fL\t:R:'`, as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next
+- `fL<TAB>:R:`, as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next
   line.
-- `$'fL\n:R  :'`, as `Notes`, then 2 spaces & `a` on the next line, then 2
-  spaces & `b` on the line after.
+- `fL<LF>:R  :`, as `Notes`, then 2 spaces & `a` on the next line, then 2 spaces
+  & `b` on the line after.
 
 Each other control character in a value, except a tab, is rendered as it is in a
 key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
@@ -135,8 +125,7 @@ leading-spacing = ^{string}^ (* default: {empty string} *)
 
 - `l`: 1 space after each key.
 - `L`: a custom spacing string after each key (e.g., `L:` for no leading
-  spacing, `fL<TAB>:` for a tab without a leader, where `<TAB>` is a tab
-  character, e.g., `$'fL\t:'` in zsh).
+  spacing, `fL<TAB>:` for a tab without a leader).
 
 ## Trailing Spacing
 
@@ -197,23 +186,21 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 
 ## Examples
 
-- `--key-value`: unstyled keys, values aligned by a `▁`-patterned leader (with 1
-  space on each side) & a blank line between items.
-- `--key-value-config K1:`: bold keys (SGR `1`) iff standard output is a
-  terminal.
-- `--key-value-config K1:a`: bold keys (SGR `1`) regardless of standard output.
-- `--key-value-config 'K\b:P<:X>:O</b>:a'`: keys wrapped in `<b>` & `</b>` tags
-  regardless of standard output.
-- `--key-value-config F.:`: values aligned by a dotted (`.`) leader.
-- `--key-value-config 'F :L:R:'`: values aligned by spaces, with 1 space after
-  each item's widest key.
-- `--key-value-config 'L\::F :R:'`: `key:` rows with values aligned by spaces,
-  with 1 space after each item's widest `key:`.
-- `--key-value-config f`: `key: value` rows (implied leading spacing).
-- `--key-value-config fL=:R:`: `key=value` rows, with a blank line between
-  items.
-- `--key-value-config S===`: a `===` line between items.
-- `--key-value-config s`: no line between items.
+- An empty key-value config: unstyled keys, values aligned by a `▁`-patterned
+  leader (with 1 space on each side) & a blank line between items.
+- `K1:`: bold keys (SGR `1`) iff normal output goes to a terminal.
+- `K1:a`: bold keys (SGR `1`) regardless of normal output.
+- `K\b:P<:X>:O</b>:a`: keys wrapped in `<b>` & `</b>` tags regardless of normal
+  output.
+- `F.:`: values aligned by a dotted (`.`) leader.
+- `F :L:R:`: values aligned by spaces, with 1 space after each item's widest
+  key.
+- `L\::F :R:`: `key:` rows with values aligned by spaces, with 1 space after
+  each item's widest `key:`.
+- `f`: `key: value` rows (implied leading spacing).
+- `fL=:R:`: `key=value` rows, with a blank line between items.
+- `S===`: a `===` line between items.
+- `s`: no line between items.
 
 ## Appendix: Escaping
 

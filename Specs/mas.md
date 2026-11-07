@@ -1,7 +1,7 @@
 # mas Configuration
 
-`mas`-specific configuration of the generic [configs](configs.md) & [`--fields`
-option](fields.md).
+`mas`-specific configuration of the generic [configs](configs.md) & [field
+selection](fields.md), which `mas` exposes per the [shell usage](shell.md).
 
 ## Display Commands
 

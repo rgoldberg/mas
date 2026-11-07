@@ -120,14 +120,14 @@ In specs, never remove a typed terminal subtype merely because no syntax uses it
 grammar, while being unused alone does not make it worth removing.
 
 In specs, never forbid a tab or a line terminator in an output config payload
-(e.g., `$'L\t:'` while `F` is effective, `$'F.\t:'`, `$'S-\t:'`, `$'O\t:'` while
-`K` & `F` are effective, or `$'L\n:'`), unless it would make the output invalid
+(e.g., `L<TAB>:` while `F` is effective, `F.<TAB>:`, `S-<TAB>:`, `O<TAB>:` while
+`K` & `F` are effective, or `L<LF>:`), unless it would make the output invalid
 in its output format, because it means what it says, and its output shows any
 misalignment or line split that it causes, while forbidding it needs a special
 rule per payload.
 
 In specs, never allow a line terminator other than an LF or a CR in
-`<indentation>` (e.g., `$'P\f:'`), because it is not JSON whitespace, so the
+`<indentation>` (e.g., `P<FF>:`), because it is not JSON whitespace, so the
 output would not be JSON, which outweighs the overruled reason for rejecting its
 forbidding: it means what it says.
 
@@ -167,8 +167,7 @@ to a string 1st.
 In specs, never forbid a number format argument merely because a
 `<digit-group-size>` of `0` ignores it (e.g., `.numberFormat:,,0,2:` or
 `.numberFormat:,x,0:`), because other payloads that nothing uses stay valid
-(e.g., `--table-config 'H:P<:'`), so forbidding it treats near parallels
-differently.
+(e.g., `H:P<:`), so forbidding it treats near parallels differently.
 
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,

@@ -11,8 +11,8 @@ Uses the [custom EBNF grammar](ebnf.md).
 
 ## Commands
 
-A **command** is a node in a CLI tool's command hierarchy: either the root
-command (the tool itself) or a subcommand of another command.
+A **command** is a node in an app's command hierarchy: either the root command
+(the app itself) or a subcommand of another command.
 
 ## Display Commands
 
@@ -31,11 +31,10 @@ A fields config applies to every output format unless otherwise specified.
 
 Each display command has a default output format.
 
-Each output format has a flag that selects it with its
-[`default`](#default-configs) config (e.g., `--json`) & an option that selects
-it with a config overlaid on its `default` config (e.g., `--json-config P`).
-Giving more than 1 such flag or option, even the same one twice (e.g.,
-`--json --json` or `--json-config P --table`), is an error.
+A run of a display command may select an output format, either with its
+[`default`](#default-configs) config or with a [transient](#transient-configs)
+output config overlaid on its `default` config. Selecting more than 1, even the
+same one twice, is an error.
 
 An **item error** is an error that depends on an item's field value (e.g.,
 `.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s
@@ -50,8 +49,15 @@ for key-value output, and, for table output, a field of only the 2nd has no
 column). An item's item errors are ordered by its `<output>` sort keys' [sort
 precedence](fields.md#sort-priority), then by its output order (e.g., for
 `a:.round,b:.round/O`, if `a` & `b` are strings, only `b`'s is reported). A
-command that reports an item error exits with a nonzero **exit status**, so that
-a script can detect an omitted item.
+command that reports an item error **fails**, so that its caller can detect an
+omitted item.
+
+## Normal & Error Output
+
+**Normal output** is where a display command outputs its items. **Error
+output**, which is separate from normal output, is where an app reports every
+error, so that no error mixes with output (e.g., no error text can break a
+parser of JSON output).
 
 ## Line Terminators
 
@@ -64,31 +70,16 @@ U+2029.
 Text's **width** is its terminal display width: the sum of its characters'
 `wcwidth`s, with 0 substituted for each negative one (e.g., a tab's).
 
-## Option Values
-
-```ebnf
-valued-option(NAME, VALUE) = !NAME! <option-value-separator> VALUE
-
-option-value-separator = "=" | _
-```
-
-A **valued option** is an option that takes a value; each spec defines one as a
-`<valued-option>` (e.g., [`<fields-option>`](fields.md#fields-option)).
-
-A valued option's **value** (`VALUE`) is the rest of its command-line argument
-after `=` (e.g., `--fields=name`), or else the next command-line argument (e.g.,
-`--fields name`), which a [command-line argument
-boundary](ebnf.md#command-line-argument-boundaries) separates from `NAME` iff
-that argument is `-` or does not start with `-`, so any other value that starts
-with `-` must follow `=` (e.g., `--fields=-x`); otherwise, the option is an
-error (e.g., `--fields -x`).
-
-A **flag** is an option that takes no value (e.g., `--json`).
-
 ## Command Lists
 
-A **command list** is the list of commands in the command line from root to
-leaf; the leaf is the command that actually runs.
+A **command list** is the list of commands in a run from root to leaf; the leaf
+is the command that actually runs.
+
+## Transient Configs
+
+A **transient config** is a fields config or an output config that is given for
+1 run of a display command, rather than persisted; an app chooses how one is
+given.
 
 ## Contexts
 
@@ -141,7 +132,7 @@ configs' `none`).
 
 A named config may be referenced:
 
-- On the command line
+- By a transient config
 - By other persistent configs of the same kind
 - For a preset, by a persistent fields config
 
@@ -150,7 +141,7 @@ the given name while iterating through the context stack from a **starting
 context** to the root context; if no match is found, an error is reported. A
 reference's starting context is:
 
-- On the command line: the leaf context.
+- In a transient config: the leaf context.
 - In a persistent config: the context that contains that config.
 
 A kind may refine how a context matches a name, e.g., fields configs'
@@ -217,22 +208,16 @@ its kind's output config syntax (e.g., [`<header-setting>`](table.md#header)),
 each of whose **alternatives** (e.g., `<header-off>` & `<header-on>`) starts
 with its own letter.
 
-An empty or [whitespace](ebnf.md#whitespace)-only [value](#option-values) of an
-output format's **output config option** (e.g.,
-[`<json-config-option>`](json.md#json-config)) overlays no settings (e.g.,
-`--json-config=` ≡ `--json`).
-
-A persistent output config's text is likewise optional (e.g.,
-`[ <json-config> ]`), because generated text may contain no setting, so an empty
-or whitespace-only one sets no setting, inheriting each from the config that it
-extends.
+An output config's text is optional (e.g., `[ <json-config> ]`), because
+generated text may contain no setting, so an empty or
+[whitespace](ebnf.md#whitespace)-only one sets no setting, inheriting each from
+the config that it extends.
 
 Output sources from the context stack's [`default`](#default-configs) output
-config of its output format's kind; an output config option's value is overlaid
-on it for the current command line only, without persistently affecting it. Each
-setting's [inherited value](ebnf.md#inherited-comments) is the value for it of
-the config that its output config extends: for an output config option's value,
-the `default` config.
+config of its output format's kind; a transient output config is overlaid on it
+for its run only, without persistently affecting it. Each setting's [inherited
+value](ebnf.md#inherited-comments) is the value for it of the config that its
+output config extends: for a transient output config, the `default` config.
 
 Each kind's [built-in standard](#immutable-built-in-named-configs) output config
 sets every setting to its default.
@@ -241,9 +226,11 @@ An alternative's **payload** is the expression between its letter & its
 [`<setting-termination>`](#setting-termination) (e.g., `<style-specifier>` in
 [`<header-on>`](table.md#header)). A payload's tabs & [line
 terminators](#line-terminators) are output as is (e.g., a key-value config of
-`$'L\n:'` puts each value on the line after its key). A **payloadless**
-alternative is the lowercase alternative of a setting whose uppercase
-alternative takes a payload (e.g., `h`, but not `t`, in a table config).
+`L<LF>:` puts each value on the line after its key, where `<LF>` is an LF; other
+examples likewise name each control character that they contain, such as `<TAB>`
+or `<ESC>`). A **payloadless** alternative is the lowercase alternative of a
+setting whose uppercase alternative takes a payload (e.g., `h`, but not `t`, in
+a table config).
 
 ### Setting Termination
 
@@ -254,9 +241,9 @@ setting-terminator   = ":"
 end-of-output-config = end
 ```
 
-E.g., in `--key-value-config Fs`, `s` is interpreted as `<leader-pattern>` text,
-not as a separate `<item-separator-setting>`, while in `--table-config Hb` &
-`--json-config Pa`, `b` & `a` are errors (because `<style-specifier>` &
+E.g., in the key-value config `Fs`, `s` is interpreted as `<leader-pattern>`
+text, not as a separate `<item-separator-setting>`, while in the table config
+`Hb` & the JSON config `Pa`, `b` & `a` are errors (because `<style-specifier>` &
 `<indentation>` cannot consume them), not a separate `<broken-setting>` or
 `<top-level-structure-setting>`.
 
@@ -265,11 +252,11 @@ not as a separate `<item-separator-setting>`, while in `--table-config Hb` &
 A kind may define **implied alternatives**, which an output config's explicit
 alternatives imply, directly or via another implied alternative (e.g., a table's
 [implied alternatives](table.md#implied-alternatives)), whether that output
-config is persistent or an output config option's value (e.g., a persistent
-`default` table config of `b` implies `S`, which implies `H`). No inherited or
-default alternative implies one (e.g., `--table` implies no separator line from
-its default `u`, while, for a persistent `default` table config of `S:h`,
-`--table-config c` implies no header row from its inherited `S`).
+config is persistent or transient (e.g., a persistent `default` table config of
+`b` implies `S`, which implies `H`). No inherited or default alternative implies
+one (e.g., an empty table config implies no separator line from its default `u`,
+while, for a persistent `default` table config of `S:h`, a transient `c` implies
+no header row from its inherited `S`).
 
 An explicit alternative of a setting, even "off" (e.g., a table's `h`), always
 overrides that setting's implied alternative, regardless of where in its output
@@ -278,5 +265,5 @@ config it appears.
 An implied alternative overrides an inherited alternative iff the inherited
 alternative is payloadless; otherwise, it retains the inherited alternative's
 payload, so it never overrides an inherited payload, but remains effective
-(e.g., for a persistent `default` table config of `S=:h`, `--table-config b`
+(e.g., for a persistent `default` table config of `S=:h`, a transient `b`
 implies `H` via an effective `S` that retains its inherited `=` payload).

@@ -62,8 +62,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - current: currently selected or governing state during evaluation
     - REJECTED: supplied / provided / active
 13. - inherited: from the config onto which syntax text is overlaid (e.g., the
-      working fields config, or the `default` config for an output config
-      option's value)
+      working fields config, or the `default` config for a transient output
+      config)
     - inherited value: a transitively absent `(* inherited *)` nonterminal's
       value from the config onto which syntax text is overlaid
       ([defined](../Specs/ebnf.md#inherited-comments))
@@ -165,8 +165,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: considered / processed as / read as / functions as / counts as
 29. - text: character sequence in syntax (tokens, `{string}` terminals, template
       text, boundary text)
-    - syntax text: the text that a syntax parses (e.g., an option value), as
-      opposed to an app's input (e.g., its items)
+    - syntax text: the text that a syntax parses (e.g., a config), as opposed to
+      an app's input (e.g., its items)
     - REJECTED: parsed text (too generic: an app's input is parsed too) / input
       (for syntax text)
     - string: the data type of a value (string fields, string transforms,
@@ -265,7 +265,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - evaluate against: evaluate a matcher or block relative to a value
     - calculate: derive a result from inputs
     - render: produce a value's output text
-    - output: write to standard output
+    - output: write to normal output
     - display: a command's purpose
     - source from: take a config or setting from
     - read: take in input (e.g., an item) from its source
@@ -663,19 +663,21 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 103. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
-104. - option value: the rest of an option's command-line argument after `=`, or
+104. - command line: a run of a command list, whose transient configs are the
+       values of its options ([defined](../Specs/shell.md#command-lines))
+     - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
-       `-` ([defined](../Specs/configs.md#option-values))
+       `-` ([defined](../Specs/shell.md#option-values))
      - option value separator: the `=` or the command-line argument boundary
        between a long option & its value (`<option-value-separator>`; e.g., in
        `--fields=name` or `--fields name`)
      - command-line argument boundary: `_`, which matches between 2 adjacent
        command-line arguments, iff the latter is `-` or does not start with `-`
-       ([defined](../Specs/ebnf.md#command-line-argument-boundaries))
+       ([defined](../Specs/shell.md#command-line-argument-boundaries))
      - valued option: an option that takes a value, defined as a
-       `<valued-option>` ([defined](../Specs/configs.md#option-values))
+       `<valued-option>` ([defined](../Specs/shell.md#option-values))
      - flag: an option that takes no value (e.g., `--json`)
-       ([defined](../Specs/configs.md#option-values))
+       ([defined](../Specs/shell.md#option-values))
      - usage: Swift Argument Parser's synopsis of a command's arguments (e.g.,
        `[--json | --json-config <json-config> | …]`)
      - REJECTED: option-argument / option-argument separator (the specs use
@@ -709,9 +711,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - REJECTED: absent field (for an unpositioned field)
 109. - output config: a table, key-value, or JSON config
        ([defined](../Specs/configs.md#output-configs))
-     - output config option: an output format's option that selects it with a
-       config overlaid on its `default` config (e.g., `--json-config`)
-       ([defined](../Specs/configs.md#output-configs))
+     - output config option: an output format's option that selects it with its
+       value as a transient output config (e.g., `--json-config`)
+       ([defined](../Specs/shell.md#output-format-options))
      - output config syntax: the syntax of an output config kind's configs
        (e.g., `<json-config>`) ([defined](../Specs/configs.md#output-configs))
      - output format: how a display command renders its items: table, key-value,
@@ -761,6 +763,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 113. - persistent: of a named config, built-in or custom, which no display
        command modifies ([defined](../Specs/configs.md#named-configs))
      - persist: verb; save a custom config
+     - transient config: a fields config or an output config given for 1 run of
+       a display command, rather than persisted
+       ([defined](../Specs/configs.md#transient-configs))
      - REJECTED: persisted (as an adjective for a config) / saved / stored
 114. - C0 control character: a character from U+0000 to U+001F
      - DEL: U+007F
@@ -795,8 +800,13 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - item error: an error that depends on an item's field value, which omits
        that item, without stopping its command
        ([defined](../Specs/configs.md#output-formats))
-     - exit status: the status with which a command exits, which is nonzero if
-       it reports an item error ([defined](../Specs/configs.md#output-formats))
+     - fail: of a command, to report an item error, so that its caller can
+       detect an omitted item ([defined](../Specs/configs.md#output-formats))
+     - exit status: the status with which a command exits, which is nonzero iff
+       it fails ([defined](../Specs/shell.md#exit-status))
+     - normal output / error output: where a display command outputs its items /
+       where an app reports every error, separately
+       ([defined](../Specs/configs.md#normal--error-output))
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, making it the matcher's matched value
        ([defined](../Specs/fields-format.md#coercion))
@@ -828,8 +838,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        determined programmatically ([defined](../Specs/mas.md#price-sorting))
 121. - display command: a command whose primary function is to display data
        ([defined](../Specs/configs.md#display-commands))
-     - command list: the list of commands in the command line from root to leaf
-       (the command that actually runs)
+     - command list: the list of commands in a run from root to leaf (the
+       command that actually runs)
        ([defined](../Specs/configs.md#command-lists))
      - alias: another name of a command, which never names a context (e.g.,
        `info` for `lookup`; [used](../Specs/configs.md#contexts))
@@ -891,8 +901,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#config-kinds))
      - context stack: a command list's contexts, from most to least specific
        ([defined](../Specs/configs.md#context-stacks))
-128. - base fields config: the named fields config that a command line
-       references or implicitly selects
+128. - base fields config: the named fields config that a transient fields
+       config references, or that a run implicitly selects
        ([defined](../Specs/fields.md#base-fields-config))
      - working fields config: a mutable copy of the fields config that a
        `<fields-config>` extends, as modified by it so far
@@ -900,8 +910,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - baseline fields config: an immutable snapshot of the working fields
        config immediately before `<field-spec-edits-section>`
        ([defined](../Specs/fields.md#baseline-fields-config))
-     - resolved fields config: the working fields config after the command line
-       has been parsed, which is used to render output
+     - resolved fields config: the working fields config after any transient
+       fields config has been parsed, which is used to render output
        ([defined](../Specs/fields.md#resolved-fields-config))
 129. - sort key: a field spec with an enabled `<sort>`
        ([defined](../Specs/fields.md#sorting))

@@ -1,10 +1,7 @@
-# JSON Output Options
+# JSON Output
 
-`--json` & `--json-config` are optional options of every [display
-command](configs.md#display-commands).
-
-Each selects JSON output; `--json-config` also configures its pretty-printing,
-top-level structure & non-ASCII character rendering.
+A JSON config configures JSON output's pretty-printing, top-level structure &
+non-ASCII character rendering.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
@@ -13,8 +10,6 @@ Uses the [custom EBNF grammar](ebnf.md).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-json-config-option = <valued-option("--json-config", [ <json-config> ])>
-
 json-config  = <json-setting>+
 json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-ascii-setting>
 ```
@@ -22,14 +17,13 @@ json-setting = <pretty-printing-setting> | <top-level-structure-setting> | <non-
 <!--editorconfig-checker-enable-->
 
 `<json-config>` is the JSON config kind's [output config
-syntax](configs.md#output-configs), and `<json-config-option>` is JSON output's
-[output config option](configs.md#output-configs).
+syntax](configs.md#output-configs).
 
 A **JSON config** is a [named config](configs.md#named-configs) of the JSON
 kind.
 
 A key-value pair is output even if its key repeats another's (e.g.,
-`--fields name=x,version=x` outputs 2 `x` keys, as does a field with 2
+`name=x,version=x` outputs 2 `x` keys, as does a field with 2
 [members](fields.md#members)), because JSON does not forbid repeated keys,
 though some consumers retain only 1 of them.
 
@@ -67,10 +61,9 @@ indentation = ^{string: only spaces, tabs, LFs & CRs}^ (* default: "  " *)
   outside strings.
 - `P`: each top-level JSON value is rendered with each object member & each
   array element on its own line, indented by 1 `<indentation>` per nesting level
-  (e.g., `P:` for 2 spaces, `P<TAB>:` for a tab, where `<TAB>` is a tab
-  character, e.g., `$'P\t:'` in zsh); each `:` between a key & its value is
-  followed by 1 space; each empty object or array, which has no member or
-  element to put on its own line, is rendered as `{}` or `[]`, respectively
+  (e.g., `P:` for 2 spaces, `P<TAB>:` for a tab); each `:` between a key & its
+  value is followed by 1 space; each empty object or array, which has no member
+  or element to put on its own line, is rendered as `{}` or `[]`, respectively
   (e.g., an item without any key-value pair).
 
 ## Top-Level Structure
@@ -116,12 +109,10 @@ Applies to every key & every string value.
 
 ## Examples
 
-- `--json`: 1 compact JSON object per item, 1 per line.
-- `--json-config P`: 1 pretty-printed JSON object per item, indented by 2
-  spaces.
-- `--json-config a`: a single compact JSON array of every item, on 1 line.
-- `--json-config aP`: a single pretty-printed JSON array of every item, indented
-  by 2 spaces.
-- `--json-config $'P\t:a'`: a single pretty-printed JSON array of every item,
-  indented by tabs.
-- `--json-config e`: 1 compact, ASCII-only JSON object per item, 1 per line.
+- An empty JSON config: 1 compact JSON object per item, 1 per line.
+- `P`: 1 pretty-printed JSON object per item, indented by 2 spaces.
+- `a`: a single compact JSON array of every item, on 1 line.
+- `aP`: a single pretty-printed JSON array of every item, indented by 2 spaces.
+- `P<TAB>:a`: a single pretty-printed JSON array of every item, indented by
+  tabs.
+- `e`: 1 compact, ASCII-only JSON object per item, 1 per line.
