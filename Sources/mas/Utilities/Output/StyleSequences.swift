@@ -8,6 +8,7 @@
 /// The literal strings (table.md's `<style-prefix>`, `<style-suffix>` &
 /// `<style-reset>`) that, with a `<style-specifier>`, style a string.
 struct StyleSequences: Equatable {
+	/// The ANSI SGR style defaults, per `Specs/command-line.md` "Style Defaults".
 	static let `default` = Self(prefix: "\u{1B}[", suffix: "m", reset: "\u{1B}[0m")
 
 	/// Precedes the `<style-specifier>`.

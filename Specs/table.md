@@ -72,11 +72,12 @@ style-specifier = {string: output-device-specific styling text with no bare ASCI
   field spec's [alignment](fields.md#alignment)). `<style-specifier>`, if given,
   styles the entire header row: [`<style-prefix>`](#style-prefix),
   `<style-specifier>` & [`<style-suffix>`](#style-suffix) precede it, and
-  [`<style-reset>`](#style-reset) follows it (e.g., with their defaults, `1` for
-  bold, `1;4` for bold & underlined, as ANSI SGR parameters); absent, the header
-  row is unstyled. A bare ASCII letter in `<style-specifier>` is invalid, so
-  that a mistyped setting is not silently consumed as `<style-specifier>` text
-  (e.g., `Hb`); escape it to include it (e.g., `H\b`).
+  [`<style-reset>`](#style-reset) follows it (e.g., with the [ANSI SGR style
+  defaults](command-line.md#style-defaults), `1` for bold, `1;4` for bold &
+  underlined); absent, the header row is unstyled. A bare ASCII letter in
+  `<style-specifier>` is invalid, so that a mistyped setting is not silently
+  consumed as `<style-specifier>` text (e.g., `Hb`); escape it to include it
+  (e.g., `H\b`).
 
 ## Styling
 
@@ -101,6 +102,12 @@ always-styling         = "a"
   support styling (e.g., if an app cannot determine that its output device, such
   as a pager, can render styled text).
 
+Styling text depends on the output device, so no default of `p`, `x`, or `o`
+styles anything: an app should override each as appropriate for its output
+devices (e.g., with the [ANSI SGR style
+defaults](command-line.md#style-defaults)). Otherwise, `<style-specifier>` is
+output as is (e.g., `H1:` outputs `1` before a header row).
+
 ## Style Prefix
 
 <!--editorconfig-checker-disable-->
@@ -108,7 +115,7 @@ always-styling         = "a"
 ```ebnf
 style-prefix-setting = <style-prefix-default> | <style-prefix-custom> (* default: <style-prefix-default>; last wins; inherited *)
 
-style-prefix-default = "p" (* default style-prefix: {ESC [} *)
+style-prefix-default = "p" (* default style-prefix: {empty string} *)
 style-prefix-custom  = "P" [ <style-prefix> ] <setting-termination>
 
 style-prefix = ^{string}^ (* default: {empty string} *)
@@ -116,8 +123,8 @@ style-prefix = ^{string}^ (* default: {empty string} *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `p`: `ESC[` (the ANSI control sequence introducer, where `ESC` is U+001B)
-  precedes `<style-specifier>`.
+- `p`: no string precedes `<style-specifier>`, unless an app [overrides this
+  default](#styling).
 - `P`: a custom string precedes `<style-specifier>` (e.g., `P:` for none).
 
 ## Style Suffix
@@ -127,7 +134,7 @@ style-prefix = ^{string}^ (* default: {empty string} *)
 ```ebnf
 style-suffix-setting = <style-suffix-default> | <style-suffix-custom> (* default: <style-suffix-default>; last wins; inherited *)
 
-style-suffix-default = "x" (* default style-suffix: "m"; mnemonic: last letter of suffix *)
+style-suffix-default = "x" (* default style-suffix: {empty string}; mnemonic: last letter of suffix *)
 style-suffix-custom  = "X" [ <style-suffix> ] <setting-termination> (* mnemonic: last letter of suffix *)
 
 style-suffix = ^{string}^ (* default: {empty string} *)
@@ -135,8 +142,8 @@ style-suffix = ^{string}^ (* default: {empty string} *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `x`: `m` (the ANSI SGR control sequence's final byte) follows
-  `<style-specifier>`.
+- `x`: no string follows `<style-specifier>`, unless an app [overrides this
+  default](#styling).
 - `X`: a custom string follows `<style-specifier>` (e.g., `X:` for none).
 
 ## Style Reset
@@ -146,7 +153,7 @@ style-suffix = ^{string}^ (* default: {empty string} *)
 ```ebnf
 style-reset-setting = <style-reset-default> | <style-reset-custom> (* default: <style-reset-default>; last wins; inherited *)
 
-style-reset-default = "o" (* default style-reset: {ESC [0m}; mnemonic: off *)
+style-reset-default = "o" (* default style-reset: {empty string}; mnemonic: off *)
 style-reset-custom  = "O" [ <style-reset> ] <setting-termination> (* mnemonic: off *)
 
 style-reset = ^{string}^ (* default: {empty string} *)
@@ -154,7 +161,8 @@ style-reset = ^{string}^ (* default: {empty string} *)
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `o`: `ESC[0m` (the ANSI SGR reset) follows each styled string.
+- `o`: no string follows each styled string, unless an app [overrides this
+  default](#styling).
 - `O`: a custom string follows each styled string (e.g., `O:` for none).
 
 ## Separator
@@ -244,6 +252,9 @@ inherited `h`, `S` implies an unstyled one; with an inherited `S=:h`, `b` breaks
 the `=`-patterned separator line, below an implied, unstyled header row).
 
 ## Examples
+
+These examples use the [ANSI SGR style
+defaults](command-line.md#style-defaults).
 
 - An empty table config: no header, no separator, 2 spaces between columns.
 - `H1:`: a header row, bold (SGR `1`) iff normal output supports styling, no

@@ -151,6 +151,11 @@ except:
    (e.g., `_`).
 3. Anywhere, to explain a motivation that applies if a shell is used.
 
+In specs, default text that depends on an output device (e.g.,
+`<style-prefix-default>`'s `<style-prefix>`) to `{empty string}`, say that an
+app should override it as appropriate & give the override in
+`Specs/command-line.md`, because no default suits every output device.
+
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload
 (e.g., off, or the default), uppercase for the one with a payload (e.g., `h` /

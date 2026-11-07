@@ -71,10 +71,10 @@ styled-key   = "K" <style-specifier> <setting-termination>
 
 - `k`: unstyled keys.
 - `K`: keys styled by `<style-specifier>`, as [defined for table
-  output](table.md#header) (e.g., with the default [style
-  prefix](table.md#style-prefix), [style suffix](table.md#style-suffix) & [style
-  reset](table.md#style-reset), `1` for bold, `1;4` for bold & underlined),
-  applied to each key, but not to its spacing, its leader, or its value.
+  output](table.md#header) (e.g., with the [ANSI SGR style
+  defaults](command-line.md#style-defaults), `1` for bold, `1;4` for bold &
+  underlined), applied to each key, but not to its spacing, its leader, or its
+  value.
 
 ## Key Styling
 
@@ -185,6 +185,9 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 `L=:`, `f` retains `key= value` rows).
 
 ## Examples
+
+These examples use the [ANSI SGR style
+defaults](command-line.md#style-defaults).
 
 - An empty key-value config: unstyled keys, values aligned by a `▁`-patterned
   leader (with 1 space on each side) & a blank line between items.
