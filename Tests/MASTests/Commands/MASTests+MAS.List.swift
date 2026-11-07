@@ -11,6 +11,11 @@ internal import Testing
 
 private extension MASTests {
 	@Test
+	func `list has no nonexistent field`() throws {
+		_ = try MAS.List.parse(["--fields", "foo"])
+	}
+
+	@Test
 	func `lists apps`() async throws {
 		let actual =
 			try await consequencesOf(try await MAS.main(try MAS.List.parse(.init())) { try $0.run(installedApps: .init()) })

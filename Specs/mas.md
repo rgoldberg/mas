@@ -37,6 +37,10 @@ for any other command, each field for which its built-in standard's user-facing
 variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 `mas list`).
 
+`config` specifies all of its item's potential fields up front, so any other
+field is [nonexistent](fields.md#nonexistent-fields) for it; no other command
+can determine that, so no field is nonexistent for it.
+
 For the same `mas` leaf context & output format suffix (or its absence), every
 listed field has a field spec in each of [`all` &
 `none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
