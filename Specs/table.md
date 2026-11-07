@@ -106,7 +106,7 @@ Styling text depends on the output device, so no default of `p`, `x`, or `o`
 styles anything: an app should override each as appropriate for its output
 devices (e.g., with the [ANSI SGR styling
 defaults](command-line.md#styling-defaults)). Otherwise, `<styling-specifier>`
-is output as is (e.g., `H1:` outputs `1` before a header row).
+is output as is (e.g., `H1:a` outputs `1` before a header row).
 
 ## Styling Prefix
 
