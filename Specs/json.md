@@ -82,8 +82,8 @@ item-array  = "a"
 
 - `s`: each item is a top-level JSON object, followed by a newline (with `p`,
   this is [JSON Lines](https://jsonlines.org)); 0 items render nothing.
-- `a`: every item is an element of a single top-level JSON array, followed by a
-  newline; 0 items render `[]`.
+- `a`: a single top-level JSON array holds every item as an element (0 items
+  render `[]`), followed by a newline.
 
 ## Non-ASCII
 
