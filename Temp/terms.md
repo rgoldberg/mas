@@ -803,7 +803,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - exit status: the status with which a command exits, which is nonzero if
        it reports an item error ([defined](../Specs/configs.md#output-formats))
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
-       from a value, replacing the input
+       from a value, making it the matcher's matched value
        ([defined](../Specs/fields-format.md#coercion))
      - matched value: the value against which a matcher is evaluated, as its
        coerced value iff it coerces
