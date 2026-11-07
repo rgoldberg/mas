@@ -243,7 +243,7 @@ private extension MASTests {
 					.init(name: "name", label: "N\na", format: .default(fieldName: "name"), sortSpec: nil),
 					.init(name: "version", label: "Ver", format: .default(fieldName: "version"), sortSpec: nil),
 				],
-				fieldOrder: .positional(.init()),
+				fieldOrders: .init(),
 				keyValueConfig: try parseKeyValueConfig("F.:"),
 			)
 		#expect(keyValue == "N⏎a . Slack\nVer . 4.0")
@@ -257,7 +257,7 @@ private extension MASTests {
 					.init(name: "name", label: "N\ta", format: .default(fieldName: "name"), sortSpec: nil),
 					.init(name: "version", label: "V\u{9B}r", format: .default(fieldName: "version"), sortSpec: nil),
 				],
-				fieldOrder: .positional(.init()),
+				fieldOrders: .init(),
 				keyValueConfig: try parseKeyValueConfig("F.:"),
 			)
 		#expect(keyValue == "N␉a .. Slack\nV␛[r . 4.0")
@@ -351,7 +351,7 @@ private func keyValue(of objects: [JSON.Object], keyValueConfig: KeyValueConfig)
 			.init(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil),
 			.init(name: "version", label: "Version", format: .default(fieldName: "version"), sortSpec: nil),
 		],
-		fieldOrder: .positional(.init()),
+		fieldOrders: .init(),
 		keyValueConfig: keyValueConfig,
 	)
 }

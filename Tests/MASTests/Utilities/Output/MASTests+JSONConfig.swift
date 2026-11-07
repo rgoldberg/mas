@@ -159,7 +159,7 @@ private func json(of objects: [JSON.Object], jsonConfig: JSONConfig) throws -> S
 			.init(name: "name", label: "name", format: .default(fieldName: "name"), sortSpec: nil),
 			.init(name: "free", label: "free", format: .default(fieldName: "free"), sortSpec: nil),
 		],
-		fieldOrder: .positional(.init()),
+		fieldOrders: .init(),
 		jsonConfig: jsonConfig,
 	)
 }

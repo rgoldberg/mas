@@ -94,7 +94,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 						(fieldSpec: fieldSpec, value: object[lastNodeKey: .init(rawValue: fieldSpec.name)])
 					}
 				} else {
-					resolved.fieldOrder.itemMembers(sortedFieldSpecs, for: object)
+					resolved.fieldOrders.itemMembers(sortedFieldSpecs, for: object)
 				}
 			return reportingItemError { () throws(FormattingError) in
 				try members.map { member throws(FormattingError) in try member.fieldSpec.rendered(value: member.value) }
@@ -109,7 +109,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 				MAS.printer.info(
 					try outputObjects.json(
 						fieldSpecs: displayFieldSpecs,
-						fieldOrder: resolved.fieldOrder,
+						fieldOrders: resolved.fieldOrders,
 						jsonConfig: jsonConfig,
 					),
 				)
@@ -119,7 +119,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 			if
 				let keyValue = try outputObjects.keyValue(
 					fieldSpecs: displayFieldSpecs,
-					fieldOrder: resolved.fieldOrder,
+					fieldOrders: resolved.fieldOrders,
 					keyValueConfig: keyValueConfig,
 				)
 			{
@@ -137,7 +137,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 private extension FieldsConfig { // swiftlint:disable:this file_types_order
 	/// The visible field specs, in field order, given `objects`' unlisted fields.
 	func displayFieldSpecs(for objects: [JSON.Object]) -> [FieldSpec] {
-		fieldOrder.applied(to: fieldSpecs, unlisted: unlistedFieldSpecs(in: objects)).filter { !$0.isHidden }
+		fieldOrders.applied(to: fieldSpecs, unlisted: unlistedFieldSpecs(in: objects)).filter { !$0.isHidden }
 	}
 }
 

@@ -124,7 +124,13 @@ each example of a `<field-spec-reference>` inside such an edit (e.g., "`@2` in
 or a `<relative-config>` that means something else.
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
-value", not "the `<branch>`'s value").
+value", not "the `<branch>`'s value"), unless `the` selects 1 of multiple
+occurrences (e.g., "the last `<primary-field-order-option-set>`"), because a
+nonterminal names a contextually unique occurrence, as a proper noun does.
+
+In specs, prefer a possessive to an `of` phrase (e.g., "the saved field order's
+`<direction>`", not "`<direction>` of the saved field order"), because it is
+shorter & puts the head noun last.
 
 In specs, never write prose that merely restates a definition or a comment,
 because a restatement can drift from what it restates; state in prose only what

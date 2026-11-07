@@ -124,7 +124,7 @@ extension FieldsConfig {
 	/// This fields config, with its saved field order of `kind` as its field
 	/// order (e.g., `all`'s of kind `O`, per fields.md "Immutable Built-In Named
 	/// Fields Configs").
-	func withFieldOrder(of kind: FieldOrderKind, outputFormat: OutputFormat) -> Self {
+	func withFieldOrder(of kind: PrimaryFieldOrderKind, outputFormat: OutputFormat) -> Self {
 		.init(
 			fieldSpecs: fieldSpecs,
 			fieldOrders: fieldOrders.savingFieldOrder(of: kind, outputFormat: outputFormat),

@@ -423,7 +423,7 @@ private extension MASTests {
 	func `none orders its field specs by position`() throws {
 		let config = try parseFieldsConfig("@none.+bundleID=B,+adamID=A")
 		#expect(config.fieldOrder == .positional(.init()))
-		#expect(config.fieldOrder
+		#expect(config.fieldOrders
 			.applied(to: config.fieldSpecs, unlisted: .init())
 			.filter { !$0.isHidden }
 			.map(\.label) == [
@@ -435,7 +435,7 @@ private extension MASTests {
 	@Test
 	func `none positions its field specs as all does`() throws {
 		let config = try parseFieldsConfig("@none.bundleID,adamID")
-		#expect(config.fieldOrder
+		#expect(config.fieldOrders
 			.applied(to: config.fieldSpecs, unlisted: .init())
 			.filter { !$0.isHidden }
 			.map(\.name) == [
@@ -462,7 +462,7 @@ private extension MASTests {
 		#expect(empty.itemSort == defaultConfig.itemSort)
 	}
 
-	@Test(arguments: [("/P,x", Character(",")), ("/I+/-,", ",")])
+	@Test(arguments: [("/P,x", Character(",")), ("/I+/T-,", ",")])
 	func `input left over after a field order section is an error`(value: String, character: Character) {
 		#expect(throws: ParsingError.unexpectedCharacter(character)) { try parseFieldsConfig(value) }
 	}

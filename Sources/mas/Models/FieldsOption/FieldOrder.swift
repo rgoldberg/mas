@@ -11,26 +11,25 @@ internal import JSONAST
 // MARK: - Field ordering (fields.md)
 
 enum FieldOrder: Equatable {
-	/// `<source>` `"O"`: sorts by label, per the `<field-order-sort-option-set>`,
-	/// ties ordered per `tiebreakDirection`.
-	case byLabel(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
-	/// `<source>` `"I"`: sorts by name, per the `<field-order-sort-option-set>`,
-	/// ties ordered per `tiebreakDirection`.
-	case byName(SortOptionSet, tiebreakDirection: SortOptionSet.Direction)
+	/// `<source>` `"O"`: sorts by label, per the `<field-order-sort-option-set>`.
+	case byLabel(SortOptionSet)
+	/// `<source>` `"I"`: sorts by name, per the `<field-order-sort-option-set>`.
+	case byName(SortOptionSet)
 	/// `<document-order>` (`"D"`): each item's fields in the order of its own
 	/// `JSON.Object`'s keys (`CatalogApp` / `InstalledApp` normalization only
 	/// renames keys, never reorders them), per `optionSet` &
-	/// `itemMembers(_:for:)`, ties ordered per `tiebreakDirection`.
-	case document(OrderOptionSet, tiebreakDirection: SortOptionSet.Direction)
+	/// `itemMembers(_:for:tiebreakDirection:)`.
+	case document(OrderOptionSet)
 	/// `<positional-order>` (`"P"`): the working fields config's field specs by
 	/// position, per `optionSet`. Its `<descending>` reverses their positions
 	/// while parsing, before `<field-spec-edits-section>`, but also orders
-	/// unpositioned (i.e., visible unlisted) fields; see `applied(to:unlisted:)`.
+	/// unpositioned (i.e., visible unlisted) fields; see
+	/// `applied(to:unlisted:tiebreakDirection:)`.
 	case positional(OrderOptionSet)
 }
 
-/// A field order's kind (fields.md `<field-order-kind>`).
-enum FieldOrderKind { // swiftlint:disable:this one_declaration_per_file
+/// A field order's kind (fields.md `<primary-field-order-kind>`).
+enum PrimaryFieldOrderKind { // swiftlint:disable:this one_declaration_per_file
 	/// `<document-order>` (`"D"`).
 	case document
 	/// `<output>` (`"O"`): sorted by label.
@@ -41,15 +40,20 @@ enum FieldOrderKind { // swiftlint:disable:this one_declaration_per_file
 	case positional
 }
 
-/// A fields config's field order & its saved field order of each kind
-/// (fields.md "Field Order"), the field order's included.
+/// A fields config's field order, its saved field order of each primary field
+/// order kind (the field order's included) & its field order tiebreaker
+/// (fields.md "Field Order").
 struct FieldOrders: Equatable { // swiftlint:disable:this one_declaration_per_file
 	/// The field order.
 	private(set) var fieldOrder: FieldOrder
 
+	/// The effective `<field-order-tiebreaker>`'s `<direction>`, independent of
+	/// `fieldOrder`'s kind.
+	var tiebreakDirection = SortOptionSet.Direction.ascending
+
 	/// Each kind's saved field order; a missing kind's is the app's default field
 	/// order of that kind (see `savedFieldOrder(of:outputFormat:)`).
-	private var savedFieldOrderByKind: [FieldOrderKind: FieldOrder]
+	private var savedFieldOrderByKind: [PrimaryFieldOrderKind: FieldOrder]
 
 	init(_ fieldOrder: FieldOrder = .positional(.init())) {
 		self.fieldOrder = fieldOrder
@@ -58,7 +62,7 @@ struct FieldOrders: Equatable { // swiftlint:disable:this one_declaration_per_fi
 
 	/// The saved field order of `kind`, else the app's default field order of
 	/// `kind` for `outputFormat`, which every built-in fields config saves.
-	func savedFieldOrder(of kind: FieldOrderKind, outputFormat: OutputFormat) -> FieldOrder {
+	func savedFieldOrder(of kind: PrimaryFieldOrderKind, outputFormat: OutputFormat) -> FieldOrder {
 		savedFieldOrderByKind[kind] ?? defaultFieldOrder(of: kind, outputFormat: outputFormat)
 	}
 
@@ -70,10 +74,23 @@ struct FieldOrders: Equatable { // swiftlint:disable:this one_declaration_per_fi
 
 	/// These field orders, with their saved field order of `kind` as the field
 	/// order.
-	func savingFieldOrder(of kind: FieldOrderKind, outputFormat: OutputFormat) -> Self {
+	func savingFieldOrder(of kind: PrimaryFieldOrderKind, outputFormat: OutputFormat) -> Self {
 		var fieldOrders = self
 		fieldOrders.save(savedFieldOrder(of: kind, outputFormat: outputFormat))
 		return fieldOrders
+	}
+
+	/// `fieldOrder.applied(to:unlisted:tiebreakDirection:)`, tiebreaking per
+	/// `tiebreakDirection`.
+	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec]) -> [FieldSpec] {
+		fieldOrder.applied(to: fieldSpecs, unlisted: unlisted, tiebreakDirection: tiebreakDirection)
+	}
+
+	/// `fieldOrder.itemMembers(_:for:tiebreakDirection:)`, tiebreaking per
+	/// `tiebreakDirection`.
+	func itemMembers(_ fieldSpecs: [FieldSpec], for object: JSON.Object)
+	-> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
+		fieldOrder.itemMembers(fieldSpecs, for: object, tiebreakDirection: tiebreakDirection)
 	}
 }
 
@@ -108,7 +125,7 @@ struct OrderOptionSet: Equatable { // swiftlint:disable:this one_declaration_per
 }
 
 extension FieldOrder {
-	var kind: FieldOrderKind {
+	var kind: PrimaryFieldOrderKind {
 		switch self {
 		case .byLabel:
 			.label
@@ -125,7 +142,7 @@ extension FieldOrder {
 	/// options, else `nil`.
 	var orderOptionSet: OrderOptionSet? {
 		switch self {
-		case let .document(optionSet, _), let .positional(optionSet):
+		case let .document(optionSet), let .positional(optionSet):
 			optionSet
 		case .byLabel, .byName:
 			nil
@@ -135,20 +152,9 @@ extension FieldOrder {
 	/// The `<field-order-sort-option-set>`'s options, else `nil`.
 	var sortOptionSet: SortOptionSet? {
 		switch self {
-		case let .byLabel(optionSet, _), let .byName(optionSet, _):
+		case let .byLabel(optionSet), let .byName(optionSet):
 			optionSet
 		case .document, .positional:
-			nil
-		}
-	}
-
-	/// The `<field-order-tiebreaker>`'s `<direction>`, else `nil` (for
-	/// `.positional`, which has none).
-	var tiebreakDirection: SortOptionSet.Direction? {
-		switch self {
-		case let .byLabel(_, tiebreakDirection), let .byName(_, tiebreakDirection), let .document(_, tiebreakDirection):
-			tiebreakDirection
-		case .positional:
 			nil
 		}
 	}
@@ -156,13 +162,14 @@ extension FieldOrder {
 	/// Reorders `fieldSpecs`, followed by `unlisted` (the field specs of visible
 	/// unlisted fields, in order of their 1st occurrence in the input), per this
 	/// order. `.document` (which orders each item's fields independently; see
-	/// `itemMembers(_:for:)`) is identity. `.positional` orders `unlisted`, as
-	/// unpositioned fields, reversed iff `.descending`, 1st iff
+	/// `itemMembers(_:for:tiebreakDirection:)`) is identity. `.positional` orders
+	/// `unlisted`, as unpositioned fields, reversed iff `.descending`, 1st iff
 	/// `isUnpositionedFieldFirst`, else last. `.byName` / `.byLabel` sort per
 	/// their `<field-order-sort-option-set>` (direction included:
 	/// `SortOptionSet.compare(_:_:)` already accounts for it), ordering ties by
 	/// position, or by reverse position iff `tiebreakDirection` is `.descending`.
-	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec]) -> [FieldSpec] {
+	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec], tiebreakDirection: SortOptionSet.Direction)
+	-> [FieldSpec] {
 		switch self {
 		case .document:
 			fieldSpecs + unlisted
@@ -170,9 +177,9 @@ extension FieldOrder {
 			unlisted.ordered(optionSet.direction) + fieldSpecs
 		case let .positional(optionSet):
 			fieldSpecs + unlisted.ordered(optionSet.direction)
-		case let .byName(optionSet, tiebreakDirection):
+		case let .byName(optionSet):
 			(fieldSpecs + unlisted).sorted(by: \.name, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
-		case let .byLabel(optionSet, tiebreakDirection):
+		case let .byLabel(optionSet):
 			(fieldSpecs + unlisted).sorted(by: \.label, optionSet: optionSet, tiebreakDirection: tiebreakDirection)
 		}
 	}
@@ -213,8 +220,11 @@ extension FieldOrder {
 	/// `isUnpositionedFieldFirst`, else last, ties ordered by position, or by
 	/// reverse position iff `tiebreakDirection` is `.descending`; otherwise, in
 	/// `fieldSpecs`' order.
-	func itemMembers(_ fieldSpecs: [FieldSpec], for object: JSON.Object)
-	-> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
+	func itemMembers(
+		_ fieldSpecs: [FieldSpec],
+		for object: JSON.Object,
+		tiebreakDirection: SortOptionSet.Direction,
+	) -> [(fieldSpec: FieldSpec, value: JSON.Node?)] {
 		let members = fieldSpecs.enumerated().flatMap { offset, fieldSpec in
 			let fieldMembers = object.fields.enumerated().filter { $0.element.key.rawValue == fieldSpec.name }
 			return fieldMembers.isEmpty
@@ -223,7 +233,7 @@ extension FieldOrder {
 					(offset: offset, documentPosition: member.offset, fieldSpec: fieldSpec, value: member.element.value)
 				}
 		}
-		guard case let .document(optionSet, tiebreakDirection) = self else {
+		guard case let .document(optionSet) = self else {
 			return members.map { ($0.fieldSpec, $0.value) }
 		}
 		func isTiebrokenBefore(_ lhsOffset: Int, _ rhsOffset: Int) -> Bool {
@@ -245,41 +255,23 @@ extension FieldOrder {
 
 // MARK: - Field order parsing primitives (fields.md "Field Order")
 
-/// Parses an optional `<field-order-tiebreaker>`, returning its `<direction>`,
-/// or `nil` iff absent: a `<field-order-tiebreaker-prefix>` followed by a
-/// `<direction>` that ends its section, else a `<field-order-kind-section>`
-/// starts there instead (e.g., `/-P` in `/O/-P`), as fields.md "Field Order"
-/// disambiguates, since no later section is a `<field-order-adjustment-set>`.
-func parseFieldOrderTiebreaker(_ input: inout Substring) -> SortOptionSet.Direction? {
-	guard input.first == fieldOrderTiebreakerPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
+/// Parses a `<field-order-tiebreaker>` after its section's
+/// `<field-order-section-prefix>` iff `input` starts with
+/// `<field-order-tiebreaker-prefix>`, returning its `<direction>`, else `nil`;
+/// its `<direction>` must end its section.
+func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingError) -> SortOptionSet.Direction? {
+	guard input.first == fieldOrderTiebreakerPrefix else {
 		return nil
 	}
-	var remainder = input.dropFirst().drop(while: \.isWhitespace)
-	guard let direction = remainder.first.flatMap(SortOptionSet.Direction.init(rawValue:)) else {
-		return nil
+	input = input.dropFirst().drop(while: \.isWhitespace)
+	guard let direction = input.first.flatMap(SortOptionSet.Direction.init(rawValue:)) else {
+		throw .missingFieldOrderTiebreakerDirection
 	}
-	remainder = remainder.dropFirst().drop(while: \.isWhitespace)
-	guard remainder.first.map({ $0 == fieldSpecSeparator || itemSortAndFieldSpecEditsPrefixSet.contains($0) }) ?? true
-	else {
-		return nil
+	input = input.dropFirst().drop(while: \.isWhitespace)
+	if let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
+		throw .unexpectedCharacter(char)
 	}
-	input = remainder
 	return direction
-}
-
-/// Whether `input`'s field order option set (up to, but not including, its
-/// terminating `<field-spec-separator>` / `<item-sort-section-prefix>` /
-/// `<field-spec-edits-section-prefix>`) is a `<field-order-adjustment-set>`:
-/// every top-level character is an `<adjustment-sort-option>`.
-func isFieldOrderAdjustmentSet(_ input: Substring) -> Bool {
-	input
-		.prefix { $0 != fieldSpecSeparator && !itemSortAndFieldSpecEditsPrefixSet.contains($0) }
-		.allSatisfy { char in
-			char.isWhitespace
-				|| SortOptionSet.Direction(rawValue: char) != nil
-				|| SortOptionSet.NonconformingComparison(rawValue: char) != nil
-				|| SortOptionSet.NonconformingPlacement(rawValue: char) != nil
-		}
 }
 
 /// The `<order>` letter (`P` / `D`) of `input`'s `<field-order-option-set>` (up

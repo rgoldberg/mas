@@ -56,7 +56,7 @@ extension FieldSpec {
 extension JSON.Object {
 	/// This item's key-value output rows, each with its unstyled width, driven by
 	/// `--fields`-resolved field specs (label & rendered value per member, per
-	/// fields.md's "Members") ordered by `fieldOrder` & `keyValueConfig`
+	/// fields.md's "Members") ordered by `fieldOrders` & `keyValueConfig`
 	/// (key-value.md): each row is its key (styled per `keyValueConfig`), its
 	/// leading spacing, its leader (iff any), its trailing spacing, then its
 	/// value. A leader's width is the item's widest rendered key's width, less
@@ -71,9 +71,9 @@ extension JSON.Object {
 	/// terminal's tab stops are. Each other control character in a value except a
 	/// tab renders as in a key (e.g., an ESC as `␛`). Each row's width is that of
 	/// its widest line.
-	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
+	func keyValueRows(fieldSpecs: [FieldSpec], fieldOrders: FieldOrders, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> [(row: String, width: Int)] {
-		let rows = try fieldOrder.itemMembers(fieldSpecs, for: self)
+		let rows = try fieldOrders.itemMembers(fieldSpecs, for: self)
 			.map { fieldSpec, value throws(FormattingError) in try fieldSpec.keyValueRow(for: value) }
 			.compactMap(\.self)
 			.map { label, value in (label: label.controlCharactersSymbolized(), value: value) }
@@ -121,13 +121,13 @@ extension JSON.Object {
 	}
 
 	/// This item's JSON output object, per `--fields`-resolved field specs
-	/// ordered by `fieldOrder`: a member per member of each field (fields.md
+	/// ordered by `fieldOrders`: a member per member of each field (fields.md
 	/// "Members"), keyed by its field spec's label, even if keys repeat, omitting
 	/// a member iff its formatted value is absent (a `null` value, unlike
 	/// key-value output, is still included).
-	func jsonObject(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder) throws(FormattingError) -> Self {
+	func jsonObject(fieldSpecs: [FieldSpec], fieldOrders: FieldOrders) throws(FormattingError) -> Self {
 		.init(
-			try fieldOrder.itemMembers(fieldSpecs, for: self)
+			try fieldOrders.itemMembers(fieldSpecs, for: self)
 				.map { fieldSpec, value throws(FormattingError) in
 					try fieldSpec.rendered(value: value).map { node in (JSON.Key(rawValue: fieldSpec.label), node) }
 				}
@@ -214,14 +214,14 @@ extension [JSON.Object] {
 	}
 
 	/// This item list's key-value output, per `--fields`-resolved field specs
-	/// ordered per item by `fieldOrder` & per `keyValueConfig` (key-value.md):
+	/// ordered per item by `fieldOrders` & per `keyValueConfig` (key-value.md):
 	/// each item's rows (none for an item without any), with an item separator
 	/// line (iff any) between each pair of adjacent items. `nil` iff no item has
 	/// a row, so there is nothing to output.
-	func keyValue(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, keyValueConfig: KeyValueConfig)
+	func keyValue(fieldSpecs: [FieldSpec], fieldOrders: FieldOrders, keyValueConfig: KeyValueConfig)
 	throws(FormattingError) -> String? {
 		let itemRows = try map { object throws(FormattingError) in
-			try object.keyValueRows(fieldSpecs: fieldSpecs, fieldOrder: fieldOrder, keyValueConfig: keyValueConfig)
+			try object.keyValueRows(fieldSpecs: fieldSpecs, fieldOrders: fieldOrders, keyValueConfig: keyValueConfig)
 		}
 		return itemRows.allSatisfy(\.isEmpty)
 			? nil
@@ -233,14 +233,14 @@ extension [JSON.Object] {
 	}
 
 	/// This item list's JSON output: 1 `JSON.Object` per item, per
-	/// `--fields`-resolved field specs ordered per item by `fieldOrder`,
+	/// `--fields`-resolved field specs ordered per item by `fieldOrders`,
 	/// structured & rendered per `jsonConfig` (json.md): each item as a top-level
 	/// JSON value, or every item in a single top-level JSON array, each top-level
 	/// JSON value on its own line(s).
-	func json(fieldSpecs: [FieldSpec], fieldOrder: FieldOrder, jsonConfig: JSONConfig) throws(FormattingError)
+	func json(fieldSpecs: [FieldSpec], fieldOrders: FieldOrders, jsonConfig: JSONConfig) throws(FormattingError)
 	-> String {
 		let nodes = try map { object throws(FormattingError) in
-			JSON.Node.object(try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrder: fieldOrder))
+			JSON.Node.object(try object.jsonObject(fieldSpecs: fieldSpecs, fieldOrders: fieldOrders))
 		}
 		let topLevelNodes =
 			switch jsonConfig.topLevelStructure {

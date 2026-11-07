@@ -25,18 +25,15 @@ private extension MASTests {
 					unpositionedFieldPlacement: .fixed,
 				)),
 			),
-			("/D", .document(.init(), tiebreakDirection: .ascending)),
-			("/D-", .document(.init(direction: .descending), tiebreakDirection: .ascending)),
-			("/D/-", .document(.init(), tiebreakDirection: .descending)),
-			("/D-/+", .document(.init(direction: .descending), tiebreakDirection: .ascending)),
-			("/PD/-", .document(.init(), tiebreakDirection: .descending)),
-			("/D / -", .document(.init(), tiebreakDirection: .descending)),
-			("/D//-", .document(.init(), tiebreakDirection: .ascending)),
-			("/aD", .document(.init(unpositionedFieldComparison: .least), tiebreakDirection: .ascending)),
-			(
-				"/PaD f-z",
-				.document(.init(direction: .descending, unpositionedFieldPlacement: .fixed), tiebreakDirection: .ascending),
-			),
+			("/D", .document(.init())),
+			("/D-", .document(.init(direction: .descending))),
+			("/D/T-", .document(.init())),
+			("/D-/T+", .document(.init(direction: .descending))),
+			("/PD/T-", .document(.init())),
+			("/D / T -", .document(.init())),
+			("/D//-", .document(.init())),
+			("/aD", .document(.init(unpositionedFieldComparison: .least))),
+			("/PaD f-z", .document(.init(direction: .descending, unpositionedFieldPlacement: .fixed))),
 		],
 	)
 	func `field order positional-order & document-order`(value: String, fieldOrder: FieldOrder) throws {
@@ -86,7 +83,7 @@ private extension MASTests {
 		names: [String],
 	) throws {
 		var fieldOrders = FieldOrders(.positional(.init(direction: .descending)))
-		fieldOrders.save(.byLabel(.default, tiebreakDirection: .ascending))
+		fieldOrders.save(.byLabel(.default))
 		let standard = SelectedFieldsConfig(
 			fieldSpecs: [bundleIDFieldSpec, adamIDFieldSpec], // Already reversed by `/P-`
 			fieldOrders: fieldOrders,
@@ -120,28 +117,62 @@ private extension MASTests {
 			("/O/P", "/P"),
 			("/P/O", "/O"),
 			("/iO/-O", "/iO-"),
-			("/O/-", "/O/-"),
-			("/O / -", "/O/-"),
+			("/O/-", "/O-"),
+			("/O / -", "/O-"),
 			("/O/-P", "/P-"),
 			("/O/-/P", "/P"),
 			("/I/-O//-", "/O-//-"),
+			("/O/a", "/Oa"),
+			("/O/-/+", "/O+"),
+			("/P/+-", "/P-"),
+			("/O/T-", "/O"),
+			("/T-/O", "/O"),
+			("/O/T-/-", "/O-"),
 		],
 	)
-	func `the last field order section sets the field order`(value: String, equivalent: String) throws {
-		#expect(try parseFieldsConfig(value).fieldOrder == (try parseFieldsConfig(equivalent).fieldOrder))
+	func `the last primary field order option set sets the field order`(value: String, equivalent: String) throws {
+		let config = try parseFieldsConfig(value)
+		let equivalentConfig = try parseFieldsConfig(equivalent)
+		#expect(config.fieldOrder == equivalentConfig.fieldOrder)
+		#expect(config.fieldSpecs == equivalentConfig.fieldSpecs)
 	}
 
-	@Test(arguments: ["/O/a", "/P/+-", "/O/-/+"])
-	func `a field order adjustment set after the 1st field order section is an error`(value: String) {
-		#expect(throws: ParsingError.misplacedFieldOrderAdjustmentSet) { try parseFieldsConfig(value) }
+	@Test(
+		arguments: [
+			("/I+", SortOptionSet.Direction.ascending),
+			("/I+/T-", .descending),
+			("/T-/I+", .descending),
+			("/T-/T+", .ascending),
+			("/D/T-", .descending),
+			("/P/T-", .descending),
+			("/DP/T+", .ascending),
+			("@none/T-", .descending),
+			("@none/a/T-", .descending),
+			("/T-/O/-", .descending),
+			("@all/-/T+", .ascending),
+		],
+	)
+	func `the last field-order-tiebreaker sets the tiebreak direction, whatever the field order's kind`(
+		value: String,
+		tiebreakDirection: SortOptionSet.Direction,
+	) throws {
+		let config = try parseFieldsConfig(value, outputFormat: .json(.default))
+		#expect(config.fieldOrders.tiebreakDirection == tiebreakDirection)
 	}
 
 	@Test(arguments: [
 		("/D/", ParsingError.missingFieldOrderOptionSet),
 		("/I+/", .missingFieldOrderOptionSet),
 		("/D/!", .invalidSortOption("!")),
+		("/T", .missingFieldOrderTiebreakerDirection),
+		("/D/T", .missingFieldOrderTiebreakerDirection),
+		("/T/I", .missingFieldOrderTiebreakerDirection),
+		("/Ta", .missingFieldOrderTiebreakerDirection),
+		("/T-a", .unexpectedCharacter("a")),
+		("/T-P", .unexpectedCharacter("P")),
+		("/T--", .unexpectedCharacter("-")),
 	])
-	func `an invalid field order section after a field order option set is an error`(value: String, error: ParsingError) {
+	func `an invalid field order section is an error`(value: String, error: ParsingError) {
 		#expect(throws: error) { try parseFieldsConfig(value, outputFormat: .json(.default)) }
 	}
 
@@ -150,7 +181,7 @@ private extension MASTests {
 		#expect(try parseFieldsConfig("/iO/D/P").fieldOrder == .positional(.init()))
 	}
 
-	@Test(arguments: ["/D", "/-D", "/P/D"])
+	@Test(arguments: ["/D", "/-D", "/P/D", "/D/T-"])
 	func `document-order is unsupported for table output`(value: String) {
 		#expect(throws: ParsingError.documentOrderUnsupportedForTable) { try parseFieldsConfig(value) }
 	}
@@ -168,7 +199,7 @@ private extension MASTests {
 
 	@Test
 	func `field order sort-option-set defaults source to output`() throws {
-		guard case let .byLabel(sortSpec, _) = try parseFieldsConfig("/-i").fieldOrder else {
+		guard case let .byLabel(sortSpec) = try parseFieldsConfig("/-i").fieldOrder else {
 			Issue.record("Expected .byLabel")
 			return
 		}
@@ -179,28 +210,13 @@ private extension MASTests {
 		}
 	}
 
-	@Test(arguments: [("/I+", SortOptionSet.Direction.ascending), ("/I+/-", .descending), ("@all/-/+", .ascending)])
-	func `field order sort-option-set parses field-order-tiebreaker`(
-		value: String,
-		tiebreakDirection: SortOptionSet.Direction,
-	) throws {
-		let parsedTiebreakDirection =
-			switch try parseFieldsConfig(value).fieldOrder {
-			case let .byLabel(_, tiebreakDirection), let .byName(_, tiebreakDirection):
-				tiebreakDirection
-			default:
-				SortOptionSet.Direction?.none
-			}
-		#expect(parsedTiebreakDirection == tiebreakDirection)
-	}
-
 	@Test(
 		arguments: [
 			("/I-", "/i", "/I-i"),
-			("/I-/-", "/+", "/I+/-"),
-			("/I+/-", "/I", "/I+/-"),
-			("/I+/-", "/D", "/D"),
-			("/D-a/-", "/Df", "/D-af/-"),
+			("/I-/T-", "/+", "/I+/T-"),
+			("/I+/T-", "/I", "/I+/T-"),
+			("/I+/T-", "/D", "/D/T-"),
+			("/D-a/T-", "/Df", "/D-af/T-"),
 			("/D-", "/PD", "/D-"),
 			("/D-", "/i", "/i"),
 			("/I-", "/D", "/D"),
@@ -212,26 +228,27 @@ private extension MASTests {
 			("/aD", "/P", "/P"),
 			("/aP", "/-", "/aP-"),
 			("/aP-", "/+", "/aP+"),
-			("/D-a/-", "/+", "/D+a/-"),
-			("/D", "/-/-", "/D-/-"),
+			("/D-a/T-", "/+", "/D+a/T-"),
+			("/D", "/-/T-", "/D-/T-"),
 			("/Ii", "/-", "/Ii-"),
 			("/aP", "/f", "/aPf"),
 			("/aP-", "/zr", "/zP-r"),
 			("/D-", "/a", "/D-a"),
-			("/D", "/af-/-", "/D-af/-"),
+			("/D", "/af-/T-", "/D-af/T-"),
 			("/Ii", "/a", "/Iia"),
 			("/Iiz", "/kf", "/Iikf"),
 			("/I-", "/O", "/O"),
-			("/O-/+", "/I", "/I"),
+			("/O-/T+", "/I", "/I"),
 			("/O-/P", "/O", "/O-"),
 			("/O-/P", "/I", "/I"),
 			("/O-/P", "/-", "/P-"),
 			("/iO/P", "/O", "/iO"),
 			("/iI/O", "/I", "/iI"),
-			("/O/-/iI/P", "/O", "/O/-"),
+			("/O/-/iI/P", "/O", "/O-"),
+			("/O/T-/P", "/I", "/I/T-"),
 		],
 	)
-	func `a field order section retains the options of the saved field order of its kind`(
+	func `a field order section retains the options of its kind's saved field order & the tiebreak direction`(
 		base: String,
 		value: String,
 		equivalent: String,
@@ -240,14 +257,16 @@ private extension MASTests {
 			fieldSpecs: standardFixture.fieldSpecs,
 			fieldOrders: try parseFieldsConfig(base, outputFormat: .json(.default)).fieldOrders,
 		)
-		let fieldOrder = try resolvedFieldsConfig(
+		let fieldOrders = try resolvedFieldsConfig(
 			from: "@default@unsuffixed" + value, // `standard@json` would be `all@json`
 			standard: standard,
 			all: allFixture,
 			outputFormat: .json(.default),
 		)
-		.fieldOrder
-		#expect(fieldOrder == (try parseFieldsConfig(equivalent, outputFormat: .json(.default)).fieldOrder))
+		.fieldOrders
+		let equivalentFieldOrders = try parseFieldsConfig(equivalent, outputFormat: .json(.default)).fieldOrders
+		#expect(fieldOrders.fieldOrder == equivalentFieldOrders.fieldOrder)
+		#expect(fieldOrders.tiebreakDirection == equivalentFieldOrders.tiebreakDirection)
 	}
 
 	@Test(arguments: ["/P", "/D", "/aP-"])
@@ -290,18 +309,6 @@ private extension MASTests {
 		)
 		.fieldOrder
 		#expect(fieldOrder == (try parseFieldsConfig("/aP", outputFormat: .json(.default)).fieldOrder))
-	}
-
-	@Test(
-		arguments: [
-			("/P/-", ParsingError.tiebreakerUnsupportedForPositionalOrder),
-			("/DP/+", .tiebreakerUnsupportedForPositionalOrder),
-			("@none/-/+", .tiebreakerUnsupportedForPositionalOrder),
-			("@none/a/+", .tiebreakerUnsupportedForPositionalOrder),
-		],
-	)
-	func `invalid field-order-tiebreaker is an error`(value: String, error: ParsingError) {
-		#expect(throws: error) { try parseFieldsConfig(value, outputFormat: .json(.default)) }
 	}
 }
 

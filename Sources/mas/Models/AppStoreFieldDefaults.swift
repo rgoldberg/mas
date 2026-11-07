@@ -66,14 +66,14 @@ func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: Output
 /// compare per the `Other` row of mas.md's "Default Sort Options"; mas has none
 /// of kinds `P` & `D`, so theirs are `/P` & `/D` (fields.md "Immutable Built-In
 /// Named Fields Configs").
-func defaultFieldOrder(of kind: FieldOrderKind, outputFormat: OutputFormat) -> FieldOrder {
+func defaultFieldOrder(of kind: PrimaryFieldOrderKind, outputFormat: OutputFormat) -> FieldOrder {
 	switch kind {
 	case .document:
-		.document(.init(), tiebreakDirection: .ascending)
+		.document(.init())
 	case .label:
-		.byLabel(defaultFieldOrderSortOptionSet(source: .output, outputFormat: outputFormat), tiebreakDirection: .ascending)
+		.byLabel(defaultFieldOrderSortOptionSet(source: .output, outputFormat: outputFormat))
 	case .name:
-		.byName(defaultFieldOrderSortOptionSet(source: .input, outputFormat: outputFormat), tiebreakDirection: .ascending)
+		.byName(defaultFieldOrderSortOptionSet(source: .input, outputFormat: outputFormat))
 	case .positional:
 		.positional(.init())
 	}
