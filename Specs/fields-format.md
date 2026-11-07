@@ -1050,7 +1050,9 @@ renders as `Z` iff the truncated offset is 0, else as `±hh:mm`.
 match-placeholder = <unary-match-placeholder> | <binary-match-placeholder>
 
 unary-match-placeholder  = <placeholder-prefix> <unary-match> <branches> <block-terminator>
-binary-match-placeholder = <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
+binary-match-placeholder =
+  <placeholder-prefix> <binary-match> <branches> <block-terminator> -[ <failure-block> ] <block-terminator>
+  (* error: its <failure-block> is absent & every <branch> is non-nullary & its block is absent *)
 
 unary-match  = "m" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
 binary-match = "M" (* matches a branch in <branches>; output type: {matched branch value's type}; value: {matched branch value} *)
@@ -1084,6 +1086,10 @@ A match has at least 1 branch, because without any, its `%m` or `%M` cannot
 affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
 branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
 means).
+
+A `%M` without a nullary branch, a branch with a block, or a `<failure-block>`
+(e.g., `%MN+++`) would always insert an empty string, as `%S++` would, so its
+matcher cannot affect what it means.
 
 Every branch is conditional, because an unconditional last branch would mean
 what a `%M` whose `<failure-block>` holds that branch as a placeholder means

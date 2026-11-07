@@ -390,9 +390,7 @@ private struct FormatParser {
 			let branches = try parseBranches()
 			return .match(
 				branches,
-				isNonNullary
-					? .binary(failure: try parseBlock(kind: .unconditional, enclosingPredicate: nil))
-					: .abortOnNoMatch,
+				isNonNullary ? .binary(failure: try parseBinaryMatchFailureBlock(after: branches)) : .abortOnNoMatch,
 			)
 		}
 		let matcher = try parseMatcher(letter: letter, coercion: coercion)
@@ -423,6 +421,18 @@ private struct FormatParser {
 			throw .binaryPlaceholderLacksBlock
 		}
 		return .binary(success: success, failure: failure)
+	}
+
+	/// Parses a binary match's `<failure-block>` & its `<block-terminator>`,
+	/// which must be present unless 1 of `branches` is nullary or has a block,
+	/// because otherwise (e.g., `%MN+++`) the match would always insert an empty
+	/// string.
+	private mutating func parseBinaryMatchFailureBlock(after branches: [Branch]) throws(ParsingError) -> Format {
+		let failure = try parseBlock(kind: .unconditional, enclosingPredicate: nil)
+		guard failure != .empty || branches.contains(where: { $0.block != .empty }) else {
+			throw .binaryMatchLacksBlock
+		}
+		return failure
 	}
 
 	/// Parses `matcher`'s `<success-block>` & its `<block-terminator>`.
