@@ -51,9 +51,10 @@ func styled(_ string: String, specifier: String, sequences: StylingSequences, is
 		: string
 }
 
-/// Whether normal output supports styling (command-line.md's "Standard
-/// Streams"): iff standard output is a terminal (`isTerminal`), `environment`'s
-/// `TERM` is not `dumb` & its `NO_COLOR` is unset or empty.
+/// Whether output supports styling (e.g., normal output, per command-line.md's
+/// "Standard Streams"): iff its file handle (by default, standard output) is a
+/// terminal (`isTerminal`), `environment`'s `TERM` is not `dumb` & its
+/// `NO_COLOR` is unset or empty.
 func supportsStyling(
 	isTerminal: Bool = FileHandle.standardOutput.isTerminal,
 	environment: [String: String] = ProcessInfo.processInfo.environment,

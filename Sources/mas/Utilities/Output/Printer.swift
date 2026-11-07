@@ -10,7 +10,7 @@ internal import Foundation
 private import Synchronization
 
 /// Prints to `FileHandle`s like `.standardOutput` & `.standardError` with ANSI
-/// color codes when connected to a terminal.
+/// color codes when their output supports styling.
 final class Printer: Sendable {
 	private let errorCounter = Atomic(UInt64(0))
 
@@ -47,41 +47,41 @@ final class Printer: Sendable {
 		print(items.map(String.init(describing:)), separator: separator, terminator: terminator, to: fileHandle)
 	}
 
-	/// Prints to `stdout`, prefixed with "==> "; if connected to a terminal, the
-	/// prefix is blue.
+	/// Prints to `stdout`, prefixed with "==> "; if its output supports styling,
+	/// the prefix is blue.
 	@_disfavoredOverload
 	func notice(_ items: Any..., separator: String = " ", terminator: String = "\n") {
 		notice(items, separator: separator, terminator: terminator)
 	}
 
-	/// Prints to `stdout`, prefixed with "==> "; if connected to a terminal, the
-	/// prefix is blue.
+	/// Prints to `stdout`, prefixed with "==> "; if its output supports styling,
+	/// the prefix is blue.
 	func notice(_ items: [Any], separator: String = " ", terminator: String = "\n") {
 		print(items, prefix: "==>", format: "1;34", separator: separator, terminator: terminator, to: .standardOutput)
 	}
 
-	/// Prints to `stderr`, prefixed with "Warning: "; if connected to a terminal,
-	/// the prefix is yellow & underlined.
+	/// Prints to `stderr`, prefixed with "Warning: "; if its output supports
+	/// styling, the prefix is yellow & underlined.
 	@_disfavoredOverload
 	func warning(_ items: Any..., error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		warning(items, error: error, separator: separator, terminator: terminator)
 	}
 
-	/// Prints to `stderr`, prefixed with "Warning: "; if connected to a terminal,
-	/// the prefix is yellow & underlined.
+	/// Prints to `stderr`, prefixed with "Warning: "; if its output supports
+	/// styling, the prefix is yellow & underlined.
 	func warning(_ items: [Any], error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		problem(items, prefix: "Warning:", format: "4;33", error: error, separator: separator, terminator: terminator)
 	}
 
-	/// Prints to `stderr`, prefixed with "Error: "; if connected to a terminal,
-	/// the prefix is red & underlined.
+	/// Prints to `stderr`, prefixed with "Error: "; if its output supports
+	/// styling, the prefix is red & underlined.
 	@_disfavoredOverload
 	func error(_ items: Any..., error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		self.error(items, error: error, separator: separator, terminator: terminator)
 	}
 
-	/// Prints to `stderr`, prefixed with "Error: "; if connected to a terminal,
-	/// the prefix is red & underlined.
+	/// Prints to `stderr`, prefixed with "Error: "; if its output supports
+	/// styling, the prefix is red & underlined.
 	func error(_ items: [Any], error: any Error? = nil, separator: String = " ", terminator: String = "\n") {
 		errorCounter.wrappingAdd(1, ordering: .relaxed)
 		problem(items, prefix: errorPrefix, format: errorFormat, error: error, separator: separator, terminator: terminator)
@@ -156,7 +156,7 @@ final class Printer: Sendable {
 
 extension String {
 	func formatted(with format: Self, for fileHandle: FileHandle) -> Self {
-		fileHandle.isTerminal ? "\(csi)\(format)m\(self)\(csi)0m" : self
+		supportsStyling(isTerminal: fileHandle.isTerminal) ? "\(csi)\(format)m\(self)\(csi)0m" : self
 	}
 }
 
