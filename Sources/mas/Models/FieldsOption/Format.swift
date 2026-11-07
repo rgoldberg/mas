@@ -1063,10 +1063,12 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 	}
 
 	/// `instant`'s local date, its local millisecond of day in `timeZone` & that
-	/// time zone's UTC offset at `instant`, in seconds.
+	/// time zone's UTC offset at `instant`, in seconds, truncated to whole
+	/// minutes, from which the local date & time are computed, so that their
+	/// rendering denotes `instant`.
 	private static func local(_ instant: Int, in timeZone: TimeZone)
 	-> (day: CivilDate, millisecondOfDay: Int, offsetSeconds: Int) {
-		let offsetSeconds = offsetMilliseconds(of: timeZone, at: instant) / 1000
+		let offsetSeconds = offsetMilliseconds(of: timeZone, at: instant) / 60000 * 60
 		// Adding the offset to the millisecond of day, rather than to `instant`,
 		// cannot overflow
 		let (days, millisecondOfDay) = floorQuotientAndRemainder(instant, millisecondsPerDay)
@@ -1077,7 +1079,8 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 
 	/// `instant` rendered in `timeZone` as `form`. A datetime or time-only
 	/// includes 3-digit fractional seconds iff its milliseconds are nonzero. Its
-	/// UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
+	/// UTC offset, truncated to whole minutes, renders as `Z` iff it is 0, else
+	/// as `±hh:mm`.
 	private static func formatted(_ instant: Int, in timeZone: TimeZone, as form: ISO8601Form) -> String {
 		let (day, millisecondOfDay, offsetSeconds) = local(instant, in: timeZone)
 		let seconds = millisecondOfDay / 1000

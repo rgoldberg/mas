@@ -1036,7 +1036,11 @@ A chronologic value renders in the output time zone, in ISO-8601 extended format
 
 Seconds always render (e.g., in the UTC output time zone, `2020-03-18 17:39Z`
 renders as `2020-03-18T17:39:00Z`), so every rendered datetime or time-only has
-the same form. A UTC offset renders as `Z` iff it is 0, else as `±hh:mm`.
+the same form. A UTC offset is truncated to whole minutes, and the local time is
+computed from the truncated offset, so the rendering denotes the same instant
+(e.g., in the `America/New_York` output time zone, whose UTC offset in 1800 is
+`-04:56:02`, `1800-01-01T00:00:00Z` renders as `1799-12-31T19:04:00-04:56`); it
+renders as `Z` iff the truncated offset is 0, else as `±hh:mm`.
 
 ###### Branched Formatting
 

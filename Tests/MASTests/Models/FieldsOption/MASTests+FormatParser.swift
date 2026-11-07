@@ -880,6 +880,10 @@ private extension MASTests { // swiftlint:disable file_length
 			("%.D.timeZone:UTC:.timeZone++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-19T02:39:23+09:00"),
 			("%.D.timeZone:GMT+5:++", "Asia/Tokyo", "2020-03-18T17:39:23Z", "2020-03-18T22:39:23+05:00"),
 			("%.D.timeZone:Asia/Tokyo:.dateOnly++", "America/New_York", "2020-03-18T17:39:23Z", "2020-03-19"),
+			// A UTC offset with seconds is truncated to whole minutes, retaining the
+			// instant
+			("%.D.timeZone:America/New_York:++", "UTC", "1800-01-01T00:00:00Z", "1799-12-31T19:04:00-04:56"),
+			("%.D.timeZone:Asia/Kolkata:++", "UTC", "1800-01-01T00:00:00Z", "1800-01-01T05:53:00+05:53"),
 			// A date-only value's date is independent of time zones
 			("%.D.timeZone:Pacific/Honolulu:++", "America/New_York", "2020-03-18", "2020-03-18"),
 			("%.D.timeZone:Pacific/Kiritimati:++", "Pacific/Honolulu", "2020-03-18", "2020-03-18"),
