@@ -71,8 +71,8 @@ Because only 1 output format can be selected, giving more than 1 such flag or
 option, even the same one twice (e.g., `--json --json` or
 `--json-config P --table`), is an error.
 
-An empty or whitespace-only value of an output config option sets no setting
-(e.g., `--json-config=` ≡ `--json`).
+Because [an output config's text is optional](configs.md#output-configs),
+`--json-config=` ≡ `--json`.
 
 ## Fields Option
 
