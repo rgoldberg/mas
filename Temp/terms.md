@@ -547,6 +547,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: field spec with default settings
 85. - segment: a part of a run of non-boundary text that sorting compares as 1
       element ([defined](../Specs/fields.md#sort-segments))
+    - chronologic segment / number segment: a segment per
+      `<chronologic-segments>` / `<number-segments>`
+      ([defined](../Specs/fields.md#sort-segments))
     - typed segment: a chronologic or number segment
     - text segment: a maximal sequence of non-boundary characters that is in no
       typed segment
@@ -860,6 +863,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - defer: of a side of an expression, to let an adjacent side override its
        outer bare whitespace treatment (`~`;
        [defined](../Specs/ebnf.md#outer-bare-whitespace-treatment))
+     - forbidden / ignored / consumed / required: the outer bare whitespace
+       treatments `!` / `-` / `^` / `&`
+       ([defined](../Specs/ebnf.md#outer-bare-whitespace-treatment))
 125. - presence state: present, transitively absent, or directly absent
        ([defined](../Specs/ebnf.md#presence-states))
      - directly absent: not present, but not transitively absent (e.g.,
