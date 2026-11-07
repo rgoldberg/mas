@@ -775,6 +775,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - Control Pictures symbol: the symbol in Unicode's Control Pictures block
        for a C0 control character or DEL (e.g., `␉` for a tab;
        [used](../Specs/table.md#table-config))
+     - control character name: an uppercase abbreviation in angle brackets that
+       denotes a control character in an example of syntax text (e.g., `<TAB>`;
+       [defined](../Specs/ebnf.md#grammar))
      - REJECTED: control code / control picture (for a Control Pictures symbol)
 115. - reference fields config: a semi-mutable copy of the baseline fields
        config, whose field spec order is immutable, in which each removed field

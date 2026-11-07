@@ -17,6 +17,9 @@ When using this custom EBNF grammar to define a syntax:
 - All text is case-sensitive.
 - [Outer bare whitespace treatment](#outer-bare-whitespace-treatment) varies by
   expression.
+- An example of syntax text denotes a control character by its uppercase
+  abbreviation in angle brackets (e.g., `<TAB>` for a tab), unlike a
+  [nonterminal reference](#nonterminal-references), whose name is lowercase.
 
 ### Escaping
 

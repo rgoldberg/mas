@@ -230,11 +230,9 @@ An alternative's **payload** is the expression between its letter & its
 [`<setting-termination>`](#setting-termination) (e.g., `<style-specifier>` in
 [`<header-on>`](table.md#header)). A payload's tabs & [line
 terminators](#line-terminators) are output as is (e.g., a key-value config of
-`L<LF>:` puts each value on the line after its key, where `<LF>` is an LF; other
-examples likewise name each control character that they contain, such as `<TAB>`
-or `<ESC>`). A **payloadless** alternative is the lowercase alternative of a
-setting whose uppercase alternative takes a payload (e.g., `h`, but not `t`, in
-a table config).
+`L<LF>:` puts each value on the line after its key). A **payloadless**
+alternative is the lowercase alternative of a setting whose uppercase
+alternative takes a payload (e.g., `h`, but not `t`, in a table config).
 
 ### Setting Termination
 
