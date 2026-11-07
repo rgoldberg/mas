@@ -28,8 +28,8 @@ defaults** override [`p`, `x` & `o`'s defaults](table.md#styling):
 - `x`'s `<style-suffix>`: `m` (the ANSI SGR control sequence's final byte).
 - `o`'s `<style-reset>`: `ESC[0m` (the ANSI SGR reset).
 
-Thus, a `<style-specifier>` holds ANSI SGR parameters (e.g., `1` for bold, `1;4`
-for bold & underlined).
+Thus, with these defaults, a `<style-specifier>` holds ANSI SGR parameters
+(e.g., `1` for bold, `1;4` for bold & underlined).
 
 ## Exit Status
 
