@@ -191,7 +191,7 @@ output shows its effect):
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`).
 5. **Redundant, whatever it holds:** a part has no effect, or its output cannot
    depend on anything but its own text (e.g., `%S..uppercase++`, `%+s`, `%S++`,
-   `K:`, `%I+`, `%m+`, or `plain`).
+   `K:`, `%I+`, `%m+`, or `name:plain`).
 6. **Reserved:** planned syntax needs it (e.g., a bare `.` in a `<field-name>`).
 
 In that list, an expression **holds** each name, argument, or block content in
