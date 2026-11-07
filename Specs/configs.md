@@ -14,6 +14,11 @@ Uses the [custom EBNF grammar](ebnf.md).
 A **command** is a node in an app's command hierarchy: either the root command
 (the app itself) or a subcommand of another command.
 
+### Failure
+
+A command that reports any error **fails**, so that its caller can detect it
+(e.g., an omitted item, for an [item error](#output-formats)).
+
 ## Display Commands
 
 A **display command** is a command whose primary function is to display data.
@@ -52,9 +57,6 @@ for key-value output, and, for table output, a field of only the 2nd has no
 column). An item's item errors are ordered by its `<output>` sort keys' [sort
 precedence](fields.md#sort-priority), then by its output order (e.g., for
 `a:.round,b:.round/O`, if `a` & `b` are strings, only `b`'s is reported).
-
-A command that reports any error **fails**, so that its caller can detect it
-(e.g., an omitted item, for an item error).
 
 ## Normal & Error Output
 

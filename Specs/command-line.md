@@ -32,8 +32,8 @@ Thus, with these defaults, a `<styling-specifier>` holds ANSI SGR parameters
 
 ## Exit Status
 
-A command that [fails](configs.md#output-formats) exits with a nonzero **exit
-status**, so that a script can detect its failure.
+A command that [fails](configs.md#failure) exits with a nonzero **exit status**,
+so that a script can detect its failure.
 
 ## Command Lines
 

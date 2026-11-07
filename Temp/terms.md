@@ -806,7 +806,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/configs.md#output-formats))
      - fail: of a command, to report any error, so that its caller can detect it
        (e.g., an omitted item, for an item error)
-       ([defined](../Specs/configs.md#output-formats))
+       ([defined](../Specs/configs.md#failure))
      - exit status: the status with which a command exits, which is nonzero iff
        it fails ([defined](../Specs/command-line.md#exit-status))
      - normal output / error output: where a display command outputs its items /
