@@ -475,8 +475,8 @@ each `<index>` (including a `<baseline-sourced-field-spec-edit>`'s) apply to the
 reversed positions (e.g., in `@all/P-.+@1`, `@1` references `all`'s last field
 spec). A `<direction>` of a field order per `<positional-order-option-set>`
 reverses those positions iff it differs from the working fields config's field
-order's `<direction>`, which is `<ascending>` unless that field order is
-`<positional-order>` (e.g., if `x` has `/P-`, each of `@x/P-`, `@x/P` & `@x/-`
+order's `<direction>`, if that field order is `<positional-order>`, else iff it
+is `<descending>` (e.g., if `x` has `/P-`, each of `@x/P-`, `@x/P` & `@x/-`
 outputs `x`'s field order, while each of `@x/P+` & `@x/+` reverses it).
 
 Field specs that the field order ties are ordered by position, reversed iff
