@@ -939,6 +939,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        whatever it holds
      - redundant: of syntax, whatever it holds, a part has no effect, or its
        output cannot depend on anything but its own text
+     - reserved: of syntax, planned syntax needs it (e.g., a bare `.` in a field
+       name)
      - hold: of an expression, to have a name, an argument, a block content, or
        a list element in it
 131. - item: 1 of the elements of a display command's input, each of which has

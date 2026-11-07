@@ -190,6 +190,7 @@ output shows its effect):
 5. **Redundant, whatever it holds:** a part has no effect, or its output cannot
    depend on anything but its own text (e.g., `%S..uppercase++`, `%+s`, `%S++`,
    `K:`, `%I+`, `%m+`, or `plain`).
+6. **Reserved:** planned syntax needs it (e.g., a bare `.` in a `<field-name>`).
 
 In that list, an expression **holds** each name, argument, or block content in
 it (e.g., `%+N…+` is not redundant, because it can hold something other than
