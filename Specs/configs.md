@@ -18,6 +18,9 @@ A **command** is a node in an app's command hierarchy: either the root command
 
 A **display command** is a command whose primary function is to display data.
 
+A display command's input is a list of **items**, each of which has fields, in
+an **input format** (e.g., JSON).
+
 ## Output Formats
 
 Display commands support multiple **output formats**:

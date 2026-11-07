@@ -942,7 +942,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - hold: of an expression, to have a name, an argument, a block content, or
        a list element in it
 131. - item: 1 of the elements of a display command's input, each of which has
-       fields (e.g., an app; [used](../Specs/mas.md#items))
+       fields (e.g., an app; [defined](../Specs/configs.md#display-commands))
+     - input format: the format of a display command's input (e.g., JSON), which
+       determines the types that its field values can have
+       ([defined](../Specs/configs.md#display-commands))
      - field spec: the configuration of an output field, with its position
        ([defined](../Specs/fields.md#field-specs))
      - label: a field spec's table header, or its key-value or JSON key
