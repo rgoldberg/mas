@@ -82,6 +82,20 @@ private extension MASTests { // swiftlint:disable:this file_types_order
 		#expect(actual == Consequences(nil, "", itemErrorMessage))
 	}
 
+	@Test(arguments: ["a:.round,b:.round/O", "a:.round/2O,b:.round/1O"])
+	func `an item's output sort keys' item errors precede its others, by sort precedence`(
+		fieldsOptionValue: String,
+	) async throws {
+		let actual = try await consequencesOf(
+			try ItemErrorOutputConfig.output(
+				[.init([("a", .string("x")), ("b", .string("y"))])],
+				outputFormat: .table(.default),
+				fieldsOptionValue: fieldsOptionValue,
+			),
+		)
+		#expect(actual == Consequences(nil, "", "Error: Transform round requires an input of its input type: y\n"))
+	}
+
 	@Test
 	func `an item with an item error adds no column for its unlisted fields`() async throws {
 		let actual = try await consequencesOf(

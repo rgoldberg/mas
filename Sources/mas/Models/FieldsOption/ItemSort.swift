@@ -20,18 +20,22 @@ struct ItemSort: Equatable {
 	/// order (`.descending`).
 	let tiebreakDirection: SortOptionSet.Direction
 
-	/// Sorts `count` items' indices per `keys` (highest-priority 1st), falling
-	/// back to `tiebreakDirection` for items left unordered by every key.
+	/// `keys`, by descending sort precedence.
+	var orderedKeys: [ItemSortKey] {
+		keys.sorted { $0.sortSpec.priority < $1.sortSpec.priority }
+	}
+
+	/// Sorts `count` items' indices per `orderedKeys`, falling back to
+	/// `tiebreakDirection` for items left unordered by every key.
 	/// `values(index:keyIndex:)` provides an item's values for the sort key at
-	/// `keyIndex` in `keys`.
+	/// `keyIndex` in `orderedKeys`.
 	func sortedIndices(count: Int, values: (_ index: Int, _ keyIndex: Int) -> SortValues) -> [Int] {
 		guard !keys.isEmpty else {
 			return tiebreakDirection == .ascending ? .init(0..<count) : .init((0..<count).reversed())
 		}
-		let orderedKeyIndices = keys.indices.sorted { keys[$0].sortSpec.priority < keys[$1].sortSpec.priority }
+		let orderedKeys = orderedKeys
 		return (0..<count).sorted { lhsIndex, rhsIndex in
-			for keyIndex in orderedKeyIndices {
-				let key = keys[keyIndex]
+			for (keyIndex, key) in orderedKeys.enumerated() {
 				switch key.sortSpec.compare(values(lhsIndex, keyIndex), values(rhsIndex, keyIndex)) {
 				case .orderedAscending:
 					return true

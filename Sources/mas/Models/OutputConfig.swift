@@ -64,12 +64,13 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 
 	private static func output(_ objects: [JSON.Object], resolved: any FieldsConfig, outputFormat: OutputFormat)
 	throws(FormattingError) {
+		let orderedKeys = resolved.itemSort.orderedKeys
 		// Each item without an item error in a sort key's value, with those values
 		let sortableItems = objects.compactMap { object in
 			reportingItemError { () throws(FormattingError) in
 				(
 					object: object,
-					sortValues: try resolved.itemSort.keys.map { key throws(FormattingError) in
+					sortValues: try orderedKeys.map { key throws(FormattingError) in
 						try key.fieldSpec.sortValues(
 							input: object[lastNodeKey: .init(rawValue: key.fieldSpec.name)],
 							source: key.sortSpec.optionSet.source,
