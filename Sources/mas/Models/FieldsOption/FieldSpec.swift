@@ -138,7 +138,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case .allConformingUnsupported:
 			"<all-conforming> 'k' is unsupported for <positional-order> 'P' or <document-order> 'D'"
 		case .binaryMatchLacksBlock:
-			"A binary match requires a nullary <branch>, a <branch> with a block, or a <failure-block>"
+			"A binary match requires a <nullary-branch>, a <blocked-branch>, or a <failure-block>"
 		case .binaryPlaceholderLacksBlock:
 			"A binary placeholder requires a <success-block> or a <failure-block>"
 		case let .coercionNotSupported(letter):

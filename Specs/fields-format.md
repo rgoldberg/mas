@@ -1096,9 +1096,9 @@ affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
 branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
 means).
 
-A `%M` without a nullary branch, a branch with a block, or a `<failure-block>`
-(e.g., `%MN+++`) would always insert an empty string, as `%S++` would, so its
-matcher cannot affect what it means.
+A `%M` without a nullary branch, a blocked branch, or a `<failure-block>` (e.g.,
+`%MN+++`) would always insert an empty string, as `%S++` would, so its matcher
+cannot affect what it means.
 
 Every branch is conditional, because an unconditional last branch would mean
 what a `%M` whose `<failure-block>` holds that branch as a placeholder means

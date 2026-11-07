@@ -92,9 +92,9 @@ affect what it means.
 
 In specs, never allow a binary placeholder whose `<success-block>` &
 `<failure-block>` are both absent (e.g., `%S++`), nor a `%M` whose
-`<failure-block>` is absent & whose branches are each non-nullary without a
-block (e.g., `%MN+++` or `%M-N+++`), because each always inserts an empty
-string, so its matcher cannot affect what it means.
+`<failure-block>` is absent & whose branches are each blockless (e.g., `%MN+++`
+or `%M-N+++`), because each always inserts an empty string, so its matcher
+cannot affect what it means.
 
 In specs, never let a top-level `<format-block>` be template text without a
 placeholder (e.g., `src:App Store`), because its output cannot depend on
