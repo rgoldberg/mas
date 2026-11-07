@@ -151,6 +151,8 @@ except:
 2. In the [custom EBNF grammar](../../Specs/ebnf.md), for grammar that exists
    for a command-line constraint (e.g., `_`).
 3. Anywhere, to explain a motivation that applies if a shell is used.
+4. In an example, `mas` & anything after it (e.g., `mas list --fields @x`), iff
+   understanding the example needs no knowledge of `mas`.
 
 In specs, default text that depends on an output device (e.g.,
 `<styling-prefix-default>`'s `<styling-prefix>`) to `{empty string}`, say that
