@@ -679,9 +679,9 @@ non-nullary-name  = "K" (* output type: string; value: {field name}; mnemonic: k
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-An unconditional placeholder's matcher always succeeds, but a `<coercion>` in
-its pipeline may abort formatting, except in an `<unconditional-block>`, because
-a `<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
+An unconditional placeholder's matcher always succeeds, but its pipeline may
+abort formatting, except in an `<unconditional-block>`, because a
+`<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
 lets a label, a name, or a format input that no matcher can match be coerced
 (e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`), and lets
 a template insert any named format, which may abort formatting (e.g., if preset
