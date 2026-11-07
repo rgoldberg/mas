@@ -1110,6 +1110,10 @@ compares as `7.5`). Its group sizes & separators come from its [number format
 arguments](fields-format.md#numberformat); a `<digit-group-size>` of `0` allows
 groups of any size.
 
+A `<grouped-numeric>` without a `<locale-identifier>` takes the base conventions
+of its option set's effective `<locale>`, even if it is inherited (e.g., if `x`
+has `name/IN:`, `@x.name/Lde_DE:` compares `1.234` as `1234`).
+
 A `-` or `+` immediately preceding a number segment is its sign:
 
 - `<word-initial-signs>`: iff it starts the value or follows

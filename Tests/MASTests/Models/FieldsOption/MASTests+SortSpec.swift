@@ -273,6 +273,13 @@ private extension MASTests {
 		#expect(try parsedSortSpec("N:", existing: existing).optionSet.numberSegments == .groupedNumeric(.default))
 	}
 
+	@Test
+	func `an inherited grouped-numeric without a locale identifier follows the effective locale`() throws {
+		let sortSpec = try parsedSortSpec("L de_DE :", existing: try parsedSortSpec("1N:"))
+		#expect(sortSpec
+			.compare(.init(input: "1.234", output: nil), .init(input: "999", output: nil)) == .orderedDescending)
+	}
+
 	@Test(
 		arguments: [
 			// A number is a single number segment, unless lexicographic or versions
