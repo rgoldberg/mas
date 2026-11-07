@@ -170,9 +170,10 @@ until the algorithm is updated.
 
 ### Output Formats
 
-Display commands support 3 output formats, each selectable via either a flag
+Display commands support 3 output formats, each selectable via either [a flag
 (e.g., `--json`) or an option with a format-specific value (e.g.,
-`--json-config P`), at most 1 of which may be given, pursuant to [mas-specific
+`--json-config P`), at most 1 of which may be
+given](Specs/command-line.md#output-format-options), pursuant to [mas-specific
 overrides & defaults](Specs/mas.md):
 
 - **Table** (`--table` / `--table-config`): Row per item, column per selected
