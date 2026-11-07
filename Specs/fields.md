@@ -533,9 +533,8 @@ a `y` of `@x//0`, `@y.+foo` sorts items by `foo`).
 
 `<ascending>` tiebreaks item sorting by input order, `<descending>` by reverse
 input order; absent any field spec with an enabled `<sort>`, items are ordered
-solely by this tiebreak. An absent `<direction>` retains the working fields
-config's (e.g., if `x` has `//-`, then `@x//0` & `@x//` tiebreak by reverse
-input order).
+solely by this tiebreak. E.g., per [inherited values](#inherited-values), if `x`
+has `//-`, then `@x//0` & `@x//` tiebreak by reverse input order.
 
 #### Field Spec References
 
