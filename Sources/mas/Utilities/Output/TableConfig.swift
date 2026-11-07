@@ -31,7 +31,7 @@ struct TableConfig: Equatable {
 
 	static let `default` = Self(
 		header: nil,
-		styling: .terminalOnly,
+		styling: .supportedOnly,
 		styleSequences: .default,
 		separator: nil,
 		columnSpacing: "  ",
@@ -55,7 +55,7 @@ struct TableConfig: Equatable {
 /// ignored.
 func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableConfig {
 	var header = TableConfigSetting<String>.unset
-	var styling = Styling.terminalOnly
+	var styling = Styling.supportedOnly
 	var stylePrefix = TableConfig.default.styleSequences.prefix
 	var styleSuffix = TableConfig.default.styleSequences.suffix
 	var styleReset = TableConfig.default.styleSequences.reset
@@ -77,7 +77,7 @@ func parseTableConfig(_ value: String) throws(TableConfigParsingError) -> TableC
 				),
 			)
 		case "t":
-			styling = .terminalOnly
+			styling = .supportedOnly
 		case "a":
 			styling = .always
 		case "p":

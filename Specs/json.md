@@ -33,9 +33,10 @@ other C0 control character (U+0000 to U+001F), each DEL (U+007F) & each C1
 control character (U+0080 to U+009F) as a `\uXXXX` escape sequence with
 lowercase hex digits (e.g., `\u001b` for an ESC & `\u009b` for U+009B), because
 JSON requires each C0 control character to be escaped, while a raw DEL would be
-invisible & a raw C1 control character would modify the terminal's state (e.g.,
-U+009B, an 8-bit CSI, which starts an escape sequence). Each other character,
-including `/`, is rendered verbatim, except as [`e`](#non-ascii) escapes it.
+invisible & a raw C1 control character would modify the output device's state
+(e.g., U+009B, an 8-bit CSI, which starts an escape sequence). Each other
+character, including `/`, is rendered verbatim, except as [`e`](#non-ascii)
+escapes it.
 
 Each number's text is rendered as JSON number syntax, modified only as that
 syntax requires: without a leading `+`, without a `0` before another digit of

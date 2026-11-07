@@ -299,14 +299,14 @@ a format's template text or from a field value) instead of rendering its ESC as
    rest of its cell.
 2. Excluding each formatting escape sequence from its cell's width, so that its
    column remains aligned.
-3. Whether formatting is output only iff normal output goes to a terminal (as
-   `t` styles a header row), being removed otherwise.
+3. Whether formatting is output only iff normal output supports styling (as `t`
+   styles a header row), being removed otherwise.
 4. Terminating each cell's formatting (e.g., with an SGR reset), so that it
    styles neither the column spacing nor the next cell.
 5. How a cell's formatting interacts with a styled header row's `<style-reset>`.
 6. Rendering each non-formatting escape sequence (e.g., OSC 52, which sets the
    clipboard, or one that moves the cursor) as Control Pictures symbols, because
-   it would modify the terminal's state or misalign the table.
+   it would modify the output device's state or misalign the table.
 7. Whether `<output>` sorts by a formatted value with or without its formatting.
 8. Whether key-value keys & values support the same formatting.
 9. Whether JSON output removes it.
@@ -321,8 +321,8 @@ Let a table column's width be constrained (e.g., truncating a long app name with
 1. Whether the constraint is a table setting, a field spec setting, or both.
 2. Whether a truncated cell is marked (e.g., with `…`) & on which side of it,
    per its column's alignment.
-3. Whether a constraint may be relative to the terminal's width, which an app
-   cannot determine if normal output does not go to a terminal.
+3. Whether a constraint may be relative to the output device's width, which an
+   app cannot always determine.
 4. Whether `<output>` sorts by a formatted value before or after truncation.
 
 ### Multi-Line Rows

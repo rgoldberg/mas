@@ -41,7 +41,7 @@ private extension MASTests {
 		#expect(throws: error) { try parseKeyValueConfig(value) }
 	}
 
-	@Test(arguments: [("K1:", Styling.terminalOnly), ("K1:a", .always), ("aK1:t", .terminalOnly)])
+	@Test(arguments: [("K1:", Styling.supportedOnly), ("K1:a", .always), ("aK1:t", .supportedOnly)])
 	func `t & a set key styling, last wins`(value: String, styling: Styling) throws {
 		#expect(try parseKeyValueConfig(value).styling == styling)
 	}
@@ -177,7 +177,7 @@ private extension MASTests {
 				of: twoItems,
 				keyValueConfig: .init(
 					keyStyleSpecifier: "",
-					styling: .terminalOnly,
+					styling: .supportedOnly,
 					styleSequences: .default,
 					leaderPattern: pattern,
 					leadingSpacing: " ",
@@ -213,7 +213,7 @@ private extension MASTests {
 				of: twoItems,
 				keyValueConfig: .init(
 					keyStyleSpecifier: "",
-					styling: .terminalOnly,
+					styling: .supportedOnly,
 					styleSequences: .default,
 					leaderPattern: nil,
 					leadingSpacing: "=",
@@ -327,8 +327,8 @@ private extension MASTests {
 	func `key-value styles only keys, for a non-terminal only with always-styling`() throws {
 		let alwaysStyled = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:afL=:R:"))
 		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m=X\n\u{1B}[1mVersion\u{1B}[0m=1")
-		let terminalOnly = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:tfL=:R:"))
-		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name=X\nVersion=1"))
+		let supportedOnly = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:tfL=:R:"))
+		#expect(supportedOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name=X\nVersion=1"))
 	}
 
 	@Test

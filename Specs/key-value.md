@@ -40,8 +40,8 @@ the value's start by its row's unstyled text before the value, after that text's
 last line terminator, if any, with each tab retained & each other character
 replaced by as many spaces as its [width](configs.md#width), so each tab reaches
 the same tab stop as in the row, because a tab's rendered width depends on the
-terminal's tab stops, which an app cannot determine. E.g., the key `Notes` & a
-value of `a` & `b` separated by an LF render, with:
+output device's tab stops, which an app cannot determine. E.g., the key `Notes`
+& a value of `a` & `b` separated by an LF render, with:
 
 - `fL=:R:`, as `Notes=a`, then 6 spaces & `b` on the next line.
 - `fL<TAB>:R:`, as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next
@@ -50,11 +50,11 @@ value of `a` & `b` separated by an LF render, with:
   & `b` on the line after.
 
 Each other control character in a value, except a tab, is rendered as it is in a
-key (e.g., an ESC as `␛`), because each would otherwise modify the terminal's
-state (e.g., an ESC, which starts an escape sequence) or move the cursor back
-over the row (e.g., a backspace), while a tab, which only advances the cursor to
-its next tab stop, follows everything that a value's line must align with, so it
-misaligns nothing.
+key (e.g., an ESC as `␛`), because each would otherwise modify the output
+device's state (e.g., an ESC, which starts an escape sequence) or move the
+cursor back over the row (e.g., a backspace), while a tab, which only advances
+the cursor to its next tab stop, follows everything that a value's line must
+align with, so it misaligns nothing.
 
 ## Key
 
@@ -188,7 +188,7 @@ with an inherited `l`, `f` implies `key: value` rows, while with an inherited
 
 - An empty key-value config: unstyled keys, values aligned by a `▁`-patterned
   leader (with 1 space on each side) & a blank line between items.
-- `K1:`: bold keys (SGR `1`) iff normal output goes to a terminal.
+- `K1:`: bold keys (SGR `1`) iff normal output supports styling.
 - `K1:a`: bold keys (SGR `1`) regardless of normal output.
 - `K\b:P<:X>:O</b>:a`: keys wrapped in `<b>` & `</b>` tags regardless of normal
   output.

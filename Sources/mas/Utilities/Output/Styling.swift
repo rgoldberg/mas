@@ -10,5 +10,5 @@ enum Styling: Equatable {
 	/// `a`: always, even if standard output is not a terminal.
 	case always
 	/// `t`: iff standard output is a terminal.
-	case terminalOnly
+	case supportedOnly
 }

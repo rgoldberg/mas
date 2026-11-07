@@ -31,7 +31,7 @@ private extension MASTests {
 			try parseTableConfig("H")
 				== .init(
 					header: .init(styleSpecifier: ""),
-					styling: .terminalOnly,
+					styling: .supportedOnly,
 					styleSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
@@ -41,7 +41,7 @@ private extension MASTests {
 			try parseTableConfig("H1")
 				== .init(
 					header: .init(styleSpecifier: "1"),
-					styling: .terminalOnly,
+					styling: .supportedOnly,
 					styleSequences: .default,
 					separator: nil,
 					columnSpacing: "  ",
@@ -71,9 +71,9 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			("H1:", Styling.terminalOnly),
+			("H1:", Styling.supportedOnly),
 			("H1:a", .always),
-			("aH1:t", .terminalOnly),
+			("aH1:t", .supportedOnly),
 		],
 	)
 	func `t & a set header styling, last wins`(value: String, styling: Styling) throws {
@@ -283,8 +283,8 @@ private extension MASTests {
 		let objects = [JSON.Object([("name", .string("Slack"))])]
 		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
 		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m\nSlack")
-		let terminalOnly = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
-		#expect(terminalOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name\nSlack"))
+		let supportedOnly = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
+		#expect(supportedOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name\nSlack"))
 	}
 
 	@Test

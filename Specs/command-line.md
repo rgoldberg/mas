@@ -12,6 +12,11 @@ Uses the [custom EBNF grammar](ebnf.md).
 output](configs.md#normal--error-output) is standard error (e.g., an item
 error's text does not reach `jq` in `app --json | jq .`).
 
+A terminal that standard output is connected to is normal output's [output
+device](configs.md#normal--error-output), so normal output [supports
+styling](configs.md#normal--error-output) iff standard output is connected to a
+terminal.
+
 ## Exit Status
 
 A command that [fails](configs.md#output-formats) exits with a nonzero **exit

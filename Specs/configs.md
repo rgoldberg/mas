@@ -59,6 +59,10 @@ output**, which is separate from normal output, is where an app reports every
 error, so that no error mixes with output (e.g., no error text can break a
 parser of JSON output).
 
+An **output device** is what renders normal output for a user. Normal output
+**supports styling** iff an app determines that its output device can render
+styled text.
+
 ## Line Terminators
 
 A **line terminator** is a CRLF (U+000D followed by U+000A, which is 1 line
@@ -67,8 +71,8 @@ U+2029.
 
 ## Width
 
-Text's **width** is its terminal display width: the sum of its characters'
-`wcwidth`s, with 0 substituted for each negative one (e.g., a tab's).
+Text's **width** is its display width: the sum of its characters' `wcwidth`s,
+with 0 substituted for each negative one (e.g., a tab's).
 
 ## Command Lists
 

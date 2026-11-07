@@ -35,9 +35,9 @@ Pictures](https://www.unicode.org/charts/PDF/U2400.pdf) symbol (e.g., a tab as
 its ECMA-48 7-bit equivalent (an ESC followed by the character 64 code points
 below it), with that ESC rendered as `␛` (e.g., U+009B, an 8-bit CSI, as `␛[`),
 because each would otherwise misalign its column (e.g., a tab, whose
-[width](configs.md#width) is 0, but which a terminal renders up to its next tab
-stop) or modify the terminal's state (e.g., an ESC, which starts an escape
-sequence).
+[width](configs.md#width) is 0, but which an output device renders up to its
+next tab stop) or modify the output device's state (e.g., an ESC, which starts
+an escape sequence).
 
 A table without any item or any column renders nothing, not even a header row or
 a separator line.
@@ -62,7 +62,7 @@ header-setting = <header-off> | <header-on> (* default: <header-off>; last wins;
 header-off = "h"
 header-on  = "H" [ <style-specifier> ] <setting-termination>
 
-style-specifier = {string: terminal-specific styling text with no bare ASCII letters}
+style-specifier = {string: output-device-specific styling text with no bare ASCII letters}
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -87,17 +87,19 @@ style-specifier = {string: terminal-specific styling text with no bare ASCII let
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-styling-setting = <terminal-only-styling> | <always-styling> (* default: <terminal-only-styling>; last wins; inherited *)
+styling-setting = <supported-only-styling> | <always-styling> (* default: <supported-only-styling>; last wins; inherited *)
 
-terminal-only-styling = "t"
-always-styling        = "a"
+supported-only-styling = "t" (* mnemonic: terminal *)
+always-styling         = "a"
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-- `t`: each stylable string is styled iff normal output goes to a terminal.
-- `a`: each stylable string is always styled, even if normal output does not go
-  to a terminal, e.g., when a pager that renders styles reads it.
+- `t`: each stylable string is styled iff normal output [supports
+  styling](configs.md#normal--error-output).
+- `a`: each stylable string is always styled, even if normal output does not
+  support styling (e.g., if an app cannot determine that its output device, such
+  as a pager, can render styled text).
 
 ## Style Prefix
 
@@ -204,8 +206,9 @@ unbroken = "u"
 - `u`: the separator line is 1 continuous, column-unaware line spanning the
   table width, except that it retains each tab of each column spacing in place,
   filling each run between tabs independently, because a tab's rendered width
-  depends on the terminal's tab stops, which an app cannot determine (e.g., with
-  `C<TAB>:S`, the separator line of 2 3-wide columns is `---`, a tab & `---`).
+  depends on the output device's tab stops, which an app cannot determine (e.g.,
+  with `C<TAB>:S`, the separator line of 2 3-wide columns is `---`, a tab &
+  `---`).
 
 ## Column Spacing
 
@@ -243,12 +246,12 @@ the `=`-patterned separator line, below an implied, unstyled header row).
 ## Examples
 
 - An empty table config: no header, no separator, 2 spaces between columns.
-- `H1:`: a header row, bold (SGR `1`) iff normal output goes to a terminal, no
+- `H1:`: a header row, bold (SGR `1`) iff normal output supports styling, no
   separator.
 - `H1:a`: a header row, bold (SGR `1`) regardless of normal output, no
   separator.
-- `H1:O<ESC>[22m:`: a header row, bold (SGR `1`) iff normal output goes to a
-  terminal, reset to normal intensity (SGR `22`) instead of via a full reset, no
+- `H1:O<ESC>[22m:`: a header row, bold (SGR `1`) iff normal output supports
+  styling, reset to normal intensity (SGR `22`) instead of via a full reset, no
   separator.
 - `S`: a header row (implied) & a dashed (`-`) separator line.
 - `b`: a header row (implied) & a dashed (`-`), broken separator line.

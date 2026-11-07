@@ -493,7 +493,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       is one in the grammar)
     - REJECTED: default value comment / applicability comment (for an error
       comment) / actual parameter (for an argument)
-78. - style specifier: terminal-specific text styling a header row or a key
+78. - style specifier: output-device-specific text styling a header row or a key
       (`<style-specifier>`)
     - style prefix: precedes a style specifier (`<style-prefix>`)
     - style suffix: follows a style specifier (`<style-suffix>`)
@@ -503,8 +503,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - final byte: ECMA-48's term for the character that terminates a control
       sequence (e.g., SGR's `m`)
     - REJECTED: style terminator / style end / final character
-79. - width: text's terminal display width
-      ([defined](../Specs/configs.md#width))
+79. - width: text's display width ([defined](../Specs/configs.md#width))
     - wide: adjective, for a character whose width is 2 (e.g., `中`)
     - column width: the width of a table column's widest rendered cell,
       including its header cell iff the header row is rendered
@@ -806,6 +805,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        it fails ([defined](../Specs/command-line.md#exit-status))
      - normal output / error output: where a display command outputs its items /
        where an app reports every error, separately
+       ([defined](../Specs/configs.md#normal--error-output))
+     - output device: what renders normal output for a user
+       ([defined](../Specs/configs.md#normal--error-output))
+     - supports styling: of normal output, whose output device an app determines
+       can render styled text
        ([defined](../Specs/configs.md#normal--error-output))
 118. - coerced value: the value, at a matcher's type, that `<coercion>` parses
        from a value, making it the matcher's matched value

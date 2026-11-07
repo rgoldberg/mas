@@ -9,7 +9,7 @@
 struct KeyValueConfig: Equatable {
 	static let `default` = Self(
 		keyStyleSpecifier: "",
-		styling: .terminalOnly,
+		styling: .supportedOnly,
 		styleSequences: .default,
 		leaderPattern: defaultLeaderPattern,
 		leadingSpacing: " ",
@@ -66,7 +66,7 @@ func parseKeyValueConfig(_ value: String) throws(KeyValueConfigParsingError) -> 
 			}
 			keyStyleSpecifier = styleSpecifier
 		case "t":
-			styling = .terminalOnly
+			styling = .supportedOnly
 		case "a":
 			styling = .always
 		case "p":

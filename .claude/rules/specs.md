@@ -139,11 +139,17 @@ In specs, give each new syntax character only punctuation that no common shell
 interprets unquoted, in case a syntax is used from a shell: `%`, `+`, `-`, `.`,
 `/`, `:`, `,`, `@`, or `_`, or `=` anywhere but at the start of a word.
 
-In specs other than `Specs/command-line.md` & `Specs/mas.md`, never mention a
-standard stream, a shell, a command line, or a command-line option (e.g., write
-normal output, error output, a transient config, or `H1:`, rather than standard
-output, standard error, the command line, or `--table-config H1:`), because a
-syntax may be used outside of a command line.
+In specs, never mention a standard stream, a shell, a command line, a
+command-line option, or a terminal as an output device (e.g., write normal
+output, error output, an output device, a transient config, or `H1:`, rather
+than standard output, standard error, a terminal, the command line, or
+`--table-config H1:`), because a syntax may be used outside of a command line,
+except:
+
+1. In `Specs/command-line.md` & `Specs/mas.md`, which require a command line.
+2. In `Specs/ebnf.md`, for grammar that exists for a command-line constraint
+   (e.g., `_`).
+3. Anywhere, to explain a motivation that applies if a shell is used.
 
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload
