@@ -193,7 +193,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 
 A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
 call whose value's type the syntax text determines takes a `<coercion>` only if
-its input type differs from that type, because it otherwise has nothing to
+that type includes a type other than its input type & `null`, because a `null`
+remains unmodified through every transform, so the call otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
 `<format-block>`'s 1st call, `%I`'s 1st call outside an `<unconditional-block>`,
 or one that a `<named-format-reference>` immediately precedes, whose preset
@@ -762,9 +763,9 @@ non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-b
 nullary-blank-predicate     = <nullary-null> | <nullary-empty> | <nullary-whitespace>
 non-nullary-blank-predicate = <non-nullary-null> | <non-nullary-empty> | <non-nullary-whitespace>
 
-nullary-null           = "u" (* is null;                                               output type: string or null; value: {matched value};
+nullary-null           = "u" (* is null;                                               output type: null; value: {matched value};
   mnemonic: 2nd letter of null *)
-non-nullary-null       = "U" (* is null;                                               output type: string or null; value: {matched value};
+non-nullary-null       = "U" (* is null;                                               output type: null; value: {matched value};
   mnemonic: 2nd letter of null *)
 nullary-empty          = "e" (* is null or an empty string;                            output type: string or null; value: {matched value} *)
 non-nullary-empty      = "E" (* is null or an empty string;                            output type: string or null; value: {matched value} *)
@@ -782,12 +783,12 @@ non-nullary-string     = "S" (* is string;                                      
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-`%U`'s, `%E`'s & `%W`'s values are each a `null`, which a transform leaves
-unmodified, or a string, so a transform has nothing to coerce, unless it follows
-a `<named-format-reference>`, whose named format may output any type (e.g.,
-`%W.trimWhitespace+-+`, `%U.uppercase+-+` & `%U:x..uppercase+-+`, but neither
-`%W..trimWhitespace+-+` nor `%U..uppercase+-+`, as `%S..uppercase++` is an
-error).
+`%U`'s value is a `null`, which a transform leaves unmodified, and `%E`'s &
+`%W`'s are each such a `null` or a string, so a string transform has nothing to
+coerce, unless it follows a `<named-format-reference>`, whose named format may
+output any type (e.g., `%W.trimWhitespace+-+`, `%U.uppercase+-+` &
+`%U:x..uppercase+-+`, but neither `%W..trimWhitespace+-+` nor
+`%U..uppercase+-+`, as `%S..uppercase++` is an error).
 
 ###### Number Formatting
 
