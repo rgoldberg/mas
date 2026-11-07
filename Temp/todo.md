@@ -175,7 +175,7 @@ E.g., `%16n`.
 
 ### `scale` Radix
 
-Restore `scale`'s `<radix>` argument (the `radix` branch's sole commit), which
+Restore `scale`'s `<radix>` argument (the `radix` branch's tip commit), which
 needs semantics for a number whose text is not decimal (e.g., `ff`) in every
 later number transform, in sorting & in JSON output.
 
