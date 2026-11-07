@@ -24,8 +24,9 @@ status**, so that a script can detect its failure.
 
 ## Command Lines
 
-A **command line** is a run of a [command list](configs.md#command-lists), whose
-[transient configs](configs.md#transient-configs) are the values of its options.
+A **command line** is text that specifies a [command
+list](configs.md#command-lists) & its arguments to run; its [transient
+configs](configs.md#transient-configs) are the values of its options.
 
 ## Option Values
 

@@ -662,8 +662,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 103. - member: 1 of a field's name / value pairs in an item, of which there may
        be multiple ([defined](../Specs/fields.md#members))
      - REJECTED: duplicate / instance / occurrence (for a member)
-104. - command line: a run of a command list, whose transient configs are the
-       values of its options ([defined](../Specs/command-line.md#command-lines))
+104. - command line: text that specifies a command list & its arguments to run;
+       its transient configs are the values of its options
+       ([defined](../Specs/command-line.md#command-lines))
      - option value: the rest of an option's command-line argument after `=`, or
        else the next command-line argument, iff it is `-` or does not start with
        `-` ([defined](../Specs/command-line.md#option-values))
