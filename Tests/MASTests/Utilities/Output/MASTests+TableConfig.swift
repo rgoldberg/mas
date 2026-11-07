@@ -278,13 +278,13 @@ private extension MASTests {
 	}
 
 	@Test
-	func `table styles a header row for a non-terminal only with always-styling`() throws {
+	func `table styles a header row without styling support only with always-styling`() throws {
 		let fieldSpecs = [FieldSpec(name: "name", label: "Name", format: .default(fieldName: "name"), sortSpec: nil)]
 		let objects = [JSON.Object([("name", .string("Slack"))])]
 		let alwaysStyled = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:a"))
 		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m\nSlack")
 		let supportedOnly = try objects.table(fieldSpecs: fieldSpecs, tableConfig: try parseTableConfig("H1:t"))
-		#expect(supportedOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name\nSlack"))
+		#expect(supportedOnly == (supportsStyling() ? alwaysStyled : "Name\nSlack"))
 	}
 
 	@Test

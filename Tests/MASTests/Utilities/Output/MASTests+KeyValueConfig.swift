@@ -324,11 +324,11 @@ private extension MASTests {
 	}
 
 	@Test
-	func `key-value styles only keys, for a non-terminal only with always-styling`() throws {
+	func `key-value styles only keys, without styling support only with always-styling`() throws {
 		let alwaysStyled = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:afL=:R:"))
 		#expect(alwaysStyled == "\u{1B}[1mName\u{1B}[0m=X\n\u{1B}[1mVersion\u{1B}[0m=1")
 		let supportedOnly = try keyValue(of: [twoItems[1]], keyValueConfig: try parseKeyValueConfig("K1:tfL=:R:"))
-		#expect(supportedOnly == (FileHandle.standardOutput.isTerminal ? alwaysStyled : "Name=X\nVersion=1"))
+		#expect(supportedOnly == (supportsStyling() ? alwaysStyled : "Name=X\nVersion=1"))
 	}
 
 	@Test

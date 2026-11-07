@@ -42,13 +42,23 @@ func parseStylingSpecifier<E: Error>(
 }
 
 /// Wraps `string` in `sequences` around `specifier` iff `specifier` is not
-/// empty & either `isAlwaysStyled` or standard output is a terminal (table.md's
-/// `<styling-setting>`): `sequences.prefix`, `specifier` & `sequences.suffix`
-/// precede `string`; `sequences.reset` follows it.
+/// empty & either `isAlwaysStyled` or normal output supports styling
+/// (table.md's `<styling-setting>`): `sequences.prefix`, `specifier` &
+/// `sequences.suffix` precede `string`; `sequences.reset` follows it.
 func styled(_ string: String, specifier: String, sequences: StylingSequences, isAlwaysStyled: Bool) -> String {
-	!specifier.isEmpty && (isAlwaysStyled || FileHandle.standardOutput.isTerminal)
+	!specifier.isEmpty && (isAlwaysStyled || supportsStyling())
 		? sequences.prefix + specifier + sequences.suffix + string + sequences.reset
 		: string
+}
+
+/// Whether normal output supports styling (command-line.md's "Standard
+/// Streams"): iff standard output is a terminal (`isTerminal`), `environment`'s
+/// `TERM` is not `dumb` & its `NO_COLOR` is unset or empty.
+func supportsStyling(
+	isTerminal: Bool = FileHandle.standardOutput.isTerminal,
+	environment: [String: String] = ProcessInfo.processInfo.environment,
+) -> Bool {
+	isTerminal && environment["TERM"] != "dumb" && environment["NO_COLOR"]?.isEmpty ?? true
 }
 
 /// Parses an uppercase output config setting's `{string}` payload through its

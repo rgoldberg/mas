@@ -87,7 +87,7 @@ private extension MASTests {
 	}
 
 	@Test
-	func `styling wraps a string in styling sequences, for a non-terminal only if always styled`() {
+	func `styling wraps a string in styling sequences, without styling support only if always styled`() {
 		#expect(
 			styled("x", specifier: "1;4", sequences: .default, isAlwaysStyled: true) == "\u{1B}[1;4mx\u{1B}[0m",
 		)
@@ -97,12 +97,31 @@ private extension MASTests {
 		)
 		#expect(
 			styled("x", specifier: "1", sequences: .default, isAlwaysStyled: false)
-				== (FileHandle.standardOutput.isTerminal ? "\u{1B}[1mx\u{1B}[0m" : "x"),
+				== (supportsStyling() ? "\u{1B}[1mx\u{1B}[0m" : "x"),
 		)
 	}
 
 	@Test(arguments: [true, false])
 	func `styling with an empty styling specifier leaves a string unstyled`(isAlwaysStyled: Bool) {
 		#expect(styled("x", specifier: "", sequences: .default, isAlwaysStyled: isAlwaysStyled) == "x")
+	}
+
+	@Test(
+		arguments: [
+			(true, [:], true),
+			(false, [:], false),
+			(true, ["TERM": "xterm-256color"], true),
+			(true, ["TERM": "dumb"], false),
+			(true, ["NO_COLOR": ""], true),
+			(true, ["NO_COLOR": "1"], false),
+			(false, ["NO_COLOR": ""], false),
+		] as [(Bool, [String: String], Bool)],
+	)
+	func `normal output supports styling iff a terminal, unless TERM is dumb or NO_COLOR is set non-empty`(
+		isTerminal: Bool,
+		environment: [String: String],
+		expected: Bool,
+	) {
+		#expect(supportsStyling(isTerminal: isTerminal, environment: environment) == expected)
 	}
 }
