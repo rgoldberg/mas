@@ -61,8 +61,9 @@ Regardless of a field spec's visibility:
 
 ### Default Field Specs
 
-A **default field spec** for a field is visible, has the [`default`
-preset](#presets) attached & otherwise has the following:
+A **default field spec** for a field is visible, unless it is for a hidden
+unlisted field, has the [`default` preset](#presets) attached & otherwise has
+the following:
 
 - Label: the field's name.
 - Format: `%i`.
