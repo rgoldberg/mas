@@ -645,6 +645,11 @@ for `"1.234,5"`, as does `%n` in `%.:de:N%n++`).
 In a template that is not solely 1 placeholder, each inserted value is [coerced
 to a string](#value-coercion).
 
+A template evaluates its placeholders in order, so aborting skips each later one
+(e.g., for `"abc"`, `%I.round+%+N+` reports an [item
+error](configs.md#output-formats), because `%I.round+` is evaluated 1st, while
+`%+N+%I.round+` aborts without one, because `%+N+` fails 1st).
+
 Formatting **aborts** by making the formatted value
 [absent](fields.md#absent-values), ignoring the rest of `<format-block>`, both
 preceding & succeeding.
