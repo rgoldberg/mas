@@ -424,7 +424,7 @@ private struct FormatParser {
 	}
 
 	/// Parses a binary match's `<failure-block>` & its `<block-terminator>`,
-	/// which must be present unless 1 of `branches` is nullary or has a block,
+	/// which must be present unless 1 of `branches` is nullary or blocked,
 	/// because otherwise (e.g., `%MN+++`) the match would always insert an empty
 	/// string.
 	private mutating func parseBinaryMatchFailureBlock(after branches: [Branch]) throws(ParsingError) -> Format {
