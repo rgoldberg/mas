@@ -274,10 +274,11 @@ func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingError) ->
 	return direction
 }
 
-/// The `<order>` letter (`P` / `D`) of `input`'s `<field-order-option-set>` (up
-/// to, but not including, its terminating `<field-spec-separator>` /
-/// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
-/// is a `<positional-order-option-set>` / `<document-order-option-set>`: every
+/// The `<order>` letter (`P` / `D`) of `input`'s
+/// `<primary-field-order-option-set>` (up to, but not including, its
+/// terminating `<field-spec-separator>` / `<item-sort-section-prefix>` /
+/// `<field-spec-edits-section-prefix>`) iff it is a
+/// `<positional-order-option-set>` / `<document-order-option-set>`: every
 /// top-level character is a `<direction>`, an
 /// `<unpositioned-field-comparison>`, an `<unpositioned-field-placement>`, or
 /// an `<order>`, with at least 1 `<order>` (last wins); or iff it is a
