@@ -90,7 +90,7 @@ style-specifier = {string: output-device-specific styling text with no bare ASCI
 ```ebnf
 styling-setting = <supported-only-styling> | <always-styling> (* default: <supported-only-styling>; last wins; inherited *)
 
-supported-only-styling = "t" (* mnemonic: terminal *)
+supported-only-styling = "t" (* mnemonic: test support *)
 always-styling         = "a"
 ```
 <!--markdownlint-enable line-length-->
