@@ -112,12 +112,12 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 	case invalidSortOptionArguments(Character)
 	case invalidTransformArguments(name: String)
 	case invalidTriviaRegex(String)
+	case misplacedFieldOrderAdjustmentSet
 	case missingBlockTerminator
 	case missingBranch
 	case missingFieldName
 	case missingFieldOccurrenceIndex
 	case missingFieldOrderOptionSet
-	case missingFieldOrderTiebreakerDirection
 	case missingFieldSpecIndex
 	case missingPredicate
 	case missingSortOptionTerminator
@@ -181,6 +181,8 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 			"Invalid arguments for transform: \(name)"
 		case let .invalidTriviaRegex(pattern):
 			"Invalid trivia regex: \(pattern)"
+		case .misplacedFieldOrderAdjustmentSet:
+			"<field-order-adjustment-set> is supported only in the 1st field order section"
 		case .missingBlockTerminator:
 			"Expected <block-terminator> '+'"
 		case .missingBranch:
@@ -190,9 +192,7 @@ enum ParsingError: Equatable, Error, CustomStringConvertible { // swiftlint:disa
 		case .missingFieldOccurrenceIndex:
 			"Expected <field-occurrence-index> after <field-occurrence-index-prefix> '@'"
 		case .missingFieldOrderOptionSet:
-			"Expected <field-order-option-set> after <field-order-section-prefix> '/'"
-		case .missingFieldOrderTiebreakerDirection:
-			"Expected <direction> after <field-order-tiebreaker>'s <sort-modifier-prefix> '/'"
+			"Expected a field order option set after a field order section's '/'"
 		case .missingFieldSpecIndex:
 			"Expected <field-spec-index> after <field-spec-index-prefix> '@'"
 		case .missingPredicate:
@@ -278,9 +278,9 @@ func fetchFieldNames(
 
 /// The fully-resolved `FieldsConfig` for `fieldsOptionValue`, which, like its
 /// positions, is independent of every item, because unlisted fields (fields.md
-/// "Unlisted Fields") have no positions. If `fieldsOptionValue` does not
-/// specify its own `<field-order-section>`, the resolved base fields config's
-/// own `fieldOrder` is used instead of a bare `.inherited`.
+/// "Unlisted Fields") have no positions. Its field orders are the resolved base
+/// fields config's, as `fieldsOptionValue`'s field order sections, if any, save
+/// to them.
 func resolvedFieldsConfig(
 	from fieldsOptionValue: String,
 	standard: some FieldsConfig,
@@ -303,7 +303,7 @@ func resolvedFieldsConfig(
 		try builder.parseAbsoluteConfig(&input)
 		return SelectedFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
-			fieldOrder: .positional(.init()),
+			fieldOrders: none.fieldOrders,
 			itemSort: .init(keys: builder.fieldSpecs.enabledSortKeys, tiebreakDirection: .ascending),
 		)
 	}
@@ -319,8 +319,7 @@ func resolvedFieldsConfig(
 		isMachineFacing: isMachineFacing,
 		fieldNameSet: fieldNameSet,
 	)
-	let parsedFieldOrder = try builder.parseFieldOrderSection(&input, inheriting: base.fieldOrder)
-	let fieldOrder = parsedFieldOrder == .inherited ? base.fieldOrder : parsedFieldOrder
+	let fieldOrders = try builder.parseFieldOrderSections(&input, inheriting: base.fieldOrders)
 	let tiebreakDirection = try builder.parseItemSortSection(&input, inheriting: base.itemSort.tiebreakDirection)
 	try builder.parseFieldSpecEditsSection(&input)
 	guard input.isEmpty else {
@@ -330,14 +329,14 @@ func resolvedFieldsConfig(
 	return base.baseIncludesAllFields
 		? BaseIncludesAllFieldsConfig(
 			fieldSpecs: builder.fieldSpecs,
-			fieldOrder: fieldOrder,
+			fieldOrders: fieldOrders,
 			itemSort: itemSort,
 			listedFieldNameSet: all.listedFieldNameSet
 				.union(builder.fieldSpecs.map(\.name))
 				.union(builder.removedUnmatchedFieldNameSet),
 			isMachineFacing: isMachineFacing,
 		)
-		: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrder: fieldOrder, itemSort: itemSort)
+		: SelectedFieldsConfig(fieldSpecs: builder.fieldSpecs, fieldOrders: fieldOrders, itemSort: itemSort)
 }
 
 /// Whether `input` (sans leading whitespace) is a `<relative-config>`, which
@@ -409,7 +408,7 @@ func resolveBaseFieldsConfig(
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
 	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? outputFormat.isJSON)
-	let allVariant = all.withDefaultFieldOrder(outputFormat: outputFormat)
+	let allVariant = all.withFieldOrder(of: .label, outputFormat: outputFormat)
 	let config: any FieldsConfig =
 		switch stem {
 		case allFieldsConfigName:
@@ -417,13 +416,9 @@ func resolveBaseFieldsConfig(
 		case defaultConfigName, standardConfigName:
 			isMachineFacing ? allVariant : standard.including(hidden: allVariant.fieldSpecs)
 		case noneFieldsConfigName:
-			SelectedFieldsConfig(
-				fieldSpecs: allVariant.fieldSpecs,
-				fieldOrder: .positional(.init()),
-				itemSort: allVariant.itemSort,
-			)
-			.hidingAll()
-			.disablingAllSorts()
+			SelectedFieldsConfig(fieldSpecs: allVariant.fieldSpecs, itemSort: allVariant.itemSort)
+				.hidingAll()
+				.disablingAllSorts()
 		default:
 			throw .nonexistentFieldsConfig(.init(stem))
 		}
@@ -471,7 +466,7 @@ private enum FieldSpecEditKind { // swiftlint:disable:this one_declaration_per_f
 	case removal // swiftlint:enable sorted_enum_cases
 }
 
-/// Applies `<field-order-section>` / `<item-sort-section>` /
+/// Applies `<field-order-sections>` / `<item-sort-section>` /
 /// `<field-spec-edits-section>` against a baseline `[FieldSpec]`, producing the
 /// working (final) `[FieldSpec]`.
 ///
@@ -532,103 +527,36 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		referenceFieldSpecs = fieldSpecs
 	}
 
-	/// Parses `<field-order-section>`: `<field-order-section-prefix>` followed by
-	/// a required `<field-order-option-set>`, either a
-	/// `<field-order-adjustment-set>` (only `<adjustment-sort-option>`s), a
-	/// `<positional-order-option-set>` / `<document-order-option-set>`
-	/// (`<direction>`s & `<order>`s, the last `<order>` being `P` / `D`,
-	/// respectively, plus `<unpositioned-field-comparison>`s &
-	/// `<unpositioned-field-placement>`s, last wins per setting), or a
-	/// `<field-order-sort-option-set>` (whose `<source>` defaults to `<output>`,
-	/// i.e., sorted by label), each but `<positional-order-option-set>` followed
-	/// by an optional `<field-order-tiebreaker>`. The alternatives are disjoint:
-	/// each but `<field-order-adjustment-set>` & `<field-order-sort-option-set>`
-	/// contains an `<order>` letter, which is no `<sort-option>`, while
-	/// `<field-order-sort-option-set>` contains a `<non-adjustment-sort-option>`.
-	/// A `<field-order-adjustment-set>` is parsed as the same alternative as
-	/// `inheritedFieldOrder`, as if its `<order>` letter, if any, preceded it,
-	/// its `<nonconforming-comparison>`s & `<nonconforming-placement>`s then
-	/// setting the same-letter `<unpositioned-field-comparison>` &
-	/// `<unpositioned-field-placement>`, except an effective `<all-conforming>`,
-	/// an error. Each option that a `<document-order-option-set>` or a
-	/// `<field-order-sort-option-set>` omits, including its tiebreak direction,
-	/// retains `inheritedFieldOrder`'s iff that is also `.document` or also
-	/// sorts, respectively; each option that a `<positional-order-option-set>`
-	/// omits retains `inheritedFieldOrder`'s iff that is also `.positional`.
-	mutating func parseFieldOrderSection(_ input: inout Substring, inheriting inheritedFieldOrder: FieldOrder)
-	throws(ParsingError) -> FieldOrder {
-		guard input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
-			return .inherited
-		}
-		input.removeFirst()
-		input = input.drop(while: \.isWhitespace)
-		guard
-			let first = input.first,
-			first != fieldSpecSeparator,
-			!itemSortAndFieldSpecEditsPrefixSet.contains(first)
-		else {
-			throw .missingFieldOrderOptionSet
-		}
-		guard let order = orderOptionSetOrder(input, inheriting: inheritedFieldOrder) else {
-			let inherited: (optionSet: SortOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
-				switch inheritedFieldOrder {
-				case let .byLabel(optionSet, tiebreakDirection), let .byName(optionSet, tiebreakDirection):
-					(optionSet, tiebreakDirection)
-				case .document, .inherited, .positional:
-					nil
-				}
-			var defaults = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
-			defaults.source = .output // `<field-order-option-set>`'s `default source: <output>`
-			let optionSet = try SortOptionSet.parsed(
-				&input,
-				terminatorSet: itemSortAndFieldSpecEditsPrefixSet,
-				defaults: inherited?.optionSet ?? defaults,
-			)
-			let tiebreakDirection = try parseFieldOrderTiebreaker(&input) ?? inherited?.tiebreakDirection ?? .ascending
-			return switch optionSet.source {
-			case .input:
-				.byName(optionSet, tiebreakDirection: tiebreakDirection)
-			case .output:
-				.byLabel(optionSet, tiebreakDirection: tiebreakDirection)
-			}
-		}
-		let inherited: (optionSet: OrderOptionSet, tiebreakDirection: SortOptionSet.Direction)? =
-			if order == documentOrderOption, case let .document(optionSet, tiebreakDirection) = inheritedFieldOrder {
-				(optionSet, tiebreakDirection)
-			} else if order == positionalOrderOption, case let .positional(optionSet) = inheritedFieldOrder {
-				(optionSet, .ascending)
-			} else {
-				nil
-			}
-		var optionSet = inherited?.optionSet ?? .init()
-		var isAllConformingEffective = false
-		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
-			if let direction = SortOptionSet.Direction(rawValue: char) {
-				optionSet.direction = direction
-			} else if let comparison = OrderOptionSet.UnpositionedFieldComparison(rawValue: char) {
-				optionSet.unpositionedFieldComparison = comparison
-				isAllConformingEffective = false
-			} else if let placement = OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) {
-				optionSet.unpositionedFieldPlacement = placement
-			} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
-				isAllConformingEffective = true
-			}
+	/// Parses `<field-order-sections>`: each field order section, a
+	/// `<field-order-section-prefix>` (or, after the 1st,
+	/// `<field-order-kind-section-prefix>`) followed by a required option set,
+	/// saving its field order in `fieldOrders` (initially the base fields
+	/// config's) as the field order & as its kind's saved field order, so each
+	/// section inherits from those before it (fields.md "Field Order").
+	mutating func parseFieldOrderSections(_ input: inout Substring, inheriting fieldOrders: FieldOrders)
+	throws(ParsingError) -> FieldOrders {
+		var fieldOrders = fieldOrders
+		var isFirstSection = true
+		while input.first == fieldOrderSectionPrefix, !input.hasPrefix(itemSortSectionPrefix) {
 			input.removeFirst()
+			input = input.drop(while: \.isWhitespace)
+			guard
+				let first = input.first,
+				first != fieldSpecSeparator,
+				!itemSortAndFieldSpecEditsPrefixSet.contains(first)
+			else {
+				throw .missingFieldOrderOptionSet
+			}
+			fieldOrders.save(try parseFieldOrderOptionSet(&input, inheriting: fieldOrders, isFirstSection: isFirstSection))
+			isFirstSection = false
 		}
-		guard !isAllConformingEffective else {
-			throw .allConformingUnsupported
-		}
-		let tiebreakDirection = try parseFieldOrderTiebreaker(&input)
-		return switch (order, outputFormat, tiebreakDirection) {
-		case (positionalOrderOption, _, nil):
-			reversingPositions(optionSet, inheritedDirection: inherited?.optionSet.direction ?? .ascending)
-		case (positionalOrderOption, _, _): // `<field-order-tiebreaker>` is only for a field order other than `P`
-			throw .tiebreakerUnsupportedForPositionalOrder
-		case (_, .table, _): // `<document-order-option-set>`'s `(* error: for table output, … *)`
+		// `<document-order-option-set>`'s
+		// `(* error: for table output, it sets the resolved fields config's field order *)`,
+		// so an overridden one is not
+		if !isFirstSection, case .table = outputFormat, case .document = fieldOrders.fieldOrder {
 			throw .documentOrderUnsupportedForTable
-		default:
-			.document(optionSet, tiebreakDirection: tiebreakDirection ?? inherited?.tiebreakDirection ?? .ascending)
 		}
+		return fieldOrders
 	}
 
 	/// Parses `<item-sort-section>`: `<item-sort-section-prefix>` followed by an
@@ -779,13 +707,105 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 		}
 	}
 
+	/// Parses a field order section's option set: a
+	/// `<field-order-adjustment-set>` (only `<adjustment-sort-option>`s, only in
+	/// the 1st section), a `<positional-order-option-set>` /
+	/// `<document-order-option-set>` (`<direction>`s & `<order>`s, the last
+	/// `<order>` being `P` / `D`, respectively, plus
+	/// `<unpositioned-field-comparison>`s & `<unpositioned-field-placement>`s,
+	/// last wins per setting), or a `<field-order-sort-option-set>`, each but
+	/// `<positional-order-option-set>` followed by an optional
+	/// `<field-order-tiebreaker>`. The alternatives are disjoint: each but
+	/// `<field-order-adjustment-set>` & `<field-order-sort-option-set>` contains
+	/// an `<order>` letter, which is no `<sort-option>`, while
+	/// `<field-order-sort-option-set>` contains a `<non-adjustment-sort-option>`.
+	/// A `<field-order-adjustment-set>` is parsed as the same alternative as
+	/// `fieldOrders`' field order, as if its `<order>` letter, if any, preceded
+	/// it, its `<nonconforming-comparison>`s & `<nonconforming-placement>`s then
+	/// setting the same-letter `<unpositioned-field-comparison>` &
+	/// `<unpositioned-field-placement>`, except an effective `<all-conforming>`,
+	/// an error. Each option that it omits, including its tiebreak direction,
+	/// retains that of `fieldOrders`' saved field order of its kind, which, for a
+	/// `<field-order-adjustment-set>`, is the field order.
+	private mutating func parseFieldOrderOptionSet(
+		_ input: inout Substring,
+		inheriting fieldOrders: FieldOrders,
+		isFirstSection: Bool,
+	) throws(ParsingError) -> FieldOrder {
+		guard isFirstSection || !isFieldOrderAdjustmentSet(input) else {
+			throw .misplacedFieldOrderAdjustmentSet
+		}
+		guard let order = orderOptionSetOrder(input, inheriting: fieldOrders.fieldOrder) else {
+			return try parseFieldOrderSortOptionSet(&input, inheriting: fieldOrders)
+		}
+		let saved = fieldOrders.savedFieldOrder(
+			of: order == documentOrderOption ? .document : .positional,
+			outputFormat: outputFormat,
+		)
+		var optionSet = saved.orderOptionSet ?? .init()
+		var isAllConformingEffective = false
+		while let char = input.first, char != fieldSpecSeparator, !itemSortAndFieldSpecEditsPrefixSet.contains(char) {
+			if let direction = SortOptionSet.Direction(rawValue: char) {
+				optionSet.direction = direction
+			} else if let comparison = OrderOptionSet.UnpositionedFieldComparison(rawValue: char) {
+				optionSet.unpositionedFieldComparison = comparison
+				isAllConformingEffective = false
+			} else if let placement = OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) {
+				optionSet.unpositionedFieldPlacement = placement
+			} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
+				isAllConformingEffective = true
+			}
+			input.removeFirst()
+		}
+		guard !isAllConformingEffective else {
+			throw .allConformingUnsupported
+		}
+		let tiebreakDirection = parseFieldOrderTiebreaker(&input)
+		return switch (order, tiebreakDirection) {
+		case (positionalOrderOption, nil):
+			reversingPositions(optionSet, inheritedDirection: saved.orderOptionSet?.direction ?? .ascending)
+		case (positionalOrderOption, _): // `<field-order-tiebreaker>` is only for a field order other than `P`
+			throw .tiebreakerUnsupportedForPositionalOrder
+		default:
+			.document(optionSet, tiebreakDirection: tiebreakDirection ?? saved.tiebreakDirection ?? .ascending)
+		}
+	}
+
+	/// Parses a `<field-order-sort-option-set>` (or a
+	/// `<field-order-adjustment-set>` that adjusts a sort) & its optional
+	/// `<field-order-tiebreaker>`. Its kind is that of its effective `<source>`,
+	/// which, absent, is that of `fieldOrders`' field order iff it sorts, else
+	/// `<output>`; each option that it omits, including its tiebreak direction,
+	/// retains that of `fieldOrders`' saved field order of its kind.
+	private func parseFieldOrderSortOptionSet(_ input: inout Substring, inheriting fieldOrders: FieldOrders)
+	throws(ParsingError) -> FieldOrder {
+		let inheritedSource = fieldOrders.fieldOrder.kind == .name ? SortOptionSet.Source.input : .output
+		let optionSet = try SortOptionSet.parsed(&input, terminatorSet: itemSortAndFieldSpecEditsPrefixSet) { source in
+			savedSortFieldOrder(of: source ?? inheritedSource, in: fieldOrders).sortOptionSet ?? .default
+		}
+		let tiebreakDirection = parseFieldOrderTiebreaker(&input)
+			?? savedSortFieldOrder(of: optionSet.source, in: fieldOrders).tiebreakDirection
+			?? .ascending
+		return switch optionSet.source {
+		case .input:
+			.byName(optionSet, tiebreakDirection: tiebreakDirection)
+		case .output:
+			.byLabel(optionSet, tiebreakDirection: tiebreakDirection)
+		}
+	}
+
+	/// `fieldOrders`' saved field order of the kind that sorts by `source`.
+	private func savedSortFieldOrder(of source: SortOptionSet.Source, in fieldOrders: FieldOrders) -> FieldOrder {
+		fieldOrders.savedFieldOrder(of: source == .input ? .name : .label, outputFormat: outputFormat)
+	}
+
 	/// `.positional(optionSet)`, after reversing the positions of the working &
 	/// reference field specs iff `optionSet`'s direction differs from
-	/// `inheritedDirection` (the working fields config's `<positional-order>`
-	/// `<direction>`, which already reversed its positions iff `.descending`),
-	/// before `<field-spec-edits-section>`, so its edits & each `<index>` apply
-	/// to the reversed positions. No edit precedes `<field-order-section>`, so
-	/// `workingTags` remains the identity mapping.
+	/// `inheritedDirection` (the `<direction>` of the working fields config's
+	/// saved field order of kind `P`, which already reversed its positions iff
+	/// `.descending`), before `<field-spec-edits-section>`, so its edits & each
+	/// `<index>` apply to the reversed positions. No edit precedes
+	/// `<field-order-sections>`, so `workingTags` remains the identity mapping.
 	private mutating func reversingPositions(
 		_ optionSet: OrderOptionSet,
 		inheritedDirection: SortOptionSet.Direction,
@@ -795,69 +815,6 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			referenceFieldSpecs.reverse()
 		}
 		return .positional(optionSet)
-	}
-}
-
-/// Parses an optional `<field-order-tiebreaker>`
-/// (`<field-order-tiebreaker-prefix> <direction>`), returning its
-/// `<direction>`, or `nil` iff absent.
-private func parseFieldOrderTiebreaker(_ input: inout Substring) throws(ParsingError) -> SortOptionSet.Direction? {
-	guard input.first == fieldOrderTiebreakerPrefix, !input.hasPrefix(itemSortSectionPrefix) else {
-		return nil
-	}
-	input.removeFirst()
-	input = input.drop(while: \.isWhitespace)
-	guard let direction = input.first.flatMap(SortOptionSet.Direction.init(rawValue:)) else {
-		throw .missingFieldOrderTiebreakerDirection
-	}
-	input.removeFirst()
-	input = input.drop(while: \.isWhitespace)
-	return direction
-}
-
-/// The `<order>` letter (`P` / `D`) of `input`'s `<field-order-option-set>` (up
-/// to, but not including, its terminating `<field-spec-separator>` /
-/// `<item-sort-section-prefix>` / `<field-spec-edits-section-prefix>`) iff it
-/// is a `<positional-order-option-set>` / `<document-order-option-set>`: every
-/// top-level character is a `<direction>`, an
-/// `<unpositioned-field-comparison>`, an `<unpositioned-field-placement>`, or
-/// an `<order>`, with at least 1 `<order>` (last wins); or iff it is a
-/// `<field-order-adjustment-set>` (every top-level character is a
-/// `<adjustment-sort-option>`: a `<direction>`, a `<nonconforming-comparison>`,
-/// or a `<nonconforming-placement>`) & `inheritedFieldOrder` is `.positional` /
-/// `.document`, as whose alternative it is parsed. `nil` means it is a
-/// `<field-order-sort-option-set>`, or a `<field-order-adjustment-set>` parsed
-/// as one, instead: the alternatives share no valid text (a sequence with no
-/// `<order>` & a `<non-adjustment-sort-option>` can only be
-/// `<field-order-sort-option-set>`, as can one with an `<order>` &
-/// `<all-conforming>`), so checking without consuming `input` is safe.
-private func orderOptionSetOrder(_ input: Substring, inheriting inheritedFieldOrder: FieldOrder) -> Character? {
-	var order = Character?.none
-	var hasAllConforming = false
-	for char in input {
-		if char == fieldSpecSeparator || itemSortAndFieldSpecEditsPrefixSet.contains(char) {
-			break
-		}
-		if orderOptionSet.contains(char) {
-			order = char
-		} else if char == SortOptionSet.NonconformingComparison.allConforming.rawValue {
-			hasAllConforming = true
-		} else if
-			!char.isWhitespace,
-			SortOptionSet.Direction(rawValue: char) == nil,
-			OrderOptionSet.UnpositionedFieldComparison(rawValue: char) == nil,
-			OrderOptionSet.UnpositionedFieldPlacement(rawValue: char) == nil
-		{
-			return nil
-		}
-	}
-	return switch (order, inheritedFieldOrder) {
-	case (nil, .document):
-		documentOrderOption
-	case (nil, .positional):
-		positionalOrderOption
-	default:
-		hasAllConforming ? nil : order
 	}
 }
 
@@ -1290,7 +1247,7 @@ private let relativeConfigStartSet = Set([
 	fieldSpecEditsSectionPrefix,
 ])
 
-private let itemSortAndFieldSpecEditsPrefixSet =
+let itemSortAndFieldSpecEditsPrefixSet =
 	Set([itemSortSectionPrefix[itemSortSectionPrefix.startIndex], fieldSpecEditsSectionPrefix])
 
 let insertLiteral = Character("+")
@@ -1315,9 +1272,6 @@ private let modifiedFieldNameTerminatorSet = Set([
 	fieldSpecSeparator,
 ])
 
-private let positionalOrderOption = Character("P")
-private let documentOrderOption = Character("D")
-private let orderOptionSet = Set([positionalOrderOption, documentOrderOption])
 private let disableAllSortsOption = Character("0")
 
 private let outputFormatSuffixSet = Set(["json", "key-value", "table"] as [Substring])

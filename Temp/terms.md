@@ -458,8 +458,20 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 74. - clean up: verb
     - cleanup: noun
     - REJECTED: cleanup (as a verb)
-75. - field order: the order in which each item's fields are output, per
-      `<field-order-option-set>` ([defined](../Specs/fields.md#field-order))
+75. - field order: the order in which each item's fields are output, per the
+      last section of `<field-order-sections>`
+      ([defined](../Specs/fields.md#field-order))
+    - field order kind: positional order, document order, sorted by name, or
+      sorted by label (`<field-order-kind>`;
+      [defined](../Specs/fields.md#field-order))
+    - field order section: a `<field-order-section>` or a
+      `<field-order-kind-section>` ([used](../Specs/fields.md#field-order))
+    - saved field order: a fields config's last field order of a field order
+      kind, which a later field order section of that kind inherits from
+      ([defined](../Specs/fields.md#field-order))
+    - default field order: the app's per-output-format field order of a field
+      order kind, which each built-in fields config saves
+      ([defined](../Specs/fields.md#immutable-built-in-named-fields-configs))
     - positional order: field specs ordered by position (`<positional-order>`)
     - document order: field specs ordered by their fields' order in an input
       item (`<document-order>`)
@@ -533,7 +545,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 82. - tie & fall through: compare as equal for a sort key, leaving the order to
       the next sort key ([used](../Specs/fields.md#sort-source))
     - default sort options: the app's per-output-format replacements for sort
-      options' defaults, for field names, field labels, or a field's content
+      options' defaults, for a field's content
       ([defined](../Specs/fields.md#sort-options))
     - REJECTED: retain their input order
 83. - field occurrence index: `<field-occurrence-index>`, an index into only the
@@ -760,10 +772,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        nonterminal in `<field-modifiers>` & its alignment
        ([defined](../Specs/fields.md#field-modifiers)); of a fields config, per
        field spec setting & per `(* inherited *)` nonterminal in
-       `<field-order-section>` & `<item-sort-section>`
-       ([defined](../Specs/fields.md#inherited-values)); or of an output config,
-       per `(* inherited *)` nonterminal in its kind's output config syntax
-       ([defined](../Specs/configs.md#output-configs))
+       `<field-order-kind-option-set>` per saved field order & in
+       `<item-sort-section>` ([defined](../Specs/fields.md#inherited-values));
+       or of an output config, per `(* inherited *)` nonterminal in its kind's
+       output config syntax ([defined](../Specs/configs.md#output-configs))
      - alternative: one of the alternatives of an output config setting's
        nonterminal, each starting with its own letter (e.g., `<header-off>`, as
        `h`; [defined](../Specs/configs.md#output-configs))
@@ -968,8 +980,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - modifier: a `<preset-modifier>`, `<label-modifier>`, `<format-modifier>`,
        or `<sort-modifier>` ([used](../Specs/fields.md#field-modifiers))
      - section: a `<relative-config>`'s `<base-fields-config-section>`,
-       `<field-order-section>`, `<item-sort-section>`, or
-       `<field-spec-edits-section>` ([used](../Specs/fields.md#relative-config))
+       `<field-order-section>`, `<field-order-kind-section>`,
+       `<item-sort-section>`, or `<field-spec-edits-section>`
+       ([used](../Specs/fields.md#relative-config))
 132. - pipeline: a named format reference and/or transforms, which are applied
        to a value (`<pipeline>`; [used](../Specs/fields-format.md#pipelines))
      - template: template text & placeholders (e.g., `(%i)`; `<format-template>`

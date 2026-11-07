@@ -169,9 +169,8 @@ For each [leaf context](configs.md#context-stacks):
   fields config that extends it outputs its inserted field specs in insertion
   order (e.g., `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
-  app lists. Absent a built-in field order: field specs are sorted by label
-  (`<output>`), while other `<sort-option>`s are per the app's [default sort
-  options](#sort-options) for labels for the current output format.
+  app lists. Absent a built-in field order: its field order is its [saved field
+  order](#field-order) of kind `O`, so field specs are sorted by label.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
   select list of field specs is visible, and unlisted fields are hidden. Absent
   a built-in field order: field specs are ordered by `<positional-order>`.
@@ -179,6 +178,10 @@ For each [leaf context](configs.md#context-stacks):
 A built-in fields config:
 
 - Has the [`default` preset](#presets) attached to each of its field specs.
+- Saves, as its saved field order of each kind, the app's **default field
+  order** of that kind for the current output format, which the app gives as
+  field order syntax (e.g., [mas's](mas.md#default-field-orders)), or, absent
+  one, that kind's `<field-order-kind>` alone (e.g., `/P`).
 - May have built-in variants.
 - Cannot have custom variants.
 
@@ -224,26 +227,29 @@ fields config has been parsed; it is used to render output.
 ## Inherited Values
 
 A fields config's **settings** are each field spec's
-[settings](#field-modifiers), plus a separate setting per `(* inherited *)`
-nonterminal in `<field-order-section>` (`<field-order-tiebreaker>`'s
-`<direction>` being separate from the field order's) & in `<item-sort-section>`.
+[settings](#field-modifiers), plus, per [saved field order](#field-order), a
+separate setting per `(* inherited *)` nonterminal in
+`<field-order-kind-option-set>` (`<field-order-tiebreaker>`'s `<direction>`
+being separate from the field order's), plus a separate setting per one in
+`<item-sort-section>`.
 
 An [inherited](ebnf.md#inherited-comments) nonterminal's inherited value is the
 working fields config's value for the same setting, if any:
 
 - In `<field-modifiers>`: that of the field spec that they modify.
 - In `<item-sort-option>`: that of item sorting.
-- `<field-order-option-set>` itself: the field order.
-- In `<field-order-option-set>`, outside `<field-order-tiebreaker>`: that of the
-  field order, iff it is also per the same one of
-  `<positional-order-option-set>`, `<document-order-option-set>` &
-  `<field-order-sort-option-set>` (as a
-  [`<field-order-adjustment-set>`](#field-order) always is).
+- `<field-order-sections>` itself: the field order & each saved field order.
+- In `<field-order-adjustment-set>`: that of the field order.
+- `<field-order-sort-option-set>`'s `<source>`: that of the field order, iff its
+  kind is `<input>` or `<output>`, so a `<field-order-sort-option-set>`'s kind
+  never depends on the saved field order that it inherits from.
+- In `<field-order-kind-option-set>`, outside `<field-order-tiebreaker>`, except
+  that `<source>`: that of the saved field order of its kind.
 - In `<field-order-tiebreaker>`: that of the field order's
-  `<field-order-tiebreaker>`, iff the field order is also per the same one of
-  `<document-order-option-set>` & `<field-order-sort-option-set>` (e.g., if `x`
-  has `/I+/-`, `@x/I` & `@x/+` tiebreak descending, while `@x/D` tiebreaks
-  ascending).
+  `<field-order-tiebreaker>` after a `<field-order-adjustment-set>`, else that
+  of the `<field-order-tiebreaker>` of the saved field order of its
+  `<field-order-kind-option-set>`'s kind (e.g., if `x` has `/I+/-`, `@x/I` &
+  `@x/+` tiebreak descending, while `@x/D` tiebreaks ascending).
 
 So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
 `.name=x`) or option (e.g., `<direction>` in `.name/1`, in `.name/1Ii`, or in
@@ -361,7 +367,7 @@ items, while `name/1,version` sorts them by `name`'s input).
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-relative-config = [ <base-fields-config-section> ] [ <field-order-section> ] [ <item-sort-section> ] [ <field-spec-edits-section> ]
+relative-config = [ <base-fields-config-section> ] [ <field-order-sections> ] [ <item-sort-section> ] [ <field-spec-edits-section> ]
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -390,13 +396,18 @@ base-fields-config-name =
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-field-order-section        = <field-order-section-prefix> <field-order-option-set>
-field-order-section-prefix = "/"
+field-order-sections            = <field-order-section> [ <field-order-kind-section>+ ] (* inherited *)
+field-order-section             = <field-order-section-prefix> <field-order-option-set>
+field-order-section-prefix      = "/"
+field-order-kind-section        = <field-order-kind-section-prefix> <field-order-kind-option-set>
+field-order-kind-section-prefix = "/"
 
-field-order-option-set        =
+field-order-option-set        = <field-order-kind-option-set> | <field-order-adjustment-set> [ <field-order-tiebreaker> ]
+field-order-kind-option-set   =
   <positional-order-option-set>
-  | ( <field-order-adjustment-set> | <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
-  (* default source: <output>; inherited *)
+  | ( <document-order-option-set> | <field-order-sort-option-set> ) [ <field-order-tiebreaker> ]
+  (* default source: <output> *)
+field-order-kind              = <positional-order> | <document-order> | <input> | <output> (* non-structural *)
 field-order-tiebreaker        =
   <field-order-tiebreaker-prefix> <direction>
   (* error: it follows a <field-order-adjustment-set> that is per <positional-order-option-set> *)
@@ -431,8 +442,9 @@ fixed-unpositioned-fields    = "f"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The **field order**, in which each item's fields are output, is per
-`<field-order-option-set>`:
+The **field order**, in which each item's fields are output, is per the last
+`<field-order-option-set>` or `<field-order-kind-option-set>` of
+`<field-order-sections>`:
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
   input JSON object, each [member](#members) at its own position. A field spec
@@ -462,6 +474,31 @@ The **field order**, in which each item's fields are output, is per
   `/I`, `@x/-` ≡ `@x/I-` & `@x/a` ≡ `@x/Ia`; if `x` has `/P`, `@x/ka` ≡ `@x/aP`,
   while `@x/k`, `@x/ak` & `@x/-/+` are errors.
 
+A field order's **kind** is the `<field-order-kind>` that its effective
+`<order>` or `<source>` is, or, for a `<field-order-adjustment-set>`, that of
+the field order that it adjusts (e.g., `P` for `/DP`, or `O` for `/i` while the
+field order is `/P`).
+
+A fields config **saves** the field order of each **field order section** (a
+`<field-order-section>` or a `<field-order-kind-section>`) as its **saved field
+order** of that field order's kind, so it has 1 per kind, the field order's
+included; each [inherits](#inherited-values) from the saved field order of its
+own kind, never from one of another kind, because each kind's options mean
+something else for another kind (e.g., if `x` is `@none/O-/P`, `@x/O` sorts by
+label, descending, while `@x/I` sorts by name, ascending, per `none`'s saved
+field order of kind `I`). Thus, a section that a later one overrides still sets
+its kind's options for a later section of that kind, in its own fields config or
+in one that extends it (e.g., `/iO/P` orders by position, while a fields config
+that extends it & has `/O` sorts by label, case-insensitively), and a later
+section of the same kind inherits from an earlier one, so splitting sections
+between a fields config & one that it extends does not change what they mean
+(e.g., `/iO/-O` ≡ `/iO-`).
+
+Only the 1st section can be a `<field-order-adjustment-set>`, because a later
+one would mean what merging it into the preceding section means (e.g., `/O-` for
+the sections `/O` & `/-`), so `/O/-` is unambiguously `/O` with a
+`<field-order-tiebreaker>`.
+
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also
 reverses its location (`<relative-unpositioned-fields>`, e.g., `D-` or `P-` puts
@@ -474,16 +511,20 @@ fields config's field specs before `<field-spec-edits-section>`, so its edits &
 each `<index>` (including a `<baseline-sourced-field-spec-edit>`'s) apply to the
 reversed positions (e.g., in `@all/P-.+@1`, `@1` references `all`'s last field
 spec). A `<direction>` of a field order per `<positional-order-option-set>`
-reverses those positions iff it differs from the working fields config's field
-order's `<direction>`, if that field order is `<positional-order>`, else iff it
-is `<descending>` (e.g., if `x` has `/P-`, each of `@x/P-`, `@x/P` & `@x/-`
-outputs `x`'s field order, while each of `@x/P+` & `@x/+` reverses it).
+reverses those positions iff it differs from the `<direction>` of the working
+fields config's saved field order of kind `P`, which already reversed them iff
+`<descending>` (e.g., if `x` has `/P-`, each of `@x/P-`, `@x/P` & `@x/-` outputs
+`x`'s field order, while each of `@x/P+` & `@x/+` reverses it; if `y` is `@x/O`,
+`@y/P-` outputs `x`'s field order, while `@y/P+` reverses it). So a positional
+order that a later section overrides still reverses positions (e.g., `/P-/I`
+sorts by name, tiebreaking as `/I/-` does, while each `<index>` references the
+reversed positions).
 
 Field specs that the field order ties are ordered by position, reversed iff
 `<field-order-tiebreaker>`'s `<direction>` is `<descending>`; no other
 `<direction>` affects their order.
 
-An option omitted from a present `<field-order-section>` may retain the working
+An option omitted from a present field order section may retain the working
 fields config's value, [as specified](#inherited-values) (e.g., if `x` has
 `/I-`, `@x/i` sorts by name, descending, while `@x/D` & `@x/P` are ascending; if
 `x` has `/D-`, `@x/PD`, being a `<document-order-option-set>`, is descending; if
@@ -895,15 +936,13 @@ sort-option-terminator = ":"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The app may set, per output format, **default sort options** for field names,
-for field labels & for each field's content, each of which replaces the default
-of its `<sort-option>` (e.g., [mas's](mas.md#default-sort-options) make
-`<insensitive>` the default `<case-sensitivity>` for table output, so `name/I`
-sorts items by `name` case-insensitively). Each `<sort-option>` that is absent &
-inherits no value thus takes the default sort option for what its option set
-compares: a field spec's `<sort>` compares its field's content, while a
-`<field-order-sort-option-set>` compares field names or labels, per its
-`<source>`.
+The app may set, per output format, **default sort options** for each field's
+content, each of which replaces the default of its `<sort-option>` in a field
+spec's `<sort>` (e.g., [mas's](mas.md#default-sort-options) make `<insensitive>`
+the default `<case-sensitivity>` for table output, so `name/I` sorts items by
+`name` case-insensitively), while a `<field-order-sort-option-set>` inherits its
+options from a [saved field order](#field-order), which a built-in fields config
+sets per the app's default field orders.
 
 ##### Sort Source
 

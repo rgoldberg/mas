@@ -47,6 +47,31 @@ private extension MASTests {
 		}
 	}
 
+	@Test
+	func `the default name & label field orders compare as the Other default sort options, by name & by label`() {
+		for outputFormat in [OutputFormat.json(.default), .keyValue(.default), .table(.default)] {
+			var optionSet = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
+			optionSet.source = .input
+			#expect(defaultFieldOrder(of: .name, outputFormat: outputFormat) == .byName(
+				optionSet,
+				tiebreakDirection: .ascending,
+			))
+			optionSet.source = .output
+			#expect(
+				defaultFieldOrder(of: .label, outputFormat: outputFormat) == .byLabel(optionSet, tiebreakDirection: .ascending),
+			)
+		}
+	}
+
+	@Test
+	func `the default positional & document field orders have only their kind`() {
+		#expect(defaultFieldOrder(of: .positional, outputFormat: .table(.default)) == .positional(.init()))
+		#expect(
+			defaultFieldOrder(of: .document, outputFormat: .json(.default))
+				== .document(.init(), tiebreakDirection: .ascending),
+		)
+	}
+
 	@Test(
 		arguments: [
 			("bundleID", "Bundle ID", Alignment.start),

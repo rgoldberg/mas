@@ -146,10 +146,6 @@ region.
 
 The **version fields** are `minimumOSVersion`, `newVersion` & `version`.
 
-Field names' & labels' default sort options, other than `<source>` (which a
-field order's `<field-order-sort-option-set>` uses to choose between names &
-labels), are those of the `Other` rows below.
-
 Version fields' default sort options compare
 [versions](fields.md#sort-number-segments) (`v`), and `formattedPrice`'s are
 [those for price sorting](#price-sorting), but they otherwise match the
@@ -161,3 +157,16 @@ following:
 | Table / Key-Value | `path` | `I+iL:N:B/_+space+:` |
 | JSON              | Other  | `I+sN:B:`            |
 | JSON              | `path` | `I+sN:B/:`           |
+
+## Default Field Orders
+
+mas's [default field orders](fields.md#immutable-built-in-named-fields-configs)
+of kinds `I` & `O` are those that the field order sections of each row below
+save, so they compare field names & labels as the `Other` rows of the [default
+sort options](#default-sort-options) compare a field's content; it has none of
+kinds `P` & `D`:
+
+| Output Format     | Field Order Sections |
+|:------------------|:---------------------|
+| Table / Key-Value | `/iL:N:I/iL:N:O`     |
+| JSON              | `/sN:B:I/sN:B:O`     |

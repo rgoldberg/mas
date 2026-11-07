@@ -245,39 +245,68 @@ extension SortOptionSet { // swiftlint:disable:this file_types_order
 	/// in `terminatorSet`, or the end of the input.
 	static func parsed(_ input: inout Substring, terminatorSet: Set<Character>, defaults: Self)
 	throws(ParsingError) -> Self {
-		var optionSet = defaults
+		try parsed(&input, terminatorSet: terminatorSet) { _ in defaults }
+	}
+
+	/// Parses a `<sort-option-set>` (last wins per option), each omitted option
+	/// retaining its value from `defaults` of its effective `<source>`, if any,
+	/// else of `nil`, up to (but not including) a character in `terminatorSet`,
+	/// or the end of the input, so the defaults may depend on `<source>` wherever
+	/// it is in the set (e.g., a field order's, per fields.md "Field Order").
+	static func parsed(
+		_ input: inout Substring,
+		terminatorSet: Set<Character>,
+		defaults: (Source?) -> Self,
+	) throws(ParsingError) -> Self {
+		var source = Source?.none
+		var setters = [(inout Self) -> Void]()
 		while skipWhitespace(&input), !isAtSortOptionSetEnd(input, terminatorSet: terminatorSet), let option = input.first {
 			input.removeFirst()
-			if let source = Source(rawValue: option) {
-				optionSet.source = source
+			if let match = Source(rawValue: option) {
+				source = match
 			} else if let direction = Direction(rawValue: option) {
-				optionSet.direction = direction
+				setters.append { $0.direction = direction }
 			} else if let caseSensitivity = CaseSensitivity(rawValue: option) {
-				optionSet.caseSensitivity = caseSensitivity
+				setters.append { $0.caseSensitivity = caseSensitivity }
 			} else if let numberSegments = numberSegmentsByOption[option] {
-				optionSet.numberSegments = numberSegments
+				setters.append { $0.numberSegments = numberSegments }
 			} else if let nonconformingComparison = NonconformingComparison(rawValue: option) {
-				optionSet.nonconformingComparison = nonconformingComparison
+				setters.append { $0.nonconformingComparison = nonconformingComparison }
 			} else if let nonconformingPlacement = NonconformingPlacement(rawValue: option) {
-				optionSet.nonconformingPlacement = nonconformingPlacement
+				setters.append { $0.nonconformingPlacement = nonconformingPlacement }
 			} else if let textOrder = TextOrder(rawValue: option) {
-				optionSet.textOrder = textOrder
+				setters.append { $0.textOrder = textOrder }
 			} else {
 				switch option {
 				case localeOption:
-					optionSet.locale = try parseLocale(&input)
+					let locale = try parseLocale(&input)
+					setters.append { $0.locale = locale }
 				case groupedNumericOption:
-					optionSet.numberSegments = .groupedNumeric(try parseGroupedNumericArguments(&input))
+					let arguments = try parseGroupedNumericArguments(&input)
+					setters.append { $0.numberSegments = .groupedNumeric(arguments) }
 				case chronologicSegmentsOption:
-					(optionSet.chronologicSegments, optionSet.hasUnixTimeSegments) = try parseChronologicFormats(&input)
+					let (chronologicSegments, hasUnixTimeSegments) = try parseChronologicFormats(&input)
+					setters.append { optionSet in
+						optionSet.chronologicSegments = chronologicSegments
+						optionSet.hasUnixTimeSegments = hasUnixTimeSegments
+					}
 				case uncollapsedBoundariesOption:
-					optionSet.boundaries = .uncollapsed(try parseBoundaryGroups(&input))
+					let boundaryGroups = try parseBoundaryGroups(&input)
+					setters.append { $0.boundaries = .uncollapsed(boundaryGroups) }
 				case collapsedBoundariesOption:
-					optionSet.boundaries = .collapsed(try parseBoundaryGroups(&input))
+					let boundaryGroups = try parseBoundaryGroups(&input)
+					setters.append { $0.boundaries = .collapsed(boundaryGroups) }
 				default:
 					throw .invalidSortOption(option)
 				}
 			}
+		}
+		var optionSet = defaults(source)
+		if let source {
+			optionSet.source = source
+		}
+		for setter in setters {
+			setter(&optionSet)
 		}
 		if
 			case let .groupedNumeric(arguments) = optionSet.numberSegments,

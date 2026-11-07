@@ -133,11 +133,19 @@ In specs, never allow a line terminator other than an LF or a CR in
 output would not be JSON, which outweighs the overruled reason for rejecting its
 forbidding: it means what it says.
 
-In specs, never allow an empty `<field-order-section>` (e.g., `@x/`), because,
-unlike an empty `<item-sort-section>` or `<field-spec-edits-section>`, nothing
-can follow it reliably: `@x///0` would consume `//`, the longest candidate
-literal, leaving `/0`, which is an error, so generated syntax that appends a
-section to it would still fail.
+In specs, never allow an empty `<field-order-section>` or
+`<field-order-kind-section>` (e.g., `@x/` or `@x/P/`), because, unlike an empty
+`<item-sort-section>` or `<field-spec-edits-section>`, nothing can follow it
+reliably: `@x///0` would consume `//`, the longest candidate literal, leaving
+`/0`, which is an error, so generated syntax that appends a section to it would
+still fail.
+
+In specs, never forbid a field order section merely because a later section of
+another kind overrides it in a transient fields config (e.g., `/iO/P`), which no
+fields config extends, because the same text is valid in a persistent fields
+config, so forbidding it would keep a transient fields config from trying that
+text before it is persisted, while whether it is redundant would depend on where
+its text is used, not on its syntax.
 
 In specs, never allow a `<coercion>` on a call whose value's type equals its
 input type, unless a `<named-format-reference>` immediately precedes it (e.g.,

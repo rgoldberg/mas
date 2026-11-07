@@ -24,10 +24,10 @@ private let versionFieldNameSet = Set(["minimumOSVersion", "newVersion", "versio
 private let appStoreLocale = Locale(identifier: Locale.Language(identifier: "und-\(appStoreRegion)").maximalIdentifier)
 
 /// mas.md's "Default Sort Options" for `outputFormat`: the `path` row iff
-/// `fieldName` is `path`, else the `Other` row (also used for sorting field
-/// names & labels, for which `fieldName` is `nil`), but comparing versions for
-/// a version field & grouped numbers per the App Store locale's conventions
-/// plus `a` for `formattedPrice`, per mas.md's "Price Sorting".
+/// `fieldName` is `path`, else the `Other` row (also used by mas.md's "Default
+/// Field Orders", for which `fieldName` is `nil`), but comparing versions for a
+/// version field & grouped numbers per the App Store locale's conventions plus
+/// `a` for `formattedPrice`, per mas.md's "Price Sorting".
 func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: OutputFormat) -> SortOptionSet {
 	let isPath = fieldName.map(pathFieldNameSet.contains) ?? false
 	var optionSet = SortOptionSet.default
@@ -59,6 +59,31 @@ func defaultSortOptionSet(forFieldNamed fieldName: String?, outputFormat: Output
 		)
 		optionSet.nonconformingComparison = .least
 	}
+	return optionSet
+}
+
+/// mas.md's "Default Field Orders" for `outputFormat`: those of kinds `I` & `O`
+/// compare per the `Other` row of mas.md's "Default Sort Options"; mas has none
+/// of kinds `P` & `D`, so theirs are `/P` & `/D` (fields.md "Immutable Built-In
+/// Named Fields Configs").
+func defaultFieldOrder(of kind: FieldOrderKind, outputFormat: OutputFormat) -> FieldOrder {
+	switch kind {
+	case .document:
+		.document(.init(), tiebreakDirection: .ascending)
+	case .label:
+		.byLabel(defaultFieldOrderSortOptionSet(source: .output, outputFormat: outputFormat), tiebreakDirection: .ascending)
+	case .name:
+		.byName(defaultFieldOrderSortOptionSet(source: .input, outputFormat: outputFormat), tiebreakDirection: .ascending)
+	case .positional:
+		.positional(.init())
+	}
+}
+
+/// The options of mas.md's "Default Field Orders" of kind `source`.
+private func defaultFieldOrderSortOptionSet(source: SortOptionSet.Source, outputFormat: OutputFormat)
+-> SortOptionSet {
+	var optionSet = defaultSortOptionSet(forFieldNamed: nil, outputFormat: outputFormat)
+	optionSet.source = source
 	return optionSet
 }
 
