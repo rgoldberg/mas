@@ -22,8 +22,8 @@ expressions' constant nonterminals (e.g., not `-"/"` for a following `/`),
 except on a terminator that terminates every expression that needs it, which
 would otherwise need many annotations (e.g., `block-terminator = -"+"`).
 
-In `Specs/command-line.md`, define each option that takes a value as a
-`<valued-option>` (e.g.,
+In the [command-line spec](../../Specs/command-line.md), define each option that
+takes a value as a `<valued-option>` (e.g.,
 `fields-option = <valued-option("--fields", <fields-config>)>`), whose
 command-line argument boundary (`_`) models Swift Argument Parser's split of an
 option from its value as the next command-line argument, so that the grammar
@@ -146,15 +146,17 @@ than standard output, standard error, a terminal, the command line, or
 `--table-config H1:`), because a syntax may be used outside of a command line,
 except:
 
-1. In `Specs/command-line.md` & `Specs/mas.md`, which require a command line.
-2. In `Specs/ebnf.md`, for grammar that exists for a command-line constraint
-   (e.g., `_`).
+1. In the [command-line spec](../../Specs/command-line.md) & the [`mas`
+   spec](../../Specs/mas.md), which require a command line.
+2. In the [custom EBNF grammar](../../Specs/ebnf.md), for grammar that exists
+   for a command-line constraint (e.g., `_`).
 3. Anywhere, to explain a motivation that applies if a shell is used.
 
 In specs, default text that depends on an output device (e.g.,
 `<style-prefix-default>`'s `<style-prefix>`) to `{empty string}`, say that an
-app should override it as appropriate & give the override in
-`Specs/command-line.md`, because no default suits every output device.
+app should override it as appropriate & give the override in the [command-line
+spec](../../Specs/command-line.md), because no default suits every output
+device.
 
 In specs, give an output config setting whose alternatives differ in whether
 they take a payload 1 letter: lowercase for the alternative without a payload
@@ -165,8 +167,8 @@ In specs, call an alternative that nothing overrides **effective** (e.g., "an
 effective `f`"), rather than describing it as not overridden (e.g., not "an `f`
 that no later `<leader-setting>` overrides").
 
-In `Specs/ebnf.md`, retain the **Required** (`&`) outer bare whitespace
-treatment, even while no syntax uses it.
+In the [custom EBNF grammar](../../Specs/ebnf.md), retain the **Required** (`&`)
+outer bare whitespace treatment, even while no syntax uses it.
 
 In specs, allow syntax unless 1 or more of the following apply, because an error
 should report a likely mistake, not harmless verbosity (e.g., allow `%+N%n+`,
