@@ -187,9 +187,9 @@ separator-pattern = ^{string}^ (* default: "-" *)
   [width](configs.md#width), truncated before the 1st character that would
   exceed that width; spaces fill any remaining width (e.g., when that character
   is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
-  rendered once, because no number of repetitions can fill any width: per
-  segment of a [`b`](#broken) line, which aligns each segment, or per run
-  between tabs of a `u` line, with no space-fill.
+  rendered once, because no number of repetitions can fill any width: per run
+  between tabs of a `u` line, with no space-fill, or per segment of a
+  [`b`](#broken) line, which aligns each segment.
 
 ## Broken
 
