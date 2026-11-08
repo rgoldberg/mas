@@ -41,8 +41,8 @@ Each display command has a default output format.
 
 A run of a display command may select an output format, either with its
 [`default`](#default-configs) config or with a [transient](#transient-configs)
-output config overlaid on its `default` config. Selecting more than 1, even the
-same one twice, is an error.
+output config overlaid on its `default` config. Selecting an output format more
+than once, even the same one, is an error.
 
 An **item error** is an error that depends on an item's field value (e.g.,
 `.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s

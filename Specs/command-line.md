@@ -84,8 +84,8 @@ Every [display command](configs.md#display-commands) has an optional flag per
 selects it with its value as a transient output config (e.g.,
 `--json-config P`).
 
-Because only 1 output format can be selected, giving more than 1 such flag or
-option, even the same one twice (e.g., `--json --json` or
+Because a run may select an output format only once, giving more than 1 such
+flag or option, even the same one twice (e.g., `--json --json` or
 `--json-config P --table`), is an error.
 
 Because [an output config's text is optional](configs.md#output-configs),
