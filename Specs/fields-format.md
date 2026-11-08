@@ -207,9 +207,8 @@ value-transform = <string-transform> | <number-transform> | <number-to-string-tr
 - A `<transform-pipeline>` `t` is applied to:
   - If a `<named-format-reference>` `n` immediately precedes `t` in its
     pipeline: `n`'s value.
-  - Otherwise: the value against which its enclosing block is evaluated (i.e.,
-    in a `<success-clause>`, the enclosing matcher's value; elsewhere, the
-    [format input](#success--failure)).
+  - Otherwise: in a `<success-clause>`, the enclosing matcher's value;
+    elsewhere, the [format input](#success--failure).
 
 A **transform run** is a `<transform-run>`'s contiguous calls of 1 value type. A
 call whose value's type the syntax text determines takes a `<coercion>` only if
