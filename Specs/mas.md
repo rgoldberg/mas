@@ -43,8 +43,9 @@ field is [nonexistent](fields.md#nonexistent-fields) for it; no other command
 can determine that, so no field is nonexistent for it.
 
 For the same `mas` leaf context & output format suffix (or its absence), every
-listed field has a field spec in each of [`all` &
-`none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
+listed field has a field spec in each of
+[`all`](fields.md#immutable-built-in-named-fields-configs),
+[`none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
 standard](configs.md#immutable-built-in-named-configs).
 
 Each user-facing variant of the built-in standard has only visible field specs &
