@@ -428,7 +428,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       notation / decimal notation (for positional notation)
 69. - time zone: noun
     - time-zone: compound adjective (`time-zone-dependent`)
-    - system time zone: the time zone of the system running mas
+    - system time zone: the time zone of the system running the app
     - output time zone: the time zone a chronologic value is rendered in
     - UTC offset:
       [defined](../Specs/fields-format.md#timezone--timeonlytimezone)
@@ -648,8 +648,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - canonical conventions: the conventions that `<canonical-locale>`
       identifies, which are independent of every real-world locale
       ([defined](../Specs/fields.md#sort-locale))
-    - system locale: the locale of the system running mas (`<system-locale>`;
-      [used](../Specs/fields.md#sort-locale))
+    - system locale: the locale of the system running the app
+      (`<system-locale>`; [used](../Specs/fields.md#sort-locale))
     - REJECTED: code point order / Unicode order (for the canonical conventions'
       text comparison)
 99. - character class: a `<character-class-name>`'s characters, per UTS #18
