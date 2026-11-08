@@ -272,7 +272,7 @@ defaults](command-line.md#styling-defaults).
 ## Appendix: Escaping
 
 [For a variable token to consume text that would otherwise match a literal, 1 or
-more of its characters must be escaped by prefixing it with a
+more of its characters must be escaped by prefixing each with a
 `\`.](ebnf.md#tokens)
 
 Throughout all variable tokens, a `\` is written `\\`, because `\` always
