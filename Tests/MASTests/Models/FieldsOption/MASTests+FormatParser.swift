@@ -437,7 +437,7 @@ private extension MASTests { // swiftlint:disable file_length
 			("..:,,,,,[$]:round..:unix-time:timeZone:UTC:.dateOnly", .string("$5"), nil),
 			("%.:unix-time:D.timeZone:UTC:.dateOnly+-+", .string("x"), "-"),
 			("%.V..round+-+", .string("1.2"), "1"),
-			("%.D..uppercase..:,,,,,.*:round+-+", .string("2020-03-18"), "2020-03-18"),
+			("%.D..uppercase..:,,,,,,.*:round+-+", .string("2020-03-18"), "2020-03-18"),
 			("%.V..round+-+", .string("x"), "-"),
 			("%+.V..uppercase+", .string("1.2b"), "1.2B"),
 			("%L:standard.uppercase+", .string("x"), "L"),

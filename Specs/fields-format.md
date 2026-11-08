@@ -216,7 +216,7 @@ determines it) may take one regardless. A date or a time-only coerces only to a
 string, neither a number nor a version coerces to a time-only & a number coerces
 to a date only as a Unix time, because its rendering is otherwise not a value of
 that type, so a pipeline that means to parse it must coerce it to a string 1st
-(e.g., `%.D..uppercase..:,,,,,.*:round++`).
+(e.g., `%.D..uppercase..:,,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
