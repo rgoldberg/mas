@@ -108,16 +108,17 @@ private extension MASTests {
 
 	@Test(
 		arguments: [
-			(true, [:], true),
-			(false, [:], false),
+			(true, [:], false),
+			(true, ["TERM": ""], false),
 			(true, ["TERM": "xterm-256color"], true),
+			(false, ["TERM": "xterm-256color"], false),
 			(true, ["TERM": "dumb"], false),
-			(true, ["NO_COLOR": ""], true),
-			(true, ["NO_COLOR": "1"], false),
-			(false, ["NO_COLOR": ""], false),
+			(true, ["TERM": "xterm-256color", "NO_COLOR": ""], true),
+			(true, ["TERM": "xterm-256color", "NO_COLOR": "1"], false),
+			(false, ["TERM": "xterm-256color", "NO_COLOR": ""], false),
 		] as [(Bool, [String: String], Bool)],
 	)
-	func `normal output supports styling iff a terminal, unless TERM is dumb or NO_COLOR is set non-empty`(
+	func `normal output supports styling iff a terminal, unless TERM is unset, empty, or dumb, or NO_COLOR is non-empty`(
 		isTerminal: Bool,
 		environment: [String: String],
 		expected: Bool,

@@ -15,10 +15,12 @@ error's text does not reach `jq` in `app --json | jq .`).
 A terminal that standard output is connected to is normal output's [output
 device](configs.md#normal--error-output), so normal output [supports
 styling](configs.md#normal--error-output) iff standard output is connected to a
-terminal, the `TERM` environment variable is not `dumb` (a terminal that renders
-no styling) & the `NO_COLOR` environment variable is unset or empty, per [the
-`NO_COLOR` convention](https://no-color.org) (e.g., with `NO_COLOR=1`, `H1:`
-outputs an unstyled header row, while `H1:a` styles it).
+terminal, the `TERM` environment variable is set to a terminal type other than
+`dumb` (a terminal that renders no styling; an unset or empty `TERM` names no
+terminal type, so it is treated as `dumb`) & the `NO_COLOR` environment variable
+is unset or empty, per [the `NO_COLOR` convention](https://no-color.org) (e.g.,
+with `NO_COLOR=1`, `H1:` outputs an unstyled header row, while `H1:a` styles
+it).
 
 ## Styling Defaults
 
