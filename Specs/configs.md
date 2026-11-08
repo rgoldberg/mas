@@ -105,7 +105,7 @@ commands from the root through the current command, never of an alias (e.g.,
 
 A **context stack** is the contexts for a command list's commands in reverse
 order, i.e., ordered from the most specific (leaf) to the least specific (root)
-context, e.g., [`mas`'s context stacks](mas.md#context-stacks).
+context, e.g., [mas's context stacks](mas.md#context-stacks).
 
 ## Config Kinds
 

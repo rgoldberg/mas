@@ -267,5 +267,5 @@ branch (e.g., `%m.d.n+`) means to match.
 
 In specs, never rewrite an example to avoid `mas` & anything after it (e.g.,
 `mas list --fields @x`), when understanding the example needs no knowledge of
-`mas`, because the example reads as well with any app's command line (e.g.,
+mas, because the example reads as well with any app's command line (e.g.,
 `abc def --fields @x`).

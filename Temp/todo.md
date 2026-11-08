@@ -138,7 +138,7 @@ the functionality that needs them from specs & code:
       every built-in preset's named format is `%i`.
    4. The `default` [preset](../Specs/fields.md#presets): always `standard`,
       which sets nothing.
-   5. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
+   5. [mas's context stacks](../Specs/mas.md#context-stacks): used only by
       custom config lookup, but the [context stacks
       definition](../Specs/configs.md#context-stacks) links to it as its
       example.

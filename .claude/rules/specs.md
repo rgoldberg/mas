@@ -154,13 +154,13 @@ than standard output, standard error, a terminal, the command line, or
 `--table-config H1:`), because a syntax may be used outside of a command line,
 except:
 
-1. In the [command-line spec](../../Specs/command-line.md) & the [`mas`
+1. In the [command-line spec](../../Specs/command-line.md) & the [mas
    spec](../../Specs/mas.md), which require a command line.
 2. In the [custom EBNF grammar](../../Specs/ebnf.md), for grammar that exists
    for a command-line constraint (e.g., `_`).
 3. Anywhere, to explain a motivation that applies if a shell is used.
 4. In an example, `mas` & anything after it (e.g., `mas list --fields @x`), iff
-   understanding the example needs no knowledge of `mas`.
+   understanding the example needs no knowledge of mas.
 
 In specs, default text that depends on an output device (e.g.,
 `<styling-prefix-default>`'s `<styling-prefix>`) to `{empty string}`, say that

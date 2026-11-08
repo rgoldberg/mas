@@ -119,6 +119,9 @@ chosen), except always use `.md` for Markdown.
   - **Output formats:** Name an output format in prose as table, key-value, or
     JSON (e.g., `JSON output`), never as a code span (e.g., not `json` output),
     except as an output format suffix (e.g., `@json`)
+  - **App name:** Write the app's name bare (e.g., `mas lists every field`), and
+    write `mas` as a code span only in literal text, such as a command line, a
+    command, a context name, or an executable (e.g., `mas list` or `mas.list`)
   - **Em dashes:** Do not use em dashes, except in `CODE_OF_CONDUCT.md`
   - **Contractions:** Never use contractions (e.g., write `it is`, not `it's`;
     `do not`, not `don't`), not even in test data (e.g., App Store data in test

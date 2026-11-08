@@ -1,12 +1,12 @@
 # mas Configuration
 
 `mas`-specific configuration of the generic [configs](configs.md) & [field
-selection](fields.md), which `mas` exposes via its [command-line
+selection](fields.md), which mas exposes via its [command-line
 interface](command-line.md).
 
 ## Display Commands
 
-`mas` display commands, with their default output formats, are:
+mas display commands, with their default output formats, are:
 
 | Command    | Format    |
 |:-----------|:----------|
@@ -33,7 +33,7 @@ process.
 
 ## Built-In Named Fields Configs
 
-For `config`, `mas` [lists](fields.md#unlisted-fields) every field of its item;
+For `config`, mas [lists](fields.md#unlisted-fields) every field of its item;
 for any other command, each field for which its built-in standard's user-facing
 variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 `mas list`).
@@ -42,7 +42,7 @@ variants have a visible field spec (e.g., only `adamID`, `name` & `version` for
 field is [nonexistent](fields.md#nonexistent-fields) for it; no other command
 can determine that, so no field is nonexistent for it.
 
-For the same `mas` leaf context & output format suffix (or its absence), every
+For the same mas leaf context & output format suffix (or its absence), every
 listed field has a field spec in each of
 [`all`](fields.md#immutable-built-in-named-fields-configs),
 [`none`](fields.md#immutable-built-in-named-fields-configs) & the [built-in
@@ -51,7 +51,7 @@ standard](configs.md#immutable-built-in-named-configs).
 Each user-facing variant of the built-in standard has only visible field specs &
 hides unlisted fields.
 
-A `mas` built-in fields config has:
+A mas built-in fields config has:
 
 - A user-facing unsuffixed variant.
 - A user-facing `@table` variant.
@@ -113,7 +113,7 @@ following visible field specs, at the given positions:
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-In every `mas` built-in fields config's user-facing variants, a field spec for a
+In every mas built-in fields config's user-facing variants, a field spec for a
 field that the table above lists has that row's label & format; any other
 field's built-in field spec is labeled by its field name & formatted as `%i`.
 
