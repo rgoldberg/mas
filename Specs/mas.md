@@ -123,7 +123,7 @@ Wherever the base fields config is, or transitively
 the variant's field specs & each field's [default field
 spec](fields.md#default-field-specs) (e.g., for an unlisted field) is the
 field's built-in field spec with the [`default` preset](fields.md#presets)
-attached (e.g., for a custom `default` of `%centerStart:..uppercase`,
+attached (e.g., for a custom `default` preset of `%centerStart:..uppercase`,
 `mas list --fields @all` outputs `bundleID` labeled `Bundle ID`, uppercased &
 center-aligned, while for one of `:..uppercase`, `mas search --fields @all`
 outputs `fileSizeBytes` end-aligned).
