@@ -216,7 +216,9 @@ Coercion arguments for boolean coercion, e.g.:
 
 1. Field references into structured values via the `.` [reserved in field
    names](../Specs/fields.md#appendix-escaping) (e.g., `a.b` for key `b` of
-   field `a`'s object, `a.0` for element `0` of field `a`'s array).
+   field `a`'s object, or, per [positions &
+   indices](../Specs/fields.md#positions--indices), `a.1` & `a.-1` for the 1st &
+   last elements of field `a`'s array).
 2. Array & object type predicates.
 3. Array & object transforms.
 
