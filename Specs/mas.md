@@ -6,15 +6,15 @@ interface](command-line.md).
 
 ## Display Commands
 
-mas display commands, with their default output formats, are:
+mas display commands, with their aliases & default output formats, are:
 
-| Command    | Format    |
-|:-----------|:----------|
-| `config`   | key-value |
-| `list`     | table     |
-| `lookup`   | key-value |
-| `outdated` | table     |
-| `search`   | table     |
+| Command    | Alias  | Format    |
+|:-----------|:-------|:----------|
+| `config`   |        | key-value |
+| `list`     |        | table     |
+| `lookup`   | `info` | key-value |
+| `outdated` |        | table     |
+| `search`   |        | table     |
 
 ## Items
 
