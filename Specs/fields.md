@@ -240,7 +240,7 @@ working fields config's value for the same setting, if any:
 
 - In `<field-modifiers>`: that of the field spec that they modify.
 - In `<item-sort-option>`: that of item sorting.
-- `<field-order-sections>` itself: the field order, each saved field order &
+- `<field-order-section>` itself: the field order, each saved field order &
   `<field-order-tiebreaker>`.
 - `<field-order-tiebreaker>` itself: the working fields config's, whatever the
   field order's kind (e.g., if `x` has `/T-/P`, `@x/I` tiebreaks descending).
@@ -398,8 +398,8 @@ base-fields-config-name =
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-field-order-sections       = <field-order-section>+ (* inherited *)
-field-order-section        = <field-order-section-prefix> <field-order-option-set>
+field-order-sections       = <field-order-section>+
+field-order-section        = <field-order-section-prefix> <field-order-option-set> (* inherited *)
 field-order-section-prefix = "/"
 
 field-order-option-set         = <primary-field-order-option-set> | <field-order-tiebreaker>
