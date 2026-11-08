@@ -86,30 +86,15 @@ extension NumberConventions {
 	/// an optional exponent; the integer part may be omitted iff the fractional
 	/// part is present); else `nil`. The text retains its sign, its leading &
 	/// trailing `0`s & its exponent, but has no digit group separators & has `.`
-	/// as its decimal separator.
+	/// as its decimal separator. A leading `+` or `-` that no number follows
+	/// starts an unsigned number iff `decimalSeparator` starts with it (e.g.,
+	/// `-x5` is `.5` for a `decimalSeparator` of `-x`).
 	func numberPrefix(of string: Substring) -> (number: String, end: Substring.Index)? {
-		var rest = string
-		let sign = rest.first.flatMap { $0 == "-" || $0 == "+" ? $0 : nil }
-		if sign != nil {
-			rest.removeFirst()
+		let sign = string.first.flatMap { $0 == "-" || $0 == "+" ? $0 : nil }
+		return sign.flatMap { sign in
+			unsignedNumberPrefix(of: string.dropFirst()).map { number, end in (String(sign) + number, end) }
 		}
-		let integerPart = integerPart(of: rest)
-		if let integerPart {
-			rest = rest[integerPart.end...]
-		}
-		let fractionalPart = fractionalPart(of: rest)
-		if let fractionalPart {
-			rest = rest[fractionalPart.endIndex...]
-		}
-		guard integerPart != nil || fractionalPart != nil else {
-			return nil
-		}
-		var number = (sign.map(String.init) ?? "") + (integerPart?.digits ?? "") + (fractionalPart.map { "." + $0 } ?? "")
-		if let exponent = exponent(of: rest) {
-			number += exponent
-			rest = rest[exponent.endIndex...]
-		}
-		return (number, rest.startIndex)
+			?? unsignedNumberPrefix(of: string)
 	}
 
 	/// The value & end of the grouped number at the start of `string` (a run of
@@ -126,6 +111,29 @@ extension NumberConventions {
 			? nil
 			: DecimalNumber((integerPart?.digits ?? "") + (fractionalPart.map { "." + $0 } ?? "") + (exponent ?? ""))
 				.map { number in (number, exponent?.endIndex ?? fractionalPart?.endIndex ?? integerEnd) }
+	}
+
+	/// The text & end of the longest unsigned number at the start of `string`, as
+	/// for `numberPrefix(of:)`; else `nil`.
+	private func unsignedNumberPrefix(of string: Substring) -> (number: String, end: Substring.Index)? {
+		var rest = string
+		let integerPart = integerPart(of: rest)
+		if let integerPart {
+			rest = rest[integerPart.end...]
+		}
+		let fractionalPart = fractionalPart(of: rest)
+		if let fractionalPart {
+			rest = rest[fractionalPart.endIndex...]
+		}
+		guard integerPart != nil || fractionalPart != nil else {
+			return nil
+		}
+		var number = (integerPart?.digits ?? "") + (fractionalPart.map { "." + $0 } ?? "")
+		if let exponent = exponent(of: rest) {
+			number += exponent
+			rest = rest[exponent.endIndex...]
+		}
+		return (number, rest.startIndex)
 	}
 
 	/// `digits` with `digitGroupSeparator` between its digit groups, counting

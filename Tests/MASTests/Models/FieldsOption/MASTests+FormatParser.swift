@@ -289,6 +289,8 @@ private extension MASTests { // swiftlint:disable file_length
 			("%n", .number(4.5), "4.5"),
 			// fields-format.md's examples
 			("%.:de:n", .string("1.234,56"), "1234.56"),
+			("%.:,,,,-x:n", .string("-x5"), ".5"),
+			("%.:,,,,-x:n", .string("--x5"), "-.5"),
 			("%.:de: n", .string("1.234,56"), "1234.56"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("US$4.99"), "US$4.99"),
 			("%.:,,,,,[A-Z]*[$]:n", .string("$4.99"), "$4.99"),
