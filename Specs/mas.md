@@ -1,6 +1,6 @@
 # mas Configuration
 
-`mas`-specific configuration of the generic [configs](configs.md) & [field
+mas-specific configuration of the generic [configs](configs.md) & [field
 selection](fields.md), which mas exposes via its [command-line
 interface](command-line.md).
 
