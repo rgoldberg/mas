@@ -951,12 +951,12 @@ A `<coercion>` to a date parses what any of its `<date-format>`s
 [matches](fields.md#sort-chronologic-segments), except that `<iso>` does not
 match a time-only, which is not a date, and `<unix-time>` also matches a number
 without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
-`"2020-03-18 17:39"`, and `%.:iso,unix-time:D` matches `0`, `"0"` &
-`"2020-03-18"`, while `%.:unix-time:D` matches only the 1st 2).
+`"2020-03-18 17:39"`, and `%.:iso,unix-time:d` matches `0`, `"0"` &
+`"2020-03-18"`, while `%.:unix-time:d` matches only the 1st 2).
 
 A default coercion to a date parses what a `<coercion>` whose only
 `<date-format>` is `<iso>` parses & a number without trivia as a Unix time, as a
-datetime, because a number has no other meaning as a date (e.g., `%.D` matches
+datetime, because a number has no other meaning as a date (e.g., `%.d` matches
 `0` & `"2020-03-18"`, but not `"0"`).
 
 A string that holds a decimal number coerces to a date only per `<unix-time>`,
