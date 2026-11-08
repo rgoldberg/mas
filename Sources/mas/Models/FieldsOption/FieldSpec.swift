@@ -946,12 +946,23 @@ private extension FieldSpecsBuilder {
 		baselineFieldSpecs.indices.compactMap { baselineFieldSpecs[$0].name == name ? $0 + 1 : nil }
 	}
 
-	/// Parses a `<named-field-spec-reference>`'s `<field-name>`, up to a
-	/// character in `modifiedFieldNameTerminatorSet` & optional
+	/// Parses a `<named-field-spec-reference>`'s `<field-name>` (up to a modifier
+	/// prefix, a `<field-spec-separator>`, or a
+	/// `<field-occurrence-index-prefix>`) & its optional
 	/// `<field-occurrence-index-prefix>` `<field-occurrence-index>` (`nil` iff
 	/// absent).
 	private func parseNameAndIndex(_ input: inout Substring) throws(ParsingError) -> (name: String, index: Int?) {
-		let name = try parseFieldName(&input, terminatorSet: modifiedFieldNameTerminatorSet)
+		let name = try parseFieldName(
+			&input,
+			terminatorSet: [
+				fieldOccurrenceIndexPrefix,
+				presetPrefix,
+				labelModifierPrefix,
+				formatModifierPrefix,
+				sortModifierPrefix,
+				fieldSpecSeparator,
+			],
+		)
 		return (
 			name,
 			input.first == fieldOccurrenceIndexPrefix
@@ -1235,17 +1246,6 @@ let sortModifierPrefix = Character("/")
 
 let fieldOccurrenceIndexPrefix = Character("@")
 let fieldSpecIndexPrefix = Character("@")
-
-/// The characters that terminate a `<field-name>` that may be followed by
-/// `<field-modifiers>`.
-private let modifiedFieldNameTerminatorSet = Set([
-	fieldOccurrenceIndexPrefix,
-	presetPrefix,
-	labelModifierPrefix,
-	formatModifierPrefix,
-	sortModifierPrefix,
-	fieldSpecSeparator,
-])
 
 private let disableAllSortsOption = Character("0")
 
