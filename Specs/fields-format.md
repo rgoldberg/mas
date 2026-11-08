@@ -84,16 +84,16 @@ unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-t
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
 
 boolean-pipeline(NULLARY, NON_NULLARY) =
-  <pipeline(<boolean-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
+  <pipeline(<boolean-format-name(NULLARY, NON_NULLARY)>, <value-transform-pipeline>, <unconditional-transform-pipeline>)>
 blank-pipeline(NULLARY, NON_NULLARY) =
-  <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
+  <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <value-transform-pipeline>, <uncoerced-string-transform-run>)>
 
 string-format-pipeline    = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline> | <coerced-string-chain>)>
 number-format-pipeline    = <pipeline(<number-format-name>, <value-transform-pipeline>, <number-input-pipeline> | <coerced-number-chain>)>
 date-format-pipeline      = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline> | <coerced-date-chain>)>
 time-only-format-pipeline = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline> | <coerced-time-only-chain>)>
 
-blank-format-pipeline(NULLARY, NON_NULLARY) = <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <string-transform-pipeline>)>
+blank-format-pipeline(NULLARY, NON_NULLARY) = <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <value-transform-pipeline>, <string-transform-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
