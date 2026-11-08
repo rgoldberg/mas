@@ -405,6 +405,7 @@ field-order-section-prefix = "/"
 field-order-option-set         = <primary-field-order-option-set> | <field-order-tiebreaker>
 primary-field-order-option-set =
   <positional-order-option-set> | <document-order-option-set> | <field-order-sort-option-set> | <field-order-adjustment-set>
+  (* last wins *)
 field-order-kind               = <primary-field-order-kind> | <field-order-tiebreaker-prefix> (* non-structural *)
 primary-field-order-kind       = <positional-order> | <document-order> | <input> | <output> (* non-structural *)
 field-order-tiebreaker         = <field-order-tiebreaker-prefix> <direction> (* last wins; inherited *)
@@ -441,8 +442,8 @@ fixed-unpositioned-fields    = "f"
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The **field order**, in which each item's fields are output, is per the last
-`<primary-field-order-option-set>` in `<field-order-sections>`:
+The **field order**, in which each item's fields are output, is per the
+effective `<primary-field-order-option-set>` in `<field-order-sections>`:
 
 - `<document-order>`: ordered in document order, e.g., the order of keys in an
   input JSON object, each [member](#members) at its own position. A field spec

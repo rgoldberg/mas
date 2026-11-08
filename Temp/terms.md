@@ -462,7 +462,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - cleanup: noun
     - REJECTED: cleanup (as a verb)
 75. - field order: the order in which each item's fields are output, per the
-      last `<primary-field-order-option-set>` in `<field-order-sections>`
+      effective `<primary-field-order-option-set>` in `<field-order-sections>`
       ([defined](../Specs/fields.md#field-order))
     - field order kind: a field order's or a field order section's kind: a
       primary field order kind, or `T` for a field order tiebreaker

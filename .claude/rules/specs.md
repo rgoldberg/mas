@@ -125,8 +125,8 @@ or a `<relative-config>` that means something else.
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value"), unless `the` selects 1 of multiple
-occurrences (e.g., "the last `<primary-field-order-option-set>`"), because a
-nonterminal names a contextually unique occurrence, as a proper noun does.
+occurrences (e.g., "the effective `<primary-field-order-option-set>`"), because
+a nonterminal names a contextually unique occurrence, as a proper noun does.
 
 In specs, prefer a possessive to an `of` phrase (e.g., "the saved field order's
 `<direction>`", not "`<direction>` of the saved field order"), because it is
