@@ -396,6 +396,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 64. - ensure: obligation on a syntax's author
     - guarantee: property that holds
 65. - edit: a `<field-spec-edit>`
+    - source: the field spec that a `<field-spec-edit>` modifies or copies: from
+      the reference fields config, or, for a `<field-spec-insertion>`, from the
+      baseline fields config
+      ([defined](../Specs/fields.md#relative-field-specs))
     - modify: applied to a value or config
     - change: only of what syntax text means, comparing 2 forms of it (e.g., "…
       does not change what they mean"), whereas "affect" names any influence on
