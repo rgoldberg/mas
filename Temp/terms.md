@@ -397,7 +397,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - guarantee: property that holds
 65. - edit: a `<field-spec-edit>`
     - modify: applied to a value or config
-    - REJECTED: change / alter
+    - change: only of what syntax text means, comparing 2 forms of it (e.g., "…
+      does not change what they mean"), whereas "affect" names any influence on
+      it (see 50)
+    - REJECTED: change (for modify) / alter
 66. - payload: a modifier's expression after its prefix, or an option's
       expression between its letter & its `<sort-option-terminator>`
       ([defined](../Specs/fields.md#payloads)); also an output config
