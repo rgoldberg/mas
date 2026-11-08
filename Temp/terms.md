@@ -298,7 +298,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       to a value ([defined](../Specs/fields-format.md#transforms))
     - REJECTED: function (except in "primary function") / method / execution /
       execute / invocation / invoke
-43. - kind: config kinds; block kinds
+43. - kind: config kinds; block kinds; field order kinds; segment kinds
     - type: value types
     - stem: a config name, without any output format suffix
       ([defined](../Specs/configs.md#named-configs))
