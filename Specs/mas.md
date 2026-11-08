@@ -90,8 +90,7 @@ outputs `name`, then `version`).
 
 `config`'s built-in standard's user-facing variants have a visible field spec
 for every field, in order, `mas`, `slice`, `slices`, `dist`, `origin`, `rev`,
-`swift`, `driver`, `store`, `region`, `macos`, `build`, `mac`, `cpu` & `arch`,
-each labeled by its field name & formatted as `%i`.
+`swift`, `driver`, `store`, `region`, `macos`, `build`, `mac`, `cpu` & `arch`.
 
 Every other command's built-in standard's user-facing variants have the
 following visible field specs, at the given positions:

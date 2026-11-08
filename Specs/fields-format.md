@@ -919,9 +919,7 @@ retaining the trivia unmodified (e.g., `..:,,,,,[$]:numberFormat:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every variable token, a regex's own
-`\` is written `\\` (e.g., `\\d` for the regex `\d` & `\\$` for `\$`), and
-`<trivia-prefix-regex>`'s `,` & `:` & `<trivia-suffix-regex>`'s `:` must be
-escaped.
+`\` is written `\\` (e.g., `\\d` for the regex `\d` & `\\$` for `\$`).
 
 ###### Chronologic Formatting
 
