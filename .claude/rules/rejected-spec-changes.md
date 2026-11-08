@@ -81,6 +81,12 @@ In specs, never make `<styled-key>`'s `<styling-specifier>` optional (e.g.,
 what `k` means, while `<header-on>`'s is optional because `H:` (an unstyled
 header row) means something other than `h` (no header row).
 
+In specs, never remove `p`'s, `x`'s, or `o`'s default for its payload (e.g.,
+`(* default styling-prefix: {empty string} *)`) merely because it equals that
+payload's own default, because an app overrides it (e.g., with the ANSI SGR
+styling defaults) without overriding the payload's, which an empty payload still
+selects (e.g., `P:` for none).
+
 In specs, never forbid a binary placeholder merely because its blocks are equal
 (e.g., `%Sx+x+` or `%N%i+%i+`), because other blocks make the same placeholder
 useful, so its equal blocks are what it holds, not what it is.
