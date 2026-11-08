@@ -872,6 +872,11 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - string coercion: a `<coercion>` to a string (e.g., in `%.s`), which
        matches every value except a `null` or an absent one
        ([defined](../Specs/fields-format.md#coercion))
+     - number coercion: a `<number-coercion>`, which parses a number's
+       separators & digit group sizes per its number format arguments & may
+       allow trivia ([used](../Specs/fields-format.md#coercion))
+     - boolean coercion: a `<coercion>` to a boolean, which parses only `true` &
+       `false`, verbatim ([used](../Specs/fields-format.md#coercion))
      - trivia: the text around the number that a number coercion allows
        ([defined](../Specs/fields-format.md#coercion))
      - trivia prefix / trivia suffix: the trivia before / after the number
