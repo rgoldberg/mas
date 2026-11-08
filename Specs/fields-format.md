@@ -270,8 +270,8 @@ is:
 - A date or time-only: its [rendering](#chronologic-formatting) (e.g.,
   `2020-03-18T17:39:23Z`).
 - A version: its text.
-- A [structured value](#value-types): its compact JSON text, with non-ASCII
-  characters verbatim (e.g., `["é",{"a":null}]`).
+- A [structured value](#value-types): its text as [JSON output](json.md) renders
+  it with `p` & `v` (e.g., `["é",{"a":null}]`, or `["a\u007f"]` for a DEL).
 
 ###### String Transforms
 

@@ -32,6 +32,8 @@ extension JSON.Node {
 			nil
 		case let .string(literal):
 			literal.value
+		case .array, .object:
+			rendered(indentation: nil, escapingNonASCII: false, depth: 0)
 		default:
 			.init(describing: self)
 		}

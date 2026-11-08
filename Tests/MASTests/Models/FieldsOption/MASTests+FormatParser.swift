@@ -156,6 +156,11 @@ private extension MASTests { // swiftlint:disable file_length
 		#expect(try rendered("(%i)", structuredValue) == #"(["é",{"a":null}])"#)
 	}
 
+	@Test
+	func `coerces a structured value's DEL & C1 control characters to JSON escape sequences`() throws {
+		#expect(try rendered("(%i)", .array([.string("a\u{7F}\u{9B}")])) == #"(["a\u007f\u009b"])"#)
+	}
+
 	@Test(
 		arguments: [
 			// fields-format.md's examples
