@@ -164,16 +164,16 @@ For each [leaf context](configs.md#context-stacks):
   `none`'s last item-sort option, so `none` [disables](#sort-priority) every
   field's sort, listed or not (e.g., if the `default` preset sets an enabled
   sort, `@none.b/I` sorts items by `b`, while neither `@none.b/0I` nor
-  `name,foo` sorts items, even if the app does not list `foo`). Field specs are
-  ordered by `<positional-order>`, so a fields config that extends it outputs
-  its inserted field specs in insertion order (e.g., `@none.+b,+a` outputs `b`,
-  then `a`).
+  `name,foo` sorts items, even if the app does not list `foo`). Its field order
+  is its [saved field order](#field-order) of kind `P`, so a fields config that
+  extends it outputs its inserted field specs in insertion order (e.g.,
+  `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
-  app lists. Its field order is its [saved field order](#field-order) of kind
-  `O`, so field specs are sorted by label.
+  app lists. Its field order is its saved field order of kind `O`, so field
+  specs are sorted by label.
 - [Built-in standard](configs.md#immutable-built-in-named-configs): Only a
-  select list of field specs is visible, and unlisted fields are hidden. Field
-  specs are ordered by `<positional-order>`.
+  select list of field specs is visible, and unlisted fields are hidden. Its
+  field order is its saved field order of kind `P`.
 
 A built-in fields config:
 
