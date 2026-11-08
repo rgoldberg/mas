@@ -781,13 +781,16 @@ non-nullary-standard-success =
   [ <coercion> ]
     (
       <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
-      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <boolean-pipeline(<nullary-boolean>, <non-nullary-boolean>)>)>
-      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <boolean-pipeline(<nullary-true>, <non-nullary-true>)>)>
-      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <boolean-pipeline(<nullary-false>, <non-nullary-false>)>)>
+      | <non-nullary-boolean-success(<nullary-boolean>, <non-nullary-boolean>)>
+      | <non-nullary-boolean-success(<nullary-true>, <non-nullary-true>)>
+      | <non-nullary-boolean-success(<nullary-false>, <non-nullary-false>)>
     )
-  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <blank-pipeline(<nullary-null>, <non-nullary-null>)>)>
-  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <blank-pipeline(<nullary-empty>, <non-nullary-empty>)>)>
-  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <blank-pipeline(<nullary-whitespace>, <non-nullary-whitespace>)>)>
+  | <non-nullary-blank-success(<nullary-null>, <non-nullary-null>)>
+  | <non-nullary-blank-success(<nullary-empty>, <non-nullary-empty>)>
+  | <non-nullary-blank-success(<nullary-whitespace>, <non-nullary-whitespace>)>
+
+non-nullary-boolean-success(NULLARY, NON_NULLARY) = <non-nullary-success(NULLARY, NON_NULLARY, <boolean-pipeline(NULLARY, NON_NULLARY)>)>
+non-nullary-blank-success(NULLARY, NON_NULLARY)   = <non-nullary-success(NULLARY, NON_NULLARY, <blank-pipeline(NULLARY, NON_NULLARY)>)>
 
 nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
 non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
