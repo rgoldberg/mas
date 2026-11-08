@@ -983,11 +983,11 @@ A string that holds a decimal number coerces to a date only per `<unix-time>`,
 because such a string is rarely a time (e.g., `%m.ds+` would otherwise render
 the string `5.6` as a date).
 
-`%.d`, and `%d` for an input format that does not support datetime, thus match
-every number that is a representable Unix time, so a branch that means to match
-a number must precede theirs or follow a `<coercion>` that omits `<unix-time>`
-(e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would render the
-price `5.6` as a date).
+`%.d` thus matches every number that is a representable Unix time, as does `%d`
+for an input format that does not support datetime, so a branch that means to
+match a number must precede theirs or follow a `<coercion>` that omits
+`<unix-time>` (e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would
+render the price `5.6` as a date).
 
 A `<coercion>` whose `<date-format>`s cannot match its input merely aborts
 (e.g., `.round..:iso:dateOnly`, because no number matches `<iso>`, or
