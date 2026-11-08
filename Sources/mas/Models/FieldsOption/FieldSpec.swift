@@ -375,9 +375,9 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 ///   field order of kind `P`, as the built-in standard's is.
 /// - `all`: every field spec visible, as are unlisted fields.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
-///   hidden, so `none`, `all` & `standard` differ only in which field specs &
-///   whether unlisted fields are hidden; `standard@json` is a reference to
-///   `all@json`.
+///   hidden, so `none`, `all` & `standard` differ only in which field specs are
+///   visible, whether unlisted fields are hidden, their field orders & whether
+///   their sorts are disabled; `standard@json` is a reference to `all@json`.
 /// - `default`: `standard`, absent a custom `default`.
 ///
 /// The `@json` variant is machine-facing (see `machineFacingVariant()`); the
