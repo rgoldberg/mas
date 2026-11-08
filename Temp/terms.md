@@ -766,6 +766,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - preset clearing: a bare `%`, which detaches every preset
      - named format: a preset's format, which a `<named-format-reference>`
        references ([defined](../Specs/fields-format.md#named-formats))
+     - conform: of a named format, to be what a `<format-name>`'s `BLOCK` would
+       parse if each of its tokens were escaped as `BLOCK` requires
+       ([defined](../Specs/fields-format.md#named-formats))
      - format input: the value against which a format is evaluated, which `%i` /
        `%I` insert: for a field spec's format, the field value; for a named
        format, the value that its `<named-format-reference>` evaluates it

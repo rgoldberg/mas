@@ -122,6 +122,12 @@ A `<named-format-reference>` evaluates its named format against the value to
 which a `<transform-pipeline>` in its position would be applied (e.g., in
 `%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
 
+A named format **conforms** to a `<format-name>`'s `BLOCK` iff `BLOCK` would
+parse it if each of its tokens were escaped as `BLOCK` requires, because a
+block's escaping differs from a `<format-block>`'s (e.g., for a preset `c` of
+`C++ %s`, `%S:c+-+` renders `"abc"` as `C++ abc`, because `BLOCK` would parse
+`C\+\+ %s`).
+
 Because every `<format-name>`'s `BLOCK` includes `<unconditional-block>`'s
 syntax, a named unconditional format conforms to every one.
 
