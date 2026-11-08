@@ -166,8 +166,8 @@ For each [leaf context](configs.md#context-stacks):
   sort, `@none.b/I` sorts items by `b`, while neither `@none.b/0I` nor
   `name,foo` sorts items, even if the app does not list `foo`). Its field order
   is its [saved field order](#field-order) of kind `P`, so a fields config that
-  extends it outputs its inserted field specs in insertion order (e.g.,
-  `@none.+b,+a` outputs `b`, then `a`).
+  extends it & whose field order is positional outputs its inserted field specs
+  in insertion order (e.g., `@none.+b,+a` outputs `b`, then `a`).
 - `all`: Visible unlisted fields & a visible field spec for each field that the
   app lists. Its field order is its saved field order of kind `O`, so field
   specs are sorted by label.
