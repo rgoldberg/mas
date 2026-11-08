@@ -411,9 +411,9 @@ NONTERMINAL "(" PARAMETER … "," ")" "=" DEFINITION
 ```
 
 A **parameterized nonterminal**'s definition names 1 or more **parameters**,
-each a word of uppercase letters, digits & `_` (as a metavariable is), which
-`DEFINITION` & its semantic comments reference bare (e.g., `PIPELINE`), not as
-nonterminal references.
+each a word of uppercase letters, digits & `_` that starts with an uppercase
+letter, as a metavariable is, which `DEFINITION` & its semantic comments
+reference bare (e.g., `PIPELINE`), not as nonterminal references.
 
 Each reference passes 1 **argument** per parameter, in order, each an
 expression; it references `DEFINITION` with each parameter replaced by its
