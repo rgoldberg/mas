@@ -462,7 +462,7 @@ definition is [non-structural](#non-structural-comments).
 An expression has 3 mutually exclusive possible presence states:
 
 - **Present**: It contains a consumed token.
-- **Transitively absent**: At least one of the expression's ancestors is absent,
+- **Transitively absent**: At least 1 of the expression's ancestors is absent,
   or no consumed token matches the expression as an alternative of a present
   choice or as an element of a present repetition.
 - **Directly absent**: Not present & not transitively absent.
