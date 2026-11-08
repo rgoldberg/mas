@@ -348,7 +348,7 @@ absolute-config = <absolute-field-spec> … <field-spec-separator>
 
 absolute-field-spec = <field-name> <field-modifiers>
 
-field-name = {string: field name with no bare "."} (* error: in a transient fields config, it names a nonexistent field *)
+field-name = {string: field name with no bare ".", "%", "=", ":", or "/"} (* error: in a transient fields config, it names a nonexistent field *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -1363,7 +1363,7 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 | `<field-name>` in `<field-spec-overlay>`                                                        | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
 | `<field-name>` in `<field-spec-move>`                                                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
 | `<field-name>` in `<field-spec-hide>`                                                           |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
-| `<field-name>` in `<field-spec-removal>`                                                        |             | `@` `.` `,`                 | ignored            | ignored                 |
+| `<field-name>` in `<field-spec-removal>`                                                        |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
 | `<preset-name>` in a `<preset-modifier>`                                                        |             |                             | ignored            | ignored                 |
 | `<label>`                                                                                       |             | `:` `/` `,`                 | ignored            | ignored                 |
 | `<locale-identifier>` in `<locale>`                                                             |             | `:`                         | ignored            | ignored                 |
@@ -1388,6 +1388,11 @@ iff before `%` (e.g., `%i %l` retains its space).
 
 A bare `.` in a field name is invalid, reserving it for future syntax; an
 escaped `.` is consumed (e.g., `a\.b` names the field `a.b`).
+
+A bare `%`, `=`, `:`, or `/` in a field name is invalid, even in a
+`<field-spec-removal>`, which has no `<field-modifiers>` for it to start, so
+that a removal written like another edit (e.g., `.-name/I`) is an error, rather
+than silently listing an unlisted field (e.g., `name/I`).
 
 A preset's `<label>` & `<template-text>` need not escape `,`, because a preset's
 syntax has no `<field-spec-separator>` (e.g., a preset of `=a,b` sets the label

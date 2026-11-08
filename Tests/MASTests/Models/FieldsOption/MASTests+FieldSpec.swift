@@ -266,6 +266,23 @@ private extension MASTests {
 		#expect(try parseFieldSpecs(value).map(\.name) == names)
 	}
 
+	@Test(
+		arguments: [
+			("@all.-adamID%x", Character("%")),
+			("@all.-adamID=X", "="),
+			("@all.-adamID:%i", ":"),
+			("@all.-adamID/I", "/"),
+		],
+	)
+	func `a bare modifier prefix after a removal's field name is an error`(value: String, character: Character) {
+		#expect(throws: ParsingError.unexpectedCharacter(character)) { try parseFieldsConfig(value) }
+	}
+
+	@Test
+	func `a removal's field name may contain an escaped modifier prefix`() throws {
+		#expect(try parseFieldSpecs(#"@all.-adamID\=X"#).map(\.name) == ["adamID", "bundleID"])
+	}
+
 	@Test(arguments: ["@all._adamID,adamID", "@all._adamID,%adamID"])
 	func `overlay & move unhide a hidden field spec`(value: String) throws {
 		#expect(try parseFieldSpecs(value).map(\.isHidden) == [false, false])

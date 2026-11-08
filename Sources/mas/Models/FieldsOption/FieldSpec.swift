@@ -647,9 +647,7 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 					modifiersInput: &input,
 				)
 			case .removal:
-				// A `<field-spec-removal>`'s `<field-name>` has no modifiers to
-				// terminate it
-				switch try parseReference(&input, nameTerminatorSet: [fieldOccurrenceIndexPrefix, fieldSpecSeparator]) {
+				switch try parseReference(&input) {
 				case let .resolved(reference):
 					if referenceFieldSpecs[reference.position - 1] != nil {
 						remove(reference)
@@ -819,10 +817,7 @@ private extension FieldSpecsBuilder {
 		let position: Int
 	}
 
-	private func parseFieldSpecReference(
-		_ input: inout Substring,
-		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
-	) throws(ParsingError) -> Reference {
+	private func parseFieldSpecReference(_ input: inout Substring) throws(ParsingError) -> Reference {
 		guard input.first != fieldSpecIndexPrefix else {
 			return .init(
 				name: nil,
@@ -832,7 +827,7 @@ private extension FieldSpecsBuilder {
 				),
 			)
 		}
-		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
+		let (name, index) = try parseNameAndIndex(&input)
 		return try namedReference(name: name, index: index, positions: referencePositions(forName: name))
 	}
 
@@ -863,14 +858,11 @@ private extension FieldSpecsBuilder {
 	/// spec (e.g., for an unlisted field), the reference to the field spec that
 	/// an earlier `<reference-sourced-field-spec-edit>` inserted for that name,
 	/// if not since removed, else that name.
-	private func parseReference(
-		_ input: inout Substring,
-		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
-	) throws(ParsingError) -> ParsedReference {
+	private func parseReference(_ input: inout Substring) throws(ParsingError) -> ParsedReference {
 		guard input.first != fieldSpecIndexPrefix else {
 			return .resolved(try parseFieldSpecReference(&input))
 		}
-		let (name, index) = try parseNameAndIndex(&input, nameTerminatorSet: nameTerminatorSet)
+		let (name, index) = try parseNameAndIndex(&input)
 		let positions = referencePositions(forName: name)
 		return if !positions.isEmpty || index != nil {
 			.resolved(try namedReference(name: name, index: index, positions: positions))
@@ -955,14 +947,11 @@ private extension FieldSpecsBuilder {
 	}
 
 	/// Parses a `<named-field-spec-reference>`'s `<field-name>`, up to a
-	/// character in `nameTerminatorSet` & optional
+	/// character in `modifiedFieldNameTerminatorSet` & optional
 	/// `<field-occurrence-index-prefix>` `<field-occurrence-index>` (`nil` iff
 	/// absent).
-	private func parseNameAndIndex(
-		_ input: inout Substring,
-		nameTerminatorSet: Set<Character> = modifiedFieldNameTerminatorSet,
-	) throws(ParsingError) -> (name: String, index: Int?) {
-		let name = try parseFieldName(&input, terminatorSet: nameTerminatorSet)
+	private func parseNameAndIndex(_ input: inout Substring) throws(ParsingError) -> (name: String, index: Int?) {
+		let name = try parseFieldName(&input, terminatorSet: modifiedFieldNameTerminatorSet)
 		return (
 			name,
 			input.first == fieldOccurrenceIndexPrefix
