@@ -191,7 +191,13 @@ extension [JSON.Object] {
 			rows.append(
 				separator.broken
 					? renderedTableRow(
-						cells: columnMetadata.map { repeatedPattern(separator.pattern, toWidth: $0.maxWidth) },
+						cells: columnMetadata.indices.map { index in
+							repeatedPattern(
+								separator.pattern,
+								toWidth: columnMetadata[index].maxWidth,
+								isSpaceFilled: index < columnMetadata.count - 1,
+							)
+						},
 						columns: columnMetadata,
 						columnSpacing: columnSpacing,
 					)
@@ -317,9 +323,10 @@ private extension String {
 /// except that each tab of each column spacing is retained in place, with each
 /// run between tabs filled independently (table.md "Broken"), because a tab's
 /// rendered width depends on the terminal's tab stops, which an app cannot
-/// determine.
+/// determine. The last run has no space-fill, so the line has no trailing
+/// spaces (table.md "Separator").
 private func continuousSeparatorLine(pattern: String, columnWidths: [Int], columnSpacing: String) -> String {
-	columnWidths.dropFirst()
+	let runWidths = columnWidths.dropFirst()
 		.reduce(into: [columnWidths.first ?? 0]) { runWidths, columnWidth in
 			for character in columnSpacing {
 				if character == "\t" {
@@ -330,20 +337,23 @@ private func continuousSeparatorLine(pattern: String, columnWidths: [Int], colum
 			}
 			runWidths[runWidths.count - 1] += columnWidth
 		}
+	return runWidths.indices
 		.lazy
-		.map { repeatedPattern(pattern, toWidth: $0) }
+		.map { index in
+			repeatedPattern(pattern, toWidth: runWidths[index], isSpaceFilled: index < runWidths.count - 1)
+		}
 		.joined(separator: "\t")
 }
 
 /// Repeats `pattern` to fill `targetWidth`, truncating mid-repetition before
-/// the 1st character that would exceed `targetWidth`, then filling any
-/// remaining width (e.g., after a truncated wide character, such as `中`) with
-/// spaces (table.md & key-value.md: a separator line's or leader's repetition
-/// cuts off immediately, even mid-character-group, rather than rounding to a
-/// whole number of repetitions). Returns a 0-width `pattern` (e.g., a tab)
-/// once, with no space-fill, because no number of repetitions can fill any
-/// width.
-private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> String {
+/// the 1st character that would exceed `targetWidth`, then, iff
+/// `isSpaceFilled`, filling any remaining width (e.g., after a truncated wide
+/// character, such as `中`) with spaces (table.md & key-value.md: a separator
+/// line's or leader's repetition cuts off immediately, even
+/// mid-character-group, rather than rounding to a whole number of repetitions).
+/// Returns a 0-width `pattern` (e.g., a tab) once, with no space-fill, because
+/// no number of repetitions can fill any width.
+private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int, isSpaceFilled: Bool = true) -> String {
 	guard pattern.terminalWidth > 0 else {
 		return pattern
 	}
@@ -360,7 +370,7 @@ private func repeatedPattern(_ pattern: String, toWidth targetWidth: Int) -> Str
 		width += characterWidth
 		index += 1
 	}
-	return result + .init(repeating: " ", count: targetWidth - width)
+	return isSpaceFilled ? result + .init(repeating: " ", count: targetWidth - width) : result
 }
 
 extension JSON.Node {

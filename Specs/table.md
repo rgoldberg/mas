@@ -189,10 +189,13 @@ separator-pattern = ^{string}^ (* default: "-" *)
   line). `<separator-pattern>` is repeated to fill the line's
   [width](configs.md#width), truncated before the 1st character that would
   exceed that width; spaces fill any remaining width (e.g., when that character
-  is wide, such as `中`). A 0-width `<separator-pattern>` (e.g., a tab) is
-  rendered once, because no number of repetitions can fill any width: per run
-  between tabs of a `u` line, with no space-fill, or per segment of a
-  [`b`](#broken) line, which aligns each segment.
+  is wide, such as `中`), except at the line's end, as no cell of the last column
+  has trailing spaces (e.g., for a table width of 5, `S中:` renders `中中`, and a
+  `b` line's last segment is aligned as such a cell is). A 0-width
+  `<separator-pattern>` (e.g., a tab) is rendered once, because no number of
+  repetitions can fill any width: per run between tabs of a `u` line, with no
+  space-fill, or per segment of a [`b`](#broken) line, which aligns each
+  segment.
 
 ## Broken
 

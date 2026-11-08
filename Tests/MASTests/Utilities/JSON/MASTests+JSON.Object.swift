@@ -15,14 +15,15 @@ private extension MASTests {
 			("-", false, "--------"),
 			("-+", false, "-+-+-+-+"),
 			("-", true, "----  --"),
-			("-中", false, "-中-中- "),
-			("-中", true, "-中-  - "),
+			("-中", false, "-中-中-"),
+			("-中", true, "-中-  -"),
+			("中-", true, "中-   中"),
 			("\t", false, "\t"),
 			("\t", true, "\t      \t"),
 			("\u{301}", false, "\u{301}"),
 		],
 	)
-	func `a table separator fills its width, except a 0-width separator, which is rendered once`(
+	func `a table separator fills its width, but not with trailing spaces, except a 0-width one, which renders once`(
 		pattern: String,
 		broken: Bool,
 		separatorLine: String,
