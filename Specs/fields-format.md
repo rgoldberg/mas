@@ -608,7 +608,7 @@ block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block> (* direct default: {empty string} *)
 
-success-pipeline = <named-format-pipeline> (* non-structural *)
+success-pipeline = <named-format-pipeline> | <string-pipeline> | <unconditional-pipeline> | <unconditional-string-pipeline> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
