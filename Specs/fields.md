@@ -181,8 +181,8 @@ A built-in fields config:
 - Saves, as its saved field order of each `<primary-field-order-kind>`, the
   app's **default field order** of that kind for the current output format,
   which the app gives as field order syntax (e.g.,
-  [mas's](mas.md#default-field-orders)), or, absent one, that kind's
-  `<primary-field-order-kind>` alone (e.g., `/P`).
+  [mas's](mas.md#default-field-orders)), or, absent one, a field order section
+  of only that kind's `<primary-field-order-kind>` (e.g., `/P`).
 - Sets its `<field-order-tiebreaker>`'s & its item sorting's `<direction>` to
   `<ascending>`.
 - May have built-in variants.
