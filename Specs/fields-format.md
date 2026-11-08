@@ -82,6 +82,11 @@ date-pipeline                 = <pipeline(<date-format-name>, <value-transform-p
 time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline>)>
 unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
+
+string-format-pipeline    = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline> | <coerced-string-chain>)>
+number-format-pipeline    = <pipeline(<number-format-name>, <value-transform-pipeline>, <number-input-pipeline> | <coerced-number-chain>)>
+date-format-pipeline      = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline> | <coerced-date-chain>)>
+time-only-format-pipeline = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline> | <coerced-time-only-chain>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -95,11 +100,11 @@ named-format-reference(FORMAT_NAME) = <name-prefix> FORMAT_NAME
 
 format-name(BLOCK) = <preset-name> (* error: its preset's format does not conform to BLOCK *)
 
-string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <named-format-pipeline(<string-format-name>)>)>)>
-version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <named-format-pipeline(<version-format-name>)>)>)>
-number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <named-format-pipeline(<number-format-name>)>)>)>
-date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <named-format-pipeline(<date-format-name>)>)>)>
-time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <named-format-pipeline(<time-only-format-name>)>)>)>
+string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <string-format-pipeline>)>)>
+version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <version-pipeline>)>)>
+number-format-name        = <format-name(<conditional-block(<nullary-number>, <non-nullary-number>, <number-format-pipeline>)>)>
+date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <date-format-pipeline>)>)>
+time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-format-pipeline>)>)>
 unconditional-format-name = <format-name(<unconditional-block>)>
 
 name-prefix = ":"!
@@ -124,6 +129,15 @@ An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 `<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
 string, as an empty named format does (e.g., `%S:e+none+` inserts an empty
 string for a string).
+
+A `<string-format-pipeline>`, `<number-format-pipeline>`,
+`<date-format-pipeline>`, or `<time-only-format-pipeline>` may start with a
+`<coercion>` to its own type, because a named format is a `<format-block>`,
+whose 1st call's value type its own syntax text does not determine, but a 1st
+call without a `<coercion>` must take that type (e.g., a preset `u` of
+`..uppercase` conforms to `<string-format-name>`, while a preset `r` of `.round`
+does not, so `%S:r+-+` is an error, rather than reporting an item error for
+every string).
 
 ##### Transforms
 
