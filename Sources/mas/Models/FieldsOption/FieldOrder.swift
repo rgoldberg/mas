@@ -72,14 +72,6 @@ struct FieldOrders: Equatable { // swiftlint:disable:this one_declaration_per_fi
 		savedFieldOrderByKind[fieldOrder.kind] = fieldOrder
 	}
 
-	/// These field orders, with their saved field order of `kind` as the field
-	/// order.
-	func savingFieldOrder(of kind: PrimaryFieldOrderKind, outputFormat: OutputFormat) -> Self {
-		var fieldOrders = self
-		fieldOrders.save(savedFieldOrder(of: kind, outputFormat: outputFormat))
-		return fieldOrders
-	}
-
 	/// `fieldOrder.applied(to:unlisted:tiebreakDirection:)`, tiebreaking per
 	/// `tiebreakDirection`.
 	func applied(to fieldSpecs: [FieldSpec], unlisted: [FieldSpec]) -> [FieldSpec] {

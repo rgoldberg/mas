@@ -45,7 +45,7 @@ extension OutputConfig { // swiftlint:disable:this file_types_order
 		do {
 			resolved = try resolvedFieldsConfig(
 				from: fieldsOptionValue,
-				standard: standardFieldsConfig,
+				standard: standardFieldsConfig.withDefaultFieldOrder(of: .positional, outputFormat: outputFormat),
 				all: allFieldsConfig,
 				outputFormat: outputFormat,
 				fieldNameSet: fieldNameSet,

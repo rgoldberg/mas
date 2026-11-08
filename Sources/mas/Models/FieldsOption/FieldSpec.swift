@@ -371,7 +371,8 @@ private func parseBaseFieldsConfigSection(_ input: inout Substring) throws(Parsi
 /// `outputFormat`:
 ///
 /// - `none`: `all` with every field spec's `<sort>`, if any, disabled & with
-///   every field spec & unlisted field hidden, ordered by `<positional-order>`.
+///   every field spec & unlisted field hidden, its field order being its saved
+///   field order of kind `P`, as the built-in standard's is.
 /// - `all`: every field spec visible, as are unlisted fields.
 /// - `standard`: `standard`'s field specs, then `all`'s other field specs,
 ///   hidden, so `none`, `all` & `standard` differ only in which field specs &
@@ -405,7 +406,7 @@ func resolveBaseFieldsConfig(
 		throw .invalidBaseFieldsConfigName(rawName)
 	}
 	let isMachineFacing = !isUnsuffixedVariant && (outputFormatSuffix.map { $0 == "json" } ?? outputFormat.isJSON)
-	let allVariant = all.withFieldOrder(of: .label, outputFormat: outputFormat)
+	let allVariant = all.withDefaultFieldOrder(of: .label, outputFormat: outputFormat)
 	let config: any FieldsConfig =
 		switch stem {
 		case allFieldsConfigName:
@@ -414,6 +415,7 @@ func resolveBaseFieldsConfig(
 			isMachineFacing ? allVariant : standard.including(hidden: allVariant.fieldSpecs)
 		case noneFieldsConfigName:
 			SelectedFieldsConfig(fieldSpecs: allVariant.fieldSpecs, itemSort: allVariant.itemSort)
+				.withDefaultFieldOrder(of: .positional, outputFormat: outputFormat)
 				.hidingAll()
 				.disablingAllSorts()
 		default:

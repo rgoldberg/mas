@@ -79,11 +79,12 @@ struct OutputConfigOptionGroup<Config: OutputConfig>: ParsableArguments {
 	/// in `validate()`, then re-derived (cheaply, `fieldsOptionValue` is tiny) by
 	/// callers that need it before fetching data.
 	func fetchFieldNames() throws -> [String] {
-		try mas::fetchFieldNames(
+		let outputFormat = try outputFormat
+		return try mas::fetchFieldNames(
 			for: fieldsOptionValue,
-			standard: Config.standardFieldsConfig,
+			standard: Config.standardFieldsConfig.withDefaultFieldOrder(of: .positional, outputFormat: outputFormat),
 			all: Config.allFieldsConfig,
-			outputFormat: try outputFormat,
+			outputFormat: outputFormat,
 			fieldNameSet: Config.fieldNameSet,
 		)
 	}
