@@ -431,9 +431,10 @@ private extension String {
 	/// This string as a quoted JSON string (json.md "JSON Config"): each `"` &
 	/// `\` escaped by a `\`, each backspace, tab, LF, form feed & CR as its short
 	/// escape sequence (e.g., `\n`), and each other C0 control character, each
-	/// DEL, each C1 control character & (iff `escapingNonASCII`) each other
-	/// non-ASCII character as a `\u` escape sequence per UTF-16 code unit, with
-	/// lowercase hex digits (e.g., `\u009b` for U+009B).
+	/// DEL, each C1 control character, each U+2028, each U+2029 & (iff
+	/// `escapingNonASCII`) each other non-ASCII character as a `\u` escape
+	/// sequence per UTF-16 code unit, with lowercase hex digits (e.g., `\u009b`
+	/// for U+009B).
 	func jsonStringLiteral(escapingNonASCII: Bool) -> Self {
 		"\""
 			+ unicodeScalars
@@ -453,7 +454,11 @@ private extension String {
 					#"\f"#
 				case "\r":
 					#"\r"#
-				case _ where scalar.value < 0x20 || (0x7f..<0xa0).contains(scalar.value) || escapingNonASCII && !scalar.isASCII:
+				case _
+					where scalar.value < 0x20
+					|| (0x7f..<0xa0).contains(scalar.value)
+					|| (0x2028...0x2029).contains(scalar.value)
+					|| escapingNonASCII && !scalar.isASCII:
 					String(scalar)
 						.utf16
 						.map { codeUnit in

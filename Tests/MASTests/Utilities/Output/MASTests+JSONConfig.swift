@@ -146,6 +146,12 @@ private extension MASTests {
 		#expect(node.rendered(jsonConfig: try parseJSONConfig("e")) == #"{"\u00e9":"\u00f6\ud83d\ude00\n"}"#)
 		#expect(node.rendered(jsonConfig: try parseJSONConfig("v")) == #"{"é":"ö😀\n"}"#)
 	}
+
+	@Test
+	func `json escapes U+2028 & U+2029 in keys & values even with v, so that each value is on 1 line`() throws {
+		let node = JSON.Node.object(.init([("\u{2028}k", .string("a\u{2029}b"))]))
+		#expect(node.rendered(jsonConfig: try parseJSONConfig("v")) == #"{"\u2028k":"a\u2029b"}"#)
+	}
 }
 
 private let twoItems = [
