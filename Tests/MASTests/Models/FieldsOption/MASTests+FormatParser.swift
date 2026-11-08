@@ -74,6 +74,14 @@ private extension MASTests { // swiftlint:disable file_length
 	}
 
 	@Test
+	func `%v before %d matches a date-only string as a version`() throws {
+		let renderings = try inSystemTimeZone("UTC") {
+			try ["%mV%v (v)+D%d (d)++", "%mD%d (d)+V%v (v)++"].map { try rendered($0, .string("2020-03-18")) }
+		}
+		#expect(renderings == ["2020-03-18 (v)", "2020-03-18 (d)"])
+	}
+
+	@Test
 	func `a number coercion parses a string, but not a structured value, whose text is a number between trivia`()
 	throws {
 		let format = #"%.:,,,,,\\[,\\]:N%n+no+"#

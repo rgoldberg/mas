@@ -845,10 +845,11 @@ non-nullary-version = "V" (* is version; output type: version; value: {matched v
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
-version (e.g., `%.v` matches `"1.2.3-beta"` & `1.2`), as does an [implicit
-coercion](#value-types), so a branch that means to match a number must precede
-`%v`'s (e.g., `%mnv+`, but not `%mvn+`, which would render the number `1.2` as
-the string `1.2`).
+version (e.g., `%.v` matches `"1.2.3-beta"`, `1.2` & `"2020-03-18"`), as does an
+[implicit coercion](#value-types), so a branch that means to match a number or a
+date-only must precede `%v`'s (e.g., `%mndv+`, but neither `%mvn+`, which would
+render the number `1.2` as the string `1.2`, nor `%mV%v (v)+D%d (d)++`, which
+would render `"2020-03-18"` as `2020-03-18 (v)`).
 
 ###### Coercion
 
