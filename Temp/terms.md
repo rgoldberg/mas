@@ -825,8 +825,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        that is `0`
      - base conventions: the conventions from which number format arguments
        default: those that `<locale-identifier>` identifies, else those of the
-       system locale, the canonical conventions, or `<locale>`'s, depending on
-       the argument list ([defined](../Specs/fields-format.md#numberformat))
+       system locale, the canonical conventions, or the effective `<locale>`'s,
+       depending on the argument list
+       ([defined](../Specs/fields-format.md#numberformat))
 117. - abort: verb; of formatting, make the formatted value absent, ignoring the
        rest of `<format-block>`
        ([defined](../Specs/fields-format.md#success--failure))
