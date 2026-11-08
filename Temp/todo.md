@@ -129,8 +129,8 @@ the functionality that needs them from specs & code:
       is removed, each `<pipeline>` is only its `TRANSFORM_PIPELINE`, so each of
       the others is only another name of its transform pipeline, and
       `<string-transform-pipeline>`, `<string-format-pipeline>`,
-      `<number-format-pipeline>`, `<date-format-pipeline>` &
-      `<time-only-format-pipeline>` are unreferenced.
+      `<blank-format-pipeline>`, `<number-format-pipeline>`,
+      `<date-format-pipeline>` & `<time-only-format-pipeline>` are unreferenced.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
       always `standard`; removing it also needs editing the [default
       configs](../Specs/configs.md#default-configs).

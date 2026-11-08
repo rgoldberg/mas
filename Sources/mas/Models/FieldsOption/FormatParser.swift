@@ -705,9 +705,9 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The kind of a non-nullary `<block-placeholder>`'s pipeline block.
 	var blockPlaceholderPipelineKind: Self {
 		switch self {
-		case .boolean, .input, .unconditional, .unconditionalString:
+		case .input, .unconditional, .unconditionalString:
 			.unconditional
-		case .blank, .date, .number, .string, .timeOnly, .version:
+		case .blank, .boolean, .date, .number, .string, .timeOnly, .version:
 			self
 		}
 	}
@@ -720,8 +720,10 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 	/// The pipeline's nonterminal name.
 	var pipelineName: String {
 		switch self {
-		case .boolean, .unconditional:
-			"<unconditional-pipeline>"
+		case .blank:
+			"<blank-pipeline>"
+		case .boolean:
+			"<boolean-pipeline>"
 		case .date:
 			"<date-pipeline>"
 		case .input:
@@ -732,7 +734,9 @@ private enum BlockKind: Equatable { // swiftlint:disable:this one_declaration_pe
 			"<string-pipeline>"
 		case .timeOnly:
 			"<time-only-pipeline>"
-		case .blank, .unconditionalString:
+		case .unconditional:
+			"<unconditional-pipeline>"
+		case .unconditionalString:
 			"<unconditional-string-pipeline>"
 		case .version:
 			"<version-pipeline>"

@@ -83,10 +83,17 @@ time-only-pipeline            = <pipeline(<time-only-format-name>, <value-transf
 unconditional-pipeline        = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
 unconditional-string-pipeline = <pipeline(<unconditional-format-name>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
 
+boolean-pipeline(NULLARY, NON_NULLARY) =
+  <pipeline(<boolean-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <unconditional-transform-pipeline>)>
+blank-pipeline(NULLARY, NON_NULLARY) =
+  <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <uncoerced-string-transform-run>)>
+
 string-format-pipeline    = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline> | <coerced-string-chain>)>
 number-format-pipeline    = <pipeline(<number-format-name>, <value-transform-pipeline>, <number-input-pipeline> | <coerced-number-chain>)>
 date-format-pipeline      = <pipeline(<date-format-name>, <value-transform-pipeline>, <date-input-pipeline> | <coerced-date-chain>)>
 time-only-format-pipeline = <pipeline(<time-only-format-name>, <value-transform-pipeline>, <time-only-input-pipeline> | <coerced-time-only-chain>)>
+
+blank-format-pipeline(NULLARY, NON_NULLARY) = <pipeline(<blank-format-name(NULLARY, NON_NULLARY)>, <string-transform-pipeline>, <string-transform-pipeline>)>
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -106,6 +113,9 @@ number-format-name        = <format-name(<conditional-block(<nullary-number>, <n
 date-format-name          = <format-name(<conditional-block(<nullary-date>, <non-nullary-date>, <date-format-pipeline>)>)>
 time-only-format-name     = <format-name(<conditional-block(<nullary-time-only>, <non-nullary-time-only>, <time-only-format-pipeline>)>)>
 unconditional-format-name = <format-name(<unconditional-block>)>
+
+boolean-format-name(NULLARY, NON_NULLARY) = <format-name(<conditional-block(NULLARY, NON_NULLARY, <boolean-pipeline(NULLARY, NON_NULLARY)>)>)>
+blank-format-name(NULLARY, NON_NULLARY)   = <format-name(<conditional-block(NULLARY, NON_NULLARY, <blank-format-pipeline(NULLARY, NON_NULLARY)>)>)>
 
 name-prefix = ":"!
 ```
@@ -136,14 +146,15 @@ An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 string, as an empty named format does (e.g., `%S:e+none+` inserts an empty
 string for a string).
 
-A `<string-format-pipeline>`, `<number-format-pipeline>`,
-`<date-format-pipeline>`, or `<time-only-format-pipeline>` may start with a
-`<coercion>` to its own type, because a named format is a `<format-block>`,
-whose 1st call's value type its own syntax text does not determine, but a 1st
-call without a `<coercion>` must take that type (e.g., the named format of a
-preset `u` of `:..uppercase` conforms to `<string-format-name>`, while that of a
-preset `r` of `:.round` does not, so `%S:r+-+` is an error, rather than
-reporting an item error for every string).
+A `<string-format-pipeline>`, `<blank-format-pipeline>`,
+`<number-format-pipeline>`, `<date-format-pipeline>`, or
+`<time-only-format-pipeline>` may start with a `<coercion>` to its own type (a
+string, for `<blank-format-pipeline>`), because a named format is a
+`<format-block>`, whose 1st call's value type its own syntax text does not
+determine, but a 1st call without a `<coercion>` must take that type (e.g., the
+named format of a preset `u` of `:..uppercase` conforms to
+`<string-format-name>`, while that of a preset `r` of `:.round` does not, so
+`%S:r+-+` is an error, rather than reporting an item error for every string).
 
 ##### Transforms
 
@@ -770,13 +781,13 @@ non-nullary-standard-success =
   [ <coercion> ]
     (
       <non-nullary-success(<nullary-string>, <non-nullary-string>, <string-pipeline>)>
-      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <unconditional-pipeline>)>
-      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <unconditional-pipeline>)>
-      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <unconditional-pipeline>)>
+      | <non-nullary-success(<nullary-boolean>, <non-nullary-boolean>, <boolean-pipeline(<nullary-boolean>, <non-nullary-boolean>)>)>
+      | <non-nullary-success(<nullary-true>, <non-nullary-true>, <boolean-pipeline(<nullary-true>, <non-nullary-true>)>)>
+      | <non-nullary-success(<nullary-false>, <non-nullary-false>, <boolean-pipeline(<nullary-false>, <non-nullary-false>)>)>
     )
-  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <unconditional-string-pipeline>)>
-  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <unconditional-string-pipeline>)>
-  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <unconditional-string-pipeline>)>
+  | <non-nullary-success(<nullary-null>, <non-nullary-null>, <blank-pipeline(<nullary-null>, <non-nullary-null>)>)>
+  | <non-nullary-success(<nullary-empty>, <non-nullary-empty>, <blank-pipeline(<nullary-empty>, <non-nullary-empty>)>)>
+  | <non-nullary-success(<nullary-whitespace>, <non-nullary-whitespace>, <blank-pipeline(<nullary-whitespace>, <non-nullary-whitespace>)>)>
 
 nullary-coercible-standard-predicate     = <nullary-string> | <nullary-boolean> | <nullary-true> | <nullary-false>
 non-nullary-coercible-standard-predicate = <non-nullary-string> | <non-nullary-boolean> | <non-nullary-true> | <non-nullary-false>
