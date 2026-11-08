@@ -136,8 +136,10 @@ conventions as their [base conventions](fields-format.md#numberformat) & include
 of it, which equals 0.
 
 The App Store's locale cannot be determined programmatically, so the App Store
-locale is the locale of the App Store region that mas guesses from the macOS
-region.
+locale is the likely locale, per [CLDR likely
+subtags](https://www.unicode.org/reports/tr35/#Likely_Subtags), of the App Store
+region that mas guesses from the macOS region (e.g., `de_Latn_CH` for `CH`),
+because a region may have multiple locales.
 
 ## Default Sort Options
 

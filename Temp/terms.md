@@ -886,9 +886,12 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        also the type of a version value (`%v`'s output type)
      - version fields: `minimumOSVersion`, `newVersion` & `version`
        ([defined](../Specs/mas.md#default-sort-options))
-120. - App Store locale: the locale of the App Store region that mas guesses
-       from the macOS region, because the App Store's locale cannot be
-       determined programmatically ([defined](../Specs/mas.md#price-sorting))
+120. - App Store locale: the likely locale, per CLDR likely subtags, of the App
+       Store region that mas guesses from the macOS region, because the App
+       Store's locale cannot be determined programmatically
+       ([defined](../Specs/mas.md#price-sorting))
+     - likely locale: a region's most likely locale, per CLDR likely subtags
+       (e.g., `de_Latn_CH` for `CH`; [used](../Specs/mas.md#price-sorting))
 121. - command: a node in an app's command hierarchy: the root command (the app
        itself) or a subcommand of another command
        ([defined](../Specs/configs.md#commands))
