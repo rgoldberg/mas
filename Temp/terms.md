@@ -322,7 +322,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - REJECTED: scope / subformat / empty template
 47. - success
     - failure
-    - conforming
+    - conforming: also of a named format (see 110)
     - nonconforming
     - coerce
     - REJECTED: convert
@@ -771,7 +771,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        references ([defined](../Specs/fields-format.md#named-formats))
      - conform: of a named format, to be what a `<format-name>`'s `BLOCK` would
        parse if each of its tokens were escaped as `BLOCK` requires
-       ([defined](../Specs/fields-format.md#named-formats))
+       ([defined](../Specs/fields-format.md#named-formats)); also of a sort
+       value (see 47)
      - format input: the value against which a format is evaluated, which `%i` /
        `%I` insert: for a field spec's format, the field value; for a named
        format, the value that its `<named-format-reference>` evaluates it
