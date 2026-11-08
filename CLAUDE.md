@@ -102,8 +102,10 @@ chosen), except always use `.md` for Markdown.
   documentation; & so on:
   - **Commas:** Use Oxford commas for lists
   - **Ampersands:** Prefer `&` to `and` (omit Oxford comma before `&`)
-  - **Exceptions:** `and` should be used in `and/or` & after a comma that
-    separates distinct clauses (but not in a list)
+  - **Exceptions:** `and` should be used in `and/or`, after a comma that
+    separates distinct clauses (but not in a list) & after a comma that ends a
+    parenthetical or a nonrestrictive clause (e.g.,
+    `matches a value, which has text, and coerces it`)
   - **Quotes**: The enclosing quotations marks of a quote at the end of a
     sentence (iff the whole sentence is not a quote) should not enclose the
     terminal punctuation mark of the encompassing sentence
