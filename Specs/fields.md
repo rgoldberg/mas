@@ -1351,8 +1351,8 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 <!--markdownlint-disable line-length-->
 | Nonterminal                                                                                     | 1st         | Any                         | Leading Whitespace | Trailing Whitespace     |
 |:------------------------------------------------------------------------------------------------|:------------|:----------------------------|:-------------------|:------------------------|
-| `<field-name>` of the 1st `<absolute-field-spec>`                                               | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
-| `<field-name>` of a subsequent `<absolute-field-spec>`                                          |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| The 1st `<absolute-field-spec>`'s `<field-name>`                                                | `@`         | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
+| A subsequent `<absolute-field-spec>`'s `<field-name>`                                           |             | `.` `%` `=` `:` `/` `,`     | ignored            | ignored                 |
 | `<base-fields-config-name>`                                                                     |             |                             | ignored            | ignored                 |
 | `<field-name>` in `<field-spec-insertion>`                                                      |             | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
 | `<field-name>` in `<field-spec-overlay>`                                                        | `+` `_` `-` | `@` `.` `%` `=` `:` `/` `,` | ignored            | ignored                 |
