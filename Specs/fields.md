@@ -231,7 +231,7 @@ fields config has been parsed; it is used to render output.
 
 A fields config's **settings** are each field spec's
 [settings](#field-modifiers), plus the field order, plus, per [saved field
-order](#field-order), a separate setting per `(* inherited *)` nonterminal in
+order](#field-order), a separate setting per `(* inherited *)` descendant of
 `<primary-field-order-option-set>`, plus `<field-order-tiebreaker>`, plus a
 separate setting per `(* inherited *)` nonterminal in `<item-sort-section>`.
 
