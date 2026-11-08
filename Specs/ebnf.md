@@ -647,11 +647,12 @@ NONTERMINAL = DEFINITION (* error: CONDITION *)
 A present `NONTERMINAL` is an error iff `CONDITION`, which describes its
 circumstances in prose, holds (e.g.,
 [`<document-order-option-set>`](fields.md#field-order) is an error for table
-output iff it sets the resolved fields config's field order). Unlike a typed
-terminal's `CONSTRAINTS`, which narrow the text that it accepts, `CONDITION`
-does not affect which text is consumed (e.g., for a `{integer}` whose error
-comment forbids values above 100, `150` consumes `150`, an error, while
-`{integer: 1 to 100}` consumes `15` from it).
+output iff the resolved fields config's field order is per it, directly or via a
+`<field-order-adjustment-set>`). Unlike a typed terminal's `CONSTRAINTS`, which
+narrow the text that it accepts, `CONDITION` does not affect which text is
+consumed (e.g., for a `{integer}` whose error comment forbids values above 100,
+`150` consumes `150`, an error, while `{integer: 1 to 100}` consumes `15` from
+it).
 
 ##### Type Comments
 

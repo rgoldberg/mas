@@ -181,7 +181,7 @@ private extension MASTests {
 		#expect(try parseFieldsConfig("/iO/D/P").fieldOrder == .positional(.init()))
 	}
 
-	@Test(arguments: ["/D", "/-D", "/P/D", "/D/T-"])
+	@Test(arguments: ["/D", "/-D", "/P/D", "/D/T-", "/D/-"])
 	func `document-order is unsupported for table output`(value: String) {
 		#expect(throws: ParsingError.documentOrderUnsupportedForTable) { try parseFieldsConfig(value) }
 	}

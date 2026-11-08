@@ -551,9 +551,10 @@ private struct FieldSpecsBuilder { // swiftlint:disable:this one_declaration_per
 			}
 			isSectionParsed = true
 		}
-		// `<document-order-option-set>`'s
-		// `(* error: for table output, it sets the resolved fields config's field order *)`,
-		// so an overridden one is not
+		// Per `<document-order-option-set>`'s error comment, one that the resolved
+		// fields config's field order is per, directly or via a
+		// `<field-order-adjustment-set>`, is an error for table output, but an
+		// overridden one is not
 		if isSectionParsed, case .table = outputFormat, case .document = fieldOrders.fieldOrder {
 			throw .documentOrderUnsupportedForTable
 		}

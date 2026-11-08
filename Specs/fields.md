@@ -420,7 +420,7 @@ field-order-sort-option-set =
 positional-order-option-set = [ <order-option>+ ] <positional-order> [ <order-trailing-option>+ ]
 document-order-option-set   =
   [ <order-option>+ ] <document-order> [ <order-trailing-option>+ ]
-  (* error: for table output, it sets the resolved fields config's field order *)
+  (* error: for table output, the resolved fields config's field order is per it, directly or via a <field-order-adjustment-set> *)
 
 order-option          = <order> | <order-trailing-option>
 order-trailing-option = <direction> | <unpositioned-field-comparison> | <unpositioned-field-placement>
