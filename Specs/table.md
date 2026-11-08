@@ -1,7 +1,7 @@
 # Table Output
 
-A table config configures table output's header row, separator line & column
-spacing.
+A table config configures table output's header row, header styling, separator
+line & column spacing.
 
 Uses the [custom EBNF grammar](ebnf.md).
 
