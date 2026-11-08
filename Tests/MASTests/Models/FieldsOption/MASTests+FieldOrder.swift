@@ -248,6 +248,8 @@ private extension MASTests {
 			("/O/T-/P", "/I", "/I/T-"),
 			("/iI-/T-", "", "/iI-/T-"),
 			("/iI-/T-", ".adamID", "/iI-/T-"),
+			("/D", "/T-", "/D/T-"),
+			("/iI-", "/T-", "/iI-/T-"),
 		],
 	)
 	func `a field order section retains the options of its kind's saved field order & the tiebreak direction`(

@@ -230,8 +230,8 @@ fields config has been parsed; it is used to render output.
 ## Inherited Values
 
 A fields config's **settings** are each field spec's
-[settings](#field-modifiers), plus, per [saved field order](#field-order), a
-separate setting per `(* inherited *)` nonterminal in
+[settings](#field-modifiers), plus the field order, plus, per [saved field
+order](#field-order), a separate setting per `(* inherited *)` nonterminal in
 `<primary-field-order-option-set>`, plus `<field-order-tiebreaker>`, plus a
 separate setting per `(* inherited *)` nonterminal in `<item-sort-section>`.
 
@@ -240,8 +240,8 @@ working fields config's value for the same setting, if any:
 
 - In `<field-modifiers>`: that of the field spec that they modify.
 - In `<item-sort-option>`: that of item sorting.
-- `<field-order-section>` itself: the field order, each saved field order &
-  `<field-order-tiebreaker>`.
+- `<primary-field-order-option-set>` itself: the field order & each saved field
+  order (e.g., if `x` is `@all/D`, `@x/T-` retains `x`'s document order).
 - `<field-order-tiebreaker>` itself: the working fields config's, whatever the
   field order's kind (e.g., if `x` has `/T-/P`, `@x/I` tiebreaks descending).
 - In `<field-order-adjustment-set>`: that of the field order.
@@ -399,13 +399,13 @@ base-fields-config-name =
 <!--markdownlint-disable line-length-->
 ```ebnf
 field-order-sections       = <field-order-section>+
-field-order-section        = <field-order-section-prefix> <field-order-option-set> (* inherited *)
+field-order-section        = <field-order-section-prefix> <field-order-option-set>
 field-order-section-prefix = "/"
 
 field-order-option-set         = <primary-field-order-option-set> | <field-order-tiebreaker>
 primary-field-order-option-set =
   <positional-order-option-set> | <document-order-option-set> | <field-order-sort-option-set> | <field-order-adjustment-set>
-  (* last wins *)
+  (* last wins; inherited *)
 field-order-kind               = <primary-field-order-kind> | <field-order-tiebreaker-prefix> (* non-structural *)
 primary-field-order-kind       = <positional-order> | <document-order> | <input> | <output> (* non-structural *)
 field-order-tiebreaker         = <field-order-tiebreaker-prefix> <direction> (* last wins; inherited *)
