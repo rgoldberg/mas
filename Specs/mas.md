@@ -163,7 +163,7 @@ following:
 mas's [default field orders](fields.md#immutable-built-in-named-fields-configs)
 of kinds `I` & `O` are those that the field order sections of each row below
 save, so they compare field names & labels as the `Other` rows of the [default
-sort options](#default-sort-options) compare a field's content; it has none of
+sort options](#default-sort-options) compare a field's content; mas has none of
 kinds `P` & `D`:
 
 | Output Format     | Field Order Sections |
