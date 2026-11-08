@@ -474,10 +474,11 @@ effective `<primary-field-order-option-set>` in `<field-order-sections>`:
   while `@x/k` & `@x/ak` are errors.
 
 A field order's **kind** is its effective `<order>` or `<source>`'s
-`<primary-field-order-kind>`, or, for a `<field-order-adjustment-set>`, that of
-the field order that it adjusts (e.g., `P` for `/DP`, or `O` for `/i` while the
-field order is `/P`). A `<field-order-section>`'s kind is its field order's, or,
-for a `<field-order-tiebreaker>`, `T`.
+`<primary-field-order-kind>` (e.g., `P` for `/DP`, or `O` for `/i` while the
+field order is `/P`), or, for a `<field-order-adjustment-set>`, that of the
+field order that it adjusts (e.g., `I` for `/-` while the field order is `/I`).
+A `<field-order-section>`'s kind is its field order's, or, for a
+`<field-order-tiebreaker>`, `T`.
 
 A fields config **saves** the field order of each `<field-order-section>` whose
 kind is a `<primary-field-order-kind>` as its **saved field order** of that
