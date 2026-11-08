@@ -809,7 +809,7 @@ non-nullary-string     = "S" (* is string;                                      
 coerce, unless it follows a `<named-format-reference>`, whose named format may
 output any type (e.g., `%W.trimWhitespace+-+`, `%U.uppercase+-+` &
 `%U:x..uppercase+-+`, but neither `%W..trimWhitespace+-+` nor
-`%U..uppercase+-+`, as `%S..uppercase++` is an error).
+`%U..uppercase+-+`, just as `%S..uppercase++` is an error).
 
 ###### Number Formatting
 
