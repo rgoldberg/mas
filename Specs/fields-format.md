@@ -930,7 +930,7 @@ date-coercion-arguments = <argument-fence> <date-formats> <argument-fence>
 
 date-coercion =
   <coercion> [ <date-coercion-arguments> ]
-  (* default date-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number as a Unix time} *)
+  (* default date-formats: {what a <coercion> whose only <date-format> is <iso> parses, or a number without trivia as a Unix time} *)
 
 date-formats = <date-format> … <argument-separator>
 
