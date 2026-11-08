@@ -129,7 +129,7 @@ the functionality that needs them from specs & code:
       the others is only another name of its transform pipeline, and
       `<string-transform-pipeline>` is unreferenced.
    2. The [`default` fields config](../Specs/fields.md#default-fields-configs):
-      always `standard`; removing it also requires editing the [default
+      always `standard`; removing it also needs editing the [default
       configs](../Specs/configs.md#default-configs).
    3. The [named format](../Specs/fields-format.md#named-formats) nonterminals:
       every built-in preset's format is `%i`.
