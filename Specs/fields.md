@@ -183,6 +183,8 @@ A built-in fields config:
   which the app gives as field order syntax (e.g.,
   [mas's](mas.md#default-field-orders)), or, absent one, that kind's
   `<primary-field-order-kind>` alone (e.g., `/P`).
+- Sets its `<field-order-tiebreaker>`'s & its item sorting's `<direction>` to
+  `<ascending>`.
 - May have built-in variants.
 - Cannot have custom variants.
 
