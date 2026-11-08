@@ -11,10 +11,10 @@ the same tokens in another order, consistent semantics).
 
 In specs, terminate every single-letter option's / setting's payload with `:`.
 
-In specs, give each expression's constant syntax (e.g., a prefix) its own
-constant nonterminal, named for that expression (e.g.,
-`field-order-tiebreaker-prefix`), rather than reusing another expression's, even
-if their values are equal.
+In specs, never reuse another expression's constant nonterminal for an
+expression's constant syntax (e.g., a prefix), even if their values are equal;
+give it its own, named for that expression (e.g.,
+`field-order-tiebreaker-prefix`).
 
 In specs, annotate an outer bare whitespace treatment on the expression whose
 tokens need it (e.g., `-[ <format-block> ]-`), rather than on adjacent
