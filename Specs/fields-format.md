@@ -125,7 +125,7 @@ which a `<transform-pipeline>` in its position would be applied (e.g., in
 A named format **conforms** to a `<format-name>`'s `BLOCK` iff `BLOCK` would
 parse it if each of its tokens were escaped as `BLOCK` requires, because a
 block's escaping differs from a `<format-block>`'s (e.g., for a preset `c` of
-`C++ %s`, `%S:c+-+` renders `"abc"` as `C++ abc`, because `BLOCK` would parse
+`:C++ %s`, `%S:c+-+` renders `"abc"` as `C++ abc`, because `BLOCK` would parse
 `C\+\+ %s`).
 
 Because every `<format-name>`'s `BLOCK` includes `<unconditional-block>`'s
@@ -141,9 +141,9 @@ A `<string-format-pipeline>`, `<number-format-pipeline>`,
 `<coercion>` to its own type, because a named format is a `<format-block>`,
 whose 1st call's value type its own syntax text does not determine, but a 1st
 call without a `<coercion>` must take that type (e.g., a preset `u` of
-`..uppercase` conforms to `<string-format-name>`, while a preset `r` of `.round`
-does not, so `%S:r+-+` is an error, rather than reporting an item error for
-every string).
+`:..uppercase` conforms to `<string-format-name>`, while a preset `r` of
+`:.round` does not, so `%S:r+-+` is an error, rather than reporting an item
+error for every string).
 
 ##### Transforms
 
