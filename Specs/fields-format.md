@@ -98,7 +98,7 @@ time-only-format-pipeline = <pipeline(<time-only-format-name>, <value-transform-
 ```ebnf
 named-format-reference(FORMAT_NAME) = <name-prefix> FORMAT_NAME
 
-format-name(BLOCK) = <preset-name> (* error: its preset's format does not conform to BLOCK *)
+format-name(BLOCK) = <preset-name> (* error: its named format does not conform to BLOCK *)
 
 string-format-name        = <format-name(<conditional-block(<nullary-string>, <non-nullary-string>, <string-format-pipeline>)>)>
 version-format-name       = <format-name(<conditional-block(<nullary-version>, <non-nullary-version>, <version-pipeline>)>)>
@@ -217,12 +217,12 @@ that type includes a type other than its input type & `null`, because a `null`
 remains unmodified through every transform, so the call otherwise has nothing to
 coerce. A call whose value's type the syntax text does not determine (e.g., a
 `<format-block>`'s 1st call, `%I`'s 1st call outside an `<unconditional-block>`,
-or one that a `<named-format-reference>` immediately precedes, whose preset
-determines it) may take one regardless. A date or a time-only coerces only to a
-string, neither a number nor a version coerces to a time-only & a number coerces
-to a date only as a Unix time, because its rendering is otherwise not a value of
-that type, so a pipeline that means to parse it must coerce it to a string 1st
-(e.g., `%.D..uppercase..:,,,,,,.*:round++`).
+or one that a `<named-format-reference>` immediately precedes, whose named
+format determines it) may take one regardless. A date or a time-only coerces
+only to a string, neither a number nor a version coerces to a time-only & a
+number coerces to a date only as a Unix time, because its rendering is otherwise
+not a value of that type, so a pipeline that means to parse it must coerce it to
+a string 1st (e.g., `%.D..uppercase..:,,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
 arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to

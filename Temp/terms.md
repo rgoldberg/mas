@@ -767,8 +767,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        (as an absolute config / a relative config does to a fields config)
      - preset delta: 1 preset's addition or removal in relative presets
      - preset clearing: a bare `%`, which detaches every preset
-     - named format: a preset's format, which a `<named-format-reference>`
-       references ([defined](../Specs/fields-format.md#named-formats))
+     - named format: the format that attaching a preset sets, or `%i` if it sets
+       none, which a `<named-format-reference>` references
+       ([defined](../Specs/fields-format.md#named-formats))
      - conform: of a named format, to be what a `<format-name>`'s `BLOCK` would
        parse if each of its tokens were escaped as `BLOCK` requires
        ([defined](../Specs/fields-format.md#named-formats)); also of a sort

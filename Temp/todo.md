@@ -70,9 +70,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
    of any item, while a custom `default` preset may give an absent field a
    formatted value that is not absent (e.g., `:%N%n+none+`). Supporting them
    also needs each [named format](../Specs/fields-format.md#named-formats) to be
-   checked per its error comment (e.g., that a `<string-format-name>`'s preset's
-   format conforms to its `BLOCK`), because every built-in preset's format is
-   `%i`, which conforms to every block. Supporting them also needs a preset's
+   checked per its error comment (e.g., that a `<string-format-name>`'s named
+   format conforms to its `BLOCK`), because every built-in preset's named format
+   is `%i`, which conforms to every block. Supporting them also needs a preset's
    `<label>` & `<template-text>` to consume a bare `,`. Supporting them also
    needs a matcher in a named format to match its format input, rather than that
    input's `node`, so that a coerced number retains its trivia & a chronologic
@@ -135,7 +135,7 @@ the functionality that needs them from specs & code:
       always `standard`; removing it also needs editing the [default
       configs](../Specs/configs.md#default-configs).
    3. The [named format](../Specs/fields-format.md#named-formats) nonterminals:
-      every built-in preset's format is `%i`.
+      every built-in preset's named format is `%i`.
    4. The `default` [preset](../Specs/fields.md#presets): always `standard`,
       which sets nothing.
    5. [`mas`'s context stacks](../Specs/mas.md#context-stacks): used only by
