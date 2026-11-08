@@ -1119,9 +1119,10 @@ A `%M` without a nullary branch, a blocked branch, or a `<failure-block>` (e.g.,
 `%MN+++`) would always insert an empty string, as `%S++` would, so its matcher
 cannot affect what it means.
 
-Every branch is conditional, because an unconditional last branch would mean
-what a `%M` whose `<failure-block>` holds that branch as a placeholder means
-(e.g., `%MN.absoluteValue+b+%I..uppercase++`).
+Every branch is conditional, because an unconditional branch would make each
+later branch unreachable, while an unconditional last branch would mean what a
+`%M` whose `<failure-block>` holds that branch as a placeholder means (e.g.,
+`%MN.absoluteValue+b+%I..uppercase++`).
 
 Examples:
 
