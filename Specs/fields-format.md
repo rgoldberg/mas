@@ -925,10 +925,10 @@ nullary-time-only-matcher     = [ <coercion> ] <nullary-time-only>
 non-nullary-time-only-matcher = [ <coercion> ] <non-nullary-time-only>
 non-nullary-time-only-success = [ <coercion> ] <non-nullary-success(<nullary-time-only>, <non-nullary-time-only>, <time-only-pipeline>)>
 
-nullary-date          = "d" (* is date;      output type: date; value: {ISO date / datetime, per input, in system time zone} *)
-non-nullary-date      = "D" (* is date;      output type: date; value: {ISO date / datetime, per input, in system time zone} *)
-nullary-time-only     = "c" (* is time-only; output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
-non-nullary-time-only = "C" (* is time-only; output type: time-only; value: {ISO time, in system time zone}; mnemonic: clock *)
+nullary-date          = "d" (* is date;      output type: date;      value: {matched value} *)
+non-nullary-date      = "D" (* is date;      output type: date;      value: {matched value} *)
+nullary-time-only     = "c" (* is time-only; output type: time-only; value: {matched value}; mnemonic: clock *)
+non-nullary-time-only = "C" (* is time-only; output type: time-only; value: {matched value}; mnemonic: clock *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
