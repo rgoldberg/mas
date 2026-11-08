@@ -318,6 +318,10 @@ private extension MASTests {
 			("1N,,,,,all:", "a-5", "a-3", .orderedAscending),
 			("1N,,,,,none:", "-5", "-3", .orderedDescending),
 			("1u", "-5", "3", .orderedAscending),
+			// A leading sign that no number follows may start a decimal separator
+			("1N,,,,-x:", "-x5", "1", .orderedAscending),
+			("1N,,,,-x,none:", "-x5", "1", .orderedAscending),
+			("1N,,,,-x:", "--x5", "-x5", .orderedAscending),
 			// Version segments compare component by component
 			("1v", "1.9.3", "1.10.2", .orderedAscending),
 			("1v", "1.0b", "1.0", .orderedAscending),

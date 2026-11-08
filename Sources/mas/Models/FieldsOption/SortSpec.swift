@@ -814,7 +814,9 @@ extension SortOptionSet {
 	}
 
 	/// The number segment (including its sign, if any) at `index` in `value` &
-	/// its end; else `nil`.
+	/// its end; else `nil`. A `-` or `+` that is not a number's sign may start an
+	/// unsigned number's decimal separator (e.g., `-x5` is `.5` for a decimal
+	/// separator of `-x`).
 	private func numberSegment(at index: String.Index, in value: String) -> (segment: Segment, end: String.Index)? {
 		let signs: NumberSigns
 		switch numberSegments {
@@ -829,16 +831,16 @@ extension SortOptionSet {
 				? value[index...].prefixMatch(of: unsafe versionRegex).map { (.version($0.output), $0.range.upperBound) }
 				: nil
 		}
-		let sign = value[index] == "-" || value[index] == "+" ? value[index] : nil
-		let start = sign == nil ? index : value.index(after: index)
-		guard
-			start < value.endIndex,
-			sign == nil || isSign(at: index, in: value, signs: signs),
-			let number = unsignedNumberPrefix(of: value[start...])
-		else {
-			return nil
-		}
-		return (.number(sign == "-" ? number.number.negated : number.number), number.end)
+		let afterSign = value.index(after: index)
+		let signedNumber = (value[index] == "-" || value[index] == "+")
+			&& afterSign < value.endIndex
+			&& isSign(at: index, in: value, signs: signs)
+			? unsignedNumberPrefix(of: value[afterSign...]).map { number in
+				(segment: Segment.number(value[index] == "-" ? number.number.negated : number.number), end: number.end)
+			}
+			: nil
+		return signedNumber ?? unsignedNumberPrefix(of: value[index...])
+			.map { number in (.number(number.number), number.end) }
 	}
 
 	/// The unsigned number at the start of `string` per `numberSegments` & its
