@@ -101,7 +101,8 @@ fields-option = <valued-option("--fields", <fields-config>)>
 
 Every display command has an optional `<fields-option>`, whose value is a
 [transient](configs.md#transient-configs) fields config (e.g.,
-`--fields name/I`), so giving it more than once is an error.
+`--fields name/I`); because [a run may have only 1 transient fields
+config](fields.md#fields-config-syntax), giving it more than once is an error.
 
 ## Quoting
 
