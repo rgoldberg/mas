@@ -157,12 +157,12 @@ reference's starting context is:
 A kind may refine how a context matches a name, e.g., fields configs'
 [variants](fields.md#output-format-specific-named-fields-configs).
 
-A persistent fields config **extends** `none` if it is an
+A fields config **extends** `none` if it is an
 [`<absolute-config>`](fields.md#absolute-config), else the fields config that
 its [`<base-fields-config-section>`](fields.md#base-fields-config-selection)
-names; a persistent table, key-value, or JSON config extends `default`, as a
-persistent `<relative-config>` without a `<base-fields-config-section>` does; a
-preset extends no config.
+names; a table, key-value, or JSON config extends `default`, as a
+`<relative-config>` without a `<base-fields-config-section>` does; a preset
+extends no config.
 
 A persistent config that references a config of its own kind & name (e.g., by
 extending it) resolves that config from the next less specific context in the

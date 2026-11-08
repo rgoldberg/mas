@@ -950,10 +950,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - config kind: a hierarchy among which a config is looked up, referenced &
        extended (e.g., fields configs)
        ([defined](../Specs/configs.md#config-kinds))
-     - extend: of a persistent config, derive its settings from another config
-       of its kind (`none` for an `<absolute-config>`, else the fields config
-       that its `<base-fields-config-section>` names; `default` for an output
-       config) ([defined](../Specs/configs.md#referencing-named-configs))
+     - extend: of a config, derive its settings from another config of its kind
+       (`none` for an `<absolute-config>`, else the fields config that its
+       `<base-fields-config-section>` names; `default` for an output config)
+       ([defined](../Specs/configs.md#referencing-named-configs))
      - context stack: a command list's contexts, from most to least specific
        ([defined](../Specs/configs.md#context-stacks))
 128. - base fields config: the named fields config that a transient fields
