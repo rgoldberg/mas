@@ -140,10 +140,10 @@ A `<string-format-pipeline>`, `<number-format-pipeline>`,
 `<date-format-pipeline>`, or `<time-only-format-pipeline>` may start with a
 `<coercion>` to its own type, because a named format is a `<format-block>`,
 whose 1st call's value type its own syntax text does not determine, but a 1st
-call without a `<coercion>` must take that type (e.g., a preset `u` of
-`:..uppercase` conforms to `<string-format-name>`, while a preset `r` of
-`:.round` does not, so `%S:r+-+` is an error, rather than reporting an item
-error for every string).
+call without a `<coercion>` must take that type (e.g., the named format of a
+preset `u` of `:..uppercase` conforms to `<string-format-name>`, while that of a
+preset `r` of `:.round` does not, so `%S:r+-+` is an error, rather than
+reporting an item error for every string).
 
 ##### Transforms
 
