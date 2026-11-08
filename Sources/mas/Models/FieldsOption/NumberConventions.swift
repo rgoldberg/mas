@@ -32,10 +32,13 @@ struct NumberConventions: Hashable {
 	let decimalSeparator: String
 
 	/// Whether a number's text can have multiple parses, because the separators
-	/// are equal, or either contains an ASCII digit or an exponent indicator.
+	/// are equal, either contains an ASCII digit or an exponent indicator, or the
+	/// decimal separator is a sign.
 	var hasAmbiguousSeparators: Bool {
 		digitGroupSeparator == decimalSeparator
 			|| (digitGroupSeparator + decimalSeparator).contains { $0.isASCIIDigit || $0 == "e" || $0 == "E" }
+			|| decimalSeparator == "+"
+			|| decimalSeparator == "-"
 	}
 
 	/// The size of each secondary digit group.
