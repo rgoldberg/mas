@@ -62,6 +62,11 @@ shared syntax & semantic comments once; repeat a short sequence or choice only
 if each use has a name of its own that documents it (e.g., `<field-spec-move>`
 or `<styling-prefix-setting>`), because a parameter would hide it for no gain.
 
+In specs, give a parameterized nonterminal only parameters whose arguments
+differ between its references (e.g., not `named-format-pipeline(FORMAT_NAME)`,
+every reference to which passed `<preset-name>`), because a parameter for which
+every reference passes the same argument hides that argument for no gain.
+
 In specs, write a literal that selects 1 of a set of names, rather than
 structuring the syntax (e.g., a transform name, `unix-time`, a config name, or
 `@unsuffixed`), as a [name literal](../../Specs/ebnf.md#name-literals) (e.g.,

@@ -6,7 +6,7 @@ format-modifier        = <format-modifier-prefix> -[ <format-block> ]-
 format-modifier-prefix = ":"
 
 format-block =
-  <named-format-pipeline(<preset-name>)> | <format-template>
+  <named-format-pipeline> | <format-template>
   (* direct default: {empty string}; inherited *)
 
 format-template = [ <template-text> ] ( <placeholder> [ <template-text> ] )+
@@ -73,7 +73,7 @@ renders the value (e.g., [JSON output](json.md#json-config) renders the number
 ```ebnf
 pipeline(FORMAT_NAME, NAMED_TRANSFORM_PIPELINE, TRANSFORM_PIPELINE) = TRANSFORM_PIPELINE | <named-format-reference(FORMAT_NAME)> [ NAMED_TRANSFORM_PIPELINE ]
 
-named-format-pipeline(FORMAT_NAME) = <pipeline(FORMAT_NAME, <value-transform-pipeline>, <value-transform-pipeline>)>
+named-format-pipeline = <pipeline(<preset-name>, <value-transform-pipeline>, <value-transform-pipeline>)>
 
 string-pipeline               = <pipeline(<string-format-name>, <value-transform-pipeline>, <string-input-pipeline>)>
 version-pipeline              = <pipeline(<version-format-name>, <value-transform-pipeline>, <version-input-pipeline>)>
@@ -608,7 +608,7 @@ block = <format-block> | <success-block> | <failure-block> (* non-structural *)
 success-block = <conditional-block> (* non-structural *)
 failure-block = <unconditional-block> (* direct default: {empty string} *)
 
-success-pipeline = <named-format-pipeline(<preset-name>)> (* non-structural *)
+success-pipeline = <named-format-pipeline> (* non-structural *)
 success-clause   = <success-block> | <success-pipeline> (* non-structural *)
 
 non-nullary-success(NULLARY, NON_NULLARY, PIPELINE) = NON_NULLARY -<conditional-block(NULLARY, NON_NULLARY, PIPELINE)>
@@ -692,7 +692,7 @@ preceding & succeeding.
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
 ```ebnf
-fallible-unconditional-placeholder   = <unconditional-placeholder(<named-format-pipeline(<preset-name>)>, <string-pipeline>)>
+fallible-unconditional-placeholder   = <unconditional-placeholder(<named-format-pipeline>, <string-pipeline>)>
 infallible-unconditional-placeholder = <unconditional-placeholder(<unconditional-pipeline>, <unconditional-string-pipeline>)>
 
 unconditional-placeholder(INPUT_PIPELINE, NAME_PIPELINE) =
