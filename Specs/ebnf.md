@@ -209,7 +209,8 @@ bare whitespace.
 
 Outer bare whitespace is treated per its adjacent sides:
 
-- The preceding token's end, or the syntax text's start.
+- The nearest preceding token's end, command-line argument boundary, or the
+  syntax text's start.
 - The start of each candidate literal that matches immediately after the
   whitespace, or the syntax text's end.
 - The start of the variable token that each available typed terminal would start
