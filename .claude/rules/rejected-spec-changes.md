@@ -283,6 +283,6 @@ indent nothing, which almost no consumer wants, while `p` already renders
 compact output.
 
 In specs, never omit a key-value row's leader & trailing spacing before an empty
-value (e.g., rendering `""` as `name`, rather than as `name`, a space, `▁` & a
-space), because they show that the value is an empty string, rather than absent,
-which omits the row.
+value (e.g., rendering `""` as `name` & a space, rather than as `name`, a space,
+`▁` & a space), because they show that the value is an empty string, rather than
+absent, which omits the row.
