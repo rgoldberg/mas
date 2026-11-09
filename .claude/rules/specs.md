@@ -44,9 +44,9 @@ In specs, make every block reference optional, except one that is:
 3. One that an alternative requires, either because a sibling alternative, with
    a default for it, expresses its absence instead (e.g., `<conditional-block>`
    in `<non-nullary-success>`, whose absence
-   `<non-nullary-scalar-blockless-success>` expresses), or so that a grammar can
+   `<non-nullary-scalar-empty-success>` expresses), or so that a grammar can
    require at least 1 of multiple blocks (e.g., `<failure-block>` after
-   `<non-nullary-scalar-blockless-success>`, to forbid `%S++`).
+   `<non-nullary-scalar-empty-success>`, to forbid `%S++`).
 
 In specs, give every block not marked `(* non-structural *)` a direct default of
 `{empty string}`, because no syntax references a non-structural block, so none

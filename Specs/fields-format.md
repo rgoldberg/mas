@@ -738,8 +738,8 @@ nullary-scalar-conditional-placeholder     = <placeholder-prefix> [ <abort-on-su
 non-nullary-scalar-conditional-placeholder =
   <placeholder-prefix>
   (
-    <non-nullary-scalar-blocked-success> <block-terminator> -[ <failure-block> ] <block-terminator>
-    | <non-nullary-scalar-blockless-success> <block-terminator> -<failure-block> <block-terminator>
+    <non-nullary-scalar-non-empty-success> <block-terminator> -[ <failure-block> ] <block-terminator>
+    | <non-nullary-scalar-empty-success> <block-terminator> -<failure-block> <block-terminator>
     | <abort-on-success> <non-nullary-scalar-matcher> -[ <failure-block> ] <block-terminator>
     | <abort-on-failure> <non-nullary-scalar-success> <block-terminator>
   )
@@ -758,9 +758,9 @@ non-nullary-scalar-matcher =
   | <non-nullary-date-matcher>
   | <non-nullary-time-only-matcher>
 
-non-nullary-scalar-success           = <non-nullary-scalar-blocked-success> | <non-nullary-scalar-blockless-success>
-non-nullary-scalar-blockless-success = <non-nullary-scalar-matcher> (* default success-block: {empty string} *)
-non-nullary-scalar-blocked-success   =
+non-nullary-scalar-success           = <non-nullary-scalar-non-empty-success> | <non-nullary-scalar-empty-success>
+non-nullary-scalar-empty-success     = <non-nullary-scalar-matcher> (* default success-block: {empty string} *)
+non-nullary-scalar-non-empty-success =
   <non-nullary-standard-success>
   | <non-nullary-number-success>
   | <non-nullary-version-success>
@@ -1090,8 +1090,8 @@ binary-match-placeholder =
   <placeholder-prefix>
   <binary-match>
   (
-    <blockless-branch>+ <block-terminator> -<failure-block>
-    | [ <blockless-branch>+ ] ( <nullary-branch> | <blocked-branch> ) [ <branch>+ ] <block-terminator> -[ <failure-block> ]
+    <empty-unary-branch>+ <block-terminator> -<failure-block>
+    | [ <empty-unary-branch>+ ] ( <nullary-branch> | <non-empty-unary-branch> ) [ <branch>+ ] <block-terminator> -[ <failure-block> ]
   )
   <block-terminator>
 
@@ -1101,13 +1101,13 @@ binary-match = "M" (* matches 1 of its branches; output type: {matched branch va
 branches = <branch>+
 branch   = <nullary-branch> | <non-nullary-branch>
 
-nullary-branch     = [ <branch-negation> ] <nullary-scalar-matcher>
-non-nullary-branch = <blockless-branch> | <blocked-branch>
-blockless-branch   =
-  ( <non-nullary-scalar-blockless-success> | <branch-negation> <non-nullary-scalar-matcher> ) <block-terminator>
+nullary-branch         = [ <branch-negation> ] <nullary-scalar-matcher>
+non-nullary-branch     = <empty-unary-branch> | <non-empty-unary-branch>
+empty-unary-branch     =
+  ( <non-nullary-scalar-empty-success> | <branch-negation> <non-nullary-scalar-matcher> ) <block-terminator>
   (* default failure-block: {empty string} *)
-blocked-branch     =
-  <non-nullary-scalar-blocked-success> <block-terminator>
+non-empty-unary-branch =
+  <non-nullary-scalar-non-empty-success> <block-terminator>
   | <branch-negation> <non-nullary-scalar-matcher> -<failure-block> <block-terminator>
 
 branch-negation = "-"!
@@ -1132,9 +1132,9 @@ affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
 branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
 means).
 
-A `%M` without a nullary branch, a blocked branch, or a `<failure-block>` (e.g.,
-`%MN+++`) would always insert an empty string, as `%S++` would, so its matcher
-cannot affect what it means.
+A `%M` without a nullary branch, a non-empty unary branch, or a
+`<failure-block>` (e.g., `%MN+++`) would always insert an empty string, as
+`%S++` would, so its matcher cannot affect what it means.
 
 Every branch is conditional, because an unconditional branch would make each
 later branch unreachable, while an unconditional last branch would mean what a
