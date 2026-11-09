@@ -286,3 +286,9 @@ In specs, never omit a key-value row's leader & trailing spacing before an empty
 value (e.g., rendering `""` as `name` & a space, rather than as `name`, a space,
 `▁` & a space), because they show that the value is an empty string, rather than
 absent, which omits the row.
+
+In specs, never rename `<empty-unary-branch>` & `<non-empty-unary-branch>` to
+`<absent-unary-branch>` & `<present-unary-branch>`, because each adjective would
+describe the branch, which is present (e.g., `N+` in `%MN+n++`), while an empty
+branch, just as an empty loop, is one whose body is empty, here a directly
+absent block.
