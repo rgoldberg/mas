@@ -809,7 +809,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - transient config: a fields config or an output config given for 1 run of
        a display command, rather than persisted
        ([defined](../Specs/configs.md#transient-configs))
-     - REJECTED: persisted (as an adjective for a config) / saved / stored
+     - REJECTED: persisted / saved / stored (as adjectives for a config)
 114. - C0 control character: a character from U+0000 to U+001F
      - DEL: U+007F
      - C1 control character: a character from U+0080 to U+009F
