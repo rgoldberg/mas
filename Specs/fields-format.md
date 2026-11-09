@@ -632,14 +632,15 @@ A placeholder or branch is a **matcher** (`<matcher>`) immediately followed by
 its success clause, blocks, or branches, which define the matcher's **form**:
 
 - **Nullary**: nothing.
-- **Unary**: a `<success-pipeline>`.
+- **Unary**: exactly 1 `<success-clause>` or `<failure-block>`: a
+  `<success-pipeline>` (e.g., `%I.round+`), or, for:
+  - **Abort-on-failure**: a `<success-block>`.
+  - **Abort-on-success**: a `<failure-block>`.
+  - **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
+  - **Non-negated** (in a non-nullary branch): a `<success-block>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`, at least 1 of which is
   present, because a binary placeholder without either (e.g., `%S++`) would
   always insert an empty string, so its matcher cannot affect what it means.
-- **Abort-on-failure**: a `<success-block>`.
-- **Abort-on-success**: a `<failure-block>`.
-- **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
-- **Non-negated** (in a non-nullary branch): a `<success-block>`.
 - **Unary match** (`%m`): `<branches>`.
 - **Binary match** (`%M`): branches & a `<failure-block>`.
 
