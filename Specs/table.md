@@ -39,8 +39,8 @@ because each would otherwise misalign its column (e.g., a tab, whose
 next tab stop) or modify the output device's state (e.g., an ESC, which starts
 an escape sequence).
 
-A table without any item or any column renders nothing, not even a header row or
-a separator line.
+A table that has no items, or no columns, renders nothing, not even a header row
+or a separator line.
 
 A column's **column width** is the [width](configs.md#width) of its widest
 rendered cell, including its header cell iff the header row is rendered. Each
