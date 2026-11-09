@@ -1266,8 +1266,8 @@ If multiple `<boundary-group>`s define the same boundary, it belongs to the last
 group. An empty group defines no boundary, so it affects no other group's sort
 precedence (e.g., `B/_:` means what `B/:` means, and `B_:` what `B:` means).
 
-At each position, the longest boundary that matches there is consumed (e.g.,
-with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).
+At each position, only the longest boundary that matches there is a boundary
+(e.g., with `B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).
 
 Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
