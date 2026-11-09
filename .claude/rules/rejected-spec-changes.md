@@ -277,10 +277,12 @@ mas, because the example reads as well with any app's command line (e.g.,
 `abc def --fields @x`).
 
 In specs, never make `<indentation>`'s default an empty string so that `P:`
-indents nothing (e.g., `P:` for `[`, then `{`, each on its own line, unindented),
-because `P` & `P:` are both directly absent, so both would then indent nothing,
-which almost no consumer wants, while `p` already renders compact output.
+indents nothing (e.g., `P:` for `[`, then `{`, each on its own line,
+unindented), because `P` & `P:` are both directly absent, so both would then
+indent nothing, which almost no consumer wants, while `p` already renders
+compact output.
 
 In specs, never omit a key-value row's leader & trailing spacing before an empty
-value (e.g., rendering `""` as `name`, rather than `name ▁ `), because they show
-that the value is an empty string, rather than absent, which omits the row.
+value (e.g., rendering `""` as `name`, rather than as `name`, a space, `▁` & a
+space), because they show that the value is an empty string, rather than absent,
+which omits the row.
