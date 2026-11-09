@@ -692,7 +692,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        non-nullary branch whose block is non-empty / empty
        (`<non-empty-unary-branch>` / `<empty-unary-branch>`, e.g., `N+` in
        `%MN+n++`)
-     - REJECTED: blocked / blockless (an omitted block is empty, not absent)
+     - REJECTED: blocked / blockless (an omitted block is a directly absent
+       block, which is empty)
      - string transform pipeline: the string transforms after a named format
        reference in an unconditional pipeline or an unconditional string
        pipeline, or a blank named format's transforms, the 1st of which may take
