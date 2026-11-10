@@ -681,7 +681,7 @@ to a string](#value-coercion).
 
 A template evaluates its placeholders in order, so aborting skips each later one
 (e.g., for `"abc"`, `%I.round+%+N+` reports an [item
-error](configs.md#output-formats), because `%I.round+` is evaluated 1st, while
+error](configs.md#item-errors), because `%I.round+` is evaluated 1st, while
 `%+N+%I.round+` aborts without one, because `%+N+` fails 1st).
 
 Formatting **aborts** by making the formatted value

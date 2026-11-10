@@ -851,7 +851,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        ([defined](../Specs/fields-format.md#success--failure))
      - item error: an error that depends on an item's field value, which omits
        that item, without stopping its command
-       ([defined](../Specs/configs.md#output-formats))
+       ([defined](../Specs/configs.md#item-errors))
      - fail: of a command, to report any error, so that its caller can detect it
        (e.g., an omitted item, for an item error)
        ([defined](../Specs/configs.md#failure))

@@ -17,7 +17,7 @@ A **command** is a node in an app's command hierarchy: either the root command
 ### Failure
 
 A command that reports any error **fails**, so that its caller can detect it
-(e.g., an omitted item, for an [item error](#output-formats)).
+(e.g., an omitted item, for an [item error](#item-errors)).
 
 ## Display Commands
 
@@ -43,6 +43,8 @@ A run of a display command may select an output format, either with its
 [`default`](#default-configs) config or with a [transient](#transient-configs)
 output config overlaid on its `default` config. Selecting an output format more
 than once, even the same one, is an error.
+
+## Item Errors
 
 An **item error** is an error that depends on an item's field value (e.g.,
 `.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s
