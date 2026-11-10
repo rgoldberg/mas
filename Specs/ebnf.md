@@ -40,7 +40,7 @@ both evaluating to that same character.
 ### Whitespace
 
 **Whitespace** is any Unicode `White_Space` character: Unicode general category
-`Z` characters, `U+0009` to `U+000D` & `U+0085`.
+`Z` characters, U+0009 to U+000D & U+0085.
 
 ### Repeating Expressions
 
