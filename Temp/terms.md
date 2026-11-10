@@ -256,6 +256,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - regex literal: Swift's `/`-fenced Regex syntax (e.g., `/[A-Y]+/`)
     - boundary: what splits a value's text outside typed segments into pieces
       ([defined](../Specs/fields.md#sort-boundaries))
+    - boundary group: a `<boundary-group>`'s boundaries, which share 1 sort
+      precedence ([defined](../Specs/fields.md#sort-boundaries))
     - exponent indicator: `e` or `E` in scientific notation
     - REJECTED: delimiter / encloser / marker / signifier
 36. - evaluate / evaluation / evaluated: perform the process that returns the
@@ -957,8 +959,6 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - abort-on-failure / abort-on-success: the form of a matcher with
        `<abort-on-failure>` / `<abort-on-success>`, which aborts formatting iff
        the matcher fails / succeeds
-     - boundary group: a `<boundary-group>`'s boundaries, which share 1 sort
-       precedence ([defined](../Specs/fields.md#sort-boundaries))
 127. - named config: a config that has a name, unique for its kind within a
        context ([defined](../Specs/configs.md#named-configs))
      - named fields config: a named config of the fields kind
