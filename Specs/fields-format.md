@@ -989,10 +989,8 @@ without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
 `"2020-03-18 17:39"`, and `%.:iso,unix-time:d` matches `0`, `"0"` &
 `"2020-03-18"`, while `%.:unix-time:d` matches only the 1st 2).
 
-A default coercion to a date parses what a `<coercion>` whose only
-`<date-format>` is `<iso>` parses & a number without trivia as a Unix time, as a
-datetime, because a number has no other meaning as a date (e.g., `%.d` matches
-`0` & `"2020-03-18"`, but not `"0"`).
+A default coercion to a date coerces a number to a datetime, because a number
+has no other meaning as a date (e.g., `%.d` matches `0`, but not `"0"`).
 
 A string that holds a decimal number coerces to a date only per `<unix-time>`,
 because such a string is rarely a time (e.g., `%m.ds+` would otherwise render
