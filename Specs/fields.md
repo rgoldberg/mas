@@ -794,6 +794,10 @@ has a list of **attached** presets, which its `<preset-list>` sets:
   `.name%-default%+end` detaches `default` from `name`, then attaches `end`,
   while `.name%-end` modifies nothing if `end` is not attached).
 
+A `<preset-list>` is wholly absolute or wholly relative, so mixing a
+`<preset-delta>` with an `<absolute-preset>` is an error (e.g., `%p%+q` or
+`%-default%end`).
+
 Attached presets are identified by name, whichever context each was looked up
 from, so at most 1 preset of each name is attached: an `<absolute-presets>` that
 names a preset more than once attaches it only at its last occurrence (e.g.,
