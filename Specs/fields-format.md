@@ -633,7 +633,7 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 
 - **Nullary**: nothing.
 - **Unary**: exactly 1 `<success-clause>` or `<failure-block>`: a
-  `<success-pipeline>` (e.g., `%I.round+`), or, for:
+  `<success-pipeline>` (e.g., `.round` in `%I.round+`), or, for:
   - **Abort-on-failure**: a `<success-block>`.
   - **Abort-on-success**: a `<failure-block>`.
   - **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
