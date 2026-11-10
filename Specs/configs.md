@@ -170,8 +170,10 @@ A persistent config that references a config of its own kind & name (e.g., by
 extending it) resolves that config from the next less specific context in the
 context stack, so a config may reference its nearest same-named ancestor. In the
 root context, which has no less specific context, a `default` that references
-`default` references the root context's `standard`. Any other cyclic chain of
-references is a **reference cycle**, which is an error.
+`default` references the root context's `standard`, while any other such
+reference is an error, because no such config is found (e.g., a root context
+fields config `x` of `@x.name`). Any other cyclic chain of references is a
+**reference cycle**, which is an error.
 
 ### Immutable Built-In Named Configs
 

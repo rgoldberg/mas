@@ -88,8 +88,9 @@ only after `=` (e.g., `--json[=<json-config>]`).
       [extending](../Specs/configs.md#referencing-named-configs) `default` &
       applying its own [implied
       alternatives](../Specs/configs.md#implied-alternatives).
-   4. Reporting reference cycles & a custom config named `standard` or any
-      built-in config's name.
+   4. Reporting reference cycles, a root context config that references its own
+      name (other than a `default` that references `default`) & a custom config
+      named `standard` or any built-in config's name.
    5. A custom `default` (currently always `standard`) & each context's
       [`standard`](../Specs/configs.md#standard-configs) layering custom
       `default`s over the built-in standard.
