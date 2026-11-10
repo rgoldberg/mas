@@ -978,7 +978,7 @@ prefix & suffix, each compared as a string (e.g., the trivia prefix `$` in
 E.g., for an input Unix time being output as an ISO date (without time):
 
 - `<input>` sorts by the input Unix time.
-- `<output>` sorts by the output ISO date (without time), so rows on the same
+- `<output>` sorts by the output ISO date (without time), so items on the same
   date tie & fall through to the next sort key.
 
 ##### Sort Segments
