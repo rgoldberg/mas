@@ -100,9 +100,9 @@ leader-pattern = ^{string}^ (* default: "▁" *)
   [implies a leading spacing](#implied-alternatives).
 - `F`: a leader between each key & its value, aligning all of an item's values.
   `<leader-pattern>` is repeated to fill the leader's [width](configs.md#width),
-  truncated before the 1st character that would exceed that width; spaces fill
-  any remaining width (e.g., when that character is wide, such as `中`). A
-  leader's width is its item's widest rendered key's width, less its own
+  truncated before the 1st grapheme cluster that would exceed that width; spaces
+  fill any remaining width (e.g., when that grapheme cluster is wide, such as
+  `中`). A leader's width is its item's widest rendered key's width, less its own
   rendered key's width, plus `<leader-pattern>`'s width, so the widest key's
   leader is 1 `<leader-pattern>`. A 0-width `<leader-pattern>` (e.g., a tab) is
   rendered once, with no space-fill, because no number of repetitions can fill

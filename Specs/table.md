@@ -187,15 +187,15 @@ separator-pattern = ^{string}^ (* default: "-" *)
   `S:h` renders neither, while, for a persistent `default` table config of
   `S=:h`, a transient `H` renders a header row & a `=`-patterned separator
   line). `<separator-pattern>` is repeated to fill the line's
-  [width](configs.md#width), truncated before the 1st character that would
-  exceed that width; spaces fill any remaining width (e.g., when that character
-  is wide, such as `中`), except at the line's end, just as no cell of the last
-  column has trailing spaces (e.g., for a table width of 5, `S中:` renders `中中`,
-  and a `b` line's last segment is aligned as such a cell is). A 0-width
-  `<separator-pattern>` (e.g., a tab) is rendered once, because no number of
-  repetitions can fill any width: per run between tabs of a `u` line, with no
-  space-fill, or per segment of a [`b`](#broken) line, which aligns each
-  segment.
+  [width](configs.md#width), truncated before the 1st grapheme cluster that
+  would exceed that width; spaces fill any remaining width (e.g., when that
+  grapheme cluster is wide, such as `中`), except at the line's end, just as no
+  cell of the last column has trailing spaces (e.g., for a table width of 5,
+  `S中:` renders `中中`, and a `b` line's last segment is aligned as such a cell
+  is). A 0-width `<separator-pattern>` (e.g., a tab) is rendered once, because
+  no number of repetitions can fill any width: per run between tabs of a `u`
+  line, with no space-fill, or per segment of a [`b`](#broken) line, which
+  aligns each segment.
 
 ## Broken
 
