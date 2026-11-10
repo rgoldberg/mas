@@ -669,11 +669,10 @@ field](#unlisted-fields)) has no such `source`: a `<field-spec-removal>` then
 does nothing (leaving $previous$ unmodified), though it lists its field, while
 any other one 1st inserts a new field spec (as `<field-spec-insertion>` would)
 as its `source` (e.g., for an unlisted `foo`, `@all.foo=Foo` inserts a visible
-field spec & `@all._foo` a hidden one, while `@all.-foo` lists `foo`, so `all`
-does not output it). Until a `<field-spec-removal>` removes that inserted field
-spec, each later such `<named-field-spec-reference>` for its field references
-it, though no index does (e.g., `@all.foo=X,foo=Y` outputs 1 `foo`, labeled
-`Y`).
+field spec & `@all._foo` a hidden one, while `@all.-foo` lists `foo`, so it does
+not output it). Until a `<field-spec-removal>` removes that inserted field spec,
+each later such `<named-field-spec-reference>` for its field references it,
+though no index does (e.g., `@all.foo=X,foo=Y` outputs 1 `foo`, labeled `Y`).
 
 A `<reference-sourced-field-spec-edit>` other than a `<field-spec-removal>`
 whose `<field-spec-reference>` resolves to a `null` likewise 1st inserts a new
