@@ -175,8 +175,8 @@ pair, in which case nothing is rendered.
 ## Implied Alternatives
 
 - An effective `f` implies a leading spacing of `:` (i.e., `L\::`), so each row
-  is `key: value` (e.g., `fF:` implies none, so its leading spacing is `l`'s 1
-  space).
+  is `key: value` (e.g., `fF:` implies none, so it retains its inherited leading
+  spacing).
 
 An implied alternative yields to an explicit alternative of its setting &
 retains an inherited [payload](configs.md#output-configs), as [output configs
