@@ -143,7 +143,7 @@ private struct FormatParser {
 		return .init(transform: transform, coercion: coercion?.coercion)
 	}
 
-	/// Parses `numberFormat`'s optional `<number-format-arguments>`, whose base
+	/// Parses `number-format`'s optional `<number-format-arguments>`, whose base
 	/// conventions default to the system locale's.
 	private mutating func parseNumberFormatArgumentsIfPresent() throws(ParsingError) -> Transform {
 		var afterWhitespace = input.drop(while: \.isWhitespace)
@@ -190,11 +190,12 @@ private struct FormatParser {
 		return .scale(exponent: exponent, significantDigits: integers[0], fractionalDigits: integers[1])
 	}
 
-	/// Parses `timeZone`'s `<date-time-zone-arguments>` or `timeOnlyTimeZone`'s
-	/// `<time-only-time-zone-arguments>` (iff `hasReferenceDate`), each optional,
-	/// for the transform named `transformName`, whose `<time-zone-code>` defaults
-	/// to `system` & whose absent `<reference-date>` is `nil`, into the transform
-	/// that `transform` makes.
+	/// Parses `time-zone`'s `<date-time-zone-arguments>` or
+	/// `time-only-time-zone`'s `<time-only-time-zone-arguments>` (iff
+	/// `hasReferenceDate`), each optional, for the transform named
+	/// `transformName`, whose `<time-zone-code>` defaults to `system` & whose
+	/// absent `<reference-date>` is `nil`, into the transform that `transform`
+	/// makes.
 	private mutating func parseTimeZoneArgumentsIfPresent(
 		for transformName: String,
 		hasReferenceDate: Bool,
@@ -882,20 +883,20 @@ private let blockNameTerminatorSet = Set([transformCallPrefix, blockTerminator])
 private let formatTemplateTextTerminatorSet = formatBlockTerminatorSet.union([placeholderPrefix])
 private let blockTemplateTextTerminatorSet = Set([placeholderPrefix, blockTerminator])
 
-private let numberFormatName = "numberFormat"
+private let numberFormatName = "number-format"
 private let scaleName = "scale"
-private let timeOnlyTimeZoneName = "timeOnlyTimeZone"
-private let timeZoneName = "timeZone"
+private let timeOnlyTimeZoneName = "time-only-time-zone"
+private let timeZoneName = "time-zone"
 
 private let systemTimeZoneCode = "system"
 
 private let valueTransformByName = [
-	"absoluteValue": Transform.absoluteValue,
-	"dateOnly": .dateOnly,
-	"initialTitlecase": .initialTitlecase,
+	"absolute-value": Transform.absoluteValue,
+	"date-only": .dateOnly,
+	"initial-titlecase": .initialTitlecase,
 	"lowercase": .lowercase,
 	"round": .round,
-	"trimWhitespace": .trimWhitespace,
+	"trim-whitespace": .trimWhitespace,
 	"uppercase": .uppercase,
 ]
 private let transformNames =

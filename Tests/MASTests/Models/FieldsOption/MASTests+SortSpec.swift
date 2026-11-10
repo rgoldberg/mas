@@ -471,7 +471,7 @@ private extension MASTests {
 		],
 	)
 	func `compares output values iff the sort source is output`(sort: String, result: ComparisonResult) throws {
-		let fieldSpec = try parsedFieldSpec(format: "%.D.dateOnly++", sort: sort)
+		let fieldSpec = try parsedFieldSpec(format: "%.D.date-only++", sort: sort)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
 			try inSystemTimeZone("America/New_York") {
@@ -493,7 +493,7 @@ private extension MASTests {
 		sort: (option: String, result: ComparisonResult),
 	) throws {
 		// As numbers, with `u`, 1.5 > 1.10; as strings, with `u` or `v`, 1.5 < 1.10
-		let fieldSpec = try parsedFieldSpec(format: "..absoluteValue", sort: sort.option, outputFormat: outputFormat)
+		let fieldSpec = try parsedFieldSpec(format: "..absolute-value", sort: sort.option, outputFormat: outputFormat)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
 			sortSpec.compare(try sortValues("1.5", fieldSpec: fieldSpec), try sortValues("1.10", fieldSpec: fieldSpec))
@@ -517,7 +517,7 @@ private extension MASTests {
 		rhs: JSON.Node,
 		result: ComparisonResult,
 	) throws {
-		let fieldSpec = try parsedFieldSpec(format: "..:,,,,,\(triviaPrefixRegex):absoluteValue", sort: sort)
+		let fieldSpec = try parsedFieldSpec(format: "..:,,,,,\(triviaPrefixRegex):absolute-value", sort: sort)
 		let sortSpec = try #require(fieldSpec.sortSpec)
 		#expect(
 			sortSpec.compare(try sortValues(lhs, fieldSpec: fieldSpec), try sortValues(rhs, fieldSpec: fieldSpec)) == result,

@@ -76,6 +76,13 @@ name is written cannot affect what it selects, while an escaped structural
 character means something else, and Swift Argument Parser does not evaluate an
 option name's escape sequences.
 
+In specs, write every name that a name literal or a built-in config has in
+kebab-case (e.g., `date-only`, `center-start`, or `iso-date`), never in
+camelCase (e.g., not `dateOnly`), because 1 convention spares users from
+remembering which names use which, option names & output format suffixes are
+kebab-case (e.g., `@key-value`) & `-` is never a candidate literal directly
+after a name.
+
 In specs, give an empty-string default for a block or a typed terminal as
 `{empty string}` (a free-form description), never as the literal `""`, which
 neither a block nor a variable token can consume.
@@ -92,7 +99,7 @@ only in prose; reference a shared argument list (e.g.,
 
 In specs, make an argument list's `<argument-fence>`s optional iff every
 argument in it is omissible or defaults when the whole list is absent (e.g.,
-`..dateOnly`, but not `..::dateOnly`), because the empty list `::` would
+`..date-only`, but not `..::date-only`), because the empty list `::` would
 otherwise be required to express all defaults.
 
 In specs, give a sort option that takes arguments an uppercase letter &

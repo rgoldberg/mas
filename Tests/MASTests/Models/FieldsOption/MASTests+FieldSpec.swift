@@ -495,9 +495,9 @@ private extension MASTests {
 			(".adamID:%i", .end),
 			(".adamID:", .end),
 			(".adamID%start:..uppercase", .start),
-			(".adamID %start % centerEnd =ID", .centerEnd),
-			(".adamID%centerStart%default%standard", .centerStart),
-			(".+adamID%centerEnd", .centerEnd),
+			(".adamID %start % center-end =ID", .centerEnd),
+			(".adamID%center-start%default%standard", .centerStart),
+			(".+adamID%center-end", .centerEnd),
 			(".+size:.uppercase", .start),
 			(".+size%end", .end),
 			("size%end,adamID", .end),
@@ -505,7 +505,7 @@ private extension MASTests {
 			(".adamID%start,adamID%-start", .end),
 			(".adamID%start%end,adamID%+start", .start),
 			(".adamID%end%start%end", .end),
-			(".adamID%centerEnd,adamID%+start%-start", .centerEnd),
+			(".adamID%center-end,adamID%+start%-start", .centerEnd),
 		],
 	)
 	func `an alignment is the last attached preset's that sets one, else the field spec's own`(

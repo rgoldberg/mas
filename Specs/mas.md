@@ -96,19 +96,19 @@ following visible field specs, at the given positions:
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
-| Field                       | Label         | Format                              | `list` | `lookup` | `outdated` | `search` |
-|:----------------------------|:--------------|:------------------------------------|-------:|---------:|-----------:|---------:|
-| `adamID`                    | `ADAM ID`     | `%i`                                |      1 |        2 |          1 |        1 |
-| `name`                      | `Name`        | `%i`                                |      2 |        1 |          2 |        2 |
-| `version`                   | `Version`     | `%i`                                |      3 |        4 |          3 |        3 |
-| `newVersion`                | `New Version` | `%i`                                |        |          |          4 |          |
-| `bundleID`                  | `Bundle ID`   | `%i`                                |        |        3 |            |          |
-| `formattedPrice`            | `Price`       | `%i`                                |        |        5 |            |          |
-| `sellerName`                | `By`          | `%i`                                |        |        6 |            |          |
-| `currentVersionReleaseDate` | `Released`    | `%+D.dateOnly+`                     |        |        7 |            |          |
-| `minimumOSVersion`          | `Minimum OS`  | `%i`                                |        |        8 |            |          |
-| `fileSizeBytes`             | `Size`        | `%+.N.scale:6,,0:.numberFormat+ MB` |        |        9 |            |          |
-| `appStorePageURL`           | `From`        | `%i`                                |        |       10 |            |          |
+| Field                       | Label         | Format                               | `list` | `lookup` | `outdated` | `search` |
+|:----------------------------|:--------------|:-------------------------------------|-------:|---------:|-----------:|---------:|
+| `adamID`                    | `ADAM ID`     | `%i`                                 |      1 |        2 |          1 |        1 |
+| `name`                      | `Name`        | `%i`                                 |      2 |        1 |          2 |        2 |
+| `version`                   | `Version`     | `%i`                                 |      3 |        4 |          3 |        3 |
+| `newVersion`                | `New Version` | `%i`                                 |        |          |          4 |          |
+| `bundleID`                  | `Bundle ID`   | `%i`                                 |        |        3 |            |          |
+| `formattedPrice`            | `Price`       | `%i`                                 |        |        5 |            |          |
+| `sellerName`                | `By`          | `%i`                                 |        |        6 |            |          |
+| `currentVersionReleaseDate` | `Released`    | `%+D.date-only+`                     |        |        7 |            |          |
+| `minimumOSVersion`          | `Minimum OS`  | `%i`                                 |        |        8 |            |          |
+| `fileSizeBytes`             | `Size`        | `%+.N.scale:6,,0:.number-format+ MB` |        |        9 |            |          |
+| `appStorePageURL`           | `From`        | `%i`                                 |        |       10 |            |          |
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
@@ -121,7 +121,7 @@ Wherever the base fields config is, or transitively
 the variant's field specs & each field's [default field
 spec](fields.md#default-field-specs) (e.g., for an unlisted field) is the
 field's built-in field spec with the [`default` preset](fields.md#presets)
-attached (e.g., for a custom `default` preset of `%centerStart:..uppercase`,
+attached (e.g., for a custom `default` preset of `%center-start:..uppercase`,
 `mas list --fields @all` outputs `bundleID` labeled `Bundle ID`, uppercased &
 center-aligned, while for one of `:..uppercase`, `mas search --fields @all`
 outputs `fileSizeBytes` end-aligned).
@@ -130,9 +130,9 @@ outputs `fileSizeBytes` end-aligned).
 
 `formattedPrice`'s default sort options compare [grouped
 numbers](fields.md#sort-number-segments) with the **App Store locale**'s
-conventions as their [base conventions](fields-format.md#numberformat) & include
-`a`, because its nonconforming values are almost always `Free` or a translation
-of it, which equals 0.
+conventions as their [base conventions](fields-format.md#number-format) &
+include `a`, because its nonconforming values are almost always `Free` or a
+translation of it, which equals 0.
 
 The App Store's locale cannot be determined programmatically, so the App Store
 locale is the likely locale, per [CLDR likely

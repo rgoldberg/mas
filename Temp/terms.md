@@ -74,7 +74,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 14. - side
     - REJECTED: end (as a synonym for side)
 15. - 1st
-    - initial: only in `initialTitlecase`, its **initial character** &
+    - initial: only in `initial-titlecase`, its **initial character** &
       word-initial (see 87)
     - REJECTED: first (except in `<text-first>`) / leftmost / initial (in other
       senses) / earliest
@@ -422,7 +422,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 67. - titlecase: verb & adjective
     - uppercase: verb & adjective
     - lowercase: verb & adjective
-    - case transform: `initialTitlecase`, `lowercase`, or `uppercase`
+    - case transform: `initial-titlecase`, `lowercase`, or `uppercase`
     - REJECTED: capitalize / title case / upper case / lower case / sentence
       case
 68. - notation: positional or scientific
@@ -437,7 +437,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
     - system time zone: the time zone of the system running the app
     - output time zone: the time zone a chronologic value is rendered in
     - UTC offset:
-      [defined](../Specs/fields-format.md#timezone--timeonlytimezone)
+      [defined](../Specs/fields-format.md#time-zone--time-only-time-zone)
     - time zone abbreviation: a Foundation `TimeZone.abbreviationDictionary` key
     - REJECTED: timezone / zone / TZ / GMT offset / local time zone
 70. - date-only: adjective & noun (e.g., "a date-only")
@@ -603,7 +603,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
       time zone (`<reference-date>`)
     - REJECTED: mode / daylight saving mode
 89. - number format arguments: the arguments of `<number-format-arguments>`
-      ([defined](../Specs/fields-format.md#numberformat))
+      ([defined](../Specs/fields-format.md#number-format))
     - REJECTED: number conventions arguments
 90. - trailing-omissible: an expression that may consume nothing iff no
       expression after it in its trailing run consumes a token (`EXPRESSION?`;
@@ -794,7 +794,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - REJECTED: named spec (the specs use "spec" for a `Specs/` document) /
        field style / template (for a preset)
 111. - alignment: where a field spec's label & values are in its table output
-       column (`start`, `centerStart`, `centerEnd`, or `end`;
+       column (`start`, `center-start`, `center-end`, or `end`;
        [defined](../Specs/fields.md#alignment))
      - align / aligned: verb & adjective
      - REJECTED: justification / justify / justified
@@ -837,8 +837,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        references its field specs
        ([defined](../Specs/fields.md#field-spec-references))
 116. - digit group: a run of digits of a number's integer part, between each 2
-       of which `numberFormat` inserts `<digit-group-separator>`
-       ([defined](../Specs/fields-format.md#numberformat))
+       of which `number-format` inserts `<digit-group-separator>`
+       ([defined](../Specs/fields-format.md#number-format))
      - primary group: the least significant digit group, of `<digit-group-size>`
        digits
      - secondary group: each other digit group, of
@@ -848,7 +848,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        default: those that `<locale-identifier>` identifies, else those of the
        system locale, the canonical conventions, or the effective `<locale>`'s,
        depending on the argument list
-       ([defined](../Specs/fields-format.md#numberformat))
+       ([defined](../Specs/fields-format.md#number-format))
 117. - abort: verb; of formatting, make the formatted value absent, ignoring the
        rest of `<format-block>`
        ([defined](../Specs/fields-format.md#success--failure))

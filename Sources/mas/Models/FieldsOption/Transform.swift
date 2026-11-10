@@ -313,18 +313,18 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 	var description: String {
 		switch self {
 		case .initialTitlecase:
-			"initialTitlecase"
+			"initial-titlecase"
 		case .lowercase:
 			"lowercase"
 		case .trimWhitespace:
-			"trimWhitespace"
+			"trim-whitespace"
 		case .uppercase:
 			"uppercase"
 		case .absoluteValue:
-			"absoluteValue"
+			"absolute-value"
 		case let .numberFormat(conventions):
 			"""
-			numberFormat(digitGroupSeparator: "\(conventions.digitGroupSeparator)", digitGroupSize: \
+			number-format(digitGroupSeparator: "\(conventions.digitGroupSeparator)", digitGroupSize: \
 			\(conventions.digitGroupSize), secondaryDigitGroupSize: \(conventions.secondaryDigitGroupSize), \
 			decimalSeparator: "\(conventions.decimalSeparator)")
 			"""
@@ -336,12 +336,12 @@ extension Transform: CustomStringConvertible { // swiftlint:disable:this file_ty
 			\(fractionalDigits, default: "nil"))
 			"""
 		case .dateOnly:
-			"dateOnly"
+			"date-only"
 		case let .timeZone(timeZone):
-			"timeZone:\(timeZone.identifier):"
+			"time-zone:\(timeZone.identifier):"
 		case let .timeOnlyTimeZone(timeZone, referenceDate):
 			"""
-			timeOnlyTimeZone:\(timeZone.identifier),\
+			time-only-time-zone:\(timeZone.identifier),\
 			\(referenceDate?.iso8601Text ?? ""):
 			"""
 		}

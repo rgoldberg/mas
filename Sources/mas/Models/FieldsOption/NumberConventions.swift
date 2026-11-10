@@ -72,7 +72,7 @@ extension NumberConventions {
 	/// `number`, a number's text (an optional sign, optional ASCII digits, an
 	/// optional `.` & fractional part & an optional exponent), with
 	/// `digitGroupSeparator` between its integer part's digit groups & its `.`
-	/// replaced by `decimalSeparator`. See `numberFormat` in fields-format.md.
+	/// replaced by `decimalSeparator`. See `number-format` in fields-format.md.
 	func formatted(_ number: String) -> String {
 		let sign = number.first.map { $0 == "-" || $0 == "+" } == true ? number.prefix(1) : ""
 		let unsigned = number.dropFirst(sign.count)

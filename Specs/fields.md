@@ -840,7 +840,7 @@ The preset kind's [built-in
 standard](configs.md#immutable-built-in-named-configs) sets nothing, so, absent
 any custom one, the [`default`](configs.md#default-configs) preset sets nothing.
 The preset kind's other built-in presets each set only an
-[alignment](#alignment): `start`, `centerStart`, `centerEnd`, or `end`.
+[alignment](#alignment): `start`, `center-start`, `center-end`, or `end`.
 
 ##### Alignment
 
@@ -850,9 +850,9 @@ other than a `<preset-modifier>` sets a field spec's alignment; each built-in
 alignment preset sets it:
 
 - `start`: at the column's start.
-- `centerStart`: centered, with any odd remaining column width's extra space
+- `center-start`: centered, with any odd remaining column width's extra space
   after the value (leaving it nearer the column's start).
-- `centerEnd`: centered, with any odd remaining column width's extra space
+- `center-end`: centered, with any odd remaining column width's extra space
   before the value (leaving it nearer the column's end).
 - `end`: at the column's end.
 
@@ -1140,7 +1140,7 @@ the preceding typed segment, at which one starts (e.g., `<versions>` finds 1
 version, `1.2.3`, rather than `1.2` & `3`, in `1.2.3`).
 
 A grouped number is an integer part (a run of ASCII digits, optionally split
-into [digit groups](fields-format.md#numberformat) by digit group separators)
+into [digit groups](fields-format.md#number-format) by digit group separators)
 and/or a decimal separator preceding a fractional part (a run of ASCII digits),
 in that order (e.g., `.5` compares as `0.5`, as a [number
 coercion](fields-format.md#coercion) parses it), then optionally an exponent
@@ -1149,7 +1149,7 @@ compares as `1500`), so it compares as a single number (e.g., `1,234` as `1234`)
 rather than being broken into smaller ones by the separator. Its integer part
 may have leading `0`s & its fractional part trailing `0`s (e.g., `007.50`
 compares as `7.5`). Its group sizes & separators come from its [number format
-arguments](fields-format.md#numberformat); a `<digit-group-size>` of `0` allows
+arguments](fields-format.md#number-format); a `<digit-group-size>` of `0` allows
 groups of any size.
 
 A `<grouped-numeric>` without a `<locale-identifier>` takes the base conventions

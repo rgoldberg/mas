@@ -109,7 +109,7 @@ anything but its own text, while a format that omits a transform's
 of reporting an error, and `%UApp Store+App Store+` already gives that output.
 
 In specs, never forbid a string transform on `%U`, `%E`, or `%W` merely because
-it cannot modify its value (e.g., `%U.uppercase+-+`, `%E.trimWhitespace+-+`, or
+it cannot modify its value (e.g., `%U.uppercase+-+`, `%E.trim-whitespace+-+`, or
 `%W.uppercase+-+`), because a string transform on a value that it cannot modify
 stays valid elsewhere (e.g., `%T..lowercase+-+`), so forbidding it treats near
 parallels differently, which outweighs the overruled reason for rejecting its
@@ -117,8 +117,8 @@ allowance: no such transform can modify its value, so it cannot affect what its
 placeholder means.
 
 In specs, never forbid a name literal merely because it cannot affect what its
-syntax text means (e.g., `%T..lowercase+-+`, `%D..trimWhitespace+-+`, or
-`.dateOnly..uppercase`), because a name only selects an operation, which merely
+syntax text means (e.g., `%T..lowercase+-+`, `%D..trim-whitespace+-+`, or
+`.date-only..uppercase`), because a name only selects an operation, which merely
 has nothing to do, while forbidding only some such names treats near parallels
 differently.
 
@@ -154,34 +154,34 @@ its text is used, not on its syntax.
 
 In specs, never allow a `<coercion>` on a call whose value's type equals its
 input type, unless a `<named-format-reference>` immediately precedes it (e.g.,
-`.round..round`, `%S..uppercase++`, or `%W..trimWhitespace+-+`, whose value is a
-string or a `null`), because it cannot affect what the call means, while every
+`.round..round`, `%S..uppercase++`, or `%W..trim-whitespace+-+`, whose value is
+a string or a `null`), because it cannot affect what the call means, while every
 `<coercion>` then marks a type change, nor require one on a call whose types
-match (e.g., `.numberFormat.uppercase`), because it would add nothing.
+match (e.g., `.number-format.uppercase`), because it would add nothing.
 
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
 (e.g., `%S.uppercase+%L..round++` or
-`%S.uppercase+%I..trimWhitespace..round++`), because a `<failure-block>` must
+`%S.uppercase+%I..trim-whitespace..round++`), because a `<failure-block>` must
 never abort, nor forbid one in a `<format-template>` or a `<success-block>`
 (e.g., `%L..round+`, `%S%I..round++-+`, `%U%I..round++-+`, or
 `%T%I..round++-+`), because no matcher can otherwise coerce a label, a name, or
 a format input that it cannot match, while `%I`'s type is any in every
 `<success-block>`, so forbidding it in only some of them would treat near
-parallels differently (e.g., `%T%I..round++-+` & `%C%I..dateOnly++-+`), which
+parallels differently (e.g., `%T%I..round++-+` & `%C%I..date-only++-+`), which
 outweighs the overruled reason for forbidding it in `<success-block>` of `%U`,
 `%E`, `%W`, `%B`, `%T`, or `%F`: its matcher matched its format input, so the
 coercion can only abort.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,
-`.dateOnly..timeOnlyTimeZone:UTC:`, `%.D..round++`, or
-`%N..timeOnlyTimeZone:UTC:++`), because its rendering is not a value of that
+`.date-only..time-only-time-zone:UTC:`, `%.D..round++`, or
+`%N..time-only-time-zone:UTC:++`), because its rendering is not a value of that
 type, so it would abort, while a pipeline that means to parse it can coerce it
 to a string 1st.
 
 In specs, never forbid a number format argument merely because a
-`<digit-group-size>` of `0` ignores it (e.g., `.numberFormat:,,0,2:` or
-`.numberFormat:,x,0:`), because other payloads that nothing uses stay valid
+`<digit-group-size>` of `0` ignores it (e.g., `.number-format:,,0,2:` or
+`.number-format:,x,0:`), because other payloads that nothing uses stay valid
 (e.g., `H:P<:`), so forbidding it treats near parallels differently.
 
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
@@ -196,7 +196,7 @@ error), because 1 item's value should not hide any other item.
 
 In specs, never make a value need a `<coercion>` to match a predicate, or to
 conform to an input type, whose type is unsupported by its input format (e.g.,
-`%d`, `%c`, or `.dateOnly` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
+`%d`, `%c`, or `.date-only` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
 input), because such syntax can otherwise never succeed without a `<coercion>`,
 which outweighs the overruled reason for rejecting its allowance: a `<coercion>`
 would then coerce nothing, so it would only choose between an error & an abort.
@@ -211,19 +211,20 @@ In specs, never implicitly coerce a value to a type that its input format
 supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
 the value then has its own type, so an implicit coercion would misread it.
 
-In specs, never forbid `timeZone` or `dateOnly` merely because it cannot affect
-a date-only (e.g., `%.:iso-date:D.timeZone:UTC:+-+`,
-`%.V..:iso:timeZone:UTC:+-+`, or `%.:iso-date:D.dateOnly+-+`), nor forbid
-`timeZone` after `dateOnly` (e.g., `.dateOnly.timeZone:UTC:`), because a date's
-transforms set its rendering jointly, in any order, while a string transform on
-a value that it cannot modify stays valid (e.g., `%T..lowercase+-+`), so
-forbidding it treats near parallels differently, which outweighs the overruled
-reason for rejecting its allowance: its value is a date-only, which no time zone
-affects, or is already a date-only, so `dateOnly` cannot affect what it means.
+In specs, never forbid `time-zone` or `date-only` merely because it cannot
+affect a date-only (e.g., `%.:iso-date:D.time-zone:UTC:+-+`,
+`%.V..:iso:time-zone:UTC:+-+`, or `%.:iso-date:D.date-only+-+`), nor forbid
+`time-zone` after `date-only` (e.g., `.date-only.time-zone:UTC:`), because a
+date's transforms set its rendering jointly, in any order, while a string
+transform on a value that it cannot modify stays valid (e.g.,
+`%T..lowercase+-+`), so forbidding it treats near parallels differently, which
+outweighs the overruled reason for rejecting its allowance: its value is a
+date-only, which no time zone affects, or is already a date-only, so `date-only`
+cannot affect what it means.
 
 In specs, never forbid a `<coercion>` to a date merely because its
-`<date-format>`s cannot match its input (e.g., `.round..:iso:dateOnly` or
-`%.V..:iso-datetime:dateOnly+-+`), because other `<date-format>`s make the same
+`<date-format>`s cannot match its input (e.g., `.round..:iso:date-only` or
+`%.V..:iso-datetime:date-only+-+`), because other `<date-format>`s make the same
 `<coercion>` useful, while an aborted value shows its effect, which outweighs
 the overruled reason for rejecting its allowance: the coercion can only abort.
 
@@ -239,15 +240,15 @@ In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
 `%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
 cannot affect what it means.
 
-In specs, never add a transform that only coerces a value's type (e.g., `toDate`
-in `.toDate.dateOnly`, or `toNumber` in `.toNumber:de:.round`), because a
-matcher must still coerce before any pipeline runs (e.g., `%.N`), so it would
-add a 2nd syntax for 1 concept, while a `<coercion>` already coerces without any
-other transform (e.g., `%.n`), and it would lengthen even the simplest pipeline
-(e.g., `.toString.uppercase` instead of `..uppercase`). An overruling to add
-`toString`, because no `<coercion>` coerced a value to a string without another
-transform, was declined, because `%.s` & `%.S` do, without any rule for where a
-transform may appear in a pipeline.
+In specs, never add a transform that only coerces a value's type (e.g.,
+`to-date` in `.to-date.date-only`, or `to-number` in `.to-number:de:.round`),
+because a matcher must still coerce before any pipeline runs (e.g., `%.N`), so
+it would add a 2nd syntax for 1 concept, while a `<coercion>` already coerces
+without any other transform (e.g., `%.n`), and it would lengthen even the
+simplest pipeline (e.g., `.to-string.uppercase` instead of `..uppercase`). An
+overruling to add `to-string`, because no `<coercion>` coerced a value to a
+string without another transform, was declined, because `%.s` & `%.S` do,
+without any rule for where a transform may appear in a pipeline.
 
 In specs, never let `%i` take a `<coercion>` (e.g., `%.i`), because a
 `<coercion>` gives a value its predicate's type, while `%i` has no type to
@@ -256,7 +257,7 @@ coerce to, and `%.s` already renders a value as a string.
 In specs, never let a block hold a conditional matcher other than its enclosing
 matcher's predicate (e.g., `%S%.N.round+-+++` or `%N%.s+none+`), because a
 `<block-placeholder>` always succeeds, while such a matcher can fail, and a
-pipeline already coerces (e.g., `%S..round+-+` or `%N..trimWhitespace+none+`).
+pipeline already coerces (e.g., `%S..round+-+` or `%N..trim-whitespace+none+`).
 
 In specs, never let a default coercion or an implicit coercion to a date accept
 a decimal number (e.g., `%.d` or `%d` for `"1.2"`), because a string that holds
@@ -264,12 +265,12 @@ a number is rarely a time, so it would match a value that a later branch (e.g.,
 `%m.ds+`) means to match.
 
 In specs, never make a number need `<unix-time>` for a default coercion or an
-implicit coercion to a date (e.g., `%.d`, `%d`, or `.dateOnly` for `0`), because
-a number has no other meaning as a date, while a branch that means to match a
-number can precede it or follow a coercion that omits `<unix-time>` (e.g.,
-`%mn.d+` or `%m.:iso:d.n+`), which outweighs the overruled reason for rejecting
-its allowance: a number is rarely a time, so it would match a value that a later
-branch (e.g., `%m.d.n+`) means to match.
+implicit coercion to a date (e.g., `%.d`, `%d`, or `.date-only` for `0`),
+because a number has no other meaning as a date, while a branch that means to
+match a number can precede it or follow a coercion that omits `<unix-time>`
+(e.g., `%mn.d+` or `%m.:iso:d.n+`), which outweighs the overruled reason for
+rejecting its allowance: a number is rarely a time, so it would match a value
+that a later branch (e.g., `%m.d.n+`) means to match.
 
 In specs, never rewrite an example to avoid `mas` & anything after it (e.g.,
 `mas list --fields @x`), when understanding the example needs no knowledge of

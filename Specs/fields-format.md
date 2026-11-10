@@ -39,7 +39,7 @@ An **implicit coercion** coerces a field value, at its original type, absent a
 `<coercion>`, wherever syntax requires a type unsupported by its input format,
 iff a default coercion would coerce it to that type, because no value can
 otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON input,
-`%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` & `.dateOnly`
+`%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` & `.date-only`
 accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces it, ignoring
 its defaults (e.g., `%.:iso:d` does not match `0`).
 
@@ -52,8 +52,8 @@ for one that supports date-only, but not datetime, `%d` would match `0`, but not
 
 A `<coercion>` to a type unsupported by its input format thus remains useful to
 choose its `<date-format>`s & to abort formatting, rather than report an error,
-for an input that it cannot coerce (e.g., for `"abc"`, `..dateOnly` aborts,
-while `.dateOnly` reports an error).
+for an input that it cannot coerce (e.g., for `"abc"`, `..date-only` aborts,
+while `.date-only` reports an error).
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
@@ -235,8 +235,8 @@ not a value of that type, so a pipeline that means to parse it must coerce it to
 a string 1st (e.g., `%.D..uppercase..:,,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
-arguments (e.g., for `"1234.5"`, `..numberFormat:de:..:de:round` evaluates to
-`1235`, while `..numberFormat:de:..round` aborts formatting, because `1.234,5`
+arguments (e.g., for `"1234.5"`, `..number-format:de:..:de:round` evaluates to
+`1235`, while `..number-format:de:..round` aborts formatting, because `1.234,5`
 is not a number in the canonical conventions).
 
 An **argument** is an element of an argument list: a transform's, a [number
@@ -245,7 +245,7 @@ coercion's](#coercion), a [date coercion's](#chronologic-formatting),
 [`C`'s](fields.md#sort-chronologic-segments).
 
 An argument ignores its outer bare whitespace, which must be escaped to be
-consumed (e.g., `.numberFormat:,\ ,3:` separates digit groups with a space).
+consumed (e.g., `.number-format:,\ ,3:` separates digit groups with a space).
 
 An argument that is empty after ignoring its outer bare whitespace is absent,
 which is an error iff the argument is required (e.g., `.scale:,,0:` is an error,
@@ -264,7 +264,7 @@ to the coerced input; otherwise, formatting [aborts](#success--failure).
 A number or number-to-string transform's coercion may take
 [`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`), and a date
 transform's may take [`<date-coercion-arguments>`](#chronologic-formatting)
-(e.g., `..:unix-time:dateOnly`).
+(e.g., `..:unix-time:date-only`).
 
 A transform's `<coercion>` to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
@@ -290,9 +290,9 @@ is:
 ```ebnf
 string-transform = <initial-titlecase> | <lowercase> | <trim-whitespace> | <uppercase> (* type: string *)
 
-initial-titlecase = 'initialTitlecase'
+initial-titlecase = 'initial-titlecase'
 lowercase         = 'lowercase'
-trim-whitespace   = 'trimWhitespace'
+trim-whitespace   = 'trim-whitespace'
 uppercase         = 'uppercase'
 ```
 <!--markdownlint-enable line-length-->
@@ -302,7 +302,7 @@ Case transforms use Unicode's full, locale-independent case mappings, which can
 modify a string's length (e.g., `ß` uppercases to `SS`).
 
 <!--editorconfig-checker-disable-->
-- `initialTitlecase`: titlecases the string's **initial character**, retaining
+- `initial-titlecase`: titlecases the string's **initial character**, retaining
   the rest. The initial character is the 1st letter (excluding uncased modifier
   letters), number, symbol (Unicode general category `S`), or private-use
   character, per [ICU's default titlecasing index adjustment](
@@ -311,7 +311,7 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
   unmodified, but titlecases a cased one (e.g., `hello` becomes `Hello` &
   `ⓐbc` becomes `Ⓐbc`, but `1st` & `$abc` are unaffected).
 - `lowercase`: lowercases every character.
-- `trimWhitespace`: removes leading & trailing
+- `trim-whitespace`: removes leading & trailing
   [whitespace](ebnf.md#whitespace).
 - `uppercase`: uppercases every character.
 <!--editorconfig-checker-enable-->
@@ -324,10 +324,10 @@ modify a string's length (e.g., `ß` uppercases to `SS`).
 number-transform           = <absolute-value> | <round> | <scale> (* type: number *)
 number-to-string-transform = <number-format> (* input type: number; output type: string *)
 
-absolute-value = 'absoluteValue'
+absolute-value = 'absolute-value'
 round          = 'round'
 scale          = 'scale' <scale-arguments>
-number-format  = 'numberFormat' [ <argument-fence> <number-format-arguments> <argument-fence> ]
+number-format  = 'number-format' [ <argument-fence> <number-format-arguments> <argument-fence> ]
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
@@ -335,10 +335,10 @@ number-format  = 'numberFormat' [ <argument-fence> <number-format-arguments> <ar
 A number transform retains its value's notation (positional or scientific),
 except `scale`, whose arguments define its rendering.
 
-###### `absoluteValue`
+###### `absolute-value`
 
-`absoluteValue` removes the value's leading sign (`-` or `+`), if any, retaining
-the rest of its representation, e.g.:
+`absolute-value` removes the value's leading sign (`-` or `+`), if any,
+retaining the rest of its representation, e.g.:
 
 - `-1.50` becomes `1.50`.
 - `-1.5e-3` becomes `1.5e-3`.
@@ -357,7 +357,7 @@ away from 0, rendering it in the value's notation:
 A leading `+` is retained, while a leading `-` is retained iff the result is
 nonzero (e.g., `+2.4` becomes `+2`, and `-0.4` becomes `0`).
 
-###### `numberFormat`
+###### `number-format`
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -381,23 +381,23 @@ decimal-separator          = {string}                (* default: {base conventio
 
 The **number format arguments** are those of `<number-format-arguments>`.
 
-`numberFormat` inserts `<digit-group-separator>` between the **digit groups** of
-its input's integer part, counting from its least significant digit: the least
-significant (**primary**) group has `<digit-group-size>` digits, and each other
-(**secondary**) group has `<secondary-digit-group-size>` digits, or
+`number-format` inserts `<digit-group-separator>` between the **digit groups**
+of its input's integer part, counting from its least significant digit: the
+least significant (**primary**) group has `<digit-group-size>` digits, and each
+other (**secondary**) group has `<secondary-digit-group-size>` digits, or
 `<digit-group-size>` digits if `<secondary-digit-group-size>` is `0`; the most
-significant group may have fewer digits (e.g., `.numberFormat:canonical,,3,2:`
+significant group may have fewer digits (e.g., `.number-format:canonical,,3,2:`
 renders `12345678` as `1,23,45,678`).
 
-`numberFormat` also replaces the `.` between its input's integer & fractional
-parts with `<decimal-separator>` (e.g., `.numberFormat:de:` renders `1234.5` as
+`number-format` also replaces the `.` between its input's integer & fractional
+parts with `<decimal-separator>` (e.g., `.number-format:de:` renders `1234.5` as
 `1.234,5`), retaining its input's sign & leading `0`s (e.g., it renders
 `+01234.50` as `+01.234,50` & `.5` as `,5`).
 
-`numberFormat` retains scientific notation, applying to its significand &
-rendering its exponent indicator & exponent verbatim (e.g., `.numberFormat:de:`
+`number-format` retains scientific notation, applying to its significand &
+rendering its exponent indicator & exponent verbatim (e.g., `.number-format:de:`
 renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
-it (e.g., `.scale:0,,2:.numberFormat:de:` renders `1.5e3` as `1.500,00`).
+it (e.g., `.scale:0,,2:.number-format:de:` renders `1.5e3` as `1.500,00`).
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.
@@ -411,7 +411,7 @@ with a sign has 1 parse (e.g., for `%.:,,,,-x:n`, `"-x5"` is `0.5`).
 
 The **base conventions** are those that
 [`<locale-identifier>`](fields.md#sort-locale) identifies, per its default if it
-is absent, even if other number format arguments are present. `numberFormat`'s
+is absent, even if other number format arguments are present. `number-format`'s
 default is the system locale, because rendered output is for people, while a
 [number coercion's](#coercion) is the [canonical](fields.md#sort-locale)
 conventions, because parsed input is data, which, like sorting's default
@@ -464,41 +464,41 @@ notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
 date-transform      = <date-only> | <date-time-zone>
 time-only-transform = <time-only-time-zone> (* type: time-only *)
 
-date-only           = 'dateOnly' (* input type: date; output type: date-only *)
-date-time-zone      = 'timeZone' [ <date-time-zone-arguments> ] (* type: date; sets the output time zone; last wins *)
-time-only-time-zone = 'timeOnlyTimeZone' [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
+date-only           = 'date-only' (* input type: date; output type: date-only *)
+date-time-zone      = 'time-zone' [ <date-time-zone-arguments> ] (* type: date; sets the output time zone; last wins *)
+time-only-time-zone = 'time-only-time-zone' [ <time-only-time-zone-arguments> ] (* sets the output time zone; last wins *)
 ```
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
 A date's or a time-only's contiguous transforms jointly set how it is rendered,
-until a `<coercion>` renders it (e.g., `.dateOnly.timeZone:UTC:` means what
-`.timeZone:UTC:.dateOnly` means):
+until a `<coercion>` renders it (e.g., `.date-only.time-zone:UTC:` means what
+`.time-zone:UTC:.date-only` means):
 
-- `dateOnly`: renders only the date, in the output time zone.
-- `timeZone` (for a date) & `timeOnlyTimeZone` (for a time-only): set the output
-  time zone to the one that their `<time-zone-code>` identifies.
+- `date-only`: renders only the date, in the output time zone.
+- `time-zone` (for a date) & `time-only-time-zone` (for a time-only): set the
+  output time zone to the one that their `<time-zone-code>` identifies.
 
-Absent `timeZone` & `timeOnlyTimeZone`, the output time zone is the system time
-zone.
+Absent `time-zone` & `time-only-time-zone`, the output time zone is the system
+time zone.
 
 A value parsed from a date-only has a date that is independent of time zones, so
-`timeZone` does not affect it.
+`time-zone` does not affect it.
 
 A time-only value is rendered in the output time zone as if on the last
-`timeOnlyTimeZone`'s `<reference-date>`, because a time zone's UTC offset can
-vary by date (e.g., for daylight saving time), or, absent `timeOnlyTimeZone`, on
-the current date in the system time zone. A UTC offset `<time-zone-code>` has a
-fixed UTC offset, but a Foundation time zone abbreviation may identify a time
+`time-only-time-zone`'s `<reference-date>`, because a time zone's UTC offset can
+vary by date (e.g., for daylight saving time), or, absent `time-only-time-zone`,
+on the current date in the system time zone. A UTC offset `<time-zone-code>` has
+a fixed UTC offset, but a Foundation time zone abbreviation may identify a time
 zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 
 A time-only value whose instant on its `<reference-date>`, as a Unix time, is
 not representable [aborts](#success--failure) formatting, with or without
 `<coercion>`, because its value, rather than its syntax, decides this (e.g., in
-the UTC system time zone, `.timeOnlyTimeZone:UTC,+292278994-08-17:` aborts for
-`"17:39:23Z"`, but renders `"01:00:00Z"` as `01:00:00Z`).
+the UTC system time zone, `.time-only-time-zone:UTC,+292278994-08-17:` aborts
+for `"17:39:23Z"`, but renders `"01:00:00Z"` as `01:00:00Z`).
 
-###### `timeZone` & `timeOnlyTimeZone`
+###### `time-zone` & `time-only-time-zone`
 
 <!--editorconfig-checker-disable-->
 <!--markdownlint-disable line-length-->
@@ -534,7 +534,7 @@ A **UTC offset** is either:
 - An optional `UTC` or `GMT` prefix, then `+` or `-`, then either a 2-digit hour
   & a 2-digit minute (e.g., `+0530`), or a 1- or 2-digit hour, then, optionally,
   `:` followed by a 2-digit minute (e.g., `+5` or `+05:30`, which
-  `.timeZone:+05\:30:` sets, escaping its `:`); each minute is from `00` to
+  `.time-zone:+05\:30:` sets, escaping its `:`); each minute is from `00` to
   `59`, and the offset is at most 18 hours from UTC (e.g., `+18`, but not
   `+18:01`).
 
@@ -822,8 +822,8 @@ non-nullary-string     = "S" (* is string;                                      
 `%U`'s value is a `null`, which a transform leaves unmodified, and `%E`'s &
 `%W`'s are each such a `null` or a string, so a string transform has nothing to
 coerce, unless it follows a `<named-format-reference>`, whose named format may
-output any type (e.g., `%W.trimWhitespace+-+`, `%U.uppercase+-+` &
-`%U:x..uppercase+-+`, but neither `%W..trimWhitespace+-+` nor
+output any type (e.g., `%W.trim-whitespace+-+`, `%U.uppercase+-+` &
+`%U:x..uppercase+-+`, but neither `%W..trim-whitespace+-+` nor
 `%U..uppercase+-+`, just as `%S..uppercase++` is an error).
 
 ###### Number Formatting
@@ -932,7 +932,7 @@ such a split exists:
 The default regexes match only an empty string, allowing no trivia (e.g.,
 `%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`). Number
 transforms & number-to-string transforms are applied to the number alone,
-retaining the trivia unmodified (e.g., `..:,,,,,[$]:numberFormat:de:` renders
+retaining the trivia unmodified (e.g., `..:,,,,,[$]:number-format:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every variable token, a regex's own
@@ -1003,9 +1003,9 @@ match a number must precede theirs or follow a `<coercion>` that omits
 render the price `5.6` as a date).
 
 A `<coercion>` whose `<date-format>`s cannot match its input merely aborts
-(e.g., `.round..:iso:dateOnly`, because no number matches `<iso>`, or
-`%.V..:iso-datetime:dateOnly+-+`, because a version has no `:`, so it is never a
-datetime).
+(e.g., `.round..:iso:date-only`, because no number matches `<iso>`, or
+`%.V..:iso-datetime:date-only+-+`, because a version has no `:`, so it is never
+a datetime).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
 format.
@@ -1031,18 +1031,18 @@ Each of their fields must be in range:
 - Second: `00` to `59` (e.g., the leap second `23:59:60` is invalid, because
   Unix time ignores leap seconds).
 - UTC offset: at most 18 hours from UTC, as for
-  [`timeZone`](#timezone--timeonlytimezone).
+  [`time-zone`](#time-zone--time-only-time-zone).
 
 No other ISO-8601 representation is detected (e.g., basic format, ordinal dates,
 week dates, or reduced precision other than a datetime without seconds).
 
 A datetime or time-only without a UTC offset is in the system time zone.
 
-A time-only value has no date, so `%C`'s block cannot apply `dateOnly` or
-`timeZone` to it, and a [`<coercion>`](#coercion) to a date fails for it (e.g.,
-`..dateOnly` aborts formatting for `"17:39:23"`, while `%.D.dateOnly+-+` outputs
-`-` for it). Likewise, a `<coercion>` to a time-only fails for a date (e.g.,
-`..timeOnlyTimeZone:UTC:` aborts formatting for `"2020-03-18"`).
+A time-only value has no date, so `%C`'s block cannot apply `date-only` or
+`time-zone` to it, and a [`<coercion>`](#coercion) to a date fails for it (e.g.,
+`..date-only` aborts formatting for `"17:39:23"`, while `%.D.date-only+-+`
+outputs `-` for it). Likewise, a `<coercion>` to a time-only fails for a date
+(e.g., `..time-only-time-zone:UTC:` aborts formatting for `"2020-03-18"`).
 
 Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
 year `0000` is 1 BCE, and `1500-02-29` does not exist).
@@ -1137,19 +1137,19 @@ A `%M` without a nullary branch, a non-empty unary branch, or a
 Every branch is conditional, because an unconditional branch would make each
 later branch unreachable, while an unconditional last branch would mean what a
 `%M` whose `<failure-block>` holds that branch as a placeholder means (e.g.,
-`%MN.absoluteValue+b+%I..uppercase++`).
+`%MN.absolute-value+b+%I..uppercase++`).
 
 Examples:
 
-- `%mN.absoluteValue+b+`:
+- `%mN.absolute-value+b+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, aborts formatting.
-- `%MN.absoluteValue+b+Status Unknown+`:
+- `%MN.absolute-value+b+Status Unknown+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs `Status Unknown`.
-- `%MN.absoluteValue+b+%I..uppercase++`:
+- `%MN.absolute-value+b+%I..uppercase++`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs the uppercased value.

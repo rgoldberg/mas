@@ -74,8 +74,8 @@ private let presetNameTerminatorSet =
 
 /// The alignment of each existing preset that sets one, by preset name.
 let alignmentByPresetName = [
-	"centerEnd": Alignment.centerEnd,
-	"centerStart": .centerStart,
+	"center-end": Alignment.centerEnd,
+	"center-start": .centerStart,
 	"end": .end,
 	"start": .start,
 ]

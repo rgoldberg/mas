@@ -131,7 +131,7 @@ private let listedLabelAndFormatByFieldName = [
 	"bundleID": ("Bundle ID", .default(fieldName: "bundleID")),
 	"currentVersionReleaseDate": (
 		"Released",
-		// `%+D.dateOnly+`: the release date, date-only, in the system time zone;
+		// `%+D.date-only+`: the release date, date-only, in the system time zone;
 		// formatting aborts for a non-date
 		.template(
 			[
@@ -148,7 +148,7 @@ private let listedLabelAndFormatByFieldName = [
 	),
 	"fileSizeBytes": (
 		"Size",
-		// `%+.N.scale:6,,0:.numberFormat+ MB`: a byte count as whole, grouped
+		// `%+.N.scale:6,,0:.number-format+ MB`: a byte count as whole, grouped
 		// decimal megabytes, with an appended " MB". JSON gets the raw byte count
 		// instead: JSON output resolves to the machine-facing `@json` variant (see
 		// `machineFacingVariant()`), which labels each field spec by its name &
