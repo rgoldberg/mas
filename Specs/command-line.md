@@ -60,10 +60,9 @@ A **valued option** is an option that takes a value; this spec defines each as a
 A valued option's **value** (`VALUE`) is the rest of its command-line argument
 after `=` (e.g., `--fields=name`), or else the next command-line argument (e.g.,
 `--fields name`), which a [command-line argument
-boundary](ebnf.md#command-line-argument-boundaries) separates from `NAME` iff
-that argument is `-` or does not start with `-`, so any other value that starts
-with `-` must follow `=` (e.g., `--fields=-x`); otherwise, the option is an
-error (e.g., `--fields -x`).
+boundary](ebnf.md#command-line-argument-boundaries) separates from `NAME`, so a
+value that starts with `-`, other than `-` itself, must follow `=` (e.g.,
+`--fields=-x`); otherwise, the option is an error (e.g., `--fields -x`).
 
 A **flag** is an option that takes no value (e.g., `--json`).
 
