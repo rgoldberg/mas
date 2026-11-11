@@ -885,9 +885,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - string coercion: a `<coercion>` to a string (e.g., in `%.s`), which
        matches every value except a `null` or an absent one
        ([defined](../Specs/fields-format.md#coercion))
-     - number coercion: a `<number-coercion>`, which parses a number's
-       separators & digit group sizes per its number format arguments & may
-       allow trivia ([used](../Specs/fields-format.md#coercion))
+     - number coercion: a `<number-coercion>`, which parses an optional sign & a
+       grouped number per its number format arguments & may allow trivia
+       ([used](../Specs/fields-format.md#coercion))
      - boolean coercion: a `<coercion>` to a boolean, which parses only `true` &
        `false`, verbatim ([used](../Specs/fields-format.md#coercion))
      - trivia: the text around the number that a number coercion allows
@@ -992,7 +992,8 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - run of non-boundary text: a maximal sequence of segments between
        boundaries ([defined](../Specs/fields.md#sort-segments))
      - grouped number: a number segment of `<grouped-numeric>`, which compares
-       as a single number ([defined](../Specs/fields.md#sort-number-segments))
+       as a single number, or what a number coercion parses after any sign
+       ([defined](../Specs/fields.md#sort-number-segments))
 130. - ambiguous: of syntax, its text, or what it parses, cannot be read
        reliably
      - ill-typed: of syntax, an expression's or a token's type does not fit what
