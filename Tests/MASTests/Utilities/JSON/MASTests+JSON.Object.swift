@@ -92,6 +92,20 @@ private extension MASTests {
 		)
 	}
 
+	@Test
+	func `a value's later line is indented by as many spaces as each grapheme cluster's width`() throws {
+		#expect(
+			try JSON.Object([("family", .string("a\nb"))])
+				.keyValueRows(
+					fieldSpecs: [.init(name: "family", label: "👨‍👩‍👧", format: .default(fieldName: "family"), sortSpec: nil)],
+					fieldOrders: .init(),
+					keyValueConfig: parseKeyValueConfig("fL=:R:"),
+				)
+				.map(\.row)
+				== ["👨‍👩‍👧=a\n   b"],
+		)
+	}
+
 	@Test(
 		arguments: [
 			(Alignment.start, "id", "1", "333"),
