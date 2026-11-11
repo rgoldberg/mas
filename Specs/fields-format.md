@@ -928,9 +928,11 @@ such a split exists:
    ) whole match of `<trivia-prefix-regex>`.
 2. The longest number there.
 3. A **trivia suffix**: the rest of the string, a whole match of
-   `<trivia-suffix-regex>` (e.g., `%.:,,,,,.*:n` matches `"a1b2"` as the trivia
-   prefix `a1b` & the number `2`).
+   `<trivia-suffix-regex>`.
 <!--editorconfig-checker-enable-->
+
+E.g., `%.:,,,,,.*:n` matches `"a1b2"` as the trivia prefix `a1b` & the number
+`2`.
 
 The default regexes match only an empty string, allowing no trivia (e.g.,
 `%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`). Number
