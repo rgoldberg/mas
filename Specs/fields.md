@@ -1185,7 +1185,7 @@ unix-time    = 'unix-time'
 <!--markdownlint-enable line-length-->
 <!--editorconfig-checker-enable-->
 
-The chronologic segments are each longest text that a `<chronologic-format>`
+The chronologic segments are each the longest text that a `<chronologic-format>`
 matches, as [`%.c`, `%.d` & `%.:unix-time:d`
 detect](fields-format.md#chronologic-formatting) it:
 
