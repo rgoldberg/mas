@@ -84,10 +84,12 @@ clusters** (each a user-perceived character, per [Unicode text
 segmentation](https://www.unicode.org/reports/tr29/)). A grapheme cluster's
 width is 2 iff its 1st code point's Unicode `Emoji_Presentation` property is
 true, or its 1st code point's `Emoji` property is true & it contains U+FE0F
-(which selects emoji presentation), because an output device renders it as 1
-emoji (e.g., a family emoji of 3 people joined by 2 U+200D joiners, which is 5
-code points). Any other grapheme cluster's width is the sum of its code points'
-`wcwidth`s, with 0 substituted for each negative one (e.g., a tab's).
+(which selects emoji presentation) or an `Emoji_Modifier` code point (a skin
+tone, which also selects it, e.g., U+1F3FD after U+261D), because an output
+device renders it as 1 emoji (e.g., a family emoji of 3 people joined by 2
+U+200D joiners, which is 5 code points). Any other grapheme cluster's width is
+the sum of its code points' `wcwidth`s, with 0 substituted for each negative one
+(e.g., a tab's).
 
 ## Command Lists
 

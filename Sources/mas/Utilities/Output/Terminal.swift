@@ -55,7 +55,7 @@ private extension Character {
 	var terminalWidth: Int {
 		unicodeScalars.first.map { firstScalar in
 			firstScalar.properties.isEmojiPresentation
-				|| firstScalar.properties.isEmoji && unicodeScalars.contains("\u{FE0F}") // VS16: emoji presentation
+				|| firstScalar.properties.isEmoji && unicodeScalars.contains(where: \.selectsEmojiPresentation)
 				? 2
 				: unicodeScalars.reduce(0) { $0 + $1.terminalWidth }
 		}
@@ -68,6 +68,12 @@ private extension Unicode.Scalar {
 	/// the environment's locale (e.g., `C`, in which `wcwidth` fails for every
 	/// non-ASCII character).
 	private nonisolated(unsafe) static let utf8Locale = unsafe newlocale(LC_CTYPE_MASK, "UTF-8", nil)
+
+	/// Whether this scalar selects emoji presentation for the emoji that it
+	/// follows: VS16 (U+FE0F) or a skin tone (an `Emoji_Modifier`).
+	var selectsEmojiPresentation: Bool {
+		self == "\u{FE0F}" || properties.isEmojiModifier
+	}
 
 	var terminalWidth: Int {
 		let previousLocale = unsafe uselocale(unsafe Self.utf8Locale)

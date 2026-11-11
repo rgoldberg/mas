@@ -22,6 +22,7 @@ private extension MASTests {
 			("e\u{301}", 1), // Combining acute accent
 			("😀", 2),
 			("👍🏽", 2), // Modifier sequence
+			("☝🏽", 2), // Modifier sequence whose base has text presentation by default
 			("🇺🇸", 2), // Flag sequence
 			("❤", 1), // Text presentation by default
 			("❤️", 2), // Emoji presentation sequence
