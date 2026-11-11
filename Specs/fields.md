@@ -1205,7 +1205,7 @@ character immediately precedes or follows it that is:
 - For `<unix-time>`: not whitespace (e.g., `at 1584553163 UTC` has a Unix time
   segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
-Directly absent `<chronologic-formats>` (i.e., `C:`), there are no chronologic
+Directly absent `<chronologic-formats>` (e.g., `C:`), there are no chronologic
 segments.
 
 ##### Sort Boundaries
