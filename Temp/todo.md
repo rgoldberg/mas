@@ -115,7 +115,10 @@ only after `=` (e.g., `--json[=<json-config>]`).
    an inherited payload, which it would not override.
 4. How a user defines & persists a [custom named
    config](../Specs/configs.md#custom-named-configs): the project owner will
-   specify this later (not actionable until then).
+   specify this later (not actionable until then). It must not take a preset's
+   text as its own command-line argument, because a preset that starts with a
+   `<label-modifier>` (e.g., `=Size`) would start that argument with `=`, which
+   zsh expands unquoted (e.g., `zsh: Size not found`).
 
 #### Custom Names Removal
 
