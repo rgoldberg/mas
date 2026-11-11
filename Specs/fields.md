@@ -505,9 +505,9 @@ ties no field specs, but it still tiebreaks a later section of another kind
 
 An unpositioned field compares as less (`a`) or greater (`z`) than every
 positioned one. Per `<unpositioned-field-placement>`, `<descending>` also
-reverses its location (`<relative-unpositioned-fields>`, e.g., `D-` or `P-` puts
-it 1st) or does not (`<fixed-unpositioned-fields>`, e.g., `D-f` or `P-f` puts it
-last).
+reverses its location (`<relative-unpositioned-fields>`, e.g., `/D-` or `/P-`
+puts it 1st) or does not (`<fixed-unpositioned-fields>`, e.g., `/D-f` or `/P-f`
+puts it last).
 
 `<descending>` reverses a positional order or a document order. For
 `<positional-order>`, it does so by reversing the positions of the working

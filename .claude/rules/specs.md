@@ -135,6 +135,11 @@ each example of a `<field-spec-reference>` inside such an edit (e.g., "`@2` in
 `.@2`", not "`@2`"), because without it, the example is an `<absolute-config>`
 or a `<relative-config>` that means something else.
 
+In specs, write each example of a `<field-order-option-set>` with its
+`<field-order-section-prefix>` (e.g., `/D-` & `/D-/T+`, not `D-` & `D-/T+`),
+because without it, the example is an `<absolute-config>` that means something
+else (e.g., `D-` names the field `D-`).
+
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value"), unless `the` selects 1 of multiple
 occurrences (e.g., "the effective `<primary-field-order-option-set>`"), because
