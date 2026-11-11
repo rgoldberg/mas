@@ -37,11 +37,11 @@ character in a key is rendered as it is in a [table cell](table.md#table-config)
 Each line terminator in a value is rendered as a newline (e.g., a CRLF as 1 LF),
 so the value continues on a new line. Each such non-empty line is indented to
 the value's start by its row's unstyled text before the value, after that text's
-last line terminator, if any, with each tab retained & each other character
-replaced by as many spaces as its [width](configs.md#width), so each tab reaches
-the same tab stop as in the row, because a tab's rendered width depends on the
-output device's tab stops, which an app cannot determine. E.g., the key `Notes`
-& a value of `a` & `b` separated by an LF render, with:
+last line terminator, if any, with each tab retained & each other grapheme
+cluster replaced by as many spaces as its [width](configs.md#width), so each tab
+reaches the same tab stop as in the row, because a tab's rendered width depends
+on the output device's tab stops, which an app cannot determine. E.g., the key
+`Notes` & a value of `a` & `b` separated by an LF render, with:
 
 - `fL=:R:`, as `Notes=a`, then 6 spaces & `b` on the next line.
 - `fL<TAB>:R:`, as `Notes`, a tab & `a`, then 5 spaces, a tab & `b` on the next
