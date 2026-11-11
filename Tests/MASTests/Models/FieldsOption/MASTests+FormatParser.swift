@@ -940,10 +940,13 @@ private extension MASTests { // swiftlint:disable file_length
 			("[%.C.time-only-time-zone:UTC,+292278994-08-17:+-+]", "17:39:23Z", nil),
 			("..time-only-time-zone:UTC,+292278994-08-17:..uppercase", "17:39:23Z", nil),
 			("..time-only-time-zone:UTC,+292278994-08-17:", "01:00:00Z", "01:00:00Z"),
-			// Only the last `time-only-time-zone` sets the reference date
+			// Only the effective `time-only-time-zone` sets the reference date
 			(".time-only-time-zone:UTC,+292278994-08-17:.time-only-time-zone:UTC,2020-01-15:", "17:39:23Z", "17:39:23Z"),
 			(".time-only-time-zone:UTC,+292278994-08-17:.time-only-time-zone:UTC:", "17:39:23Z", "17:39:23Z"),
 			(".time-only-time-zone:UTC,2020-01-15:.time-only-time-zone:UTC,+292278994-08-17:", "17:39:23Z", nil),
+			// A later transform run's `time-only-time-zone` does not set an earlier
+			// run's reference date
+			("..time-only-time-zone:UTC,+292278994-08-17:..uppercase..time-only-time-zone:UTC:", "17:39:23Z", nil),
 			("[%.c]", "24:00:00", nil),
 			("[%.c]", "23:59:60", nil),
 			("[%.c]", "17:39:23+19:00", nil),

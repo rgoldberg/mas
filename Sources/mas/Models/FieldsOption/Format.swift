@@ -1109,8 +1109,8 @@ private struct ChronologicStyle: Equatable { // swiftlint:disable:this one_decla
 
 	var isDateOnly = false
 	var timeZone = TimeZone?.none
-	/// The last `time-only-time-zone`'s `<reference-date>`, iff any; else the
-	/// current date in the system time zone.
+	/// The effective `time-only-time-zone`'s `<reference-date>`, iff any; else
+	/// the current date in the system time zone.
 	var referenceDate = CivilDate?.none
 
 	/// This style modified by a chronologic `transform`: `date-only` renders only

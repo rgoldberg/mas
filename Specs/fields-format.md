@@ -485,7 +485,7 @@ time zone.
 A value parsed from a date-only has a date that is independent of time zones, so
 `time-zone` does not affect it.
 
-A time-only value is rendered in the output time zone as if on the last
+A time-only value is rendered in the output time zone as if on the effective
 `time-only-time-zone`'s `<reference-date>`, because a time zone's UTC offset can
 vary by date (e.g., for daylight saving time), or, absent `time-only-time-zone`,
 on the current date in the system time zone. A UTC offset `<time-zone-code>` has
