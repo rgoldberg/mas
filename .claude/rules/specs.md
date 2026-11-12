@@ -136,9 +136,12 @@ each example of a `<field-spec-reference>` inside such an edit (e.g., "`@2` in
 or a `<relative-config>` that means something else.
 
 In specs, write each example of a `<field-order-option-set>` with its
-`<field-order-section-prefix>` (e.g., `/D-` & `/D-/T+`, not `D-` & `D-/T+`),
-because without it, the example is an `<absolute-config>` that means something
-else (e.g., `D-` names the field `D-`).
+`<field-order-section-prefix>` (e.g., `/D-` & `/D-/T+`, not `D-` & `D-/T+`), and
+each example of a `<sort-modifier>`, a `<sort>`, a `<sort-option>`, or a
+`<preset-modifier>` in a field spec (e.g., `name/a-`, `.name/L:` & `name%x`, not
+`a-`, `L:` & `%x`), because without them, the example is other fields config
+text, which means something else or is an error (e.g., `D-` & `a-` name fields,
+`/-` is a `<field-order-adjustment-set>` & `%x` is an error).
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value"), unless `the` selects 1 of multiple
@@ -199,8 +202,8 @@ outer bare whitespace treatment, even while no syntax uses it.
 
 In specs, allow syntax unless 1 or more of the following apply, because an error
 should report a likely mistake, not harmless verbosity (e.g., allow `%+N%n+`,
-`%T..lowercase+-+`, `%Sx+x+`, `005`, or a tab in a `<leader-pattern>`, whose
-output shows its effect):
+`%T..lowercase+-+`, `%Sx+x+`, `name/005`, or a tab in a `<leader-pattern>`,
+whose output shows its effect):
 
 1. **Ambiguous:** the syntax text, or what it parses, cannot be read reliably
    (e.g., `@x/`, or a digit group separator that equals the decimal separator).

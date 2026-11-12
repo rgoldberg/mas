@@ -38,8 +38,8 @@ as a removal for an unlisted field does, so forbidding it treats near parallels
 differently (e.g., `@all.size=X,-size,-size`), which outweighs the overruled
 reason for forbidding it: it removes a `null`.
 
-In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `005`) or a
-repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
+In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `name/005`) or
+a repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
 contradictory.
 
 In specs, never forbid an empty `<field-spec-edits-section>` (e.g., `@x.`),

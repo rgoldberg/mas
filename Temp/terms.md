@@ -376,7 +376,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 59. - define: bind a meaning
     - specify: state a rule
     - set: assign a value; also, of a `<field-modifiers>`, give a setting a
-      value, rather than retain its inherited value (e.g., `/-` sets
+      value, rather than retain its inherited value (e.g., `.name/-` sets
       `<direction>`; [defined](../Specs/fields.md#field-modifiers))
 60. - visible
     - hidden
