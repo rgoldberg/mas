@@ -909,9 +909,7 @@ group of any other size thus terminates the number before that separator (e.g.,
 `%.:,,,,,,.*:n` matches `"1,2345"` as the number `1` followed by the trivia
 suffix `,2345`).
 
-A number coercion accepts both positional & scientific notation (an exponent
-indicator, `e` or `E`, followed by an optionally signed integer exponent). The
-coerced value's text retains the number's sign, leading & trailing `0`s &
+The coerced value's text retains the number's sign, leading & trailing `0`s &
 notation, but has no digit group separators & has `.` as its decimal separator
 (e.g., `%.n` coerces `"+01.50e+03"` to `+01.50e+03` & `".5"` to `.5`, while
 `%.:de:n` coerces `"1.234,50"` to `1234.50`), because each later transform reads

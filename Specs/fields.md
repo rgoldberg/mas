@@ -1145,8 +1145,7 @@ version, `1.2.3`, rather than `1.2` & `3`, in `1.2.3`).
 A grouped number is an integer part (a run of ASCII digits, optionally split
 into [digit groups](fields-format.md#number-format) by digit group separators)
 and/or a decimal separator preceding a fractional part (a run of ASCII digits),
-in that order (e.g., `.5` compares as `0.5`, as a [number
-coercion](fields-format.md#coercion) parses it), then optionally an exponent
+in that order (e.g., `.5` compares as `0.5`), then optionally an exponent
 indicator (`e` or `E`) & an optionally signed integer exponent (e.g., `1.5e3`
 compares as `1500`), so it compares as a single number (e.g., `1,234` as `1234`)
 rather than being broken into smaller ones by the separator. Its integer part
