@@ -47,7 +47,7 @@ than once, even the same one, is an error.
 ## Item Errors
 
 An **item error** is an error that depends on an item's field value (e.g.,
-`.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s
+`:.round` for `"abc"`, per [`<transform-call>`](fields-format.md#transforms)'s
 error comment). A format that no output & no [`<output>`](fields.md#sort-source)
 sort key evaluates has no item error (e.g., a hidden field spec without a
 [`<sort>`](fields.md#sorting), or a non-last member for table output). Only an
@@ -141,7 +141,7 @@ its kind within a context.
 
 A config name is a **stem** matching the regex `^[_0-9A-Za-z][-_0-9A-Za-z]*$`,
 so that it never starts with `-`, which would make it ambiguous with a
-[`<preset-removal>`](fields.md#presets) (e.g., `name%-x`). A kind may extend the
+[`<preset-removal>`](fields.md#presets) (e.g., `%-x`). A kind may extend the
 name syntax, e.g., fields configs' [output format
 suffix](fields.md#output-format-specific-named-fields-configs).
 

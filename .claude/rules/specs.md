@@ -46,7 +46,7 @@ In specs, make every block reference optional, except one that is:
    in `<non-nullary-success>`, whose absence
    `<non-nullary-scalar-empty-success>` expresses), or so that a grammar can
    require at least 1 of multiple blocks (e.g., `<failure-block>` after
-   `<non-nullary-scalar-empty-success>`, to forbid `%S++`).
+   `<non-nullary-scalar-empty-success>`, to forbid `:%S++`).
 
 In specs, give every block not marked `(* non-structural *)` a direct default of
 `{empty string}`, because no syntax references a non-structural block, so none
@@ -99,7 +99,7 @@ only in prose; reference a shared argument list (e.g.,
 
 In specs, make an argument list's `<argument-fence>`s optional iff every
 argument in it is omissible or defaults when the whole list is absent (e.g.,
-`..date-only`, but not `..::date-only`), because the empty list `::` would
+`:..date-only`, but not `:..::date-only`), because the empty list `::` would
 otherwise be required to express all defaults.
 
 In specs, give a sort option that takes arguments an uppercase letter &
@@ -128,20 +128,6 @@ by letter case with `nullary-` (lowercase: no success clause or block follows)
 or `non-nullary-` (uppercase: a success clause or 1 or more blocks follow),
 except name a letter that other syntax follows in its lowercase form too (e.g.,
 `m`'s `<branches>`) by its arity (e.g., `<unary-match>` & `<binary-match>`).
-
-In specs, write each example of a `<field-spec-edit>` with its
-`<field-spec-edits-section-prefix>` (e.g., `.-a,a=X`, not `-a,a=X`), and show
-each example of a `<field-spec-reference>` inside such an edit (e.g., "`@2` in
-`.@2`", not "`@2`"), because without it, the example is an `<absolute-config>`
-or a `<relative-config>` that means something else.
-
-In specs, write each example of a `<field-order-option-set>` with its
-`<field-order-section-prefix>` (e.g., `/D-` & `/D-/T+`, not `D-` & `D-/T+`), and
-each example of a `<sort-modifier>`, a `<sort>`, a `<sort-option>`, or a
-`<preset-modifier>` in a field spec (e.g., `name/a-`, `.name/L:` & `name%x`, not
-`a-`, `L:` & `%x`), because without them, the example is other fields config
-text, which means something else or is an error (e.g., `D-` & `a-` name fields,
-`/-` is a `<field-order-adjustment-set>` & `%x` is an error).
 
 In specs, refer to a nonterminal without a preceding `the` (e.g., "`<branch>`'s
 value", not "the `<branch>`'s value"), unless `the` selects 1 of multiple
@@ -201,36 +187,37 @@ In the [custom EBNF grammar](../../Specs/ebnf.md), retain the **Required** (`&`)
 outer bare whitespace treatment, even while no syntax uses it.
 
 In specs, allow syntax unless 1 or more of the following apply, because an error
-should report a likely mistake, not harmless verbosity (e.g., allow `%+N%n+`,
-`%T..lowercase+-+`, `%Sx+x+`, `name/005`, or a tab in a `<leader-pattern>`,
-whose output shows its effect):
+should report a likely mistake, not harmless verbosity (e.g., allow `:%+N%n+`,
+`:%T..lowercase+-+`, `:%Sx+x+`, `/005`, or a tab in a `<leader-pattern>`, whose
+output shows its effect):
 
 1. **Ambiguous:** the syntax text, or what it parses, cannot be read reliably
    (e.g., `@x/`, or a digit group separator that equals the decimal separator).
 2. **Ill-typed:** an expression's or a token's type does not fit what surrounds
-   it (e.g., `%S.round+-+`, `%.D..round++`, `%N%s++`, or `P<FF>:`).
+   it (e.g., `:%S.round+-+`, `:%.D..round++`, `:%N%s++`, or `P<FF>:`).
 3. **Dangling:** it refers to something that does not exist (e.g., a
-   `<preset-name>` of no preset, or `@9` in `.@9` for fewer than 9 field specs).
+   `<preset-name>` of no preset, or the `<indexed-field-spec-reference>` `@9`
+   for fewer than 9 field specs).
 4. **Unsupported in context, whatever it holds:** its context cannot do what it
-   asks (e.g., `%S.uppercase+%L..round++`, whose `<failure-block>` can abort,
+   asks (e.g., `:%S.uppercase+%L..round++`, whose `<failure-block>` can abort,
    `<document-order>` for table output, or an effective `k` in a
    `<field-order-adjustment-set>` that is per `<positional-order-option-set>`).
 5. **Redundant, whatever it holds:** a part has no effect, or its output cannot
-   depend on anything but its own text (e.g., `%S..uppercase++`, `%+s`, `%S++`,
-   `K:`, `%I+`, `%m+`, or `name:plain`).
+   depend on anything but its own text (e.g., `:%S..uppercase++`, `:%+s`,
+   `:%S++`, `K:`, `:%I+`, `:%m+`, or `name:plain`).
 6. **Reserved:** planned syntax needs it (e.g., a bare `.` in a `<field-name>`).
 
 In that list, an expression **holds** each name, argument, or block content in
-it (e.g., `%+N…+` is not redundant, because it can hold something other than
+it (e.g., `:%+N…+` is not redundant, because it can hold something other than
 `%n`, such as `.round`). An absent expression holds nothing. A list holds its
 elements, and its own prefix or fences are never redundant, because generated
-syntax may hold no elements (e.g., `@x.`, but not `%m+`, whose `%m` is a
+syntax may hold no elements (e.g., `@x.`, but not `:%m+`, whose `%m` is a
 predicate, not a prefix). A template is not a list, because it mixes text &
 placeholders.
 
 That list judges occurrences of expressions & spellings that a spec defines, so
 it adds neither; add an expression only for output that existing syntax cannot
-give (e.g., not `%S%.N.round+-+++`, because `%M-S+.N.round++-+` gives its
+give (e.g., not `:%S%.N.round+-+++`, because `:%M-S+.N.round++-+` gives its
 output).
 
 Forbid syntax in the grammar when the syntax text alone decides it & the grammar

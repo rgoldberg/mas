@@ -68,10 +68,10 @@ the following:
 - Alignment: [`start`](#alignment).
 - No `<sort>`, so it is not a sort key.
 
-E.g., `.+size`, when the base fields config has no field spec for `size`,
-outputs `size` labeled `size`, formatted as `%i`, start-aligned & not sorting
-items, absent a custom `default` preset (e.g., one of `%end` would end-align
-it).
+E.g., the insertion `+size`, when the base fields config has no field spec for
+`size`, outputs `size` labeled `size`, formatted as `%i`, start-aligned & not
+sorting items, absent a custom `default` preset (e.g., one of `%end` would
+end-align it).
 
 ### Unlisted Fields
 
@@ -253,16 +253,16 @@ working fields config's value for the same setting, if any:
   `<field-order-sort-option-set>`, except that `<source>`: that of its kind's
   saved field order.
 
-So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in
-`.name=x`) or option (e.g., `<direction>` in `.name/1`, in `.name/1Ii`, or in
-`//0`) retains the working fields config's value, while an empty
-[payload](#payloads) (e.g., in `.name=`, `.name/`, `.name/L:`, or `.name/B:`) is
-directly absent, so it resets the payload's value to the payload's own default,
-rather than to its option's (e.g., `.name/B:` sets no boundaries, rather than
-`<boundaries>`'s default ones, and `.name/L:` selects the system locale, rather
-than the canonical conventions), as it does each value within it (e.g., `.name/`
-removes the field spec's `<sort>`, resetting its `<sort-priority>` & each of its
-`<sort-option>`s, while `.name:` empties its format, but retains its alignment).
+So an omitted modifier (e.g., `<preset-modifier>` or `<sort-modifier>` in `=x`)
+or option (e.g., `<direction>` in `/1`, in `/1Ii`, or in `//0`) retains the
+working fields config's value, while an empty [payload](#payloads) (e.g., in
+`=`, `/`, `/L:`, or `/B:`) is directly absent, so it resets the payload's value
+to the payload's own default, rather than to its option's (e.g., `/B:` sets no
+boundaries, rather than `<boundaries>`'s default ones, and `/L:` selects the
+system locale, rather than the canonical conventions), as it does each value
+within it (e.g., `/` removes the field spec's `<sort>`, resetting its
+`<sort-priority>` & each of its `<sort-option>`s, while `:` empties its format,
+but retains its alignment).
 
 ## Nonexistent Fields
 
@@ -277,7 +277,7 @@ for others.
 A reference to a nonexistent field is an error in a transient fields config, but
 a persistent fields config, which may apply to multiple commands, ignores each
 `<absolute-field-spec>` & `<field-spec-edit>` that references one (e.g., a `mas`
-context `default` of `@standard.name=App` ignores `.name=App` for `mas config`,
+context `default` of `@standard.name=App` ignores `name=App` for `mas config`,
 whose item has no `name` field).
 
 ## Members
@@ -299,7 +299,7 @@ A field spec formats an absent field's absent value once.
 
 A field spec's [formatted value](fields-format.md#value-types) is **absent** iff
 formatting [aborts](fields-format.md#success--failure), or iff the field value
-is absent & the format evaluates to it (e.g., via `%i`, `%u`, or `.round`,
+is absent & the format evaluates to it (e.g., via `:%i`, `:%u`, or `:.round`,
 because an absent value remains unmodified through every
 [transform](fields-format.md#value-coercion)).
 
@@ -319,9 +319,9 @@ item lacks:
   the formatted value is not absent; e.g., for JSON input, `null`, `true`,
   `false`, `0`, `1`, `""` & `"null"` are all values.
 
-E.g., for an absent field, `%N%n+none+` outputs `none` in every output format,
-while `%i` & `%n` output an empty table cell, but no key-value pair in key-value
-or JSON output.
+E.g., for an absent field, `:%N%n+none+` outputs `none` in every output format,
+while `:%i` & `:%n` output an empty table cell, but no key-value pair in
+key-value or JSON output.
 
 ## Fields Config Syntax
 
@@ -449,7 +449,7 @@ effective `<primary-field-order-option-set>` in `<field-order-sections>`:
   input JSON object, each [member](#members) at its own position. A field spec
   whose field an item lacks (which outputs anything only per a format whose
   formatted value for an absent field is not [absent](#absent-values), e.g.,
-  `%N%n+none+`) has no document position, so its field is **unpositioned**.
+  `:%N%n+none+`) has no document position, so its field is **unpositioned**.
 - `<positional-order>`: ordered by position. Each visible [unlisted
   field](#unlisted-fields) has no position, so it is **unpositioned**;
   unpositioned fields are ordered among themselves by their 1st occurrence in
@@ -614,8 +614,8 @@ field specs, in reference fields config order, filtered to include:
 
 E.g., if the baseline fields config's field specs are `x,a=aa,b,a=AA`:
 
-- `a@2` in `.a@2` references `a=AA`.
-- `@2` in `.@2` references `a=aa`.
+- The `<named-field-spec-reference>` `a@2` references `a=AA`.
+- The `<indexed-field-spec-reference>` `@2` references `a=aa`.
 
 While a field spec's position in the reference fields config cannot be modified:
 
@@ -681,7 +681,7 @@ fields config, so that a later field spec edit modifies it (e.g., `.-a,a=X`
 restores `a`, labeled `X`, while `.-a,a=X,a=Y` outputs 1 `a`, labeled `Y`).
 
 A `<field-spec-removal>` whose `<field-spec-reference>` resolves to a `null`
-does nothing, leaving $previous$ unmodified (e.g., `.-a,-a` means what `.-a`
+does nothing, leaving $previous$ unmodified (e.g., `.-a,-a` means what `-a`
 means).
 
 For a given `<baseline-sourced-field-spec-edit>` `fs`, its `source` is the field
@@ -693,7 +693,7 @@ spec from the baseline fields config referenced by `fs`, so
 `<field-name>` names no field spec selects a [default field
 spec](#default-field-specs) for field `<field-name>` (whereas a present
 `<field-occurrence-index>` beyond its field's field specs is an error, e.g.,
-`.+x@1` when `x` has no field spec).
+`+x@1` when `x` has no field spec).
 
 $previous$ is the location in the working fields config where the immediately
 preceding `<field-spec-edit>`'s direct results were effected: a field spec, or
@@ -718,7 +718,7 @@ Field spec edits act as follows:
   - Sets $previous$ to `source`.
 - `<field-spec-hide>`:
   - Overlays its `<field-modifiers>` onto `source` & hides it, so a field can
-    sort items without being output (e.g., `._size/1-`).
+    sort items without being output (e.g., `_size/1-`).
   - Sets $previous$ to `source`.
 - `<field-spec-removal>`:
   - Sets $previous$ to the field spec immediately before `source` in the working
@@ -741,8 +741,8 @@ A field spec has a separate **setting** per `(* inherited *)` nonterminal in
 `<field-modifiers>` (e.g., `<label>` or `<direction>`), plus its
 [alignment](#alignment). A `<field-modifiers>` **sets** each setting whose
 nonterminal does not retain its [inherited value](#inherited-values) in it
-(e.g., `.name/-` enables `<sort>` & sets `<direction>`, but no other sort
-option, while `.name/` removes `<sort>` & resets every setting within it).
+(e.g., `/-` enables `<sort>` & sets `<direction>`, but no other sort option,
+while `/` removes `<sort>` & resets every setting within it).
 
 `<preset-modifier>`, then `<label-modifier>`, `<format-modifier>` &
 `<sort-modifier>` overlay their settings onto the field spec, so a later one
@@ -780,32 +780,32 @@ preset-name = {string: preset name} (* error: no preset of its name is found, or
 
 A **preset** is a [named config](configs.md#named-configs) of the preset [config
 kind](configs.md#config-kinds), whose syntax is `<field-modifiers>`, which a
-`<preset-name>` references (e.g., `name%x` references preset `x`). Each field
-spec has a list of **attached** presets, which its `<preset-list>` sets:
+`<preset-name>` references (e.g., `%x` references preset `x`). Each field spec
+has a list of **attached** presets, which its `<preset-list>` sets:
 
 - `<absolute-presets>`: replaces the list with the presets of its
-  `<absolute-preset>`s, in order (e.g., `name%p%q`), or, for
-  `<preset-clearing>`, with none (e.g., `name%`).
+  `<absolute-preset>`s, in order (e.g., `%p%q`), or, for `<preset-clearing>`,
+  with none (e.g., `%`).
 - `<relative-presets>`: applies each `<preset-delta>` to the list, left to
   right: `<preset-addition>` attaches its preset at the end of the list,
   replacing any attached preset of its name, while `<preset-removal>`
   **detaches** the attached preset of its name, if any (e.g.,
-  `.name%-default%+end` detaches `default` from `name`, then attaches `end`,
-  while `.name%-end` modifies nothing if `end` is not attached).
+  `name%-default%+end` detaches `default` from `name`, then attaches `end`,
+  while `name%-end` modifies nothing if `end` is not attached).
 
 A `<preset-list>` is wholly absolute or wholly relative, so mixing a
-`<preset-delta>` with an `<absolute-preset>` is an error (e.g., `name%p%+q` or
-`name%-default%end`).
+`<preset-delta>` with an `<absolute-preset>` is an error (e.g., `%p%+q` or
+`%-default%end`).
 
 Attached presets are identified by name, whichever context each was looked up
 from, so at most 1 preset of each name is attached: an `<absolute-presets>` that
 names a preset more than once attaches it only at its last occurrence (e.g.,
-`name%p%q%p` ≡ `name%q%p`), and a `<preset-delta>` matches an attached preset of
-its name, even one looked up from another context (e.g., for a fields config `x`
-of `@all.name%-default` in context `mas`, `mas list --fields @x` detaches from
+`%p%q%p` ≡ `%q%p`), and a `<preset-delta>` matches an attached preset of its
+name, even one looked up from another context (e.g., for a fields config `x` of
+`@all.name%-default` in context `mas`, `mas list --fields @x` detaches from
 `name` the `default` preset that `all` attached from `mas.list`).
 `<preset-name>`'s error comment applies even to a `<preset-removal>` that
-detaches nothing (e.g., `.size%-bytess`, a typo of `bytes`, is an error absent a
+detaches nothing (e.g., `%-bytess`, a typo of `bytes`, is an error absent a
 preset `bytess`).
 
 Attaching a preset (including moving it to the end of the list) sets, at that
@@ -824,13 +824,13 @@ retains its attached presets & when each of its settings was set.
 
 E.g., if preset `bytes` is `%end:%+.N.scale:6,,0:+ MB`, `size%bytes%start=Size`
 outputs `size` labeled `Size`, formatted per `bytes` & start-aligned, while
-`.+size%+bytes` inserts a copy of `size` that also has its `default` preset
+`+size%+bytes` inserts a copy of `size` that also has its `default` preset
 attached.
 
 A preset's own `<preset-list>` sets the list of presets attached within it,
 which starts empty, not the list of any field spec to which it is attached,
 though attaching it sets what they set (e.g., if preset `mb` is `%bytes=Size`,
-`.size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
+`size%mb` attaches only `mb` to `size`, yet end-aligns it & labels it `Size`).
 
 A `<preset-name>` is looked up from its reference's starting context, as
 [specified for every config kind](configs.md#referencing-named-configs); the
@@ -905,11 +905,11 @@ sort-priority = {integer: positive, no leading 0s} (* default: 100; inherited *)
 ```
 
 A `<sort>` that starts with `<disabled-sort-prefix>` **disables** its field
-spec's sort (e.g., `name/05` disables a sort whose `<sort-priority>` is `5`, as
-does `name/005`): its `<sort-priority>` & `<sort-option>`s are retained, but do
-not sort items until a `<sort>` without `<disabled-sort-prefix>` enables them,
-e.g., if `x` has `size/0-`, `@x._size/1` or `@x._size/I` enables its sort, while
-`@x._size/0I` modifies its `<sort-option>`s, but its sort remains disabled.
+spec's sort (e.g., `/05` disables a sort whose `<sort-priority>` is `5`, as does
+`/005`): its `<sort-priority>` & `<sort-option>`s are retained, but do not sort
+items until a `<sort>` without `<disabled-sort-prefix>` enables them, e.g.,
+`_size/1` or `_size/I` enables a hidden field spec's inherited `/0-`, while
+`_size/0I` modifies its `<sort-option>`s, but its sort remains disabled.
 
 A field spec with an enabled `<sort>` takes sort precedence over field specs:
 
@@ -1185,7 +1185,7 @@ unix-time    = 'unix-time'
 <!--editorconfig-checker-enable-->
 
 The chronologic segments are each the longest text that a `<chronologic-format>`
-matches, as [`%.c`, `%.d` & `%.:unix-time:d`
+matches, as [`:%.c`, `:%.d` & `:%.:unix-time:d`
 detect](fields-format.md#chronologic-formatting) it:
 
 - `<iso-date>`: a representable ISO-8601 date-only.
@@ -1204,8 +1204,8 @@ character immediately precedes or follows it that is:
 - For `<unix-time>`: not whitespace (e.g., `at 1584553163 UTC` has a Unix time
   segment, but `v2`, `1.2.3`, `(1584553163)` & `1584553163,` have none).
 
-Directly absent `<chronologic-formats>` (e.g., `name/C:`), there are no
-chronologic segments.
+Directly absent `<chronologic-formats>` (e.g., `/C:`), there are no chronologic
+segments.
 
 ##### Sort Boundaries
 
@@ -1265,12 +1265,10 @@ Each of the following is itself a boundary:
 
 If multiple `<boundary-group>`s define the same boundary, it belongs to the last
 group. An empty group defines no boundary, so it affects no other group's sort
-precedence (e.g., `name/B/_:` means what `name/B/:` means, and `name/B_:` what
-`name/B:` means).
+precedence (e.g., `/B/_:` means what `/B/:` means, and `/B_:` what `/B:` means).
 
 At each position, only the longest boundary that matches there is a boundary
-(e.g., with `name/B-%--%:`, `a--b` contains the boundary `--`, rather than 2
-`-`s).
+(e.g., with `/B-%--%:`, `a--b` contains the boundary `--`, rather than 2 `-`s).
 
 Boundaries take sort precedence over all boundaries in all groups succeeding
 their group & over all non-boundary characters.
@@ -1278,7 +1276,7 @@ their group & over all non-boundary characters.
 `<uncollapsed-boundaries>` retains a value's contiguous boundaries as separate
 boundaries; `<collapsed-boundaries>` collapses contiguous boundaries belonging
 to the same boundary group into one. Directly absent `<boundary-groups>` (e.g.,
-`name/B:`), nothing is a boundary.
+`/B:`), nothing is a boundary.
 
 ##### Sort Nonconforming Values
 
@@ -1306,9 +1304,9 @@ values do, but as less than (`a`) or greater than (`z`) every conforming value.
 Per `<nonconforming-placement>`:
 
 - `<relative-nonconforming>`: `<descending>` also reverses their location (e.g.,
-  `name/a-` puts them last).
+  `/a-` puts them last).
 - `<fixed-nonconforming>`: they are 1st (`a`) or last (`z`) regardless of
-  `<direction>` (e.g., `name/af-` puts them 1st), as SQL's `NULLS FIRST` &
+  `<direction>` (e.g., `/af-` puts them 1st), as SQL's `NULLS FIRST` &
   `NULLS LAST` put `NULL`s.
 
 With `<all-conforming>`, no value is nonconforming.
@@ -1387,14 +1385,14 @@ trailing outer bare whitespace is consumed, ignored, or forbidden, as given.
 <!--editorconfig-checker-enable-->
 
 Whitespace-only `<template-text>` immediately after a placeholder is consumed
-iff before `%` (e.g., `%i %l` retains its space).
+iff before `%` (e.g., `:%i %l` retains its space).
 
 A bare `.` in a field name is invalid, reserving it for future syntax; an
 escaped `.` is consumed (e.g., `a\.b` names the field `a.b`).
 
 A bare `%`, `=`, `:`, or `/` in a field name is invalid, even in a
 `<field-spec-removal>`, which has no `<field-modifiers>` for it to start, so
-that a removal written like another edit (e.g., `.-name/I`) is an error, rather
+that a removal written like another edit (e.g., `-name/I`) is an error, rather
 than silently listing an unlisted field (e.g., `name/I`).
 
 A preset's `<label>` & `<template-text>` need not escape `,`, because a preset's

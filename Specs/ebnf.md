@@ -142,7 +142,7 @@ position that contains no candidate terminator & that its typed terminal
 `{integer: 1 to 100}`, `150` consumes `15`, leaving `0` for the next token),
 less any ignored outer bare whitespace; iff no such prefix exists, an error is
 reported. Text that is empty after ignoring its outer bare whitespace is not a
-variable token (e.g., if the syntax text ends with `a=` & a space, `<label>` is
+variable token (e.g., if the syntax text ends with `=` & a space, `<label>` is
 directly absent).
 
 Iff multiple typed terminals are available at the current position (e.g., in
@@ -228,9 +228,9 @@ Of those sides:
 - Otherwise: each non-deferring side's treatment applies. A syntax must ensure
   that no 2 potentially adjacent non-deferring sides differ.
 
-E.g., `%k %l` consumes its space as `<template-text>`, because each side defers
+E.g., `:%k %l` consumes its space as `<template-text>`, because each side defers
 & `<template-text>`'s Consumed takes precedence over `%`'s Ignored, while
-`%S%k +-+` ignores its space, because `<block-terminator>`'s start does not
+`:%S%k +-+` ignores its space, because `<block-terminator>`'s start does not
 defer.
 
 Consumed outer bare whitespace is included in the adjacent variable token's

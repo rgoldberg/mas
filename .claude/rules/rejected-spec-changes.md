@@ -38,8 +38,8 @@ as a removal for an unlisted field does, so forbidding it treats near parallels
 differently (e.g., `@all.size=X,-size,-size`), which outweighs the overruled
 reason for forbidding it: it removes a `null`.
 
-In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `name/005`) or
-a repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
+In specs, never forbid a repeated `<disabled-sort-prefix>` (e.g., `/005`) or a
+repeated `<disable-all-sorts>` (e.g., `//00`), because each is redundant, not
 contradictory.
 
 In specs, never forbid an empty `<field-spec-edits-section>` (e.g., `@x.`),
@@ -47,34 +47,35 @@ because it is redundant, not contradictory, and it lets a script append edits
 that may be empty to a `<field-spec-edits-section-prefix>`.
 
 In specs, never forbid a `<chronologic-formats>` whose formats overlap (e.g.,
-`Ciso,iso:` or `Ciso,iso-date:`), because each is redundant, not contradictory,
-and detecting the overlap depends on what each format matches, not on the
-syntax.
+`/Ciso,iso:` or `/Ciso,iso-date:`), because each is redundant, not
+contradictory, and detecting the overlap depends on what each format matches,
+not on the syntax.
 
 In specs, never forbid a `<match-placeholder>` with only 1 branch (e.g.,
-`%mN.round++` or `%MN.round++none+`), because it does what it says, while a
-match with a repeated branch means the same & stays valid (e.g., `%mnn+`), and
+`:%mN.round++` or `:%MN.round++none+`), because it does what it says, while a
+match with a repeated branch means the same & stays valid (e.g., `:%mnn+`), and
 removing a branch should not break what remains, which outweighs the overruled
 reason for rejecting its allowance: it means what its branch's own placeholder
-means (e.g., `%+N.round+` or `%N.round+none+`), so its `%m` or `%M` cannot
+means (e.g., `:%+N.round+` or `:%N.round+none+`), so its `%m` or `%M` cannot
 affect what it means.
 
-In specs, never allow a `<match-placeholder>` with no branches (e.g., `%m+` or
-`%M+none+`), because it has nothing to match, so its `%m` or `%M` cannot affect
+In specs, never allow a `<match-placeholder>` with no branches (e.g., `:%m+` or
+`:%M+none+`), because it has nothing to match, so its `%m` or `%M` cannot affect
 what it means.
 
 In specs, never allow `<abort-on-failure>` on a nullary conditional placeholder
-or on an unconditional placeholder (e.g., `%+s` or `%+I.uppercase+`), because
+or on an unconditional placeholder (e.g., `:%+s` or `:%+I.uppercase+`), because
 the former already aborts on failure & the latter's matcher cannot fail, so it
 cannot affect what either means.
 
 In specs, never forbid a `<success-block>` that is solely 1 placeholder merely
-because it means what shorter syntax text means (e.g., `%+N%n+`, `%mN%n+b+`,
-`%+N%N.round++`, `%N%N.round++none+`, or `%+N%i+`), because verbose syntax text
-still does what it says, while forbidding `%+N%i+` only for a predicate without
-an implicit coercion or a `<coercion>` would treat near parallels differently
-(e.g., `%+.N%i+`, which can output a string), which outweighs the overruled
-reason for forbidding it: its other literals cannot affect what it means.
+because it means what shorter syntax text means (e.g., `:%+N%n+`, `:%mN%n+b+`,
+`:%+N%N.round++`, `:%N%N.round++none+`, or `:%+N%i+`), because verbose syntax
+text still does what it says, while forbidding `:%+N%i+` only for a predicate
+without an implicit coercion or a `<coercion>` would treat near parallels
+differently (e.g., `:%+.N%i+`, which can output a string), which outweighs the
+overruled reason for forbidding it: its other literals cannot affect what it
+means.
 
 In specs, never make `<styled-key>`'s `<styling-specifier>` optional (e.g.,
 `K:`), because `K:` would style keys by nothing, which contradicts `K` & means
@@ -88,39 +89,39 @@ styling defaults) without overriding the payload's, which an empty payload still
 selects (e.g., `P:` for none).
 
 In specs, never forbid a binary placeholder merely because its blocks are equal
-(e.g., `%Sx+x+` or `%N%i+%i+`), because other blocks make the same placeholder
+(e.g., `:%Sx+x+` or `:%N%i+%i+`), because other blocks make the same placeholder
 useful, so its equal blocks are what it holds, not what it is.
 
 In specs, never let a non-nullary unconditional placeholder take an empty
-pipeline or a template block (e.g., `%I+` or `%I(%i)+`), because `%I+` always
-outputs an empty string & `%I(%i)+` means what `(%i)` means, so its `%I` cannot
-affect what it means.
+pipeline or a template block (e.g., `:%I+` or `:%I(%i)+`), because `:%I+` always
+outputs an empty string & `:%I(%i)+` means what `:(%i)` means, so its `%I`
+cannot affect what it means.
 
 In specs, never allow a binary placeholder whose `<success-block>` &
-`<failure-block>` are both absent (e.g., `%S++`), nor a `%M` whose
+`<failure-block>` are both absent (e.g., `:%S++`), nor a `%M` whose
 `<failure-block>` is absent & whose branches are each an empty unary branch
-(e.g., `%MN+++` or `%M-N+++`), because each always inserts an empty string, so
+(e.g., `:%MN+++` or `:%M-N+++`), because each always inserts an empty string, so
 its matcher cannot affect what it means.
 
 In specs, never let a top-level `<format-block>` be template text without a
-placeholder (e.g., `src:App Store`), because its output cannot depend on
-anything but its own text, while a format that omits a transform's
-`<transform-call-prefix>` (e.g., `name:uppercase`) would output its text instead
-of reporting an error, and `%UApp Store+App Store+` already gives that output.
+placeholder (e.g., `:App Store`), because its output cannot depend on anything
+but its own text, while a format that omits a transform's
+`<transform-call-prefix>` (e.g., `:uppercase`) would output its text instead of
+reporting an error, and `:%UApp Store+App Store+` already gives that output.
 
 In specs, never forbid a string transform on `%U`, `%E`, or `%W` merely because
-it cannot modify its value (e.g., `%U.uppercase+-+`, `%E.trim-whitespace+-+`, or
-`%W.uppercase+-+`), because a string transform on a value that it cannot modify
-stays valid elsewhere (e.g., `%T..lowercase+-+`), so forbidding it treats near
-parallels differently, which outweighs the overruled reason for rejecting its
-allowance: no such transform can modify its value, so it cannot affect what its
-placeholder means.
+it cannot modify its value (e.g., `:%U.uppercase+-+`, `:%E.trim-whitespace+-+`,
+or `:%W.uppercase+-+`), because a string transform on a value that it cannot
+modify stays valid elsewhere (e.g., `:%T..lowercase+-+`), so forbidding it
+treats near parallels differently, which outweighs the overruled reason for
+rejecting its allowance: no such transform can modify its value, so it cannot
+affect what its placeholder means.
 
 In specs, never forbid a name literal merely because it cannot affect what its
-syntax text means (e.g., `%T..lowercase+-+`, `%D..trim-whitespace+-+`, or
-`.date-only..uppercase`), because a name only selects an operation, which merely
-has nothing to do, while forbidding only some such names treats near parallels
-differently.
+syntax text means (e.g., `:%T..lowercase+-+`, `:%D..trim-whitespace+-+`, or
+`:.date-only..uppercase`), because a name only selects an operation, which
+merely has nothing to do, while forbidding only some such names treats near
+parallels differently.
 
 In specs, never remove a typed terminal subtype merely because no syntax uses it
 (e.g., `boolean`, `number`, or `time-only`), because each mirrors a value type
@@ -154,39 +155,39 @@ its text is used, not on its syntax.
 
 In specs, never allow a `<coercion>` on a call whose value's type equals its
 input type, unless a `<named-format-reference>` immediately precedes it (e.g.,
-`.round..round`, `%S..uppercase++`, or `%W..trim-whitespace+-+`, whose value is
-a string or a `null`), because it cannot affect what the call means, while every
-`<coercion>` then marks a type change, nor require one on a call whose types
-match (e.g., `.number-format.uppercase`), because it would add nothing.
+`:.round..round`, `:%S..uppercase++`, or `:%W..trim-whitespace+-+`, whose value
+is a string or a `null`), because it cannot affect what the call means, while
+every `<coercion>` then marks a type change, nor require one on a call whose
+types match (e.g., `:.number-format.uppercase`), because it would add nothing.
 
 In specs, never let an `<unconditional-block>` take a `<coercion>` that can fail
-(e.g., `%S.uppercase+%L..round++` or
-`%S.uppercase+%I..trim-whitespace..round++`), because a `<failure-block>` must
+(e.g., `:%S.uppercase+%L..round++` or
+`:%S.uppercase+%I..trim-whitespace..round++`), because a `<failure-block>` must
 never abort, nor forbid one in a `<format-template>` or a `<success-block>`
-(e.g., `%L..round+`, `%S%I..round++-+`, `%U%I..round++-+`, or
-`%T%I..round++-+`), because no matcher can otherwise coerce a label, a name, or
+(e.g., `:%L..round+`, `:%S%I..round++-+`, `:%U%I..round++-+`, or
+`:%T%I..round++-+`), because no matcher can otherwise coerce a label, a name, or
 a format input that it cannot match, while `%I`'s type is any in every
 `<success-block>`, so forbidding it in only some of them would treat near
-parallels differently (e.g., `%T%I..round++-+` & `%C%I..date-only++-+`), which
+parallels differently (e.g., `:%T%I..round++-+` & `:%C%I..date-only++-+`), which
 outweighs the overruled reason for forbidding it in `<success-block>` of `%U`,
 `%E`, `%W`, `%B`, `%T`, or `%F`: its matcher matched its format input, so the
 coercion can only abort.
 
 In specs, never allow a `<coercion>` from a date or a time-only to anything but
 a string, nor from a number or a version to a time-only (e.g.,
-`.date-only..time-only-time-zone:UTC:`, `%.D..round++`, or
-`%N..time-only-time-zone:UTC:++`), because its rendering is not a value of that
+`:.date-only..time-only-time-zone:UTC:`, `:%.D..round++`, or
+`:%N..time-only-time-zone:UTC:++`), because its rendering is not a value of that
 type, so it would abort, while a pipeline that means to parse it can coerce it
 to a string 1st.
 
 In specs, never forbid a number format argument merely because a
-`<digit-group-size>` of `0` ignores it (e.g., `.number-format:,,0,2:` or
-`.number-format:,x,0:`), because other payloads that nothing uses stay valid
+`<digit-group-size>` of `0` ignores it (e.g., `:.number-format:,,0,2:` or
+`:.number-format:,x,0:`), because other payloads that nothing uses stay valid
 (e.g., `H:P<:`), so forbidding it treats near parallels differently.
 
 In specs, never let a `<coercion>` or an argument choose whether `scale` reports
 an error or aborts formatting for a value that it cannot render (e.g.,
-`.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
+`:.scale:0,,0:` for `1e100`), because that value is a number, so no coercion
 affects it, while an argument would add syntax for a value that almost never
 occurs, and an aborted value shows its effect without omitting its item.
 
@@ -196,81 +197,84 @@ error), because 1 item's value should not hide any other item.
 
 In specs, never make a value need a `<coercion>` to match a predicate, or to
 conform to an input type, whose type is unsupported by its input format (e.g.,
-`%d`, `%c`, or `.date-only` for `"2020-03-18"`, or `%v` for `"1.2.3"`, for JSON
-input), because such syntax can otherwise never succeed without a `<coercion>`,
-which outweighs the overruled reason for rejecting its allowance: a `<coercion>`
-would then coerce nothing, so it would only choose between an error & an abort.
+`:%d`, `:%c`, or `:.date-only` for `"2020-03-18"`, or `:%v` for `"1.2.3"`, for
+JSON input), because such syntax can otherwise never succeed without a
+`<coercion>`, which outweighs the overruled reason for rejecting its allowance:
+a `<coercion>` would then coerce nothing, so it would only choose between an
+error & an abort.
 
 In specs, never let an input format's support of a date-only or a datetime stop
-an implicit coercion to the other (e.g., `%d` for `0` or
+an implicit coercion to the other (e.g., `:%d` for `0` or
 `"2020-03-18T17:39:23Z"`, for an input format that supports date-only, but not
 datetime), because such a value can otherwise match `%d` only with a
 `<coercion>`, although its type is unsupported by its input format.
 
 In specs, never implicitly coerce a value to a type that its input format
-supports (e.g., `%n` for `"5"`, or `%b` for `"true"`, for JSON input), because
+supports (e.g., `:%n` for `"5"`, or `:%b` for `"true"`, for JSON input), because
 the value then has its own type, so an implicit coercion would misread it.
 
 In specs, never forbid `time-zone` or `date-only` merely because it cannot
-affect a date-only (e.g., `%.:iso-date:D.time-zone:UTC:+-+`,
-`%.V..:iso:time-zone:UTC:+-+`, or `%.:iso-date:D.date-only+-+`), nor forbid
-`time-zone` after `date-only` (e.g., `.date-only.time-zone:UTC:`), because a
+affect a date-only (e.g., `:%.:iso-date:D.time-zone:UTC:+-+`,
+`:%.V..:iso:time-zone:UTC:+-+`, or `:%.:iso-date:D.date-only+-+`), nor forbid
+`time-zone` after `date-only` (e.g., `:.date-only.time-zone:UTC:`), because a
 date's transforms set its rendering jointly, in any order, while a string
 transform on a value that it cannot modify stays valid (e.g.,
-`%T..lowercase+-+`), so forbidding it treats near parallels differently, which
+`:%T..lowercase+-+`), so forbidding it treats near parallels differently, which
 outweighs the overruled reason for rejecting its allowance: its value is a
 date-only, which no time zone affects, or is already a date-only, so `date-only`
 cannot affect what it means.
 
 In specs, never forbid a `<coercion>` to a date merely because its
-`<date-format>`s cannot match its input (e.g., `.round..:iso:date-only` or
-`%.V..:iso-datetime:date-only+-+`), because other `<date-format>`s make the same
-`<coercion>` useful, while an aborted value shows its effect, which outweighs
-the overruled reason for rejecting its allowance: the coercion can only abort.
+`<date-format>`s cannot match its input (e.g., `:.round..:iso:date-only` or
+`:%.V..:iso-datetime:date-only+-+`), because other `<date-format>`s make the
+same `<coercion>` useful, while an aborted value shows its effect, which
+outweighs the overruled reason for rejecting its allowance: the coercion can
+only abort.
 
 In specs, never let a number coercion normalize its coerced value's text,
-whether only for a string (e.g., `%.n` giving `1.5` for `"1.50"`, but `1.50` for
-the number `1.50`) or for every number (e.g., `%.n` giving `1.5` for both),
+whether only for a string (e.g., `:%.n` giving `1.5` for `"1.50"`, but `1.50`
+for the number `1.50`) or for every number (e.g., `:%.n` giving `1.5` for both),
 because it loses text that a format may mean to output, while only an output
 format's syntax requires a modified number, so that output format modifies it
 only as necessary when rendering it (e.g., JSON output renders `+01.50` as
 `1.50`).
 
 In specs, never let a `<coercion>` to a time-only take a list of formats (e.g.,
-`%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
+`:%.:iso-time:c`), because a time-only has only 1 ISO-8601 format, so a list
 cannot affect what it means.
 
 In specs, never add a transform that only coerces a value's type (e.g.,
-`to-date` in `.to-date.date-only`, or `to-number` in `.to-number:de:.round`),
+`to-date` in `:.to-date.date-only`, or `to-number` in `:.to-number:de:.round`),
 because a matcher must still coerce before any pipeline runs (e.g., `%.N`), so
 it would add a 2nd syntax for 1 concept, while a `<coercion>` already coerces
-without any other transform (e.g., `%.n`), and it would lengthen even the
-simplest pipeline (e.g., `.to-string.uppercase` instead of `..uppercase`). An
+without any other transform (e.g., `:%.n`), and it would lengthen even the
+simplest pipeline (e.g., `:.to-string.uppercase` instead of `:..uppercase`). An
 overruling to add `to-string`, because no `<coercion>` coerced a value to a
 string without another transform, was declined, because `%.s` & `%.S` do,
 without any rule for where a transform may appear in a pipeline.
 
-In specs, never let `%i` take a `<coercion>` (e.g., `%.i`), because a
+In specs, never let `%i` take a `<coercion>` (e.g., `:%.i`), because a
 `<coercion>` gives a value its predicate's type, while `%i` has no type to
 coerce to, and `%.s` already renders a value as a string.
 
 In specs, never let a block hold a conditional matcher other than its enclosing
-matcher's predicate (e.g., `%S%.N.round+-+++` or `%N%.s+none+`), because a
+matcher's predicate (e.g., `:%S%.N.round+-+++` or `:%N%.s+none+`), because a
 `<block-placeholder>` always succeeds, while such a matcher can fail, and a
-pipeline already coerces (e.g., `%S..round+-+` or `%N..trim-whitespace+none+`).
+pipeline already coerces (e.g., `:%S..round+-+` or
+`:%N..trim-whitespace+none+`).
 
 In specs, never let a default coercion or an implicit coercion to a date accept
-a decimal number (e.g., `%.d` or `%d` for `"1.2"`), because a string that holds
-a number is rarely a time, so it would match a value that a later branch (e.g.,
-`%m.ds+`) means to match.
+a decimal number (e.g., `:%.d` or `:%d` for `"1.2"`), because a string that
+holds a number is rarely a time, so it would match a value that a later branch
+(e.g., `:%m.ds+`) means to match.
 
 In specs, never make a number need `<unix-time>` for a default coercion or an
-implicit coercion to a date (e.g., `%.d`, `%d`, or `.date-only` for `0`),
+implicit coercion to a date (e.g., `:%.d`, `:%d`, or `:.date-only` for `0`),
 because a number has no other meaning as a date, while a branch that means to
 match a number can precede it or follow a coercion that omits `<unix-time>`
-(e.g., `%mn.d+` or `%m.:iso:d.n+`), which outweighs the overruled reason for
+(e.g., `:%mn.d+` or `:%m.:iso:d.n+`), which outweighs the overruled reason for
 rejecting its allowance: a number is rarely a time, so it would match a value
-that a later branch (e.g., `%m.d.n+`) means to match.
+that a later branch (e.g., `:%m.d.n+`) means to match.
 
 In specs, never rewrite an example to avoid `mas` & anything after it (e.g.,
 `mas list --fields @x`), when understanding the example needs no knowledge of
@@ -290,6 +294,6 @@ absent, which omits the row.
 
 In specs, never rename `<empty-unary-branch>` & `<non-empty-unary-branch>` to
 `<absent-unary-branch>` & `<present-unary-branch>`, because each adjective would
-describe the branch, which is present (e.g., `N+` in `%MN+n++`), while an empty
+describe the branch, which is present (e.g., `N+` in `:%MN+n++`), while an empty
 branch, just as an empty loop, is one whose body is empty, here a directly
 absent block.

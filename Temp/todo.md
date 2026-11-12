@@ -8,8 +8,8 @@
 2. Getting Started / Overview
 3. Manual accompanying specs, which, unlike the specs, explains consequences of
    the grammar, e.g.:
-   1. A `<format-block>` that is a template needs a placeholder (e.g.,
-      `name:none` is an error, while `name:` outputs an empty string).
+   1. A `<format-block>` that is a template needs a placeholder (e.g., `:none`
+      is an error, while `:` outputs an empty string).
 4. Examples
 
 ### Repeated Options
@@ -178,7 +178,7 @@ patterns](https://www.unicode.org/reports/tr35/tr35-numbers.html)).
 
 ### Radix `%n` Modifier
 
-E.g., `%16n`.
+E.g., `:%16n`.
 
 ### `scale` Radix
 
@@ -195,12 +195,12 @@ Cross-unit conversion.
 ### Chronologic Coercion & Output Formats
 
 Mirror number coercion: chronologic coercion's fenced arguments also give a
-custom input format (e.g., `%.:yyyy-MM-dd:d`, `..:yyyy-MM-dd:time-zone:UTC:`),
+custom input format (e.g., `:%.:yyyy-MM-dd:d`, `:..:yyyy-MM-dd:time-zone:UTC:`),
 with [UTS #35 date format patterns](
   https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 ) as the pattern syntax. It would also cover the ISO-8601 representations that
 auto-detection omits (e.g., week dates) & let `%.c` & `%.C` take arguments
-(e.g., `%.:HH\:mm:c`).
+(e.g., `:%.:HH\:mm:c`).
 
 A named or inline output format (e.g., a chronologic-to-string transform
 mirroring `number-format`) needs the same pattern syntax &, for a named one,

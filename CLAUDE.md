@@ -183,6 +183,27 @@ Keep all prose about input (in specs, code comments, `Temp/*`, etc.)
 input-format agnostic (e.g., "a number", not "a JSON number"; "as a string", not
 "as its JSON text"), since input need not be JSON.
 
+Write each example of fields config syntax (in specs, `Temp/*` &
+`.claude/rules/*`) as the smallest of the following that holds everything that
+it shows, because anything more hides what it shows:
+
+1. A modifier (e.g., `:%v`, `/-`, or `%x`), for an example that needs at most 1
+   modifier & neither a field name nor a `<field-spec-reference>`.
+2. A field spec or a field spec edit (e.g., `size%bytes%start=Size`, `+size`, or
+   `@2`), for an example that needs multiple modifiers, a field name, or a
+   `<field-spec-reference>`.
+3. An absolute config or a section (e.g., `name,name`, `.-a,a=X`, or `/D-`), for
+   an example that needs multiple field specs or field spec edits, or that shows
+   a section's own syntax.
+4. A relative config (e.g., `@x/P-` or `/D-/T+`), for an example that needs
+   multiple sections.
+
+Such an example may read as other syntax (e.g., `/-` as a `<sort-modifier>` or
+as a `<field-order-section>`), so the prose before it must say which syntax it
+is. A value (e.g., a field spec's format `%i`), a name (e.g., `%U` in "`%U`'s
+value"), or a config of another kind (e.g., a preset `/-`, or a table config
+`H1:`) is not such an example.
+
 ## Temp Files
 
 `Temp/*` track in-progress work: `Temp/todo.md` (open issues & questions) &

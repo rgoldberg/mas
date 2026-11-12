@@ -320,7 +320,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 46. - block
     - directly absent block: a [directly
       absent](../Specs/ebnf.md#presence-states) `<block>` (e.g.,
-      `<format-block>` in `name:`), which defaults to an empty string
+      `<format-block>` in `:`), which defaults to an empty string
     - REJECTED: scope / subformat / empty template
 47. - success
     - failure
@@ -376,7 +376,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 59. - define: bind a meaning
     - specify: state a rule
     - set: assign a value; also, of a `<field-modifiers>`, give a setting a
-      value, rather than retain its inherited value (e.g., `.name/-` sets
+      value, rather than retain its inherited value (e.g., `/-` sets
       `<direction>`; [defined](../Specs/fields.md#field-modifiers))
 60. - visible
     - hidden
@@ -693,10 +693,10 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `<infallible-unconditional-placeholder>`)
      - non-empty / empty: of a non-nullary success whose success block is
        non-empty / empty (`<non-nullary-scalar-non-empty-success>` /
-       `<non-nullary-scalar-empty-success>`, e.g., `S` in `%S+none+`), or of a
+       `<non-nullary-scalar-empty-success>`, e.g., `S` in `:%S+none+`), or of a
        non-nullary branch whose block is non-empty / empty
        (`<non-empty-unary-branch>` / `<empty-unary-branch>`, e.g., `N+` in
-       `%MN+n++`)
+       `:%MN+n++`)
      - string transform pipeline: the string transforms after a named format
        reference in an unconditional pipeline or an unconditional string
        pipeline, or a blank named format's transforms, the 1st of which may take
@@ -882,7 +882,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
      - support: of an input format, can have field values of a type; of an
        output format, can render a value at a type
        ([defined](../Specs/fields-format.md#value-types))
-     - string coercion: a `<coercion>` to a string (e.g., in `%.s`), which
+     - string coercion: a `<coercion>` to a string (e.g., in `:%.s`), which
        matches every value except a `null` or an absent one
        ([defined](../Specs/fields-format.md#coercion))
      - number coercion: a `<number-coercion>`, which parses an optional sign & a
@@ -940,7 +940,7 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
 124. - presence state: present, transitively absent, or directly absent
        ([defined](../Specs/ebnf.md#presence-states))
      - directly absent: not present, but not transitively absent (e.g.,
-       `<label>` in `name=`)
+       `<label>` in `=`)
      - transitively absent: of an expression an ancestor of which is absent, or
        that no consumed token matches as an alternative of a present choice or
        as an element of a present repetition
@@ -1023,8 +1023,9 @@ it under `REJECTED`. A bullet may hold multiple forms of 1 root word.
        `<field-spec-edits-section>` ([used](../Specs/fields.md#relative-config))
 132. - pipeline: a named format reference and/or transforms, which are applied
        to a value (`<pipeline>`; [used](../Specs/fields-format.md#pipelines))
-     - template: template text & placeholders (e.g., `(%i)`; `<format-template>`
-       or `<block-template>`; [used](../Specs/fields-format.md#value-types))
+     - template: template text & placeholders (e.g., `:(%i)`;
+       `<format-template>` or `<block-template>`;
+       [used](../Specs/fields-format.md#value-types))
      - predicate: what a matcher tests a value for, named by a letter
        (`<predicate>`; [used](../Specs/fields-format.md#placeholders))
      - conditional / unconditional placeholder: a placeholder whose matcher can

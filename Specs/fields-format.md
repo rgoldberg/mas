@@ -39,21 +39,21 @@ An **implicit coercion** coerces a field value, at its original type, absent a
 `<coercion>`, wherever syntax requires a type unsupported by its input format,
 iff a default coercion would coerce it to that type, because no value can
 otherwise ever satisfy that syntax without a `<coercion>` (e.g., for JSON input,
-`%v` matches `"1.2.3"`, `%c` matches `"17:39:23"`, while `%d` & `.date-only`
+`:%v` matches `"1.2.3"`, `:%c` matches `"17:39:23"`, while `:%d` & `:.date-only`
 accept `"2020-03-18"` & the Unix time `0`). A `<coercion>` replaces it, ignoring
-its defaults (e.g., `%.:iso:d` does not match `0`).
+its defaults (e.g., `:%.:iso:d` does not match `0`).
 
 No implicit coercion gives a value a type that its input format supports, so
-only a `<coercion>` does (e.g., for JSON input, `%n` does not match `"5"`, while
-`%.n` does, and for an input format that supports date-only & datetime, but not
-time-only, `%d` would match no string, while `%c` would match `"17:39:23"`, and
-for one that supports date-only, but not datetime, `%d` would match `0`, but not
-`"2020-03-18"`).
+only a `<coercion>` does (e.g., for JSON input, `:%n` does not match `"5"`,
+while `:%.n` does, and for an input format that supports date-only & datetime,
+but not time-only, `:%d` would match no string, while `:%c` would match
+`"17:39:23"`, and for one that supports date-only, but not datetime, `:%d` would
+match `0`, but not `"2020-03-18"`).
 
 A `<coercion>` to a type unsupported by its input format thus remains useful to
 choose its `<date-format>`s & to abort formatting, rather than report an error,
-for an input that it cannot coerce (e.g., for `"abc"`, `..date-only` aborts,
-while `.date-only` reports an error).
+for an input that it cannot coerce (e.g., for `"abc"`, `:..date-only` aborts,
+while `:.date-only` reports an error).
 
 A field spec's **formatted value** is its `<format-block>`'s value, at its type,
 regardless of the output format, which renders it at its type iff it supports
@@ -124,18 +124,18 @@ name-prefix = ":"!
 
 A `<named-format-reference>` references the format of the
 [preset](fields.md#presets) that its `<preset-name>` names, its **named format**
-(e.g., `:x` references preset `x`'s format), which is the format that attaching
+(e.g., `::x` references preset `x`'s format), which is the format that attaching
 that preset sets (including via the presets attached within it), or `%i` if it
 sets none; it applies none of the preset's other settings (e.g., its alignment).
 
 A `<named-format-reference>` evaluates its named format against the value to
 which a `<transform-pipeline>` in its position would be applied (e.g., in
-`%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
+`:%+.N:x+`, the coerced number, which a `%n` in `x`'s format inserts).
 
 A named format **conforms** to a `<format-name>`'s `BLOCK` iff `BLOCK` would
 parse it if each of its tokens were escaped as `BLOCK` requires, because a
 block's escaping differs from a `<format-block>`'s (e.g., for a preset `c` of
-`:C++ %s`, `%S:c+-+` renders `"abc"` as `C++ abc`, because `BLOCK` would parse
+`:C++ %s`, `:%S:c+-+` renders `"abc"` as `C++ abc`, because `BLOCK` would parse
 `C\+\+ %s`).
 
 Because every `<format-name>`'s `BLOCK` includes `<unconditional-block>`'s
@@ -143,7 +143,7 @@ syntax, a named unconditional format conforms to every one.
 
 An empty named format (e.g., that of a preset `e` of `:`) conforms to every
 `<format-name>`'s `BLOCK`, because a directly absent block evaluates to an empty
-string, as an empty named format does (e.g., `%S:e+none+` inserts an empty
+string, as an empty named format does (e.g., `:%S:e+none+` inserts an empty
 string for a string).
 
 A `<string-format-pipeline>`, `<blank-format-pipeline>`,
@@ -154,7 +154,7 @@ string, for `<blank-format-pipeline>`), because a named format is a
 determine, but a 1st call without a `<coercion>` must take that type (e.g., the
 named format of a preset `u` of `:..uppercase` conforms to
 `<string-format-name>`, while that of a preset `r` of `:.round` does not, so
-`%S:r+-+` is an error, rather than reporting an item error for every string).
+`:%S:r+-+` is an error, rather than reporting an item error for every string).
 
 ##### Transforms
 
@@ -232,11 +232,11 @@ format determines it) may take one regardless. A date or a time-only coerces
 only to a string, neither a number nor a version coerces to a time-only & a
 number coerces to a date only as a Unix time, because its rendering is otherwise
 not a value of that type, so a pipeline that means to parse it must coerce it to
-a string 1st (e.g., `%.D..uppercase..:,,,,,,.*:round++`).
+a string 1st (e.g., `:%.D..uppercase..:,,,,,,.*:round++`).
 
 A later `<coercion>` parses only the text rendered so far, using only its own
-arguments (e.g., for `"1234.5"`, `..number-format:de:..:de:round` evaluates to
-`1235`, while `..number-format:de:..round` aborts formatting, because `1.234,5`
+arguments (e.g., for `"1234.5"`, `:..number-format:de:..:de:round` evaluates to
+`1235`, while `:..number-format:de:..round` aborts formatting, because `1.234,5`
 is not a number in the canonical conventions).
 
 An **argument** is an element of an argument list: a transform's, a [number
@@ -245,26 +245,26 @@ coercion's](#coercion), a [date coercion's](#chronologic-formatting),
 [`C`'s](fields.md#sort-chronologic-segments).
 
 An argument ignores its outer bare whitespace, which must be escaped to be
-consumed (e.g., `.number-format:,\ ,3:` separates digit groups with a space).
+consumed (e.g., `:.number-format:,\ ,3:` separates digit groups with a space).
 
 An argument that is empty after ignoring its outer bare whitespace is absent,
-which is an error iff the argument is required (e.g., `.scale:,,0:` is an error,
-but `.scale:6, ,0:` omits `<significant-digits>`).
+which is an error iff the argument is required (e.g., `:.scale:,,0:` is an
+error, but `:.scale:6, ,0:` omits `<significant-digits>`).
 
 ###### Value Coercion
 
 A `null` or [absent](fields.md#absent-values) value remains unmodified through
 every transform, with or without `<coercion>`, so it is never an error (e.g.,
-`..uppercase` evaluates to `null` for `null`).
+`:..uppercase` evaluates to `null` for `null`).
 
 A `<coercion>` attempts to coerce an input value into the correct input type for
 the annotated transform. If the coercion is successful, the transform is applied
 to the coerced input; otherwise, formatting [aborts](#success--failure).
 
 A number or number-to-string transform's coercion may take
-[`<number-coercion-arguments>`](#coercion) (e.g., `..:de:round`), and a date
+[`<number-coercion-arguments>`](#coercion) (e.g., `:..:de:round`), and a date
 transform's may take [`<date-coercion-arguments>`](#chronologic-formatting)
-(e.g., `..:unix-time:date-only`).
+(e.g., `:..:unix-time:date-only`).
 
 A transform's `<coercion>` to a string always succeeds, so an
 `<unconditional-transform-pipeline>`, whose sole `<coercion>` is in its 1st
@@ -386,28 +386,29 @@ of its input's integer part, counting from its least significant digit: the
 least significant (**primary**) group has `<digit-group-size>` digits, and each
 other (**secondary**) group has `<secondary-digit-group-size>` digits, or
 `<digit-group-size>` digits if `<secondary-digit-group-size>` is `0`; the most
-significant group may have fewer digits (e.g., `.number-format:canonical,,3,2:`
+significant group may have fewer digits (e.g., `:.number-format:canonical,,3,2:`
 renders `12345678` as `1,23,45,678`).
 
 `number-format` also replaces the `.` between its input's integer & fractional
-parts with `<decimal-separator>` (e.g., `.number-format:de:` renders `1234.5` as
-`1.234,5`), retaining its input's sign & leading `0`s (e.g., it renders
+parts with `<decimal-separator>` (e.g., `:.number-format:de:` renders `1234.5`
+as `1.234,5`), retaining its input's sign & leading `0`s (e.g., it renders
 `+01234.50` as `+01.234,50` & `.5` as `,5`).
 
 `number-format` retains scientific notation, applying to its significand &
-rendering its exponent indicator & exponent verbatim (e.g., `.number-format:de:`
-renders `12345.6E3` as `12.345,6E3`); `scale` renders positional notation before
-it (e.g., `.scale:0,,2:.number-format:de:` renders `1.5e3` as `1.500,00`).
+rendering its exponent indicator & exponent verbatim (e.g.,
+`:.number-format:de:` renders `12345.6E3` as `12.345,6E3`); `scale` renders
+positional notation before it (e.g., `:.scale:0,,2:.number-format:de:` renders
+`1.5e3` as `1.500,00`).
 
 A `<digit-group-size>` of `0` inserts no separators, ignoring
 `<secondary-digit-group-size>`.
 
 A separator that contains an ASCII digit, `e`, or `E`, or a decimal separator
-that is a sign, would give a number multiple parses (e.g., for `%.:,5,3:n`,
-`"15234"` would be either `15234` or `1234`, for `%.:,e,3:n`, `"1e234"` would be
-either `1234` or `1` with the exponent `234`, and, for `%.:,,,,-:n`, `"-5"`
+that is a sign, would give a number multiple parses (e.g., for `:%.:,5,3:n`,
+`"15234"` would be either `15234` or `1234`, for `:%.:,e,3:n`, `"1e234"` would
+be either `1234` or `1` with the exponent `234`, and, for `:%.:,,,,-:n`, `"-5"`
 would be either `-5` or `0.5`), while a longer decimal separator that starts
-with a sign has 1 parse (e.g., for `%.:,,,,-x:n`, `"-x5"` is `0.5`).
+with a sign has 1 parse (e.g., for `:%.:,,,,-x:n`, `"-x5"` is `0.5`).
 
 The **base conventions** are those that
 [`<locale-identifier>`](fields.md#sort-locale) identifies, per its default if it
@@ -436,25 +437,26 @@ fractional-digits  = {integer: 0 to 100} (* exactly this many digits after the p
 <!--editorconfig-checker-enable-->
 
 `scale` applies its arguments in order, then renders its result in positional
-notation (e.g., `.scale:3:` renders `1500` as `1.5`, while `.scale:6,3:` renders
-`1234567` as `1.23` & `123456789` as `123`).
+notation (e.g., `:.scale:3:` renders `1500` as `1.5`, while `:.scale:6,3:`
+renders `1234567` as `1.23` & `123456789` as `123`).
 
 - Both roundings (to `<significant-digits>`, then to `<fractional-digits>`)
   round halves away from 0.
 - A result's integer part has at least 1 digit & no `0` before another digit;
   absent `<fractional-digits>`, its fractional part has no trailing `0`s (e.g.,
-  `.scale:0:` renders `01.50` as `1.5`, while `.scale:3:` renders `500` as
+  `:.scale:0:` renders `01.50` as `1.5`, while `:.scale:3:` renders `500` as
   `0.5`).
 - A leading `+` is retained, while a leading `-` is retained iff the result is
-  nonzero (e.g., `.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
+  nonzero (e.g., `:.scale:0,,0:` renders `+2.4` as `+2` & `-0.4` as `0`), as for
   `round`.
 - A value that would render with more than 100 digits before the decimal point,
   or, absent `<fractional-digits>`, after it, [aborts](#success--failure)
   formatting, with or without `<coercion>`, because that restricts rendering,
-  not a number (e.g., `.scale:0,,0:` for `1e100`, or `.scale:0:` for `1e-101`).
-- E.g., a byte count as integer megabytes: `.scale:6,,0:`, or as megabytes to 3
-  significant digits: `.scale:6,3:`; a ratio as an integer percentage:
-  `.scale:-2,,0:` (e.g., `0.25` as `25`).
+  not a number (e.g., `:.scale:0,,0:` for `1e100`, or `:.scale:0:` for
+  `1e-101`).
+- E.g., a byte count as integer megabytes: `:.scale:6,,0:`, or as megabytes to 3
+  significant digits: `:.scale:6,3:`; a ratio as an integer percentage:
+  `:.scale:-2,,0:` (e.g., `0.25` as `25`).
 
 ###### Chronologic Transforms
 
@@ -472,8 +474,8 @@ time-only-time-zone = 'time-only-time-zone' [ <time-only-time-zone-arguments> ] 
 <!--editorconfig-checker-enable-->
 
 A date's or a time-only's contiguous transforms jointly set how it is rendered,
-until a `<coercion>` renders it (e.g., `.date-only.time-zone:UTC:` means what
-`.time-zone:UTC:.date-only` means):
+until a `<coercion>` renders it (e.g., `:.date-only.time-zone:UTC:` means what
+`:.time-zone:UTC:.date-only` means):
 
 - `date-only`: renders only the date, in the output time zone.
 - `time-zone` (for a date) & `time-only-time-zone` (for a time-only): set the
@@ -495,7 +497,7 @@ zone whose UTC offset varies (e.g., `EST` identifies `America/New_York`).
 A time-only value whose instant on its `<reference-date>`, as a Unix time, is
 not representable [aborts](#success--failure) formatting, with or without
 `<coercion>`, because its value, rather than its syntax, decides this (e.g., in
-the UTC system time zone, `.time-only-time-zone:UTC,+292278994-08-17:` aborts
+the UTC system time zone, `:.time-only-time-zone:UTC,+292278994-08-17:` aborts
 for `"17:39:23Z"`, but renders `"01:00:00Z"` as `01:00:00Z`).
 
 ###### `time-zone` & `time-only-time-zone`
@@ -534,7 +536,7 @@ A **UTC offset** is either:
 - An optional `UTC` or `GMT` prefix, then `+` or `-`, then either a 2-digit hour
   & a 2-digit minute (e.g., `+0530`), or a 1- or 2-digit hour, then, optionally,
   `:` followed by a 2-digit minute (e.g., `+5` or `+05:30`, which
-  `.time-zone:+05\:30:` sets, escaping its `:`); each minute is from `00` to
+  `:.time-zone:+05\:30:` sets, escaping its `:`); each minute is from `00` to
   `59`, and the offset is at most 18 hours from UTC (e.g., `+18`, but not
   `+18:01`).
 
@@ -633,13 +635,13 @@ its success clause, blocks, or branches, which define the matcher's **form**:
 
 - **Nullary**: nothing.
 - **Unary**: exactly 1 `<success-clause>` or `<failure-block>`: a
-  `<success-pipeline>` (e.g., `.round` in `%I.round+`), or, for:
+  `<success-pipeline>` (e.g., `.round` in `:%I.round+`), or, for:
   - **Abort-on-failure**: a `<success-block>`.
   - **Abort-on-success**: a `<failure-block>`.
   - **Negated** (`-…`, in a non-nullary branch): a `<failure-block>`.
   - **Non-negated** (in a non-nullary branch): a `<success-block>`.
 - **Binary**: a `<success-block>` & a `<failure-block>`, at least 1 of which is
-  present, because a binary placeholder without either (e.g., `%S++`) would
+  present, because a binary placeholder without either (e.g., `:%S++`) would
   always insert an empty string, so its matcher cannot affect what it means.
 - **Unary match** (`%m`): `<branches>`.
 - **Binary match** (`%M`): branches & a `<failure-block>`.
@@ -657,20 +659,20 @@ enclosing matcher's value (coerced, if it coerces), so it always succeeds. A
 `<conditional-placeholder>`, a `%i` & a `%I` are each evaluated against the
 **format input**, which no block modifies: in a field spec's format, the field
 value, at its original type; in a named format, the value against which its
-`<named-format-reference>` evaluates it (e.g., `%.:de:N%n (%i)++` renders
-`"1.234,5"` as `1234.5 (1.234,5)`, while `%+.:de:N:x+`, where preset `x` sets no
-format, renders it as `1234.5`).
+`<named-format-reference>` evaluates it (e.g., `:%.:de:N%n (%i)++` renders
+`"1.234,5"` as `1234.5 (1.234,5)`, while `:%+.:de:N:x+`, where preset `x` sets
+no format, renders it as `1234.5`).
 
 A matcher's **value** is given by its `<predicate>`'s `value:` comment part, in
 which its **matched value** is the value against which it is evaluated, as its
-[coerced value](#coercion) iff it coerces (e.g., `%.:de:n` evaluates to `1234.5`
-for `"1.234,5"`, as does `%n` in `%.:de:N%n++`).
+[coerced value](#coercion) iff it coerces (e.g., `:%.:de:n` evaluates to
+`1234.5` for `"1.234,5"`, as does `%n` in `:%.:de:N%n++`).
 
 - If a placeholder succeeds, the following is inserted in situ:
   - If it has `<abort-on-success>`: formatting aborts.
   - If it is nullary, unary match, or binary match: the placeholder's value.
   - Otherwise: its `<success-clause>`'s evaluated value.
-- If a placeholder fails (e.g., `%u` is evaluated against a non-`null`):
+- If a placeholder fails (e.g., `:%u` is evaluated against a non-`null`):
   - If it has `<abort-on-success>` & a nullary predicate: the format input.
   - If it is binary, binary match, or abort-on-success: its `<failure-block>`'s
     evaluated value.
@@ -680,9 +682,9 @@ In a template that is not solely 1 placeholder, each inserted value is [coerced
 to a string](#value-coercion).
 
 A template evaluates its placeholders in order, so aborting skips each later one
-(e.g., for `"abc"`, `%I.round+%+N+` reports an [item
+(e.g., for `"abc"`, `:%I.round+%+N+` reports an [item
 error](configs.md#item-errors), because `%I.round+` is evaluated 1st, while
-`%+N+%I.round+` aborts without one, because `%+N+` fails 1st).
+`:%+N+%I.round+` aborts without one, because `%+N+` fails 1st).
 
 Formatting **aborts** by making the formatted value
 [absent](fields.md#absent-values), ignoring the rest of `<format-block>`, both
@@ -722,10 +724,10 @@ An unconditional placeholder's matcher always succeeds, but its pipeline may
 abort formatting, except in an `<unconditional-block>`, because a
 `<failure-block>` must never abort. A `<fallible-unconditional-placeholder>`
 lets a label, a name, or a format input that no matcher can match be coerced
-(e.g., `%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`), and lets
-a template insert any named format, which may abort formatting (e.g., if preset
-`bytes` is `%end:%+.N.scale:6,,0:+ MB`, `Size: %I:bytes+` renders `1500000` as
-`Size: 2 MB`).
+(e.g., `:%L..:,,,,,.*:round+` renders the label `Size 5.6` as `Size 6`), and
+lets a template insert any named format, which may abort formatting (e.g., if
+preset `bytes` is `%end:%+.N.scale:6,,0:+ MB`, `:Size: %I:bytes+` renders
+`1500000` as `Size: 2 MB`).
 
 ###### Conditional Placeholders
 
@@ -822,9 +824,9 @@ non-nullary-string     = "S" (* is string;                                      
 `%U`'s value is a `null`, which a transform leaves unmodified, and `%E`'s &
 `%W`'s are each such a `null` or a string, so a string transform has nothing to
 coerce, unless it follows a `<named-format-reference>`, whose named format may
-output any type (e.g., `%W.trim-whitespace+-+`, `%U.uppercase+-+` &
-`%U:x..uppercase+-+`, but neither `%W..trim-whitespace+-+` nor
-`%U..uppercase+-+`, just as `%S..uppercase++` is an error).
+output any type (e.g., `:%W.trim-whitespace+-+`, `:%U.uppercase+-+` &
+`:%U:x..uppercase+-+`, but neither `:%W..trim-whitespace+-+` nor
+`:%U..uppercase+-+`, just as `:%S..uppercase++` is an error).
 
 ###### Number Formatting
 
@@ -859,11 +861,11 @@ non-nullary-version = "V" (* is version; output type: version; value: {matched v
 A **version** is 1 or more `.`-separated components, each an ASCII digit
 followed by any Unicode general category `L` or `N` characters, `+`s & `-`s
 (e.g., `1.2.3-beta`). `<coercion>` parses a value whose entire content is a
-version (e.g., `%.v` matches `"1.2.3-beta"`, `1.2` & `"2020-03-18"`), as does an
-[implicit coercion](#value-types), so a branch that means to match a number or a
-date-only must precede `%v`'s (e.g., `%mndv+`, but neither `%mvn+`, which would
-render the number `1.2` as the string `1.2`, nor `%mV%v (v)+D%d (d)++`, which
-would render `"2020-03-18"` as `2020-03-18 (v)`).
+version (e.g., `:%.v` matches `"1.2.3-beta"`, `1.2` & `"2020-03-18"`), as does
+an [implicit coercion](#value-types), so a branch that means to match a number
+or a date-only must precede `%v`'s (e.g., `:%mndv+`, but neither `:%mvn+`, which
+would render the number `1.2` as the string `1.2`, nor `:%mV%v (v)+D%d (d)++`,
+which would render `"2020-03-18"` as `2020-03-18 (v)`).
 
 ###### Coercion
 
@@ -888,33 +890,33 @@ trivia-suffix-regex = {regex} (* default: {empty string} *)
 
 `<coercion>` allows a matcher to also match a value whose entire content parses
 as the matcher's type, instead of requiring the input's type to match (e.g.,
-`%.n` matches `4.5` & `"4.50"`, but not `"4.5a"`), making the **coerced value**
+`:%.n` matches `4.5` & `"4.50"`, but not `"4.5a"`), making the **coerced value**
 its matched value.
 
 A string coercion matches every value except a `null` or an absent one, which
 has no text to coerce, and coerces it as [specified](#value-coercion) (e.g., for
-JSON output, `%.s` renders `5` as `"5"` & `" a "` as `" a "`, `%.S%s+none+`
-renders `null` as `none`, and `%m.su+` retains `null`).
+JSON output, `:%.s` renders `5` as `"5"` & `" a "` as `" a "`, `:%.S%s+none+`
+renders `null` as `none`, and `:%m.su+` retains `null`).
 
 A boolean coercion parses only `true` & `false`, verbatim.
 
 A number coercion parses a number: an optional sign (`+` or `-`), then a
 [grouped number](fields.md#sort-number-segments), whose separators & digit group
-sizes come from its number format arguments (e.g., `%.:de:n` matches
-`"1.234,56"`, coercing it to `1234.56`, and `%.n` matches `"+.5"`, but not
+sizes come from its number format arguments (e.g., `:%.:de:n` matches
+`"1.234,56"`, coercing it to `1234.56`, and `:%.n` matches `"+.5"`, but not
 `"1."`, whose `.` precedes no fractional part). A digit group separator is
 accepted only between digit groups of the given sizes; a `<digit-group-size>` of
 `0` accepts groups of any size. A digit group separator adjacent to a digit
 group of any other size thus terminates the number before that separator (e.g.,
-`%.:,,,,,,.*:n` matches `"1,2345"` as the number `1` followed by the trivia
+`:%.:,,,,,,.*:n` matches `"1,2345"` as the number `1` followed by the trivia
 suffix `,2345`).
 
 The coerced value's text retains the number's sign, leading & trailing `0`s &
 notation, but has no digit group separators & has `.` as its decimal separator
-(e.g., `%.n` coerces `"+01.50e+03"` to `+01.50e+03` & `".5"` to `.5`, while
-`%.:de:n` coerces `"1.234,50"` to `1234.50`), because each later transform reads
-that 1 syntax, while an [output format](#value-types) modifies it only as its
-syntax requires.
+(e.g., `:%.n` coerces `"+01.50e+03"` to `+01.50e+03` & `".5"` to `.5`, while
+`:%.:de:n` coerces `"1.234,50"` to `1234.50`), because each later transform
+reads that 1 syntax, while an [output format](#value-types) modifies it only as
+its syntax requires.
 
 A number coercion also allows **trivia** around the number, matching a string
 iff it splits into the following, using the shortest trivia prefix for which
@@ -929,13 +931,13 @@ such a split exists:
    `<trivia-suffix-regex>`.
 <!--editorconfig-checker-enable-->
 
-E.g., `%.:,,,,,.*:n` matches `"a1b2"` as the trivia prefix `a1b` & the number
+E.g., `:%.:,,,,,.*:n` matches `"a1b2"` as the trivia prefix `a1b` & the number
 `2`.
 
 The default regexes match only an empty string, allowing no trivia (e.g.,
-`%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`). Number
-transforms & number-to-string transforms are applied to the number alone,
-retaining the trivia unmodified (e.g., `..:,,,,,[$]:number-format:de:` renders
+`:%.:,,,,,[A-Z]*[$]:n` matches `"US$4.99"` & `"$4.99"`, but not `"4.99"`).
+Number transforms & number-to-string transforms are applied to the number alone,
+retaining the trivia unmodified (e.g., `:..:,,,,,[$]:number-format:de:` renders
 `"$1234.5"` as `$1.234,5`).
 
 Because `\` escapes the next character in every variable token, a regex's own
@@ -977,7 +979,7 @@ its type & its `<date-format>`s allow; this does not depend on field name,
 label, output format, or any other context.
 
 No chronologic predicate matches both a date & a time-only value (e.g.,
-`%m.d.c+` coerces to either).
+`:%m.d.c+` coerces to either).
 
 **Unix time** is the number of seconds since 1970-01-01T00:00:00Z, ignoring leap
 seconds.
@@ -988,26 +990,26 @@ form](ebnf.md#typed-terminals) (e.g., `-1`, `.5`, or `1.5e9`).
 A `<coercion>` to a date parses what any of its `<date-format>`s
 [matches](fields.md#sort-chronologic-segments), except that `<iso>` does not
 match a time-only, which is not a date, and `<unix-time>` also matches a number
-without trivia (e.g., `%.:iso-date:d` matches `"2020-03-18"`, but not
-`"2020-03-18 17:39"`, and `%.:iso,unix-time:d` matches `0`, `"0"` &
-`"2020-03-18"`, while `%.:unix-time:d` matches only the 1st 2).
+without trivia (e.g., `:%.:iso-date:d` matches `"2020-03-18"`, but not
+`"2020-03-18 17:39"`, and `:%.:iso,unix-time:d` matches `0`, `"0"` &
+`"2020-03-18"`, while `:%.:unix-time:d` matches only the 1st 2).
 
 A default coercion to a date coerces a number to a datetime, because a number
-has no other meaning as a date (e.g., `%.d` matches `0`, but not `"0"`).
+has no other meaning as a date (e.g., `:%.d` matches `0`, but not `"0"`).
 
 A string that holds a decimal number coerces to a date only per `<unix-time>`,
-because such a string is rarely a time (e.g., `%m.ds+` would otherwise render
+because such a string is rarely a time (e.g., `:%m.ds+` would otherwise render
 the string `5.6` as a date).
 
-`%.d` thus matches every number that is a representable Unix time, as does `%d`
-for an input format that does not support datetime, so a branch that means to
-match a number must precede theirs or follow a `<coercion>` that omits
-`<unix-time>` (e.g., `%mn.d+` or `%m.:iso:d.n+`, but not `%m.d.n+`, which would
-render the price `5.6` as a date).
+`:%.d` thus matches every number that is a representable Unix time, as does
+`:%d` for an input format that does not support datetime, so a branch that means
+to match a number must precede theirs or follow a `<coercion>` that omits
+`<unix-time>` (e.g., `:%mn.d+` or `:%m.:iso:d.n+`, but not `:%m.d.n+`, which
+would render the price `5.6` as a date).
 
 A `<coercion>` whose `<date-format>`s cannot match its input merely aborts
-(e.g., `.round..:iso:date-only`, because no number matches `<iso>`, or
-`%.V..:iso-datetime:date-only+-+`, because a version has no `:`, so it is never
+(e.g., `:.round..:iso:date-only`, because no number matches `<iso>`, or
+`:%.V..:iso-datetime:date-only+-+`, because a version has no `:`, so it is never
 a datetime).
 
 A `<coercion>` to a time-only takes no arguments, because a time-only has only 1
@@ -1043,9 +1045,9 @@ A datetime or time-only without a UTC offset is in the system time zone.
 
 A time-only value has no date, so `%C`'s block cannot apply `date-only` or
 `time-zone` to it, and a [`<coercion>`](#coercion) to a date fails for it (e.g.,
-`..date-only` aborts formatting for `"17:39:23"`, while `%.D.date-only+-+`
+`:..date-only` aborts formatting for `"17:39:23"`, while `:%.D.date-only+-+`
 outputs `-` for it). Likewise, a `<coercion>` to a time-only fails for a date
-(e.g., `..time-only-time-zone:UTC:` aborts formatting for `"2020-03-18"`).
+(e.g., `:..time-only-time-zone:UTC:` aborts formatting for `"2020-03-18"`).
 
 Every date is in the proleptic Gregorian calendar, as ISO-8601 requires (e.g.,
 year `0000` is 1 BCE, and `1500-02-29` does not exist).
@@ -1129,30 +1131,30 @@ branch-negation = "-"!
   - For `%M`: returns its `<failure-block>`'s value.
 
 A match has at least 1 branch, because without any, its `%m` or `%M` cannot
-affect what it means (e.g., `%M+none+`). A match with 1 branch means what that
-branch's own placeholder means (e.g., `%mN.round++` means what `%+N.round+`
+affect what it means (e.g., `:%M+none+`). A match with 1 branch means what that
+branch's own placeholder means (e.g., `:%mN.round++` means what `:%+N.round+`
 means).
 
 A `%M` without a nullary branch, a non-empty unary branch, or a
-`<failure-block>` (e.g., `%MN+++`) would always insert an empty string, as
-`%S++` would, so its matcher cannot affect what it means.
+`<failure-block>` (e.g., `:%MN+++`) would always insert an empty string, as
+`:%S++` would, so its matcher cannot affect what it means.
 
 Every branch is conditional, because an unconditional branch would make each
 later branch unreachable, while an unconditional last branch would mean what a
 `%M` whose `<failure-block>` holds that branch as a placeholder means (e.g.,
-`%MN.absolute-value+b+%I..uppercase++`).
+`:%MN.absolute-value+b+%I..uppercase++`).
 
 Examples:
 
-- `%mN.absolute-value+b+`:
+- `:%mN.absolute-value+b+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, aborts formatting.
-- `%MN.absolute-value+b+Status Unknown+`:
+- `:%MN.absolute-value+b+Status Unknown+`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs `Status Unknown`.
-- `%MN.absolute-value+b+%I..uppercase++`:
+- `:%MN.absolute-value+b+%I..uppercase++`:
   - If number, outputs the absolute value.
   - If boolean, outputs the boolean value.
   - Otherwise, outputs the uppercased value.
